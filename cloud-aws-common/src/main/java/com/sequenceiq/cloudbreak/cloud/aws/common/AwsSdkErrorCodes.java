@@ -10,6 +10,8 @@ public class AwsSdkErrorCodes {
 
     public static final String UNSUPPORTED = "Unsupported";
 
+    public static final String INVALID_PARAMETER_VALUE = "InvalidParameterValue";
+
     public static final String INVALID_INSTANCE_ID_MALFORMED = "InvalidInstanceID.Malformed";
 
     public static final String VALIDATION_ERROR = "ValidationError";

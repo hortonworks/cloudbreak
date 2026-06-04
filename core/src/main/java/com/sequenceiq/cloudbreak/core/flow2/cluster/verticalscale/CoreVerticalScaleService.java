@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -107,6 +109,7 @@ public class CoreVerticalScaleService {
                 template.setInstanceStorageCount(instanceStorageCount);
                 template.setInstanceStorageSize(instanceStorageSize);
             }
+            setFallbackInstanceTypesIfNecessary(requestedTemplate, template);
             if (requestedTemplate.getRootVolume() != null) {
                 Integer rootVolumeSize = requestedTemplate.getRootVolume().getSize();
                 template.setRootVolumeSize(rootVolumeSize);
@@ -120,6 +123,14 @@ public class CoreVerticalScaleService {
                 }
             }
             templateService.savePure(template);
+        }
+    }
+
+    private static void setFallbackInstanceTypesIfNecessary(InstanceTemplateV4Request requestedTemplate, Template template) {
+        if (requestedTemplate.getFallbackInstanceTypes() != null) {
+            template.setFallbackInstanceTypes(new Json(requestedTemplate.getFallbackInstanceTypes()));
+        } else {
+            template.setFallbackInstanceTypes(new Json(Collections.emptyList()));
         }
     }
 

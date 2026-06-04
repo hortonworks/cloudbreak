@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSUFFICIENT_INSTANCE_CAPACITY;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INVALID_PARAMETER_VALUE;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.UNSUPPORTED;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -12,6 +13,8 @@ public class InstanceTypeRetryExceptionMatcher {
 
     public static boolean isInstanceTypeNotSupported(AwsServiceException e) {
         return e.awsErrorDetails().errorCode().equalsIgnoreCase(INSUFFICIENT_INSTANCE_CAPACITY) ||
-                e.awsErrorDetails().errorCode().equalsIgnoreCase(UNSUPPORTED);
+                e.awsErrorDetails().errorCode().equalsIgnoreCase(UNSUPPORTED) ||
+                (e.awsErrorDetails().errorCode().equalsIgnoreCase(INVALID_PARAMETER_VALUE) &&
+                        e.awsErrorDetails().errorMessage().contains("Cannot execute method: runInstances. Invalid value"));
     }
 }

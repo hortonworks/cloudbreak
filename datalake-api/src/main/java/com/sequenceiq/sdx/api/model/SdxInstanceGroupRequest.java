@@ -1,5 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,6 +21,9 @@ public class SdxInstanceGroupRequest {
     @Schema(description = ModelDescriptions.INSTANCE_TYPE)
     private String instanceType;
 
+    @Schema(description = ModelDescriptions.FALLBACK_INSTANCE_TYPES)
+    private List<String> fallbackInstanceTypes;
+
     public String getName() {
         return name;
     }
@@ -33,5 +38,13 @@ public class SdxInstanceGroupRequest {
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public void setFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes;
     }
 }

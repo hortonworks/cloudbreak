@@ -82,6 +82,8 @@ public class ModelDescriptions {
 
     public static final String INSTANCE_TYPE = "Instance type.";
 
+    public static final String FALLBACK_INSTANCE_TYPES = "Fallback instance types in case instance type is not available";
+
     public static final String INSTANCE_DISK_SIZE = "Instance attached disk size.";
 
     public static final String IMD_UPDATE_TYPE = "Instance metadata update type.";

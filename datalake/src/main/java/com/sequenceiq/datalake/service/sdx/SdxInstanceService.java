@@ -81,7 +81,8 @@ public class SdxInstanceService {
                     InstanceGroupV4Request templateInstanceGroup = getTemplateInstanceGroup(defaultTemplate, customInstanceGroup.getName())
                             .orElseThrow(() ->
                                     new BadRequestException("Custom instance group is missing from default template: " + customInstanceGroup.getName()));
-                    overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType(), availableVmTypes, diskTypes);
+                    overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType(),
+                            customInstanceGroup.getFallbackInstanceTypes(), availableVmTypes, diskTypes);
                 });
             } else if (isResize(originalInstanceGroups, currentInstanceGroups, sdxClusterShape)) {
                 LOGGER.debug("Override default template with previous instance groups");
@@ -126,17 +127,18 @@ public class SdxInstanceService {
                 !currentInstanceGroup.getTemplate().getInstanceType().equals(originalInstanceGroup.getTemplate().getInstanceType())) {
             getTemplateInstanceGroup(defaultTemplate, currentInstanceGroup.getName())
                     .ifPresent(templateIg -> overrideInstanceType(templateIg, currentInstanceGroup.getTemplate().getInstanceType(),
-                            availableVmTypes, diskMappings));
+                            currentInstanceGroup.getTemplate().getFallbackInstanceTypes(), availableVmTypes, diskMappings));
         }
     }
 
-    private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType, List<VmTypeResponse> availableVmTypes,
-            Map<String, String> diskMappings) {
+    private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType, List<String> fallbackInstanceTypes,
+            List<VmTypeResponse> availableVmTypes, Map<String, String> diskMappings) {
         InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
         if (instanceTemplate != null && StringUtils.isNoneBlank(newInstanceType)) {
             LOGGER.info("Override instance group {} instance type from {} to {}",
                     templateGroup.getName(), instanceTemplate.getInstanceType(), newInstanceType);
             instanceTemplate.setInstanceType(newInstanceType);
+            instanceTemplate.setFallbackInstanceTypes(fallbackInstanceTypes);
             availableVmTypes.stream()
                     .filter(vmType -> vmType.getValue().equals(newInstanceType))
                     .findFirst()
