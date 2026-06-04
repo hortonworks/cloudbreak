@@ -33,14 +33,14 @@ public interface SdxRecoveryEndpoint {
     @POST
     @Path("{name}/recover")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "recovers the datalake upgrade", operationId = "recoverDatalakeCluster",
+    @Operation(summary = "recovers the datalake", operationId = "recoverDatalakeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecoveryResponse recoverClusterByName(@PathParam("name") String name, @Valid SdxRecoveryRequest recoverSdxClusterRequest);
 
     @POST
     @Path("/crn/{crn}/recover")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "recovers the datalake upgrade", operationId = "recoverDatalakeClusterByCrn",
+    @Operation(summary = "recovers the datalake", operationId = "recoverDatalakeClusterByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecoveryResponse recoverClusterByCrn(@PathParam("crn") String crn, @Valid SdxRecoveryRequest recoverSdxClusterRequest);
 

@@ -5,7 +5,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 
 @Prototype
 public class SdxRecoveryTestDto extends AbstractSdxTestDto<SdxRecoveryRequest, SdxRecoveryResponse, SdxRecoveryTestDto> {
@@ -20,11 +19,6 @@ public class SdxRecoveryTestDto extends AbstractSdxTestDto<SdxRecoveryRequest, S
 
     @Override
     public SdxRecoveryTestDto valid() {
-        return withRecoveryType(SdxRecoveryType.RECOVER_WITHOUT_DATA);
-    }
-
-    public SdxRecoveryTestDto withRecoveryType(SdxRecoveryType type) {
-        getRequest().setType(type);
         return this;
     }
 

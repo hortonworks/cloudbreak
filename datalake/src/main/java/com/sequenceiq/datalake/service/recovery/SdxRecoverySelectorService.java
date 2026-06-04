@@ -18,9 +18,7 @@ import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 
 @Service
 /*
- * Recovers an SDX cluster from a failure during Resize or Upgrade.
- *
- * Chooses the appropriate RecoveryService to use based on the state of the SDX cluster.
+ * Recovers an SDX cluster by delegating to the first RecoveryService that reports a recoverable state.
  */
 public class SdxRecoverySelectorService {
 

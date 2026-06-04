@@ -12,19 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRecoveryRequest {
 
-    @Schema(description = ModelDescriptions.RECOVERY_TYPE)
-    private SdxRecoveryType type;
-
     @Schema(description = ModelDescriptions.RECOVERY_FORCE)
     private boolean force;
-
-    public SdxRecoveryType getType() {
-        return type;
-    }
-
-    public void setType(SdxRecoveryType type) {
-        this.type = type;
-    }
 
     public boolean isForced() {
         return force;
@@ -37,7 +26,6 @@ public class SdxRecoveryRequest {
     @Override
     public String toString() {
         return new StringJoiner(", ", SdxRecoveryRequest.class.getSimpleName() + "[", "]")
-                .add("type=" + type)
                 .add("force=" + force)
                 .toString();
     }

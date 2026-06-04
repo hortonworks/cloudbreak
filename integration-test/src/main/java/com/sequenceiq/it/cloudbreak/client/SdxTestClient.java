@@ -68,7 +68,6 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpdatePublicDnsEntriesAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeDatabaseServerAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxVerticalScaleAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxVerticalScaleByCrnAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
@@ -173,10 +172,6 @@ public class SdxTestClient {
 
     public Action<SdxTestDto, SdxClient> upgradeDatabaseServer() {
         return new SdxUpgradeDatabaseServerAction();
-    }
-
-    public Action<SdxTestDto, SdxClient> recoverFromUpgrade() {
-        return new SdxUpgradeRecoveryAction();
     }
 
     public Action<SdxInternalTestDto, SdxClient> recoverFromResizeInternal() {

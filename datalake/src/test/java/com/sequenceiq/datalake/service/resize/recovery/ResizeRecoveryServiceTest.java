@@ -38,7 +38,6 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 
 @ExtendWith(MockitoExtension.class)
 class ResizeRecoveryServiceTest {
@@ -75,7 +74,6 @@ class ResizeRecoveryServiceTest {
     @BeforeEach
     public void setup() {
         request = new SdxRecoveryRequest();
-        request.setType(SdxRecoveryType.RECOVER_WITHOUT_DATA);
         lenient().when(sdxStatusService.getActualStatusForSdx(cluster)).thenReturn(sdxStatusEntity);
         lenient().when(entitlementService.isDatalakeResizeRecoveryEnabled(anyString())).thenReturn(true);
         lenient().when(sdxReactorFlowManager.triggerSdxResizeRecovery(any(), any())).thenReturn(flowId);

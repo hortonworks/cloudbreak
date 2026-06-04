@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_TRIG
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_VALIDATION_ONLY_TRIGGERED;
 import static com.sequenceiq.datalake.flow.certrotation.RotateCertificateStateSelectors.ROTATE_CERTIFICATE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryEvent.DATALAKE_RECOVERY_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.preparation.DatalakeUpgradePreparationEvent.DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT;
@@ -69,7 +68,6 @@ import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
 import com.sequenceiq.datalake.flow.datalake.kraftmigration.DatalakeKraftMigrationEvent;
 import com.sequenceiq.datalake.flow.datalake.kraftmigration.KraftMigrationOperationType;
 import com.sequenceiq.datalake.flow.datalake.kraftmigration.event.DatalakeKraftMigrationStartEvent;
-import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
 import com.sequenceiq.datalake.flow.datalake.restartservices.event.DatalakeRestartServicesStartEvent;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleSdxEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
@@ -113,7 +111,6 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
-import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
@@ -256,13 +253,6 @@ public class SdxReactorFlowManager {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCmSyncStartEvent event = new SdxCmSyncStartEvent(cluster.getId(), userId);
         return notify(event.selector(), event, cluster.getClusterName());
-    }
-
-    public FlowIdentifier triggerDatalakeRuntimeRecoveryFlow(SdxCluster cluster, SdxRecoveryType recoveryType) {
-        LOGGER.info("Trigger recovery of failed runtime upgrade for: {} with recovery type: {}", cluster, recoveryType);
-        String selector = DATALAKE_RECOVERY_EVENT.event();
-        String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new DatalakeRecoveryStartEvent(selector, cluster.getId(), userId, recoveryType), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxStartFlow(SdxCluster cluster) {

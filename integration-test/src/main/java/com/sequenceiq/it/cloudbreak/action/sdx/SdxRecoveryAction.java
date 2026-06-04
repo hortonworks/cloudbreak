@@ -14,9 +14,9 @@ import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 
-public class SdxUpgradeRecoveryAction implements Action<SdxTestDto, SdxClient> {
+public class SdxRecoveryAction implements Action<SdxTestDto, SdxClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeRecoveryAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxRecoveryAction.class);
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
@@ -28,7 +28,7 @@ public class SdxUpgradeRecoveryAction implements Action<SdxTestDto, SdxClient> {
         SdxRecoveryResponse recoveryResponse = client.getDefaultClient(testContext)
                 .sdxRecoveryEndpoint()
                 .recoverClusterByName(testDto.getName(), recoveryRequest);
-        testDto.setFlow("SDX upgrade recovery", recoveryResponse.getFlowIdentifier());
+        testDto.setFlow("SDX recovery", recoveryResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
@@ -37,3 +37,4 @@ public class SdxUpgradeRecoveryAction implements Action<SdxTestDto, SdxClient> {
         return testDto;
     }
 }
+

@@ -2,7 +2,6 @@ package com.sequenceiq.sdx.api.model;
 
 public class ModelDescriptions {
 
-    public static final String RECOVERY_TYPE = "Type of the recovery operation, automatic restore is performed in case of 'RECOVER_WITH_DATA'.";
 
     public static final String RECOVERY_FORCE = "Boolean flag indicating whether to force the recovery or not.";
 

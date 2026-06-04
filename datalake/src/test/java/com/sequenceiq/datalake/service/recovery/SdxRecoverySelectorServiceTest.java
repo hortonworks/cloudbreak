@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -23,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.Recove
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.resize.recovery.ResizeRecoveryService;
-import com.sequenceiq.datalake.service.upgrade.recovery.SdxUpgradeRecoveryService;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
@@ -39,7 +37,7 @@ class SdxRecoverySelectorServiceTest {
     private SdxCluster cluster;
 
     @Mock
-    private SdxUpgradeRecoveryService mockSdxUpgradeRecoveryService;
+    private RecoveryService secondaryRecoveryService;
 
     @Mock
     private ResizeRecoveryService mockResizeRecoveryService;
@@ -51,48 +49,34 @@ class SdxRecoverySelectorServiceTest {
 
     @BeforeEach
     public void setUp() {
-        sdxRecoverySelectorService = new SdxRecoverySelectorService(List.of(mockResizeRecoveryService, mockSdxUpgradeRecoveryService));
+        sdxRecoverySelectorService = new SdxRecoverySelectorService(List.of(mockResizeRecoveryService, secondaryRecoveryService));
         request = new SdxRecoveryRequest();
     }
 
-    public void setResizeTest() {
-        lenient().when(mockSdxUpgradeRecoveryService.validateRecovery(cluster)).thenReturn(nonrecoverableResponse);
-        lenient().when(mockResizeRecoveryService.validateRecovery(cluster)).thenReturn(recoverableResponse);
-        lenient().when(mockSdxUpgradeRecoveryService.validateRecovery(cluster, request)).thenReturn(nonrecoverableResponse);
-        lenient().when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenReturn(recoverableResponse);
-    }
-
-    public void setUpgradeTest() {
-        lenient().when(mockSdxUpgradeRecoveryService.validateRecovery(cluster)).thenReturn(recoverableResponse);
-        lenient().when(mockResizeRecoveryService.validateRecovery(cluster)).thenReturn(nonrecoverableResponse);
-        lenient().when(mockSdxUpgradeRecoveryService.validateRecovery(cluster, request)).thenReturn(recoverableResponse);
-        lenient().when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenReturn(nonrecoverableResponse);
-
-    }
-
     @Test
-    void testRecoveryServiceCanRecoverFromUpgradeFailureByClusterName() {
-        setUpgradeTest();
+    void testRecoveryServiceCanRecoverWithSecondaryService() {
+        when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenReturn(nonrecoverableResponse);
+        when(secondaryRecoveryService.validateRecovery(cluster, request)).thenReturn(recoverableResponse);
 
         SdxRecoveryResponse response = new SdxRecoveryResponse();
-        when(mockSdxUpgradeRecoveryService.triggerRecovery(cluster, request)).thenReturn(response);
+        when(secondaryRecoveryService.triggerRecovery(cluster, request)).thenReturn(response);
         SdxRecoveryResponse result = sdxRecoverySelectorService.triggerRecovery(cluster, request);
 
-        // Basically, just check that we pass through
-        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster, request);
-        verify(mockSdxUpgradeRecoveryService).triggerRecovery(cluster, request);
+        verify(secondaryRecoveryService).validateRecovery(cluster, request);
+        verify(secondaryRecoveryService).triggerRecovery(cluster, request);
         verify(mockResizeRecoveryService, never()).triggerRecovery(cluster, request);
         assertNotNull(result);
         assertEquals(response, result);
     }
 
     @Test
-    void testRecoveryServiceCanValidateUpgradeFailureByClusterName() {
-        setUpgradeTest();
+    void testRecoveryServiceCanValidateWithSecondaryService() {
+        when(mockResizeRecoveryService.validateRecovery(cluster)).thenReturn(nonrecoverableResponse);
+        when(secondaryRecoveryService.validateRecovery(cluster)).thenReturn(recoverableResponse);
+
         SdxRecoverableResponse result = sdxRecoverySelectorService.validateRecovery(cluster);
 
-        // Basically, just check that we pass through
-        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster);
+        verify(secondaryRecoveryService).validateRecovery(cluster);
 
         assertNotNull(result);
         assertEquals(recoverableResponse, result);
@@ -100,19 +84,16 @@ class SdxRecoverySelectorServiceTest {
 
     @Test
     void testRecoveryServiceCanSwitchDespiteValidationError() {
-        setUpgradeTest();
-        when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenAnswer(invocation -> {
-            throw new Exception("Error!");
-        });
+        when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenThrow(new RuntimeException("Error!"));
+        when(secondaryRecoveryService.validateRecovery(cluster, request)).thenReturn(recoverableResponse);
 
         SdxRecoveryResponse response = new SdxRecoveryResponse();
-        when(mockSdxUpgradeRecoveryService.triggerRecovery(cluster, request)).thenReturn(response);
+        when(secondaryRecoveryService.triggerRecovery(cluster, request)).thenReturn(response);
 
         SdxRecoveryResponse result = sdxRecoverySelectorService.triggerRecovery(cluster, request);
 
-        // Basically, just check that we pass through to the Upgrade Recovery Service despite error during resize recovery validation.
         verify(mockResizeRecoveryService, never()).triggerRecovery(cluster, request);
-        verify(mockSdxUpgradeRecoveryService).triggerRecovery(cluster, request);
+        verify(secondaryRecoveryService).triggerRecovery(cluster, request);
 
         assertNotNull(result);
         assertEquals(response, result);
@@ -120,17 +101,15 @@ class SdxRecoverySelectorServiceTest {
 
     @Test
     void testRecoveryServiceCanSwitchToResizeRecovery() {
-        setResizeTest();
+        when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenReturn(recoverableResponse);
 
         SdxRecoveryResponse response = new SdxRecoveryResponse();
         when(mockResizeRecoveryService.triggerRecovery(cluster, request)).thenReturn(response);
 
         SdxRecoveryResponse result = sdxRecoverySelectorService.triggerRecovery(cluster, request);
 
-        // Basically, just check that we pass through to the Resize Recovery Service
-        verifyNoInteractions(mockSdxUpgradeRecoveryService);
+        verifyNoInteractions(secondaryRecoveryService);
         verify(mockResizeRecoveryService).triggerRecovery(cluster, request);
-        verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
 
         assertNotNull(result);
         assertEquals(response, result);
@@ -138,13 +117,12 @@ class SdxRecoverySelectorServiceTest {
 
     @Test
     void testRecoveryServiceCanValidateResizeRecovery() {
-        setResizeTest();
+        when(mockResizeRecoveryService.validateRecovery(cluster)).thenReturn(recoverableResponse);
 
         SdxRecoverableResponse result = sdxRecoverySelectorService.validateRecovery(cluster);
 
-        // Basically, just check that we pass through
         verify(mockResizeRecoveryService).validateRecovery(cluster);
-        verify(mockSdxUpgradeRecoveryService, never()).validateRecovery(cluster);
+        verify(secondaryRecoveryService, never()).validateRecovery(cluster);
         assertNotNull(result);
         assertEquals(recoverableResponse, result);
     }
@@ -154,16 +132,15 @@ class SdxRecoverySelectorServiceTest {
         SdxRecoverableResponse nonrecoverableResponse2 = new SdxRecoverableResponse("Some non reason2", RecoveryStatus.NON_RECOVERABLE);
 
         when(mockResizeRecoveryService.validateRecovery(cluster)).thenReturn(nonrecoverableResponse);
-        when(mockSdxUpgradeRecoveryService.validateRecovery(cluster)).thenReturn(nonrecoverableResponse2);
+        when(secondaryRecoveryService.validateRecovery(cluster)).thenReturn(nonrecoverableResponse2);
 
         SdxRecoverableResponse result = sdxRecoverySelectorService.validateRecovery(cluster);
 
         verify(mockResizeRecoveryService).validateRecovery(cluster);
-        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster);
+        verify(secondaryRecoveryService).validateRecovery(cluster);
 
         assertNotNull(result);
         assertTrue(result.getStatus().nonRecoverable());
-        //"Some non reason, Some non reason2" order independent
         assertEquals(33, result.getReason().length(), result.getReason());
 
     }
@@ -174,14 +151,13 @@ class SdxRecoverySelectorServiceTest {
         SdxRecoveryRequest request = new SdxRecoveryRequest();
 
         when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenReturn(nonrecoverableResponse);
-        when(mockSdxUpgradeRecoveryService.validateRecovery(cluster, request)).thenReturn(nonrecoverableResponse2);
+        when(secondaryRecoveryService.validateRecovery(cluster, request)).thenReturn(nonrecoverableResponse2);
 
         BadRequestException result = assertThrows(BadRequestException.class, () -> sdxRecoverySelectorService.triggerRecovery(cluster, request));
 
         verify(mockResizeRecoveryService).validateRecovery(cluster, request);
-        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster, request);
-        verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
-        verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
+        verify(secondaryRecoveryService).validateRecovery(cluster, request);
+        verify(secondaryRecoveryService, never()).triggerRecovery(cluster, request);
 
         assertNotNull(result);
         assertEquals(33, result.getMessage().length(), result.getMessage());
