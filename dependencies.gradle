@@ -1,7 +1,7 @@
 // Version definitions
 ext {
   // Gradle Build tools
-  sonarVersion = '7.3.0.8198'
+  sonarVersion = '7.3.1.8318'
   protobufPluginVersion = '0.9.6'
   springDependencyManagementVersion = '1.1.7'
   openapiGeneratorGradlePlugin = '7.15.0'
