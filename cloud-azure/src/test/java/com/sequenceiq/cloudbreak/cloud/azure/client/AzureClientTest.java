@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,7 @@ import org.springframework.retry.RetryException;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.core.management.exception.ManagementError;
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.compute.fluent.ComputeManagementClient;
@@ -98,6 +100,7 @@ import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
 import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.azure.resourcemanager.resources.implementation.GenericResourcesImpl;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.azure.resourcemanager.storage.models.StorageAccounts;
@@ -197,6 +200,28 @@ class AzureClientTest {
         underTest.setupDiskEncryptionWithDesIfNeeded(diskEncryptionSetId, diskInner);
 
         verify(diskInner, never()).withEncryption(any());
+    }
+
+    @Test
+    void createResourceGroupWhenFirstAttemptFailsThenRetrySucceedsDeterministically() {
+        ResourceGroup expectedResourceGroup = mock(ResourceGroup.class);
+        ManagementException concurrentWriteException = mock(ManagementException.class);
+        when(azureExceptionHandler.isConcurrentWrite(concurrentWriteException)).thenReturn(true);
+        when(azureExceptionHandler.handleException(any(Supplier.class), eq(null))).thenReturn(null);
+
+        AtomicInteger createCallCount = new AtomicInteger();
+        when(azureExceptionHandler.handleException(any(Supplier.class))).thenAnswer(invocation -> {
+            if (createCallCount.getAndIncrement() == 0) {
+                throw concurrentWriteException;
+            }
+            return expectedResourceGroup;
+        });
+
+        ResourceGroup result = underTest.createResourceGroup(RESOURCE_GROUP_NAME, "westus2", Map.of());
+
+        assertThat(result).isEqualTo(expectedResourceGroup);
+        assertThat(createCallCount.get()).isEqualTo(2);
+        verify(azureExceptionHandler, times(1)).handleException(any(Supplier.class), eq(null));
     }
 
     @Test

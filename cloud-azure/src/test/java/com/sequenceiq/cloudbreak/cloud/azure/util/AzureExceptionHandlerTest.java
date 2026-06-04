@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -54,7 +55,7 @@ public class AzureExceptionHandlerTest {
                 Arguments.of(401, "ConflictingUserInput", "", false),
                 Arguments.of(409, "anything", "", false),
                 Arguments.of(409, "ConflictingUserInput", "", false),
-                Arguments.of(409, "ConflictingUserInput", "cannot be attached as the disk is already owned by VM", false)
+                Arguments.of(409, "ConflictingUserInput", "cannot be attached as the disk is already owned by VM", true)
         );
     }
 
@@ -67,9 +68,9 @@ public class AzureExceptionHandlerTest {
 
     @ParameterizedTest
     @MethodSource("diskAlreadyAttachedCheckTestSource")
-    void concurrentWriteCheckTest(int statusCode, String azureErrorCode, String azureErrorMessage, boolean result) {
+    void diskAlreadyAttachedCheckTest(int statusCode, String azureErrorCode, String azureErrorMessage, boolean result) {
         ApiErrorException apiErrorException = getApiErrorException(statusCode, azureErrorCode, azureErrorMessage);
-        assertEquals(result, underTest.isConcurrentWrite(apiErrorException));
+        assertEquals(result, underTest.isDiskAlreadyAttached(apiErrorException));
     }
 
     private ApiErrorException getApiErrorException(int statusCode, String azureErrorCode, String azureErrorMessage) {
@@ -125,12 +126,30 @@ public class AzureExceptionHandlerTest {
     @Test
     void handleExceptionWhenMsalForbiddenThenThrowsProviderAuthenticationFailedException() {
         Supplier<String> stringSupplier = () -> {
-            throw getMsalServiceException(HttpStatus.UNAUTHORIZED);
+            throw getMsalServiceException(HttpStatus.FORBIDDEN);
         };
 
         Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier))
                 .isExactlyInstanceOf(ProviderAuthenticationFailedException.class);
 
+    }
+
+    @Test
+    void handleExceptionRunnableWhenMsalUnauthorizedThenThrowsProviderAuthenticationFailedException() {
+        Runnable runnable = () -> {
+            throw getMsalServiceException(HttpStatus.UNAUTHORIZED);
+        };
+
+        assertThrows(ProviderAuthenticationFailedException.class, () -> underTest.handleException(runnable));
+    }
+
+    @Test
+    void handleExceptionRunnableWhenOtherMsalExceptionThenThrowsOriginalException() {
+        Runnable runnable = () -> {
+            throw getMsalServiceException(HttpStatus.BAD_REQUEST);
+        };
+
+        assertThrows(MsalServiceException.class, () -> underTest.handleException(runnable));
     }
 
     @ParameterizedTest
@@ -218,7 +237,6 @@ public class AzureExceptionHandlerTest {
     private MsalServiceException getMsalServiceException(HttpStatus httpStatus) {
         MsalServiceException msalServiceException = mock(MsalServiceException.class);
         when(msalServiceException.statusCode()).thenReturn(httpStatus.value());
-        when(msalServiceException.getSuppressed()).thenReturn(new Throwable[]{});
         return msalServiceException;
     }
 

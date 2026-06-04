@@ -150,6 +150,10 @@ public class AzureClient {
 
     private static final String FLEXIBLE_SERVER_EXTENSIONS = "PG_STAT_STATEMENTS,PG_BUFFERCACHE";
 
+    private static final int CREATE_MAX_RETRY = 3;
+
+    private static final Duration CREATE_INITIAL_BACKOFF = Duration.ofSeconds(4);
+
     private final AzureResourceManager azure;
 
     private final PrivateDnsZoneManager privateDnsZoneManager;
@@ -168,6 +172,8 @@ public class AzureClient {
 
     private final ComputeManager computeManager;
 
+    private final AzureRetryExecutor azureRetryExecutor;
+
     public AzureClient(AzureClientFactory azureClientCredentials, AzureExceptionHandler azureExceptionHandler, AzureListResultFactory azureListResultFactory) {
         this.azureClientFactory = azureClientCredentials;
         azure = azureClientCredentials.getAzureResourceManager();
@@ -178,6 +184,7 @@ public class AzureClient {
         computeManager = azureClientCredentials.getComputeManager();
         this.azureExceptionHandler = azureExceptionHandler;
         this.azureListResultFactory = azureListResultFactory;
+        azureRetryExecutor = new AzureRetryExecutor(azureExceptionHandler);
     }
 
     public ResourceGroup getResourceGroup(String name) {
@@ -209,10 +216,13 @@ public class AzureClient {
     }
 
     public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
-        return handleException(() -> azure.resourceGroups().define(name)
-                .withRegion(region)
-                .withTags(tags)
-                .create());
+        return handleException(
+                () -> azure.resourceGroups().define(name)
+                        .withRegion(region)
+                        .withTags(tags)
+                        .create(),
+                () -> azure.resourceGroups().getByName(name)
+        );
     }
 
     public Deployment createTemplateDeployment(String resourceGroupName, String deploymentName, String templateContent, String parameterContent) {
@@ -941,6 +951,14 @@ public class AzureClient {
 
     private <T> T handleException(Supplier<T> function) {
         return azureExceptionHandler.handleException(function);
+    }
+
+    private <T> T handleException(Supplier<T> function, Supplier<T> existingResourceSupplier) {
+        return azureRetryExecutor.executeWithConcurrentWriteRetry(
+                () -> handleException(function),
+                existingResourceSupplier,
+                AzureClient.CREATE_MAX_RETRY,
+                AzureClient.CREATE_INITIAL_BACKOFF);
     }
 
     private <T> T handleExceptionWithDefault(Supplier<T> function, T defaultValue) {
