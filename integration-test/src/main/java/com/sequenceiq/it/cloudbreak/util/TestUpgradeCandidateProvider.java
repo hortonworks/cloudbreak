@@ -68,10 +68,15 @@ public class TestUpgradeCandidateProvider {
                 .sorted(Comparator.comparing(ImageV4Response::getCreated).reversed())
                 .toList();
 
-        for (int i = 0; i < advertisedCdhImages.size(); i++) {
-            ImageV4Response targetImage = advertisedCdhImages.get(i);
-            for (int j = 0; j < allCdhImage.size(); j++) {
-                ImageV4Response sourceImage = allCdhImage.get(j);
+        return findUpgradePair(allCdhImage, advertisedCdhImages, matchCondition, runtimeVersion);
+    }
+
+    Pair<String, String> findUpgradePair(List<ImageV4Response> sourceImages, List<ImageV4Response> targetImages,
+            BiPredicate<ImageV4Response, ImageV4Response> matchCondition, String runtimeVersion) {
+        for (int i = 0; i < targetImages.size(); i++) {
+            ImageV4Response targetImage = targetImages.get(i);
+            for (int j = 0; j < sourceImages.size(); j++) {
+                ImageV4Response sourceImage = sourceImages.get(j);
                 if (matchCondition.test(sourceImage, targetImage)) {
                     Pair<String, String> pair = Pair.of(sourceImage.getUuid(), targetImage.getUuid());
                     LOGGER.info("Upgrade candidates found. Source image: {}, target image: {}", pair.getLeft(), pair.getRight());
@@ -79,7 +84,7 @@ public class TestUpgradeCandidateProvider {
                 }
             }
         }
-        throw new TestFailException(String.format("There is no upgrade candidate found for runtime %s. Available images: %s", runtimeVersion, allCdhImage));
+        throw new TestFailException(String.format("There is no upgrade candidate found for runtime %s. Available images: %s", runtimeVersion, sourceImages));
     }
 
     private static Predicate<ImageV4Response> hasArchitecture(Architecture architecture) {
@@ -139,16 +144,16 @@ public class TestUpgradeCandidateProvider {
                 .toList();
     }
 
-    private boolean hasDifferentBuildNumber(ImageV4Response current, ImageV4Response target) {
+    boolean hasDifferentBuildNumber(ImageV4Response current, ImageV4Response target) {
         String currentCdhBuildNumber = current.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         String targetCdhBuildNumber = target.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         String currentCmVersion = current.getPackageVersions().get(ImagePackageVersion.CM.getKey());
         String targetCmVersion = target.getPackageVersions().get(ImagePackageVersion.CM.getKey());
-        return new VersionComparator().compare(() -> targetCmVersion, () -> currentCmVersion) > 0 &&
-                !Objects.equals(currentCdhBuildNumber, targetCdhBuildNumber) && current.getCreated() < target.getCreated();
+        return new VersionComparator().compare(() -> targetCmVersion, () -> currentCmVersion) >= 0 &&
+                Long.parseLong(targetCdhBuildNumber) > Long.parseLong(currentCdhBuildNumber);
     }
 
-    private boolean hasSameBuildNumber(ImageV4Response current, ImageV4Response target) {
+    boolean hasSameBuildNumber(ImageV4Response current, ImageV4Response target) {
         String currentCdhBuildNumber = current.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         String targetCdhBuildNumber = target.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         String currentCmBuildNumber = current.getPackageVersions().get(ImagePackageVersion.CM_BUILD_NUMBER.getKey());
