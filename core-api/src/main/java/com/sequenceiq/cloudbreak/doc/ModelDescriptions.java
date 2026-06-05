@@ -211,6 +211,7 @@ public class ModelDescriptions {
         public static final String PROVIDER_SYNC_STATES = "Contains information about provider issues. No issues found if empty or 'VALID'.";
         public static final String DATA_LAKE = "Details about the data lake associated with the stack";
         public static final String STACK_TYPE = "Type of the stack, for example Data Lake or DataHub";
+        public static final String RESOURCE_UPDATE_RESPONSE_DESCRIPTION = "Flow identifier for the current resource/ volume sync operation";
     }
 
     public static class ClusterModelDescription {

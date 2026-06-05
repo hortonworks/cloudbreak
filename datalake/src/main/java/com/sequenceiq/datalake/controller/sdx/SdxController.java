@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -104,6 +105,7 @@ import com.sequenceiq.sdx.api.model.SdxInstanceMetadataUpdateRequest;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxResourceUpdateRequest;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -716,6 +718,12 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = UPGRADE_DATALAKE)
     public ResetJvmParamsV4Response resetJvmParamsByCrn(@ResourceCrn String crn, ResetJvmParamsRequest request) {
         return stackService.resetJvmParams(crn, request);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public ResourceUpdateResponse updateDatalakeVolumeResourcesByCrn(@RequestObject SdxResourceUpdateRequest request) {
+        return stackService.updateDatalakeVolumeResourcesByCrn(request);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

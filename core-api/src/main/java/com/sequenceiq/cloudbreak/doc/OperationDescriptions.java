@@ -110,6 +110,7 @@ public class OperationDescriptions {
         public static final String IMD_UPDATE = "update instance metadata for stack's instances";
         public static final String REFRESH_ENTITLEMENTS_PARAMS = "Refresh configurations based on entitlements";
         public static final String RESET_JVM_PARAMS = "Reset JVM params on the cluster";
+        public static final String UPDATE_VOLUME_RESOURCE_BY_CRN = "Updates the additional volumes or fstab drift identified by DiskSyncJob";
     }
 
     public static class ClusterOpDescription {

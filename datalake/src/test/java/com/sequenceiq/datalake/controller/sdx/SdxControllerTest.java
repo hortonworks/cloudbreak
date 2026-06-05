@@ -76,6 +76,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
+import com.sequenceiq.sdx.api.model.SdxResourceUpdateRequest;
 
 @ExtendWith(MockitoExtension.class)
 class SdxControllerTest {
@@ -655,5 +656,20 @@ class SdxControllerTest {
         verify(sdxReactorFlowManager).triggerRestartClusterServices(sdxCluster, true, true);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testUpdateDatalakeVolumeResourceByCrn() {
+        String crn = "crn";
+        SdxResourceUpdateRequest request = mock(SdxResourceUpdateRequest.class);
+        com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse response =
+            mock(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse.class);
+        when(stackService.updateDatalakeVolumeResourcesByCrn(request)).thenReturn(response);
+
+        com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse actual =
+            sdxController.updateDatalakeVolumeResourcesByCrn(request);
+
+        assertEquals(response, actual);
+        verify(stackService).updateDatalakeVolumeResourcesByCrn(request);
     }
 }

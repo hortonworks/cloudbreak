@@ -104,6 +104,7 @@ public class RestUrlParserTest {
             "/imd_update",
             "internal/get_database_certificate_status",
             "internal/manage_db_user",
+            "internal/update_stack_volume_resources",
             "support/internal/defaults",
             "internal/get_clusters_names_by_encryption_profile",
             "cluster_upgrade/reinitiable"
@@ -180,6 +181,9 @@ public class RestUrlParserTest {
                                 } else {
                                     checkIfMoreThanOneParserDetected(methodPath, matchedParsers);
                                     checkWorkspaceId(methodPath, params);
+                                    if (methodPath.contains("update_stack_volume_resources")) {
+                                        checkResourceIdOrName(methodPath, params);
+                                    }
                                     checkResourceIdOrName(methodPath, params);
                                     checkResourceType(methodPath, params);
                                     checkResourceEvent(methodPath, params);
@@ -280,6 +284,7 @@ public class RestUrlParserTest {
     }
 
     private void checkResourceIdOrName(String methodPath, Map<String, String> params) {
+
         if (methodPath.contains(RESOURCE_ID)) {
             assertEquals(RESOURCE_ID,
                     params.get(LegacyRestUrlParser.RESOURCE_ID), "params should contain resource ID");

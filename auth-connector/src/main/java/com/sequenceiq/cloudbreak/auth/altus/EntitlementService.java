@@ -22,6 +22,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CONF
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DB_DISK_AUTO_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENABLE_UPDATE_RESOURCE_ATTRIBUTES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
@@ -675,5 +676,9 @@ public class EntitlementService {
 
     public boolean isStrictImageCatalogUrlValidationDisabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION);
+    }
+
+    public boolean isUpdateResourceAttributesEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_ENABLE_UPDATE_RESOURCE_ATTRIBUTES);
     }
 }

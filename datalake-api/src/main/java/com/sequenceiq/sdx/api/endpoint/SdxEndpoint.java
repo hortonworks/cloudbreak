@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_VOLUME_RESOURCE_BY_CRN;
 import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.MIGRATE_DATABASE_TO_SSL_BY_CRN;
 import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.MIGRATE_DATABASE_TO_SSL_BY_NAME;
 import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.MIGRATE_DATABASE_TO_SSL_NOTES;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
@@ -68,6 +70,7 @@ import com.sequenceiq.sdx.api.model.SdxInstanceMetadataUpdateRequest;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxResourceUpdateRequest;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -676,6 +679,15 @@ public interface SdxEndpoint {
     FlowIdentifier restartClusterServicesByName(@PathParam("name") String name,
             @QueryParam("rollingRestart") @DefaultValue("false") boolean rollingRestart,
             @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly);
+
+    @POST
+    @Path("update_volume_resource")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = UPDATE_VOLUME_RESOURCE_BY_CRN,
+            operationId = "updateDatalakeVolumeResourceByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ResourceUpdateResponse updateDatalakeVolumeResourcesByCrn(@NotNull @Valid SdxResourceUpdateRequest request);
 
     @POST
     @Path("crn/{crn}/restart_cluster_services")

@@ -49,7 +49,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -789,5 +791,17 @@ public class StackOperationService {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         clusterService.disableEncryptionProfile(stack.getCluster().getId());
         return flowManager.triggerPillarConfigurationUpdate(stack.getId());
+    }
+
+    public ResourceUpdateResponse updateVolumeResourcesByCrn(ResourceUpdateRequest request, String accountId) {
+        if (!entitlementService.isUpdateResourceAttributesEnabled(accountId)) {
+            throw new CloudbreakServiceException("Updating resources is not granted to the account. " +
+                    "Please contact your CDP administrator to enable it.");
+        }
+        LOGGER.debug("Triggering volume resources update on stack ('{}')", request.getCrn());
+        StackDto stack = stackDtoService.getByCrn(request.getCrn());
+        request.setResourceId(stack.getId());
+        FlowIdentifier flowIdentifier = flowManager.triggerVolumeResourcesUpdateByCrn(request);
+        return new ResourceUpdateResponse(flowIdentifier);
     }
 }

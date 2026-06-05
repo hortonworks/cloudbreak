@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -66,6 +67,8 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.disksync.DiskSyncEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.disksync.request.DiskSyncRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFinalizationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
@@ -671,5 +674,10 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerUpdateSslConfigsOnCluster(Long stackId, String encryptionProfileCrn) {
         String selector = FlowChainTriggers.UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new UpdateSslConfigTriggerEvent(selector, stackId, new Promise<>(), encryptionProfileCrn));
+    }
+
+    public FlowIdentifier triggerVolumeResourcesUpdateByCrn(ResourceUpdateRequest request) {
+        String selector = DiskSyncEvent.DISK_SYNC_TRIGGER_EVENT.event();
+        return reactorNotifier.notify(request.getResourceId(), selector, new DiskSyncRequest(request.getResourceId(), request.getDiskSyncMode()));
     }
 }

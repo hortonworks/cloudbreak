@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DistroxResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -64,6 +65,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -1005,5 +1007,11 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
     public FlowIdentifier disableEncryptionProfileByName(@ResourceName String name) {
         return stackOperationService.disableEncryptionProfile(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public ResourceUpdateResponse updateVolumeResourcesByCrn(@RequestObject DistroxResourceUpdateRequest request) {
+        return stackOperationService.updateVolumeResourcesByCrn(request, ThreadBasedUserCrnProvider.getAccountId());
     }
 }

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
@@ -288,5 +289,14 @@ class StackV4ControllerTest {
             underTest.triggerUserDefinedTagsUpdateInternal(WORKSPACE_ID, STACK_CRN, userDefinedTags);
         });
         verify(stackOperationService).triggerUserDefinedTagsUpdate(STACK_CRN, ACCOUNT_ID, userDefinedTags);
+    }
+
+    @Test
+    void testUpdateVolumeResourcesByCrnInternal() {
+        StackResourceUpdateRequest request = new StackResourceUpdateRequest();
+        doAs(USER_CRN, () -> {
+            underTest.updateStackVolumeResourcesByCrn(WORKSPACE_ID, request, USER_CRN);
+        });
+        verify(stackOperationService).updateVolumeResourcesByCrn(request, ACCOUNT_ID);
     }
 }

@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -241,6 +242,7 @@ class ReactorFlowManagerTest {
         underTest.triggerResetJvmParams(STACK_ID);
         underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true, false);
         underTest.triggerUserDefinedTagsUpdate(STACK_ID, Map.of("custom", "value"));
+        underTest.triggerVolumeResourcesUpdateByCrn(mock(ResourceUpdateRequest.class));
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

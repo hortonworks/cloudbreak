@@ -76,6 +76,8 @@ public class DistroXOpDescription {
     public static final String COST = "Get cost calculation for Distrox clusters";
     public static final String CO2 = "Get CO2 cost calculation for Distro clusters";
 
+    public static final String UPDATE_VOLUME_RESOURCE_BY_CRN = "Updates the additional volumes or fstab drift identified by DiskSyncJob";
+
     private DistroXOpDescription() {
     }
 }

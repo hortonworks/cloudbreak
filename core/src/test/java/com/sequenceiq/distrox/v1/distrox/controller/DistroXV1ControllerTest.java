@@ -29,8 +29,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DistroxResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
@@ -392,5 +394,23 @@ class DistroXV1ControllerTest {
         });
 
         verify(stackOperationService).disableEncryptionProfile(NameOrCrn.ofName(NAME), ACCOUNT_ID);
+    }
+
+    @Test
+    void testUpdateVolumeResourcesByCrn() {
+        DistroxResourceUpdateRequest resourceUpdateRequest = mock(DistroxResourceUpdateRequest.class);
+        ResourceUpdateResponse resourceUpdateResponse = new ResourceUpdateResponse(FLOW_IDENTIFIER);
+        when(stackOperationService.updateVolumeResourcesByCrn(resourceUpdateRequest, ACCOUNT_ID))
+                .thenReturn(resourceUpdateResponse);
+
+        ResourceUpdateResponse result = doAs(TEST_USER_CRN, () -> {
+            try {
+                return distroXV1Controller.updateVolumeResourcesByCrn(resourceUpdateRequest);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        assertEquals(resourceUpdateResponse, result);
+        verify(stackOperationService).updateVolumeResourcesByCrn(resourceUpdateRequest, ACCOUNT_ID);
     }
 }

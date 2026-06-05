@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -22,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxResourceUpdateRequest;
 
 @Service
 public class StackService {
@@ -135,5 +138,12 @@ public class StackService {
         LOGGER.info("Disabling encryption profile for CRN {}", datalakeCrn);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 initiatorUserCrn -> stackV4Endpoint.disableEncryptionProfileByCrn(WORKSPACE_ID_DEFAULT, datalakeCrn));
+    }
+
+    public ResourceUpdateResponse updateDatalakeVolumeResourcesByCrn(SdxResourceUpdateRequest request) {
+        LOGGER.debug("Calling DistroX service for updating resource of datalake: '{}'", request.getCrn());
+        StackResourceUpdateRequest stackResourceUpdateRequest = new StackResourceUpdateRequest(request);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                initiatorUserCrn -> stackV4Endpoint.updateStackVolumeResourcesByCrn(WORKSPACE_ID_DEFAULT, stackResourceUpdateRequest, initiatorUserCrn));
     }
 }

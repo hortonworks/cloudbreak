@@ -74,6 +74,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MOD
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROOT_VOLUME_UPDATE_BY_STACK_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_STACK_SECRETS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SEND_NOTIFICATION;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.UPDATE_VOLUME_RESOURCE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
@@ -109,6 +110,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackNotificationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -125,6 +127,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -1159,4 +1162,15 @@ public interface StackV4Endpoint {
             operationId = "disableEncryptionProfileByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier disableEncryptionProfileByCrn(@PathParam("workspaceId") Long workspaceId, @NotEmpty @PathParam("crn") String crn);
+
+    @PUT
+    @Path("internal/update_stack_volume_resources")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = UPDATE_VOLUME_RESOURCE_BY_CRN,
+            operationId = "updateStackVolumeResourceByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ResourceUpdateResponse updateStackVolumeResourcesByCrn(@PathParam("workspaceId") Long workspaceId, @NotNull @Valid StackResourceUpdateRequest request,
+            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }
