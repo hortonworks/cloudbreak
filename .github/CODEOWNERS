@@ -31,8 +31,8 @@ orchestrator-salt/src/main/resources/salt/salt/datalake_metrics                 
 environment/                                                                        @cloudbreak/cloudbreak-wolf-backend
 environment-api/                                                                    @cloudbreak/cloudbreak-wolf-backend
 environment-common/                                                                 @cloudbreak/cloudbreak-wolf-backend
-environment-remote/                                                                 @cloudbreak/cloudbreak-wolf-backend
-environment-remote-api/                                                             @cloudbreak/cloudbreak-wolf-backend
+environment-remote/                                                                 @cloudbreak/cloudbreak-wolf-backend @cloudbreak/cloudbreak-duck
+environment-remote-api/                                                             @cloudbreak/cloudbreak-wolf-backend @cloudbreak/cloudbreak-duck
 
 # Wolf team should review template modules
 template-manager-blueprint/                                                         @cloudbreak/cloudbreak-wolf-backend
