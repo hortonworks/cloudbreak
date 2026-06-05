@@ -101,21 +101,21 @@ public interface EncryptionProfileEndpoint {
     CipherSuitesByTlsVersionResponse listCiphersByTlsVersion();
 
     @PUT
-    @Path("internal/crn/{encryptionProfileCrn}/enable_encryption_profile_by_crn")
+    @Path("crn/{encryptionProfileCrn}/enable_encryption_profile")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Enable encryption profile in the given environment by crn",
-            operationId = "updateSslConfigsInternal",
+            operationId = "enableEncryptionProfileByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier enableEncryptionProfileByCrn(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENCYRPTION_PROFILE)
             @PathParam("encryptionProfileCrn") String encryptionProfileCrn, @QueryParam("envNameOrCrn") String envNameOrCrn);
 
     @PUT
-    @Path("internal/name/{encryptionProfileName}/enable_encryption_profile_by_name")
+    @Path("name/{encryptionProfileName}/enable_encryption_profile")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Enable encryption profile in the given environment by name",
-            operationId = "updateSslConfigsInternal",
+            operationId = "enableEncryptionProfileByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier enableEncryptionProfileByName(@NotEmpty @PathParam("encryptionProfileName") String encryptionProfileName,
             @QueryParam("envNameOrCrn") String envNameOrCrn);
