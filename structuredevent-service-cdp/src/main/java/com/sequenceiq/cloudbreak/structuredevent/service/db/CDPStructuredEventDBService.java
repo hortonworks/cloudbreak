@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -11,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRe
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventEntityToCDPStructuredEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventToCDPStructuredEventEntityConverter;
+import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Component
@@ -105,9 +109,17 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         LOGGER.debug("Gathering pageable events for types: '{}' and resource CRN: '{}'", eventTypes, resourceCrn);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn, pageable);
-            return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
-                    .convert(event));
+            Slice<CDPStructuredEventEntity> events = Benchmark.measureAndWarnIfLong(() ->
+                pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn, pageable),
+                LOGGER,
+                String.format("getPagedEventsOfResource for resourceCrn='%s', types=%s, pageable=%s", resourceCrn, types, pageable)
+            );
+            List<T> content = (List<T>) Optional.ofNullable(events)
+                    .map(Slice::stream)
+                    .orElse(Stream.empty())
+                    .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter.convert(event))
+                    .collect(Collectors.toList());
+            return new PageImpl<>(content, pageable, content.size());
         } catch (Exception ex) {
             String msg = String.format("Failed get pageable events for types: '%s' and resource CRN: '%s'", types, resourceCrn);
             LOGGER.warn(msg, ex);
@@ -120,9 +132,17 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         LOGGER.debug("Gathering pageable events for types: '{}' and resource CRNs: '{}'", eventTypes, resourceCrns);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns, pageable);
-            return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
-                    .convert(event));
+            Slice<CDPStructuredEventEntity> events = Benchmark.measureAndWarnIfLong(() ->
+                pagingStructuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns, pageable),
+                LOGGER,
+                String.format("getPagedEventsOfResources for resourceCrns='%s', types=%s, pageable=%s", resourceCrns, types, pageable)
+            );
+            List<T> content = (List<T>) Optional.ofNullable(events)
+                    .map(Slice::stream)
+                    .orElse(Stream.empty())
+                    .map(cdpStructuredEventEntityToCDPStructuredEventConverter::convert)
+                    .collect(Collectors.toList());
+            return new PageImpl<>(content, pageable, content.size());
         } catch (Exception ex) {
             String msg = String.format("Failed get pageable events for types: '%s' and resource CRNs: '%s'", types, resourceCrns);
             LOGGER.warn(msg, ex);
@@ -135,11 +155,15 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         LOGGER.debug("Gathering events for type: '{}' and resource CRN: '{}'", eventTypes, resourceCrn);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn,
-                    createPageRequest());
-            return (List<T>) Optional.ofNullable(events).orElse(Page.empty()).stream()
-                    .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
-                            .convert(event))
+            Slice<CDPStructuredEventEntity> events = Benchmark.measureAndWarnIfLong(() ->
+                pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn, createPageRequest()),
+                LOGGER,
+                String.format("getEventsOfResource for resourceCrn='%s', types=%s", resourceCrn, types)
+            );
+            return (List<T>) Optional.ofNullable(events)
+                    .map(Slice::stream)
+                    .orElse(Stream.empty())
+                    .map(cdpStructuredEventEntityToCDPStructuredEventConverter::convert)
                     .collect(Collectors.toList());
         } catch (Exception ex) {
             String msg = String.format("Failed get events for types: '%s' and resource CRN: '%s'", types, resourceCrn);
@@ -153,11 +177,15 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         LOGGER.debug("Gathering events for type: '{}' and resource CRN's: '{}'", eventTypes, resourceCrns);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns,
-                    createPageRequest());
-            return (List<T>) Optional.ofNullable(events).orElse(Page.empty()).stream()
-                    .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
-                            .convert(event))
+            Slice<CDPStructuredEventEntity> events = Benchmark.measureAndWarnIfLong(() ->
+                pagingStructuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns, createPageRequest()),
+                LOGGER,
+                String.format("getEventsOfResources for resourceCrns='{}', types={}", resourceCrns, types)
+            );
+            return (List<T>) Optional.ofNullable(events)
+                    .map(Slice::stream)
+                    .orElse(Stream.empty())
+                    .map(cdpStructuredEventEntityToCDPStructuredEventConverter::convert)
                     .collect(Collectors.toList());
         } catch (Exception ex) {
             String msg = String.format("Failed get events for types: '%s' and resource CRNs: '%s'", types, resourceCrns);

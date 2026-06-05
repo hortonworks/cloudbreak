@@ -50,6 +50,7 @@ main() {
     echo "export CPUS_FOR_CLOUDBREAK=4.0" >> integcb/Profile_template
     export TARGET_BRANCH=CB-$(echo $PRODUCTION_VERSION | sed -E "s/-b[0-9]+//g")
     make without-build && make stop-containers
+    git checkout $SOURCE_BRANCH
   else
   	echo "No SQL found in the PR. Interrupting test"
   fi
