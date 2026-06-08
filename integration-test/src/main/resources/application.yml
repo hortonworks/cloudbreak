@@ -387,7 +387,7 @@ integrationtest:
       hyperDiskBalanced: hyperdisk-balanced
       hyperDiskThroughput: hyperdisk-throughput
     storageOptimizedInstance:
-      type: n2-highmem-8
+      type: n2d-highmem-8
       rootVolumeSize: 200
       volumeSize: 375
       volumeCount: 2
@@ -414,7 +414,7 @@ integrationtest:
       environmentKey:
       datahubKey:
     embeddedDbUpgradeSourceVersion: 14
-    datahubCustomInstanceType: n2-standard-8
+    datahubCustomInstanceType: n2d-standard-8
 
   # yarn parameters
   yarn:
