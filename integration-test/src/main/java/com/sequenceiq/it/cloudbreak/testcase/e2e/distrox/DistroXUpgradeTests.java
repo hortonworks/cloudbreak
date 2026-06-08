@@ -75,6 +75,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
             then = "All DistroX upgrade should be successful, the clusters should be up and running, disks are encrypted too")
     public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
         boolean govCloud = testContext.getCloudProvider().getGovCloud();
+        String currentVersion = commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion(govCloud);
         String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(govCloud);
 
         String firstDhName = resourcePropertyProvider().getName();
@@ -86,7 +87,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         encryptedTestUtil.createFreeipa(testContext, commonCloudProperties());
         encryptedTestUtil.doFreeipUserSync(testContext);
         encryptedTestUtil.assertEnvironmentAndFreeipa(testContext, null);
-        createDatalake(testContext, currentUpgradeRuntimeVersion);
+        createDatalake(testContext, currentVersion);
         encryptedTestUtil.assertDatalake(testContext, null);
         createDataHubs(testContext, currentUpgradeRuntimeVersion, firstDhName, secondDhName, thirdDhName, patchUpgradePair.getLeft());
         encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
