@@ -80,8 +80,22 @@ public class TestUpgradeCandidateProviderTest {
         assertEquals(result.getRight(), "cdc4ace6");
     }
 
+    @Test
+    public void testFindUpgradePairNoValidPairFallsBackToNewerCdhBuild() {
+        ImageV4Response osUpdate = createImage("os-update", "7.13.1.706", "76410574", "76397095", 1779357979L);
+        ImageV4Response emergency = createImage("emergency", "7.13.1.706", "76410574", "78150083", 1778051561L);
+
+        List<ImageV4Response> sourceImages = List.of(osUpdate, emergency);
+        List<ImageV4Response> targetImages = List.of(osUpdate, emergency);
+
+        Pair<String, String> result = underTest.findUpgradePair(sourceImages, targetImages, underTest::hasSameBuildNumber, RUNTIME_731);
+
+        assertEquals(result.getLeft(), "os-update");
+        assertEquals(result.getRight(), "emergency");
+    }
+
     @Test(expectedExceptions = TestFailException.class)
-    public void testFindUpgradePairNoValidPairAllSameCdhBuild() {
+    public void testFindUpgradePairNoValidPairSameCdhBuildFallbackThrows() {
         ImageV4Response image1 = createImage("image-1", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response image2 = createImage("image-2", "7.13.1.706", "76410574", "76397095", 1779357928L);
 

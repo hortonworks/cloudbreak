@@ -84,7 +84,34 @@ public class TestUpgradeCandidateProvider {
                 }
             }
         }
-        throw new TestFailException(String.format("There is no upgrade candidate found for runtime %s. Available images: %s", runtimeVersion, sourceImages));
+        LOGGER.warn("No strict upgrade candidate found for runtime {} with the given condition. Falling back to oldest source and newest target.",
+                runtimeVersion);
+        return fallbackToOldestSourceAndNewestTarget(sourceImages, targetImages, runtimeVersion);
+    }
+
+    private Pair<String, String> fallbackToOldestSourceAndNewestTarget(List<ImageV4Response> sourceImages, List<ImageV4Response> targetImages,
+            String runtimeVersion) {
+        List<ImageV4Response> candidates = targetImages.isEmpty() ? sourceImages : targetImages;
+        if (candidates.size() < 2) {
+            throw new TestFailException(String.format("There is no upgrade candidate found for runtime %s. Available images: %s",
+                    runtimeVersion, sourceImages));
+        }
+        List<ImageV4Response> sorted = candidates.stream()
+                .sorted(Comparator.comparing(this::getCdhBuildNumber))
+                .toList();
+        ImageV4Response source = sorted.get(0);
+        ImageV4Response target = sorted.get(sorted.size() - 1);
+        if (source.getUuid().equals(target.getUuid()) || getCdhBuildNumber(source) == getCdhBuildNumber(target)) {
+            throw new TestFailException(String.format("There is no upgrade candidate found for runtime %s. Available images: %s",
+                    runtimeVersion, sourceImages));
+        }
+        Pair<String, String> pair = Pair.of(source.getUuid(), target.getUuid());
+        LOGGER.info("Fallback upgrade candidates found. Source image: {}, target image: {}", pair.getLeft(), pair.getRight());
+        return pair;
+    }
+
+    private long getCdhBuildNumber(ImageV4Response image) {
+        return Long.parseLong(image.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey()));
     }
 
     private static Predicate<ImageV4Response> hasArchitecture(Architecture architecture) {
