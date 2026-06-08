@@ -434,7 +434,12 @@ public class OpenstackCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubCustomInstanceType() {
+    public String getDatahubInstanceType(String name) {
+        return null;
+    }
+
+    @Override
+    public String getDatalakeInstanceType(String name) {
         return null;
     }
 

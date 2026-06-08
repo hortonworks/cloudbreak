@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -44,8 +45,6 @@ public class AzureProperties {
     private MarketplaceProperties marketplace = new MarketplaceProperties();
 
     private String embeddedDbUpgradeSourceVersion;
-
-    private String datahubCustomInstanceType;
 
     public VerticalScaleProperties getVerticalScale() {
         return verticalScale;
@@ -143,14 +142,6 @@ public class AzureProperties {
         this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
     }
 
-    public String getDatahubCustomInstanceType() {
-        return datahubCustomInstanceType;
-    }
-
-    public void setDatahubCustomInstanceType(String datahubCustomInstanceType) {
-        this.datahubCustomInstanceType = datahubCustomInstanceType;
-    }
-
     public static class Credential {
         private String appId;
 
@@ -204,6 +195,8 @@ public class AzureProperties {
 
         private String volumeType;
 
+        private final InstanceTypes types = new InstanceTypes();
+
         public String getType() {
             return type;
         }
@@ -242,6 +235,43 @@ public class AzureProperties {
 
         public void setVolumeType(String volumeType) {
             this.volumeType = volumeType;
+        }
+
+        public InstanceTypes getTypes() {
+            return types;
+        }
+
+        public static class InstanceTypes {
+
+            private String defaultType;
+
+            private Map<String, String> datalake;
+
+            private Map<String, String> datahub;
+
+            public String getDefault() {
+                return defaultType;
+            }
+
+            public void setDefault(String defaultType) {
+                this.defaultType = defaultType;
+            }
+
+            public Map<String, String> getDatalake() {
+                return datalake;
+            }
+
+            public void setDatalake(Map<String, String> datalake) {
+                this.datalake = datalake;
+            }
+
+            public Map<String, String> getDatahub() {
+                return datahub;
+            }
+
+            public void setDatahub(Map<String, String> datahub) {
+                this.datahub = datahub;
+            }
         }
     }
 

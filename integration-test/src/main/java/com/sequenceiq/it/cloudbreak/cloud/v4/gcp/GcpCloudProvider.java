@@ -119,7 +119,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         if (Architecture.ARM64.equals(architecture)) {
             throw new NotImplementedException("Arm64 instance is not configured for GCP.");
         }
-        return gcpProperties.getInstance().getType();
+        return gcpProperties.getInstance().getTypes().getDefault();
     }
 
     @Override
@@ -129,7 +129,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
-        return template.withInstanceType(gcpProperties.getInstance().getType());
+        return template.withInstanceType(gcpProperties.getInstance().getTypes().getDefault());
     }
 
     @Override
@@ -137,7 +137,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         if (architecture != Architecture.X86_64) {
             throw new NotImplementedException(String.format("Architecture %s is not implemented", architecture.getName()));
         }
-        return template.withInstanceType(gcpProperties.getInstance().getType());
+        return template.withInstanceType(gcpProperties.getInstance().getTypes().getDefault());
     }
 
     @Override
@@ -569,8 +569,15 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubCustomInstanceType() {
-        return gcpProperties.getDatahubCustomInstanceType();
+    public String getDatahubInstanceType(String name) {
+        return gcpProperties.getInstance().getTypes().getDatahub().getOrDefault(name,
+                gcpProperties.getInstance().getTypes().getDefault());
+    }
+
+    @Override
+    public String getDatalakeInstanceType(String name) {
+        return gcpProperties.getInstance().getTypes().getDatalake().getOrDefault(name,
+                gcpProperties.getInstance().getTypes().getDefault());
     }
 
     @Override

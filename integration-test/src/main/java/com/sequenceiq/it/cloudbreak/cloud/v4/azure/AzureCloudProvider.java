@@ -206,12 +206,12 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         if (Architecture.ARM64.equals(architecture)) {
             throw new NotImplementedException("Arm64 instance is not configured for Azure.");
         }
-        return azureProperties.getInstance().getType();
+        return azureProperties.getInstance().getTypes().getDefault();
     }
 
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
-        return template.withInstanceType(azureProperties.getInstance().getType());
+        return template.withInstanceType(azureProperties.getInstance().getTypes().getDefault());
     }
 
     @Override
@@ -219,7 +219,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         if (architecture != Architecture.X86_64) {
             throw new NotImplementedException(String.format("Architecture %s is not implemented", architecture.getName()));
         }
-        return template.withInstanceType(azureProperties.getInstance().getType());
+        return template.withInstanceType(azureProperties.getInstance().getTypes().getDefault());
     }
 
     @Override
@@ -643,8 +643,15 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubCustomInstanceType() {
-        return azureProperties.getDatahubCustomInstanceType();
+    public String getDatahubInstanceType(String name) {
+        return azureProperties.getInstance().getTypes().getDatahub().getOrDefault(name,
+                azureProperties.getInstance().getTypes().getDefault());
+    }
+
+    @Override
+    public String getDatalakeInstanceType(String name) {
+        return azureProperties.getInstance().getTypes().getDatalake().getOrDefault(name,
+                azureProperties.getInstance().getTypes().getDefault());
     }
 
     @Override
