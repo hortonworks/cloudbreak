@@ -3,6 +3,24 @@
   "displayName": "dataengineering",
   "services": [
     {
+      "refName": "core_settings",
+      "serviceType": "CORE_SETTINGS",
+      "serviceConfigs": [
+        {
+          "name": "hadoop_security_authorization",
+          "value": "true"
+        },
+        {
+          "name": "hadoop_security_authentication",
+          "value": "kerberos"
+        },
+        {
+          "name": "trusted_realms",
+          "value": "COSMOS.ES.FTGROUP"
+        }
+      ]
+    },
+    {
       "refName": "data_context_connector-1afa",
       "serviceType": "DATA_CONTEXT_CONNECTOR"
     },
