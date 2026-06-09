@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
@@ -41,15 +42,15 @@ public class EncryptionProfileFlowService {
         this.entitlementService = entitlementService;
     }
 
-    public FlowIdentifier enableEncryptionProfileByName(NameOrCrn envNameOrCrn, String encryptionProfileName) {
-        EnvironmentDto environmentDto = getEnvironment(envNameOrCrn);
-        EncryptionProfile encryptionProfile = encryptionProfileService.getByNameAndAccountId(encryptionProfileName, ThreadBasedUserCrnProvider.getAccountId());
+    public FlowIdentifier enableEncryptionProfileByName(NameOrCrn envNameOrCrn, String encryptionProfileNameOrCrn) {
+        EnvironmentDto environmentDto = getEnvironmentByNameOrCrn(envNameOrCrn);
+        EncryptionProfile encryptionProfile = getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn);
         return enableEncryptionProfile(environmentDto, encryptionProfile);
     }
 
-    public FlowIdentifier enableEncryptionProfileByCrn(NameOrCrn envNameOrCrn, String encryptionProfileCrn) {
-        EnvironmentDto environmentDto = getEnvironment(envNameOrCrn);
-        EncryptionProfile encryptionProfile = encryptionProfileService.getByCrn(encryptionProfileCrn);
+    public FlowIdentifier enableEncryptionProfileByCrn(NameOrCrn envNameOrCrn, String encryptionProfileNameOrCrn) {
+        EnvironmentDto environmentDto = getEnvironmentByNameOrCrn(envNameOrCrn);
+        EncryptionProfile encryptionProfile = getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn);
         return enableEncryptionProfile(environmentDto, encryptionProfile);
     }
 
@@ -65,17 +66,25 @@ public class EncryptionProfileFlowService {
         if (!entitlementService.isChangeEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             throw new ForbiddenException("Disable encryption profile is not granted for the account");
         }
-        EnvironmentDto environmentDto = getEnvironment(envNameOrCrn);
+        EnvironmentDto environmentDto = getEnvironmentByNameOrCrn(envNameOrCrn);
         SdxClusterResponse sdxCluster = sdxService.list(environmentDto.getName()).getFirst();
         environmentService.disableEncryptionProfile(environmentDto.getResourceCrn());
         return stackService.updatePillarConfigurationByCrn(sdxCluster.getCrn());
     }
 
-    private EnvironmentDto getEnvironment(NameOrCrn nameOrCrn) {
+    private EnvironmentDto getEnvironmentByNameOrCrn(NameOrCrn nameOrCrn) {
         if (nameOrCrn.hasCrn()) {
             return environmentService.getByCrnAndAccountId(nameOrCrn.getCrn(), ThreadBasedUserCrnProvider.getAccountId());
         } else {
             return environmentService.getByNameAndAccountId(nameOrCrn.getName(), ThreadBasedUserCrnProvider.getAccountId());
+        }
+    }
+
+    private EncryptionProfile getEncryptionProfileByNameOrCrn(String nameOrCrn) {
+        if (Crn.isCrn(nameOrCrn)) {
+            return encryptionProfileService.getByCrn(nameOrCrn);
+        } else {
+            return encryptionProfileService.getByNameAndAccountId(nameOrCrn, ThreadBasedUserCrnProvider.getAccountId());
         }
     }
 }
