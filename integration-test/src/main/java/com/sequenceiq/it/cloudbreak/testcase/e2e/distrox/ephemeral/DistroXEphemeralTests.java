@@ -60,8 +60,7 @@ public class DistroXEphemeralTests extends AbstractE2EWithReusableResourcesTest 
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
 
-        boolean govCloud = testContext.getCloudProvider().getGovCloud();
-        String currentVersion = commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion(govCloud);
+        String currentVersion = commonClusterManagerProperties.getRuntimeVersion();
         createAndWaitDatalakeWithRuntime(testContext, currentVersion);
     }
 
