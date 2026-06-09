@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,12 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
@@ -166,12 +163,9 @@ class StackVersionBasedRollingUpgradeValidatorTest {
     }
 
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled, String currentRuntimeVersion, String targetRuntimeVersion) {
-        com.sequenceiq.cloudbreak.cloud.model.Image image = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
-                .withPackageVersions(Map.of(STACK.getKey(), currentRuntimeVersion))
-                .build();
-        return new ServiceUpgradeValidationRequest(stackDto, false, rollingUpgradeEnabled,
-                new UpgradeImageInfo(image,
-                        StatedImage.statedImage(Image.builder().withVersion(targetRuntimeVersion).build(), null, null)), false);
+        return ServiceUpgradeValidationRequestTestUtils.of(stackDto,
+                ClusterUpgradePropertiesTestUtils.withCurrentAndTargetRuntime(currentRuntimeVersion, targetRuntimeVersion, false, rollingUpgradeEnabled,
+                        false));
     }
 
     private ClouderaManagerProduct createCdhProduct(String cdhVersion) {

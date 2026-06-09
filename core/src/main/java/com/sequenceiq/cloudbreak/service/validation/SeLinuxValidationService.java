@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.common.model.SeLinux;
 
 @Service
@@ -52,6 +53,12 @@ public class SeLinuxValidationService {
         SeLinux selinuxModeOfStack = getSelinuxModeOfStack(stack);
         validateSeLinuxSupportedOnTargetImage(selinuxModeOfStack, targetImage.getTags(), targetImage.getUuid(),
                 Optional.ofNullable(targetImage.getStackDetails()).map(ImageStackDetails::getVersion));
+    }
+
+    public void validateSeLinuxSupportedOnTargetImage(StackDtoDelegate stack, ClusterUpgradeProperties clusterUpgradeProperties) {
+        SeLinux selinuxModeOfStack = getSelinuxModeOfStack(stack);
+        validateSeLinuxSupportedOnTargetImage(selinuxModeOfStack, clusterUpgradeProperties.getTargetImageTags(),
+                clusterUpgradeProperties.getTargetImageId(), Optional.ofNullable(clusterUpgradeProperties.getRuntimeVersion()));
     }
 
     public void validateSeLinuxSupportedOnTargetImage(SeLinux selinuxModeOfStack, com.sequenceiq.cloudbreak.cloud.model.Image targetImage) {

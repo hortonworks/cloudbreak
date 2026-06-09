@@ -12,18 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfoFactory;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -39,7 +36,7 @@ public class ClusterUpgradeParcelCleanupHandler extends ExceptionCatcherEventHan
     private ParcelService parcelService;
 
     @Inject
-    private UpgradeImageInfoFactory upgradeImageInfoFactory;
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
 
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeValidationEvent> event) {
@@ -47,15 +44,13 @@ public class ClusterUpgradeParcelCleanupHandler extends ExceptionCatcherEventHan
         ClusterUpgradeValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
         try {
+            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
             StackDto stackDto = stackDtoService.getById(stackId);
-            UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(request.getImageId(), stackId);
-            Image targetImage = upgradeImageInfo.getTargetStatedImage().getImage();
-            Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsFromImage(stackDto, targetImage);
+            Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsFromProducts(stackDto,
+                    clusterUpgradeProperties.getAllTargetProducts());
             parcelService.removeUnusedParcelVersions(stackDto, clouderaManagerProducts);
-            return new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.event(), stackId, request.getImageId());
-        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            LOGGER.error("Cluster upgrade parcel cleanup failed due to image lookup error.", e);
-            return new ClusterUpgradeValidationFailureEvent(stackId, e);
+            return new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.event(), stackId,
+                    clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel cleanup failed.", e);
             return new ClusterUpgradeValidationFailureEvent(stackId, e);

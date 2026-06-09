@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
-public class ClusterUpgradeUpdateCheckFinishedEvent extends StackEvent {
+public class ClusterUpgradeUpdateCheckFinishedEvent extends ClusterUpgradeValidationEvent {
 
     private final CloudCredential cloudCredential;
 
@@ -17,11 +17,14 @@ public class ClusterUpgradeUpdateCheckFinishedEvent extends StackEvent {
 
     @JsonCreator
     public ClusterUpgradeUpdateCheckFinishedEvent(
-            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("imageId") String imageId,
+            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties,
             @JsonProperty("cloudStack") CloudStack cloudStack,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
             @JsonProperty("cloudContext") CloudContext cloudContext) {
-        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.name(), stackId);
+        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.name(), resourceId, imageId,
+                clusterUpgradeProperties);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;
         this.cloudContext = cloudContext;

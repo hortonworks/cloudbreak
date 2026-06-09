@@ -11,13 +11,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,14 +46,7 @@ class Spark2UpgradeValidatorTest {
     @Mock
     private Blueprint blueprint;
 
-    @Mock
-    private Image image;
-
-    @Mock
-    private StatedImage targetStatedImage;
-
-    @Mock
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetImage;
+    private String targetRuntimeVersion = "7.2.18";
 
     @Test
     public void testValidateShouldThrowExceptionWhenLockComponentsIsFalseAndSpark2ClusterGoesTo730() {
@@ -97,20 +89,13 @@ class Spark2UpgradeValidatorTest {
         underTest.validate(getServiceUpgradeValidationRequest(false));
     }
 
-    private ServiceUpgradeValidationRequest getServiceUpgradeValidationRequest(boolean lockComponent) {
-        ServiceUpgradeValidationRequest serviceUpgradeValidationRequest = new ServiceUpgradeValidationRequest(
-                stack,
-                lockComponent,
-                false,
-                new UpgradeImageInfo(image, targetStatedImage),
-                false
-        );
-        return serviceUpgradeValidationRequest;
+    private ServiceUpgradeValidationRequest getServiceUpgradeValidationRequest(boolean lockComponents) {
+        return ServiceUpgradeValidationRequestTestUtils.of(stack,
+                ClusterUpgradePropertiesTestUtils.withRuntimeVersionAndFlags(targetRuntimeVersion, lockComponents, false, false));
     }
 
     private void setupMockWhenException(String version, boolean spark2Presented) {
-        when(targetImage.getVersion()).thenReturn(version);
-        when(targetStatedImage.getImage()).thenReturn(targetImage);
+        targetRuntimeVersion = version;
         when(clusterView.getExtendedBlueprintText()).thenReturn("");
         when(stack.getCluster()).thenReturn(clusterView);
         when(cmTemplateService.isServiceTypePresent(any(), any())).thenReturn(spark2Presented);

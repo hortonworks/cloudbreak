@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -31,11 +33,15 @@ public class ClusterUpgradeFreeIpaStatusValidationHandler extends ExceptionCatch
     @Inject
     private FreeipaService freeipaService;
 
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeFreeIpaStatusValidationEvent> event) {
         LOGGER.debug("Accepting Cluster upgrade FreeIPA status validation event.");
         ClusterUpgradeFreeIpaStatusValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
         StackView stack = getStack(stackId);
         String environmentCrn = stack.getEnvironmentCrn();
         if (!freeipaService.checkFreeipaRunning(environmentCrn, stack.getName())) {
@@ -44,7 +50,8 @@ public class ClusterUpgradeFreeIpaStatusValidationHandler extends ExceptionCatch
             return new ClusterUpgradeValidationFailureEvent(stackId, new UpgradeValidationFailedException(message));
         } else {
             LOGGER.debug("FreeIPA status validation passed successfully");
-            return new ClusterUpgradeFreeIpaStatusValidationFinishedEvent(stackId);
+            return new ClusterUpgradeFreeIpaStatusValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(),
+                    clusterUpgradeProperties);
         }
     }
 

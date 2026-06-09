@@ -121,6 +121,31 @@ public class ParcelService {
                 .collect(Collectors.toSet());
     }
 
+    public Set<ClouderaManagerProduct> getRequiredProductsFromProducts(StackDtoDelegate stackDto, Set<ClouderaManagerProduct> targetProducts) {
+        Set<String> requiredParcelNames = getComponentNamesByProducts(stackDto, targetProducts);
+        return targetProducts.stream()
+                .filter(product -> requiredParcelNames.contains(product.getName()))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getComponentNamesByProducts(StackDtoDelegate stack, Set<ClouderaManagerProduct> products) {
+        return getComponentsByProducts(stack.getStack(), stack.getCluster().getId(), stack.getBlueprint(), products)
+                .stream().map(ClusterComponentView::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<ClusterComponentView> getComponentsByProducts(StackView stack, Long clusterId, Blueprint blueprint, Set<ClouderaManagerProduct> products) {
+        Set<ClusterComponentView> components = getComponents(clusterId);
+        if (stack.isDatalake()) {
+            return getDataLakeClusterComponents(components);
+        } else {
+            Map<String, ClusterComponentView> cmProductMap = collectClusterComponentsByName(components);
+            Set<ClouderaManagerProduct> cmProducts = filterParcelsByBlueprint(stack.getWorkspaceId(), stack.getId(), products, blueprint);
+            LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
+            return getComponentsByRequiredProducts(cmProductMap, cmProducts);
+        }
+    }
+
     private Map<String, ClusterComponentView> collectClusterComponentsByName(Set<ClusterComponentView> components) {
         return components.stream().collect(Collectors.toMap(ClusterComponentView::getName, component -> component));
     }

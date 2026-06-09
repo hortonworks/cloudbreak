@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 
 /**
  * Validates Kafka metadata store constraints during runtime upgrades.
@@ -94,11 +95,7 @@ public class KafkaMetadataStoreUpgradeValidator implements ServiceUpgradeValidat
     }
 
     private boolean isTargetVersionAtLeast733(ServiceUpgradeValidationRequest request) {
-        String targetVersion =
-                request.upgradeImageInfo()
-                        .getTargetStatedImage()
-                        .getImage()
-                        .getVersion();
+        String targetVersion = getTargetVersion(request);
         return isVersionNewerOrEqualThanLimited(
                 targetVersion,
                 ZOOKEEPER_CHECK_MIN_TARGET_VERSION
@@ -106,19 +103,38 @@ public class KafkaMetadataStoreUpgradeValidator implements ServiceUpgradeValidat
     }
 
     private boolean isUpgradeInKraftByDefaultRange(ServiceUpgradeValidationRequest request) {
-        Optional<String> currentVersion = Optional.ofNullable(request.upgradeImageInfo().getCurrentImage())
-                .map(img -> img.getPackageVersion(ImagePackageVersion.STACK));
+        Optional<String> currentVersion = getCurrentRuntimeVersion(request);
         if (currentVersion.isEmpty()) {
             LOGGER.debug("Current runtime version is not available, skipping KRaft-by-default validation.");
             return false;
         }
-        String targetVersion =
-                request.upgradeImageInfo()
-                        .getTargetStatedImage()
-                        .getImage()
-                        .getVersion();
+        String targetVersion = getTargetVersion(request);
         return isVersionOlderThanLimited(currentVersion.get(), KRAFT_BY_DEFAULT_BOUNDARY_VERSION)
                 && isVersionNewerOrEqualThanLimited(targetVersion, KRAFT_BY_DEFAULT_BOUNDARY_VERSION);
+    }
+
+    private Optional<String> getCurrentRuntimeVersion(ServiceUpgradeValidationRequest request) {
+        if (request.clusterUpgradeProperties() != null && request.clusterUpgradeProperties().getCurrentRuntimeVersion() != null) {
+            return Optional.of(request.clusterUpgradeProperties().getCurrentRuntimeVersion());
+        }
+        // TODO CB-33421: Remove upgradeImageInfo fallback once callers always pass clusterUpgradeProperties.
+        return Optional.ofNullable(request.upgradeImageInfo())
+                .map(UpgradeImageInfo::getCurrentImage)
+                .map(img -> img.getPackageVersion(ImagePackageVersion.STACK));
+    }
+
+    private String getTargetVersion(ServiceUpgradeValidationRequest request) {
+        if (request.clusterUpgradeProperties() != null) {
+            if (request.clusterUpgradeProperties().getTargetImageVersion() != null) {
+                return request.clusterUpgradeProperties().getTargetImageVersion();
+            }
+            return request.clusterUpgradeProperties().getRuntimeVersion();
+        }
+        // TODO CB-33421: Remove upgradeImageInfo fallback once callers always pass clusterUpgradeProperties.
+        if (request.upgradeImageInfo() != null && request.upgradeImageInfo().getTargetStatedImage() != null) {
+            return request.upgradeImageInfo().getTargetStatedImage().getImage().getVersion();
+        }
+        return null;
     }
 
     private boolean isKafkaMetadataStore(Optional<String> metadataStore, String expectedValue) {

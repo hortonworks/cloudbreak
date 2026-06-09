@@ -1,13 +1,17 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 
 public record ServiceUpgradeValidationRequest(
         StackDto stack,
+        // TODO CB-33421: Remove lockComponents and rollingUpgradeEnabled once callers use clusterUpgradeProperties.
         boolean lockComponents,
         boolean rollingUpgradeEnabled,
+        // TODO CB-33421: Remove upgradeImageInfo once callers and in-flight flow events no longer use it.
         UpgradeImageInfo upgradeImageInfo,
+        ClusterUpgradeProperties clusterUpgradeProperties,
         boolean replaceVms) {
 
     public static Builder builder() {
@@ -23,6 +27,8 @@ public record ServiceUpgradeValidationRequest(
         private boolean rollingUpgradeEnabled;
 
         private UpgradeImageInfo upgradeImageInfo;
+
+        private ClusterUpgradeProperties clusterUpgradeProperties;
 
         private boolean replaceVms;
 
@@ -49,13 +55,18 @@ public record ServiceUpgradeValidationRequest(
             return this;
         }
 
+        public Builder withClusterUpgradeProperties(ClusterUpgradeProperties clusterUpgradeProperties) {
+            this.clusterUpgradeProperties = clusterUpgradeProperties;
+            return this;
+        }
+
         public Builder withReplaceVms(boolean replaceVms) {
             this.replaceVms = replaceVms;
             return this;
         }
 
         public ServiceUpgradeValidationRequest build() {
-            return new ServiceUpgradeValidationRequest(stack, lockComponents, rollingUpgradeEnabled, upgradeImageInfo, replaceVms);
+            return new ServiceUpgradeValidationRequest(stack, lockComponents, rollingUpgradeEnabled, upgradeImageInfo, clusterUpgradeProperties, replaceVms);
         }
     }
 }

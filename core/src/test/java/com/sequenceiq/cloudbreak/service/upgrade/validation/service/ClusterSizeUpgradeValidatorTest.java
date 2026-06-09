@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.util.CodUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -143,7 +145,8 @@ class ClusterSizeUpgradeValidatorTest {
     }
 
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled, boolean replaceVms) {
-        return new ServiceUpgradeValidationRequest(stack, false, rollingUpgradeEnabled, null, replaceVms);
+        return ServiceUpgradeValidationRequestTestUtils.of(stack,
+                ClusterUpgradePropertiesTestUtils.withFlags(false, rollingUpgradeEnabled, replaceVms));
     }
 
     private void mockStackTags(Map<String, String> applicationTags) throws IOException {

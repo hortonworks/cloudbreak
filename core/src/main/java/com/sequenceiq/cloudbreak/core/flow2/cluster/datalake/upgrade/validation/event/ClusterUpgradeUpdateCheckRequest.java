@@ -8,9 +8,10 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
-public class ClusterUpgradeUpdateCheckRequest extends StackEvent {
+public class ClusterUpgradeUpdateCheckRequest extends ClusterUpgradeValidationEvent {
+
     private final CloudCredential cloudCredential;
 
     private final CloudStack cloudStack;
@@ -21,12 +22,14 @@ public class ClusterUpgradeUpdateCheckRequest extends StackEvent {
 
     @JsonCreator
     public ClusterUpgradeUpdateCheckRequest(
-            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("imageId") String imageId,
+            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties,
             @JsonProperty("cloudStack") CloudStack cloudStack,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
             @JsonProperty("cloudContext") CloudContext cloudContext,
             @JsonProperty("cloudResources") List<CloudResource> cloudResources) {
-        super(ClusterUpgradeValidationHandlerSelectors.VALIDATE_CLOUDPROVIDER_UPDATE.name(), stackId);
+        super(ClusterUpgradeValidationHandlerSelectors.VALIDATE_CLOUDPROVIDER_UPDATE.name(), resourceId, imageId, clusterUpgradeProperties);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;
         this.cloudContext = cloudContext;

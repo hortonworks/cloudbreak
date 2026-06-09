@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelSizeService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -59,18 +61,23 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
     @Inject
     private ImageFallbackService imageFallbackService;
 
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeImageValidationEvent> event) {
         LOGGER.debug("Accepting cluster upgrade image validation event.");
         ClusterUpgradeImageValidationEvent request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
+            // TODO CB-33362: Use clusterUpgradeProperties once ParcelAvailabilityService accepts it.
             Set<Response> parcelsResponses = parcelAvailabilityService.validateAvailability(request.getTargetImage(), request.getResourceId());
             long requiredDiskSpaceForUpgrade = parcelSizeService.getRequiredFreeSpace(parcelsResponses);
             Set<String> warningMessages = executePlatformSpecificValidations(request, cloudContext);
             LOGGER.debug("Cluster upgrade image validation succeeded.");
+            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
             return new ClusterUpgradeImageValidationFinishedEvent(START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT.selector(), request.getResourceId(),
-                    requiredDiskSpaceForUpgrade, warningMessages);
+                    clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, requiredDiskSpaceForUpgrade, warningMessages);
         } catch (RuntimeException e) {
             LOGGER.warn("Cluster upgrade image validation failed: ", e);
             return new ClusterUpgradeValidationFailureEvent(request.getResourceId(), e);

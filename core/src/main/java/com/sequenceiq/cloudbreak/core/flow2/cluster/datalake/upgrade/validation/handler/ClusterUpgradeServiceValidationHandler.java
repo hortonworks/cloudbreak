@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidationRequest;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidator;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -34,29 +36,35 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
     @Inject
     private List<ServiceUpgradeValidator> serviceUpgradeValidators;
 
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeServiceValidationEvent> event) {
         ClusterUpgradeServiceValidationEvent request = event.getData();
         LOGGER.debug("Accepting Cluster upgrade service validation event. {}", request);
         Long stackId = request.getResourceId();
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
         try {
             ServiceUpgradeValidationRequest validationRequest = createValidationRequest(request, stackId);
             LOGGER.debug("Running the following upgrade validations: {}", serviceUpgradeValidators);
             serviceUpgradeValidators.forEach(validator -> validator.validate(validationRequest));
-            return new ClusterUpgradeValidationFinishedEvent(stackId);
+            return new ClusterUpgradeValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
         } catch (UpgradeValidationFailedException e) {
             LOGGER.warn("Cluster upgrade service validation failed", e);
             return new ClusterUpgradeValidationFailureEvent(stackId, e);
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade service validation was unsuccessful due to an internal error", e);
-            return new ClusterUpgradeValidationFinishedEvent(stackId, e);
+            return new ClusterUpgradeValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, e);
         }
     }
 
     private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeServiceValidationEvent request, Long stackId) {
         StackDto stack = stackDtoService.getById(stackId);
-        return new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.isRollingUpgradeEnabled(), request.getUpgradeImageInfo(),
-                request.isReplaceVms());
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        return new ServiceUpgradeValidationRequest(stack, clusterUpgradeProperties.isLockComponents(), clusterUpgradeProperties.isRollingUpgradeEnabled(),
+                // TODO CB-33421: Remove upgradeImageInfo field once callers and in-flight flow events no longer use it.
+                null, clusterUpgradeProperties, clusterUpgradeProperties.isReplaceVms());
     }
 
     @Override
@@ -67,6 +75,7 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeServiceValidationEvent> event) {
         LOGGER.error("Cluster upgrade service validation was unsuccessful due to an unexpected error", e);
-        return new ClusterUpgradeValidationFinishedEvent(resourceId, e);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(event.getData());
+        return new ClusterUpgradeValidationFinishedEvent(resourceId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, e);
     }
 }

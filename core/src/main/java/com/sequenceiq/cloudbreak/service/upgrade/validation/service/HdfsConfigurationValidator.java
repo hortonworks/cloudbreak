@@ -50,7 +50,8 @@ public class HdfsConfigurationValidator implements ServiceUpgradeValidator {
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         StackDto stack = validationRequest.stack();
-        if (validationRequest.rollingUpgradeEnabled() && rollingUpgradeValidationEnabled() && hdfsServicePresentOnTheCluster(stack)) {
+        if (validationRequest.clusterUpgradeProperties().isRollingUpgradeEnabled()
+                && rollingUpgradeValidationEnabled() && hdfsServicePresentOnTheCluster(stack)) {
             validateHbaseConfigurationForRollingUpgrade(stack);
         } else {
             LOGGER.debug("Skipping HDFS configuration validation because the rolling upgrade is not enabled");

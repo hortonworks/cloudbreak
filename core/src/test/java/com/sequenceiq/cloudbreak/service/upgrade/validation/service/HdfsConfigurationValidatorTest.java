@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class HdfsConfigurationValidatorTest {
@@ -166,7 +168,8 @@ class HdfsConfigurationValidatorTest {
 
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled) {
         lenient().when(stack.getName()).thenReturn(STACK_NAME);
-        return new ServiceUpgradeValidationRequest(stack, false, rollingUpgradeEnabled, null, false);
+        return ServiceUpgradeValidationRequestTestUtils.of(stack,
+                ClusterUpgradePropertiesTestUtils.withFlags(false, rollingUpgradeEnabled, false));
     }
 
     private SupportedServices createSupportedServices(Set<String> services) {

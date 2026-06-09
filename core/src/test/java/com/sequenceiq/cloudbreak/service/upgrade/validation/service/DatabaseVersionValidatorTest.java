@@ -16,12 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseVersionValidatorTest {
@@ -74,8 +73,8 @@ class DatabaseVersionValidatorTest {
 
         when(stackDto.getDatabase()).thenReturn(database);
         when(stackDto.getType()).thenReturn(stackType);
-        UpgradeImageInfo upgradeImageInfo = new UpgradeImageInfo(null, StatedImage.statedImage(Image.builder().withVersion(targetRuntime).build(), null, null));
-        return new ServiceUpgradeValidationRequest(stackDto, false, false, upgradeImageInfo, false);
+        return ServiceUpgradeValidationRequestTestUtils.of(stackDto,
+                ClusterUpgradePropertiesTestUtils.withRuntimeVersion(targetRuntime));
     }
 
 }

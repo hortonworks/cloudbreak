@@ -46,7 +46,7 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         if (isNifiServicePresent(validationRequest.stack())) {
             validateNifiBlueprintVersion(validationRequest);
-            if (validationRequest.lockComponents() || validationRequest.replaceVms()) {
+            if (validationRequest.clusterUpgradeProperties().isLockComponents() || validationRequest.clusterUpgradeProperties().isReplaceVms()) {
                 validateNifiWorkingDirectory(validationRequest.stack());
             } else {
                 LOGGER.debug("Skipping Nifi working directory validation because it's not OS upgrade.");
@@ -57,7 +57,7 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
     }
 
     private void validateNifiBlueprintVersion(ServiceUpgradeValidationRequest validationRequest) {
-        String targetRuntime = validationRequest.upgradeImageInfo().targetStatedImage().getImage().getVersion();
+        String targetRuntime = validationRequest.clusterUpgradeProperties().runtimeVersion();
         if (isVersionNewerOrEqualThanLimited(targetRuntime, CLOUDERA_STACK_VERSION_7_3_2)) {
             String blueprintName = validationRequest.stack().getBlueprint().getName();
             if (blueprintName.contains(NIFI_LIGHT_DUTY_BLUEPRINT_PREFIX)

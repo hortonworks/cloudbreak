@@ -49,11 +49,11 @@ public class Spark2UpgradeValidator implements ServiceUpgradeValidator {
     }
 
     private String getTargetVersion(ServiceUpgradeValidationRequest validationRequest) {
-        return validationRequest.upgradeImageInfo().targetStatedImage().getImage().getVersion();
+        return validationRequest.clusterUpgradeProperties().runtimeVersion();
     }
 
     private boolean spark2PresentedInTheOriginalBlueprint(ServiceUpgradeValidationRequest validationRequest) {
-        return !validationRequest.lockComponents() && isSparkOnYarnServicePresent(validationRequest.stack());
+        return !validationRequest.clusterUpgradeProperties().isLockComponents() && isSparkOnYarnServicePresent(validationRequest.stack());
     }
 
     private boolean isSparkOnYarnServicePresent(StackDto stack) {

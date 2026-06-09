@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,9 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,8 +48,13 @@ class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
     @Mock
     private StackView stackView;
 
+    @Mock
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @BeforeEach
     public void setup() {
+        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+                ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
         when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
         when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stackView.getName()).thenReturn(STACK_NAME);
@@ -74,8 +85,9 @@ class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
     }
 
     private HandlerEvent<ClusterUpgradeFreeIpaStatusValidationEvent> getHandlerEvent() {
+        ClusterUpgradeProperties clusterUpgradeProperties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.2.18");
         ClusterUpgradeFreeIpaStatusValidationEvent clusterUpgradeImageValidationEvent =
-                new ClusterUpgradeFreeIpaStatusValidationEvent(1L);
+                new ClusterUpgradeFreeIpaStatusValidationEvent(1L, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
         HandlerEvent<ClusterUpgradeFreeIpaStatusValidationEvent> handlerEvent = mock(HandlerEvent.class);
         when(handlerEvent.getData()).thenReturn(clusterUpgradeImageValidationEvent);
         return handlerEvent;

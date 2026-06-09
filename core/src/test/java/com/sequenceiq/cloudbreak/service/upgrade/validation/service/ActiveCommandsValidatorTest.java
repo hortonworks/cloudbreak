@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ActiveCommandsValidatorTest {
@@ -54,7 +56,7 @@ public class ActiveCommandsValidatorTest {
 
     @BeforeEach
     void before() {
-        request = new ServiceUpgradeValidationRequest(stack, true, true, null, false);
+        request = ServiceUpgradeValidationRequestTestUtils.of(stack, ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.2.18"));
     }
 
     @Test

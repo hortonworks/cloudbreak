@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,11 +28,15 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -64,11 +69,16 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     @Mock
     private ClusterStatusService clusterStatusService;
 
+    @Mock
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @InjectMocks
     private ClusterUpgradeExistingUpgradeCommandValidationHandler underTest;
 
     @BeforeEach
     public void setup() {
+        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+                ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         lenient().when(stack.getStack()).thenReturn(stackView);
         lenient().when(stackView.getName()).thenReturn(STACK_NAME);
@@ -183,8 +193,10 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
         packageVersions.put(ImagePackageVersion.STACK.getKey(), STACK_VERSION);
 
         lenient().when(targetImage.getPackageVersions()).thenReturn(packageVersions);
+        ClusterUpgradeProperties clusterUpgradeProperties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion(STACK_VERSION);
         ClusterUpgradeExistingUpgradeCommandValidationEvent clusterUpgradeImageValidationEvent =
-                new ClusterUpgradeExistingUpgradeCommandValidationEvent(1L, targetImage);
+                new ClusterUpgradeExistingUpgradeCommandValidationEvent(1L, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties,
+                        targetImage);
         HandlerEvent<ClusterUpgradeExistingUpgradeCommandValidationEvent> handlerEvent = mock(HandlerEvent.class);
         when(handlerEvent.getData()).thenReturn(clusterUpgradeImageValidationEvent);
         return handlerEvent;

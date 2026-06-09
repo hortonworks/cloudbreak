@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.DiskSpaceValidationService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -31,20 +33,26 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
     @Inject
     private StackService stackService;
 
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeDiskSpaceValidationEvent> event) {
         LOGGER.debug("Accepting Cluster upgrade validation event.");
         ClusterUpgradeDiskSpaceValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
         try {
             diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), request.getRequiredFreeSpace());
-            return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
+            return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId(), clusterUpgradeProperties.getTargetImageId(),
+                    clusterUpgradeProperties);
         } catch (UpgradeValidationFailedException e) {
             LOGGER.warn("Cluster upgrade validation failed", e);
             return new ClusterUpgradeValidationFailureEvent(stackId, e);
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade validation was unsuccessful due to an internal error", e);
-            return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
+            return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId(), clusterUpgradeProperties.getTargetImageId(),
+                    clusterUpgradeProperties);
         }
     }
 
@@ -60,6 +68,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeDiskSpaceValidationEvent> event) {
         LOGGER.error("Cluster upgrade validation was unsuccessful due to an unexpected error", e);
-        return new ClusterUpgradeDiskSpaceValidationFinishedEvent(resourceId);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(event.getData());
+        return new ClusterUpgradeDiskSpaceValidationFinishedEvent(resourceId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
     }
 }

@@ -3,12 +3,14 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_CLOUDPROVIDER_UPDATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -23,7 +25,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckFailed;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,16 +41,22 @@ class CloudProviderUpdateCheckHandlerTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudConnector cloudConnector;
 
+    @Mock
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @InjectMocks
     private CloudProviderUpdateCheckHandler underTest;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+                ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
+    }
 
     @Test
     void doAcceptShouldCallPlatformConnectorsGet() {
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(cloudConnector);
-        CloudStack cloudStack = CloudStack.builder()
-                .build();
-        CloudContext cloudContext = CloudContext.Builder.builder().withId(0L).build();
-        ClusterUpgradeUpdateCheckRequest checkRequest = new ClusterUpgradeUpdateCheckRequest(0L, cloudStack, new CloudCredential(), cloudContext, List.of());
+        ClusterUpgradeUpdateCheckRequest checkRequest = createCheckRequest();
 
         underTest.doAccept(new HandlerEvent<>(new Event<>(checkRequest)));
 
@@ -58,19 +70,24 @@ class CloudProviderUpdateCheckHandlerTest {
 
     @Test
     void testDefaultFailureEvent() {
-        CloudStack cloudStack = CloudStack.builder()
-                .build();
-        CloudContext cloudContext = CloudContext.Builder.builder().withId(0L).build();
-        ClusterUpgradeUpdateCheckRequest checkRequest = new ClusterUpgradeUpdateCheckRequest(0L, cloudStack, new CloudCredential(), cloudContext, List.of());
+        ClusterUpgradeUpdateCheckRequest checkRequest = createCheckRequest();
         Exception exception = new Exception("bumm");
 
         ClusterUpgradeUpdateCheckFailed result = (ClusterUpgradeUpdateCheckFailed) underTest.defaultFailureEvent(0L, exception, new Event<>(checkRequest));
 
         assertEquals(0L, result.getResourceId());
-        assertEquals(cloudStack, result.getCloudStack());
+        assertEquals(checkRequest.getCloudStack(), result.getCloudStack());
         assertEquals(checkRequest.getCloudCredential(), result.getCloudCredential());
-        assertEquals(cloudContext, result.getCloudContext());
+        assertEquals(checkRequest.getCloudContext(), result.getCloudContext());
         assertEquals(exception, result.getError());
 
+    }
+
+    private ClusterUpgradeUpdateCheckRequest createCheckRequest() {
+        ClusterUpgradeProperties clusterUpgradeProperties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.2.18");
+        CloudStack cloudStack = CloudStack.builder().build();
+        CloudContext cloudContext = CloudContext.Builder.builder().withId(0L).build();
+        return new ClusterUpgradeUpdateCheckRequest(0L, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, cloudStack,
+                new CloudCredential(), cloudContext, List.of());
     }
 }

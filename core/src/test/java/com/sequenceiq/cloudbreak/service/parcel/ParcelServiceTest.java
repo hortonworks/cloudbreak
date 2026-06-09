@@ -113,6 +113,52 @@ public class ParcelServiceTest {
         verify(parcelFilterService).filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, parcelsInImage, BLUEPRINT);
     }
 
+    @Test
+    void testGetRequiredProductsFromProductsShouldOnlyReturnRequiredParcelsForWorkload() {
+        Stack stack = createStack();
+        ClouderaManagerProduct cdhParcel = createClouderaManagerProduct("CDH");
+        Set<ClouderaManagerProduct> targetProducts = Set.of(cdhParcel, createClouderaManagerProduct("FLINK"));
+        when(parcelFilterService.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, targetProducts, BLUEPRINT)).thenReturn(Collections.singleton(cdhParcel));
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(
+                Set.of(createClusterComponent("CDH"), createClusterComponent("FLINK")));
+
+        Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsFromProducts(stack, targetProducts);
+
+        assertEquals(1, actual.size());
+        assertTrue(actual.contains(cdhParcel));
+        verify(parcelFilterService).filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, targetProducts, BLUEPRINT);
+    }
+
+    @Test
+    void testGetRequiredProductsFromProductsShouldExcludeParcelsWithoutClusterComponent() {
+        Stack stack = createStack();
+        ClouderaManagerProduct cdhParcel = createClouderaManagerProduct("CDH");
+        ClouderaManagerProduct flinkParcel = createClouderaManagerProduct("FLINK");
+        Set<ClouderaManagerProduct> targetProducts = Set.of(cdhParcel, flinkParcel);
+        when(parcelFilterService.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, targetProducts, BLUEPRINT)).thenReturn(targetProducts);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(Set.of(createClusterComponent("CDH")));
+
+        Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsFromProducts(stack, targetProducts);
+
+        assertEquals(1, actual.size());
+        assertTrue(actual.contains(cdhParcel));
+    }
+
+    @Test
+    void testGetRequiredProductsFromProductsForDatalakeShouldOnlyReturnCdh() {
+        Stack stack = createStack(StackType.DATALAKE);
+        ClouderaManagerProduct cdhParcel = createClouderaManagerProduct("CDH");
+        ClouderaManagerProduct flinkParcel = createClouderaManagerProduct("FLINK");
+        Set<ClouderaManagerProduct> targetProducts = Set.of(cdhParcel, flinkParcel);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(
+                Set.of(createClusterComponent("CDH"), createClusterComponent("FLINK")));
+
+        Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsFromProducts(stack, targetProducts);
+
+        assertEquals(1, actual.size());
+        assertTrue(actual.contains(cdhParcel));
+    }
+
     private ClouderaManagerProduct createClouderaManagerProduct(String name) {
         return new ClouderaManagerProduct().withName(name);
     }
@@ -125,13 +171,17 @@ public class ParcelServiceTest {
     }
 
     private Stack createStack() {
+        return createStack(StackType.WORKLOAD);
+    }
+
+    private Stack createStack(StackType stackType) {
         Stack stack = new Stack();
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         cluster.setBlueprint(BLUEPRINT);
         stack.setId(STACK_ID);
         stack.setCluster(cluster);
-        stack.setType(StackType.WORKLOAD);
+        stack.setType(stackType);
 
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);

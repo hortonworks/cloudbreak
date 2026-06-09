@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
 public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidationEvent {
 
@@ -18,6 +19,8 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
 
     private final CloudContext cloudContext;
 
+    // TODO CB-33362: Remove targetImage field once ParcelAvailabilityService accepts ClusterUpgradeProperties.
+    // TODO CB-33421: Remove targetImage field once in-flight flow events no longer depend on it in JSON.
     private final Image targetImage;
 
     @JsonCreator
@@ -27,8 +30,9 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
             @JsonProperty("cloudStack") CloudStack cloudStack,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
             @JsonProperty("cloudContext") CloudContext cloudContext,
-            @JsonProperty("targetImage") Image targetImage) {
-        super(VALIDATE_IMAGE_EVENT.selector(), resourceId, imageId);
+            @JsonProperty("targetImage") Image targetImage,
+            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties) {
+        super(VALIDATE_IMAGE_EVENT.selector(), resourceId, imageId, clusterUpgradeProperties);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;
         this.cloudContext = cloudContext;
@@ -48,6 +52,8 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
     }
 
     public Image getTargetImage() {
+        // TODO CB-33362: Remove targetImage getter once ParcelAvailabilityService accepts ClusterUpgradeProperties.
+        // TODO CB-33421: Remove targetImage getter once in-flight flow events no longer depend on it in JSON.
         return targetImage;
     }
 
@@ -57,6 +63,7 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
                 "cloudCredential=" + cloudCredential +
                 ", cloudStack=" + cloudStack +
                 ", cloudContext=" + cloudContext +
+                ", clusterUpgradeProperties=" + getClusterUpgradeProperties() +
                 "} " + super.toString();
     }
 }

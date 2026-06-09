@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Component
@@ -39,9 +39,9 @@ public class StackVersionBasedRollingUpgradeValidator implements ServiceUpgradeV
 
     @Override
     public void validate(ServiceUpgradeValidationRequest request) {
-        if (request.rollingUpgradeEnabled() && rollingUpgradeValidationEnabled()) {
+        if (request.clusterUpgradeProperties().isRollingUpgradeEnabled() && rollingUpgradeValidationEnabled()) {
             getCurrentCdhPatchVersion(request).ifPresentOrElse(currentPatchVersion -> {
-                String currentCdhVersion = getCurrentCdhVersion(request.upgradeImageInfo());
+                String currentCdhVersion = getCurrentCdhVersion(request);
                 if (targetVersionIs7218OrNewer(request) && (currentRuntimeVersionOlderThan7217(currentCdhVersion) ||
                         currentVersionIs7217AndPatchVersionIsLowerThanLimited(currentCdhVersion, currentPatchVersion, MIN_PATCH_VERSION_FOR_7218_UPGRADE))) {
                     throwValidationError(currentCdhVersion, currentPatchVersion, MIN_PATCH_VERSION_FOR_7218_UPGRADE);
@@ -65,12 +65,20 @@ public class StackVersionBasedRollingUpgradeValidator implements ServiceUpgradeV
         throw new UpgradeValidationFailedException(errorMessage);
     }
 
-    private String getCurrentCdhVersion(UpgradeImageInfo upgradeImageInfo) {
-        return upgradeImageInfo.getCurrentImage().getPackageVersion(ImagePackageVersion.STACK);
+    private String getCurrentCdhVersion(ServiceUpgradeValidationRequest request) {
+        ClusterUpgradeProperties clusterUpgradeProperties = request.clusterUpgradeProperties();
+        if (clusterUpgradeProperties != null && clusterUpgradeProperties.getCurrentRuntimeVersion() != null) {
+            return clusterUpgradeProperties.getCurrentRuntimeVersion();
+        }
+        // TODO CB-33421: Remove upgradeImageInfo fallback once callers always pass clusterUpgradeProperties.
+        if (request.upgradeImageInfo() != null && request.upgradeImageInfo().getCurrentImage() != null) {
+            return request.upgradeImageInfo().getCurrentImage().getPackageVersion(ImagePackageVersion.STACK);
+        }
+        return null;
     }
 
     private boolean targetVersionIs7218OrNewer(ServiceUpgradeValidationRequest request) {
-        return isVersionNewerOrEqualThanLimited(request.upgradeImageInfo().targetStatedImage().getImage().getVersion(), CLOUDERA_STACK_VERSION_7_2_18);
+        return isVersionNewerOrEqualThanLimited(request.clusterUpgradeProperties().runtimeVersion(), CLOUDERA_STACK_VERSION_7_2_18);
     }
 
     private boolean currentRuntimeVersionOlderThan7217(String currentCdhVersion) {

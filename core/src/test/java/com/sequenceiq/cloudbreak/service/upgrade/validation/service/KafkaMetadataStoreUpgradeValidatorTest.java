@@ -7,12 +7,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +19,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class KafkaMetadataStoreUpgradeValidatorTest {
@@ -45,15 +40,15 @@ class KafkaMetadataStoreUpgradeValidatorTest {
     private static final String METADATA_STORE_CONFIG = "metadata.store";
 
     private static final String ZOOKEEPER_VALIDATION_MESSAGE = """
-        In the selected runtime, ZooKeeper is used as the Kafka metadata store.
-        This configuration is not supported for the target runtime.
-        Please migrate your Kafka brokers to KRaft before proceeding with the upgrade.
-        """.trim();
+            In the selected runtime, ZooKeeper is used as the Kafka metadata store.
+            This configuration is not supported for the target runtime.
+            Please migrate your Kafka brokers to KRaft before proceeding with the upgrade.
+            """.trim();
 
     private static final String KRAFT_BY_DEFAULT_VALIDATION_MESSAGE = """
-        Cluster upgrade is blocked because the cluster was originally created with KRaft as the default Kafka metadata store.
-        Upgrading from runtime 7.3.1 or lower to 7.3.2 or higher with this configuration is not supported.
-        """.trim();
+            Cluster upgrade is blocked because the cluster was originally created with KRaft as the default Kafka metadata store.
+            Upgrading from runtime 7.3.1 or lower to 7.3.2 or higher with this configuration is not supported.
+            """.trim();
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
@@ -160,33 +155,12 @@ class KafkaMetadataStoreUpgradeValidatorTest {
     }
 
     private ServiceUpgradeValidationRequest createRequest(String targetRuntimeVersion) {
-        Image targetImage = mock(Image.class);
-        when(targetImage.getVersion()).thenReturn(targetRuntimeVersion);
-
-        StatedImage targetStatedImage = StatedImage.statedImage(targetImage, null, null);
-
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withTargetStatedImage(targetStatedImage)
-                .build();
-
-        return new ServiceUpgradeValidationRequest(mockStackDto, false, true, upgradeImageInfo, false);
+        return ServiceUpgradeValidationRequestTestUtils.of(mockStackDto,
+                ClusterUpgradePropertiesTestUtils.withTargetRuntimeOnly(targetRuntimeVersion));
     }
 
     private ServiceUpgradeValidationRequest createRequest(String currentRuntimeVersion, String targetRuntimeVersion) {
-        Image targetImage = mock(Image.class);
-        when(targetImage.getVersion()).thenReturn(targetRuntimeVersion);
-
-        StatedImage targetStatedImage = StatedImage.statedImage(targetImage, null, null);
-
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
-                .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), currentRuntimeVersion))
-                .build();
-
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withCurrentImage(currentImage)
-                .withTargetStatedImage(targetStatedImage)
-                .build();
-
-        return new ServiceUpgradeValidationRequest(mockStackDto, false, true, upgradeImageInfo, false);
+        return ServiceUpgradeValidationRequestTestUtils.of(mockStackDto,
+                ClusterUpgradePropertiesTestUtils.withCurrentAndTargetRuntime(currentRuntimeVersion, targetRuntimeVersion, false, true, false));
     }
 }

@@ -4,10 +4,10 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 
 @Component
@@ -20,10 +20,10 @@ public class SeLinuxUpgradeValidator implements ServiceUpgradeValidator {
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         try {
             StackDto stack = validationRequest.stack();
-            Image targetImage = validationRequest.upgradeImageInfo().targetStatedImage().getImage();
+            ClusterUpgradeProperties clusterUpgradeProperties = validationRequest.clusterUpgradeProperties();
 
             seLinuxValidationService.validateSeLinuxEntitlementGranted(stack);
-            seLinuxValidationService.validateSeLinuxSupportedOnTargetImage(stack, targetImage);
+            seLinuxValidationService.validateSeLinuxSupportedOnTargetImage(stack, clusterUpgradeProperties);
         } catch (CloudbreakServiceException e) {
             throw new UpgradeValidationFailedException(e);
         }

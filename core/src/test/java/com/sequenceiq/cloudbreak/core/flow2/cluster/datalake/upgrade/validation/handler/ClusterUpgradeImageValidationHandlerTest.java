@@ -43,9 +43,13 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeImageValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelSizeService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -88,8 +92,13 @@ public class ClusterUpgradeImageValidationHandlerTest {
     @Mock
     private StackDtoService stackDtoService;
 
+    @Mock
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @BeforeEach
     void setUp() {
+        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+                ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
         lenient().when(cloudStack.toBuilder()).thenReturn(CloudStack.builder());
     }
 
@@ -186,8 +195,10 @@ public class ClusterUpgradeImageValidationHandlerTest {
     }
 
     private HandlerEvent<ClusterUpgradeImageValidationEvent> getHandlerEvent() {
+        ClusterUpgradeProperties clusterUpgradeProperties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.2.18");
         ClusterUpgradeImageValidationEvent clusterUpgradeImageValidationEvent =
-                new ClusterUpgradeImageValidationEvent(1L, "imageId", cloudStack, cloudCredential, cloudContext, mock(Image.class));
+                new ClusterUpgradeImageValidationEvent(1L, clusterUpgradeProperties.getTargetImageId(), cloudStack, cloudCredential, cloudContext,
+                        mock(Image.class), clusterUpgradeProperties);
         HandlerEvent<ClusterUpgradeImageValidationEvent> handlerEvent = mock(HandlerEvent.class);
         when(handlerEvent.getData()).thenReturn(clusterUpgradeImageValidationEvent);
         return handlerEvent;

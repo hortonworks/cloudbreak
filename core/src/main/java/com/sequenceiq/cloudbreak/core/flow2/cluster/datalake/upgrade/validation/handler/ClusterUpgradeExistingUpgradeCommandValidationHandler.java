@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -43,14 +45,19 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
     @Inject
     private StackDtoService stackDtoService;
 
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeExistingUpgradeCommandValidationEvent> event) {
         LOGGER.debug("Accepting Cluster upgrade existing upgradeCDH command validation event.");
 
         ClusterUpgradeExistingUpgradeCommandValidationEvent request = event.getData();
 
+        // TODO CB-33421: Remove legacy image fallback once in-flight flow events no longer depend on it in JSON.
         Image targetImage = request.getImage();
         Long stackId = request.getResourceId();
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
         StackDto stackDto = getStack(stackId);
 
         ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
@@ -58,34 +65,39 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
 
         if (optionalUpgradeCommand.isEmpty()) {
             LOGGER.debug("There is no existing upgradeCDH command, validation passed successfully");
-            return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId);
+            return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(),
+                    clusterUpgradeProperties);
         } else {
             ClusterManagerCommand upgradeCommand = optionalUpgradeCommand.get();
 
             if (upgradeCommand.getActive() || !upgradeCommand.getSuccess() && upgradeCommand.getRetryable()) {
                 LOGGER.debug("Upgrade command found with id: {}", upgradeCommand.getId());
-                return validateIfExistingRuntimeMatchesTargetRuntime(stackDto.getStack(), connector, targetImage);
+                return validateIfExistingRuntimeMatchesTargetRuntime(stackDto.getStack(), connector, targetImage, clusterUpgradeProperties);
             } else {
                 LOGGER.debug("There is no retryable upgradeCDH command, validation passed successfully");
-                return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId);
+                return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(),
+                        clusterUpgradeProperties);
             }
         }
     }
 
-    private StackEvent validateIfExistingRuntimeMatchesTargetRuntime(StackView stack, ClusterApi connector, Image targetImage) {
+    private StackEvent validateIfExistingRuntimeMatchesTargetRuntime(StackView stack, ClusterApi connector, Image targetImage,
+            ClusterUpgradeProperties clusterUpgradeProperties) {
         String activeRuntimeParcelVersion = getActiveRuntimeParcelVersion(stack, connector);
-        String targetRuntimeBuildNumber = getTargetRuntimeBuildNumber(targetImage);
+        String targetRuntimeBuildNumber = getTargetRuntimeBuildNumber(clusterUpgradeProperties, targetImage);
         Long stackId = stack.getId();
 
         if (StringUtils.isEmpty(activeRuntimeParcelVersion)) {
             String message = "There is an existing upgradeCDH command but active parcel version could not be queried from CM, validation passed successfully";
             LOGGER.debug(message);
-            return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId);
+            return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(),
+                    clusterUpgradeProperties);
         } else if (activeRuntimeParcelVersion.endsWith(targetRuntimeBuildNumber)) {
             String message = String.format("There is an existing upgradeCDH command with the same build number %s, validation passed successfully",
                     targetRuntimeBuildNumber);
             LOGGER.debug(message);
-            return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId);
+            return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(),
+                    clusterUpgradeProperties);
         } else {
             String msg = String.format("Existing upgrade command found for active runtime %s, "
                             + "upgrading to a different runtime version (%s-%s) is not allowed! "
@@ -94,18 +106,26 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
                             + "#2, complete the upgrade manually in Cloudera Manager. "
                             + "#3, recover the cluster",
                     activeRuntimeParcelVersion,
-                    getTargetRuntimeVersion(targetImage),
+                    getTargetRuntimeVersion(clusterUpgradeProperties, targetImage),
                     targetRuntimeBuildNumber);
             LOGGER.debug(msg);
             return new ClusterUpgradeValidationFailureEvent(stackId, new UpgradeValidationFailedException(msg));
         }
     }
 
-    private String getTargetRuntimeBuildNumber(Image targetImage) {
+    private String getTargetRuntimeBuildNumber(ClusterUpgradeProperties clusterUpgradeProperties, Image targetImage) {
+        if (clusterUpgradeProperties != null && clusterUpgradeProperties.getCdhBuildNumber() != null) {
+            return clusterUpgradeProperties.getCdhBuildNumber();
+        }
+        // TODO CB-33421: Remove fallback once in-flight flow events always carry clusterUpgradeProperties.
         return targetImage.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
     }
 
-    private String getTargetRuntimeVersion(Image targetImage) {
+    private String getTargetRuntimeVersion(ClusterUpgradeProperties clusterUpgradeProperties, Image targetImage) {
+        if (clusterUpgradeProperties != null && clusterUpgradeProperties.getRuntimeVersion() != null) {
+            return clusterUpgradeProperties.getRuntimeVersion();
+        }
+        // TODO CB-33421: Remove fallback once in-flight flow events always carry clusterUpgradeProperties.
         return targetImage.getPackageVersions().get(ImagePackageVersion.STACK.getKey());
     }
 

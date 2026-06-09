@@ -23,7 +23,7 @@ public class DatabaseVersionValidator implements ServiceUpgradeValidator {
 
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
-        String targetRuntime = validationRequest.upgradeImageInfo().getTargetStatedImage().getImage().getVersion();
+        String targetRuntime = validationRequest.clusterUpgradeProperties().runtimeVersion();
         Database database = validationRequest.stack().getDatabase();
         String databaseVersion = database.getExternalDatabaseEngineVersion();
         if (isExternalDatabase(validationRequest) && isVersionNewerOrEqualThan731(targetRuntime) && isPostgresVersionOlderThanRequired(databaseVersion)) {

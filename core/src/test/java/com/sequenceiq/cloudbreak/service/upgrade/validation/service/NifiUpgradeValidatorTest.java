@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
@@ -30,8 +29,8 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -105,14 +104,7 @@ public class NifiUpgradeValidatorTest {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of(VolumeUtils.VOLUME_PREFIX));
-        Image image = Image.builder()
-                .withVersion(CLOUDERA_STACK_VERSION_7_3_1.getVersion())
-                .build();
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withTargetStatedImage(StatedImage.statedImage(image, null, null))
-                .build();
-
-        underTest.validate(createRequest(true, false, upgradeImageInfo));
+        underTest.validate(createRequest(true, false, CLOUDERA_STACK_VERSION_7_3_1.getVersion()));
         verify(cmTemplateService).isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT);
         verify(clusterApiConnectors).getConnector(stack);
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
@@ -123,15 +115,8 @@ public class NifiUpgradeValidatorTest {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of("/var/etc"));
-        Image image = Image.builder()
-                .withVersion(CLOUDERA_STACK_VERSION_7_3_1.getVersion())
-                .build();
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withTargetStatedImage(StatedImage.statedImage(image, null, null))
-                .build();
-
         Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createRequest(true, false,
-                upgradeImageInfo)));
+                CLOUDERA_STACK_VERSION_7_3_1.getVersion())));
 
         assertEquals("Nifi working directory validation failed. The current directory /var/etc is not eligible for upgrade because it is located on the "
                 + "root disk. The Nifi working directory should be under the /hadoopfs/fs path. During upgrade or repair the Nifi directory would get deleted "
@@ -148,16 +133,9 @@ public class NifiUpgradeValidatorTest {
     })
     public void testValidateShouldThrowExceptionWhenUpgradingToCdp732WithNifi1Template(String blueprintName) {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
-        Image image = Image.builder()
-                .withVersion(CLOUDERA_STACK_VERSION_7_3_2.getVersion())
-                .build();
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withTargetStatedImage(StatedImage.statedImage(image, null, null))
-                .build();
         stack.getBlueprint().setName(blueprintName);
-
         Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createRequest(true, false,
-                upgradeImageInfo)));
+                CLOUDERA_STACK_VERSION_7_3_2.getVersion())));
 
         assertEquals("Action Required: Upgrade to NiFi 2.x" + System.lineSeparator()
                         + "The selected CDP Runtime version (7.3.2) does not support NiFi 1.x. A direct, in-place upgrade is not possible. "
@@ -174,16 +152,10 @@ public class NifiUpgradeValidatorTest {
     })
     public void testValidateShouldThrowExceptionWhenUpgradingToCdp732WithNifi1TemplateWithoutOsUpgrade(String blueprintName) {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
-        Image image = Image.builder()
-                .withVersion(CLOUDERA_STACK_VERSION_7_3_2.getVersion())
-                .build();
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withTargetStatedImage(StatedImage.statedImage(image, null, null))
-                .build();
         stack.getBlueprint().setName(blueprintName);
 
         Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createRequest(false, false,
-                upgradeImageInfo)));
+                CLOUDERA_STACK_VERSION_7_3_2.getVersion())));
 
         assertEquals("Action Required: Upgrade to NiFi 2.x" + System.lineSeparator()
                         + "The selected CDP Runtime version (7.3.2) does not support NiFi 1.x. A direct, in-place upgrade is not possible. "
@@ -201,15 +173,9 @@ public class NifiUpgradeValidatorTest {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of(VolumeUtils.VOLUME_PREFIX));
-        Image image = Image.builder()
-                .withVersion(CLOUDERA_STACK_VERSION_7_3_1.getVersion())
-                .build();
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withTargetStatedImage(StatedImage.statedImage(image, null, null))
-                .build();
         stack.getBlueprint().setName(blueprintName);
 
-        assertDoesNotThrow(() -> underTest.validate(createRequest(true, false, upgradeImageInfo)));
+        assertDoesNotThrow(() -> underTest.validate(createRequest(true, false, CLOUDERA_STACK_VERSION_7_3_1.getVersion())));
         verify(cmTemplateService).isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT);
         verify(clusterApiConnectors).getConnector(stack);
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
@@ -220,26 +186,20 @@ public class NifiUpgradeValidatorTest {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of(VolumeUtils.VOLUME_PREFIX));
-        Image image = Image.builder()
-                .withVersion(CLOUDERA_STACK_VERSION_7_3_1.getVersion())
-                .build();
-        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
-                .withTargetStatedImage(StatedImage.statedImage(image, null, null))
-                .build();
         stack.getBlueprint().setName("7.2.18 - NiFi 2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry");
 
-        assertDoesNotThrow(() -> underTest.validate(createRequest(true, false,
-                upgradeImageInfo)));
+        assertDoesNotThrow(() -> underTest.validate(createRequest(true, false, CLOUDERA_STACK_VERSION_7_3_1.getVersion())));
         verify(cmTemplateService).isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT);
         verify(clusterApiConnectors).getConnector(stack);
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
     }
 
     private ServiceUpgradeValidationRequest createRequest(boolean lockComponents, boolean replaceVms) {
-        return createRequest(lockComponents, replaceVms, null);
+        return createRequest(lockComponents, replaceVms, "7.2.18");
     }
 
-    private ServiceUpgradeValidationRequest createRequest(boolean lockComponents, boolean replaceVms, UpgradeImageInfo upgradeImageInfo) {
-        return new ServiceUpgradeValidationRequest(stack, lockComponents, true, upgradeImageInfo, replaceVms);
+    private ServiceUpgradeValidationRequest createRequest(boolean lockComponents, boolean replaceVms, String runtimeVersion) {
+        return ServiceUpgradeValidationRequestTestUtils.of(stack,
+                ClusterUpgradePropertiesTestUtils.withRuntimeVersionAndFlags(runtimeVersion, lockComponents, true, replaceVms));
     }
 }

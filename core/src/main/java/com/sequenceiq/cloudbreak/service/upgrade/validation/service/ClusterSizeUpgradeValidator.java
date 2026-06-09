@@ -33,10 +33,10 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         long numberOfInstances = validationRequest.stack().getFullNodeCount();
-        if (validationRequest.rollingUpgradeEnabled() && rollingUpgradeValidationEnabled(validationRequest.stack())) {
+        if (validationRequest.clusterUpgradeProperties().isRollingUpgradeEnabled() && rollingUpgradeValidationEnabled(validationRequest.stack())) {
             validateClusterSizeForRollingUpgrade(numberOfInstances);
         }
-        if (validationRequest.replaceVms()) {
+        if (validationRequest.clusterUpgradeProperties().isReplaceVms()) {
             validateForOsUpgrade(numberOfInstances);
         }
     }

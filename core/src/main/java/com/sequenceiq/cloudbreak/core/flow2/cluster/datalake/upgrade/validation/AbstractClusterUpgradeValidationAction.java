@@ -18,11 +18,16 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -41,8 +46,23 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
 
+    // TODO CB-33421: Remove resolver once in-flight flow events always carry clusterUpgradeProperties in JSON.
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     protected AbstractClusterUpgradeValidationAction(Class<P> payloadClass) {
         super(payloadClass);
+    }
+
+    // TODO CB-33421: Replace with event.getClusterUpgradeProperties() once in-flight flow events no longer need rebuild.
+    protected ClusterUpgradeProperties resolveUpgradeProperties(ClusterUpgradeValidationEvent event)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        return clusterUpgradePropertiesResolver.resolve(event);
+    }
+
+    // TODO CB-33421: Remove once payload converters no longer need to rebuild clusterUpgradeProperties.
+    protected ClusterUpgradePropertiesResolver getClusterUpgradePropertiesResolver() {
+        return clusterUpgradePropertiesResolver;
     }
 
     @Override

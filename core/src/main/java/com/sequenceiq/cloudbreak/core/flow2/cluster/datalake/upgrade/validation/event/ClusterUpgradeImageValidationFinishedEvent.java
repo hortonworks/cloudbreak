@@ -4,9 +4,10 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
-public class ClusterUpgradeImageValidationFinishedEvent extends StackEvent {
+public class ClusterUpgradeImageValidationFinishedEvent extends ClusterUpgradeValidationEvent {
+
     private final long requiredFreeSpace;
 
     private final Set<String> warningMessages;
@@ -15,9 +16,11 @@ public class ClusterUpgradeImageValidationFinishedEvent extends StackEvent {
     public ClusterUpgradeImageValidationFinishedEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("imageId") String imageId,
+            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties,
             @JsonProperty("requiredFreeSpace") long requiredFreeSpace,
             @JsonProperty("warningMessages") Set<String> warningMessages) {
-        super(selector, resourceId);
+        super(selector, resourceId, imageId, clusterUpgradeProperties);
         this.requiredFreeSpace = requiredFreeSpace;
         this.warningMessages = warningMessages;
     }

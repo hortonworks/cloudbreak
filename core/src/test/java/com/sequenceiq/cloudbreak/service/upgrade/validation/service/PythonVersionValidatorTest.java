@@ -21,8 +21,9 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -38,8 +39,6 @@ class PythonVersionValidatorTest {
     private static final long WORKSPACE_ID = 2L;
 
     private static final String IMAGE_CATALOG_NAME = "image-catalog-name";
-
-    private static final String CURRENT_IMAGE = "currentImage";
 
     private static final String ACCOUNT_ID = "1234";
 
@@ -75,30 +74,29 @@ class PythonVersionValidatorTest {
 
     @Test
     void testValidateShouldThrowValidationExceptionWhenTheUpgradeIsNotPermittedForTheTargetImage() {
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Image targetImage = Image.builder().withUuid("targetImage").build();
+        ClusterUpgradeProperties properties = createProperties();
 
-        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, currentImage, targetImage)).thenReturn(false);
+        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, properties.toCurrentCloudImage(),
+                properties.toTargetCatalogImage())).thenReturn(false);
 
-        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createValidationRequest(currentImage, targetImage)));
+        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createValidationRequest(properties)));
     }
 
     @Test
     void testValidateShouldNotThrowValidationExceptionWhenTheUpgradeIsPermittedForTheTargetImage() {
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Image targetImage = Image.builder().withUuid("targetImage").build();
+        ClusterUpgradeProperties properties = createProperties();
 
-        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, currentImage, targetImage)).thenReturn(true);
+        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, properties.toCurrentCloudImage(),
+                properties.toTargetCatalogImage())).thenReturn(true);
 
-        underTest.validate(createValidationRequest(currentImage, targetImage));
+        underTest.validate(createValidationRequest(properties));
     }
 
-    private ServiceUpgradeValidationRequest createValidationRequest(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image targetImage) {
-        return new ServiceUpgradeValidationRequest(stack, false, true,
-                new UpgradeImageInfo(currentImage, StatedImage.statedImage(targetImage, null, null)), false);
+    private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeProperties properties) {
+        return ServiceUpgradeValidationRequestTestUtils.of(stack, properties);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
-        return com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId(CURRENT_IMAGE).withImageCatalogName(IMAGE_CATALOG_NAME).build();
+    private ClusterUpgradeProperties createProperties() {
+        return ClusterUpgradePropertiesTestUtils.withCurrentAndTargetRuntime("7.2.17", "7.2.18", IMAGE_CATALOG_NAME, false, true, false);
     }
 }
