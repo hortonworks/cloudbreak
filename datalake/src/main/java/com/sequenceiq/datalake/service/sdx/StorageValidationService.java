@@ -142,12 +142,7 @@ public class StorageValidationService {
                 throw new BadRequestException("AWS baselocation missing protocol. please specify s3a://");
             }
         } else  if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudPlatform)) {
-            if (!isAzureAuthenticationConfigured(cloudStorage)) {
-                throw new BadRequestException("managed identity or account key and account name must be defined for ABFS");
-            }
-            if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol() + "://")) {
-                throw new BadRequestException("AZURE baselocation missing protocol. please specify abfs://");
-            }
+            validateAzureStorage(cloudStorage);
         } else if (CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform)) {
             if (!isGcsAuthenticationConfigured(cloudStorage)) {
                 throw new BadRequestException("service account email must be defined for GCS");
@@ -155,6 +150,17 @@ public class StorageValidationService {
             if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol() + "://")) {
                 throw new BadRequestException("GCP baselocation missing protocol. please specify gcs://");
             }
+        }
+    }
+
+    private void validateAzureStorage(SdxCloudStorageRequest cloudStorage) {
+        if (!isAzureAuthenticationConfigured(cloudStorage)) {
+            throw new BadRequestException("managed identity or account key and account name must be defined for ABFS");
+        }
+        // TODO: CB-33307 to properly handle abfss
+        if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol() + "://") &&
+                !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol() + "s://")) {
+            throw new BadRequestException("AZURE baselocation missing protocol. please specify abfs:// or abfss://");
         }
     }
 

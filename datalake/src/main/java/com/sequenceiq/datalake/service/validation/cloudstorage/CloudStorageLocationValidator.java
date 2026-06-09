@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
@@ -8,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.FileSystemType;
@@ -32,7 +35,7 @@ public class CloudStorageLocationValidator {
     }
 
     public void validate(String storageLocation, FileSystemType fileSystemType, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
-        String bucketName = getBucketName(fileSystemType, storageLocation);
+        String bucketName = LocationHelper.getBucketName(Optional.ofNullable(fileSystemType), storageLocation);
         CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
                 environment.getLocation().getName());
@@ -45,11 +48,6 @@ public class CloudStorageLocationValidator {
                         environment.getLocation().getName()));
         resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.RESOURCE_NOT_FOUND,
                 String.format("Object storage cannot be found at location: %s.", bucketName));
-    }
-
-    private String getBucketName(FileSystemType fileSystemType, String storageLocation) {
-        storageLocation = storageLocation.replace(fileSystemType.getProtocol() + "://", "");
-        return storageLocation.split("/")[0];
     }
 
     private ObjectStorageMetadataRequest createObjectStorageMetadataRequest(String cloudPlatform, CloudCredential credential, String objectStoragePath,

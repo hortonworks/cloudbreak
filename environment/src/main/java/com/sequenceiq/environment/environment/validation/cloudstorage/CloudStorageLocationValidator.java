@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -45,7 +46,7 @@ public class CloudStorageLocationValidator {
                     storageLocation, getDocLink(environment.getCloudPlatform())));
         }
         LOGGER.debug("Calculating bucket for {} location for {} environment.", storageLocation, environment.getId());
-        String bucketName = getBucketName(fileSystemType, storageLocation);
+        String bucketName = LocationHelper.getBucketName(fileSystemType, storageLocation);
         LOGGER.debug("Bucket is {} for {} location for {} environment.", bucketName, storageLocation, environment.getId());
         validateObjectStorage(environment, resultBuilder, bucketName, ObjectStorageType.LOGS);
     }
@@ -79,7 +80,7 @@ public class CloudStorageLocationValidator {
 
     public void validateBackup(String storageLocation, Environment environment, ValidationResultBuilder resultBuilder) {
         Optional<FileSystemType> fileSystemType = getBackupFileSystemType(environment);
-        String bucketName = getBucketName(fileSystemType, storageLocation);
+        String bucketName = LocationHelper.getBucketName(fileSystemType, storageLocation);
         validateObjectStorage(environment, resultBuilder, bucketName, ObjectStorageType.BACKUP);
     }
 
@@ -114,13 +115,6 @@ public class CloudStorageLocationValidator {
             }
         }
         return Optional.empty();
-    }
-
-    private String getBucketName(Optional<FileSystemType> fileSystemType, String storageLocation) {
-        if (fileSystemType.isPresent()) {
-            storageLocation = storageLocation.replace(fileSystemType.get().getProtocol() + "://", "");
-        }
-        return storageLocation.split("/")[0];
     }
 
     private ObjectStorageMetadataRequest createObjectStorageMetadataRequest(String cloudPlatform, CloudCredential credential, String objectStoragePath,
