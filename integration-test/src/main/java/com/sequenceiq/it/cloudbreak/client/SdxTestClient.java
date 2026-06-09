@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxDetailWithResourceAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDetailedDescribeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDiskUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxEnableRangerRazAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxEncryptionProfileEnableAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetAuditsAction;
@@ -350,5 +351,9 @@ public class SdxTestClient {
 
     public Action<SdxTestDto, SdxClient> oneByOneVerticalScaleByCrn(String verticalScaleKey) {
         return new SdxVerticalScaleByCrnAction(verticalScaleKey, OrchestratorType.ONE_BY_ONE);
+    }
+
+    public Action<SdxTestDto, SdxClient> enableEncryptionProfileOnDatalake() {
+        return new SdxEncryptionProfileEnableAction();
     }
 }

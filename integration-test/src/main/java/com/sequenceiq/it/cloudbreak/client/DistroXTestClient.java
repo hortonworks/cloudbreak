@@ -49,6 +49,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpdatePublicDnsEntriesAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpdateSslConfigurationsAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXVerticalScaleAction;
@@ -243,5 +244,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> validateKraftMigrationStatus(String desiredStatus) {
         return new DistroXMigrationFromZookeeperToKraftStatusAction(desiredStatus);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> updateSslConfigurations() {
+        return new DistroXUpdateSslConfigurationsAction();
     }
 }

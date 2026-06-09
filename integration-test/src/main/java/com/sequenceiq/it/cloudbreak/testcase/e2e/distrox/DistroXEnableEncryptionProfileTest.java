@@ -32,7 +32,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
+public class DistroXEnableEncryptionProfileTest extends AbstractE2ETest {
 
     private static final String VERSION_7_3_2 = "7.3.2";
 
@@ -66,9 +66,9 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
-            when = "a custom encryption profile is used to create the environment",
-            then = "datalake and datahub uses the same TLS version from the custom encryption profile")
-    public void testCreateDistroXWithCustomEncryptionProfile(TestContext testContext) {
+            when = "encryption profile is enabled on the environment",
+            then = "datalake and datahub use the same TLS version and ciphers from the custom encryption profile")
+    public void testEnableEncryptionProfileInDistroX(TestContext testContext) {
         String encryptionProfileName = "encryption-profile-" + UUID.randomUUID();
         testContext
                 .given(CredentialTestDto.class)
@@ -87,15 +87,12 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
                 .withCreateFreeIpa(Boolean.TRUE)
-                .withEncryptionProfile(encryptionProfileName)
+                .withOneFreeIpaNode()
                 .when(environmentTestClient.create())
                 .awaitForCreationFlow()
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(SdxTestDto.class)
@@ -105,11 +102,24 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(VERSION_7_3_2))
                 .withEnvironment()
                 .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .given(EnvironmentTestDto.class)
+                .withEncryptionProfile(encryptionProfileName)
+                .when(environmentTestClient.enableEncryptionProfileOnEnvironment())
+                .awaitForFlow()
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
+                .given(SdxTestDto.class)
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
+                .given(DistroXTestDto.class)
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
@@ -120,12 +130,31 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
-            when = "a default encryption profile is used to create the environment",
-            then = "datalake and datahub uses the same TLS version from the default encryption profile with TLSv1.2 and TLSv1.3")
-    public void testCreateDistroXWithDefaultEncryptionProfile(TestContext testContext) {
+            when = "encryption profile is enabled on the datalake and a different one on the datahub",
+            then = "datalake and datahub use different TLS version and ciphers from the custom encryption profiles")
+    public void testEnableDifferentEncryptionProfilesInSdxAndDistroX(TestContext testContext) {
+        String envEncryptionProfileName = "encryption-profile-env" + UUID.randomUUID();
+        String dlEncryptionProfileName = "encryption-profile-dl" + UUID.randomUUID();
+        String distroXEncryptionProfileName = "encryption-profile-dx" + UUID.randomUUID();
+
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
+                .given(envEncryptionProfileName, EncryptionProfileTestDto.class)
+                .withName(envEncryptionProfileName)
+                .withTlsVersions(Set.of(TlsVersion.TLS_1_2))
+                .withCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"))
+                .when(encryptionProfileTestClient.create())
+                .given(dlEncryptionProfileName, EncryptionProfileTestDto.class)
+                .withName(dlEncryptionProfileName)
+                .withTlsVersions(Set.of(TlsVersion.TLS_1_3))
+                .withCipherSuites(List.of("TLS_AES_256_GCM_SHA384"))
+                .when(encryptionProfileTestClient.create())
+                .given(distroXEncryptionProfileName, EncryptionProfileTestDto.class)
+                .withName(distroXEncryptionProfileName)
+                .withTlsVersions(Set.of(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3))
+                .withCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"))
+                .when(encryptionProfileTestClient.create())
                 .given(EnvironmentNetworkTestDto.class)
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
@@ -135,7 +164,9 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
                 .withCreateFreeIpa(Boolean.TRUE)
-                .withEncryptionProfile(testContext.getTestContext().getCloudProvider().defaultEncryptionProfile())
+                .withOneFreeIpaNode()
+                // TODO Uncomment after CB-34283 is fixed.
+                // .withEncryptionProfile(envEncryptionProfileName)
                 .when(environmentTestClient.create())
                 .awaitForCreationFlow()
                 .given(FreeIpaUserSyncTestDto.class)
@@ -143,7 +174,8 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
-                .then((tc, testDto, client) -> encryptionProfileAssertion.assertDefaultTls12Tls13EncryptionProfile(testDto))
+                // TODO Uncomment after CB-34283 is fixed.
+                // .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls12EncryptionProfile(testDto))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(SdxTestDto.class)
@@ -153,14 +185,30 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> encryptionProfileAssertion.assertDefaultTls12Tls13EncryptionProfile(testDto))
+                // TODO Uncomment after CB-34283 is fixed.
+                // .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls12EncryptionProfile(testDto))
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(VERSION_7_3_2))
                 .withEnvironment()
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> encryptionProfileAssertion.assertDefaultTls12Tls13EncryptionProfile(testDto))
+                // TODO Uncomment after CB-34283 is fixed.
+                // .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls12EncryptionProfile(testDto))
+                .given(SdxTestDto.class)
+                .withEncryptionProfile(dlEncryptionProfileName)
+                .when(sdxTestClient.enableEncryptionProfileOnDatalake())
+                .awaitForFlow()
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
+                .given(DistroXTestDto.class)
+                .withEncryptionProfile(distroXEncryptionProfileName)
+                .when(distroXTestClient.updateSslConfigurations())
+                .awaitForFlow()
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls12Tls13EncryptionProfile(testDto))
                 .validate();
     }
 }

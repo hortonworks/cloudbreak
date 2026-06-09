@@ -622,4 +622,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         refresh();
         return InstanceIPCollectorUtil.getAllInstanceIps(this, false);
     }
+
+    public DistroXTestDto withEncryptionProfile(String name) {
+        getRequest().getCluster().setEncryptionProfileNameOrCrn(name);
+        return this;
+    }
 }

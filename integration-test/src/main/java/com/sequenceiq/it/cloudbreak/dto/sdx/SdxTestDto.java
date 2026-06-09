@@ -539,4 +539,9 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         }
         return this;
     }
+
+    public SdxTestDto withEncryptionProfile(String name) {
+        getRequest().setEncryptionProfileNameOrCrn(name);
+        return this;
+    }
 }
