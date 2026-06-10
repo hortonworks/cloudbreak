@@ -8,10 +8,13 @@ public class ClusterProxyCertificate {
 
     private String signCert;
 
+    private String signTokenCert;
+
     private ClusterProxyCertificate(Builder builder) {
         this.signKey = builder.signKey;
         this.signPub = builder.signPub;
         this.signCert = builder.signCert;
+        this.signTokenCert = builder.signTokenCert;
     }
 
     public String getSignKey() {
@@ -26,6 +29,10 @@ public class ClusterProxyCertificate {
         return signCert;
     }
 
+    public String getSignTokenCert() {
+        return signTokenCert;
+    }
+
     public static Builder newClusterProxyCertificate() {
         return new Builder();
     }
@@ -36,6 +43,8 @@ public class ClusterProxyCertificate {
         private String signPub;
 
         private String signCert;
+
+        private String signTokenCert;
 
         private Builder() {
         }
@@ -52,6 +61,11 @@ public class ClusterProxyCertificate {
 
         public Builder withSignCert(String signCert) {
             this.signCert = signCert;
+            return this;
+        }
+
+        public Builder withSignTokenCert(String signTokenCert) {
+            this.signTokenCert = signTokenCert;
             return this;
         }
 

@@ -64,7 +64,7 @@ public class GatewayService {
         gateway.setSignKey(clusterProxyCertificate.getSignKey());
         gateway.setSignPub(clusterProxyCertificate.getSignPub());
         gateway.setSignCert(clusterProxyCertificate.getSignCert());
-        gateway.setTokenCert(clusterProxyCertificate.getSignCert());
+        gateway.setTokenCert(clusterProxyCertificate.getSignTokenCert());
         //in case of service rollback we need this for another release
         gateway.setSignPubDeprecated(clusterProxyCertificate.getSignPub());
         gateway.setSignCertDeprecated(clusterProxyCertificate.getSignCert());
