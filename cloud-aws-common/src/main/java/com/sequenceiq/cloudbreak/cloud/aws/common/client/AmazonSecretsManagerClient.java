@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueReques
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 import software.amazon.awssdk.services.secretsmanager.model.PutResourcePolicyRequest;
 import software.amazon.awssdk.services.secretsmanager.model.PutResourcePolicyResponse;
+import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceResponse;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretRequest;
@@ -45,6 +46,9 @@ public class AmazonSecretsManagerClient extends AmazonClient {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 return secretsManagerClient.getSecretValue(getSecretValueRequest);
+            } catch (ResourceNotFoundException ex) {
+                // Retry ResourceNotFoundException to avoid eventual consistency issues
+                throw ActionFailedException.ofCause(ex);
             } catch (AwsServiceException ex) {
                 throw createActionFailedExceptionIfRetriableError(ex);
             }
@@ -55,6 +59,9 @@ public class AmazonSecretsManagerClient extends AmazonClient {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 return secretsManagerClient.describeSecret(describeSecretRequest);
+            } catch (ResourceNotFoundException ex) {
+                // Retry ResourceNotFoundException to avoid eventual consistency issues
+                throw ActionFailedException.ofCause(ex);
             } catch (AwsServiceException ex) {
                 throw createActionFailedExceptionIfRetriableError(ex);
             }

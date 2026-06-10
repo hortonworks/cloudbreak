@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,7 @@ import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretReques
 import software.amazon.awssdk.services.secretsmanager.model.GetResourcePolicyRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.PutResourcePolicyRequest;
+import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceResponse;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretRequest;
@@ -162,5 +164,25 @@ class AmazonSecretsManagerClientTest {
         TagResourceResponse response = underTest.tagResource(request);
 
         assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void testGetSecretValueIsRetriedWhenResourceNotFound() {
+        GetSecretValueRequest request = mock(GetSecretValueRequest.class);
+        when(secretsManagerClient.getSecretValue(request)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ActionFailedException.class, () -> underTest.getSecretValue(request));
+
+        verify(secretsManagerClient).getSecretValue(request);
+    }
+
+    @Test
+    void testDescribeSecretIsRetriedWhenResourceNotFound() {
+        DescribeSecretRequest request = mock(DescribeSecretRequest.class);
+        when(secretsManagerClient.describeSecret(request)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ActionFailedException.class, () -> underTest.describeSecret(request));
+
+        verify(secretsManagerClient).describeSecret(request);
     }
 }

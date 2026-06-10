@@ -276,8 +276,8 @@ public class AwsSecretsManagerConnector implements SecretConnector {
             DescribeSecretResponse describeSecretResponse = secretsManagerClient.describeSecret(describeSecretRequest);
             return getCloudSecret(describeSecretResponse, getSecretValueResponse);
         } catch (ResourceNotFoundException e) {
-            LOGGER.info("CloudSecret with ARN [{}] not found on provider!", secretArn, e);
-            throw new NotFoundException(String.format("The secret with ARN [%s] does not exist on the provider!", secretArn));
+            LOGGER.info("CloudSecret with ARN [{}] not found on provider!", secretArn);
+            throw new NotFoundException(String.format("The secret with ARN [%s] does not exist on the provider!", secretArn), e);
         }
     }
 
@@ -289,8 +289,8 @@ public class AwsSecretsManagerConnector implements SecretConnector {
             return Optional.of(secretsManagerClient.describeSecret(describeSecretRequest));
         } catch (ResourceNotFoundException e) {
             LOGGER.debug("Secret with name [{}] does not exist on the provider.", secretName);
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     private static CloudSecret getCloudSecret(DescribeSecretResponse describeSecretResponse, GetSecretValueResponse getSecretValueResponse) {
