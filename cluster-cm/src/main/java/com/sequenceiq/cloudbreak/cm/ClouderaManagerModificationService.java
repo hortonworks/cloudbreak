@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -859,14 +860,31 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
             ApiCommand applyHostTemplateCommand;
-            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
-                HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
-                applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, body, true, START_ROLES_ON_UPSCALED_NODES);
-            } else {
-                HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
-                applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, body, false, START_ROLES_ON_UPSCALED_NODES);
+            try {
+                if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
+                    HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
+                    applyHostTemplateCommand = hostTemplatesResourceApi
+                            .applyHostTemplate(stack.getName(), hostGroupName, body, true, START_ROLES_ON_UPSCALED_NODES);
+                } else {
+                    HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
+                    applyHostTemplateCommand = hostTemplatesResourceApi
+                            .applyHostTemplate(stack.getName(), hostGroupName, body, false, START_ROLES_ON_UPSCALED_NODES);
+                }
+            } catch (ApiException e) {
+                if (isHostTemplateDuplicateTagError(e)) {
+                    LOGGER.warn("Received duplicate key constraint error for host template tag during applyHostTemplate " +
+                            "for host group '{}'. This indicates a prior timed-out call already succeeded on CM. " +
+                            "Attempting to find the active command for polling.", hostGroupName);
+                    applyHostTemplateCommand = findActiveApplyHostTemplateCommand();
+                    if (applyHostTemplateCommand == null) {
+                        LOGGER.info("No active ApplyHostTemplate command found for cluster '{}'. " +
+                                "The operation already completed successfully.", stack.getName());
+                        return;
+                    }
+                    LOGGER.info("Found active ApplyHostTemplate command with id [{}], will poll for completion.", applyHostTemplateCommand.getId());
+                } else {
+                    throw e;
+                }
             }
             ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
                     stack, v31Client, applyHostTemplateCommand.getId());
@@ -876,6 +894,28 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } else {
             LOGGER.debug("Skip applying host template, empty host list for host group: {}", hostGroupName);
         }
+    }
+
+    private boolean isHostTemplateDuplicateTagError(ApiException e) {
+        if (e.getCode() != HttpStatus.BAD_REQUEST.value()) {
+            return false;
+        }
+        String responseBody = e.getResponseBody();
+        return responseBody != null
+                && responseBody.contains("duplicate key value violates unique constraint")
+                && (responseBody.contains("idx_tags_to_entity") || responseBody.contains(HOST_TEMPLATE_NAME_TAG));
+    }
+
+    private ApiCommand findActiveApplyHostTemplateCommand() throws ApiException {
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
+        ApiCommandList commandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY, null);
+        if (commandList == null || commandList.getItems() == null) {
+            return null;
+        }
+        return commandList.getItems().stream()
+                .filter(cmd -> "ApplyHostTemplate".equals(cmd.getName()))
+                .findFirst()
+                .orElse(null);
     }
 
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {

@@ -465,13 +465,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void upscaleClusterNoHostToUpscale() throws Exception {
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
-                .thenReturn(success);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setPredefined(false);
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        setUpNonPrewarmedParcelRefresh();
         setUpListClusterHosts();
         setUpReadHosts(false);
 
@@ -509,13 +503,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void upscaleClusterTestWhenNoHostToUpscaleButRackIdUpdatedForOutdatedClusterHost() throws Exception {
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
-                .thenReturn(success);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setPredefined(false);
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        setUpNonPrewarmedParcelRefresh();
         setUpListClusterHosts();
         setUpReadHosts(false);
 
@@ -539,13 +527,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void upscaleClusterTestWhenNoHostToUpscaleAndRackIdNotUpdatedForClusterHost() throws Exception {
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
-                .thenReturn(success);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setPredefined(false);
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        setUpNonPrewarmedParcelRefresh();
         setUpListClusterHosts();
         setUpReadHosts(false, "/originalRack");
 
@@ -563,15 +545,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void upscaleClusterRecovery() throws Exception {
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
-                .thenReturn(success);
+        setUpNonPrewarmedParcelRefresh();
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, v31Client, REFRESH_PARCEL_REPOS_ID, Collections.emptyList()))
                 .thenReturn(success);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setPredefined(false);
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         setUpListClusterHosts();
         setUpReadHosts(false);
 
@@ -635,12 +611,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
                 .thenReturn(success);
 
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(HOST_GROUP_NAME);
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setDiscoveryFQDN("upscaled");
-        instanceMetaData.setRackId("/upscaledRack");
-        instanceMetaData.setInstanceGroup(instanceGroup);
+        InstanceMetaData instanceMetaData = getUpscaledImd();
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
 
         List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
@@ -675,23 +646,11 @@ class ClouderaManagerModificationServiceTest {
         setUpBatchSuccess();
 
         Long applyHostTemplateCommandId = 200L;
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE),
-                eq(Boolean.TRUE))).thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
-
-        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
-                .thenReturn(success);
-        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        mockApplyHostTemplateV52(applyHostTemplateCommandId);
         doNothing().when(clouderaManagerClientConfigDeployService)
                 .deployAndPollClientConfig(any());
 
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(HOST_GROUP_NAME);
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setDiscoveryFQDN("upscaled");
-        instanceMetaData.setRackId("/upscaledRack");
-        instanceMetaData.setInstanceGroup(instanceGroup);
+        InstanceMetaData instanceMetaData = getUpscaledImd();
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
 
         List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
@@ -723,12 +682,7 @@ class ClouderaManagerModificationServiceTest {
         setUpListClusterHosts();
         setUpReadHosts(false);
 
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(HOST_GROUP_NAME);
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setDiscoveryFQDN("upscaled");
-        instanceMetaData.setRackId("/upscaledRack");
-        instanceMetaData.setInstanceGroup(instanceGroup);
+        InstanceMetaData instanceMetaData = getUpscaledImd();
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
 
         List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
@@ -808,13 +762,7 @@ class ClouderaManagerModificationServiceTest {
         setUpReadHosts(true);
 
         Long applyHostTemplateCommandId = 200L;
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
-                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
-        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
-                .thenReturn(success);
+        mockApplyHostTemplateV52(applyHostTemplateCommandId);
 
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(HOST_GROUP_NAME);
@@ -853,25 +801,9 @@ class ClouderaManagerModificationServiceTest {
         setUpBatchSuccess();
 
         Long applyHostTemplateCommandId = 200L;
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
-                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
-        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
-                .thenReturn(success);
+        mockApplyHostTemplateV52(applyHostTemplateCommandId);
 
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(HOST_GROUP_NAME);
-        InstanceMetaData instanceMetaDataOriginal = new InstanceMetaData();
-        instanceMetaDataOriginal.setDiscoveryFQDN("original");
-        instanceMetaDataOriginal.setRackId("/originalRack");
-        instanceMetaDataOriginal.setInstanceGroup(instanceGroup);
-        InstanceMetaData instanceMetaDataUpscaled = new InstanceMetaData();
-        instanceMetaDataUpscaled.setDiscoveryFQDN("upscaled");
-        instanceMetaDataUpscaled.setRackId("/upscaledRack");
-        instanceMetaDataUpscaled.setInstanceGroup(instanceGroup);
-        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaDataOriginal, instanceMetaDataUpscaled);
+        List<InstanceMetaData> instanceMetaDataList = getOriginalAndUpscaledImdList();
 
         List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
 
@@ -908,25 +840,9 @@ class ClouderaManagerModificationServiceTest {
         setUpBatchSuccess();
 
         Long applyHostTemplateCommandId = 200L;
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
-                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
-        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
-                .thenReturn(success);
+        mockApplyHostTemplateV52(applyHostTemplateCommandId);
 
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(HOST_GROUP_NAME);
-        InstanceMetaData instanceMetaDataOriginal = new InstanceMetaData();
-        instanceMetaDataOriginal.setDiscoveryFQDN("original");
-        instanceMetaDataOriginal.setRackId("/originalRack");
-        instanceMetaDataOriginal.setInstanceGroup(instanceGroup);
-        InstanceMetaData instanceMetaDataUpscaled = new InstanceMetaData();
-        instanceMetaDataUpscaled.setDiscoveryFQDN("upscaled");
-        instanceMetaDataUpscaled.setRackId("/upscaledRack");
-        instanceMetaDataUpscaled.setInstanceGroup(instanceGroup);
-        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaDataOriginal, instanceMetaDataUpscaled);
+        List<InstanceMetaData> instanceMetaDataList = getOriginalAndUpscaledImdList();
 
         List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
 
@@ -956,39 +872,18 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testUpgradeClusterWhenPatchUpgradeAndNoPostUpgradeCommandIsAvailable() throws CloudbreakException, ApiException {
-        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        mockUpgradeClusterApiFactorySetup();
         Long apiCommandId = 200L;
         when(stack.getJavaVersion()).thenReturn(17);
 
-        // Mgmt Service restart
-        ApiCommandList apiCommandList = new ApiCommandList();
-        apiCommandList.setItems(new ArrayList<>());
-        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
-        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
-        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
-
-        // Start services if they are not running
-        ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
-        ApiCommand startCommand = mock(ApiCommand.class);
-        when(startCommand.getId()).thenReturn(apiCommandId);
-        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
-        when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
+        mockMgmtServiceRestart(apiCommandId);
+        mockStartStoppedServices(apiCommandId);
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
 
-        // Post parcel activation
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
 
-        // Restart services
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
@@ -1025,38 +920,17 @@ class ClouderaManagerModificationServiceTest {
     @Test
     void testUpgradeClusterWhenPatchUpgradeAndPostUpgradeCommandIsAvailable()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
-        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        mockUpgradeClusterApiFactorySetup();
         Long apiCommandId = 200L;
 
-        // Mgmt Service restart
-        ApiCommandList apiCommandList = new ApiCommandList();
-        apiCommandList.setItems(new ArrayList<>());
-        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
-        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
-        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
+        mockMgmtServiceRestart(apiCommandId);
         when(stack.getJavaVersion()).thenReturn(17);
+        mockStartStoppedServices(apiCommandId);
 
-        // Start services if they are not running
-        ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
-        ApiCommand startCommand = mock(ApiCommand.class);
-        when(startCommand.getId()).thenReturn(apiCommandId);
-        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
-        when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
-
-        // Post parcel activation
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
 
-        // Restart services
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
 
@@ -1123,12 +997,7 @@ class ClouderaManagerModificationServiceTest {
     @Test
     void testUpgradeClusterWhenPatchUpgradeAndPostUpgradeCommandIsAvailableAndRestartIsRunning()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
-        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        mockUpgradeClusterApiFactorySetup();
         when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
         ApiHostList clusterHostsRef = new ApiHostList().items(List.of(new ApiHost().hostname(HOSTNAME)));
         when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenReturn(clusterHostsRef);
@@ -1136,22 +1005,8 @@ class ClouderaManagerModificationServiceTest {
         Long apiCommandId = 200L;
         when(stack.getJavaVersion()).thenReturn(17);
 
-        // Mgmt Service restart
-        ApiCommandList apiCommandList = new ApiCommandList();
-        apiCommandList.setItems(new ArrayList<>());
-        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
-        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
-        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
-
-        // Start services if they are not running
-        ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
-        ApiCommand startCommand = mock(ApiCommand.class);
-        when(startCommand.getId()).thenReturn(apiCommandId);
-        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
-        when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
+        mockMgmtServiceRestart(apiCommandId);
+        mockStartStoppedServices(apiCommandId);
 
         // Post parcel activation
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
@@ -1206,11 +1061,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testUpgradeClusterWhenNotPatchUpgrade() throws CloudbreakException, ApiException {
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
-        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        mockUpgradeClusterApiFactorySetup();
         when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
         when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
         ApiHostList clusterHostsRef = new ApiHostList().items(List.of(new ApiHost().hostname(HOSTNAME)));
@@ -1218,12 +1069,7 @@ class ClouderaManagerModificationServiceTest {
         setUpReadHosts(false);
 
         Long apiCommandId = 200L;
-        // Mgmt Service restart
-        ApiCommandList apiCommandList = new ApiCommandList();
-        apiCommandList.setItems(new ArrayList<>());
-        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
-        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
-        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
+        mockMgmtServiceRestart(apiCommandId);
         when(stack.getJavaVersion()).thenReturn(17);
 
         ApiService apiService = new ApiService()
@@ -1237,7 +1083,8 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
                 .thenReturn(new ApiCommand().id(apiCommandId));
         when(servicesResourceApi.readServices(stack.getName(), "SUMMARY")).thenReturn(apiServiceList);
-        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null)).thenReturn(apiCommandList);
+        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null))
+                .thenReturn(new ApiCommandList().items(new ArrayList<>()));
 
         when(clustersResourceApi.startCommand(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
@@ -1336,23 +1183,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testDeployConfigAndRefreshCMStaleServicesWhenConfigStale() throws CloudbreakException, ApiException {
-        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
-                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
-        List<ApiService> apiServices = List.of(apiService);
-        ApiServiceList apiServiceList = new ApiServiceList();
-        apiServiceList.setItems(apiServices);
-
-        List<ApiCommand> apiCommands = List.of(
-                new ApiCommand().name("DeployClusterClientConfig").id(1L),
-                new ApiCommand().name("RefreshCluster").id(1L));
-        ApiCommandList apiCommandList = new ApiCommandList();
-        apiCommandList.setItems(apiCommands);
-
-        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        mockStaleServiceWithActiveCommands();
         when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
                 .thenReturn(new ApiCommand().id(1L));
-        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
-        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null)).thenReturn(apiCommandList);
 
         underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
 
@@ -1361,23 +1194,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testDeployConfigAndRefreshCMStaleServicesWhenRefreshFailAndForcedIsTrueSwallowError() throws CloudbreakException, ApiException {
-        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
-                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
-        List<ApiService> apiServices = List.of(apiService);
-        ApiServiceList apiServiceList = new ApiServiceList();
-        apiServiceList.setItems(apiServices);
-
-        List<ApiCommand> apiCommands = List.of(
-                new ApiCommand().name("DeployClusterClientConfig").id(1L),
-                new ApiCommand().name("RefreshCluster").id(1L));
-        ApiCommandList apiCommandList = new ApiCommandList();
-        apiCommandList.setItems(apiCommands);
-
-        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        mockStaleServiceWithActiveCommands();
         when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
                 .thenThrow(new ClouderaManagerOperationFailedException("RefreshCommand failed"));
-        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
-        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null)).thenReturn(apiCommandList);
 
         underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi, true);
 
@@ -1386,23 +1205,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testDeployConfigAndRefreshCMStaleServicesWhenRefreshFailAndForcedIsFalseFail() throws ApiException {
-        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
-                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
-        List<ApiService> apiServices = List.of(apiService);
-        ApiServiceList apiServiceList = new ApiServiceList();
-        apiServiceList.setItems(apiServices);
-
-        List<ApiCommand> apiCommands = List.of(
-                new ApiCommand().name("DeployClusterClientConfig").id(1L),
-                new ApiCommand().name("RefreshCluster").id(1L));
-        ApiCommandList apiCommandList = new ApiCommandList();
-        apiCommandList.setItems(apiCommands);
-
-        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        mockStaleServiceWithActiveCommands();
         when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
                 .thenThrow(new ClouderaManagerOperationFailedException("RefreshCommand failed"));
-        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
-        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null)).thenReturn(apiCommandList);
 
         ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi, false));
@@ -1412,18 +1217,17 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     public void testDeployConfigAndRestartClusterServices() throws Exception {
-        // GIVEN
+
         doNothing().when(clouderaManagerClientConfigDeployService).deployAndPollClientConfig(any());
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(v31Client))).thenReturn(clustersResourceApi);
-        // WHEN
+
         underTest.deployConfigAndRestartClusterServices(false);
-        // THEN
+
         verify(configService, times(1)).modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), true);
     }
 
     @Test
     void removeUnusedParcels() {
-        // GIVEN
         Set<String> parcelNamesFromImage = new HashSet<>();
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
         ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
@@ -1438,10 +1242,8 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerParcelDecommissionService.removeUnusedParcels(v31Client, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames,
                 parcelNamesFromImage)).thenReturn(new ParcelOperationStatus(Map.of("product3", "version3"), Map.of()));
 
-        // WHEN
         ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(usedComponents, parcelNamesFromImage);
 
-        // THEN
         verify(clouderaManagerParcelDecommissionService).deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(),
                 usedParcelComponentNames, parcelNamesFromImage);
         verify(clouderaManagerParcelDecommissionService).undistributeUnusedParcels(v31Client, parcelsResourceApi, parcelResourceApi, stack,
@@ -1454,7 +1256,6 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void removeUnusedParcelsWhenSomeParcelOperationsFail() {
-        // GIVEN
         Set<String> parcelNamesFromImage = new HashSet<>();
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
         ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
@@ -1471,10 +1272,8 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerParcelDecommissionService.removeUnusedParcels(v31Client, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames,
                 parcelNamesFromImage)).thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of()));
 
-        // WHEN
         ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(usedComponents, parcelNamesFromImage);
 
-        // THEN
         verify(clouderaManagerParcelDecommissionService, times(1)).deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(),
                 usedParcelComponentNames, parcelNamesFromImage);
         verify(clouderaManagerParcelDecommissionService, times(1)).undistributeUnusedParcels(v31Client, parcelsResourceApi, parcelResourceApi, stack,
@@ -1727,13 +1526,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     public void testStartClusterWithOnlyServicesWhenNoActiveStartCommand() throws Exception {
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
-        ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
-        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        mockReadServicesForStartClusterWithOnlyServicesTests();
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER))).thenReturn(Optional.empty());
         ApiCommand startCommand = mock(ApiCommand.class);
         when(startCommand.getId()).thenReturn(1L);
@@ -1753,13 +1546,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     public void testStartClusterWithOnlyServicesWhenNoStartCommandInCM() throws Exception {
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
-        ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
-        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        mockReadServicesForStartClusterWithOnlyServicesTests();
         ClusterCommand clusterCommand = new ClusterCommand();
         clusterCommand.setCommandId(1L);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
@@ -1782,13 +1569,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     public void testStartClusterWithOnlyServicesWhenActiveStartCommand() throws Exception {
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
-        ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
-        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        mockReadServicesForStartClusterWithOnlyServicesTests();
         ClusterCommand clusterCommand = new ClusterCommand();
         clusterCommand.setCommandId(1L);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
@@ -1811,13 +1592,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     public void testStartClusterWithOnlyServicesWhenInactiveStartCommand() throws Exception {
-        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
-        ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
-        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        mockReadServicesForStartClusterWithOnlyServicesTests();
         ClusterCommand clusterCommand = new ClusterCommand();
         clusterCommand.setCommandId(1L);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
@@ -1993,6 +1768,233 @@ class ClouderaManagerModificationServiceTest {
         assertEquals("2048", result.getConfigsAfter().getFirst().getValue());
         assertEquals(JvmConfigApplicability.RECONFIGURABLE, result.getConfigsAfter().getFirst().getApplicability());
         verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorAndActiveCommandFound() throws Exception {
+        Long activeCommandId = 300L;
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint \\\"idx_tags_to_entity\\\"\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        ApiCommandList activeCommands = new ApiCommandList().items(List.of(
+                new ApiCommand().name("ApplyHostTemplate").id(activeCommandId)
+        ));
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(activeCommands);
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(activeCommandId)))
+                .thenReturn(success);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider).startPollingCmApplyHostTemplate(stack, v31Client, activeCommandId);
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorAndNoActiveCommandFound() throws Exception {
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint \\\"idx_tags_to_entity\\\"\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        ApiCommandList activeCommands = new ApiCommandList().items(List.of(
+                new ApiCommand().name("SomeOtherCommand").id(999L)
+        ));
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(activeCommands);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorWithHostTemplateNameTag() throws Exception {
+        Long activeCommandId = 300L;
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint: _cldr_cm_host_template_name already exists\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        ApiCommandList activeCommands = new ApiCommandList().items(List.of(
+                new ApiCommand().name("ApplyHostTemplate").id(activeCommandId)
+        ));
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(activeCommands);
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(activeCommandId)))
+                .thenReturn(success);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider).startPollingCmApplyHostTemplate(stack, v31Client, activeCommandId);
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsNonDuplicateTag400ErrorThenThrows() throws Exception {
+        ApiException otherBadRequestException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"some other bad request error\"}"
+        );
+
+        mockApplyHostTemplateCalls(otherBadRequestException);
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
+
+        assertEquals("Failed to upscale", exception.getMessage());
+        assertThat(exception).hasCauseReference(otherBadRequestException);
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsNon400ErrorThenThrows() throws Exception {
+        ApiException serverErrorException = new ApiException(
+                500, Collections.emptyMap(),
+                "{\"message\":\"internal server error\"}"
+        );
+
+        mockApplyHostTemplateCalls(serverErrorException);
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
+
+        assertEquals("Failed to upscale", exception.getMessage());
+        assertThat(exception).hasCauseReference(serverErrorException);
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorAndListActiveCommandsReturnsNull() throws Exception {
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint \\\"idx_tags_to_entity\\\"\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(null);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    private void mockApplyHostTemplateCalls(ApiException duplicateTagException) throws ApiException {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+        setUpBatchSuccess();
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+                .thenThrow(duplicateTagException);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+    }
+
+    private InstanceMetaData getUpscaledImd() {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(HOST_GROUP_NAME);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        instanceMetaData.setRackId("/upscaledRack");
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        return instanceMetaData;
+    }
+
+    private List<InstanceMetaData> getOriginalAndUpscaledImdList() {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(HOST_GROUP_NAME);
+        InstanceMetaData instanceMetaDataOriginal = new InstanceMetaData();
+        instanceMetaDataOriginal.setDiscoveryFQDN("original");
+        instanceMetaDataOriginal.setRackId("/originalRack");
+        instanceMetaDataOriginal.setInstanceGroup(instanceGroup);
+        InstanceMetaData instanceMetaDataUpscaled = new InstanceMetaData();
+        instanceMetaDataUpscaled.setDiscoveryFQDN("upscaled");
+        instanceMetaDataUpscaled.setRackId("/upscaledRack");
+        instanceMetaDataUpscaled.setInstanceGroup(instanceGroup);
+        return List.of(instanceMetaDataOriginal, instanceMetaDataUpscaled);
+    }
+
+    private void mockReadServicesForStartClusterWithOnlyServicesTests() throws ApiException {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList serviceList = new ApiServiceList();
+        ApiService service = new ApiService();
+        service.setServiceState(ApiServiceState.STOPPED);
+        serviceList.addItemsItem(service);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+    }
+
+    private void setUpNonPrewarmedParcelRefresh() throws ApiException {
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
+                .thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setPredefined(false);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+    }
+
+    private void mockUpgradeClusterApiFactorySetup() {
+        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
+        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+    }
+
+    private void mockMgmtServiceRestart(Long apiCommandId) throws ApiException {
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(new ArrayList<>());
+        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
+        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
+    }
+
+    private void mockStartStoppedServices(Long apiCommandId) throws ApiException {
+        ApiServiceList serviceList = new ApiServiceList();
+        ApiService service = new ApiService();
+        service.setServiceState(ApiServiceState.STOPPED);
+        serviceList.addItemsItem(service);
+        ApiCommand startCommand = mock(ApiCommand.class);
+        when(startCommand.getId()).thenReturn(apiCommandId);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
+    }
+
+    private void mockApplyHostTemplateV52(Long applyHostTemplateCommandId) throws ApiException {
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
+                .thenReturn(success);
+    }
+
+    private void mockStaleServiceWithActiveCommands() throws ApiException {
+        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
+                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
+        ApiServiceList apiServiceList = new ApiServiceList();
+        apiServiceList.setItems(List.of(apiService));
+
+        List<ApiCommand> apiCommands = List.of(
+                new ApiCommand().name("DeployClusterClientConfig").id(1L),
+                new ApiCommand().name("RefreshCluster").id(1L));
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(apiCommands);
+
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
+        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null)).thenReturn(apiCommandList);
     }
 
 }
