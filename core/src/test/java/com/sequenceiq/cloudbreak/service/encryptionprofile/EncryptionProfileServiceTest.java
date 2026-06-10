@@ -14,6 +14,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -180,5 +183,92 @@ class EncryptionProfileServiceTest {
         verify(encryptionProfileEndpoint, times(1)).getByCrn(encryptionProfileCrn);
         assertEquals("Encryption profile not found: crn:cdp:environments:us-west-1:cloudera:encryptionProfile:a645ac1b-14b6-45a7-88ef-b920ad9b32b4",
                 ex.getMessage());
+    }
+
+    @Test
+    void testGetDefaultEncryptionProfileIfRequiredWhenClusterHasProfileCrn() {
+        Cluster cluster = new Cluster();
+        cluster.setEncryptionProfileCrn("clusterProfileCrn");
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setEncryptionProfileCrn("envProfileCrn");
+
+        Optional<String> result = underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.of("7.3.2"));
+
+        assertThat(result).contains("clusterProfileCrn");
+        verify(encryptionProfileEndpoint, never()).getDefaultEncryptionProfile();
+    }
+
+    @Test
+    void testGetDefaultEncryptionProfileIfRequiredWhenGovCloudAndVersion732ReturnsDefaultProfile() {
+        Cluster cluster = new Cluster();
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setEncryptionProfileCrn("envProfileCrn");
+        CredentialResponse credential = new CredentialResponse();
+        credential.setGovCloud(true);
+        environment.setCredential(credential);
+        EncryptionProfileResponse defaultProfile = new EncryptionProfileResponse();
+        defaultProfile.setCrn("defaultProfileCrn");
+        when(encryptionProfileEndpoint.getDefaultEncryptionProfile()).thenReturn(defaultProfile);
+
+        Optional<String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.of("7.3.2")));
+
+        assertThat(result).contains("defaultProfileCrn");
+        verify(encryptionProfileEndpoint, times(1)).getDefaultEncryptionProfile();
+    }
+
+    @Test
+    void testGetDefaultEncryptionProfileIfRequiredWhenNotGovCloudReturnsEnvCrn() {
+        Cluster cluster = new Cluster();
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setEncryptionProfileCrn("envProfileCrn");
+        CredentialResponse credential = new CredentialResponse();
+        credential.setGovCloud(false);
+        environment.setCredential(credential);
+
+        Optional<String> result = underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.of("7.3.2"));
+
+        assertThat(result).isEmpty();
+        verify(encryptionProfileEndpoint, never()).getDefaultEncryptionProfile();
+    }
+
+    @Test
+    void testGetDefaultEncryptionProfileIfRequiredWhenGovCloudButOlderVersionReturnsEnvCrn() {
+        Cluster cluster = new Cluster();
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setEncryptionProfileCrn("envProfileCrn");
+        CredentialResponse credential = new CredentialResponse();
+        credential.setGovCloud(true);
+        environment.setCredential(credential);
+
+        Optional<String> result = underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.of("7.3.1"));
+
+        assertThat(result).isEmpty();
+        verify(encryptionProfileEndpoint, never()).getDefaultEncryptionProfile();
+    }
+
+    @Test
+    void testGetDefaultEncryptionProfileIfRequiredWhenNoCrnAnywhereReturnsEmpty() {
+        Cluster cluster = new Cluster();
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+
+        Optional<String> result = underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.empty());
+
+        assertThat(result).isEmpty();
+        verify(encryptionProfileEndpoint, never()).getDefaultEncryptionProfile();
+    }
+
+    @Test
+    void testGetDefaultEncryptionProfileIfRequiredWhenGovCloudButNoEnvCrnReturnsEmpty() {
+        Cluster cluster = new Cluster();
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        CredentialResponse credential = new CredentialResponse();
+        credential.setGovCloud(true);
+        environment.setCredential(credential);
+
+        Optional<String> result = underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.of("7.3.2"));
+
+        assertThat(result).isEmpty();
+        verify(encryptionProfileEndpoint, never()).getDefaultEncryptionProfile();
     }
 }

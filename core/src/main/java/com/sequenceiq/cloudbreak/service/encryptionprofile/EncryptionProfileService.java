@@ -154,14 +154,16 @@ public class EncryptionProfileService {
     ) {
         if (StringUtils.isNoneBlank(cluster.getEncryptionProfileCrn())) {
             return Optional.ofNullable(cluster.getEncryptionProfileCrn());
-        } else if (govCloudAnd732(environment, runtimeVersion)) {
+        } else if (govCloudAnd732AndProfileShouldApplied(environment, cluster, runtimeVersion)) {
             return Optional.ofNullable(getDefaultEncryptionProfile().getCrn());
         }
         return Optional.empty();
     }
 
-    private boolean govCloudAnd732(DetailedEnvironmentResponse environment, Optional<String> runtimeVersion) {
-        return environment.getCredential().getGovCloud()
+    private boolean govCloudAnd732AndProfileShouldApplied(DetailedEnvironmentResponse environment, Cluster cluster, Optional<String> runtimeVersion) {
+        return StringUtils.isBlank(cluster.getEncryptionProfileCrn())
+                && StringUtils.isNoneBlank(environment.getEncryptionProfileCrn())
+                && environment.getCredential().getGovCloud()
                 && isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_2);
     }
 }
