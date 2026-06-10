@@ -130,6 +130,7 @@ public enum DetailedStackStatus {
     TRUST_SETUP_FINISH_IN_PROGRESS(Status.TRUST_SETUP_FINISH_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     CANCEL_TRUST_SETUP_FAILED(Status.CANCEL_TRUST_SETUP_FAILED, AvailabilityStatus.UNAVAILABLE),
     CANCEL_TRUST_SETUP_IN_PROGRESS(Status.CANCEL_TRUST_SETUP_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    @Deprecated
     CANCEL_TRUST_SETUP_SUCCESSFUL(Status.CANCEL_TRUST_SETUP_SUCCESSFUL, AvailabilityStatus.AVAILABLE),;
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES = Stream.of(DetailedStackStatus.values())

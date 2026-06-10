@@ -178,7 +178,7 @@ class CancelTrustSetupFlowIntegrationTest {
 
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CANCEL_TRUST_SETUP_IN_PROGRESS, "Cancel cross-realm trust setup");
         stackStatusVerify.verify(stackUpdater)
-                .updateStackStatus(stack, DetailedStackStatus.CANCEL_TRUST_SETUP_SUCCESSFUL,
+                .updateStackStatus(stack, DetailedStackStatus.AVAILABLE,
                         "Cancel cross-realm trust was successful");
 
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
