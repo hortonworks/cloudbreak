@@ -21,7 +21,7 @@ public class ImageCatalogUrlValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogUrlValidator.class);
 
     private static final Pattern AWS_S3_PATTERN = Pattern.compile(
-            "^([^.]+\\.)?s3[.-][^.]+\\.amazonaws\\.com$", Pattern.CASE_INSENSITIVE
+            "^([^.]+\\.)?s3([.-][^.]+)?\\.amazonaws\\.com$", Pattern.CASE_INSENSITIVE
     );
 
     private static final Pattern AZURE_BLOB_PATTERN = Pattern.compile(

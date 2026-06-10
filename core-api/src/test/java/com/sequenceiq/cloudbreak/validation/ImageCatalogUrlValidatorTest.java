@@ -17,7 +17,10 @@ class ImageCatalogUrlValidatorTest {
             "https://mybucket.s3.us-east-1.amazonaws.com/catalog.json",
             "https://mybucket.s3-us-west-2.amazonaws.com/catalog.json",
             "https://s3.eu-west-1.amazonaws.com/mybucket/catalog.json",
-            "https://mybucket.s3.us-east-1.amazonaws.com/catalog.json?versionId=abc"
+            "https://mybucket.s3.us-east-1.amazonaws.com/catalog.json?versionId=abc",
+            "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json",
+            "https://mybucket.s3.amazonaws.com/catalog.json",
+            "https://s3.amazonaws.com/mybucket/catalog.json",
     })
     void testAwsS3UrlsAreAllowed(String url) {
         assertTrue(ImageCatalogUrlValidator.isUrlValid(url));

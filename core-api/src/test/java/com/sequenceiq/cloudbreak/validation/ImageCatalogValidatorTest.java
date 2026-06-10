@@ -165,6 +165,48 @@ class ImageCatalogValidatorTest {
     }
 
     @Test
+    void testLegacyS3UrlWithoutRegionUsesRedirectFollowingHttpHelper() {
+        String url = "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json";
+        when(httpContentSizeValidator.isValid(eq(url), eq(constraintValidatorContext), eq(true))).thenReturn(true);
+        when(httpHelper.getContent(url)).thenReturn(new ImmutablePair<>(statusType, VALID_CATALOG_JSON));
+        when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
+
+        assertTrue(underTest.isValid(url, constraintValidatorContext));
+
+        verify(httpContentSizeValidator).isValid(eq(url), eq(constraintValidatorContext), eq(true));
+        verify(httpHelper).getContent(url);
+        verify(httpHelper, never()).getContentNoRedirects(anyString());
+    }
+
+    @Test
+    void testPathStyleS3UrlWithoutRegionUsesRedirectFollowingHttpHelper() {
+        String url = "https://s3.amazonaws.com/cloudbreak-imagecatalog/v2-dev-cb-image-catalog.json";
+        when(httpContentSizeValidator.isValid(eq(url), eq(constraintValidatorContext), eq(true))).thenReturn(true);
+        when(httpHelper.getContent(url)).thenReturn(new ImmutablePair<>(statusType, VALID_CATALOG_JSON));
+        when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
+
+        assertTrue(underTest.isValid(url, constraintValidatorContext));
+
+        verify(httpContentSizeValidator).isValid(eq(url), eq(constraintValidatorContext), eq(true));
+        verify(httpHelper).getContent(url);
+        verify(httpHelper, never()).getContentNoRedirects(anyString());
+    }
+
+    @Test
+    void testNonAllowedDomainUsesNoRedirectHttpHelper() {
+        String url = "https://cloudbreak.example.com/catalog.json";
+        when(httpContentSizeValidator.isValid(eq(url), eq(constraintValidatorContext), eq(false))).thenReturn(true);
+        when(httpHelper.getContentNoRedirects(url)).thenReturn(new ImmutablePair<>(statusType, VALID_CATALOG_JSON));
+        when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
+
+        assertTrue(underTest.isValid(url, constraintValidatorContext));
+
+        verify(httpContentSizeValidator).isValid(eq(url), eq(constraintValidatorContext), eq(false));
+        verify(httpHelper).getContentNoRedirects(url);
+        verify(httpHelper, never()).getContent(anyString());
+    }
+
+    @Test
     void testNonStrictModeAllowsQueryParamsAndLocalAddress() {
         ReflectionTestUtils.setField(underTest, "strictUrlValidation", false);
         String url = "https://mock-infrastructure:10090/mock-image-catalog?catalog-name=cb-catalog&runtime=7.2.2";
