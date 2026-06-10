@@ -105,7 +105,7 @@ public class RemoteClusterServiceClient {
                 .setShowOnPremiseEnvironmentDetails(withDetails)
                 .build();
         LOGGER.info("Created request to describe cluster {}: {}", clusterCrn, request);
-        return createOnPremisesApiBlockingStub(userCrn).describeCluster(request).getCluster();
+        return createInternalOnPremisesApiBlockingStub(userCrn).describeCluster(request).getCluster();
     }
 
     public OnPremisesApiProto.ValidateClusterForDatalakeResponse validateClusterForDatalake(String userCrn, String clusterCrn) {
@@ -113,7 +113,7 @@ public class RemoteClusterServiceClient {
                 .setClusterCrn(clusterCrn)
                 .build();
         LOGGER.info("Created request to validate cluster {} for datalake: {}", clusterCrn, request);
-        return createOnPremisesApiBlockingStub(userCrn).validateClusterForDatalake(request);
+        return createInternalOnPremisesApiBlockingStub(userCrn).validateClusterForDatalake(request);
     }
 
     private RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub createRemoteClusterInternalBlockingStub() {
@@ -125,5 +125,10 @@ public class RemoteClusterServiceClient {
     private OnPremisesApiGrpc.OnPremisesApiBlockingStub createOnPremisesApiBlockingStub(String userCrn) {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         return stubProvider.newOnPremisesStub(channelWrapper.getChannel(), requestId, remoteClusterConfig.getGrpcTimeoutSec(), userCrn);
+    }
+
+    private OnPremisesApiGrpc.OnPremisesApiBlockingStub createInternalOnPremisesApiBlockingStub(String userCrn) {
+        String requestId = MDCBuilder.getOrGenerateRequestId();
+        return stubProvider.newOnPremisesInternalStub(channelWrapper.getChannel(), requestId, remoteClusterConfig.getGrpcTimeoutSec(), userCrn);
     }
 }

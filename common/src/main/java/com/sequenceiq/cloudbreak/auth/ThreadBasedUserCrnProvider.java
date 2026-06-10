@@ -50,6 +50,10 @@ public class ThreadBasedUserCrnProvider {
         return USER_CRN.get();
     }
 
+    public static String getInternalForUserCrn(String userCrn) {
+        return getInternalUserCrn(getAccountIdIfAvailable(userCrn));
+    }
+
     private static void setUserCrn(String userCrn) {
         if (StringUtils.isNotEmpty(USER_CRN.get())) {
             String errorMessage = String.format("Trying to set crn %s when it already contains %s!", userCrn, USER_CRN.get());

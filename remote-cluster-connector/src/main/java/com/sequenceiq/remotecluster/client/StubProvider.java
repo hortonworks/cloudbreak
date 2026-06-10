@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiGrpc;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalGrpc;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
@@ -39,5 +40,14 @@ public class StubProvider {
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(timeout),
                         new AltusMetadataInterceptor(requestId, userCrn));
+    }
+
+    public OnPremisesApiGrpc.OnPremisesApiBlockingStub newOnPremisesInternalStub(
+            ManagedChannel channel,
+            String requestId,
+            Long timeout,
+            String userCrn) {
+        String internalUserCrn = ThreadBasedUserCrnProvider.getInternalForUserCrn(userCrn);
+        return newOnPremisesStub(channel, requestId, timeout, internalUserCrn);
     }
 }
