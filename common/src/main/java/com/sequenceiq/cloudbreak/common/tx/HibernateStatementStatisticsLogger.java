@@ -4,8 +4,12 @@ import static com.sequenceiq.cloudbreak.common.tx.HibernateCircuitBreakerConfigP
 import static com.sequenceiq.cloudbreak.common.tx.HibernateCircuitBreakerConfigProvider.getMaxTimeWarning;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
+import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 
 public class HibernateStatementStatisticsLogger extends HibernateStatementStatistics {
 
@@ -13,8 +17,32 @@ public class HibernateStatementStatisticsLogger extends HibernateStatementStatis
 
     @Override
     public void end() {
-        logMaxStatementWarning(getQueryCount());
+        int queryCount = getQueryCount();
+        logMaxStatementWarning(queryCount);
         logJdbcExecutionTimeWarning();
+        recordMetrics(queryCount);
+    }
+
+    private void recordMetrics(int queryCount) {
+        MetricService metricService = HibernateMetricsProvider.getMetricService();
+        if (metricService == null) {
+            return;
+        }
+        if (getJdbcExecuteStatementTime() > 0) {
+            metricService.recordTimerMetric(HibernateMetricType.JDBC_EXECUTE_DURATION,
+                    Duration.ofNanos(getJdbcExecuteStatementTime()), "type", "statement");
+        }
+        if (getJdbcExecuteBatchTime() > 0) {
+            metricService.recordTimerMetric(HibernateMetricType.JDBC_EXECUTE_DURATION,
+                    Duration.ofNanos(getJdbcExecuteBatchTime()), "type", "batch");
+        }
+        if (getJdbcPrepareStatementTime() > 0) {
+            metricService.recordTimerMetric(HibernateMetricType.JDBC_EXECUTE_DURATION,
+                    Duration.ofNanos(getJdbcPrepareStatementTime()), "type", "prepare");
+        }
+        if (queryCount > getMaxStatementWarning()) {
+            metricService.incrementMetricCounter(HibernateMetricType.STATEMENT_COUNT_WARNING);
+        }
     }
 
     private void logMaxStatementWarning(int queryCount) {

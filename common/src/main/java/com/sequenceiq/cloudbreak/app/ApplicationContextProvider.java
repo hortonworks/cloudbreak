@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 import com.sequenceiq.cloudbreak.common.tx.HibernateCircuitBreakerConfigProvider;
+import com.sequenceiq.cloudbreak.common.tx.HibernateMetricsProvider;
 
 @Configuration
 @Order(HIGHEST_PRECEDENCE)
@@ -17,5 +18,6 @@ public class ApplicationContextProvider implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         StaticApplicationContext.setApplicationContext(applicationContext);
         HibernateCircuitBreakerConfigProvider.init(applicationContext);
+        HibernateMetricsProvider.init(applicationContext);
     }
 }
