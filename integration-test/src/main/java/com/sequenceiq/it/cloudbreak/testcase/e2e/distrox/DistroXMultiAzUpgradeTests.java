@@ -57,11 +57,12 @@ public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
             when = "upgrade called on DistroX cluster",
             then = "Upgrade should be successful,the clusters should be up and running and nodes should be distributed across multiple AZs")
     public void testDistroXMultiAzUpgrade(TestContext testContext) {
+        String currentVersion = commonClusterManagerProperties.getRuntimeVersion();
         String runTimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(false);
         String dataHubKey = "multiAzDistroxUpgrade";
         testContext.given(SdxTestDto.class)
                 .withCloudStorage()
-                .withRuntimeVersion(runTimeVersion)
+                .withRuntimeVersion(currentVersion)
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
