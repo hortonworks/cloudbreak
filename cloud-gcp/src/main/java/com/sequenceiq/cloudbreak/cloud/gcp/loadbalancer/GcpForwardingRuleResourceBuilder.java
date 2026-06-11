@@ -106,10 +106,21 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                                 .or(() -> resourcesWithProtocol.stream()
                                         .filter(doesResourceExistInWithProtocolListPredicate(trafficsByHealth))
                                         .findFirst())
+                                .map(existingResource -> rebuildWithEnrichedParameters(existingResource, trafficsByHealth, loadBalancer))
                                 .orElseGet(() -> createCloudResource(context, loadBalancer, trafficsByHealth)))
                 .toList();
         LOGGER.debug("Created cloud resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), allResources);
         return allResources;
+    }
+
+    private CloudResource rebuildWithEnrichedParameters(CloudResource existingResource,
+            Pair<HealthProbeParameters, GcpLBTraffics> trafficsByHealth, CloudLoadBalancer loadBalancer) {
+        Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficsByHealth.getValue(), HCPORT, trafficsByHealth.getKey());
+        parameters = enrichParametersWithAttributes(parameters, loadBalancer.getType());
+        return CloudResource.builder()
+                .cloudResource(existingResource)
+                .withParameters(parameters)
+                .build();
     }
 
     private Predicate<CloudResource> doesResourceExistInWithProtocolListPredicate(Pair<HealthProbeParameters, GcpLBTraffics> trafficsByHealth) {

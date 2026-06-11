@@ -89,7 +89,9 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                                 .findFirst().map(existingCloudResource ->
                                         CloudResource.builder()
                                                 .cloudResource(existingCloudResource)
-                                                .withParameters(Map.of(TRAFFICPORTS, trafficByHealth.getValue(), HCPORT, trafficByHealth.getKey()))
+                                                .withParameters(enrichParametersWithAttributes(
+                                                        Map.of(TRAFFICPORTS, trafficByHealth.getValue(), HCPORT, trafficByHealth.getKey()),
+                                                        loadBalancer.getType()))
                                                 .build())
                                 .orElseGet(() -> createCloudResource(context, loadBalancer, trafficByHealth.getKey(), trafficByHealth.getValue())))
                 .toList();

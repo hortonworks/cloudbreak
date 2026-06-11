@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpBackendServiceResourceBuilder.GCP_INSTANCEGROUP_REFERENCE_FORMAT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -241,6 +242,10 @@ class GcpBackendServiceResourceBuilderTest {
         assertEquals(healthProbe2, newResource.getParameter("hcport", HealthProbeParameters.class));
         CloudResource existingResource = cloudResources.stream().filter(resource -> resource.getName().contains("8080")).findFirst().get();
         assertEquals(existingPrivateResource.getName(), existingResource.getName());
+        assertEquals(healthProbe1, existingResource.getParameter("hcport", HealthProbeParameters.class));
+        assertNotNull(existingResource.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class));
+        assertEquals(LoadBalancerType.PRIVATE.name(),
+                existingResource.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class).getName());
     }
 
     @ParameterizedTest(name = "testBuildWithSeparateHCPort{index}")

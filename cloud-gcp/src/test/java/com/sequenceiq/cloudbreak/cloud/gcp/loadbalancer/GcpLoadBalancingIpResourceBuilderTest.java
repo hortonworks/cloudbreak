@@ -191,7 +191,10 @@ class GcpLoadBalancingIpResourceBuilderTest {
 
         List<CloudResource> resources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, network);
 
-        assertEquals(existingIp, resources.getFirst());
+        assertEquals(existingIp.getName(), resources.getFirst().getName());
+        assertEquals(existingIp.getType(), resources.getFirst().getType());
+        assertEquals(existingIp.getStatus(), resources.getFirst().getStatus());
+        assertEquals(HC_PORT, resources.getFirst().getParameter("hcport", Integer.class));
     }
 
     @Test

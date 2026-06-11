@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -392,5 +394,39 @@ class GcpForwardingRuleResourceBuilderTest {
         lenient().when(gcpStackUtil.getNetworkUrl(anyString(), anyString())).thenCallRealMethod();
         lenient().when(gcpStackUtil.getSubnetUrl(anyString(), anyString(), anyString())).thenCallRealMethod();
         lenient().when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();
+    }
+
+    @Test
+    void testCreateWithExistingResourceShouldEnrichParametersWithAttributes() {
+        underTest.init();
+        lenient().when(gcpContext.getName()).thenReturn("name");
+        when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+        Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
+        HealthProbeParameters healthProbe = new HealthProbeParameters(null, 8080, null, 0, 0);
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, NetworkProtocol.TCP, healthProbe), Collections.emptySet());
+        when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
+
+        Map<String, Object> existingParams = new HashMap<>();
+        existingParams.put(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.PRIVATE.asMap());
+        CloudResource existingResource = CloudResource.builder()
+                .withType(ResourceType.GCP_FORWARDING_RULE)
+                .withStatus(CommonStatus.CREATED)
+                .withName("existing-private-8080-rule")
+                .withParameters(existingParams)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(any(), any(), any()))
+                .thenReturn(new java.util.ArrayList<>(List.of(existingResource)));
+
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork());
+
+        assertEquals(1, cloudResources.size());
+        assertEquals(existingResource.getName(), cloudResources.get(0).getName());
+        HealthProbeParameters resultHcPort = cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class);
+        assertEquals(8080, resultHcPort.getPort());
+        GcpLBTraffics resultTraffics = cloudResources.get(0).getParameter("trafficports", GcpLBTraffics.class);
+        assertNotNull(resultTraffics);
+        assertTrue(resultTraffics.trafficPorts().contains(80));
+        Map<String, Object> attributesMap = cloudResources.get(0).getParameter(CloudResource.ATTRIBUTES, Map.class);
+        assertNotNull(attributesMap.get("hcport"), "hcport should be present inside ATTRIBUTES for DB persistence");
     }
 }

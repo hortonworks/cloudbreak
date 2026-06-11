@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -154,7 +155,13 @@ class GcpHealthCheckResourceBuilderTest {
         assertEquals(2, cloudResources.size());
         assertEquals(8080, cloudResources.getFirst().getParameter("hcport", HealthProbeParameters.class).getPort());
         assertEquals(CommonStatus.CREATED, cloudResources.getFirst().getStatus());
-        assertEquals(existingResource, cloudResources.getLast());
+        assertEquals(existingResource.getName(), cloudResources.getLast().getName());
+        assertEquals(existingResource.getType(), cloudResources.getLast().getType());
+        assertEquals(existingResource.getStatus(), cloudResources.getLast().getStatus());
+        assertEquals(8081, cloudResources.getLast().getParameter("hcport", HealthProbeParameters.class).getPort());
+        Map<String, Object> attributesMap = cloudResources.getLast().getParameter(CloudResource.ATTRIBUTES, Map.class);
+        assertNotNull(attributesMap, "ATTRIBUTES map should contain enriched parameters for persistence");
+        assertNotNull(attributesMap.get("hcport"), "hcport should be present inside ATTRIBUTES for DB persistence");
     }
 
     @Test

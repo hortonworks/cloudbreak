@@ -55,10 +55,21 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
                                 .filter(resource -> resource.getName().contains(mapPortToPortPart(lbHealthCheck.getPort())))
                                 .filter(resource -> resource.getName().contains(lbTypePart))
                                 .findFirst()
+                                .map(existingResource -> rebuildWithEnrichedParameters(existingResource, lbHealthCheck, loadBalancer))
                                 .orElseGet(() -> createCloudResource(context, loadBalancer, lbHealthCheck)))
                 .toList();
         LOGGER.debug("Created cloud resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), resources);
         return resources;
+    }
+
+    private CloudResource rebuildWithEnrichedParameters(CloudResource existingResource, HealthProbeParameters lbHealthCheck,
+            CloudLoadBalancer loadBalancer) {
+        Map<String, Object> parameters = Map.of(HCPORT, lbHealthCheck);
+        parameters = enrichParametersWithAttributes(parameters, loadBalancer.getType());
+        return CloudResource.builder()
+                .cloudResource(existingResource)
+                .withParameters(parameters)
+                .build();
     }
 
     private CloudResource createCloudResource(GcpContext context, CloudLoadBalancer loadBalancer, HealthProbeParameters lbHealthCheck) {

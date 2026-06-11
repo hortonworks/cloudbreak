@@ -80,6 +80,10 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
                 .filter(resource -> loadBalancer.getType().name()
                         .equals(resource.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class).name()))
                 .findFirst()
+                .map(existingResource -> CloudResource.builder()
+                        .cloudResource(existingResource)
+                        .withParameters(parameters)
+                        .build())
                 .or(() -> resourceWithoutTypeButMatchingName.map(cloudResource ->
                         CloudResource.builder()
                                 .cloudResource(cloudResource)

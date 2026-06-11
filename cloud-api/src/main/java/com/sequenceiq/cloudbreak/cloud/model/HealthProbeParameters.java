@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -19,11 +20,11 @@ public class HealthProbeParameters {
 
     @JsonCreator
     public HealthProbeParameters(
-            @JsonProperty("healthCheckPath")String healthCheckPath,
-            @JsonProperty("healthCheckPort")int healthCheckPort,
-            @JsonProperty("healthCheckProtocol") NetworkProtocol healthCheckProtocol,
-            @JsonProperty("healthCheckInterval")int healthCheckInterval,
-            @JsonProperty("healthCheckProbeDownThreshold")int healthCheckProbeDownThreshold) {
+            @JsonProperty("healthCheckPath") @JsonAlias("path") String healthCheckPath,
+            @JsonProperty("healthCheckPort") @JsonAlias("port") int healthCheckPort,
+            @JsonProperty("healthCheckProtocol") @JsonAlias("protocol") NetworkProtocol healthCheckProtocol,
+            @JsonProperty("healthCheckInterval") @JsonAlias("interval") int healthCheckInterval,
+            @JsonProperty("healthCheckProbeDownThreshold") @JsonAlias("probeDownThreshold") int healthCheckProbeDownThreshold) {
         this.path = healthCheckPath;
         this.port = healthCheckPort;
         this.protocol = healthCheckProtocol;
