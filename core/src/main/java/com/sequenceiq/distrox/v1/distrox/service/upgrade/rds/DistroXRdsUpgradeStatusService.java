@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade.rds;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.MajorVersionComparator;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXDatabaseUpgradeStatus;
@@ -41,6 +43,9 @@ public class DistroXRdsUpgradeStatusService {
 
     @Inject
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Inject
+    private DbOverrideConfig dbOverrideConfig;
 
     public List<DistroXDatabaseUpgradeStatus> getUpgradeRequiredByDatahubCrns(List<String> datahubCrns) {
         if (datahubCrns == null) {
@@ -103,11 +108,18 @@ public class DistroXRdsUpgradeStatusService {
             MajorVersion currentMajorVersion = databaseResponse.getMajorVersion();
             String currentVersionStr = currentMajorVersion != null ? currentMajorVersion.getMajorVersion() : null;
             boolean upgradeNeeded = isUpgradeNeeded(currentMajorVersion, targetMajorVersion);
+            DistroXDatabaseUpgradeStatus status;
             if (upgradeNeeded) {
-                return DistroXDatabaseUpgradeStatus.upgradeRequired(datahubCrn, targetVersionStr, currentVersionStr);
+                status = DistroXDatabaseUpgradeStatus.upgradeRequired(datahubCrn, targetVersionStr, currentVersionStr);
             } else {
-                return DistroXDatabaseUpgradeStatus.upgradeNotRequired(datahubCrn, currentVersionStr);
+                status = DistroXDatabaseUpgradeStatus.upgradeNotRequired(datahubCrn, currentVersionStr);
             }
+            if (currentVersionStr != null) {
+                dbOverrideConfig.getEolDate(currentVersionStr)
+                        .filter(eol -> !LocalDate.now().isBefore(eol))
+                        .ifPresent(eol -> status.setEolDate(eol.toString()));
+            }
+            return status;
         } catch (Exception e) {
             LOGGER.warn("Failed to check RDS upgrade status for datahub '{}', defaulting to UPGRADE_NOT_REQUIRED (fail-open): {}",
                     datahubCrn, e.getMessage());

@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -101,6 +103,9 @@ public class SdxDatabaseServerUpgradeService {
     @Inject
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
 
+    @Inject
+    private DbOverrideConfig dbOverrideConfig;
+
     public List<SdxDatabaseUpgradeStatus> getDatabaseServerUpgradeStatusByDatalakeCrns(String userCrn, List<String> datalakeCrns) {
         if (datalakeCrns == null) {
             throw new BadRequestException("Datalake CRN list must not be null.");
@@ -140,11 +145,18 @@ public class SdxDatabaseServerUpgradeService {
             MajorVersion currentMajorVersion = databaseResponse.getMajorVersion();
             String currentVersionStr = currentMajorVersion != null ? currentMajorVersion.getMajorVersion() : null;
             boolean upgradeNeeded = sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion, false);
+            SdxDatabaseUpgradeStatus status;
             if (upgradeNeeded) {
-                return SdxDatabaseUpgradeStatus.upgradeRequired(datalakeCrn, targetVersionStr, currentVersionStr);
+                status = SdxDatabaseUpgradeStatus.upgradeRequired(datalakeCrn, targetVersionStr, currentVersionStr);
             } else {
-                return SdxDatabaseUpgradeStatus.upgradeNotRequired(datalakeCrn, currentVersionStr);
+                status = SdxDatabaseUpgradeStatus.upgradeNotRequired(datalakeCrn, currentVersionStr);
             }
+            if (currentVersionStr != null) {
+                dbOverrideConfig.getEolDate(currentVersionStr)
+                        .filter(eol -> !LocalDate.now().isBefore(eol))
+                        .ifPresent(eol -> status.setEolDate(eol.toString()));
+            }
+            return status;
         } catch (Exception e) {
             LOGGER.warn("Failed to check RDS upgrade status for datalake '{}': {}", datalakeCrn, e.getMessage());
             return SdxDatabaseUpgradeStatus.unknown(datalakeCrn);

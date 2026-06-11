@@ -9,8 +9,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXDatabaseUpgradeStatus;
@@ -49,6 +52,9 @@ class DistroXRdsUpgradeStatusServiceTest {
 
     @Mock
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Mock
+    private DbOverrideConfig dbOverrideConfig;
 
     @InjectMocks
     private DistroXRdsUpgradeStatusService underTest;
@@ -296,6 +302,58 @@ class DistroXRdsUpgradeStatusServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             List<String> tooManyCrns = Collections.nCopies(51, DATAHUB_CRN);
             assertThrows(BadRequestException.class, () -> underTest.getUpgradeRequiredByDatahubCrns(tooManyCrns));
+        });
+    }
+
+    @Test
+    void testEolDateSetWhenCurrentVersionIsEol() {
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            StackDto stackDto = mockStackDtoWithExternalDb(DATAHUB_CRN);
+            when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(DATAHUB_CRN)), any())).thenReturn(stackDto);
+            when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+            StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+            dbResponse.setMajorVersion(MajorVersion.VERSION_11);
+            when(databaseService.getDatabaseServer(eq(NameOrCrn.ofCrn(DATAHUB_CRN)), any())).thenReturn(dbResponse);
+            when(dbOverrideConfig.getEolDate("11")).thenReturn(Optional.of(LocalDate.of(2023, 11, 9)));
+
+            DistroXDatabaseUpgradeStatus result = underTest.getUpgradeRequired(NameOrCrn.ofCrn(DATAHUB_CRN));
+
+            assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
+            assertEquals("2023-11-09", result.getEolDate());
+        });
+    }
+
+    @Test
+    void testEolDateNotSetWhenEolNotReached() {
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            StackDto stackDto = mockStackDtoWithExternalDb(DATAHUB_CRN);
+            when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(DATAHUB_CRN)), any())).thenReturn(stackDto);
+            when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+            StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+            dbResponse.setMajorVersion(MajorVersion.VERSION_11);
+            when(databaseService.getDatabaseServer(eq(NameOrCrn.ofCrn(DATAHUB_CRN)), any())).thenReturn(dbResponse);
+            when(dbOverrideConfig.getEolDate("11")).thenReturn(Optional.of(LocalDate.of(2099, 12, 31)));
+
+            DistroXDatabaseUpgradeStatus result = underTest.getUpgradeRequired(NameOrCrn.ofCrn(DATAHUB_CRN));
+
+            assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
+            assertNull(result.getEolDate());
+        });
+    }
+
+    @Test
+    void testEolDateNotSetWhenCurrentVersionIsNull() {
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            StackDto stackDto = mockStackDtoWithExternalDb(DATAHUB_CRN);
+            when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(DATAHUB_CRN)), any())).thenReturn(stackDto);
+            when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+            StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+            when(databaseService.getDatabaseServer(eq(NameOrCrn.ofCrn(DATAHUB_CRN)), any())).thenReturn(dbResponse);
+
+            DistroXDatabaseUpgradeStatus result = underTest.getUpgradeRequired(NameOrCrn.ofCrn(DATAHUB_CRN));
+
+            assertNull(result.getEolDate());
+            verifyNoInteractions(dbOverrideConfig);
         });
     }
 }

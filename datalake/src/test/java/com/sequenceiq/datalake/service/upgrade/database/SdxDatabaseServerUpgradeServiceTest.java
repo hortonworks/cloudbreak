@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -135,6 +137,9 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Mock
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Mock
+    private DbOverrideConfig dbOverrideConfig;
 
     @InjectMocks
     private SdxDatabaseServerUpgradeService underTest;
@@ -675,6 +680,55 @@ public class SdxDatabaseServerUpgradeServiceTest {
         assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
         assertEquals("14", result.getTargetMajorVersion());
         assertNull(result.getCurrentMajorVersion());
+    }
+
+    @Test
+    void testEolDateSetWhenCurrentVersionIsEol() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        dbResponse.setMajorVersion(MajorVersion.VERSION_11);
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(true);
+        when(dbOverrideConfig.getEolDate("11")).thenReturn(Optional.of(LocalDate.of(2023, 11, 9)));
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
+        assertEquals("2023-11-09", result.getEolDate());
+    }
+
+    @Test
+    void testEolDateNotSetWhenEolNotReached() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        dbResponse.setMajorVersion(MajorVersion.VERSION_11);
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(true);
+        when(dbOverrideConfig.getEolDate("11")).thenReturn(Optional.of(LocalDate.of(2099, 12, 31)));
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
+        assertNull(result.getEolDate());
+    }
+
+    @Test
+    void testEolDateNotSetWhenCurrentVersionIsNull() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(true);
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertNull(result.getEolDate());
+        verifyNoInteractions(dbOverrideConfig);
     }
 
     private SdxCluster getSdxClusterWithExternalDb(String crn) {

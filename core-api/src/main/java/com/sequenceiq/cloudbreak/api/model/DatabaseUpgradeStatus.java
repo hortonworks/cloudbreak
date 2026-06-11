@@ -19,6 +19,10 @@ public abstract class DatabaseUpgradeStatus {
     @Schema(description = "The current PostgreSQL major version (e.g. '11'); present when the DB server was reachable.")
     private String currentMajorVersion;
 
+    @Schema(description = "The end-of-life date for the current DB engine version in ISO-8601 format (e.g. '2023-11-09'); "
+            + "present only when the current version has reached EOL.")
+    private String eolDate;
+
     protected DatabaseUpgradeStatus() {
     }
 
@@ -50,5 +54,13 @@ public abstract class DatabaseUpgradeStatus {
 
     public void setCurrentMajorVersion(String currentMajorVersion) {
         this.currentMajorVersion = currentMajorVersion;
+    }
+
+    public String getEolDate() {
+        return eolDate;
+    }
+
+    public void setEolDate(String eolDate) {
+        this.eolDate = eolDate;
     }
 }

@@ -54,6 +54,7 @@ public class DistroXDatabaseUpgradeStatus extends DatabaseUpgradeStatus {
                 + ", upgradeStatus='" + getUpgradeStatus() + '\''
                 + ", targetMajorVersion='" + getTargetMajorVersion() + '\''
                 + ", currentMajorVersion='" + getCurrentMajorVersion() + '\''
+                + ", eolDate='" + getEolDate() + '\''
                 + '}';
     }
 }
