@@ -45,7 +45,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "r5.2xlarge"
         },
         "nodeCount": 1,
         "type": "GATEWAY",

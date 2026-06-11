@@ -35,7 +35,7 @@
               "type": "pd-balanced"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-highmem-8"
         },
         "nodeCount": 1,
         "type": "GATEWAY",

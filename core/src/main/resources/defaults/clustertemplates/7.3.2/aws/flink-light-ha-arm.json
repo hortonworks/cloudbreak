@@ -50,7 +50,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.4xlarge"
+          "instanceType": "r7gd.2xlarge"
         },
         "nodeCount": 2,
         "type": "GATEWAY",

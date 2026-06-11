@@ -16,8 +16,8 @@
             "size": 50
           },
           "yarn": {
-            "cpus": 4,
-            "memory": 8192
+            "cpus": 8,
+            "memory": 65536
           }
         },
         "nodeCount": 1,
