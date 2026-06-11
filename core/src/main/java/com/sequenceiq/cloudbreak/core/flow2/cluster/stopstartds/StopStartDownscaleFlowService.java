@@ -141,7 +141,7 @@ public class StopStartDownscaleFlowService {
     public void handleClusterDownscaleFailure(long stackId, Exception errorDetails) {
         LOGGER.info("Error during stopstart downscale flow: " + errorDetails.getMessage(), errorDetails);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_BY_STOP_FAILED,
-                String.format("New node(s) (stopstart) could not be removed from the cluster: %s", errorDetails));
+                String.format("New node(s) (stopstart) could not be removed from the cluster: %s", errorDetails.getMessage()));
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FAILED, errorDetails.getMessage());
     }
 }

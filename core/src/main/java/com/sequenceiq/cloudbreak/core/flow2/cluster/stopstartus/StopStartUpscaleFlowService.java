@@ -160,7 +160,7 @@ class StopStartUpscaleFlowService {
     void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.info("Error during stopstart upscale flow: " + errorDetails.getMessage(), errorDetails);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_BY_START_FAILED,
-                String.format("Node(s) could not be upscaled via startstop: %s", errorDetails));
+                String.format("Node(s) could not be upscaled via startstop: %s", errorDetails.getMessage()));
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FAILED, errorDetails.getMessage());
     }
 
