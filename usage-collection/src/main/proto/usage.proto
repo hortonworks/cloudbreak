@@ -403,6 +403,8 @@ message Event {
     CDPDFDeploymentProjectTag cdpDFDeploymentProjectTag = 197;
     // A notification event was sent out by Cloudbreak
     CDPCBNotificationSentEvent cdpCBNotificationSentEvent = 198;
+    // A CDP CAI Inference endpoint started or stopped event
+    CDPCMLServingEndpointStartedStoppedEvent cdpCMLServingEndpointStartedStoppedEvent = 199;
   }
 }
 
@@ -2051,6 +2053,8 @@ message CDPLiftieClusterNodeStatesHeartbeat {
   string kubernetesVersion = 8;
   // The cluster id
   string clusterId = 9;
+  // The experience type
+  string experienceType = 10;
 }
 
 message CDPLiftieClusterNodeState {
@@ -2128,6 +2132,8 @@ message CDPLiftieClusterNodeStatesHeartbeatSummary {
   repeated CDPLiftieClusterInstanceTypeSummary instanceTypeSummary = 12;
   // Summary info for all instance group ids
   repeated CDPLiftieClusterInstanceGroupIdSummary instanceGroupIdSummary = 13;
+  // The Experience type associated with the workload
+  string experienceType = 14;
 }
 
 // Summary info for all instance types
@@ -2156,6 +2162,12 @@ message CDPLiftieClusterWorkloadNodesSummary {
   int32 numNodesMeteredUnhealthy = 3;
   // workload CRN for this workload
   string workloadCRN = 4;
+  // experience types associated for this workload
+  string experienceType = 5;
+  // node tier type 1 associated with the workload
+  int32 numNodesTier1 = 6;
+  // node tier type 2 associated with the workload
+  int32 numNodesTier2 = 7;
 }
 
 message CDPLiftieClusterNodesSummary {
@@ -2253,6 +2265,8 @@ message CDPLiftieClusterPodStatesHeartbeatSummary {
   string workloadCRN = 15;
   // Summary Info of Metering v2 Pods
   CDPLiftieClusterPodSummmary meteringv2Pods = 16;
+  // ExperienceType associated with the workload
+  string experienceType = 17;
 }
 
 message CDPLiftieClusterPodSummmary {
@@ -2275,6 +2289,8 @@ message CDPLiftieClusterPodStatesHeartbeat {
   string environmentCrn = 4;
   // The workload region of the cluster
   string workloadRegion = 5;
+  // The experienceType associated with the workload
+  string experienceType = 7;
 }
 
 // The status of a CDP request
@@ -7411,6 +7427,16 @@ message CDPClassicClusterStatusChanged {
   CDPClusterStatus.Value status = 3;
   // The description of error during creation or deletion of the classic cluster.
   string errorDescription = 4;
+  // The cluster type. Values can be "CDPDC", "CDH" or "HDP".
+  string clusterType = 5;
+  // The registration time in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 registrationTimestamp = 6;
+  // The timestamp of the most recent sync operation in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 lastSuccessfulSyncTimestamp = 7;
+  // The CRN of the environment in PvC.
+  string environmentCrn = 8;
+  // The data center name of the registered on-premise cluster.
+  string datacenterName = 9;
 }
 
 // Generated when the On Premises Control Plane registration or deletion is requested.
@@ -7590,6 +7616,8 @@ message CDPCloudbreakFlowEvent {
   string reason = 11;
   // Request id
   string requestId = 12;
+  // Service
+  string service = 13;
 }
 
 // CDP CAI Inference Model Format
@@ -7844,6 +7872,113 @@ message CDPCMLServingEndpointDeployedOrUpdatedEvent {
   string instance_type = 13;
   // Whether CAI Inference is up to date
   bool is_update = 14;
+  // Runtime information
+  RuntimeInfo runtime_info = 15;
+  // API standard being followed
+  string api_standard = 16;
+  // Whether CAI inference has a chat template
+  bool has_chat_template = 17;
+  // Deployment mode
+  string deployment_mode = 18;
+  // Format of the model
+  string model_format = 19;
+  // Task of the model
+  string model_task = 20;
+  // Architecture of the model
+  string model_architecture = 21;
+  // Endpoint CRN
+  string endpoint_crn = 22;
+  // NIM optimization profile (GPU, precision, etc.)
+  OptimizationProfile optimization_profile = 23;
+}
+
+
+// CAI Inference Runtime information
+message RuntimeInfo {
+  // Display name of the runtime
+  string display_name = 1;
+  // Version of the runtime
+  string version = 2;
+  // Image identifier of the runtime
+  string image_identifier = 3;
+  // Version details of the runtime
+  oneof version_details {
+    string vllm_version = 4;
+    string transformers_library_version = 5;
+  }
+  // Whether the runtime is the latest version
+  bool latest_version = 6;
+  // Runtime name
+  string runtime_name = 7;
+}
+
+// CAI Inference Optimization profile
+message OptimizationProfile {
+  // GPU
+  string gpu = 1;
+  // GPU device
+  string gpu_device = 2;
+  // GPU count
+  string gpu_count = 3;
+  // Precision
+  string precision = 4;
+  // Release
+  string release = 5;
+  // Configuration
+  oneof config {
+    // Embed configuration
+    EmbedConfig embed_config = 6;
+    // Text generation configuration
+    TextGenerationConfig text_gen_config = 7;
+    // Rank configuration
+    RankConfig rank_config = 8;
+  }
+}
+
+// CAI Inference Embed configuration
+message EmbedConfig {
+  // Dimension
+  int32 Dimension = 8;
+  // Maximum number of tokens
+  int32 MaxTokens = 9;
+}
+
+// CAI Inference Text generation configuration
+message TextGenerationConfig {
+  // LLM engine
+  string LLMEngine = 1;
+  // Maximum image size
+  string MaxImageSize = 2;
+  // Profile
+  string profile = 3;
+}
+
+// CAI Inference Rank configuration
+message RankConfig {
+  // Maximum number of tokens
+  int32 MaxTokens = 1;
+  // Maximum number of passages
+  int32 MaxPassages = 2;
+}
+
+// A CDP CAI Inference endpoint started or stopped event
+message CDPCMLServingEndpointStartedStoppedEvent {
+  // CAI Inference Resource CRN
+  string resource_crn = 1;
+  // Resource type (Serving in this case)
+  string resource_type = 2;
+  // CAI Inference version
+  string resource_version = 3;
+  // Username hash
+  string username_hash = 4;
+  // Namespace
+  string namespace = 5;
+  // Endpoint name hash
+  string endpoint_name_hash = 6;
+  // Whether the endpoint is stopped
+  bool is_stopped = 7;
+  // Endpoint CRN
+  string endpoint_crn = 8;
 }
 
 // A CDP CAI Inferenc endpoint deletion event
@@ -7860,6 +7995,8 @@ message CDPCMLServingEndpointDeletedEvent {
   string namespace = 5;
   // Endpoint name hash
   string endpoint_name_hash = 6;
+  // Individual endpoint CRN for lifecycle tracking
+  string endpoint_crn = 7;
 }
 
 // A CDP CAI Application deployment event
@@ -7890,6 +8027,8 @@ message CDPCMLServingApplicationDeployedEvent {
   string instance_type = 13;
   // Whether CAI Inference is up to date
   bool is_update = 14;
+  // CRN for the Application
+  string application_crn = 15;
 }
 
 // A CDP CAI Application deletion event
@@ -7906,6 +8045,8 @@ message CDPCMLServingApplicationDeletedEvent {
   string namespace = 5;
   // Application name hash
   string application_name_hash = 6;
+  // CRN for the Application
+  string application_crn = 7;
 }
 
 // Event message for tracking AI Studio deployments in CDP CML

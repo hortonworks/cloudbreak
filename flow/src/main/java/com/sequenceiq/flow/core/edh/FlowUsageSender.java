@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCloudbreakFlowEvent;
@@ -24,6 +25,9 @@ import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 public class FlowUsageSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowUsageSender.class);
+
+    @Value("${spring.application.name:}")
+    private String applicationName;
 
     @Inject
     private UsageReporter usageReporter;
@@ -64,6 +68,7 @@ public class FlowUsageSender {
                         .setEdgeState(edgeState)
                         .setReason(reason)
                         .setRequestId(MDCBuilder.getOrGenerateRequestId())
+                        .setService(getServiceName())
                         .build();
                 usageReporter.cdpCloudbreakFlowEvent(event);
             } else {
@@ -72,6 +77,13 @@ public class FlowUsageSender {
         } catch (Exception e) {
             LOGGER.warn("Flow usage event sending failed!", e);
         }
+    }
+
+    private String getServiceName() {
+        if (StringUtils.isEmpty(applicationName)) {
+            return "";
+        }
+        return applicationName.replace("Service", "").replace("Application", "").toLowerCase();
     }
 
     private String getReason(AbstractFlowConfiguration.FlowEdgeConfig edgeConfig, Enum<? extends FlowState> nextFlowStateEnum, String flowId) {
