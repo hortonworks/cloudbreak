@@ -188,6 +188,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .given(ClusterTemplateTestDto.class)
                 .when(clusterTemplateTestClient.listV4(), RunningParameter.key(generatedKey))
                 .then(this::validateDefaultCount)
+                .then(this::validateArchitecture)
                 .validate();
     }
 
@@ -360,6 +361,16 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("The length of name has to be in range" +
                         " of 5 to 40"))
                 .validate();
+    }
+
+    private ClusterTemplateTestDto validateArchitecture(TestContext tc, ClusterTemplateTestDto entity, CloudbreakClient cc) {
+        entity.getResponses().stream()
+                .forEach(template -> {
+                    if (template.getName().contains("(ARM)") && template.getArchitecture() != null && !template.getArchitecture().getName().equals("arm64")) {
+                        throw new TestFailException("The architecture must be arm64 on ARM templates!");
+                    }
+                });
+        return entity;
     }
 
     private ClusterTemplateTestDto validateDefaultCount(TestContext tc, ClusterTemplateTestDto entity, CloudbreakClient cc) {

@@ -4,6 +4,7 @@
   "type": "DATAVIZ",
   "featureState": "PREVIEW",
   "cloudPlatform": "AWS",
+  "architecture": "arm64",
   "distroXTemplate": {
     "cluster": {
       "blueprintName": "7.3.2 - Data Visualization"
