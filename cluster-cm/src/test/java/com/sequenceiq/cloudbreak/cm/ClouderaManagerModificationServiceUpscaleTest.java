@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.SUMMARY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiBatchRequest;
 import com.cloudera.api.swagger.model.ApiBatchResponse;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
@@ -515,5 +518,143 @@ class ClouderaManagerModificationServiceUpscaleTest extends ClouderaManagerModif
         List<ApiBatchRequest> batchRequests = batchRequestCaptor.getAllValues();
         assertThat(batchRequests).hasSize(1);
         verifyRackIdBatch(batchRequests.get(0), "upscaledId", "/upscaledRack");
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorAndActiveCommandFound() throws Exception {
+        Long activeCommandId = 300L;
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint \\\"idx_tags_to_entity\\\"\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        ApiCommandList activeCommands = new ApiCommandList().items(List.of(
+                new ApiCommand().name("ApplyHostTemplate").id(activeCommandId)
+        ));
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(activeCommands);
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(activeCommandId)))
+                .thenReturn(success);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider).startPollingCmApplyHostTemplate(stack, v31Client, activeCommandId);
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorAndNoActiveCommandFound() throws Exception {
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint \\\"idx_tags_to_entity\\\"\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        ApiCommandList activeCommands = new ApiCommandList().items(List.of(
+                new ApiCommand().name("SomeOtherCommand").id(999L)
+        ));
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(activeCommands);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorWithHostTemplateNameTag() throws Exception {
+        Long activeCommandId = 300L;
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint: _cldr_cm_host_template_name already exists\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        ApiCommandList activeCommands = new ApiCommandList().items(List.of(
+                new ApiCommand().name("ApplyHostTemplate").id(activeCommandId)
+        ));
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(activeCommands);
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(activeCommandId)))
+                .thenReturn(success);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider).startPollingCmApplyHostTemplate(stack, v31Client, activeCommandId);
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsNonDuplicateTag400ErrorThenThrows() throws Exception {
+        ApiException otherBadRequestException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"some other bad request error\"}"
+        );
+
+        mockApplyHostTemplateCalls(otherBadRequestException);
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
+
+        assertEquals("Failed to upscale", exception.getMessage());
+        assertThat(exception).hasCauseReference(otherBadRequestException);
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsNon400ErrorThenThrows() throws Exception {
+        ApiException serverErrorException = new ApiException(
+                500, Collections.emptyMap(),
+                "{\"message\":\"internal server error\"}"
+        );
+
+        mockApplyHostTemplateCalls(serverErrorException);
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
+
+        assertEquals("Failed to upscale", exception.getMessage());
+        assertThat(exception).hasCauseReference(serverErrorException);
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    @Test
+    void upscaleClusterWhenApplyHostTemplateHitsDuplicateTagErrorAndListActiveCommandsReturnsNull() throws Exception {
+        ApiException duplicateTagException = new ApiException(
+                400, Collections.emptyMap(),
+                "{\"message\":\"duplicate key value violates unique constraint \\\"idx_tags_to_entity\\\"\"}"
+        );
+
+        mockApplyHostTemplateCalls(duplicateTagException);
+
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq(SUMMARY), eq(null))).thenReturn(null);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
+    }
+
+    private void mockApplyHostTemplateCalls(ApiException duplicateTagException) throws ApiException {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+        setUpBatchSuccess();
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+                .thenThrow(duplicateTagException);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+    }
+
+    private InstanceMetaData getUpscaledImd() {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(HOST_GROUP_NAME);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        instanceMetaData.setRackId("/upscaledRack");
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        return instanceMetaData;
     }
 }
