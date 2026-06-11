@@ -134,8 +134,8 @@ public class SshJClientActions {
                     .filter(Objects::nonNull)
                     .flatMap(Collection::stream)
                     .map(x -> {
-                        LOGGER.info("For instance [{}] in host group [{}], Private IP [{}] and Public IP [{}] are available. {} ip will be used!",
-                                x.getInstanceId(), hostGroupName, x.getPublicIp(), x.getPrivateIp(), publicIp && isPublicIpAvailable(x) ? "Public" : "Private");
+                        LOGGER.info("For instance [{}] in host group [{}], Private IP [{}] and Public IP [{}] are available. {} IP will be used!",
+                                x.getInstanceId(), hostGroupName, x.getPrivateIp(), x.getPublicIp(), publicIp && isPublicIpAvailable(x) ? "Public" : "Private");
                         return publicIp && isPublicIpAvailable(x) ? x.getPublicIp() : x.getPrivateIp();
                     })
                     .filter(Objects::nonNull)
@@ -270,6 +270,12 @@ public class SshJClientActions {
             String sshCommand, boolean publicIp) {
         return getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
+    }
+
+    public Map<String, Pair<Integer, String>> executeSshCommandOnHost(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+            String user, String password, String privateKeyFilePath, String sshCommand, boolean publicIp) {
+        return getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, user, password, privateKeyFilePath, sshCommand)));
     }
 
     public Map<String, Pair<Integer, String>> executeSshCommandOnAllHosts(Collection<InstanceGroupV4Response> instanceGroups,

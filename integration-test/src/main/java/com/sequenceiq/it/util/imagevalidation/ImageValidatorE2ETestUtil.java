@@ -40,6 +40,7 @@ import com.sequenceiq.it.cloudbreak.listener.PassedTestsReporter;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.hybrid.BasicHybridCloudE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.BaseImageValidatorE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.ImageContentValidatorE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.java.ForceJavaVersionE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.BasicEnvironmentVirtualGroupTest;
@@ -62,7 +63,9 @@ public class ImageValidatorE2ETestUtil {
     private static final Map<String, Class<?>> ALL_TESTS_FOR_RUNTIME = Map.of(
             "testClusterProvisionWithForcedJavaVersion", ForceJavaVersionE2ETest.class,
             "testSDXUpgrade", SdxUpgradeTests.class,
-            "testMonitoringOnFreeIpaSdxDistrox", MonitoringTests.class
+            "testMonitoringOnFreeIpaSdxDistrox", MonitoringTests.class,
+            "testPythonVersionsAreCorrect", ImageContentValidatorE2ETest.class,
+            "testJavaVersionsAreCorrect", ImageContentValidatorE2ETest.class
     );
 
     @Inject
