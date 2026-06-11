@@ -16,9 +16,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -45,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretReq
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.secretsmanager.model.CreateSecretRequest;
@@ -143,13 +148,21 @@ public class AwsSecretsManagerConnectorTest {
     @Captor
     private ArgumentCaptor<GetSecretValueRequest> getSecretValueRequestArgumentCaptor;
 
-    @Test
-    void testCreateCloudSecretWhenSecretDoesNotExistAnywhere() {
+    static Stream<Arguments> possibleThrowablesFromDescribeSecret() {
+        return Stream.of(
+                Arguments.of(ResourceNotFoundException.builder().build()),
+                Arguments.of(Retry.ActionFailedException.ofCause(ResourceNotFoundException.builder().build()))
+        );
+    }
+
+    @MethodSource("possibleThrowablesFromDescribeSecret")
+    @ParameterizedTest
+    void testCreateCloudSecretWhenSecretDoesNotExistAnywhere(Throwable throwable) {
         when(awsClient.createSecretsManagerClient(any(), any())).thenReturn(secretsManagerClient);
 
         ArgumentCaptor<CreateSecretRequest> createSecretRequestArgumentCaptor = ArgumentCaptor.forClass(CreateSecretRequest.class);
         when(secretsManagerClient.describeSecret(any()))
-                .thenThrow(ResourceNotFoundException.class)
+                .thenThrow(throwable)
                 .thenReturn(getDescribeSecretResponse(NAME, ARN));
         when(secretsManagerClient.getSecretValue(any())).thenReturn(getGetSecretValueResponse(NAME, ARN));
         when(secretsManagerClient.createSecret(any())).thenReturn(CreateSecretResponse.builder().arn(ARN).build());
@@ -634,7 +647,7 @@ public class AwsSecretsManagerConnectorTest {
 
         assertThat(illegalArgumentException).hasMessage(String.format(
                 "The following elements of request.cryptographicAuthorizedClients are malformed. Only EC2 instance resource ARNs are supported. %s",
-                        cryptographicAuthorizedClients));
+                cryptographicAuthorizedClients));
         verifyNoInteractions(secretsManagerClient);
     }
 

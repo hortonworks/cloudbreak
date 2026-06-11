@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretReq
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 import software.amazon.awssdk.policybuilder.iam.IamAction;
@@ -289,8 +290,14 @@ public class AwsSecretsManagerConnector implements SecretConnector {
             return Optional.of(secretsManagerClient.describeSecret(describeSecretRequest));
         } catch (ResourceNotFoundException e) {
             LOGGER.debug("Secret with name [{}] does not exist on the provider.", secretName);
-            return Optional.empty();
+        } catch (Retry.ActionFailedException e) {
+            if (e.getCause() instanceof ResourceNotFoundException) {
+                LOGGER.info("Secret with name [{}] does not exist on the provider.", secretName);
+            } else {
+                throw e;
+            }
         }
+        return Optional.empty();
     }
 
     private static CloudSecret getCloudSecret(DescribeSecretResponse describeSecretResponse, GetSecretValueResponse getSecretValueResponse) {
@@ -328,7 +335,7 @@ public class AwsSecretsManagerConnector implements SecretConnector {
                 LOGGER.info("Using the default AWS managed encryption key...");
             } else {
                 LOGGER.warn("Only EncryptionKeyTypes of {} are allowed when creating AWS Secrets Manager secrets! " +
-                        "Using the default AWS managed encryption key...",
+                                "Using the default AWS managed encryption key...",
                         List.of(EncryptionKeyType.AWS_KMS_KEY_ARN, EncryptionKeyType.AWS_MANAGED_KEY));
             }
         }, () -> LOGGER.info("Using the default AWS managed encryption key, since no encryption key was specified in the request..."));
