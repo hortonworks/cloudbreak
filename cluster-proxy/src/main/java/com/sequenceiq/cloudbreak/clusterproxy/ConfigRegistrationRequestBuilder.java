@@ -12,8 +12,6 @@ public class ConfigRegistrationRequestBuilder {
 
     private String uriOfKnox;
 
-    private String knoxSecretRef;
-
     private List<String> aliases;
 
     private List<ClusterServiceConfig> services;
@@ -87,18 +85,13 @@ public class ConfigRegistrationRequestBuilder {
         return this;
     }
 
-    public ConfigRegistrationRequestBuilder withKnoxSecretRef(String knoxSecretRef) {
-        this.knoxSecretRef = knoxSecretRef;
-        return this;
-    }
-
     public ConfigRegistrationRequestBuilder withTlsStrictCheck(boolean tlsStrictCheck) {
         this.tlsStrictCheck = tlsStrictCheck;
         return this;
     }
 
     public ConfigRegistrationRequest build() {
-        return new ConfigRegistrationRequest(clusterCrn, environmentCrn, uriOfKnox, knoxSecretRef, accountId,
+        return new ConfigRegistrationRequest(clusterCrn, environmentCrn, uriOfKnox, accountId,
                 useTunnel, tunnels, aliases, services, certificates, useCcmV2, ccmV2Configs, tlsStrictCheck);
     }
 }

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.clusterproxy.CdpAccessKey;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
-import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.thunderhead.controller.MockPvcControlPlaneApiController;
@@ -88,22 +87,20 @@ public class PrivateControlPlaneService implements LoadResourcesForAccountIdServ
     }
 
     private void registerClusterProxy(PrivateControlPlane privateControlPlane) {
-        ConfigRegistrationRequest configRegistrationRequest =
-                new ConfigRegistrationRequestBuilder(privateControlPlane.getCrn())
-                .withEnvironmentCrn(privateControlPlane.getCrn())
-                .withKnoxUrl(null)
-                .withKnoxSecretRef(null)
-                .withAccountId(privateControlPlane.getAccountId())
-                .withUseCcmV2(false)
-                .withCcmV2Entries(null)
-                .withTunnelEntries(null)
-                .withAliases(null)
-                .withServices(getClusterServiceConfigs(privateControlPlane))
-                .withCertificates(null)
-                .withUseCcmV2(false)
-                .withCcmV2Entries(null)
-                .withTlsStrictCheck(false)
-                .build();
+        ConfigRegistrationRequest configRegistrationRequest = new ConfigRegistrationRequest(
+                privateControlPlane.getCrn(),
+                privateControlPlane.getCrn(),
+                null,
+                privateControlPlane.getAccountId(),
+                false,
+                null,
+                null,
+                getClusterServiceConfigs(privateControlPlane),
+                null,
+                false,
+                null,
+                false
+        );
         intermediateBuilderExecutor.submit(() -> clusterProxyRegistrationClient.registerConfig(configRegistrationRequest));
     }
 

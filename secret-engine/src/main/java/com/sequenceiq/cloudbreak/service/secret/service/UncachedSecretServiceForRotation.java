@@ -72,11 +72,8 @@ public class UncachedSecretServiceForRotation {
         String fullPath = vaultSecretConverter.convert(vaultSecretJson).getPath();
         RotationSecret response = vaultRetryService.tryReadingVault(() -> {
             Map<String, String> secretValue = persistentEngine.getWithoutCache(fullPath);
-            return secretValue != null ?
-                    new RotationSecret(
-                        String.valueOf(secretValue.get(VaultConstants.FIELD_SECRET)),
-                        String.valueOf(secretValue.get(VaultConstants.FIELD_BACKUP))
-                    ) : null;
+            return secretValue != null ? new RotationSecret(String.valueOf(secretValue.get(VaultConstants.FIELD_SECRET)),
+                    String.valueOf(secretValue.get(VaultConstants.FIELD_BACKUP))) : null;
         });
         return response;
     }
