@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.gateway;
 
 import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -10,8 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyCertificate;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -30,9 +29,6 @@ public class GatewayService {
 
     @Inject
     private ClusterProxyRotationService clusterProxyRotationService;
-
-    @Inject
-    private ClusterProxySecretProvider clusterProxySecretProvider;
 
     public Gateway save(Gateway gateway) {
         gateway.setGatewayPort(Integer.valueOf(httpsPort));
@@ -59,33 +55,20 @@ public class GatewayService {
     }
 
     public Gateway generateSignKeys(Gateway gateway) {
-        ClusterProxyCertificate clusterProxyCertificate = clusterProxySecretProvider.generateSignKeys();
+        KeyPair identityKey = PkiUtil.generateKeypair();
+        KeyPair signKeyPair = PkiUtil.generateKeypair();
+        X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKeyPair);
 
-        gateway.setSignKey(clusterProxyCertificate.getSignKey());
-        gateway.setSignPub(clusterProxyCertificate.getSignPub());
-        gateway.setSignCert(clusterProxyCertificate.getSignCert());
-        gateway.setTokenCert(clusterProxyCertificate.getSignCert());
+        String signKey = PkiUtil.convert(identityKey.getPrivate());
+        String signPub = PkiUtil.convertPemPublicKey(identityKey.getPublic());
+        String signCert = PkiUtil.convert(cert);
+        gateway.setSignKey(signKey);
+        gateway.setSignPub(signPub);
+        gateway.setSignCert(signCert);
         //in case of service rollback we need this for another release
-        gateway.setSignPubDeprecated(clusterProxyCertificate.getSignPub());
-        gateway.setSignCertDeprecated(clusterProxyCertificate.getSignCert());
+        gateway.setSignPubDeprecated(signPub);
+        gateway.setSignCertDeprecated(signCert);
         return gateway;
-    }
-
-    public Gateway rotateGatewayKeys(Long currentGatewayId, GatewayView newGateway) {
-        Optional<Gateway> gatewayOptional = repository.findById(currentGatewayId);
-        if (gatewayOptional.isPresent()) {
-            Gateway gateway = gatewayOptional.get();
-            gateway.setSignKey(newGateway.getSignKey());
-            gateway.setSignPub(newGateway.getSignPub());
-            gateway.setSignCert(newGateway.getSignCert());
-            gateway.setTokenCert(newGateway.getSignCert());
-            //in case of service rollback we need this for another release
-            gateway.setSignPubDeprecated(newGateway.getSignPub());
-            gateway.setSignCertDeprecated(newGateway.getSignCert());
-
-            return repository.save(gateway);
-        }
-        return null;
     }
 
     public GatewayView putLegacyFieldsIntoVaultIfNecessary(GatewayView gatewayView) {

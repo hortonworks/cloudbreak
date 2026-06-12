@@ -184,4 +184,14 @@ class ClusterProxyRotationServiceTest {
         assertTrue(keyAndCert.toString().contains(("publicKey")));
     }
 
+    @Test
+    void generateClusterProxySecretFormat() {
+        String secretJson = "{\"enginePath\":\"secret\"," +
+                "\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
+                "\"path\":\"cb/secretPath\"}";
+        String clusterProxySecretFormat = underTest.generateClusterProxySecretFormat(secretJson);
+
+        assertEquals("cb/secretPath:secret", clusterProxySecretFormat);
+    }
+
 }

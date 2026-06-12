@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.clusterproxy;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
 import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -25,10 +22,6 @@ public class ConfigRegistrationRequest {
 
     @JsonProperty
     private final String uriOfKnox;
-
-    @JsonProperty
-    @JsonInclude(NON_NULL)
-    private final String knoxSecretRef;
 
     @JsonProperty
     private final List<String> aliases;
@@ -55,24 +48,12 @@ public class ConfigRegistrationRequest {
     private final boolean tlsStrictCheck;
 
     @JsonCreator
-    public ConfigRegistrationRequest(
-            String clusterCrn,
-            String environmentCrn,
-            String knoxUrl,
-            String knoxSecretRef,
-            String accountId,
-            boolean useTunnel,
-            List<TunnelEntry> tunnelEntries,
-            List<String> aliases,
-            List<ClusterServiceConfig> services,
-            List<String> certificates,
-            boolean useCcmV2,
-            List<CcmV2Config> ccmV2Configs,
-            boolean tlsStrictCheck) {
+    public ConfigRegistrationRequest(String clusterCrn, String environmentCrn, String knoxUrl, String accountId, boolean useTunnel,
+            List<TunnelEntry> tunnelEntries, List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates, boolean useCcmV2,
+            List<CcmV2Config> ccmV2Configs, boolean tlsStrictCheck) {
         this.clusterCrn = clusterCrn;
         this.environmentCrn = environmentCrn;
         this.uriOfKnox = knoxUrl;
-        this.knoxSecretRef = knoxSecretRef;
         this.accountId = accountId;
         this.useTunnel = useTunnel;
         this.tunnels = tunnelEntries;
@@ -112,10 +93,6 @@ public class ConfigRegistrationRequest {
         return uriOfKnox;
     }
 
-    public String getKnoxSecretRef() {
-        return knoxSecretRef;
-    }
-
     public List<String> getAliases() {
         return aliases;
     }
@@ -153,7 +130,6 @@ public class ConfigRegistrationRequest {
                 Objects.equals(clusterCrn, that.clusterCrn) &&
                 Objects.equals(environmentCrn, that.environmentCrn) &&
                 Objects.equals(uriOfKnox, that.uriOfKnox) &&
-                Objects.equals(knoxSecretRef, that.knoxSecretRef) &&
                 Objects.equals(aliases, that.aliases) &&
                 Objects.equals(services, that.services) &&
                 Objects.equals(certificates, that.certificates) &&
@@ -164,7 +140,7 @@ public class ConfigRegistrationRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId, clusterCrn, environmentCrn, uriOfKnox, knoxSecretRef, aliases,
+        return Objects.hash(accountId, clusterCrn, environmentCrn, uriOfKnox, aliases,
                 services, certificates, useTunnel, tunnels, useCcmV2, ccmV2Configs, tlsStrictCheck);
     }
 
@@ -175,7 +151,6 @@ public class ConfigRegistrationRequest {
                 ", clusterCrn='" + clusterCrn + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", uriOfKnox='" + uriOfKnox + '\'' +
-                ", knoxSecretRef='" + knoxSecretRef + '\'' +
                 ", aliases=" + aliases +
                 ", services=" + services +
                 ", certificates=" + certificates +

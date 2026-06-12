@@ -91,6 +91,12 @@ public class ClusterProxyRotationService {
         return pathAndField.length == SECRETREF_MAX_LENGTH && BASE64_ENCODING.equalsIgnoreCase(pathAndField[2]);
     }
 
+    public String generateClusterProxySecretFormat(String knoxSecretJson) {
+        Map<String, Object> knoxSecretMap = new Json(knoxSecretJson).getMap();
+        String knoxSecretPath = (String) knoxSecretMap.get("path");
+        return format("%s:%s", knoxSecretPath, "secret");
+    }
+
     private void checkPathAndField(String[] pathAndField) {
         if (pathAndField == null || !(pathAndField.length == 2 || pathAndField.length == SECRETREF_MAX_LENGTH)) {
             throw new IllegalArgumentException("Cannot read jwk from cluster-proxy, secret path invalid.");
