@@ -65,7 +65,6 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -107,10 +106,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     private static final String DEFAULT_CM_PASSWORD = "Admin123";
 
     private static final String DEFAULT_CM_USER = "admin";
-
-    private static final String MASTER_INSTANCE_TEMPLATE = "sdx-master-instance-template";
-
-    private static final String IDBROKER_INSTANCE_TEMPLATE = "sdx-idbroker-instance-template";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -269,19 +264,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         }
 
         getTestContext()
-                .given(MASTER_INSTANCE_TEMPLATE, InstanceTemplateV4TestDto.class)
-                    .withInstanceType(getCloudProvider().getDatalakeInstanceType(MASTER.getName()))
-                .given(MASTER.getName(), InstanceGroupTestDto.class)
-                    .withHostGroup(MASTER)
-                    .withNodeCount(1)
-                    .withTemplate(MASTER_INSTANCE_TEMPLATE)
-                .given(IDBROKER_INSTANCE_TEMPLATE, InstanceTemplateV4TestDto.class)
-                    .withInstanceType(getCloudProvider().getDatalakeInstanceType(IDBROKER.getName()))
-                .given(IDBROKER.getName(), InstanceGroupTestDto.class)
-                    .withHostGroup(IDBROKER)
-                    .withNodeCount(1)
-                    .withTemplate(IDBROKER_INSTANCE_TEMPLATE);
-
+                .given("master", InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
+                .given("idbroker", InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1);
         stack.withName(stack.getName())
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())

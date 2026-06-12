@@ -270,9 +270,11 @@ public interface CloudProvider {
 
     ResourceType getRootDiskResourceType();
 
-    String getDatahubInstanceType(String name);
+    String getDatahubCustomInstanceType();
 
-    String getDatalakeInstanceType(String name);
+    default String getDatahubCustomInstanceTypeWithStorage() {
+        return getDatahubCustomInstanceType();
+    }
 
     String getAddDiskVolumeType();
 

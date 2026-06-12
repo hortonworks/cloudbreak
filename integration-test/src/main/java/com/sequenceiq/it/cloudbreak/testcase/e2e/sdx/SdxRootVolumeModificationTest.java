@@ -44,12 +44,14 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
             then = "root volume should be modified and the datalake should be up and running"
     )
     public void testSdxRootVolumeModification(TestContext testContext) {
+        String instanceType = testContext.getCloudProvider().getDatahubCustomInstanceType();
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs()
                 .given(SdxInternalTestDto.class)
                 .withTelemetry("telemetry")
+                .withInstanceType(instanceType)
                 .addTags(SDX_TAGS)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())

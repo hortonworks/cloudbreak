@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +23,8 @@ public class GcpProperties {
     private Boolean externalDatabaseSslEnforcementSupported;
 
     private String embeddedDbUpgradeSourceVersion;
+
+    private String datahubCustomInstanceType;
 
     private final Credential credential = new Credential();
 
@@ -84,6 +85,14 @@ public class GcpProperties {
 
     public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
         this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
+    }
+
+    public String getDatahubCustomInstanceType() {
+        return datahubCustomInstanceType;
+    }
+
+    public void setDatahubCustomInstanceType(String datahubCustomInstanceType) {
+        this.datahubCustomInstanceType = datahubCustomInstanceType;
     }
 
     public String getAvailabilityZone() {
@@ -324,8 +333,6 @@ public class GcpProperties {
 
         private String hyperDiskThroughput;
 
-        private final InstanceTypes types = new InstanceTypes();
-
         public String getType() {
             return type;
         }
@@ -396,43 +403,6 @@ public class GcpProperties {
 
         public void setHyperDiskThroughput(String hyperDiskThroughput) {
             this.hyperDiskThroughput = hyperDiskThroughput;
-        }
-
-        public InstanceTypes getTypes() {
-            return types;
-        }
-
-        public static class InstanceTypes {
-
-            private String defaultType;
-
-            private Map<String, String> datalake;
-
-            private Map<String, String> datahub;
-
-            public String getDefault() {
-                return defaultType;
-            }
-
-            public void setDefault(String defaultType) {
-                this.defaultType = defaultType;
-            }
-
-            public Map<String, String> getDatalake() {
-                return datalake;
-            }
-
-            public void setDatalake(Map<String, String> datalake) {
-                this.datalake = datalake;
-            }
-
-            public Map<String, String> getDatahub() {
-                return datahub;
-            }
-
-            public void setDatahub(Map<String, String> datahub) {
-                this.datahub = datahub;
-            }
         }
     }
 
