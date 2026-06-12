@@ -73,7 +73,6 @@ class GatewayServiceTest {
                         .withSignKey("testSignKey")
                         .withSignPub("testSignPub")
                         .withSignCert("testSignCert")
-                        .withSignTokenCert("testSignTokenCert")
                         .build());
 
         Gateway gatewayWithKeys = underTest.generateSignKeys(input);
@@ -89,7 +88,7 @@ class GatewayServiceTest {
         assertNotNull(gatewayWithKeys.getSignCertSecret());
         assertEquals(gatewayWithKeys.getSignCertSecret().getRaw(), gatewayWithKeys.getSignCert());
         assertEquals(gatewayWithKeys.getSignCertDeprecated(), gatewayWithKeys.getSignCert());
-        assertEquals("testSignTokenCert", gatewayWithKeys.getTokenCert());
+        assertEquals("testSignCert", gatewayWithKeys.getTokenCert());
     }
 
     @Test

@@ -28,14 +28,11 @@ public class ClusterProxySecretProvider {
         String signKey = PkiUtil.convert(identityKey.getPrivate());
         String signPub = PkiUtil.convertPemPublicKey(identityKey.getPublic());
         String signCert = PkiUtil.convert(cert);
-        String signTokenCert = signCert.replaceAll("-----[A-Z ]+-----", "")
-                .trim();
 
         return ClusterProxyCertificate.newClusterProxyCertificate()
                         .withSignKey(signKey)
                         .withSignPub(signPub)
                         .withSignCert(signCert)
-                        .withSignTokenCert(signTokenCert)
                         .build();
     }
 }
