@@ -17,7 +17,9 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
+import com.sequenceiq.cloudbreak.clusterproxy.TokenCertInfo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
@@ -33,7 +35,6 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ClusterProxyRotationService;
-import com.sequenceiq.cloudbreak.service.TokenCertInfo;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -58,6 +59,9 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Inject
+    private ClusterProxySecretProvider clusterProxySecretProvider;
+
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> result = new HashMap<>();
@@ -70,7 +74,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
                 .orElseThrow(() -> new CloudbreakRuntimeException(format("Cannot find Gateway in database, cluster id %s", stack.getCluster().getId())));
         Gateway fullGateway = gatewayService.getById(gateway.getId()).orElseThrow(() -> new SecretRotationException("Gateway cannot be found!"));
         GatewayView newGatewaySecrets = gatewayService.generateSignKeys(new Gateway());
-        validateKnoxSecretRef(readConfigResponse.getKnoxSecretRef(), gateway.getTokenKeySecret().getSecret());
+        validateKnoxSecretRef(readConfigResponse.getKnoxSecretRef(), gateway.getSignKeySecret().getSecret());
 
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(stack.getResourceCrn())
@@ -80,7 +84,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         result.put(VAULT, vaultRotationContext);
         result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), fullGateway, stack));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));
-        result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), fullGateway));
+        result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), fullGateway, newGatewaySecrets));
         return result;
     }
 
@@ -104,11 +108,13 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
 
         Map<SecretMarker, String> tokenSecretMap = Collections.emptyMap();
         if (shouldGenerateNewTokenCert(readConfigResponse)) {
-            TokenCertInfo tokenCertInfo = clusterProxyRotationService.generateTokenCert();
+            TokenCertInfo tokenCertInfo = clusterProxySecretProvider.generateSignKeys();
             tokenSecretMap = Map.of(
                     SecretMarker.GATEWAY_TOKEN_CERT, tokenCertInfo.base64DerCert(),
                     SecretMarker.GATEWAY_TOKEN_PUB, tokenCertInfo.publicKey(),
-                    SecretMarker.GATEWAY_TOKEN_KEY, tokenCertInfo.privateKey());
+                    SecretMarker.GATEWAY_TOKEN_KEY, tokenCertInfo.privateKey(),
+                    SecretMarker.GATEWAY_SIGN_CERT, tokenCertInfo.signCert()
+            );
         }
         result.putAll(signSecretMap);
         result.putAll(tokenSecretMap);
@@ -129,10 +135,13 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         return customJobRotationContextBuilder.build();
     }
 
-    private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, Gateway gateway) {
+    private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, Gateway gateway, GatewayView newGatewaySecrets) {
         return ClusterProxyUpdateConfigRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withKnoxSecretPath(() -> clusterProxyRotationService.generateClusterProxySecretFormat(gateway.getTokenKeySecret().getSecret()))
+                .withNewGatewaySecrets(newGatewaySecrets)
+                .withCurrentGatewayId(gateway.getId())
+                .withKnoxSecretPath(() -> clusterProxySecretProvider.generateClusterProxySecretFormat(
+                        gateway.getSignKeySecret().getSecret()))
                 .build();
     }
 

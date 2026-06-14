@@ -7,8 +7,6 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateCrtKeySpec;
@@ -24,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -91,12 +88,6 @@ public class ClusterProxyRotationService {
         return pathAndField.length == SECRETREF_MAX_LENGTH && BASE64_ENCODING.equalsIgnoreCase(pathAndField[2]);
     }
 
-    public String generateClusterProxySecretFormat(String knoxSecretJson) {
-        Map<String, Object> knoxSecretMap = new Json(knoxSecretJson).getMap();
-        String knoxSecretPath = (String) knoxSecretMap.get("path");
-        return format("%s:%s", knoxSecretPath, "secret");
-    }
-
     private void checkPathAndField(String[] pathAndField) {
         if (pathAndField == null || !(pathAndField.length == 2 || pathAndField.length == SECRETREF_MAX_LENGTH)) {
             throw new IllegalArgumentException("Cannot read jwk from cluster-proxy, secret path invalid.");
@@ -139,21 +130,6 @@ public class ClusterProxyRotationService {
         if (jwkMap == null || !jwkMap.keySet().containsAll(Set.of(MODULUS, PUBLIC_EXPONENT, PRIVATE_EXPONENT, PRIME_P, PRIME_Q,
                 PRIME_EXPONENT_P, PRIME_EXPONENT_Q, CRT_COEFFICIENT))) {
             throw new IllegalArgumentException("JWK key from cluster-proxy cannot converted to PEM, key elements missing.");
-        }
-    }
-
-    public TokenCertInfo generateTokenCert() {
-        try {
-            KeyPair identityKey = PkiUtil.generateKeypair();
-            KeyPair signKeyPair = PkiUtil.generateKeypair();
-            X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKeyPair);
-
-            String tokenKey = PkiUtil.convert(identityKey.getPrivate());
-            String tokenPub = PkiUtil.convertPemPublicKey(identityKey.getPublic());
-            String tokenCert = Base64.getEncoder().encodeToString(cert.getEncoded());
-            return new TokenCertInfo(tokenKey, tokenPub, tokenCert);
-        } catch (CertificateEncodingException e) {
-            throw new CloudbreakServiceException("Cannot generate new tokenCert for Gateway rotation.", e);
         }
     }
 
