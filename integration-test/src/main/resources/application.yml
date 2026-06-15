@@ -211,7 +211,7 @@ integrationtest:
           idbroker: t3.medium
         datahub:
           custom: m5.4xlarge
-          customWithStorage: m5d.2xlarge
+          customWithStorage: m5d.4xlarge
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
@@ -297,6 +297,7 @@ integrationtest:
           idbroker: Standard_D2s_v5
         datahub:
           custom: Standard_D8s_v5
+          customWithStorage: Standard_D16s_v3
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1

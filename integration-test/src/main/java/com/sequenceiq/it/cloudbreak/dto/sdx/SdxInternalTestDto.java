@@ -269,15 +269,15 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         }
 
         getTestContext()
-                .given(MASTER_INSTANCE_TEMPLATE, InstanceTemplateV4TestDto.class)
+                .given(MASTER_INSTANCE_TEMPLATE, InstanceTemplateV4TestDto.class, getCloudPlatform())
                     .withInstanceType(getCloudProvider().getDatalakeInstanceType(MASTER.getName()))
-                .given(MASTER.getName(), InstanceGroupTestDto.class)
+                .given(MASTER.getName(), InstanceGroupTestDto.class, getCloudPlatform())
                     .withHostGroup(MASTER)
                     .withNodeCount(1)
                     .withTemplate(MASTER_INSTANCE_TEMPLATE)
-                .given(IDBROKER_INSTANCE_TEMPLATE, InstanceTemplateV4TestDto.class)
+                .given(IDBROKER_INSTANCE_TEMPLATE, InstanceTemplateV4TestDto.class, getCloudPlatform())
                     .withInstanceType(getCloudProvider().getDatalakeInstanceType(IDBROKER.getName()))
-                .given(IDBROKER.getName(), InstanceGroupTestDto.class)
+                .given(IDBROKER.getName(), InstanceGroupTestDto.class, getCloudPlatform())
                     .withHostGroup(IDBROKER)
                     .withNodeCount(1)
                     .withTemplate(IDBROKER_INSTANCE_TEMPLATE);
