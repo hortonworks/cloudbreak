@@ -15,23 +15,28 @@ import jakarta.ws.rs.core.Response.Status.Family;
 import jakarta.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @ExtendWith(MockitoExtension.class)
 class ImageCatalogValidatorTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:accountId:user:userId";
 
     private static final String VALID_CATALOG_JSON = "{\"images\": {\"base-images\": []}, \"versions\": {}}";
 
     @InjectMocks
     private ImageCatalogValidator underTest;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @Mock
     private HttpContentSizeValidator httpContentSizeValidator;
@@ -47,11 +52,6 @@ class ImageCatalogValidatorTest {
 
     @Mock
     private StatusType statusType;
-
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(underTest, "strictUrlValidation", true);
-    }
 
     @Test
     void testValidUrlWithValidCatalogJson() {
@@ -207,15 +207,27 @@ class ImageCatalogValidatorTest {
     }
 
     @Test
-    void testNonStrictModeAllowsQueryParamsAndLocalAddress() {
-        ReflectionTestUtils.setField(underTest, "strictUrlValidation", false);
+    void testEntitlementDisablesStrictValidation() {
         String url = "https://mock-infrastructure:10090/mock-image-catalog?catalog-name=cb-catalog&runtime=7.2.2";
+        when(entitlementService.isStrictImageCatalogUrlValidationDisabled("accountId")).thenReturn(true);
         when(httpContentSizeValidator.isValid(eq(url), eq(constraintValidatorContext), eq(true))).thenReturn(true);
         when(httpHelper.getContent(url)).thenReturn(new ImmutablePair<>(statusType, VALID_CATALOG_JSON));
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
 
-        assertTrue(underTest.isValid(url, constraintValidatorContext));
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.isValid(url, constraintValidatorContext));
 
+        assertTrue(result);
         verify(httpHelper, never()).getContentNoRedirects(anyString());
+    }
+
+    @Test
+    void testEntitlementNotSetKeepsStrictValidation() {
+        String url = "https://mock-infrastructure:10090/mock-image-catalog?catalog-name=cb-catalog&runtime=7.2.2";
+        when(entitlementService.isStrictImageCatalogUrlValidationDisabled("accountId")).thenReturn(false);
+        when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.isValid(url, constraintValidatorContext));
+
+        assertFalse(result);
     }
 }
