@@ -197,12 +197,14 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
     private List<Backend> makeBackendForTargetGroup(GcpContext context, AuthenticatedContext auth, String projectId, Set<Group> groups)
             throws IOException {
         List<Backend> backends = new ArrayList<>();
+        List<CloudResource> instanceGroupResources = fetchAllResourceFromDb(ResourceType.GCP_INSTANCE_GROUP, auth.getCloudContext().getId());
         for (Group group : groups) {
             for (String availabilityZone : getAvailabilityZones(group, context)) {
                 String instanceGroupName = getResourceNameService()
                         .group(context.getName(), group.getName(), auth.getCloudContext().getId(), availabilityZone);
                 Optional<String> realInstanceGroupNameIfNotEmpty =
-                        fetchInstanceGroupNameIfNotEmpty(context.getCompute(), projectId, availabilityZone, instanceGroupName);
+                        fetchInstanceGroupNameIfNotEmpty(context.getCompute(), projectId, availabilityZone, instanceGroupName, instanceGroupResources,
+                                auth.getCloudContext().getId());
                 if (realInstanceGroupNameIfNotEmpty.isPresent()) {
                     Backend backend = new Backend();
                     backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
@@ -217,20 +219,36 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
         return backends;
     }
 
-    private Optional<String> fetchInstanceGroupNameIfNotEmpty(Compute compute, String projectId, String zone, String instanceGroupName) throws IOException {
+    private Optional<String> fetchInstanceGroupNameIfNotEmpty(Compute compute, String projectId, String zone, String instanceGroupName,
+            List<CloudResource> instanceGroupResources, Long stackId) throws IOException {
         try {
             InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupName,
                     new InstanceGroupsListInstancesRequest()).execute();
             return CollectionUtils.isEmpty(instances.getItems()) ? Optional.empty() : Optional.ofNullable(instanceGroupName);
         } catch (GoogleJsonResponseException e) {
-            if (GcpExceptionUtil.resourceNotFoundException(e) && StringUtils.isNotBlank(zone)) {
-                LOGGER.warn("Instances check in project [{}] zone [{}] instance group [{}] returned empty. Retry without zone",
+            if (GcpExceptionUtil.resourceNotFoundException(e)) {
+                LOGGER.warn("Instances check in project [{}] zone [{}] instance group [{}] returned empty. Retry without zone/ID",
                         projectId, zone, instanceGroupName, e);
                 String instanceGroupNameWithoutAz = StringUtils.substringBeforeLast(instanceGroupName, DELIMITER);
                 LOGGER.debug("Instance group name without AZ: [{}]", instanceGroupNameWithoutAz);
-                InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupNameWithoutAz,
-                        new InstanceGroupsListInstancesRequest()).execute();
-                return CollectionUtils.isEmpty(instances.getItems()) ? Optional.empty() : Optional.ofNullable(instanceGroupNameWithoutAz);
+                try {
+                    InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupNameWithoutAz,
+                            new InstanceGroupsListInstancesRequest()).execute();
+                    return CollectionUtils.isEmpty(instances.getItems()) ? Optional.empty() : Optional.ofNullable(instanceGroupNameWithoutAz);
+                } catch (GoogleJsonResponseException ex) {
+                    LOGGER.debug("Existing instance groups in DB: {}", instanceGroupResources.stream()
+                            .map(resource -> String.format("name: %s, availability zone: %s", resource.getName(), resource.getAvailabilityZone()))
+                            .toList());
+                    if (GcpExceptionUtil.resourceNotFoundException(e) && instanceGroupNameWithoutAz.endsWith(DELIMITER + stackId)) {
+                        String instanceGroupNameWithoutStackId = StringUtils.substringBeforeLast(instanceGroupNameWithoutAz, DELIMITER);
+                        LOGGER.debug("Instance group name without stack ID: [{}]", instanceGroupNameWithoutStackId);
+                        InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupNameWithoutStackId,
+                                new InstanceGroupsListInstancesRequest()).execute();
+                        return CollectionUtils.isEmpty(instances.getItems()) ? Optional.empty() : Optional.ofNullable(instanceGroupNameWithoutStackId);
+                    } else {
+                        throw ex;
+                    }
+                }
             } else {
                 throw e;
             }
