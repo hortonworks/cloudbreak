@@ -45,12 +45,14 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Re
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXDatabaseUpgradeStatus;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -79,6 +81,9 @@ class DistroXUpgradeV1ControllerTest {
 
     @Mock
     private DistroXRdsUpgradeService rdsUpgradeService;
+
+    @Mock
+    private DistroXRdsUpgradeStatusService rdsUpgradeStatusService;
 
     @Mock
     private StackCcmUpgradeService stackCcmUpgradeService;
@@ -314,5 +319,97 @@ class DistroXUpgradeV1ControllerTest {
                 underTest.osUpgradeByUpgradeSetsInternal(DATAHUB_CRN, orderedOSUpgradeSetRequest));
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubCrns() {
+        List<String> datahubCrns = List.of(DATAHUB_CRN, "crn:cdp:datahub:us-west-1:1234:cluster:2");
+        List<DistroXDatabaseUpgradeStatus> expected = List.of(
+                DistroXDatabaseUpgradeStatus.upgradeRequired(datahubCrns.get(0), "14", "11"),
+                DistroXDatabaseUpgradeStatus.upgradeNotRequired(datahubCrns.get(1), "14"));
+        when(rdsUpgradeStatusService.getUpgradeRequiredByDatahubCrns(datahubCrns)).thenReturn(expected);
+
+        List<DistroXDatabaseUpgradeStatus> result = underTest.getDatabaseServerUpgradeRequiredByDatahubCrns(datahubCrns);
+
+        verify(rdsUpgradeStatusService).getUpgradeRequiredByDatahubCrns(datahubCrns);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubCrnsWhenNull() {
+        when(rdsUpgradeStatusService.getUpgradeRequiredByDatahubCrns(null)).thenThrow(new BadRequestException("Datahub CRN list must not be null."));
+
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseServerUpgradeRequiredByDatahubCrns(null));
+
+        verify(rdsUpgradeStatusService).getUpgradeRequiredByDatahubCrns(null);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubCrnsWhenEmpty() {
+        List<String> datahubCrns = List.of();
+        when(rdsUpgradeStatusService.getUpgradeRequiredByDatahubCrns(datahubCrns)).thenReturn(List.of());
+
+        List<DistroXDatabaseUpgradeStatus> result = underTest.getDatabaseServerUpgradeRequiredByDatahubCrns(datahubCrns);
+
+        verify(rdsUpgradeStatusService).getUpgradeRequiredByDatahubCrns(datahubCrns);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubCrnsWhenExceedsMaxBatchSize() {
+        List<String> datahubCrns = Stream.generate(() -> DATAHUB_CRN).limit(51).toList();
+        when(rdsUpgradeStatusService.getUpgradeRequiredByDatahubCrns(datahubCrns))
+                .thenThrow(new BadRequestException("Datahub CRN list must not exceed 50 entries."));
+
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseServerUpgradeRequiredByDatahubCrns(datahubCrns));
+
+        verify(rdsUpgradeStatusService).getUpgradeRequiredByDatahubCrns(datahubCrns);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubCrn() {
+        DistroXDatabaseUpgradeStatus expected = DistroXDatabaseUpgradeStatus.upgradeRequired(DATAHUB_CRN, "14", "11");
+        when(rdsUpgradeStatusService.getUpgradeRequired(NameOrCrn.ofCrn(DATAHUB_CRN))).thenReturn(expected);
+
+        DistroXDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeRequiredByDatahubCrn(DATAHUB_CRN);
+
+        verify(rdsUpgradeStatusService).getUpgradeRequired(NameOrCrn.ofCrn(DATAHUB_CRN));
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubName() {
+        DistroXDatabaseUpgradeStatus expected = DistroXDatabaseUpgradeStatus.upgradeNotRequired(DATAHUB_CRN, "11");
+        when(rdsUpgradeStatusService.getUpgradeRequired(NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(expected);
+
+        DistroXDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeRequiredByDatahubName(CLUSTER_NAME);
+
+        verify(rdsUpgradeStatusService).getUpgradeRequired(NameOrCrn.ofName(CLUSTER_NAME));
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubCrnPropagatesFullContract() {
+        DistroXDatabaseUpgradeStatus expected = DistroXDatabaseUpgradeStatus.upgradeRequired(DATAHUB_CRN, "14", "11");
+        expected.setEolDate("2023-11-09");
+        when(rdsUpgradeStatusService.getUpgradeRequired(NameOrCrn.ofCrn(DATAHUB_CRN))).thenReturn(expected);
+
+        DistroXDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeRequiredByDatahubCrn(DATAHUB_CRN);
+
+        assertThat(result.getDatahubCrn()).isEqualTo(DATAHUB_CRN);
+        assertThat(result.getUpgradeStatus()).isEqualTo("UPGRADE_REQUIRED");
+        assertThat(result.getTargetMajorVersion()).isEqualTo("14");
+        assertThat(result.getCurrentMajorVersion()).isEqualTo("11");
+        assertThat(result.getEolDate()).isEqualTo("2023-11-09");
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeRequiredByDatahubCrnPropagatesUnknownStatus() {
+        DistroXDatabaseUpgradeStatus expected = DistroXDatabaseUpgradeStatus.unknown(DATAHUB_CRN);
+        when(rdsUpgradeStatusService.getUpgradeRequired(NameOrCrn.ofCrn(DATAHUB_CRN))).thenReturn(expected);
+
+        DistroXDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeRequiredByDatahubCrn(DATAHUB_CRN);
+
+        assertThat(result.getUpgradeStatus()).isEqualTo("UNKNOWN");
     }
 }

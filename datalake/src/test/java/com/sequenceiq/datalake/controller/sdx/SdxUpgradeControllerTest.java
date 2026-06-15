@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseUpgradeStatus;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
@@ -398,5 +400,66 @@ class SdxUpgradeControllerTest {
         SdxUpgradeResponse result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrn(CLUSTER_NAME, request));
 
         assertEquals(response, result);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeStatusByDatalakeCrns() {
+        List<String> datalakeCrns = List.of(CLUSTER_CRN, "crn:cdp:datalake:us-west-1:" + ACCOUNT_ID + ":datalake:" + UUID.randomUUID());
+        List<SdxDatabaseUpgradeStatus> expected = List.of(
+                SdxDatabaseUpgradeStatus.upgradeRequired(datalakeCrns.get(0), "14", "11"),
+                SdxDatabaseUpgradeStatus.upgradeNotRequired(datalakeCrns.get(1), "14"));
+        when(sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatusByDatalakeCrns(USER_CRN, datalakeCrns)).thenReturn(expected);
+
+        List<SdxDatabaseUpgradeStatus> result = doAs(USER_CRN, () -> underTest.getDatabaseServerUpgradeStatusByDatalakeCrns(datalakeCrns));
+
+        verify(sdxDatabaseServerUpgradeService).getDatabaseServerUpgradeStatusByDatalakeCrns(USER_CRN, datalakeCrns);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeStatusByDatalakeCrn() {
+        SdxDatabaseUpgradeStatus expected = SdxDatabaseUpgradeStatus.upgradeRequired(CLUSTER_CRN, "14", "11");
+        when(sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(expected);
+
+        SdxDatabaseUpgradeStatus result = doAs(USER_CRN, () -> underTest.getDatabaseServerUpgradeStatusByDatalakeCrn(CLUSTER_CRN));
+
+        verify(sdxDatabaseServerUpgradeService).getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(CLUSTER_CRN));
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeStatusByDatalakeName() {
+        SdxDatabaseUpgradeStatus expected = SdxDatabaseUpgradeStatus.upgradeNotRequired(CLUSTER_CRN, "11");
+        when(sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(expected);
+
+        SdxDatabaseUpgradeStatus result = doAs(USER_CRN, () -> underTest.getDatabaseServerUpgradeStatusByDatalakeName(CLUSTER_NAME));
+
+        verify(sdxDatabaseServerUpgradeService).getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME));
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeStatusByDatalakeCrnPropagatesFullContract() {
+        SdxDatabaseUpgradeStatus expected = SdxDatabaseUpgradeStatus.upgradeRequired(CLUSTER_CRN, "14", "11");
+        expected.setEolDate("2023-11-09");
+        when(sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(expected);
+
+        SdxDatabaseUpgradeStatus result = doAs(USER_CRN, () -> underTest.getDatabaseServerUpgradeStatusByDatalakeCrn(CLUSTER_CRN));
+
+        assertThat(result.getDatalakeCrn()).isEqualTo(CLUSTER_CRN);
+        assertThat(result.getUpgradeStatus()).isEqualTo("UPGRADE_REQUIRED");
+        assertThat(result.getTargetMajorVersion()).isEqualTo("14");
+        assertThat(result.getCurrentMajorVersion()).isEqualTo("11");
+        assertThat(result.getEolDate()).isEqualTo("2023-11-09");
+    }
+
+    @Test
+    void testGetDatabaseServerUpgradeStatusByDatalakeCrnPropagatesUnknownStatus() {
+        SdxDatabaseUpgradeStatus expected = SdxDatabaseUpgradeStatus.unknown(CLUSTER_CRN);
+        when(sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(expected);
+
+        SdxDatabaseUpgradeStatus result = doAs(USER_CRN, () -> underTest.getDatabaseServerUpgradeStatusByDatalakeCrn(CLUSTER_CRN));
+
+        assertThat(result.getUpgradeStatus()).isEqualTo("UNKNOWN");
     }
 }
