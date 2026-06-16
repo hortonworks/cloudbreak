@@ -14,6 +14,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -62,6 +63,17 @@ public interface SdxInternalEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier modifyProxy(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn,
             @ValidCrn(resource = CrnResourceDescriptor.PROXY) @QueryParam("previousProxy") String previousProxyCrn,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @PUT
+    @Path("crn/{crn}/update_trusted_realm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Initiates the update of the trusted realm configuration on the datalake",
+            operationId = "updateInternalSdxTrustedRealm",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateTrustedRealm(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn,
+            @Valid UpdateTrustedRealmRequest request,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }

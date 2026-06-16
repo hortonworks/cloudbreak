@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
@@ -138,6 +139,18 @@ public class SdxService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to modify proxy config of SDX cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowIdentifier updateTrustedRealm(String datalakeCrn, UpdateTrustedRealmRequest request) {
+        try {
+            LOGGER.debug("Calling SDX update trusted realm by CRN {}", datalakeCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    initiatorUserCrn -> sdxInternalEndpoint.updateTrustedRealm(datalakeCrn, request, initiatorUserCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to update trusted realm on SDX cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }

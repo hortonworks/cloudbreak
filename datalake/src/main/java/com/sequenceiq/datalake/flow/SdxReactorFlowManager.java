@@ -92,6 +92,7 @@ import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateTriggerEvent;
 import com.sequenceiq.datalake.flow.sku.DataLakeSkuMigrationTriggerEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
+import com.sequenceiq.datalake.flow.trustedrealm.UpdateTrustedRealmTrackerEvent;
 import com.sequenceiq.datalake.flow.update.publicdns.DatalakeUpdatePublicDnsEntriesTriggerEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerEvent;
@@ -390,6 +391,13 @@ public class SdxReactorFlowManager {
     public FlowIdentifier triggerModifyProxyConfigTracker(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake modify proxy config tracker for: {}", cluster);
         String selector = ModifyProxyConfigTrackerEvent.MODIFY_PROXY_CONFIG_EVENT.event();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerUpdateTrustedRealmTracker(SdxCluster cluster) {
+        LOGGER.info("Trigger Datalake update trusted realm tracker for: {}", cluster);
+        String selector = UpdateTrustedRealmTrackerEvent.UPDATE_TRUSTED_REALM_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }

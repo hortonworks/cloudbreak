@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.dyngr.Polling;
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -33,6 +30,7 @@ import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -49,8 +47,6 @@ public class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler extends Ex
     @Value("${env.saltupdate.datahub.polling.sleep.time:20}")
     private Integer sleeptime;
 
-    private final StackV4Endpoint stackV4Endpoint;
-
     private final DatahubPollerProvider datahubPollerProvider;
 
     private final MultipleFlowsResultEvaluator multipleFlowsResultEvaluator;
@@ -61,15 +57,17 @@ public class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler extends Ex
 
     private final FreeIpaService freeIpaService;
 
-    protected EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler(StackV4Endpoint stackV4Endpoint, DatahubPollerProvider datahubPollerProvider,
+    private final SdxPollerService sdxPollerService;
+
+    protected EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler(DatahubPollerProvider datahubPollerProvider,
             MultipleFlowsResultEvaluator multipleFlowsResultEvaluator, EnvironmentService environmentService, ClusterService clusterService,
-            FreeIpaService freeIpaService) {
-        this.stackV4Endpoint = stackV4Endpoint;
+            FreeIpaService freeIpaService, SdxPollerService sdxPollerService) {
         this.datahubPollerProvider = datahubPollerProvider;
         this.multipleFlowsResultEvaluator = multipleFlowsResultEvaluator;
         this.environmentService = environmentService;
         this.clusterService = clusterService;
         this.freeIpaService = freeIpaService;
+        this.sdxPollerService = sdxPollerService;
     }
 
     @Override
@@ -96,20 +94,17 @@ public class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler extends Ex
                     .map(response -> response.getTrust().getRealm().toUpperCase(Locale.ROOT))
                     .orElseThrow(() -> new CloudbreakServiceException("Failed to get realm from FreeIPA for environment " + envCrn));
 
-            List<String> stackCrns = clusterService.getStackCrnsForConfigUpdate(envCrn, environmentType);
-            LOGGER.info("Triggering update trusted realm chain flow for {} stacks (saltUpdateRequired={}, realm={})",
-                    stackCrns.size(), saltUpdateRequired, realm);
+            UpdateTrustedRealmRequest request = new UpdateTrustedRealmRequest();
+            request.setRealm(realm);
+            request.setSaltUpdateRequired(saltUpdateRequired);
 
-            List<FlowIdentifier> flowIdentifiers = stackCrns.stream()
-                    .map(crn -> {
-                        UpdateTrustedRealmRequest request = new UpdateTrustedRealmRequest();
-                        request.setRealm(realm);
-                        request.setSaltUpdateRequired(saltUpdateRequired);
-                        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.triggerUpdateTrustedRealm(0L, crn, request));
-                    })
-                    .collect(Collectors.toList());
+            LOGGER.info("Triggering update trusted realm on datalakes for environment {} (realm={})", envCrn, realm);
+            sdxPollerService.updateTrustedRealmOnAttachedDatalakeClusters(data.getResourceId(), data.getResourceName(), request);
 
-            waitForFlowIds(data.getResourceId(), flowIdentifiers);
+            LOGGER.info("Triggering update trusted realm on datahub clusters for environment {} (saltUpdateRequired={}, realm={})",
+                    envCrn, saltUpdateRequired, realm);
+            List<FlowIdentifier> datahubFlowIds = clusterService.triggerUpdateTrustedRealmOnDatahubs(envCrn, request);
+            waitForFlowIds(data.getResourceId(), datahubFlowIds);
 
             return EnvironmentCrossRealmTrustSetupFinishEvent.builder()
                     .withSelector(FINISH_TRUST_SETUP_FINISH_EVENT.selector())

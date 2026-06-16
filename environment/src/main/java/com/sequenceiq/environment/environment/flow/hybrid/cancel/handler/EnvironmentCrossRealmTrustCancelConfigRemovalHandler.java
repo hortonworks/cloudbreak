@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.dyngr.Polling;
 import com.dyngr.exception.PollerStoppedException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -27,6 +28,7 @@ import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -55,17 +57,21 @@ public class EnvironmentCrossRealmTrustCancelConfigRemovalHandler extends Except
 
     private final FreeIpaService freeIpaService;
 
+    private final SdxPollerService sdxPollerService;
+
     protected EnvironmentCrossRealmTrustCancelConfigRemovalHandler(
             DatahubPollerProvider datahubPollerProvider,
             MultipleFlowsResultEvaluator multipleFlowsResultEvaluator,
             ClusterService clusterService,
             EnvironmentService environmentService,
-            FreeIpaService freeIpaService) {
+            FreeIpaService freeIpaService,
+            SdxPollerService sdxPollerService) {
         this.datahubPollerProvider = datahubPollerProvider;
         this.multipleFlowsResultEvaluator = multipleFlowsResultEvaluator;
         this.clusterService = clusterService;
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
+        this.sdxPollerService = sdxPollerService;
     }
 
     @Override
@@ -84,17 +90,22 @@ public class EnvironmentCrossRealmTrustCancelConfigRemovalHandler extends Except
         EnvironmentCrossRealmTrustCancelEvent data = event.getData();
         try {
             Optional<EnvironmentDto> environmentDto = environmentService.findById(data.getResourceId());
-            // Fetch the realm here, before the trust entity is deleted, so that ClusterService doesn't need
-            // to call FreeIPA itself. On a retry where FreeIPA cancel already ran, the realm may still be
-            // carried on the incoming event from the first attempt; otherwise we fetch it fresh from FreeIPA.
             Optional<String> realm = resolveRealm(data);
             EnvironmentCrossRealmTrustCancelEvent.Builder cancelEventBuilder = EnvironmentCrossRealmTrustCancelEvent.builder()
                     .withSelector(TRUST_CANCEL_TRUST_ENTITY_DELETE_EVENT.selector())
                     .withResourceCrn(data.getResourceCrn())
                     .withResourceId(data.getResourceId())
                     .withResourceName(data.getResourceName());
-            if (environmentDto.isPresent()) {
-                LOGGER.info("Removing trusted realm '{}' from Cloudera Manager on clusters for environment: {}", realm, data.getResourceCrn());
+            // Realm must be resolved before the trust entity is deleted (next step), because the trust entity holds the realm name.
+            if (environmentDto.isPresent() && realm.isPresent()) {
+                LOGGER.info("Removing trusted realm '{}' from clusters for environment: {}", realm.get(), data.getResourceCrn());
+
+                UpdateTrustedRealmRequest request = new UpdateTrustedRealmRequest();
+                request.setRealm(realm.get());
+                request.setRemove(true);
+
+                sdxPollerService.updateTrustedRealmOnAttachedDatalakeClusters(data.getResourceId(), data.getResourceName(), request);
+
                 List<FlowIdentifier> removeTrustedRealmFlows = clusterService.removeTrustedRealmConfigFromClusters(environmentDto, realm.get());
                 waitOnFlowIds(data.getResourceId(), removeTrustedRealmFlows);
                 cancelEventBuilder.withRealm(realm.get());

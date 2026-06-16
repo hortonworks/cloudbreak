@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackResourceUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -72,6 +73,11 @@ public class StackService {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 initiatorUserCrn -> stackV4Endpoint.modifyProxyConfigInternal(WORKSPACE_ID_DEFAULT, clusterCrn,
                         previousProxyConfigCrn, initiatorUserCrn));
+    }
+
+    public FlowIdentifier triggerUpdateTrustedRealm(String clusterCrn, UpdateTrustedRealmRequest request) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> stackV4Endpoint.triggerUpdateTrustedRealm(WORKSPACE_ID_DEFAULT, clusterCrn, request));
     }
 
     public void validateRdsSslCertRotation(String crn) {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
@@ -17,6 +18,7 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.ProxyConfigService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.TrustedRealmService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
@@ -40,6 +42,9 @@ public class SdxInternalController implements SdxInternalEndpoint {
 
     @Inject
     private ProxyConfigService proxyConfigService;
+
+    @Inject
+    private TrustedRealmService trustedRealmService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -73,5 +78,13 @@ public class SdxInternalController implements SdxInternalEndpoint {
     public FlowIdentifier modifyProxy(@ResourceCrn String crn, String previousProxyCrn, @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         return proxyConfigService.modifyProxyConfig(sdxCluster, previousProxyCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier updateTrustedRealm(@ResourceCrn String crn, UpdateTrustedRealmRequest request,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        SdxCluster sdxCluster = sdxService.getByCrn(crn);
+        return trustedRealmService.updateTrustedRealm(sdxCluster, request);
     }
 }

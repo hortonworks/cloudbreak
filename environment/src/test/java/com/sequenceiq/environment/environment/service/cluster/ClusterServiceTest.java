@@ -69,7 +69,7 @@ class ClusterServiceTest {
         );
         when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
 
-        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
+        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN);
 
         assertThat(result).containsExactly(STACK_CRN_1);
     }
@@ -83,7 +83,7 @@ class ClusterServiceTest {
         );
         when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
 
-        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
+        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN);
 
         assertThat(result).isEmpty();
     }
@@ -96,22 +96,22 @@ class ClusterServiceTest {
         );
         when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
 
-        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN, EnvironmentType.HYBRID);
+        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN);
 
         assertThat(result).containsExactly(STACK_CRN_1);
     }
 
     @Test
-    void getStackCrnsForConfigUpdateForPublicCloudIncludesAllStackTypes() {
+    void getStackCrnsForConfigUpdateForPublicCloudExcludesDatalakeStacks() {
         StackViewV4Responses responses = buildStackViewV4Responses(
                 stackView(STACK_CRN_1, Status.AVAILABLE, StackType.WORKLOAD),
                 stackView(STACK_CRN_2, Status.AVAILABLE, StackType.DATALAKE)
         );
         when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
 
-        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
+        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN);
 
-        assertThat(result).containsExactlyInAnyOrder(STACK_CRN_1, STACK_CRN_2);
+        assertThat(result).containsExactly(STACK_CRN_1);
     }
 
     @Test
@@ -119,7 +119,7 @@ class ClusterServiceTest {
         StackViewV4Responses responses = buildStackViewV4Responses();
         when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
 
-        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
+        List<String> result = underTest.getStackCrnsForConfigUpdate(ENV_CRN);
 
         assertThat(result).isEmpty();
     }

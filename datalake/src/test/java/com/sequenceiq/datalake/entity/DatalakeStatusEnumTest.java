@@ -16,6 +16,8 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPDATE_TRUSTED_REALM_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED;
@@ -83,7 +85,8 @@ class DatalakeStatusEnumTest {
                     entry(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_IN_PROGRESS, DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FAILED),
                     entry(DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED),
                     entry(DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_FAILED),
-                    entry(DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_FAILED))
+                    entry(DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_FAILED),
+                    entry(DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS, DATALAKE_UPDATE_TRUSTED_REALM_FAILED))
     );
 
     private static final Set<DatalakeStatusEnum> STOP_STATE_SET = EnumSet.of(STOPPED, STOP_IN_PROGRESS);

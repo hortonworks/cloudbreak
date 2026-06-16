@@ -101,6 +101,9 @@ sdx:
     modifyproxy:
       sleeptime_sec: 10
       duration_min: 10
+    updatetrustedrealm:
+      sleeptime_sec: 10
+      duration_min: 30
     saltupdate:
       sleeptime-sec: 10
       duration-min: 120

@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_PROXY_CONFIG_MODIFICATION_IN_PROGRESS;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_UPDATE_TRUSTED_REALM_FAILED;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.exception.PollerException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.flow.DatalakeMultipleFlowsResultEvaluator;
 import com.sequenceiq.environment.environment.poller.SdxPollerProvider;
@@ -33,6 +36,9 @@ public class SdxPollerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxPollerService.class);
 
     private static final Set<SdxClusterStatusResponse> SKIP_MODIFY_PROXY_OPERATION = Set.of(DATALAKE_PROXY_CONFIG_MODIFICATION_IN_PROGRESS);
+
+    private static final Set<SdxClusterStatusResponse> SKIP_UPDATE_TRUSTED_REALM = Set.of(DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS,
+            DATALAKE_UPDATE_TRUSTED_REALM_FAILED);
 
     @Value("${env.stop.polling.attempt:360}")
     private Integer attempt;
@@ -60,6 +66,12 @@ public class SdxPollerService {
     public void modifyProxyConfigOnAttachedDatalakeClusters(Long envId, String environmentName, String previousProxyCrn) {
         executeSdxOperationAndStartPolling(envId, environmentName, SKIP_MODIFY_PROXY_OPERATION,
                 sdxCrn -> sdxService.modifyProxy(sdxCrn, previousProxyCrn));
+    }
+
+    public void updateTrustedRealmOnAttachedDatalakeClusters(Long envId, String environmentName,
+            UpdateTrustedRealmRequest request) {
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_UPDATE_TRUSTED_REALM,
+                sdxCrn -> sdxService.updateTrustedRealm(sdxCrn, request));
     }
 
     private void executeSdxOperationAndStartPolling(Long envId, String environmentName, Set<SdxClusterStatusResponse> skipStatuses,

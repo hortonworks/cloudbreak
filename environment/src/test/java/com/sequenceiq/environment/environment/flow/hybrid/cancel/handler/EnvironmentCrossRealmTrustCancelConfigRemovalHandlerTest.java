@@ -35,6 +35,7 @@ import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -66,6 +67,9 @@ class EnvironmentCrossRealmTrustCancelConfigRemovalHandlerTest {
 
     @Mock
     private FreeIpaService freeIpaService;
+
+    @Mock
+    private SdxPollerService sdxPollerService;
 
     @Mock
     private EnvironmentDto environmentDto;
@@ -117,15 +121,16 @@ class EnvironmentCrossRealmTrustCancelConfigRemovalHandlerTest {
     }
 
     @Test
-    void testDoAcceptWhenRealmNotOnEventAndFreeIpaHasNoTrustShouldReturnFailedEvent() {
+    void testDoAcceptWhenRealmNotOnEventAndFreeIpaHasNoTrustShouldSkipAndReturnEntityDeleteEvent() {
         when(environmentService.findById(RESOURCE_ID)).thenReturn(Optional.of(environmentDto));
         when(freeIpaService.describe(RESOURCE_CRN)).thenReturn(Optional.empty());
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(new Event<>(buildEvent(null))));
 
-        assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustCancelFailedEvent.class);
-        assertThat(((EnvironmentCrossRealmTrustCancelFailedEvent) result).getEnvironmentStatus()).isEqualTo(TRUST_CANCEL_CONFIG_REMOVAL_FAILED);
+        assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustCancelEvent.class);
+        assertThat(result.selector()).isEqualTo(TRUST_CANCEL_TRUST_ENTITY_DELETE_EVENT.selector());
         verify(clusterService, never()).removeTrustedRealmConfigFromClusters(any(), any());
+        verify(sdxPollerService, never()).updateTrustedRealmOnAttachedDatalakeClusters(anyLong(), any(), any());
     }
 
     @Test

@@ -53,12 +53,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
@@ -105,6 +104,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateSer
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.environment.environment.service.stack.StackPollerService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
@@ -114,10 +114,8 @@ import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
-import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
@@ -138,7 +136,7 @@ import com.sequenceiq.notification.WebSocketNotificationService;
 import io.micrometer.core.instrument.MeterRegistry;
 
 @ExtendWith(SpringExtension.class)
-class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
+class  EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
     private static final long ENVIRONMENT_ID = 1L;
@@ -154,73 +152,130 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
     @Inject
     private FlowRegister flowRegister;
 
-    @Inject
+    @MockitoBean
     private FlowLogRepository flowLogRepository;
 
     @Inject
     private EnvironmentReactorFlowManager environmentReactorFlowManager;
 
-    @MockBean
+    @MockitoBean
     private FlowOperationStatsRepository flowOperationStatsRepository;
 
-    @MockBean
+    @MockitoBean
     private FlowCancelService flowCancelService;
 
-    @MockBean
+    @MockitoBean
     private FlowUsageSender flowUsageSender;
 
-    @MockBean
-    private FlowEventCommonListener flowEventCommonListener;
-
-    @MockBean
-    private FlowEventListener flowEventListener;
-
-    @MockBean
+    @MockitoBean
     private MeterRegistry meterRegistry;
 
-    @MockBean
+    @MockitoBean
     private NodeConfig nodeConfig;
 
-    @MockBean
+    @MockitoBean
     private OperationService operationService;
 
-    @MockBean
+    @MockitoBean
     private NodeValidator nodeValidator;
 
-    @MockBean
+    @MockitoBean
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaService freeIpaService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaPollerService freeIpaPollerService;
 
-    @MockBean
+    @MockitoBean
     private ClusterService clusterService;
 
-    @MockBean
+    @MockitoBean
     private StackPollerService stackPollerService;
 
-    @MockBean
+    @MockitoBean
     private DatahubPollerProvider datahubPollerProvider;
 
-    @MockBean
+    @MockitoBean
     private MultipleFlowsResultEvaluator multipleFlowsResultEvaluator;
 
-    @MockBean
+    @MockitoBean
     private ClusterAvailabilityValidator clusterAvailabilityValidator;
 
-    @MockBean
+    @MockitoBean
     private StackService stackService;
 
-    @MockBean
+    @MockitoBean
     private SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter crossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 
-    @MockBean
+    @MockitoBean
     private Environment environment;
 
-    @Autowired
+    @MockitoBean
+    private PlatformParameterService platformParameterService;
+
+    @MockitoBean
+    private EnvironmentDtoConverter environmentDtoConverter;
+
+    @MockitoBean
+    private GrpcUmsClient grpcUmsClient;
+
+    @MockitoBean
+    private RoleCrnGenerator roleCrnGenerator;
+
+    @MockitoBean
+    private ExperienceConnectorService experienceConnectorService;
+
+    @MockitoBean
+    private ManagedChannelWrapper channelWrapper;
+
+    @MockitoBean
+    private UmsClientConfig umsClientConfig;
+
+    @MockitoBean
+    private ApplicationFlowInformation applicationFlowInformation;
+
+    @MockitoBean
+    private FlowChainLogRepository flowChainLogRepository;
+
+    @MockitoBean
+    private EnvironmentMetricService environmentMetricService;
+
+    @MockitoBean
+    private OwnerAssignmentService ownerAssignmentService;
+
+    @MockitoBean
+    private WebSocketNotificationService webSocketNotificationService;
+
+    @MockitoBean
+    private Client client;
+
+    @MockitoBean
+    private SecretService secretService;
+
+    @MockitoBean
+    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @MockitoBean
+    private TransactionalScheduler scheduler;
+
+    @MockitoBean
+    private FlowOperationStatisticsService flowOperationStatisticsService;
+
+    @MockitoBean
+    private CcmResourceTerminationListener ccmResourceTerminationListener;
+
+    @MockitoBean
+    private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
+
+    @MockitoBean
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
+
+    @MockitoBean
+    private SdxPollerService sdxPollerService;
+
+    @MockitoBean
     private EnvironmentService environmentService;
 
     @BeforeEach
@@ -515,79 +570,12 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
             EnvironmentMetricService.class,
             Clock.class,
             EventSender.class,
-            EntitlementService.class,
-            EnvironmentService.class
+            EntitlementService.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",
     })
     static class Config {
-
-        @MockBean
-        EnvironmentService environmentService;
-
-        @MockBean
-        PlatformParameterService platformParameterService;
-
-        @MockBean
-        EnvironmentDtoConverter environmentDtoConverter;
-
-        @MockBean
-        GrpcUmsClient grpcUmsClient;
-
-        @MockBean
-        RoleCrnGenerator roleCrnGenerator;
-
-        @MockBean
-        ExperienceConnectorService experienceConnectorService;
-
-        @MockBean
-        ManagedChannelWrapper channelWrapper;
-
-        @MockBean
-        UmsClientConfig umsClientConfig;
-
-        @MockBean
-        private FlowLogRepository flowLogRepository;
-
-        @MockBean
-        private ApplicationFlowInformation applicationFlowInformation;
-
-        @MockBean
-        private FlowChainLogRepository flowChainLogRepository;
-
-        @MockBean
-        private EnvironmentMetricService environmentMetricService;
-
-        @MockBean
-        private OwnerAssignmentService ownerAssignmentService;
-
-        @MockBean
-        private WebSocketNotificationService webSocketNotificationService;
-
-        @MockBean
-        private Client client;
-
-        @MockBean
-        private SecretService secretService;
-
-        @MockBean
-        private FreeIpaV1Endpoint freeIpaV1Endpoint;
-
-        @MockBean
-        private TransactionalScheduler scheduler;
-
-        @MockBean
-        private FlowOperationStatisticsService flowOperationStatisticsService;
-
-        @MockBean
-        private CcmResourceTerminationListener ccmResourceTerminationListener;
-
-        @MockBean
-        private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
-
-        @MockBean
-        private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
         @Bean
         public EventBus reactor(ExecutorService threadPoolExecutor) {

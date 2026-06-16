@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRea
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -36,7 +35,7 @@ public class ClusterService {
         return stackV4Endpoint.getClustersNamesByEncryptionProfile(0L, encryptionProfileCrn);
     }
 
-    public List<String> getStackCrnsForConfigUpdate(String envCrn, EnvironmentType environmentType) {
+    public List<String> getStackCrnsForConfigUpdate(String envCrn) {
         StackViewV4Responses stackViewV4Responses = stackV4Endpoint.list(0L, envCrn, false);
         List<String> responseToLog = Optional.ofNullable(stackViewV4Responses.getResponses()).orElse(List.of()).stream()
                 .map(response -> String.format("[Name: %s; Crn: %s; Status: %s, ClusterStatus: %s]",
@@ -45,14 +44,22 @@ public class ClusterService {
         LOGGER.info("Stacks returned for configuration update: {}", responseToLog);
 
         Predicate<StackViewV4Response> operationalStacks = stack -> AVAILABLE.equals(stack.getStatus());
-        Predicate<StackViewV4Response> workloadsBasedOnEnvironmentType = stack ->
-                environmentType == EnvironmentType.PUBLIC_CLOUD || StackType.WORKLOAD.name().equals(stack.getStackType());
+        Predicate<StackViewV4Response> workloadsOnly = stack -> StackType.WORKLOAD.name().equals(stack.getStackType());
 
         return stackViewV4Responses.getResponses().stream()
                 .filter(operationalStacks)
-                .filter(workloadsBasedOnEnvironmentType)
+                .filter(workloadsOnly)
                 .map(StackViewV4Response::getCrn)
                 .collect(Collectors.toList());
+    }
+
+    public List<FlowIdentifier> triggerUpdateTrustedRealmOnDatahubs(String envCrn, UpdateTrustedRealmRequest request) {
+        List<String> stackCrns = getStackCrnsForConfigUpdate(envCrn);
+        LOGGER.info("Triggering update trusted realm on {} datahub clusters with request: {}", stackCrns.size(), request);
+        return stackCrns.stream().map(crn ->
+                ThreadBasedUserCrnProvider.doAsInternalActor(
+                        () -> stackV4Endpoint.triggerUpdateTrustedRealm(0L, crn, request))
+        ).collect(Collectors.toList());
     }
 
     public List<FlowIdentifier> removeTrustedRealmConfigFromClusters(Optional<EnvironmentDto> environmentDto, String realm) {
@@ -62,9 +69,8 @@ public class ClusterService {
         }
         EnvironmentDto env = environmentDto.get();
         String envCrn = env.getResourceCrn();
-        EnvironmentType environmentType = env.getEnvironmentType();
 
-        List<String> stackCrns = getStackCrnsForConfigUpdate(envCrn, environmentType);
+        List<String> stackCrns = getStackCrnsForConfigUpdate(envCrn);
         return stackCrns.stream().map(crn -> {
             LOGGER.info("Triggering async removal of trusted realm '{}' from cluster: {}", realm, crn);
             UpdateTrustedRealmRequest request = new UpdateTrustedRealmRequest();
