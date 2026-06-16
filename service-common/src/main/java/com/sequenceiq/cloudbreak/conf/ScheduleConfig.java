@@ -30,7 +30,7 @@ public class ScheduleConfig implements SchedulingConfigurer {
 
     private static final String SCHEDULER_TASK_EXECUTOR = "schedulerTaskExecutor";
 
-    @Value("${cb.task.scheduler.pool.size:10}")
+    @Value("${task.scheduler.pool.size:10}")
     private int taskSchedulerPoolSize;
 
     @Inject

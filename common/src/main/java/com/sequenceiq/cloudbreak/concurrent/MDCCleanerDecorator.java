@@ -12,6 +12,7 @@ public class MDCCleanerDecorator implements Function<Callable, Callable>, TaskDe
     @Override
     public Callable apply(Callable callable) {
         return () -> {
+            MDCBuilder.buildMdcContext();
             try {
                 return callable.call();
             } finally {
@@ -23,6 +24,7 @@ public class MDCCleanerDecorator implements Function<Callable, Callable>, TaskDe
     @Override
     public Runnable decorate(Runnable runnable) {
         return () -> {
+            MDCBuilder.buildMdcContext();
             try {
                 runnable.run();
             } finally {

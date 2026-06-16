@@ -33,6 +33,7 @@ public class MDCCleanerScheduledExecutor extends ScheduledThreadPoolExecutor {
 
     @Override
     protected void beforeExecute(Thread t, Runnable r) {
+        MDCBuilder.buildMdcContext();
         super.beforeExecute(t, r);
         LOGGER.info("Threadpool tasks: active threads: {}, poolsize: {}, queueSize: {}, completed tasks {}",
                 getActiveCount(),
