@@ -758,4 +758,5 @@ class ClouderaManagerModificationServiceTest extends ClouderaManagerModification
         assertEquals(JvmConfigApplicability.RECONFIGURABLE, result.getConfigsAfter().getFirst().getApplicability());
         verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
     }
+
 }

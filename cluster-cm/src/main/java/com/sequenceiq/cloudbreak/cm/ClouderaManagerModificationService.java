@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -71,6 +73,10 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.HTTPMethod;
+import com.dyngr.Polling;
+import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
+import com.dyngr.exception.UserBreakException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
@@ -101,6 +107,7 @@ import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTim
 import com.sequenceiq.cloudbreak.cm.model.ClouderaManagerClientConfigDeployRequest;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
+import com.sequenceiq.cloudbreak.cm.util.TransientCmCommandFailureClassifier;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -131,6 +138,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private static final Boolean START_ROLES_ON_UPSCALED_NODES = Boolean.TRUE;
 
     private static final String HOST_TEMPLATE_NAME_TAG = "_cldr_cm_host_template_name";
+
+    private static final int APPLY_HOST_TEMPLATE_MAX_ATTEMPTS = 3;
+
+    private static final long APPLY_HOST_TEMPLATE_RETRY_INTERVAL_MS = 5000L;
 
     private final StackDtoDelegate stack;
 
@@ -201,6 +212,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClouderaManagerKraftMigrationService clouderaManagerKraftMigrationService;
+
+    @Inject
+    private TransientCmCommandFailureClassifier transientCmCommandFailureClassifier;
+
+    private long applyHostTemplateRetryIntervalMs = APPLY_HOST_TEMPLATE_RETRY_INTERVAL_MS;
 
     private ApiClient v31Client;
 
@@ -807,41 +823,82 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private void applyHostGroupRolesOnUpscaledHosts(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {
         if (body.getItems() != null && !body.getItems().isEmpty()) {
             LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
-            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
-            ApiCommand applyHostTemplateCommand;
-            try {
-                if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
-                    HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
-                    applyHostTemplateCommand = hostTemplatesResourceApi
-                            .applyHostTemplate(stack.getName(), hostGroupName, body, true, START_ROLES_ON_UPSCALED_NODES);
-                } else {
-                    HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
-                    applyHostTemplateCommand = hostTemplatesResourceApi
-                            .applyHostTemplate(stack.getName(), hostGroupName, body, false, START_ROLES_ON_UPSCALED_NODES);
-                }
-            } catch (ApiException e) {
-                if (isHostTemplateDuplicateTagError(e)) {
-                    LOGGER.warn("Received duplicate key constraint error for host template tag during applyHostTemplate " +
-                            "for host group '{}'. This indicates a prior timed-out call already succeeded on CM. " +
-                            "Attempting to find the active command for polling.", hostGroupName);
-                    applyHostTemplateCommand = findActiveApplyHostTemplateCommand();
-                    if (applyHostTemplateCommand == null) {
-                        LOGGER.info("No active ApplyHostTemplate command found for cluster '{}'. " +
-                                "The operation already completed successfully.", stack.getName());
-                        return;
-                    }
-                    LOGGER.info("Found active ApplyHostTemplate command with id [{}], will poll for completion.", applyHostTemplateCommand.getId());
-                } else {
-                    throw e;
-                }
+            retryApplyHostTemplateOnTransientFailure(body, hostGroupName);
+            LOGGER.debug("Applied host template on upscaled hosts. Host group: [{}]", hostGroupName);
+        } else {
+            LOGGER.debug("Skip applying host template, empty host list for host group: {}", hostGroupName);
+        }
+    }
+
+    private void retryApplyHostTemplateOnTransientFailure(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {
+        AtomicInteger attempt = new AtomicInteger();
+        try {
+            Polling.stopAfterAttempt(APPLY_HOST_TEMPLATE_MAX_ATTEMPTS)
+                    .stopIfException(false)
+                    .waitPeriodly(applyHostTemplateRetryIntervalMs, TimeUnit.MILLISECONDS)
+                    .run(() -> {
+                        int currentAttempt = attempt.incrementAndGet();
+                        try {
+                            applyHostTemplateAndPoll(body, hostGroupName);
+                            return AttemptResults.<Void>finishWith(null);
+                        } catch (ClouderaManagerOperationFailedException e) {
+                            if (transientCmCommandFailureClassifier.isTransientCredentialGenerationFailure(e.getMessage())) {
+                                LOGGER.warn("Applying host template on host group '{}' failed with a transient credential generation error "
+                                        + "on attempt {}/{}. Reason: {}", hostGroupName, currentAttempt, APPLY_HOST_TEMPLATE_MAX_ATTEMPTS, e.getMessage());
+                                return AttemptResults.continueFor(e);
+                            }
+                            return AttemptResults.breakFor(e);
+                        } catch (Exception e) {
+                            return AttemptResults.breakFor(e);
+                        }
+                    });
+        } catch (PollerStoppedException | UserBreakException e) {
+            throwApplyHostTemplateFailure(e.getCause(), hostGroupName);
+        }
+    }
+
+    private void throwApplyHostTemplateFailure(Throwable cause, String hostGroupName) throws ApiException, CloudbreakException {
+        switch (cause) {
+            case ApiException apiException -> throw apiException;
+            case CloudbreakException cloudbreakException -> throw cloudbreakException;
+            case RuntimeException runtimeException -> throw runtimeException;
+            case null, default -> throw new CloudbreakException("Failed to apply host template on host group: " + hostGroupName, cause);
+        }
+    }
+
+    private void applyHostTemplateAndPoll(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {
+        ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+        ApiCommand applyHostTemplateCommand;
+        try {
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
+                HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
+                applyHostTemplateCommand = hostTemplatesResourceApi
+                        .applyHostTemplate(stack.getName(), hostGroupName, body, true, START_ROLES_ON_UPSCALED_NODES);
+            } else {
+                HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
+                applyHostTemplateCommand = hostTemplatesResourceApi
+                        .applyHostTemplate(stack.getName(), hostGroupName, body, false, START_ROLES_ON_UPSCALED_NODES);
             }
+        } catch (ApiException e) {
+            if (!isHostTemplateDuplicateTagError(e)) {
+                throw e;
+            }
+            LOGGER.warn("Received duplicate key constraint error for host template tag during applyHostTemplate " +
+                    "for host group '{}'. This indicates a prior timed-out call already succeeded on CM. " +
+                    "Attempting to find the active command for polling.", hostGroupName);
+            applyHostTemplateCommand = findActiveApplyHostTemplateCommand();
+            if (applyHostTemplateCommand != null) {
+                LOGGER.info("Found active ApplyHostTemplate command with id [{}], will poll for completion.", applyHostTemplateCommand.getId());
+            } else {
+                LOGGER.info("No active ApplyHostTemplate command found for cluster '{}'. " +
+                        "The operation already completed successfully.", stack.getName());
+            }
+        }
+        if (applyHostTemplateCommand != null) {
             ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
                     stack, v31Client, applyHostTemplateCommand.getId());
             handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",
                     "Timeout while Cloudera Manager was applying host template.");
-            LOGGER.debug("Applied host template on upscaled hosts. Host group: [{}]", hostGroupName);
-        } else {
-            LOGGER.debug("Skip applying host template, empty host list for host group: {}", hostGroupName);
         }
     }
 

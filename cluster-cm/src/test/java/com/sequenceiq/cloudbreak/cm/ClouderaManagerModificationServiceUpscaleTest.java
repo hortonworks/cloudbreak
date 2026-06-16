@@ -637,6 +637,88 @@ class ClouderaManagerModificationServiceUpscaleTest extends ClouderaManagerModif
         verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
     }
 
+    @Test
+    void upscaleClusterRetriesApplyHostTemplateOnTransientCredentialGenerationFailure() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+        setUpBatchSuccess();
+        ReflectionTestUtils.setField(underTest, "applyHostTemplateRetryIntervalMs", 0L);
+
+        Long applyHostTemplateCommandId = 200L;
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
+                .thenThrow(new ClouderaManagerOperationFailedException(
+                        "Failed command(s): GenerateCredentials(id=1): ipa: ERROR: Operations error: Error checking for attribute uniqueness."))
+                .thenReturn(success);
+        when(transientCmCommandFailureClassifier.isTransientCredentialGenerationFailure(anyString())).thenReturn(true);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd()))));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+        verify(hostTemplatesResourceApi, times(2))
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE));
+        verify(clouderaManagerPollingServiceProvider, times(2)).startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId));
+    }
+
+    @Test
+    void upscaleClusterFailsWhenApplyHostTemplateExhaustsTransientRetries() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+        setUpBatchSuccess();
+        ReflectionTestUtils.setField(underTest, "applyHostTemplateRetryIntervalMs", 0L);
+
+        Long applyHostTemplateCommandId = 200L;
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        ClouderaManagerOperationFailedException transientFailure = new ClouderaManagerOperationFailedException(
+                "Failed command(s): GenerateCredentials(id=1): Error checking for attribute uniqueness.");
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
+                .thenThrow(transientFailure);
+        when(transientCmCommandFailureClassifier.isTransientCredentialGenerationFailure(anyString())).thenReturn(true);
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
+
+        assertThat(exception).isSameAs(transientFailure);
+        verify(hostTemplatesResourceApi, times(3))
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE));
+        verify(clouderaManagerPollingServiceProvider, times(3)).startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId));
+    }
+
+    @Test
+    void upscaleClusterDoesNotRetryApplyHostTemplateOnNonTransientFailure() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+        setUpBatchSuccess();
+
+        Long applyHostTemplateCommandId = 200L;
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        ClouderaManagerOperationFailedException nonTransientFailure = new ClouderaManagerOperationFailedException(
+                "Failed command(s): Start(id=2): Role is missing Kerberos keytab.");
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
+                .thenThrow(nonTransientFailure);
+        when(transientCmCommandFailureClassifier.isTransientCredentialGenerationFailure(anyString())).thenReturn(false);
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
+
+        assertThat(exception).isSameAs(nonTransientFailure);
+        verify(hostTemplatesResourceApi, times(1))
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE));
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId));
+    }
+
     private void mockApplyHostTemplateCalls(ApiException duplicateTagException) throws ApiException {
         setUpListClusterHosts();
         setUpReadHosts(true);

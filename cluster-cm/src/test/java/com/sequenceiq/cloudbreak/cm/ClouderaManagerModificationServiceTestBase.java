@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.cm.config.ClouderaManagerFlinkConfigurationServ
 import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
+import com.sequenceiq.cloudbreak.cm.util.TransientCmCommandFailureClassifier;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -202,6 +203,9 @@ abstract class ClouderaManagerModificationServiceTestBase {
 
     @Mock
     protected RolesResourceApi rolesResourceApi;
+
+    @Mock
+    protected TransientCmCommandFailureClassifier transientCmCommandFailureClassifier;
 
     protected Cluster cluster;
 

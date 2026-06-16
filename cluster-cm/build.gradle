@@ -40,6 +40,7 @@ dependencies {
 
   implementation            group: "joda-time",                 name: "joda-time",                               version: "2.14.2"
   implementation            group: 'org.hibernate',             name: 'hibernate-envers',                        version: hibernateCoreVersion
+  implementation            group: 'com.dyngr',                 name: 'polling',                                 version: dyngrPollingVersion
 
   testImplementation project(path: ':common', configuration: 'tests')
 
