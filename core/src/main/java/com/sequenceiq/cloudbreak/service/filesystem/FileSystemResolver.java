@@ -36,8 +36,6 @@ public class FileSystemResolver {
                 fileSystemType = storageIdentityRequest.getAdls().getType();
             } else if (storageIdentityRequest.getGcs() != null) {
                 fileSystemType = storageIdentityRequest.getGcs().getType();
-            } else if (storageIdentityRequest.getWasb() != null) {
-                fileSystemType = storageIdentityRequest.getWasb().getType();
             } else if (storageIdentityRequest.getS3() != null) {
                 fileSystemType = storageIdentityRequest.getS3().getType();
             } else if (storageIdentityRequest.getAdlsGen2() != null) {
@@ -64,6 +62,6 @@ public class FileSystemResolver {
     }
 
     private boolean locationStartsWith(String path, FileSystemType probableFsTye) {
-        return path != null && path.startsWith(probableFsTye.getProtocol());
+        return probableFsTye.startsWithProtocol(path);
     }
 }

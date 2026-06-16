@@ -36,13 +36,6 @@ function printLogic() {
 		printIfValid "storage container:                          " "{{{ fileSystemConfigs.adls.storageContainer}}}"
 		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.adls.locations}}}{{{ this.configFile }}}: [{{{ this.property }}}: {{{ this.value }}}], {{{/each}}}"
 		printIfValid "default file system?                        " "{{{ fileSystemConfigs.adls.defaultFs }}}"
-	elif {{{#if fileSystemConfigs.wasb}}}true{{{else}}}false{{{/if}}}; then
-		printIfValid "account key:                                " "{{{ fileSystemConfigs.wasb.accountKey }}}"
-		printIfValid "account name:                               " "{{{ fileSystemConfigs.wasb.accountName }}}"
-		printIfValid "storage container name:                     " "{{{ fileSystemConfigs.wasb.storageContainerName }}}"
-		printIfValid "secure?                                     " "{{{ fileSystemConfigs.wasb.secure }}}"
-		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.wasb.locations}}}{{{ this.configFile }}}: [{{{ this.property }}}: {{{ this.value }}}], {{{/each}}}"
-		printIfValid "default file system?                        " "{{{ fileSystemConfigs.wasb.defaultFs }}}"
 	fi
 }
 

@@ -162,7 +162,7 @@ public class AnonymizerUtilTest {
     }
 
     @Test
-    public void testWasbJson() {
+    public void testAzureAccountKeyJson() {
         String testData = "{\"hive-site\":{\"hive.metastore.warehouse.dir\":\"wasb://asdf/mmolnar-v/apps/hive/warehouse\"},"
                 + "\"core-site\":{\"fs.AbstractFileSystem.wasbs.impl\":\"org.apache.hadoop.fs.azure.Wasbs\",\"fs.AbstractFileSystem.wasb.impl\""
                 + ":\"org.apache.hadoop.fs.azure.Wasbs\",\"fs.azure.account.key.mmolnar.blob.core.windows.net\":\"dontshowup\","

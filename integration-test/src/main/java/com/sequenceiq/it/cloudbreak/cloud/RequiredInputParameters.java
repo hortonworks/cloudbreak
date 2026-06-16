@@ -91,15 +91,6 @@ public class RequiredInputParameters {
 
         public static class Storage {
 
-            public static class Wasb {
-
-                public static final String STORAGE_NAME = "NN_AZ_STORAGE_BLOB";
-
-                public static final String ACCESS_KEY = "NN_AZ_STORAGE_ACCESS_KEY";
-
-                public static final String ACCOUNT = "NN_AZ_STORAGE_ACCOUNT";
-            }
-
             public static class Adls {
 
                 public static final String ACCOUNT_NAME = "NN_AZ_DATALAKE";

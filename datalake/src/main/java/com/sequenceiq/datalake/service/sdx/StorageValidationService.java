@@ -157,9 +157,7 @@ public class StorageValidationService {
         if (!isAzureAuthenticationConfigured(cloudStorage)) {
             throw new BadRequestException("managed identity or account key and account name must be defined for ABFS");
         }
-        // TODO: CB-33307 to properly handle abfss
-        if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol() + "://") &&
-                !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol() + "s://")) {
+        if (!FileSystemType.ADLS_GEN_2.startsWithProtocol(cloudStorage.getBaseLocation())) {
             throw new BadRequestException("AZURE baselocation missing protocol. please specify abfs:// or abfss://");
         }
     }
@@ -227,15 +225,10 @@ public class StorageValidationService {
                     validationBuilder.ifError(() -> cloudStorage.getAdls() == null, "'adls' must be set if 'fileSystemType' is 'ADLS'!");
                 }
                 if (FileSystemType.ADLS_GEN_2.equals(cloudStorage.getFileSystemType())) {
-                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol()),
-                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'ADLS_GEN_2'!",
-                                    FileSystemType.ADLS_GEN_2.getProtocol()));
+                    validationBuilder.ifError(() -> !FileSystemType.ADLS_GEN_2.startsWithProtocol(cloudStorage.getBaseLocation()),
+                            String.format("'baseLocation' must start with one of '%s' if 'fileSystemType' is 'ADLS_GEN_2'!",
+                                    FileSystemType.ADLS_GEN_2.getProtocols()));
                     validationBuilder.ifError(() -> cloudStorage.getAdlsGen2() == null, "'adlsGen2' must be set if 'fileSystemType' is 'ADLS_GEN_2'!");
-                }
-                if (FileSystemType.WASB.equals(cloudStorage.getFileSystemType())) {
-                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.WASB.getProtocol()),
-                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'WASB'", FileSystemType.WASB.getProtocol()));
-                    validationBuilder.ifError(() -> cloudStorage.getWasb() == null, "'wasb' must be set if 'fileSystemType' is 'WASB'!");
                 }
                 if (FileSystemType.GCS.equals(cloudStorage.getFileSystemType())) {
                     validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol()),

@@ -30,8 +30,6 @@ public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider imple
             Map.entry(FileSystemType.S3.name(), CloudPlatform.AWS),
             Map.entry(FileSystemType.ADLS.name(), CloudPlatform.AZURE),
             Map.entry(FileSystemType.ADLS_GEN_2.name(), CloudPlatform.AZURE),
-            Map.entry(FileSystemType.WASB.name(), CloudPlatform.AZURE),
-            Map.entry(FileSystemType.WASB_INTEGRATED.name(), CloudPlatform.AZURE),
             Map.entry(FileSystemType.GCS.name(), CloudPlatform.GCP)
     );
 

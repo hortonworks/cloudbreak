@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudEfsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
@@ -32,7 +31,6 @@ import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.EfsFileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
-import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 
@@ -77,8 +75,6 @@ public class FileSystemConverter {
                                 return cloudIdentityToS3View(cloudIdentity);
                             } else if (source.getType().isEfs()) {
                                 return cloudIdentityToEfsView(cloudIdentity);
-                            } else if (source.getType().isWasb()) {
-                                return cloudIdentityToWasbView(cloudIdentity);
                             } else if (source.getType().isAdlsGen2()) {
                                 return cloudIdentityToAdlsGen2View(cloudIdentity);
                             }  else if (source.getType().isGcs()) {
@@ -126,15 +122,6 @@ public class FileSystemConverter {
         return cloudEfsView;
     }
 
-    private CloudFileSystemView cloudIdentityToWasbView(CloudIdentity cloudIdentity) {
-        CloudWasbView cloudWasbView = new CloudWasbView(cloudIdentity.getIdentityType());
-        cloudWasbView.setAccountName(cloudIdentity.getWasbIdentity().getAccountName());
-        cloudWasbView.setAccountKey(cloudIdentity.getWasbIdentity().getAccountKey());
-        cloudWasbView.setSecure(cloudIdentity.getWasbIdentity().isSecure());
-        cloudWasbView.setResourceGroupName(cloudIdentity.getWasbIdentity().getStorageContainerName());
-        return cloudWasbView;
-    }
-
     private CloudFileSystemView cloudIdentityToAdlsGen2View(CloudIdentity cloudIdentity) {
         CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View(cloudIdentity.getIdentityType());
         AdlsGen2Identity adlsGen2Identity = cloudIdentity.getAdlsGen2Identity();
@@ -161,9 +148,6 @@ public class FileSystemConverter {
             } else if (source.getType().isEfs()) {
                 EfsFileSystem efsFileSystem = source.getConfigurations().get(EfsFileSystem.class);
                 fileSystemView = convertEfsLegacy(efsFileSystem);
-            } else if (source.getType().isWasb()) {
-                WasbFileSystem wasbFileSystem = source.getConfigurations().get(WasbFileSystem.class);
-                fileSystemView = convertWasbLegacy(wasbFileSystem);
             } else if (source.getType().isAdlsGen2()) {
                 AdlsGen2FileSystem adlsGen2FileSystem = source.getConfigurations().get(AdlsGen2FileSystem.class);
                 fileSystemView = convertAdlsGen2Legacy(adlsGen2FileSystem);
@@ -175,15 +159,6 @@ public class FileSystemConverter {
             LOGGER.warn("Error occurred when tried to convert filesystem object: {}", e.getMessage());
         }
         return Collections.emptyList();
-    }
-
-    private CloudWasbView convertWasbLegacy(WasbFileSystem source) {
-        CloudWasbView cloudWasbView = new CloudWasbView(CloudIdentityType.LOG);
-        cloudWasbView.setAccountName(source.getAccountName());
-        cloudWasbView.setAccountKey(source.getAccountKey());
-        cloudWasbView.setSecure(source.isSecure());
-        cloudWasbView.setResourceGroupName(source.getStorageContainerName());
-        return cloudWasbView;
     }
 
     private CloudS3View convertS3Legacy(S3FileSystem source) {

@@ -159,8 +159,6 @@ public class CloudStorageManifester {
         if (isFileSystemConfigured(fileSystemType)) {
             if (fileSystemType.isS3()) {
                 idBroker.setS3(cloudStorage.getS3());
-            } else if (fileSystemType.isWasb()) {
-                idBroker.setWasb(cloudStorage.getWasb());
             } else if (fileSystemType.isAdlsGen2()) {
                 idBroker.setAdlsGen2(cloudStorage.getAdlsGen2());
             } else if (fileSystemType.isGcs()) {

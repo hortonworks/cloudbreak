@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 
 /**
  * Decorate telemetry related (fluentd,metering,monitoring,databus) salt pillar configs (in order to ship data to cloud storage or databus)
- * Currently only S3/WASB cloud storage output supported, right now salt properties are filled based on attributes,
+ * Currently only S3/ADLS Gen2 cloud storage output supported, right now salt properties are filled based on attributes,
  * the calculation can be changed based on UI requirements.
  * The defaults could look like this:
  * <pre>

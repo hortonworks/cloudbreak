@@ -6,17 +6,14 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
-import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 @Component
@@ -95,30 +92,6 @@ public class CloudStorageParametersConverter {
         CloudS3View cloudS3View = new CloudS3View(CloudIdentityType.LOG);
         cloudS3View.setInstanceProfile(source.getInstanceProfile());
         return cloudS3View;
-    }
-
-    public WasbFileSystem wasbToFileSystem(WasbCloudStorageV1Parameters source) {
-        WasbFileSystem wasbFileSystem = new WasbFileSystem();
-        wasbFileSystem.setSecure(source.isSecure());
-        wasbFileSystem.setAccountName(source.getAccountName());
-        wasbFileSystem.setAccountKey(source.getAccountKey());
-        return wasbFileSystem;
-    }
-
-    public CloudWasbView wasbToCloudView(StorageIdentityBase source) {
-        CloudWasbView cloudWasbView = new CloudWasbView(source.getType());
-        cloudWasbView.setAccountKey(source.getWasb().getAccountKey());
-        cloudWasbView.setAccountName(source.getWasb().getAccountName());
-        cloudWasbView.setSecure(source.getWasb().isSecure());
-        return cloudWasbView;
-    }
-
-    public CloudWasbView wasbToCloudView(WasbCloudStorageV1Parameters source) {
-        CloudWasbView cloudWasbView = new CloudWasbView(CloudIdentityType.LOG);
-        cloudWasbView.setAccountKey(source.getAccountKey());
-        cloudWasbView.setAccountName(source.getAccountName());
-        cloudWasbView.setSecure(source.isSecure());
-        return cloudWasbView;
     }
 
     public AdlsGen2FileSystem adlsGen2ToFileSystem(AdlsGen2CloudStorageV1Parameters source) {
