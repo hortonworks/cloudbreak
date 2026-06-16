@@ -23,7 +23,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_S3GUARD_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 
@@ -49,8 +48,8 @@ public class ClusterUpgradeValidationFlowConfig
                     .event(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CLUSTER_UPGRADE_VALIDATION_INIT_STATE).to(CLUSTER_UPGRADE_S3GUARD_VALIDATION_STATE)
-                    .event(START_CLUSTER_UPGRADE_S3GUARD_VALIDATION_EVENT)
+                    .from(CLUSTER_UPGRADE_VALIDATION_INIT_STATE).to(CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE)
+                    .event(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT)
                     .defaultFailureEvent()
 
                     .from(CLUSTER_UPGRADE_S3GUARD_VALIDATION_STATE).to(CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE)

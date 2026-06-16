@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_CLOUDPROVIDER_UPDATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_S3GUARD_VALIDATION_EVENT;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -113,7 +112,7 @@ public class ClusterUpgradeValidationActions {
                 cloudbreakEventService.fireCloudbreakEvent(payload.getResourceId(), UPDATE_IN_PROGRESS.name(), resourceEvent);
                 ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesFactory.create(
                         payload.getResourceId(), payload.getImageId(), payload.isLockComponents(), payload.isRollingUpgradeEnabled(), payload.isReplaceVms());
-                ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_S3GUARD_VALIDATION_EVENT.name(),
+                ClusterUpgradeS3guardValidationFinishedEvent event = new ClusterUpgradeS3guardValidationFinishedEvent(
                         payload.getResourceId(), clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
                 sendEvent(context, event.selector(), event);
             }
