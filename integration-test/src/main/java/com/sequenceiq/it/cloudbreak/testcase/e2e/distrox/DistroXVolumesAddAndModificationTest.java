@@ -108,7 +108,7 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     }
 
     private void createAndWaitDataHub(TestContext testContext) {
-        String instanceType = testContext.getCloudProvider().getDatahubCustomInstanceTypeWithStorage();
+        String instanceType = testContext.getCloudProvider().getDatahubInstanceType("customWithStorage");
 
         testContext
                 .given("dx", DistroXTestDto.class)

@@ -13,7 +13,6 @@ import jakarta.ws.rs.core.Response.StatusType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,6 +21,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.common.api.util.ValidatorUtil;
 
 @Component
@@ -41,8 +42,8 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @Value("${cb.imagecatalog.url.validation.strict:true}")
-    private boolean strictUrlValidation;
+    @Inject
+    private EntitlementService entitlementService;
 
     @Inject
     private HttpContentSizeValidator httpContentSizeValidator;
@@ -62,7 +63,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
                 return false;
             }
             boolean allowedDomain;
-            if (strictUrlValidation) {
+            if (isStrictValidationEnabled()) {
                 Optional<String> urlValidationError = ImageCatalogUrlValidator.validateUrl(value);
                 if (urlValidationError.isPresent()) {
                     ValidatorUtil.addConstraintViolation(context, urlValidationError.get());
@@ -93,6 +94,19 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
             LOGGER.debug("Failed to validate the specified image catalog URL: " + value, throwable);
         }
         return false;
+    }
+
+    private boolean isStrictValidationEnabled() {
+        try {
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            if (entitlementService.isStrictImageCatalogUrlValidationDisabled(accountId)) {
+                LOGGER.debug("Strict image catalog URL validation is disabled for account '{}'", accountId);
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Could not resolve account for entitlement check, defaulting to strict validation", e);
+        }
+        return true;
     }
 
     private boolean imageCatalogParsable(ConstraintValidatorContext context, String responseContent) throws java.io.IOException {

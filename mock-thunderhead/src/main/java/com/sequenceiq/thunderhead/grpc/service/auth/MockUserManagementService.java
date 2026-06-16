@@ -24,6 +24,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CONFIGURE_ENCRYPTION_PROFILE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DB_DISK_AUTO_RESIZE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
@@ -1209,6 +1210,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_CB_CM_TEMPLATE_SYNC))
                                 .addEntitlements(createEntitlement(CDP_CB_NOTIFICATION_SENDING_ENABLED))
                                 .addEntitlements(createEntitlement(CDP_CB_DB_DISK_AUTO_RESIZE))
+                                .addEntitlements(createEntitlement(CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION))
                                 .addEntitlements(createEntitlement(CDP_FALLBACK_INSTANCETYPE))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(getAccountId(request.getExternalAccountId(), accountId))

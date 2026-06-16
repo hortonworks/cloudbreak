@@ -13,7 +13,6 @@ import java.util.Set;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -49,8 +48,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> implements CloudbreakTestDto {
 
     @Inject
-    @Qualifier("cloudProviderProxy")
-    private CloudProvider cloudProvider;
+    private CloudProviderProxy cloudProvider;
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
@@ -116,7 +114,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     protected CloudProvider getCloudProvider() {
-        return cloudProvider;
+        return cloudProvider.getDelegate(getCloudPlatform());
     }
 
     public TestContext getTestContext() {

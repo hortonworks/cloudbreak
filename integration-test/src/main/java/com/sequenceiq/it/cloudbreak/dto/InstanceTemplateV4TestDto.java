@@ -105,7 +105,9 @@ public class InstanceTemplateV4TestDto extends AbstractCloudbreakTestDto<Instanc
     }
 
     public InstanceTemplateV4TestDto withInstanceType(String instanceType) {
-        getRequest().setInstanceType(instanceType);
+        if (instanceType != null) {
+            getRequest().setInstanceType(instanceType);
+        }
         return this;
     }
 }

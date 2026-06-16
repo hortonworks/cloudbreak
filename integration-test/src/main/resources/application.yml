@@ -204,7 +204,14 @@ integrationtest:
       accessKeyId:
       secretKey:
     instance:
-      type: r5.2xlarge
+      types:
+        default: r5.2xlarge
+        datalake:
+          master: r5.2xlarge
+          idbroker: t3.medium
+        datahub:
+          custom: m5.4xlarge
+          customWithStorage: m5d.4xlarge
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
@@ -248,8 +255,6 @@ integrationtest:
       subnetIds:
         - subnet-0476e538519ac9570
         - subnet-0cb6292385565e5da
-    datahubCustomInstanceType: m5.4xlarge
-    datahubCustomInstanceTypeWithStorage: m5d.2xlarge
 
   # azure parameters
   azure:
@@ -285,7 +290,14 @@ integrationtest:
       subscriptionId:
       tenantId:
     instance:
-      type: Standard_D16s_v3
+      types:
+        default: Standard_D16s_v5
+        datalake:
+          master: Standard_E8s_v5
+          idbroker: Standard_D2s_v5
+        datahub:
+          custom: Standard_D8s_v5
+          customWithStorage: Standard_D16s_v3
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
@@ -341,7 +353,6 @@ integrationtest:
       resourceGroupName:
       managedIdentity:
     embeddedDbUpgradeSourceVersion: 11
-    datahubCustomInstanceType: Standard_D8s_v3
 
   # gcp parameters
   gcp:
@@ -378,7 +389,13 @@ integrationtest:
         serviceAccountPrivateKey:
         projectId:
     instance:
-      type: e2-highmem-8
+      types:
+        default: e2-highmem-8
+        datalake:
+          master: e2-highmem-8
+          idbroker: e2-standard-2
+        datahub:
+          custom: n2d-standard-8
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
@@ -415,7 +432,6 @@ integrationtest:
       environmentKey:
       datahubKey:
     embeddedDbUpgradeSourceVersion: 14
-    datahubCustomInstanceType: n2d-standard-8
 
   # yarn parameters
   yarn:
@@ -463,7 +479,7 @@ integrationtest:
       accessKeyId:
       secretKey:
     instance:
-      type: m5.2xlarge
+      type: large
       volumeSize: 100
       volumeCount: 1
       volumeType: gp3

@@ -97,7 +97,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         AwsInstanceTemplateV4SpotParameters spot = new AwsInstanceTemplateV4SpotParameters();
         spot.setPercentage(getSpotPercentage());
         aws.setSpot(spot);
-        return template.withInstanceType(awsProperties.getInstance().getType())
+        return template.withInstanceType(awsProperties.getInstance().getTypes().getDefault())
                 .withAws(aws);
     }
 
@@ -105,8 +105,10 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template, Architecture architecture) {
         AwsInstanceTemplateV1Parameters awsParameters = new AwsInstanceTemplateV1Parameters();
         awsParameters.setSpot(getAwsInstanceTemplateV1SpotParameters());
-        AwsProperties.Instance instance = architecture == Architecture.X86_64 ? awsProperties.getInstance() : awsProperties.getArm64Instance();
-        return template.withInstanceType(instance.getType())
+        String instanceType = architecture == Architecture.X86_64
+                ? awsProperties.getInstance().getTypes().getDefault()
+                : awsProperties.getArm64Instance().getType();
+        return template.withInstanceType(instanceType)
                 .withAws(awsParameters);
     }
 
@@ -315,7 +317,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         if (Architecture.ARM64.equals(architecture)) {
             return awsProperties.getArm64Instance().getType();
         }
-        return awsProperties.getInstance().getType();
+        return awsProperties.getInstance().getTypes().getDefault();
     }
 
     @Override
@@ -591,13 +593,15 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubCustomInstanceType() {
-        return awsProperties.getDatahubCustomInstanceType();
+    public String getDatahubInstanceType(String name) {
+        return awsProperties.getInstance().getTypes().getDatahub().getOrDefault(name,
+                awsProperties.getInstance().getTypes().getDefault());
     }
 
     @Override
-    public String getDatahubCustomInstanceTypeWithStorage() {
-        return awsProperties.getDatahubCustomInstanceTypeWithStorage();
+    public String getDatalakeInstanceType(String name) {
+        return awsProperties.getInstance().getTypes().getDatalake().getOrDefault(name,
+                awsProperties.getInstance().getTypes().getDefault());
     }
 
     @Override

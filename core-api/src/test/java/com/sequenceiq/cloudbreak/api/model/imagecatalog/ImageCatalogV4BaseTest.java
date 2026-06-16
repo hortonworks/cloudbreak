@@ -28,12 +28,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV4Base;
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.HttpContentSizeValidator;
 
 @ExtendWith(MockitoExtension.class)
 class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:accountId:user:userId";
 
     private static final String INVALID_MESSAGE = "A valid image catalog must be available on the given URL";
 
@@ -46,8 +50,12 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     @MockBean
     private HttpContentSizeValidator httpContentSizeValidator;
 
+    @MockBean
+    private EntitlementService entitlementService;
+
     @BeforeEach
     public void setUp() {
+        when(entitlementService.isStrictImageCatalogUrlValidationDisabled(anyString())).thenReturn(Boolean.FALSE);
         when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class), anyBoolean())).thenReturn(true);
     }
 
@@ -63,7 +71,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
         i.setName("testname");
         i.setUrl(url);
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> getValidator().validate(i));
 
         assertEquals(2L, violations.size());
         String failedToGetMessage = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, url, reasonPhrase);
@@ -79,7 +87,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> getValidator().validate(i));
 
         assertEquals(2L, violations.size());
         assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) ||
@@ -95,7 +103,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> getValidator().validate(i));
 
         assertEquals(2L, violations.size());
         assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(INVALID_JSON_IN_RESPONSE)));
@@ -109,7 +117,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> getValidator().validate(i));
 
         assertEquals(2L, violations.size());
         String failsWithExceptionMessage = String.format(FAILED_TO_GET_WITH_EXCEPTION, i.getUrl());
@@ -124,7 +132,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> getValidator().validate(i));
 
         assertEquals(1L, violations.size());
         assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE)));
