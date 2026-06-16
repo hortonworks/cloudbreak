@@ -78,8 +78,9 @@ public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToSto
             response = new SdxStopFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxStopFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database stop timed out after " + durationInMinutes + " minutes"));
+            String message = String.format("Database stop timed out after %s minutes. Stop operation is still running in the background, " +
+                    "please get more information on the cloud provider side.", durationInMinutes);
+            response = new SdxStopFailedEvent(sdxId, userId, new PollerStoppedException(message));
         } catch (PollerException exception) {
             LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
             response = new SdxStopFailedEvent(sdxId, userId, exception);

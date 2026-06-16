@@ -5,6 +5,7 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_FAILED_HAN
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -212,8 +213,8 @@ public class SdxStopActions {
                         flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId()))) {
                     statusReason = "Datalake resize failure: " + statusReason;
                 }
-
-                sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, List.of(Optional.ofNullable(exception.getMessage()).orElse("")),
+                        statusReason, payload.getResourceId());
                 sendEvent(context, SDX_STOP_FAILED_HANDLED_EVENT.event(), payload);
             }
 
