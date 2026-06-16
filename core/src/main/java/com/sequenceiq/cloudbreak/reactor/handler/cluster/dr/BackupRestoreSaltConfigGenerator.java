@@ -63,7 +63,8 @@ public class BackupRestoreSaltConfigGenerator {
     public static final String DATABASE_NAMES_FOR_DRY_RUN = "database_names_for_dry_run";
 
     public static final List<DatabaseType> DEFAULT_BACKUP_DATABASE =
-            List.of(DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.PROFILER_AGENT, DatabaseType.PROFILER_METRIC, DatabaseType.KNOX_GATEWAY);
+            List.of(DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.PROFILER_AGENT, DatabaseType.PROFILER_METRIC, DatabaseType.KNOX_GATEWAY,
+                    DatabaseType.ATLAS);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreSaltConfigGenerator.class);
 

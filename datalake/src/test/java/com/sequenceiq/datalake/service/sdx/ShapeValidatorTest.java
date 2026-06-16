@@ -126,7 +126,7 @@ class ShapeValidatorTest {
                 underTest.validateShape(shape, "7.3.3", detailedEnvironmentResponse));
 
         assertEquals(String.format("Your account is not entitled to provision SDX with '%s' shape. " +
-                "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", shape), ex.getMessage());
+                "Contact Cloudera support to enable CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS entitlement for the account.", shape), ex.getMessage());
     }
 
     @ParameterizedTest(name = "with shape {0}")

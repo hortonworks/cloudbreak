@@ -97,7 +97,7 @@ public class ShapeValidator {
         }
         if (!entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(accountId)) {
             String message = String.format("Your account is not entitled to provision SDX with '%s' shape. " +
-                    "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", shape.name());
+                    "Contact Cloudera support to enable CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS entitlement for the account.", shape.name());
             validationBuilder.error(message);
         }
     }

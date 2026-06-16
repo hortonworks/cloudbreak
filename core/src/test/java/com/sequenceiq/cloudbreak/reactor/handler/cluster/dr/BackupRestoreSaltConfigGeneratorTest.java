@@ -42,9 +42,9 @@ class BackupRestoreSaltConfigGeneratorTest {
 
     private static final String TEST_ACCOUNT_ID = "test-account-id";
 
-    private static final String EXPECTED_DATABASE_NAMES = "hive ranger profiler_agent profiler_metric";
+    private static final String EXPECTED_DATABASE_NAMES = "hive ranger profiler_agent profiler_metric atlas";
 
-    private static final String EXPECTED_DATABASE_NAMES_WITH_KNOX = "hive ranger profiler_agent profiler_metric knox_gateway";
+    private static final String EXPECTED_DATABASE_NAMES_WITH_KNOX = "hive ranger profiler_agent profiler_metric knox_gateway atlas";
 
     private static final String EXPECTED_DRY_RUN_DATABASE_NAMES = "hive ranger";
 
@@ -156,7 +156,7 @@ class BackupRestoreSaltConfigGeneratorTest {
 
         assertEquals("s3a://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
         assertEquals(RANGER_ADMIN_GROUP, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP_KEY));
-        assertEquals("ranger profiler_agent profiler_metric", disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
+        assertEquals("ranger profiler_agent profiler_metric atlas", disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
 
     }
 
