@@ -70,7 +70,6 @@ import com.sequenceiq.environment.authorization.EnvironmentFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
-import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileFlowService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.CreateEnvironmentDto;
@@ -161,8 +160,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentOutboundService environmentOutboundService;
 
-    private final EncryptionProfileFlowService encryptionProfileFlowService;
-
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -187,8 +184,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             ExternalizedComputeFlowService externalizedComputeFlowService,
             EnvironmentReactorFlowManager environmentReactorFlowManager,
             RedBeamsService redBeamsService,
-            EnvironmentOutboundService environmentOutboundService,
-            EncryptionProfileFlowService encryptionProfileFlowService) {
+            EnvironmentOutboundService environmentOutboundService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -212,7 +208,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.externalizedComputeFlowService = externalizedComputeFlowService;
         this.redBeamsService = redBeamsService;
         this.environmentOutboundService = environmentOutboundService;
-        this.encryptionProfileFlowService = encryptionProfileFlowService;
     }
 
     @Override
@@ -580,29 +575,5 @@ public class EnvironmentController implements EnvironmentEndpoint {
             responses.getResponses().add(databaseServerCertificateStatusV4Response);
         }
         return responses;
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier enableEncryptionProfileByCrn(@ResourceCrn String envCrn, String encryptionProfileNameOrCrn) {
-        return encryptionProfileFlowService.enableEncryptionProfileByCrn(NameOrCrn.ofCrn(envCrn), encryptionProfileNameOrCrn);
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier enableEncryptionProfileByName(@ResourceName String envName, String encryptionProfileNameOrCrn) {
-        return encryptionProfileFlowService.enableEncryptionProfileByName(NameOrCrn.ofName(envName), encryptionProfileNameOrCrn);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier disableEncryptionProfileByCrn(@ResourceCrn String envCrn) {
-        return encryptionProfileFlowService.disableEncryptionProfile(NameOrCrn.ofCrn(envCrn));
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier disableEncryptionProfileByName(@ResourceName String envName) {
-        return encryptionProfileFlowService.disableEncryptionProfile(NameOrCrn.ofName(envName));
     }
 }

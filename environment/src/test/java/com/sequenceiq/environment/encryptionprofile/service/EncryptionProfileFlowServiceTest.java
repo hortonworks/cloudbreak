@@ -30,7 +30,7 @@ public class EncryptionProfileFlowServiceTest {
 
     private static final String ENCRYPTION_PROFILE_NAME = "encryptionProfileName";
 
-    private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
+    private static final String ENCRYPTION_PROFILE_CRN = "encryptionProfileCrn";
 
     @Mock
     private EnvironmentService environmentService;

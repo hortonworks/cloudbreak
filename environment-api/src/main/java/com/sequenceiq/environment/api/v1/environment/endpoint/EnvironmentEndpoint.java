@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -424,41 +423,4 @@ public interface EnvironmentEndpoint {
             EnvironmentDatabaseServerCertificateStatusV4Request request
     );
 
-    @PUT
-    @Path("crn/{crn}/enable_encryption_profile")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Enable encryption profile in the given environment by crn",
-            operationId = "enableEncryptionProfileByCrn",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableEncryptionProfileByCrn(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @PathParam("crn") String envCrn, @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
-
-    @PUT
-    @Path("name/{name}/enable_encryption_profile")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Enable encryption profile in the given environment by name",
-            operationId = "enableEncryptionProfileByName",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableEncryptionProfileByName(@NotEmpty @PathParam("name") String envName,
-            @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
-
-    @PUT
-    @Path("crn/{crn}/disable_encryption_profile")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Disable encryption profile in the given environment by crn",
-            operationId = "disableEncryptionProfileByCrn",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier disableEncryptionProfileByCrn(@NotEmpty @PathParam("crn") String envCrn);
-
-    @PUT
-    @Path("name/{name}/disable_encryption_profile")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Disable encryption profile in the given environment by name",
-            operationId = "disableEncryptionProfileByName",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier disableEncryptionProfileByName(@NotEmpty @PathParam("name") String envName);
 }

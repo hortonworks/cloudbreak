@@ -71,35 +71,6 @@ setup_ciphers:
     - pattern: "setsettings tls_ciphers.*"
     - repl: 'setsettings tls_ciphers {{ tlsCipherSuitesJavaIntermediateWithComma }}'
     - append_if_not_found: True
-
-{% else %}
-tls_advanced_control_disable:
-  file.replace:
-    - name: /etc/default/cloudera-scm-server
-    - pattern: '(?m)^(?!\s*#)\s*(?:export\s+)?CMF_FF_TLS_ADVANCED_CONTROL.*$'
-    - repl: ''
-    - append_if_not_found: False
-
-encrypt_all_ports_disable:
-  file.replace:
-    - name: /etc/default/cloudera-scm-server
-    - pattern: '(?m)^(?!\s*#)\s*(?:export\s+)?CMF_FF_ENCRYPT_ALL_PORTS.*'
-    - repl: ''
-    - append_if_not_found: False
-
-setup_tls_disable:
-  file.replace:
-    - name: /etc/cloudera-scm-server/cm.settings
-    - pattern: "setsettings SUPPORTED_TLS_VERSIONS.*"
-    - repl: ''
-    - append_if_not_found: False
-
-setup_ciphers_disable:
-   file.replace:
-    - name: /etc/cloudera-scm-server/cm.settings
-    - pattern: "setsettings tls_ciphers.*"
-    - repl: ''
-    - append_if_not_found: False
 {% endif %}
 
 {% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
