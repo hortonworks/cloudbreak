@@ -122,11 +122,7 @@ public class VerticalScalingValidatorService {
             throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
         }
 
-        if (entitlementService.isVerticalScaleHaEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
-            if (!stack.isAvailable()) {
-                throw new BadRequestException(String.format("%s is not supported on unavailable cluster %s", message, stack.getName()));
-            }
-        } else {
+        if (!entitlementService.isVerticalScaleHaEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
             if (!stack.isStopped()) {
                 //Instruction: You must stop Environment for Vertical scaling of FreeIPA
                 throw new BadRequestException(String.format("You must stop Environment for %s of %s.", message, stack.getName()));

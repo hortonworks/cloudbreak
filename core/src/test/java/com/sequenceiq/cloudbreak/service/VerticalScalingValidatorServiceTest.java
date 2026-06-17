@@ -567,37 +567,32 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getCloudPlatform()).thenReturn(cloudPlatform);
         when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
         when(entitlementService.isVerticalScaleHaEnabled("default")).thenReturn(true);
-        when(stack.isAvailable()).thenReturn(true);
 
         underTest.validateProvider(stack, message, request);
 
         verify(cloudParameterCache).isVerticalScalingSupported(cloudPlatform);
         verify(entitlementService).isVerticalScaleHaEnabled("default");
-        verify(stack).isAvailable();
+        verify(stack, never()).isStopped();
+        verify(stack, never()).isAvailable();
     }
 
     @Test
-    public void testValidateProviderWhenEntitlementEnabledAndStackNotAvailable() {
+    public void testValidateProviderWhenEntitlementEnabledAndStackStopped() {
         String message = "Vertical scaling";
         String cloudPlatform = "AWS";
-        String stackName = "test-stack";
         StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
 
         when(cloudParameterCache.isVerticalScalingSupported(cloudPlatform)).thenReturn(true);
         when(stack.getCloudPlatform()).thenReturn(cloudPlatform);
         when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
         when(entitlementService.isVerticalScaleHaEnabled("default")).thenReturn(true);
-        when(stack.isAvailable()).thenReturn(false);
-        when(stack.getName()).thenReturn(stackName);
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateProvider(stack, message, request);
-        });
+        underTest.validateProvider(stack, message, request);
 
-        assertEquals(String.format("%s is not supported on unavailable cluster %s", message, stackName), badRequestException.getMessage());
         verify(cloudParameterCache).isVerticalScalingSupported(cloudPlatform);
         verify(entitlementService).isVerticalScaleHaEnabled("default");
-        verify(stack).isAvailable();
+        verify(stack, never()).isStopped();
+        verify(stack, never()).isAvailable();
     }
 
     @Test
