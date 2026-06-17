@@ -21,7 +21,9 @@ public class TelemetryFeatureService {
             Pair.of("cdp-request-signer", () -> "0.2.3"),
             Pair.of("cdp-telemetry", () -> "0.4.30"));
 
-    private static final Pair<String, Versioned> MINIFI_MIN_VERSION_REQUIREMENT = Pair.of("cem-agents", () -> "1.25.09-b38");
+    private static final List<Pair<String, Versioned>> MINIFI_MIN_VERSION_REQUIREMENTS = List.of(
+            Pair.of("cem-agents", () -> "1.25.09-b38"),
+            Pair.of("cdp-telemetry", () -> "1.3.14_b2"));
 
     public boolean isECDSAAccessKeyTypeSupported(Map<String, String> packages) {
         if (packages == null) {
@@ -49,17 +51,21 @@ public class TelemetryFeatureService {
         if (packages == null) {
             return false;
         }
-        String packageName = MINIFI_MIN_VERSION_REQUIREMENT.getKey();
-        if (!packages.containsKey(packageName)) {
-            LOGGER.warn("Image doesn't contain {} package. Minifi logging is not supported.", packageName);
-            return false;
-        } else {
-            String packageVersion = packages.get(packageName);
-            Versioned minimumVersion = MINIFI_MIN_VERSION_REQUIREMENT.getValue();
-            if (new VersionComparator().compare(() -> packageVersion, minimumVersion) < 0) {
-                LOGGER.info("{} package's version {} is smaller than {}. Minifi logging is not supported.",
-                        packageName, packageVersion, minimumVersion.getVersion());
+        for (Pair<String, Versioned> packageWithVersion : MINIFI_MIN_VERSION_REQUIREMENTS) {
+            String packageName = packageWithVersion.getKey();
+            Versioned minimumVersion = packageWithVersion.getValue();
+            if (!packages.containsKey(packageName)) {
+                LOGGER.warn("Image doesn't contain {} package. Minifi logging is not supported.", packageName);
                 return false;
+            } else {
+                String packageVersion = packages.get(packageName);
+                Versioned normalizedPackageVersion = () -> packageVersion.replace('_', '-');
+                Versioned normalizedMinimumVersion = () -> minimumVersion.getVersion().replace('_', '-');
+                if (new VersionComparator().compare(normalizedPackageVersion, normalizedMinimumVersion) < 0) {
+                    LOGGER.info("{} package's version {} is smaller than {}. Minifi logging is not supported.",
+                            packageName, packageVersion, minimumVersion.getVersion());
+                    return false;
+                }
             }
         }
         LOGGER.info("Minifi logging is supported.");

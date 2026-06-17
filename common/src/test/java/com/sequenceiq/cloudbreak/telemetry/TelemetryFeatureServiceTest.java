@@ -57,12 +57,52 @@ class TelemetryFeatureServiceTest {
 
     @Test
     void testIsMinifiLoggingSupportedWhenPackagesContainsOldMinifiVersion() {
-        assertFalse(undertest.isMinifiLoggingSupported(Map.of("cdp-minifi-agent", "1.22.9-b40")));
+        assertFalse(undertest.isMinifiLoggingSupported(minifiPackages("1.22.9-b40", "1.3.14_b2")));
     }
 
     @Test
     void testIsMinifiLoggingSupportedWhenPackagesContainsCorrectMinifi() {
-        assertTrue(undertest.isMinifiLoggingSupported(Map.of("cem-agents", "1.25.09-b39")));
+        assertTrue(undertest.isMinifiLoggingSupported(minifiPackages("1.25.09-b39", "1.3.14_b2")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenCdpTelemetryIsMissing() {
+        assertFalse(undertest.isMinifiLoggingSupported(Map.of("cem-agents", "1.25.09-b39")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenCemAgentsIsMissing() {
+        assertFalse(undertest.isMinifiLoggingSupported(Map.of("cdp-telemetry", "1.3.14_b2")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenCdpTelemetryVersionIsTooOld() {
+        assertFalse(undertest.isMinifiLoggingSupported(minifiPackages("1.25.09-b39", "1.3.14_b1")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenCdpTelemetryHasHigherBuildNumber() {
+        assertTrue(undertest.isMinifiLoggingSupported(minifiPackages("1.25.09-b39", "1.3.14_b3")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenCdpTelemetryHasHigherPatchVersion() {
+        assertTrue(undertest.isMinifiLoggingSupported(minifiPackages("1.25.09-b39", "1.3.15_b1")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenCdpTelemetryHasMultiDigitPatchVersion() {
+        assertTrue(undertest.isMinifiLoggingSupported(minifiPackages("1.25.09-b39", "1.3.100_b1")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenCdpTelemetryHasSingleDigitPatchBelowMinimum() {
+        assertFalse(undertest.isMinifiLoggingSupported(minifiPackages("1.25.09-b39", "1.3.9_b1")));
+    }
+
+    private Map<String, String> minifiPackages(String cemAgentsVersion, String cdpTelemetryVersion) {
+        return Map.of("cem-agents", cemAgentsVersion,
+                "cdp-telemetry", cdpTelemetryVersion);
     }
 
     private Map<String, String> generatePackageVersions() {
