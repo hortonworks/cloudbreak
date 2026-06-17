@@ -593,12 +593,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubInstanceType(String name) {
-        return awsProperties.getInstance().getTypes().getDatahub().getOrDefault(name,
-                awsProperties.getInstance().getTypes().getDefault());
-    }
-
-    @Override
     public String getDatalakeInstanceType(String name) {
         return awsProperties.getInstance().getTypes().getDatalake().getOrDefault(name,
                 awsProperties.getInstance().getTypes().getDefault());

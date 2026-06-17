@@ -569,12 +569,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubInstanceType(String name) {
-        return gcpProperties.getInstance().getTypes().getDatahub().getOrDefault(name,
-                gcpProperties.getInstance().getTypes().getDefault());
-    }
-
-    @Override
     public String getDatalakeInstanceType(String name) {
         return gcpProperties.getInstance().getTypes().getDatalake().getOrDefault(name,
                 gcpProperties.getInstance().getTypes().getDefault());

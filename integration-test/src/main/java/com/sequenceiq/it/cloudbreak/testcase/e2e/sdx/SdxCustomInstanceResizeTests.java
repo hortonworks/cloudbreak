@@ -52,7 +52,7 @@ public class SdxCustomInstanceResizeTests extends PreconditionSdxE2ETest {
 
                 SdxInstanceGroupRequest sdxInstanceGroupRequest = new SdxInstanceGroupRequest();
                 sdxInstanceGroupRequest.setName("master");
-                sdxInstanceGroupRequest.setInstanceType(tc.getCloudProvider().getDatahubInstanceType("custom"));
+                sdxInstanceGroupRequest.setInstanceType(tc.getCloudProvider().getDatalakeInstanceType("custom"));
                 SdxInstanceGroupDiskRequest sdxInstanceGroupDiskRequest = new SdxInstanceGroupDiskRequest();
                 sdxInstanceGroupDiskRequest.setName("master");
                 sdxInstanceGroupDiskRequest.setInstanceDiskSize(300);

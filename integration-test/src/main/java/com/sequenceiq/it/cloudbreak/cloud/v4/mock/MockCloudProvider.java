@@ -156,11 +156,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubInstanceType(String name) {
-        return mockProperties.getInstance().getType();
-    }
-
-    @Override
     public String getDatalakeInstanceType(String name) {
         return mockProperties.getInstance().getType();
     }

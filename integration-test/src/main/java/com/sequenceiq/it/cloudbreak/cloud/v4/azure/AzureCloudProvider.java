@@ -643,12 +643,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDatahubInstanceType(String name) {
-        return azureProperties.getInstance().getTypes().getDatahub().getOrDefault(name,
-                azureProperties.getInstance().getTypes().getDefault());
-    }
-
-    @Override
     public String getDatalakeInstanceType(String name) {
         return azureProperties.getInstance().getTypes().getDatalake().getOrDefault(name,
                 azureProperties.getInstance().getTypes().getDefault());
