@@ -27,8 +27,8 @@ public class CustomConfigurationPropertyParameters {
     @Schema(description = CustomConfigurationsJsonProperties.VALUE)
     @NotNull
     @Size(max = 4096, message = "Configuration property value must be at most 4096 characters")
-    @Pattern(regexp = "^[^\\p{Cntrl}<>]*$",
-            message = "Configuration property value must not contain control characters or angle brackets")
+    @Pattern(regexp = "^[^\\p{Cntrl}]*$",
+            message = "Configuration property value must not contain control characters")
     private String value;
 
     @Schema

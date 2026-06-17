@@ -91,7 +91,10 @@ class CustomConfigurationPropertyParametersTest {
             "org.apache.hadoop.io.compress.SnappyCodec",
             "host1:8080,host2:8080",
             "",
-            "value with spaces and numbers 123"
+            "value with spaces and numbers 123",
+            "<property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property>",
+            "<configuration><property><name>key</name><value>val</value></property></configuration>",
+            "value<with>brackets"
     })
     void testPropertyValueValid(String value) {
         CustomConfigurationPropertyParameters params = createValid();
@@ -103,15 +106,14 @@ class CustomConfigurationPropertyParametersTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "<script>alert(1)</script>",
-            "value<with>brackets"
+            "<script>alert(1)</script>"
     })
-    void testPropertyValueWithAngleBracketsInvalid(String value) {
+    void testPropertyValueWithXmlContentIsValid(String value) {
         CustomConfigurationPropertyParameters params = createValid();
         params.setValue(value);
         Set<ConstraintViolation<CustomConfigurationPropertyParameters>> violations = localValidatorFactory.validate(params);
         long valueViolations = violations.stream().filter(v -> v.getPropertyPath().toString().equals("value")).count();
-        assertTrue(valueViolations > 0, "Expected violation for value: " + value);
+        assertEquals(0, valueViolations, "Angle brackets should be allowed in value for safety valve XML configs: " + value);
     }
 
     @Test
