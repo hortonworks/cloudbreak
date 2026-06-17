@@ -168,6 +168,18 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             CdpResourceType cdpResourceType,
             List<String> availabilityZones,
             String architecture) {
+        List<String> instanceTypes = instanceType == null ? List.of() : List.of(instanceType);
+        return getVmTypesForVerticalScalingWithMultipleInstanceTypes(environmentCrn, instanceTypes, cdpResourceType, availabilityZones, architecture);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public PlatformVmtypesResponse getVmTypesForVerticalScalingWithMultipleInstanceTypes(
+            @ResourceCrn String environmentCrn,
+            List<String> instanceTypes,
+            CdpResourceType cdpResourceType,
+            List<String> availabilityZones,
+            String architecture) {
         String accountId = getAccountId();
         validateEnvironmentCrnPattern(environmentCrn);
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(environmentCrn, accountId);
@@ -182,7 +194,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         cloudVmTypes = verticalScaleInstanceProvider.listInstanceTypes(
                 environmentDto.getCloudPlatform(),
                 null,
-                instanceType,
+                instanceTypes,
                 cloudVmTypes,
                 null,
                 cdpResourceType);

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 import static com.sequenceiq.common.model.Architecture.ALL_ARCHITECTURE;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -106,8 +107,8 @@ public class VerticalScalingValidatorService {
             Json attributes = instanceGroupOptional.get().getTemplate().getAttributes();
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     stack.getCloudPlatform(),
-                    getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
-                    requestInstanceForVerticalScaling,
+                    List.of(getInstance(region, availabilityZone, currentInstanceType, allVmTypes)),
+                    List.of(requestInstanceForVerticalScaling),
                     availabilityZones,
                     attributes == null ? Map.of() : attributes.getMap(),
                     CdpResourceType.FREEIPA);

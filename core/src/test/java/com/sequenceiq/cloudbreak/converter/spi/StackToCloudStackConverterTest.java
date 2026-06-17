@@ -1622,6 +1622,52 @@ public class StackToCloudStackConverterTest {
         return verticalScaleRequest;
     }
 
+    @Test
+    void testUpdateWithVerticalScaleRequestPropagatesFallbackInstanceTypes() {
+        InstanceTemplate instanceTemplate1 = new InstanceTemplate("small", null, 1L, Set.of(), null, null, 0L, null, null, 0L);
+        CloudInstance instance1 = new CloudInstance("instance1", instanceTemplate1, null, null, null);
+        Group group1 = Group.builder()
+                .withName("group1")
+                .withInstances(Set.of(instance1))
+                .withRootVolumeSize(100)
+                .build();
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(Set.of(group1))
+                .build();
+        StackVerticalScaleV4Request verticalScaleRequest = new StackVerticalScaleV4Request();
+        verticalScaleRequest.setGroup("group1");
+        InstanceTemplateV4Request instanceTemplateRequest = new InstanceTemplateV4Request();
+        instanceTemplateRequest.setInstanceType("very_large");
+        instanceTemplateRequest.setFallbackInstanceTypes(List.of("large", "medium"));
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+
+        underTest.updateWithVerticalScaleRequest(cloudStack, verticalScaleRequest);
+
+        assertEquals("very_large", instanceTemplate1.getFlavor());
+        assertEquals(List.of("large", "medium"), instanceTemplate1.getFallbackInstanceTypes());
+    }
+
+    @Test
+    void testUpdateWithVerticalScaleRequestEmptyOutFallbackWhenNullInRequest() {
+        InstanceTemplate instanceTemplate1 = new InstanceTemplate("small", null, 1L, Set.of(), null, null, 0L, null, null, 0L);
+        instanceTemplate1.setFallbackInstanceTypes(List.of("preexisting"));
+        CloudInstance instance1 = new CloudInstance("instance1", instanceTemplate1, null, null, null);
+        Group group1 = Group.builder()
+                .withName("group1")
+                .withInstances(Set.of(instance1))
+                .withRootVolumeSize(100)
+                .build();
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(Set.of(group1))
+                .build();
+        StackVerticalScaleV4Request verticalScaleRequest = getStackVerticalScaleV4Request();
+
+        underTest.updateWithVerticalScaleRequest(cloudStack, verticalScaleRequest);
+
+        assertEquals("very_large", instanceTemplate1.getFlavor());
+        assertEquals(List.of(), instanceTemplate1.getFallbackInstanceTypes());
+    }
+
     private StackAuthentication createStackAuthentication() {
         StackAuthentication stackAuthentication = new StackAuthentication();
         stackAuthentication.setLoginUserName(TEST_USERNAME_VALUE);

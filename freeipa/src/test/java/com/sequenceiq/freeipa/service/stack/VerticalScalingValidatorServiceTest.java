@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -196,7 +195,7 @@ public class VerticalScalingValidatorServiceTest {
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
         doThrow(new BadRequestException("The current instancetype m3.xlarge has more Memory then the requested m2.xlarge."))
                 .when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(anyString(),
-                        any(Optional.class), any(Optional.class), isNull(), any(), any());
+                        any(List.class), any(List.class), isNull(), any(), any());
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
@@ -215,7 +214,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), eq(Map.of("architecture", "ALL")));
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
         verify(verticalScaleInstanceProvider, times(1))
-                .validateInstanceTypeForVerticalScaling(anyString(), any(Optional.class), any(Optional.class), isNull(), any(), any());
+                .validateInstanceTypeForVerticalScaling(anyString(), any(List.class), any(List.class), isNull(), any(), any());
     }
 
     @Test
@@ -262,7 +261,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), eq(Map.of("architecture", "ALL")));
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
         verify(verticalScaleInstanceProvider, times(1))
-                .validateInstanceTypeForVerticalScaling(anyString(), any(Optional.class), any(Optional.class), isNull(), anyMap(), any());
+                .validateInstanceTypeForVerticalScaling(anyString(), any(List.class), any(List.class), isNull(), anyMap(), any());
     }
 
     @Test
@@ -362,7 +361,7 @@ public class VerticalScalingValidatorServiceTest {
                 "Availability Zones for Instance Group. Supported Availability Zones for Instance type Standard_D16d_v4 : 1,2." +
                 "Existing Availability Zones for Instance Group : 1,2,3"))
                 .when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(anyString(),
-                        any(Optional.class), any(Optional.class),
+                        any(List.class), any(List.class),
                         eq(Set.of("1", "2", "3")), anyMap(), any(CdpResourceType.class));
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
@@ -378,7 +377,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), eq(Map.of("architecture", "ALL")));
         verify(verticalScaleInstanceProvider, times(1))
-                .validateInstanceTypeForVerticalScaling(anyString(), any(Optional.class), any(Optional.class),
+                .validateInstanceTypeForVerticalScaling(anyString(), any(List.class), any(List.class),
                         eq(Set.of("1", "2", "3")), anyMap(), any(CdpResourceType.class));
     }
 

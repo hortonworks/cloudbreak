@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERA
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -131,7 +133,7 @@ public class VerticalScalingValidatorService {
     }
 
     public void validateIfInstanceAvailable(String accountId, String requestedInstanceType,
-                                            Architecture architecture, String cloudPlatformVariant, String cloudPlatform) {
+            Architecture architecture, String cloudPlatformVariant, String cloudPlatform) {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(platform(cloudPlatform), Variant.variant(cloudPlatformVariant));
         Set<String> distroxEnabledInstanceTypes = cloudConnector.parameters().getDistroxEnabledInstanceTypes(architecture);
         if (!distroxEnabledInstanceTypes.contains(requestedInstanceType) && !entitlementService.enableDistroxInstanceTypesEnabled(accountId)) {
@@ -158,13 +160,14 @@ public class VerticalScalingValidatorService {
                 .filter(e -> e.getGroupName().equals(group))
                 .findFirst();
         String requestedInstanceType = verticalScaleV4Request.getTemplate().getInstanceType();
+        List<String> requestedFallbackInstanceTypes = verticalScaleV4Request.getTemplate().getFallbackInstanceTypes();
+        List<String> allRequestedInstanceTypes = getAllInstanceTypes(requestedInstanceType, requestedFallbackInstanceTypes);
         if (instanceGroupOptional.isPresent()) {
             InstanceGroup instanceGroup = instanceGroupOptional.get();
             boolean validateMultiAz = stack.isMultiAz() && providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(stack) != null;
             String availabilityZone = stack.getAvailabilityZone();
             String region = stack.getRegion();
-            String currentInstanceType = getCurrentInstanceType(instanceGroup);
-            Optional<String> providerInstanceType = instanceGroup.getInstanceMetaData().stream().findFirst().map(InstanceMetaData::getProviderInstanceType);
+            List<String> currentInstanceTypes = getCurrentInstanceTypes(instanceGroup);
             Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
             Json attributes = instanceGroup.getTemplate().getAttributes();
@@ -176,8 +179,8 @@ public class VerticalScalingValidatorService {
                     Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     stack.getCloudPlatform(),
-                    getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
-                    getInstance(region, availabilityZone, requestedInstanceType, allVmTypes),
+                    getInstances(region, availabilityZone, currentInstanceTypes, allVmTypes),
+                    getInstances(region, availabilityZone, allRequestedInstanceTypes, allVmTypes),
                     validateMultiAz ? instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(instanceGroup.getId()) : null,
                     attributes == null ? Map.of() : attributes.getMap()
             );
@@ -191,15 +194,44 @@ public class VerticalScalingValidatorService {
         }
     }
 
-    private String getCurrentInstanceType(InstanceGroup instanceGroup) {
+    private List<String> getCurrentInstanceTypes(InstanceGroup instanceGroup) {
         String templateInstanceType = instanceGroup.getTemplate().getInstanceType();
-        List<String> alternativeInstanceTypes = instanceGroup.getTemplate().getFallbackInstanceTypesAsList();
-        Optional<String> providerInstanceType = instanceGroup.getInstanceMetaData().stream().findFirst().map(InstanceMetaData::getProviderInstanceType);
-        if (providerInstanceType.isPresent()
-                && alternativeInstanceTypes.stream().anyMatch(instanceType -> instanceType.equalsIgnoreCase(providerInstanceType.get()))) {
-            return providerInstanceType.get();
+        List<String> allProviderInstanceTypes = instanceGroup.getNotTerminatedAndNotZombieInstanceMetaDataSet().stream()
+                .filter(instanceMetaData -> instanceMetaData.getProviderInstanceType() != null)
+                .map(InstanceMetaData::getProviderInstanceType)
+                .distinct()
+                .toList();
+        if (!allProviderInstanceTypes.isEmpty()) {
+            // Compare case-insensitively: provider casing may differ from the template (e.g. Azure may
+            // surface "standard_d8_v3" while the template stores "Standard_D8_v3").
+            Set<String> templateInstanceTypesLowerSet =
+                    getAllInstanceTypes(templateInstanceType, instanceGroup.getTemplate().getFallbackInstanceTypesAsList()).stream()
+                            .filter(it -> it != null)
+                            .map(String::toLowerCase)
+                            .collect(Collectors.toSet());
+            if (allProviderInstanceTypes.stream().map(String::toLowerCase).allMatch(templateInstanceTypesLowerSet::contains)) {
+                return allProviderInstanceTypes;
+            } else {
+                List<String> instanceTypesNotInTemplate = allProviderInstanceTypes.stream()
+                        .map(String::toLowerCase)
+                        .filter(Predicate.not(templateInstanceTypesLowerSet::contains))
+                        .toList();
+                throw new BadRequestException(String.format("There are actual instance types '%s' in the group '%s' that are not present in the template.",
+                        instanceTypesNotInTemplate, instanceGroup.getGroupName()));
+            }
         }
-        return templateInstanceType;
+        return List.of(templateInstanceType);
+    }
+
+    private List<String> getAllInstanceTypes(String instanceType, List<String> fallbackInstanceTypes) {
+        List<String> result = new ArrayList<>();
+        if (instanceType != null) {
+            result.add(instanceType);
+            if (fallbackInstanceTypes != null) {
+                result.addAll(fallbackInstanceTypes);
+            }
+        }
+        return result;
     }
 
     private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(StackVerticalScaleV4Request verticalScaleV4Request) {
@@ -214,6 +246,15 @@ public class VerticalScalingValidatorService {
                 .stream()
                 .filter(e -> e.getValue().equals(currentInstanceType))
                 .findFirst();
+    }
+
+    private List<Optional<VmType>> getInstances(String region, String availabilityZone, List<String> instanceTypes, CloudVmTypes allVmTypes) {
+        Set<VmType> vmTypesInZone = allVmTypes.getCloudVmResponses().get(getZone(region, availabilityZone));
+        return instanceTypes.stream()
+                .map(instanceType -> vmTypesInZone.stream()
+                        .filter(vmType -> vmType.getValue().equals(instanceType))
+                        .findFirst())
+                .collect(Collectors.toList());
     }
 
     private String getZone(String region, String availabilityZone) {

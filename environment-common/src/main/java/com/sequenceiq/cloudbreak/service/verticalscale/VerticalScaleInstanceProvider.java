@@ -49,6 +49,11 @@ public class VerticalScaleInstanceProvider {
 
     public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, String currentInstanceType,
             CloudVmTypes allVmTypes, Set<String> instanceGroupAvailabilityZones, CdpResourceType cdpResourceType) {
+        return listInstanceTypes(cloudPlatform, availabilityZone, List.of(currentInstanceType), allVmTypes, instanceGroupAvailabilityZones, cdpResourceType);
+    }
+
+    public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, List<String> currentInstanceTypes,
+            CloudVmTypes allVmTypes, Set<String> instanceGroupAvailabilityZones, CdpResourceType cdpResourceType) {
         Map<String, Set<VmType>> cloudVmResponses = allVmTypes.getCloudVmResponses();
         LOGGER.debug("cloudVmResponses: {}", cloudVmResponses);
         if (cloudVmResponses.isEmpty()) {
@@ -63,16 +68,16 @@ public class VerticalScaleInstanceProvider {
             LOGGER.warn("Invalid availabilityZoneForSelection; no corresponding key found in cloudVmResponses.");
             return new CloudVmTypes(Map.of(availabilityZoneForSelection, Set.of()), Map.of());
         }
-        Optional<VmType> currentInstance = getInstance(currentInstanceType, vmTypes);
-        LOGGER.debug("currentInstance: {}", currentInstance);
+        List<Optional<VmType>> currentInstances = getInstances(currentInstanceTypes, vmTypes);
+        LOGGER.debug("currentInstances: {}", currentInstances);
         Set<VmType> suitableInstances = vmTypes
                 .stream()
                 .filter(availableVmType -> {
                     try {
                         validateInstanceType(
                                 cloudPlatform,
-                                currentInstance,
-                                Optional.of(availableVmType),
+                                currentInstances,
+                                List.of(Optional.ofNullable(availableVmType)),
                                 instanceGroupAvailabilityZones,
                                 Map.of(),
                                 cdpResourceType
@@ -96,14 +101,14 @@ public class VerticalScaleInstanceProvider {
     }
 
     public void validateInstanceTypeForVerticalScaling(String cloudPlatform,
-        Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
-        Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
+            List<Optional<VmType>> currentInstanceTypeOptional, List<Optional<VmType>> requestedInstanceTypeOptional,
+            Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
         validateInstanceTypeForVerticalScaling(cloudPlatform, currentInstanceTypeOptional, requestedInstanceTypeOptional,
                 instanceGroupAvailabilityZones, additionalProperties, CdpResourceType.DEFAULT);
     }
 
     public void validateInstanceTypeForVerticalScaling(String cloudPlatform,
-            Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
+            List<Optional<VmType>> currentInstanceTypeOptional, List<Optional<VmType>> requestedInstanceTypeOptional,
             Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties, CdpResourceType cdpResourceType) {
         try {
             validateInstanceType(
@@ -119,38 +124,43 @@ public class VerticalScaleInstanceProvider {
         }
     }
 
-    private void validateInstanceType(String cloudPlatform, Optional<VmType> currentInstanceTypeOptional,
-            Optional<VmType> requestedInstanceTypeOptional, Set<String> instanceGroupAvailabilityZones,
+    private void validateInstanceType(String cloudPlatform, List<Optional<VmType>> currentInstanceTypeOptionals,
+            List<Optional<VmType>> requestedInstanceTypeOptionals, Set<String> instanceGroupAvailabilityZones,
             Map<String, Object> additionalProperties, CdpResourceType cdpResourceType) {
-        if (currentInstanceTypeOptional.isEmpty()) {
-            throw new BadRequestException("The current instancetype does not exist on provider side.");
-        }
-
-        if (requestedInstanceTypeOptional.isPresent()) {
-            VmType currentInstanceType = currentInstanceTypeOptional.get();
-            VmType requestedInstanceType = requestedInstanceTypeOptional.get();
-            String currentInstanceTypeName = currentInstanceType.getValue();
-            String requestedInstanceTypeName = requestedInstanceType.getValue();
-            VmTypeMeta currentInstanceTypeMetaData = currentInstanceType.getMetaData();
-            VmTypeMeta requestedInstanceTypeMetaData = requestedInstanceType.getMetaData();
-
-            validateArchitecture(currentInstanceType, requestedInstanceType);
-            validateCPU(requestedInstanceTypeName, requestedInstanceTypeMetaData, cdpResourceType);
-            validateMemory(requestedInstanceTypeName, requestedInstanceTypeMetaData, cdpResourceType);
-            validateEphemeral(currentInstanceTypeName, requestedInstanceTypeName,
-                    currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
-            validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
-                    currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
-            validateHyperDisk(cloudPlatform, currentInstanceType, requestedInstanceType);
-            validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
-            validateHostEncryption(currentInstanceType, requestedInstanceType, additionalProperties);
-            validateEnhancedNetwork(currentInstanceType, requestedInstanceType);
-            if (instanceGroupAvailabilityZones != null) {
-                validateInstanceSupportsExistingZones(instanceGroupAvailabilityZones, requestedInstanceTypeMetaData.getAvailabilityZones(),
-                        requestedInstanceTypeName);
+        // Every (current, requested) pair must validate: with fallback instance types, any of the actual provider
+        // types could be replaced by any of the requested types, so all cross-pair compatibilities are required.
+        for (Optional<VmType> currentInstanceTypeOptional : currentInstanceTypeOptionals) {
+            if (currentInstanceTypeOptional.isEmpty()) {
+                throw new BadRequestException("The current instancetype does not exist on provider side.");
             }
-        } else {
-            throw new BadRequestException("The requested instancetype does not exist on provider side.");
+            for (Optional<VmType> requestedInstanceTypeOptional : requestedInstanceTypeOptionals) {
+                if (requestedInstanceTypeOptional.isPresent()) {
+                    VmType currentInstanceType = currentInstanceTypeOptional.get();
+                    VmType requestedInstanceType = requestedInstanceTypeOptional.get();
+                    String currentInstanceTypeName = currentInstanceType.getValue();
+                    String requestedInstanceTypeName = requestedInstanceType.getValue();
+                    VmTypeMeta currentInstanceTypeMetaData = currentInstanceType.getMetaData();
+                    VmTypeMeta requestedInstanceTypeMetaData = requestedInstanceType.getMetaData();
+
+                    validateArchitecture(currentInstanceType, requestedInstanceType);
+                    validateCPU(requestedInstanceTypeName, requestedInstanceTypeMetaData, cdpResourceType);
+                    validateMemory(requestedInstanceTypeName, requestedInstanceTypeMetaData, cdpResourceType);
+                    validateEphemeral(currentInstanceTypeName, requestedInstanceTypeName,
+                            currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
+                    validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
+                            currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
+                    validateHyperDisk(cloudPlatform, currentInstanceType, requestedInstanceType);
+                    validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
+                    validateHostEncryption(currentInstanceType, requestedInstanceType, additionalProperties);
+                    validateEnhancedNetwork(currentInstanceType, requestedInstanceType);
+                    if (instanceGroupAvailabilityZones != null) {
+                        validateInstanceSupportsExistingZones(instanceGroupAvailabilityZones, requestedInstanceTypeMetaData.getAvailabilityZones(),
+                                requestedInstanceTypeName);
+                    }
+                } else {
+                    throw new BadRequestException("The requested instancetype does not exist on provider side.");
+                }
+            }
         }
     }
 
@@ -287,6 +297,14 @@ public class VerticalScaleInstanceProvider {
                 .stream()
                 .filter(e -> e.getValue().equals(currentInstanceType))
                 .findFirst();
+    }
+
+    private List<Optional<VmType>> getInstances(List<String> instanceTypes, Set<VmType> allVmTypes) {
+        return instanceTypes.stream()
+                .map(instanceType -> allVmTypes.stream()
+                        .filter(vmType -> vmType.getValue().equals(instanceType))
+                        .findFirst())
+                .collect(Collectors.toList());
     }
 
     public String getAvailabilityZone(String availabilityZone, Map<String, Set<VmType>> cloudVmResponses) {

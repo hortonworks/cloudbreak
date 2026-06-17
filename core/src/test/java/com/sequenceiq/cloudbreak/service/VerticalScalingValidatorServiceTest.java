@@ -640,6 +640,182 @@ public class VerticalScalingValidatorServiceTest {
         verify(stack, never()).isAvailable();
     }
 
+    @Test
+    public void testValidateInstanceTypeWithMultipleCurrentInstanceTypesSuccess() {
+        String instanceGroupNameInRequest = "compute";
+        String templateInstanceType = "m3.xlarge";
+        String fallbackInstanceType = "m3.2xlarge";
+        String actualProviderInstanceType1 = "m3.xlarge";
+        String actualProviderInstanceType2 = "m3.2xlarge";
+
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        template.setFallbackInstanceTypes(new Json(List.of(fallbackInstanceType)));
+
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
+        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd1 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        imd1.setProviderInstanceType(actualProviderInstanceType1);
+        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd2 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        imd2.setProviderInstanceType(actualProviderInstanceType2);
+        instanceGroup.setInstanceMetaData(Set.of(imd1, imd2));
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        Credential credential = credential();
+        ExtendedCloudCredential cloudCredential = extendedCloudCredential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(eq(credential))).thenReturn(cloudCredential);
+
+        VmType vt1 = vmType(actualProviderInstanceType1, 1, 1, null, null, List.of("1"));
+        VmType vt2 = vmType(actualProviderInstanceType2, 2, 2, null, null, List.of("1"));
+        CloudVmTypes cloudVmTypes = cloudVmTypes("eu1", vt1, vt2);
+
+        when(stack.isMultiAz()).thenReturn(false);
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(templateInstanceType);
+        instanceTemplateV4Request.setFallbackInstanceTypes(List.of(fallbackInstanceType));
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), any(), isNull(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeWithProviderTypeNotInTemplateThrowsBadRequest() {
+        String instanceGroupNameInRequest = "compute";
+        String templateInstanceType = "m3.xlarge";
+        String actualProviderInstanceType = "m3.4xlarge";
+
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
+        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd1 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        imd1.setProviderInstanceType(actualProviderInstanceType);
+        instanceGroup.setInstanceMetaData(Set.of(imd1));
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(templateInstanceType);
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateInstanceType(stack, stackVerticalScaleV4Request));
+        assertEquals("There are actual instance types '[m3.4xlarge]' in the group 'compute' that are not present in the template.",
+                badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidateInstanceTypeAcceptsCaseDifferenceBetweenTemplateAndProviderInstanceType() {
+        String instanceGroupNameInRequest = "compute";
+        String templateInstanceType = "Standard_D8_v3";
+        String providerInstanceTypeDifferentCase = "standard_d8_v3";
+
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
+        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd1 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        imd1.setProviderInstanceType(providerInstanceTypeDifferentCase);
+        instanceGroup.setInstanceMetaData(Set.of(imd1));
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        Credential credential = credential();
+        ExtendedCloudCredential cloudCredential = extendedCloudCredential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(eq(credential))).thenReturn(cloudCredential);
+
+        VmType vt = vmType(providerInstanceTypeDifferentCase, 1, 1, null, null, List.of("1"));
+        VmType vtRequested = vmType("Standard_D16_v3", 2, 2, null, null, List.of("1"));
+        CloudVmTypes cloudVmTypes = cloudVmTypes("eu1", vt, vtRequested);
+
+        when(stack.isMultiAz()).thenReturn(false);
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformVariant()).thenReturn("AZURE");
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType("Standard_D16_v3");
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), any(), isNull(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeIgnoresTerminatedAndZombieInstanceMetadata() {
+        String instanceGroupNameInRequest = "compute";
+        String templateInstanceType = "m3.xlarge";
+        // Terminated/zombie metadata carries an obsolete instance type that's NOT in the template;
+        // it must be filtered out and not cause a BadRequestException.
+        String terminatedProviderInstanceType = "m3.legacy";
+
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
+        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData terminated =
+                new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        terminated.setProviderInstanceType(terminatedProviderInstanceType);
+        terminated.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED);
+        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData zombie =
+                new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        zombie.setProviderInstanceType(terminatedProviderInstanceType);
+        zombie.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE);
+        instanceGroup.setInstanceMetaData(Set.of(terminated, zombie));
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        Credential credential = credential();
+        ExtendedCloudCredential cloudCredential = extendedCloudCredential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(eq(credential))).thenReturn(cloudCredential);
+
+        VmType vt = vmType(templateInstanceType, 1, 1, null, null, List.of("1"));
+        VmType vtRequested = vmType("m3.2xlarge", 2, 2, null, null, List.of("1"));
+        CloudVmTypes cloudVmTypes = cloudVmTypes("eu1", vt, vtRequested);
+
+        when(stack.isMultiAz()).thenReturn(false);
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType("m3.2xlarge");
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), any(), isNull(), any());
+    }
+
     private Credential credential() {
         return Credential.builder().crn("crn").name("name").cloudPlatform("aws").account("accountId").attributes(new Json("")).build();
     }

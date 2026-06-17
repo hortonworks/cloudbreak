@@ -79,6 +79,38 @@ public class EnvironmentPlatformResourceControllerTest {
         verify(request, times(1)).setFilters(Map.of(NetworkConstants.AVAILABILITY_ZONES, "1,2,3"));
     }
 
+    @Test
+    void testGetVmTypesForVerticalScalingWithMultipleInstanceTypesForwardsInstanceTypesToProvider() {
+        PlatformResourceRequest request = mock(PlatformResourceRequest.class);
+        CloudVmTypes cloudVmTypes = setupMocksForMultipleInstanceTypes(request, List.of("m5.xlarge", "m5.2xlarge"));
+        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScalingWithMultipleInstanceTypes(ENV_CRN, List.of("m5.xlarge", "m5.2xlarge"),
+                null, List.of("1"), Architecture.X86_64.getName()));
+        verify(request, times(1)).setFilters(Map.of(NetworkConstants.AVAILABILITY_ZONES, "1"));
+        verify(verticalScaleInstanceProvider, times(1))
+                .listInstanceTypes(null, null, List.of("m5.xlarge", "m5.2xlarge"), cloudVmTypes, null, null);
+    }
+
+    private CloudVmTypes setupMocksForMultipleInstanceTypes(PlatformResourceRequest request, List<String> instanceTypes) {
+        Region region = new Region();
+        region.setName("west-us2");
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.getAccountId()).thenReturn(null);
+        }
+        EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentDto.getRegions()).thenReturn(Set.of(region));
+        when(environmentService.getByCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(environmentDto);
+
+        when(platformParameterService.getPlatformResourceRequestByEnvironmentForVerticalScaling(ACCOUNT_ID, ENV_CRN, "west-us2",
+                null)).thenReturn(request);
+        CloudVmTypes cloudVmTypes = mock(CloudVmTypes.class);
+        when(platformParameterService.getVmTypesByCredential(request)).thenReturn(cloudVmTypes);
+        when(verticalScaleInstanceProvider.listInstanceTypes(null, null, instanceTypes,
+                cloudVmTypes, null, null)).thenReturn(cloudVmTypes);
+        PlatformVmtypesResponse response = mock(PlatformVmtypesResponse.class);
+        when(cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes)).thenReturn(response);
+        return cloudVmTypes;
+    }
+
     private void setupMocks(PlatformResourceRequest request) {
         Region region = new Region();
         region.setName("west-us2");
@@ -90,11 +122,11 @@ public class EnvironmentPlatformResourceControllerTest {
         when(environmentService.getByCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(environmentDto);
 
         when(platformParameterService.getPlatformResourceRequestByEnvironmentForVerticalScaling(ACCOUNT_ID, ENV_CRN, "west-us2",
-                        null)).thenReturn(request);
+                null)).thenReturn(request);
         CloudVmTypes cloudVmTypes = mock(CloudVmTypes.class);
         when(platformParameterService.getVmTypesByCredential(request)).thenReturn(cloudVmTypes);
-        when(verticalScaleInstanceProvider.listInstanceTypes(null, null, null, cloudVmTypes, null,
-                null)).thenReturn(cloudVmTypes);
+        when(verticalScaleInstanceProvider.listInstanceTypes(null, null, List.<String>of(),
+                cloudVmTypes, null, null)).thenReturn(cloudVmTypes);
         PlatformVmtypesResponse response = mock(PlatformVmtypesResponse.class);
         when(cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes)).thenReturn(response);
     }

@@ -70,6 +70,19 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("architecture") @DefaultValue("X86_64") String architecture);
 
     @GET
+    @Path("machine_types_for_vertical_scaling_with_multiple_instancetypes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = OpEnvDescription.GET_VERTICAL_SCALE_RECOMMENDATION_MULTIPLE, description = CONNECTOR_NOTES,
+            operationId = "getVmTypesForVerticalScalingWithMultipleInstanceTypes",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    PlatformVmtypesResponse getVmTypesForVerticalScalingWithMultipleInstanceTypes(
+            @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
+            @QueryParam("instanceTypes") List<String> instanceTypes,
+            @QueryParam("resourceType") CdpResourceType resourceType,
+            @QueryParam("availabilityZones") List<String> availabilityZones,
+            @QueryParam("architecture") @DefaultValue("X86_64") String architecture);
+
+    @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = OpEnvDescription.GET_REGIONS_BY_ENVIRONMENT, description = CONNECTOR_NOTES,

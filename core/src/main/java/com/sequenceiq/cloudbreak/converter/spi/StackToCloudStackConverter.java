@@ -567,6 +567,11 @@ public class StackToCloudStackConverter {
                     .findFirst().ifPresent(group -> {
                         if (template.getInstanceType() != null) {
                             group.getReferenceInstanceTemplate().setFlavor(template.getInstanceType());
+                            if (template.getFallbackInstanceTypes() != null) {
+                                group.getReferenceInstanceTemplate().setFallbackInstanceTypes(template.getFallbackInstanceTypes());
+                            } else {
+                                group.getReferenceInstanceTemplate().setFallbackInstanceTypes(List.of());
+                            }
                             group.getInstances().stream()
                                     .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
                                     .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
