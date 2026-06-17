@@ -21,4 +21,11 @@ public class CredentialVerificationRequest extends CloudPlatformRequest<Credenti
     public boolean isCreationVerification() {
         return creationVerification;
     }
+
+    @Override
+    public String toString() {
+        return "CredentialVerificationRequest{" +
+                "creationVerification=" + creationVerification +
+                "} " + super.toString();
+    }
 }

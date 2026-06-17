@@ -1,6 +1,7 @@
 package com.sequenceiq.common.api.type;
 
 import java.util.List;
+import java.util.Set;
 
 public enum ResourceType {
     // AWS
@@ -109,6 +110,11 @@ public enum ResourceType {
 
     private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE);
 
+    private static final Set<ResourceType> AWS_LB_RESOURCE_TYPES = Set.of(
+            ELASTIC_LOAD_BALANCER,
+            ELASTIC_LOAD_BALANCER_LISTENER,
+            ELASTIC_LOAD_BALANCER_TARGET_GROUP);
+
     private final CommonResourceType commonResourceType;
 
     private final boolean taggable;
@@ -144,5 +150,9 @@ public enum ResourceType {
 
     public static boolean isCanaryResource(ResourceType resourceType) {
         return resourceType.getCommonResourceType() == CommonResourceType.CANARY;
+    }
+
+    public static Set<ResourceType> getAwsLbResourceTypes() {
+        return AWS_LB_RESOURCE_TYPES;
     }
 }

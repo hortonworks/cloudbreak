@@ -42,6 +42,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String GET_IMAGE = "Get current image used for creating instances";
     public static final String UPGRADE_FREEIPA = "Upgrades FreeIPA to the latest or defined image";
     public static final String UPGRADE_OPTIONS = "Get available images for FreeIPA upgrade. If catalog is defined use the catalog as image source.";
+    public static final String PREPARE_UPGRADE = "Prepares FreeIPA for upgrade by validating required cloud permissions";
     public static final String UPSCALE_FREEIPA = "Upscales FreeIPA instances";
     public static final String DOWNSCALE_FREEIPA = "Downscales FreeIPA instances, either by providing a target AvailabilityType, or specifying a list of " +
             "nodes to delete";

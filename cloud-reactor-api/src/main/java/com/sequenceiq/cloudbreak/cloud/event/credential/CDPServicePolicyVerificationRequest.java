@@ -27,4 +27,12 @@ public class CDPServicePolicyVerificationRequest extends CloudPlatformRequest<CD
     public Map<String, String> getExperiencePrerequisites() {
         return experiencePrerequisites;
     }
+
+    @Override
+    public String toString() {
+        return "CDPServicePolicyVerificationRequest{" +
+                "services=" + services +
+                ", experiencePrerequisites=" + experiencePrerequisites +
+                "} " + super.toString();
+    }
 }

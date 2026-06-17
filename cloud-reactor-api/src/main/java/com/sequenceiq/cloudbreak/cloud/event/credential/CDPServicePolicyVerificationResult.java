@@ -25,4 +25,11 @@ public class CDPServicePolicyVerificationResult extends CloudPlatformResult {
     public CDPServicePolicyVerificationResponses getCdpServicePolicyVerificationResponses() {
         return cdpServicePolicyVerificationResponses;
     }
+
+    @Override
+    public String toString() {
+        return "CDPServicePolicyVerificationResult{" +
+                "cdpServicePolicyVerificationResponses=" + cdpServicePolicyVerificationResponses +
+                "} " + super.toString();
+    }
 }

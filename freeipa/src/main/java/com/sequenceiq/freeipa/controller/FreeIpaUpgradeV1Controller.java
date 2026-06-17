@@ -12,9 +12,11 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaPrepareUpgradeResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
+import com.sequenceiq.freeipa.service.upgrade.PrepareUpgradeService;
 import com.sequenceiq.freeipa.service.upgrade.UpgradeService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -23,6 +25,9 @@ public class FreeIpaUpgradeV1Controller implements FreeIpaUpgradeV1Endpoint {
 
     @Inject
     private UpgradeService upgradeService;
+
+    @Inject
+    private PrepareUpgradeService prepareUpgradeService;
 
     @Inject
     private CrnService crnService;
@@ -39,5 +44,12 @@ public class FreeIpaUpgradeV1Controller implements FreeIpaUpgradeV1Endpoint {
     public FreeIpaUpgradeOptions getFreeIpaUpgradeOptions(@ResourceCrn String environmentCrn, String catalog, Boolean allowMajorOsUpgrade) {
         String accountId = crnService.getCurrentAccountId();
         return upgradeService.collectUpgradeOptions(accountId, environmentCrn, catalog, allowMajorOsUpgrade);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = UPGRADE_FREEIPA)
+    public FreeIpaPrepareUpgradeResponse prepareUpgrade(@RequestObject FreeIpaUpgradeRequest request) {
+        String accountId = crnService.getCurrentAccountId();
+        return prepareUpgradeService.prepareUpgrade(accountId, request);
     }
 }

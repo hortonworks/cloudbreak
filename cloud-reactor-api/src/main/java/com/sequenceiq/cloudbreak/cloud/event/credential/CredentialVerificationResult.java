@@ -24,4 +24,11 @@ public class CredentialVerificationResult extends CloudPlatformResult {
     public CloudCredentialStatus getCloudCredentialStatus() {
         return cloudCredentialStatus;
     }
+
+    @Override
+    public String toString() {
+        return "CredentialVerificationResult{" +
+                "cloudCredentialStatus=" + cloudCredentialStatus +
+                "} " + super.toString();
+    }
 }

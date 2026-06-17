@@ -8,4 +8,9 @@ public class CredentialExperiencePolicyRequest extends CloudPlatformRequest<Cred
     public CredentialExperiencePolicyRequest(CloudContext cloudContext) {
         super(cloudContext, null);
     }
+
+    @Override
+    public String toString() {
+        return "CredentialExperiencePolicyRequest{} " + super.toString();
+    }
 }

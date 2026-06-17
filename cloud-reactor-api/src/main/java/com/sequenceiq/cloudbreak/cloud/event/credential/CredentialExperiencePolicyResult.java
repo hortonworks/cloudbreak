@@ -20,4 +20,11 @@ public class CredentialExperiencePolicyResult extends CloudPlatformResult {
     public Map<String, String> getPolicies() {
         return policies;
     }
+
+    @Override
+    public String toString() {
+        return "CredentialExperiencePolicyResult{" +
+                "policies=" + policies +
+                "} " + super.toString();
+    }
 }

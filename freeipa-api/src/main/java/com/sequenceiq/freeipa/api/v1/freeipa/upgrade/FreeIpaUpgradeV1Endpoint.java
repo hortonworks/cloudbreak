@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaPrepareUpgradeResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
@@ -47,4 +48,12 @@ public interface FreeIpaUpgradeV1Endpoint {
             @QueryParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn,
             @QueryParam("catalog") String catalog,
             @QueryParam("allowMajorOsUpgrade") Boolean allowMajorOsUpgrade);
+
+    @POST
+    @Path("/prepare_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.PREPARE_UPGRADE, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "prepareUpgradeFreeIpaV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FreeIpaPrepareUpgradeResponse prepareUpgrade(@Valid FreeIpaUpgradeRequest request);
 }

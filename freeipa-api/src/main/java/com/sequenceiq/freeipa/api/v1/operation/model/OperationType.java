@@ -28,7 +28,8 @@ public enum OperationType {
     CANCEL_TRUST_SETUP,
     REPAIR_TRUST_SETUP,
     UPGRADE_DEFAULT_OUTBOUND,
-    MIGRATE_TO_MULTI_AZ;
+    MIGRATE_TO_MULTI_AZ,
+    PREPARE_UPGRADE;
 
     private final String lowerCaseName;
 
