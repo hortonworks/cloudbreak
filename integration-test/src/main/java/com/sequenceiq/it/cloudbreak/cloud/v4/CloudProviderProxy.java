@@ -597,11 +597,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getDatahubInstanceType(String name) {
-        return delegate.getDatahubInstanceType(name);
-    }
-
-    @Override
     public String getDatalakeInstanceType(String name) {
         return delegate.getDatalakeInstanceType(name);
     }
