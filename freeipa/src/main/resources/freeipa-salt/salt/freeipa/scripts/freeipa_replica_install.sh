@@ -4,6 +4,7 @@ set -e
 
 function cleanup() {
   kdestroy
+  rm -f /tmp/krb5cc_ldap /tmp/krb5cc_http
 }
 
 trap cleanup EXIT
@@ -130,6 +131,28 @@ ipa-replica-install \
           --no-ntp \
 {%- endif %}
           --dirsrv-config-file /opt/salt/initial-ldap-conf.ldif
+
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 8 %}
+verify_kinit() {
+  local ok=true
+  if ! echo "$FPW" | kinit $ADMIN_USER; then ok=false; fi
+  if ! KRB5CCNAME=/tmp/krb5cc_ldap kinit -k -t /etc/dirsrv/ds.keytab "ldap/$FQDN"; then ok=false; fi
+  if ! KRB5CCNAME=/tmp/krb5cc_http kinit -k -t /var/lib/ipa/gssproxy/http.keytab "HTTP/$FQDN"; then ok=false; fi
+  $ok
+}
+
+echo "Verifying Kerberos credentials after replica install"
+if ! verify_kinit; then
+  echo "kinit failed after replica install, restarting IPA services"
+  ipactl restart
+  sleep 10
+  if ! verify_kinit; then
+    echo "kinit still failing after ipactl restart — replica install cannot proceed"
+    exit 1
+  fi
+fi
+echo "Kerberos credentials verified successfully"
+{%- endif %}
 
 set +e
 
