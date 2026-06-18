@@ -67,7 +67,7 @@ If you use an **AWS or Azure MCP** in Cursor/Gemini, it typically picks up the *
 
 ## Repo context
 
-Cloudbreak implementation code maps roughly to **`cloud-aws-*`**, **`cloud-azure/`**, **`cloud-gcp/`**, and **`cloud-api/`** (see root `GEMINI.md`). Use this skill for **account reality**; use **`cb-architect`** / module **`GEMINI.md`** for **code-level** behavior.
+Cloudbreak implementation code maps roughly to **`cloud-aws-*`**, **`cloud-azure/`**, **`cloud-gcp/`**, and **`cloud-api/`** (see root `AGENTS.md`). Use this skill for **account reality**; use root/module **`AGENTS.md`** for **code-level** behavior.
 
 ---
 
@@ -159,5 +159,5 @@ Prefer **`gcloud`** **list** / **describe**; avoid **`delete`** without explicit
 
 ## Pairing
 
-- **`cb-triage` / `cb-junior-dev`** — Ground “what Cloudbreak should do” with “what the cloud currently shows.”
+- **`.agent/WORKFLOW.md`** — Ground “what Cloudbreak should do” with “what the cloud currently shows.”
 - **`cdp-docs`** — Customer-facing network and CDP requirements vs your account layout.

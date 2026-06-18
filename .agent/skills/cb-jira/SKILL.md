@@ -31,7 +31,7 @@ Resolve other clans’ ids from `customfield_10001` on a representative issue (R
 
 ## Domain mapping (Mascot Clan → repository)
 
-Same mapping as **`.agent/WORKFLOW.md`** and **cb-junior-dev**:
+Same mapping as **`.agent/WORKFLOW.md`**:
 
 | Clan        | Primary areas |
 |-------------|----------------|
@@ -44,6 +44,16 @@ Same mapping as **`.agent/WORKFLOW.md`** and **cb-junior-dev**:
 ## Labels and epics
 
 - **Quarterly epics**: Labels such as `Q4FY26-CB`.
+
+## Confluence (CB wiki scope)
+
+CB engineering docs live under the **Cloudbreak Engineering Home** hub (page id **`92898027`**, space **`ENG`**). Scope searches to that subtree with the `ancestor` filter rather than the whole space, e.g.:
+
+```cql
+type = page AND space = "ENG" AND ancestor = 92898027 AND text ~ "your keyword"
+```
+
+Pull keywords from the Jira summary, error text, labels, or components. When search returns a page URL, fetch by the numeric **page id** (the segment in `/wiki/spaces/.../pages/<pageId>/...`) to read the full body. If the ticket links outside this subtree, still fetch those pages — the ancestor filter is only the default discovery scope.
 
 ## Commits and PRs
 

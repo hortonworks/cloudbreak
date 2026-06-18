@@ -1,6 +1,6 @@
 # Cloudbreak Development SOP: Jira-to-PR Workflow
 
-This workflow defines the standard operating procedure for resolving Jira tickets using the `cb-junior-dev` persona. It can be executed autonomously or with human intervention.
+This workflow defines the standard operating procedure for resolving Jira tickets. It can be executed autonomously or with human intervention.
 
 ## Phase 1: Jira Ingestion
 1.  **Ticket ID**: User specifies a ticket (e.g., `CB-12345`).
@@ -21,7 +21,7 @@ This workflow defines the standard operating procedure for resolving Jira ticket
 3.  **Verify**: Run the reproduction test and confirm it passes.
 
 ## Phase 4: Full-Module Validation
-1.  **Audit**: Run the `cb-developer` skill for import standardization and API audits.
+1.  **Audit**: Standardize import order and audit API surface (`boolean` over `Boolean`, `String` over `Enum`, `jakarta.*` over `javax.*`) per the mandates in root `AGENTS.md`.
 2.  **Full Test Suite**: Run `./gradlew :<module>:test`.
 3.  **Checkstyle/Lint**: (Optional) Run `./gradlew checkstyleMain` if configured.
 

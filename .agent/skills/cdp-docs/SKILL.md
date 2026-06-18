@@ -1,6 +1,6 @@
 ---
 name: cdp-docs
-description: Official CDP Public Cloud documentation lookup. Use this skill when any agent (Developer, Architect, Reviewer) needs to verify official Cloudera requirements, release notes, or API specifications for the Public Cloud.
+description: Official CDP Public Cloud documentation lookup. Use this skill to verify official Cloudera requirements, release notes, or API specifications for the Public Cloud.
 ---
 
 # CDP Public Cloud Documentation (Reference)

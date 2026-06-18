@@ -341,8 +341,7 @@ If a server fails to start, check the client’s **MCP logs** for Docker errors 
 
 ## Repo skills that benefit from MCP
 
-- **`cb-triage`**, **`cb-junior-dev`**: Jira + Confluence (when configured).
-- **`cb-github-workflows`**: GitHub PRs, diffs, check runs.
+- **`cb-jira`**: Jira + Confluence conventions (when configured); see also `WORKFLOW.md` for the Jira-to-PR flow.
 - **`cb-cloud-providers`**: Read-first AWS/Azure/GCP checks; **AWS MCP** and **Azure MCP** align with the same credential flows as **AWS CLI** and **Azure CLI** when configured as above.
 
 See also `WORKFLOW.md` in this directory for end-to-end issue-to-PR flow.
