@@ -108,15 +108,13 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     }
 
     private void createAndWaitDataHub(TestContext testContext) {
-        String instanceType = testContext.getCloudProvider().getDatahubInstanceType("customWithStorage");
-
         testContext
                 .given("dx", DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataMartDistroXBlueprintNameForCurrentRuntime())
                 .withSeLinuxSecurity(SeLinux.ENFORCING.name())
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .verticalScaleHostGroup()
-                        .withInstanceType(instanceType)
+                        .withStorageOptimizedInstancetype()
                         .build())
                 .addTags(DX_TAGS)
                 .when(distroXTestClient.create(), RunningParameter.key("dx"))
