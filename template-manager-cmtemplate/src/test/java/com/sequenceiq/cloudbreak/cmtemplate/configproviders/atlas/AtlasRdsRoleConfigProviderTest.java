@@ -67,8 +67,32 @@ class AtlasRdsRoleConfigProviderTest {
     }
 
     @Test
-    void testGetRoleConfigs() {
-        assertThat(underTest.getRoleConfigs("ATLAS_SERVER", mock(CmTemplateProcessor.class), mock(TemplatePreparationObject.class))).isEmpty();
+    void testGetRoleConfigsWhenSslEnabled() {
+        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
+        RdsView rdsView = mock(RdsView.class);
+        when(source.getRdsView(DatabaseType.ATLAS)).thenReturn(rdsView);
+        when(rdsView.isUseSsl()).thenReturn(true);
+        when(rdsView.getSslCertificateFilePath()).thenReturn("/path/to/cert.pem");
+
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs("ATLAS_SERVER", mock(CmTemplateProcessor.class), source);
+
+        assertThat(result).hasSize(4);
+        assertConfig(result, "atlas.db.ssl.enabled", "true");
+        assertConfig(result, "atlas.db.ssl.required", "true");
+        assertConfig(result, "atlas.db.ssl.verifyServerCertificate", "true");
+        assertConfig(result, "atlas.db.ssl.certificateFile", "/path/to/cert.pem");
+    }
+
+    @Test
+    void testGetRoleConfigsWhenSslDisabled() {
+        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
+        RdsView rdsView = mock(RdsView.class);
+        when(source.getRdsView(DatabaseType.ATLAS)).thenReturn(rdsView);
+        when(rdsView.isUseSsl()).thenReturn(false);
+
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs("ATLAS_SERVER", mock(CmTemplateProcessor.class), source);
+
+        assertThat(result).isEmpty();
     }
 
     @Test

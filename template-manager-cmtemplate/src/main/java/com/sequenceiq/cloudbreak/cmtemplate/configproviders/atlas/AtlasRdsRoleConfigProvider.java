@@ -7,6 +7,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.g
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class AtlasRdsRoleConfigProvider extends AbstractRdsRoleConfigProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AtlasRdsRoleConfigProvider.class);
 
     private static final String ATLAS_SERVER_ROLE_TYPE = "ATLAS_SERVER";
 
@@ -57,8 +60,6 @@ public class AtlasRdsRoleConfigProvider extends AbstractRdsRoleConfigProvider {
         serviceConfigs.add(config("atlas_database_user", rdsView.getConnectionUserName()));
         serviceConfigs.add(config("atlas_database_password", rdsView.getConnectionPassword()));
         serviceConfigs.add(config(ATLAS_SAFETY_VALVE_CONFIG_KEY, getSafetyValveProperty("atlas_database_type", "PostgreSQL")));
-
-        //TODO Add Database SSL config to force wire encryption and certificate verification - the feature is still on PR
         return serviceConfigs;
     }
 
@@ -89,6 +90,15 @@ public class AtlasRdsRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        return List.of();
+        List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
+        RdsView rdsView = getRdsView(source);
+        if (rdsView.isUseSsl()) {
+            LOGGER.info("Adding SSL options to {}", ATLAS_SERVER_ROLE_TYPE);
+            roleConfigs.add(config("atlas.db.ssl.enabled", "true"));
+            roleConfigs.add(config("atlas.db.ssl.required", "true"));
+            roleConfigs.add(config("atlas.db.ssl.verifyServerCertificate", "true"));
+            roleConfigs.add(config("atlas.db.ssl.certificateFile", rdsView.getSslCertificateFilePath()));
+        }
+        return roleConfigs;
     }
 }
