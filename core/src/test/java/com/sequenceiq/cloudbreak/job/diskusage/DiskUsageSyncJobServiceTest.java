@@ -33,7 +33,6 @@ import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
@@ -69,9 +68,6 @@ class DiskUsageSyncJobServiceTest {
     @Mock
     private JobKey jobKey;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @InjectMocks
     private DiskUsageSyncJobService underTest;
 
@@ -90,7 +86,6 @@ class DiskUsageSyncJobServiceTest {
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
         configureEmbeddedDhStack();
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(new DiskUsageSyncJobAdapter(jobResource));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
@@ -120,7 +115,6 @@ class DiskUsageSyncJobServiceTest {
         when(diskUsageSyncConfig.getIntervalInMinutes()).thenReturn(10);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(stack);
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
@@ -133,7 +127,6 @@ class DiskUsageSyncJobServiceTest {
         when(stack.getCloudPlatform()).thenReturn("AZURE");
         configureStack(DATALAKE, null);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(stack);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
@@ -146,7 +139,6 @@ class DiskUsageSyncJobServiceTest {
         when(stack.getCloudPlatform()).thenReturn("AZURE");
         configureStack(WORKLOAD, NON_HA);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(stack);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
@@ -155,19 +147,6 @@ class DiskUsageSyncJobServiceTest {
     void testScheduleWithIdWhenDiskUsageSyncIsDisabled() throws TransactionService.TransactionExecutionException {
         StackView stackView = mock(StackView.class);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.FALSE);
-
-        underTest.schedule(stackView);
-        verify(scheduler, never()).scheduleJob(any(), any());
-    }
-
-    @Test
-    void testScheduleWithIdWhenEntitlementIsDisabled() throws TransactionService.TransactionExecutionException {
-        configureJobResource();
-        StackView stackView = mock(StackView.class);
-        when(stackView.getId()).thenReturn(1L);
-        when(stackView.getCloudPlatform()).thenReturn("AZURE");
-        when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(false);
 
         underTest.schedule(stackView);
         verify(scheduler, never()).scheduleJob(any(), any());
@@ -183,7 +162,6 @@ class DiskUsageSyncJobServiceTest {
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
         configureEmbeddedDhStack();
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         DiskUsageSyncJobAdapter resource = new DiskUsageSyncJobAdapter(jobResource);
         underTest.schedule(resource);
         verify(scheduler, times(1)).scheduleJob(any(), any());
@@ -244,26 +222,11 @@ class DiskUsageSyncJobServiceTest {
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
         configureEmbeddedDhStack();
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         doThrow(new SchedulerRuntimeException("Test exception", new Exception())).when(scheduler).scheduleJob(any(), any());
 
         underTest.schedule(new DiskUsageSyncJobAdapter(jobResource));
 
         verify(scheduler, times(1)).scheduleJob(any(), any());
-    }
-
-    @Test
-    void testScheduleWhenEntitlementServiceThrowsException() throws TransactionService.TransactionExecutionException {
-        JobResource jobResource = mock(JobResource.class);
-        when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
-        when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
-        when(jobResource.getProvider()).thenReturn(Optional.of("AZURE"));
-        when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
-        doThrow(new RuntimeException("Entitlement exception")).when(entitlementService).isDbDiskAutoResizeEnabled(any());
-
-        underTest.schedule(new DiskUsageSyncJobAdapter(jobResource));
-
-        verify(scheduler, never()).scheduleJob(any(), any());
     }
 
     @Test
@@ -274,7 +237,6 @@ class DiskUsageSyncJobServiceTest {
         when(stack.getCloudPlatform()).thenReturn("AZURE");
         configureStack(WORKLOAD, null);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
-        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(stack);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
@@ -285,7 +247,7 @@ class DiskUsageSyncJobServiceTest {
         when(applicationContext.getBean(StackRepository.class)).thenReturn(jobResourceRepository);
         when(jobResourceRepository.getJobResource(1L)).thenReturn(Optional.of(jobResource));
         lenient().when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
-        when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
+        lenient().when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
         lenient().when(jobResource.getProvider()).thenReturn(Optional.of("AZURE"));
     }
 

@@ -902,7 +902,6 @@ diskusage-sync:
   dbdiskthreshold: 80
   increment: 100
   maxsize: 1000
-  dryrun: true
 
 disk-sync:
   intervalminutes: 360
