@@ -142,7 +142,7 @@ public class CMRepositoryVersionUtil {
         {
             put(AWS, List.of(StackType.DATALAKE, StackType.WORKLOAD));
             put(AZURE, List.of(StackType.DATALAKE, StackType.WORKLOAD));
-            put(GCP, List.of(StackType.DATALAKE));
+            put(GCP, List.of(StackType.DATALAKE, StackType.WORKLOAD));
         }
     };
 

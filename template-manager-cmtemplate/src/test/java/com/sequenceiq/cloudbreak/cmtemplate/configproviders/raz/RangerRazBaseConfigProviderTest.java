@@ -132,27 +132,6 @@ public class RangerRazBaseConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenGcpDataHubAnd7210ShouldNotAddProperty() {
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
-        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
-        cmRepo.setVersion("7.2.16");
-
-        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
-                .withStackType(StackType.WORKLOAD)
-                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
-                .withCloudPlatform(CloudPlatform.GCP)
-                .withProductDetails(cmRepo, List.of())
-                .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
-                .withAccountMappingView(getAccountMappingView())
-                .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
-
-        assertEquals(0, roleConfigs.size());
-    }
-
-    @Test
     public void getRoleConfigWheAzureAnd729ShouldNOTAddProperty() {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.9"));
