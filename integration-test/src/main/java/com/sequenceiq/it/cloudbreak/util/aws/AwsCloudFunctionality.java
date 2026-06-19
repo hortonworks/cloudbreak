@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
@@ -161,6 +162,10 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Override
     public List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
         return amazonEC2Util.describeVolumes(volumeIds);
+    }
+
+    public String calculateDevicePath(VolumeSetAttributes.Volume volume) {
+        return volume.getId() != null ? "/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_" + volume.getId().replace("-", "") : "";
     }
 
     @Override

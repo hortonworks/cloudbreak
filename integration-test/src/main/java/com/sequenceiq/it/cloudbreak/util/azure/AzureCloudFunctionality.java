@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -180,7 +181,7 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
+    public List<Volume> describeVolumes(List<String> volumeIds) {
         return azureClientActions.describeVolumes(volumeIds);
     }
 

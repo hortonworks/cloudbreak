@@ -50,7 +50,7 @@ public class DistroXGcpVolumesTest extends AbstractE2ETest {
     private GcpProperties gcpProperties;
 
     @Inject
-    private DistroXVolumeValidationService distroXVolumeValidationService;
+    private ClusterVolumeValidationService clusterVolumeValidationService;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -93,7 +93,7 @@ public class DistroXGcpVolumesTest extends AbstractE2ETest {
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get())
-                .then((tc, testDto, client) -> distroXVolumeValidationService.validateAttachedDisks(testDto, tc, client))
+                .then((tc, testDto, client) -> clusterVolumeValidationService.validateAttachedDisks(testDto, tc, client))
                 .validate();
     }
 

@@ -326,7 +326,7 @@ public class EC2ClientActions extends EC2Client {
             }
             return describeVolumesResponse.volumes()
                     .stream()
-                    .map(vol -> new com.sequenceiq.cloudbreak.cloud.model.Volume("",
+                    .map(vol -> new com.sequenceiq.cloudbreak.cloud.model.Volume(vol.volumeId(), "",
                                 vol.volumeType().name(), vol.size(), CloudVolumeUsageType.GENERAL)).toList();
         }
     }

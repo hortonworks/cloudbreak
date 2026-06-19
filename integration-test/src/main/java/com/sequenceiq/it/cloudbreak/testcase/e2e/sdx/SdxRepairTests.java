@@ -32,6 +32,8 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ClusterVolumeValidationService;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -63,6 +65,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     @Inject
     private StackAssertion stackAssertion;
 
+    @Inject
+    private ClusterVolumeValidationService clusterVolumeValidationService;
+
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
@@ -90,6 +95,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     .awaitForFlow();
         }
         sdxTestDto
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .then((tc, testDto, client) -> assertCronCreatedOnMasterNodesForUserHomeCreation(testDto))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -119,6 +126,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     stackAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .validate();
     }
 
@@ -150,6 +159,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     .awaitForFlow();
         }
         sdxTestDto
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(sdxTestDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .then((tc, testDto, client) -> assertCronCreatedOnMasterNodesForUserHomeCreation(testDto))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -174,6 +185,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(sdxTestDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .validate();
     }
 
@@ -205,6 +218,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     .awaitForFlow();
         }
         sdxTestDto
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .then((tc, testDto, client) -> assertCronCreatedOnMasterNodesForUserHomeCreation(testDto))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -229,6 +244,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .validate();
     }
 
@@ -278,7 +295,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForHealthyInstances();
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)));
 
         repair(sdxTestDto, sdx, MASTER.getName(), Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE));
         repair(sdxTestDto, sdx, IDBROKER.getName(), Set.of(SdxClusterStatusResponse.NODE_FAILURE));
@@ -294,6 +313,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                             describeFreeIpaResponse.getName(), describeFreeIpaResponse.getCrn());
                     return testDto;
                 })
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .validate();
     }
 
@@ -317,6 +338,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, "gateway");
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
@@ -339,6 +362,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .validate();
     }
 
@@ -369,6 +394,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, gatewayHostGroupName);
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, idBrokerHostGroupName));
@@ -396,6 +423,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     stackAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
+                .then((tc, testDto, client) ->
+                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
                 .validate();
     }
 

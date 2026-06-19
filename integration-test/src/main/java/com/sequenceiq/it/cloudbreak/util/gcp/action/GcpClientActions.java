@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -29,6 +30,7 @@ import com.google.api.services.compute.Compute.GlobalOperations;
 import com.google.api.services.compute.Compute.ZoneOperations.Get;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
+import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.cloud.storage.Blob;
@@ -36,6 +38,8 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.Storage.BlobSourceOption;
 import com.google.cloud.storage.StorageException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.cloudbreak.service.retry.RetryService;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -437,6 +441,26 @@ public class GcpClientActions extends GcpClient {
         } else {
             return null;
         }
+    }
+
+    public List<Volume> describeVolumes(List<String> volumeIds) {
+        Compute compute = buildCompute();
+        return volumeIds.stream()
+                .map(volumeId -> {
+                    try {
+                        Disk disk = compute.disks()
+                                .get(getProjectId(), getAvailabilityZone(), volumeId)
+                                .execute();
+                        String diskType = disk.getType();
+                        diskType = diskType != null ? diskType.substring(diskType.lastIndexOf('/') + 1) : null;
+                        return new Volume(volumeId, "", diskType, disk.getSizeGb().intValue(), CloudVolumeUsageType.GENERAL);
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to describe GCP disk: '{}'", volumeId, e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {

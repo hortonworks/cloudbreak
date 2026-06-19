@@ -13,6 +13,9 @@ import org.springframework.retry.annotation.Retryable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -210,8 +213,12 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    default List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
+    default List<Volume> describeVolumes(List<String> volumeIds) {
         return List.of();
+    }
+
+    default String calculateDevicePath(VolumeSetAttributes.Volume volume) {
+        return NullUtil.getIfNotNullOtherwise(volume.getDevice(), "");
     }
 
     @Retryable(

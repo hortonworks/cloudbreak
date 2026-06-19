@@ -34,6 +34,7 @@ import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.HasId;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -298,8 +299,8 @@ public class AzureClientActions {
         }
     }
 
-    public List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
-        List<com.sequenceiq.cloudbreak.cloud.model.Volume> volumeDescriptions = new ArrayList<>();
+    public List<Volume> describeVolumes(List<String> volumeIds) {
+        List<Volume> volumeDescriptions = new ArrayList<>();
         if (!volumeIds.isEmpty()) {
             //USING GET FROM AZURE CLIENT FOR DISKS INSTEAD OF LIST BECAUSE LIST DOESN'T PROVIDE SKU (WHICH IS THE TYPE OF THE DATA DISK ATTACHED)
             volumeIds.forEach(vol -> {
@@ -307,8 +308,7 @@ public class AzureClientActions {
                 String diskName = vol.substring(vol.lastIndexOf("/") + 1);
                 DiskInner azureDisk = azure.virtualMachines().manager()
                         .serviceClient().getDisks().getByResourceGroup(resourceGroupName, diskName);
-                volumeDescriptions.add(new com.sequenceiq.cloudbreak.cloud.model.Volume("",
-                        azureDisk.sku().name().toString(), azureDisk.diskSizeGB(), CloudVolumeUsageType.GENERAL));
+                volumeDescriptions.add(new Volume(diskName, "", azureDisk.sku().name().toString(), azureDisk.diskSizeGB(), CloudVolumeUsageType.GENERAL));
             });
         }
         return volumeDescriptions;

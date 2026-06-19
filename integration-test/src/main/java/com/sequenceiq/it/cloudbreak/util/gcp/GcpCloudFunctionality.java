@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -171,6 +172,11 @@ public class GcpCloudFunctionality implements CloudFunctionality {
         LOGGER.warn("CloudFormation is only available at AWS. So validation on GCP is not possible!");
         Log.then(LOGGER, "CloudFormation is only available at AWS. So validation on GCP is not possible! ");
         return true;
+    }
+
+    @Override
+    public List<Volume> describeVolumes(List<String> volumeIds) {
+        return gcpUtil.describeVolumes(volumeIds);
     }
 
     @Override

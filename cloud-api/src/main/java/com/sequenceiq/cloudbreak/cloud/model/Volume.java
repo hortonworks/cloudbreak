@@ -25,6 +25,14 @@ public class Volume {
         this.volumeUsageType = volumeUsageType;
     }
 
+    public Volume(String id, String mount, String type, int size, CloudVolumeUsageType volumeUsageType) {
+        this.id = id;
+        this.mount = mount;
+        this.type = type;
+        this.size = size;
+        this.volumeUsageType = volumeUsageType;
+    }
+
     public String getMount() {
         return mount;
     }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.it.cloudbreak.util.gcp.action.GcpClientActions;
 
 @Component
@@ -87,6 +88,10 @@ public class GcpUtil {
 
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return gcpClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datahub/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
+    public List<Volume> describeVolumes(List<String> volumeIds) {
+        return gcpClientActions.describeVolumes(volumeIds);
     }
 
     public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
