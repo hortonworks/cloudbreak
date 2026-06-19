@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -50,7 +49,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsN
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class DistroXV1RequestToStackV4RequestConverter {
@@ -87,9 +85,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private TelemetryConverter telemetryConverter;
 
     @Inject
-    private SdxClientService sdxClientService;
-
-    @Inject
     private DistroXDatabaseRequestToStackDatabaseRequestConverter databaseRequestConverter;
 
     @Inject
@@ -108,8 +103,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
         StackV4Request request = new StackV4Request();
-        SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
-        String runtime = sdxClusterResponse != null ? sdxClusterResponse.getRuntime() : null;
+        Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environment.getCrn());
+        String runtime = sdxBasicView.map(SdxBasicView::runtime).orElse(null);
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
         request.setCloudPlatform(getCloudPlatform(environment));
@@ -128,7 +123,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setPlacement(preparePlacement(environment));
-        request.setSharedService(sdxConverter.getSharedService(sdxClusterResponse));
+        request.setSharedService(sdxBasicView.map(sdxConverter::getSharedService).orElse(null));
         request.setCustomDomain(null);
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(environment));
@@ -350,17 +345,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         response.setUserDefined(source.getUserDefined());
         response.setDefaults(source.getDefaults());
         return response;
-    }
-
-    private SdxClusterResponse getSdxClusterResponse(DetailedEnvironmentResponse environment) {
-        if (environment != null) {
-            return sdxClientService
-                    .getByEnvironmentCrn(environment.getCrn())
-                    .stream()
-                    .findFirst()
-                    .orElse(null);
-        }
-        return null;
     }
 
     private PlacementSettingsV4Request preparePlacement(DetailedEnvironmentResponse environment) {

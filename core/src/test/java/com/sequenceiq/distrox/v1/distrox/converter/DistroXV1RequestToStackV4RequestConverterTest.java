@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.Architecture;
@@ -68,7 +67,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegio
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class DistroXV1RequestToStackV4RequestConverterTest {
@@ -107,9 +105,6 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
     @Mock
     private SecurityV1RequestToSecurityV4RequestConverter securityV1RequestToSecurityV4RequestConverter;
-
-    @Mock
-    private SdxClientService sdxClientService;
 
     @Mock
     private DistroXDatabaseRequestToStackDatabaseRequestConverter databaseRequestConverter;
@@ -157,9 +152,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
         when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setRuntime("7.3.1");
-        when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(sdxBasicView("7.3.1"));
 
         DistroXV1Request source = new DistroXV1Request();
         source.setEnvironmentName("envname");
@@ -177,6 +170,10 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         assertThat(convert.getVariant()).isEqualTo("AWS_NATIVE");
     }
 
+    private Optional<SdxBasicView> sdxBasicView(String runtime) {
+        return Optional.of(new SdxBasicView("name", "crn", runtime, false, null, null, null));
+    }
+
     @Test
     void testConvertWithAwsNativeEntitlementAndRuntimeVersionButVariantSetByUser() {
         DetailedEnvironmentResponse environmentResponse = createAwsEnvironment();
@@ -185,9 +182,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
         when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.TRUE);
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setRuntime("7.3.1");
-        when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(sdxBasicView("7.3.1"));
         when(providerPreferencesService.cloudConstantByName(any())).thenReturn(Optional.of(new AwsMockConstants()));
 
         DistroXV1Request source = new DistroXV1Request();
@@ -216,9 +211,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
         when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.TRUE);
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setRuntime("7.3.1");
-        when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(sdxBasicView("7.3.1"));
         when(providerPreferencesService.cloudConstantByName(any())).thenReturn(Optional.of(new AwsMockConstants()));
 
         DistroXV1Request source = new DistroXV1Request();
@@ -243,9 +236,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
         when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setRuntime("7.3.1");
-        when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(sdxBasicView("7.3.1"));
 
         DistroXV1Request source = new DistroXV1Request();
         source.setEnvironmentName("envname");
