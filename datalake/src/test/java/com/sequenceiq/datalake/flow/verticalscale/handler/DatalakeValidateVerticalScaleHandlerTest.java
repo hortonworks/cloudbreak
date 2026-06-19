@@ -67,7 +67,8 @@ public class DatalakeValidateVerticalScaleHandlerTest {
                 "Test",
                 "test-crn",
                 "stack-crn",
-                new StackVerticalScaleV4Request()
+                new StackVerticalScaleV4Request(),
+                null
         );
     }
 }

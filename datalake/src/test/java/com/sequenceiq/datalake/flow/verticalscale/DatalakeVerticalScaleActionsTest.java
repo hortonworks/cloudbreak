@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -58,9 +57,6 @@ class DatalakeVerticalScaleActionsTest {
     @Mock
     private FlowParameters flowParameters;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @Captor
     private ArgumentCaptor<DatalakeStatusEnum> statusCaptor;
 
@@ -76,20 +72,18 @@ class DatalakeVerticalScaleActionsTest {
     @BeforeEach
     void setUp() {
         context = new CommonContext(flowParameters);
-        ReflectionTestUtils.setField(underTest, "entitlementService", entitlementService);
     }
 
     @Test
-    void testFinishedActionSetsRunningStatusWhenHaEnabled() throws Exception {
+    void testFinishedActionSetsRunningStatusWhenPreOperationStatusWasRunning() throws Exception {
         DatalakeVerticalScaleEvent event = createEvent();
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), eq(event));
-        doReturn(true).when(entitlementService).isVerticalScaleHaEnabled("123456789012");
+        variables.put("preOperationDlStatus", DatalakeStatusEnum.RUNNING);
 
         Action<?, ?> action = underTest.finishedAction();
         initActionPrivateFields(action);
         ReflectionTestUtils.invokeMethod(action, "doExecute", context, event, variables);
 
-        verify(entitlementService, times(1)).isVerticalScaleHaEnabled("123456789012");
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotifyWithStatusReason(statusCaptor.capture(), anyString(), eq(RESOURCE_ID));
         assertEquals(DatalakeStatusEnum.RUNNING, statusCaptor.getValue());
         verify(eventBus, times(1)).notify(anyString(), eventCaptor.capture());
@@ -97,16 +91,15 @@ class DatalakeVerticalScaleActionsTest {
     }
 
     @Test
-    void testFinishedActionSetsStoppedStatusWhenHaDisabled() throws Exception {
+    void testFinishedActionSetsStoppedStatusWhenPreOperationStatusWasStopped() throws Exception {
         DatalakeVerticalScaleEvent event = createEvent();
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), eq(event));
-        doReturn(false).when(entitlementService).isVerticalScaleHaEnabled("123456789012");
+        variables.put("preOperationDlStatus", DatalakeStatusEnum.STOPPED);
 
         Action<?, ?> action = underTest.finishedAction();
         initActionPrivateFields(action);
         ReflectionTestUtils.invokeMethod(action, "doExecute", context, event, variables);
 
-        verify(entitlementService, times(1)).isVerticalScaleHaEnabled("123456789012");
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotifyWithStatusReason(statusCaptor.capture(), anyString(), eq(RESOURCE_ID));
         assertEquals(DatalakeStatusEnum.STOPPED, statusCaptor.getValue());
         verify(eventBus, times(1)).notify(anyString(), eventCaptor.capture());
@@ -126,4 +119,3 @@ class DatalakeVerticalScaleActionsTest {
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
     }
 }
-

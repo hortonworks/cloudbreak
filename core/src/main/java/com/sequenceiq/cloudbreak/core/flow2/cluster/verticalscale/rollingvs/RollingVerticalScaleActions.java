@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -115,6 +116,7 @@ public class RollingVerticalScaleActions {
                 variables.put(TARGET_INSTANCES, payload.getInstanceIds());
                 variables.put(STOPPED_INSTANCES, payload.getStoppedInstanceIds());
                 variables.put(STACK_VERTICALSCALE_V4_REQUEST, payload.getStackVerticalScaleV4Request());
+                variables.put(PRE_OPERATION_STATUS, payload.getPreOperationStatus());
             }
 
             @Override
@@ -254,7 +256,8 @@ public class RollingVerticalScaleActions {
                             payload.getResourceId(), new CloudbreakException(errorMessage)));
                 } else {
                     String message = String.format("Successfully vertically scaled instances: [%s]", result.getInstanceIds());
-                    rollingVerticalScaleService.verticalScalingCompletedSuccessfully(stackId, message);
+                    Status preOperationStatus = (Status) variables.get(PRE_OPERATION_STATUS);
+                    rollingVerticalScaleService.verticalScalingCompletedSuccessfully(stackId, message, preOperationStatus);
                     sendEvent(context, RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_FINALIZED_EVENT.event(), payload);
                 }
             }
@@ -309,6 +312,8 @@ public class RollingVerticalScaleActions {
         static final String PREVIOUS_INSTANCE_TYPE = "PREVIOUS_INSTANCE_TYPE";
 
         static final String GROUP_BEING_SCALED = "GROUP_BEING_SCALED";
+
+        static final String PRE_OPERATION_STATUS = "PRE_OPERATION_STATUS";
 
         @Inject
         private StackService stackService;

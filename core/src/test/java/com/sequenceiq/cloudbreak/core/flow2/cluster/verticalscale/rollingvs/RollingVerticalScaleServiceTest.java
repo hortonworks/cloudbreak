@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -326,6 +327,33 @@ class RollingVerticalScaleServiceTest {
         verify(clusterService, times(1)).updateClusterStatusByStackId(eq(STACK_ID), eq(DetailedStackStatus.CLUSTER_VERTICALSCALE_FAILED), eq(ERROR_MESSAGE));
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_FAILED.name()),
                 eq(CLUSTER_VERTICALSCALING_FAILED), eq(ERROR_MESSAGE), any(String.class));
+    }
+
+    @Test
+    void testVerticalScalingCompletedSuccessfullyRestoresStoppedStatusWhenDlWasStopped() {
+        String message = "Successfully vertically scaled instances";
+
+        underTest.verticalScalingCompletedSuccessfully(STACK_ID, message, STOPPED);
+
+        verify(clusterService).updateClusterStatusByStackId(eq(STACK_ID), eq(DetailedStackStatus.STOPPED), eq(message));
+    }
+
+    @Test
+    void testVerticalScalingCompletedSuccessfullySetsCompleteStatusWhenDlWasRunning() {
+        String message = "Successfully vertically scaled instances";
+
+        underTest.verticalScalingCompletedSuccessfully(STACK_ID, message, AVAILABLE);
+
+        verify(clusterService).updateClusterStatusByStackId(eq(STACK_ID), eq(DetailedStackStatus.CLUSTER_VERTICALSCALE_COMPLETE), eq(message));
+    }
+
+    @Test
+    void testVerticalScalingCompletedSuccessfullySetsCompleteStatusWhenPreOperationStatusIsNull() {
+        String message = "Successfully vertically scaled instances";
+
+        underTest.verticalScalingCompletedSuccessfully(STACK_ID, message, null);
+
+        verify(clusterService).updateClusterStatusByStackId(eq(STACK_ID), eq(DetailedStackStatus.CLUSTER_VERTICALSCALE_COMPLETE), eq(message));
     }
 
     @Test

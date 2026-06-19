@@ -146,8 +146,11 @@ public class RollingVerticalScaleService {
                 CLUSTER_VERTICALSCALING_FAILED, message, String.join(", ", instanceIds));
     }
 
-    public void verticalScalingCompletedSuccessfully(Long stackId, String message) {
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_VERTICALSCALE_COMPLETE, message);
+    public void verticalScalingCompletedSuccessfully(Long stackId, String message, Status preOperationStatus) {
+        DetailedStackStatus completionStatus = Status.STOPPED.equals(preOperationStatus)
+                ? DetailedStackStatus.STOPPED
+                : DetailedStackStatus.CLUSTER_VERTICALSCALE_COMPLETE;
+        clusterService.updateClusterStatusByStackId(stackId, completionStatus, message);
     }
 
     public void updateInstancesToServicesHealthy(Long stackId, Set<InstanceMetadataView> instances) {

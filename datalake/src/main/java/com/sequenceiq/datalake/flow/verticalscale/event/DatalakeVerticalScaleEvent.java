@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 @JsonDeserialize(builder = DatalakeVerticalScaleEvent.Builder.class)
@@ -16,6 +17,8 @@ public class DatalakeVerticalScaleEvent extends BaseNamedFlowEvent implements Se
 
     private final String stackCrn;
 
+    private final DatalakeStatusEnum preOperationDlStatus;
+
     public DatalakeVerticalScaleEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
@@ -23,10 +26,12 @@ public class DatalakeVerticalScaleEvent extends BaseNamedFlowEvent implements Se
             @JsonProperty("resourceName") String resourceName,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("stackCrn") String stackCrn,
-            @JsonProperty("verticalScaleRequest") StackVerticalScaleV4Request verticalScaleRequest) {
+            @JsonProperty("verticalScaleRequest") StackVerticalScaleV4Request verticalScaleRequest,
+            @JsonProperty("preOperationDlStatus") DatalakeStatusEnum preOperationDlStatus) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
         this.verticalScaleRequest = verticalScaleRequest;
         this.stackCrn = stackCrn;
+        this.preOperationDlStatus = preOperationDlStatus;
     }
 
     public StackVerticalScaleV4Request getVerticalScaleRequest() {
@@ -35,6 +40,10 @@ public class DatalakeVerticalScaleEvent extends BaseNamedFlowEvent implements Se
 
     public String getStackCrn() {
         return stackCrn;
+    }
+
+    public DatalakeStatusEnum getPreOperationDlStatus() {
+        return preOperationDlStatus;
     }
 
     public static Builder builder() {
@@ -56,6 +65,8 @@ public class DatalakeVerticalScaleEvent extends BaseNamedFlowEvent implements Se
         private StackVerticalScaleV4Request verticalScaleRequest;
 
         private String stackCrn;
+
+        private DatalakeStatusEnum preOperationDlStatus;
 
         private Builder() {
         }
@@ -95,8 +106,14 @@ public class DatalakeVerticalScaleEvent extends BaseNamedFlowEvent implements Se
             return this;
         }
 
+        public Builder withPreOperationDlStatus(DatalakeStatusEnum preOperationDlStatus) {
+            this.preOperationDlStatus = preOperationDlStatus;
+            return this;
+        }
+
         public DatalakeVerticalScaleEvent build() {
-            return new DatalakeVerticalScaleEvent(selector, resourceId, accepted, resourceName, resourceCrn, stackCrn, verticalScaleRequest);
+            return new DatalakeVerticalScaleEvent(selector, resourceId, accepted, resourceName, resourceCrn, stackCrn, verticalScaleRequest,
+                    preOperationDlStatus);
         }
     }
 }

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.RollingVerticalScaleFlowChainTriggerEvent;
@@ -62,15 +63,18 @@ public class RollingVerticalScaleFlowEventChainFactory implements FlowEventChain
                 .flatMap(r -> r.getInstanceMetadataViews().stream().filter(InstanceMetadataView::isStopped))
                 .map(InstanceMetadataView::getInstanceId).distinct().toList();
 
+        Status preOperationStatus = stackDto.getStatus();
+
         switch (orchestratorType) {
             case ALL_AT_ONCE -> {
                 return Collections.singletonList(new RollingVerticalScaleTriggerEvent(ROLLING_VERTICALSCALE_TRIGGER_EVENT.event(),
-                        event.getResourceId(), instanceIds, stoppedInstanceIds, event.getRequest(), event.accepted()));
+                        event.getResourceId(), instanceIds, stoppedInstanceIds, event.getRequest(), preOperationStatus, event.accepted()));
             }
             case ONE_BY_ONE -> {
                 List<Selectable> flowChain = new ArrayList<>();
                 instanceIds.forEach(instanceId -> flowChain.add(new RollingVerticalScaleTriggerEvent(ROLLING_VERTICALSCALE_TRIGGER_EVENT.event(),
-                        event.getResourceId(), Collections.singletonList(instanceId), stoppedInstanceIds, event.getRequest(), event.accepted())));
+                        event.getResourceId(), Collections.singletonList(instanceId), stoppedInstanceIds, event.getRequest(), preOperationStatus,
+                        event.accepted())));
                 return flowChain;
             }
             default -> throw new IllegalStateException("Unexpected value: " + orchestratorType);

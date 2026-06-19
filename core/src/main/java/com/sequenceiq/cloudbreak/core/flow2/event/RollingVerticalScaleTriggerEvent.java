@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
@@ -19,12 +20,15 @@ public class RollingVerticalScaleTriggerEvent extends StackEvent {
 
     private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
 
+    private final Status preOperationStatus;
+
     public RollingVerticalScaleTriggerEvent(String selector, Long stackId, List<String> instanceIds,
-            List<String> stoppedInstanceIds, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+            List<String> stoppedInstanceIds, StackVerticalScaleV4Request stackVerticalScaleV4Request, Status preOperationStatus) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
         this.stoppedInstanceIds = stoppedInstanceIds;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
+        this.preOperationStatus = preOperationStatus;
     }
 
     @JsonCreator
@@ -34,11 +38,13 @@ public class RollingVerticalScaleTriggerEvent extends StackEvent {
             @JsonProperty("instanceIds") List<String> instanceIds,
             @JsonProperty("stoppedInstanceIds") List<String> stoppedInstanceIds,
             @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request,
+            @JsonProperty("preOperationStatus") Status preOperationStatus,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, resourceId, accepted);
         this.instanceIds = instanceIds;
         this.stoppedInstanceIds = stoppedInstanceIds;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
+        this.preOperationStatus = preOperationStatus;
     }
 
     public List<String> getInstanceIds() {
@@ -53,10 +59,15 @@ public class RollingVerticalScaleTriggerEvent extends StackEvent {
         return stackVerticalScaleV4Request;
     }
 
+    public Status getPreOperationStatus() {
+        return preOperationStatus;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", RollingVerticalScaleTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("instanceIds=" + instanceIds)
+                .add("preOperationStatus=" + preOperationStatus)
                 .add("stackVerticalScaleV4Request=" + stackVerticalScaleV4Request)
                 .add(super.toString())
                 .toString();

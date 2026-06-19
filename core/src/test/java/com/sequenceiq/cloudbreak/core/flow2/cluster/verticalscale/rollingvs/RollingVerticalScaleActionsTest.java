@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
@@ -279,6 +280,27 @@ public class RollingVerticalScaleActionsTest {
     }
 
     @Test
+    void testVerticalScaleFinishedActionRestoresStoppedStatusWhenDlWasStopped() throws Exception {
+        AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult> action =
+                (AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult>) underTest.verticalScaleFinishedAction();
+        initActionPrivateFields(action);
+
+        RollingVerticalScaleContext context = createContext();
+        List<String> instanceIds = createInstanceIds(3);
+        RollingVerticalScaleResult result = createRollingVerticalScaleResult(instanceIds, RollingVerticalScaleStatus.SUCCESS);
+        RollingVerticalScaleStartInstancesResult payload = new RollingVerticalScaleStartInstancesResult(STACK_ID, result);
+
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        Map<Object, Object> variables = createVariables(instanceIds);
+        variables.put(AbstractRollingVerticalScaleActions.PRE_OPERATION_STATUS, Status.STOPPED);
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(rollingVerticalScaleService).verticalScalingCompletedSuccessfully(eq(STACK_ID), any(String.class), eq(Status.STOPPED));
+        verify(eventBus).notify("ROLLING_VERTICALSCALE_FINALIZED_EVENT", event);
+    }
+
+    @Test
     void testVerticalScaleFinishedActionWithFailures() throws Exception {
         AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult> action =
                 (AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult>) underTest.verticalScaleFinishedAction();
@@ -393,7 +415,8 @@ public class RollingVerticalScaleActionsTest {
     }
 
     private RollingVerticalScaleTriggerEvent createTriggerEvent(List<String> instanceIds) {
-        return new RollingVerticalScaleTriggerEvent(SELECTOR, STACK_ID, instanceIds, Collections.emptyList(), createStackVerticalScaleV4Request());
+        return new RollingVerticalScaleTriggerEvent(SELECTOR, STACK_ID, instanceIds, Collections.emptyList(),
+                createStackVerticalScaleV4Request(), Status.AVAILABLE);
     }
 
     private StackVerticalScaleV4Request createStackVerticalScaleV4Request() {

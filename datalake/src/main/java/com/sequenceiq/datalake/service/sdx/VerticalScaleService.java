@@ -72,6 +72,8 @@ public class VerticalScaleService {
     public FlowIdentifier verticalScaleDatalake(SdxCluster sdxCluster, StackVerticalScaleV4Request request, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
         LOGGER.info("Data Lake Cluster Vertical Scale flow triggered for environment {}", sdxCluster.getName());
+        DatalakeStatusEnum preOperationDlStatus = sdxStatusService.getActualStatusForSdx(sdxCluster.getId()).getStatus();
+        LOGGER.debug("Captured pre-operation DL status: {} for cluster {}", preOperationDlStatus, sdxCluster.getName());
         DatalakeVerticalScaleEvent environmentVerticalScaleEvent = DatalakeVerticalScaleEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceCrn(sdxCluster.getResourceCrn())
@@ -79,6 +81,7 @@ public class VerticalScaleService {
                 .withResourceName(sdxCluster.getName())
                 .withVerticalScaleRequest(request)
                 .withStackCrn(sdxCluster.getStackCrn())
+                .withPreOperationDlStatus(preOperationDlStatus)
                 .withSelector(DatalakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_VALIDATION_EVENT.selector())
                 .build();
         FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));

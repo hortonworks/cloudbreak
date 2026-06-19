@@ -13,8 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleFailedEvent;
@@ -26,13 +24,12 @@ public class DatalakeVerticalScaleActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeVerticalScaleActions.class);
 
+    private static final String PRE_OPERATION_DL_STATUS = "preOperationDlStatus";
+
     private final SdxStatusService sdxStatusService;
 
-    private final EntitlementService entitlementService;
-
-    public DatalakeVerticalScaleActions(SdxStatusService sdxStatusService, EntitlementService entitlementService) {
+    public DatalakeVerticalScaleActions(SdxStatusService sdxStatusService) {
         this.sdxStatusService = sdxStatusService;
-        this.entitlementService = entitlementService;
     }
 
     @Bean(name = "VERTICAL_SCALING_DATALAKE_VALIDATION_STATE")
@@ -40,6 +37,7 @@ public class DatalakeVerticalScaleActions {
         return new AbstractDatalakeVerticalScaleAction<>(DatalakeVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleEvent payload, Map<Object, Object> variables) {
+                variables.put(PRE_OPERATION_DL_STATUS, payload.getPreOperationDlStatus());
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_VALIDATION_IN_PROGRESS,
                         String.format("Validation of vertical scale is in progress for group of %s with instance type of %s on the Data Lake.",
                                 payload.getVerticalScaleRequest().getGroup(), payload.getVerticalScaleRequest().getTemplate().getInstanceType()),
@@ -68,14 +66,12 @@ public class DatalakeVerticalScaleActions {
         return new AbstractDatalakeVerticalScaleAction<>(DatalakeVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleEvent payload, Map<Object, Object> variables) {
-                String accountId = Crn.safeFromString(payload.getResourceCrn()).getAccountId();
-                if (entitlementService.isVerticalScaleHaEnabled(accountId)) {
-                    sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.RUNNING,
-                            "Vertical scale has finished on the Data Lake.", payload.getResourceId());
-                } else {
-                    sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.STOPPED,
-                            "Vertical scale has finished on the Data Lake.", payload.getResourceId());
-                }
+                DatalakeStatusEnum preOperationStatus = (DatalakeStatusEnum) variables.get(PRE_OPERATION_DL_STATUS);
+                DatalakeStatusEnum completionStatus = DatalakeStatusEnum.STOPPED.equals(preOperationStatus)
+                        ? DatalakeStatusEnum.STOPPED
+                        : DatalakeStatusEnum.RUNNING;
+                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(completionStatus,
+                        "Vertical scale has finished on the Data Lake.", payload.getResourceId());
                 sendEvent(context, FINALIZE_VERTICAL_SCALING_DATALAKE_EVENT.selector(), payload);
             }
         };
