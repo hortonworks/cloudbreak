@@ -1,11 +1,13 @@
 package com.sequenceiq.environment.experience.common;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -15,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,6 +27,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status.Family;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -400,6 +404,98 @@ class CommonExperienceConnectorServiceTest {
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
 
         verify(mockCommonExperienceResponseReader, never()).read(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("When environment tags are distributed, then the web target is created from the experience path and environment CRN")
+    void testWhenEnvironmentTagsAreDistributedThenWebTargetIsObtainedUsingBasePathAndCrn() {
+        Map<String, String> tags = Map.of("key", "value");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenReturn(mockResponse);
+
+        underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags);
+
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+    }
+
+    @Test
+    @DisplayName("When environment tags are distributed, then an internal actor invocation builder is used for authentication")
+    void testWhenEnvironmentTagsAreDistributedThenInternalActorInvocationBuilderIsUsed() {
+        Map<String, String> tags = Map.of("key", "value");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenReturn(mockResponse);
+
+        underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags);
+
+        verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilderForInternalActor(mockWebTarget);
+    }
+
+    @Test
+    @DisplayName("When environment tags are distributed, then the retryable PUT call receives the tags as its payload")
+    void testWhenEnvironmentTagsAreDistributedThenPutIsExecutedWithTagsAsPayload() {
+        Map<String, String> tags = Map.of("key", "value");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenReturn(mockResponse);
+
+        underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags);
+
+        verify(mockRetryableWebTarget, times(ONCE)).put(eq(mockInvocationBuilder), eq(tags));
+    }
+
+    @Test
+    @DisplayName("When environment tag distribution returns a successful response, then the operation completes without an exception")
+    void testWhenEnvironmentTagDistributionResponseIsSuccessfulThenCallCompletesWithoutException() {
+        Map<String, String> tags = Map.of("key", "value");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenReturn(mockResponse);
+
+        assertDoesNotThrow(() -> underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Family.class, names = "SUCCESSFUL", mode = EXCLUDE)
+    @DisplayName("When environment tag distribution returns a non-successful response, then an operation failure exception is thrown")
+    void testWhenEnvironmentTagDistributionResponseIsNotSuccessfulThenExperienceOperationFailedExceptionIsThrown(Family family) {
+        Map<String, String> tags = Map.of("key", "value");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenReturn(mockResponse);
+        when(mockStatusType.getFamily()).thenReturn(family);
+
+        assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags));
+    }
+
+    @Test
+    @DisplayName("When environment tag distribution returns no response, then an operation failure exception is thrown")
+    void testWhenEnvironmentTagDistributionReturnsNullThenExperienceOperationFailedExceptionIsThrown() {
+        Map<String, String> tags = Map.of("key", "value");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenReturn(null);
+
+        ExperienceOperationFailedException ex = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags));
+
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("When the environment tag distribution call fails, then its error is wrapped in an operation failure exception")
+    void testWhenEnvironmentTagDistributionCallThrowsThenExperienceOperationFailedExceptionIsThrown() {
+        Map<String, String> tags = Map.of("key", "value");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenThrow(new RuntimeException("connection error"));
+
+        ExperienceOperationFailedException ex = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags));
+
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, ex.getMessage());
     }
 
     @ParameterizedTest

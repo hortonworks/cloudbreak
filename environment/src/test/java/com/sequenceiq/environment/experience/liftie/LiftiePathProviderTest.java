@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
@@ -19,6 +20,8 @@ class LiftiePathProviderTest {
 
     private static final String LIFTIE_POLICY_ENDPOINT = "/prerequisites?cloudPlatform={cloudProvider}";
 
+    private static final String LIFTIE_ENVIRONMENT_TAGS_PATH = "/environment/tags";
+
     private LiftiePathProvider underTest;
 
     private ExperiencePathConfig pathConfig;
@@ -26,7 +29,7 @@ class LiftiePathProviderTest {
     @BeforeEach
     void setUp() {
         pathConfig = new ExperiencePathConfig(Map.of("envCrn", "{environmentCrn}", "cloudProvider", "{cloudProvider}"));
-        underTest = new LiftiePathProvider(pathConfig, LIFTIE_API, LIFTIE_PATH_INFIX, LIFTIE_POLICY_ENDPOINT);
+        underTest = new LiftiePathProvider(pathConfig, LIFTIE_API, LIFTIE_PATH_INFIX, LIFTIE_POLICY_ENDPOINT, LIFTIE_ENVIRONMENT_TAGS_PATH);
     }
 
     @Test
@@ -44,6 +47,16 @@ class LiftiePathProviderTest {
         String expected = LIFTIE_API + LIFTIE_PATH_INFIX + LIFTIE_POLICY_ENDPOINT.replace("{cloudProvider}", platform);
 
         String result = underTest.getPathToPolicyEndpoint(platform);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    @DisplayName("When the environment tags endpoint is requested, then the Liftie base path and tags path are concatenated")
+    void testWhenEnvironmentTagsEndpointPathIsRequestedThenBasePathAndEnvironmentTagsPathAreConcatenated() {
+        String expected = LIFTIE_API + LIFTIE_PATH_INFIX + LIFTIE_ENVIRONMENT_TAGS_PATH;
+
+        String result = underTest.getPathToEnvironmentTagsEndpoint();
 
         assertEquals(expected, result);
     }

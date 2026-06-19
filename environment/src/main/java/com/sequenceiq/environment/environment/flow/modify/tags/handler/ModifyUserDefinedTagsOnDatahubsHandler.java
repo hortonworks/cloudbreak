@@ -6,8 +6,6 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 
 import java.util.Map;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,8 +24,11 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyUserDefinedTagsOnDatahubsHandler.class);
 
-    @Inject
-    private StackPollerService stackPollerService;
+    private final StackPollerService stackPollerService;
+
+    public ModifyUserDefinedTagsOnDatahubsHandler(StackPollerService stackPollerService) {
+        this.stackPollerService = stackPollerService;
+    }
 
     @Override
     public String selector() {

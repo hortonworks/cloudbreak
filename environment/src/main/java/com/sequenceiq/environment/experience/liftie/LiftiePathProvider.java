@@ -17,15 +17,20 @@ public class LiftiePathProvider {
 
     private final String policyPath;
 
-    private ExperiencePathConfig pathConfig;
+    private final String environmentTagsPath;
+
+    private final ExperiencePathConfig pathConfig;
 
     public LiftiePathProvider(ExperiencePathConfig pathConfig, @Value("${environment.experience.liftie.address}") String liftieApi,
             @Value("${environment.experience.liftie.pathInfix}") String pathInfix,
-            @Value("${environment.experience.liftie.policyPath}") String policyPath) {
+            @Value("${environment.experience.liftie.policyPath}") String policyPath,
+            @Value("${environment.experience.environmentTagsPath:}") String environmentTagsPath) {
         this.basePath = liftieApi + pathInfix;
         this.policyPath = policyPath;
         this.pathConfig = pathConfig;
-        LOGGER.debug("Liftie address has been set to: {}", basePath);
+        this.environmentTagsPath = environmentTagsPath;
+        LOGGER.debug("Liftie address has been set to: {}, environment tags distribution {}",
+                basePath, isEnvironmentTagsDistributionDisabled() ? "disabled" : "enabled");
     }
 
     public String getPathToPolicyEndpoint(String provider) {
@@ -34,8 +39,18 @@ public class LiftiePathProvider {
         return path;
     }
 
+    public String getPathToEnvironmentTagsEndpoint() {
+        String path = basePath + environmentTagsPath;
+        LOGGER.info("Path has created to liftie for environment tags distribution: {}", path);
+        return path;
+    }
+
     public boolean isPolicyFetchDisabled() {
         return StringUtils.isEmpty(policyPath);
+    }
+
+    public boolean isEnvironmentTagsDistributionDisabled() {
+        return StringUtils.isEmpty(environmentTagsPath);
     }
 
     public String getPathToClustersEndpoint() {

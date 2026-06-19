@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.tags;
 
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATALAKE_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_EXPERIENCES_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT;
@@ -12,8 +13,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -29,10 +28,14 @@ import com.sequenceiq.flow.core.CommonContext;
 
 @Configuration
 public class EnvTagsModificationActions {
+
     private static final Logger LOGGER = getLogger(EnvTagsModificationActions.class);
 
-    @Inject
-    private EnvironmentStatusUpdateService environmentStatusUpdateService;
+    private final EnvironmentStatusUpdateService environmentStatusUpdateService;
+
+    public EnvTagsModificationActions(EnvironmentStatusUpdateService environmentStatusUpdateService) {
+        this.environmentStatusUpdateService = environmentStatusUpdateService;
+    }
 
     @Bean(name = "ENVIRONMENT_TAGS_MODIFICATION_START_STATE")
     public Action<?, ?> initUserDefinedTagsModificationOnEnvironment() {
@@ -224,6 +227,41 @@ public class EnvTagsModificationActions {
             @Override
             protected EnvironmentStatus getFailureEnvironmentStatus() {
                 return EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED;
+            }
+        };
+    }
+
+    @Bean(name = "USER_DEFINED_TAGS_MODIFICATION_EXPERIENCES_STATE")
+    public Action<?, ?> modifyUserDefinedTagsOnExperiences() {
+        return new AbstractEnvTagsModificationAction<>(EnvTagsModificationEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvTagsModificationEvent payload, Map<Object, Object> variables) {
+                LOGGER.debug("Modify user defined tags on Experiences state started {}", payload);
+                environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
+                        EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATA_SERVICES_IN_PROGRESS,
+                        ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_EXPERIENCES_STARTED,
+                        EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_EXPERIENCES_STATE);
+                String nextEvent = MODIFY_USER_DEFINED_TAGS_ON_EXPERIENCES_EVENT.event();
+                Long resourceId = payload.getResourceId();
+                String resourceName = payload.getResourceName();
+                String resourceCrn = payload.getResourceCrn();
+                Map<String, String> tags = payload.getUserDefinedTags();
+                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
+                        .withSelector(nextEvent)
+                        .withResourceId(resourceId)
+                        .withResourceName(resourceName)
+                        .withResourceCrn(resourceCrn)
+                        .withUserDefinedTags(tags)
+                        .build();
+                sendEvent(context, nextEvent, event);
+            }
+
+            @Override
+            protected Object getFailurePayload(EnvTagsModificationEvent payload, Optional<CommonContext> context,
+                    Exception ex) {
+                return new EnvTagsModificationFailureEvent(payload.getResourceId(), payload.getResourceName(), payload.getResourceCrn(),
+                        getFailureEnvironmentStatus(), ex);
             }
         };
     }

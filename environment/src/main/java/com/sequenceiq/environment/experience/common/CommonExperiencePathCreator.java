@@ -22,6 +22,12 @@ public class CommonExperiencePathCreator {
         return path;
     }
 
+    public String createPathToEnvironmentTags(CommonExperience xp) {
+        String path = createCombinedBasedAddress(xp) + xp.getEnvironmentTagsEndpoint();
+        LOGGER.info("Path created to experience for environment tags distribution: {}", path);
+        return path;
+    }
+
     private String createCombinedBasedAddress(CommonExperience xp) {
         return xp.getBaseAddress() + ":" + xp.getEnvironmentEndpointPort();
     }

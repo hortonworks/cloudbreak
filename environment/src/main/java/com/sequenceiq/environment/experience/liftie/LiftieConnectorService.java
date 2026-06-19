@@ -112,6 +112,24 @@ public class LiftieConnectorService implements LiftieApi {
         }
     }
 
+    @Override
+    public void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags) {
+        if (liftiePathProvider.isEnvironmentTagsDistributionDisabled()) {
+            LOGGER.info("Environment tags distribution for Liftie is not configured.");
+            return;
+        }
+        LOGGER.debug("About to distribute environment tags to Kubernetes Experience for environment [crn: {}]", environmentCrn);
+        WebTarget webTarget = client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint());
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.put(call, tags))) {
+            responseReader.read(webTarget.getUri().toString(), result, Void.class)
+                    .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+        } catch (RuntimeException e) {
+            LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
+            throw new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
+        }
+    }
+
     private Response executeCall(URI path, Callable<Response> toCall) {
         LOGGER.debug("About to connect to Kubernetes Experience on path: {}", path);
         try {

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience.api;
 
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
@@ -14,5 +15,7 @@ public interface CommonExperienceApi {
     void deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn, boolean force);
 
     @NotNull ExperiencePolicyResponse collectPolicy(String experienceBasePath, String cloudPlatform);
+
+    void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags);
 
 }

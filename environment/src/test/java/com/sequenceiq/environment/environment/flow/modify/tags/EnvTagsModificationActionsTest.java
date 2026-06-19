@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.tags;
 
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATALAKE_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_EXPERIENCES_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT;
@@ -10,6 +11,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_ENVIRONMENT_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -146,6 +148,15 @@ class EnvTagsModificationActionsTest {
                 EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_IN_PROGRESS,
                 ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_STARTED,
                 EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE
+            ),
+            Arguments.of(
+                "Experiences",
+                START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.selector(),
+                (Function<EnvTagsModificationActions, Action<?, ?>>) EnvTagsModificationActions::modifyUserDefinedTagsOnExperiences,
+                MODIFY_USER_DEFINED_TAGS_ON_EXPERIENCES_EVENT.event(),
+                EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATA_SERVICES_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_EXPERIENCES_STARTED,
+                EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_EXPERIENCES_STATE
             ),
             Arguments.of(
                 "Finished",

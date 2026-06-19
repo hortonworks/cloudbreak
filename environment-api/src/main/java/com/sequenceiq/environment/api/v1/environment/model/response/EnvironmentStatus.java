@@ -165,6 +165,7 @@ public enum EnvironmentStatus {
     USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_FAILED("Failed to modify user defined tags on Data Lake"),
     USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_IN_PROGRESS("Modifying user defined tags on Data Hubs"),
     USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED("Failed to modify user defined tags on Data Hubs"),
+    USER_DEFINED_TAGS_MODIFICATION_ON_DATA_SERVICES_IN_PROGRESS("Distributing user defined tags to connected Data Services"),
     USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_IN_PROGRESS("Modifying user defined tags on RDS"),
     USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED("Failed to modify user defined tags on RDS"),
     USER_DEFINED_TAGS_MODIFICATION_FAILED("Failed to modify user defined tags on attached resources"),
