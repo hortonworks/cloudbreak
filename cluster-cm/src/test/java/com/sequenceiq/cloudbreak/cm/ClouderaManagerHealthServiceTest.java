@@ -41,6 +41,7 @@ import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
+import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
@@ -268,6 +269,105 @@ class ClouderaManagerHealthServiceTest {
     }
 
     @Test
+    public void testStoppedServiceOnAliveHost() throws ApiException {
+        hostsAre(
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("stoppedService", ApiHealthSummary.GOOD, ApiRoleState.STOPPED))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
+
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertTrue(extendedHostStatuses.statusReasonForHost(hostName("host1")).contains("The following services are stopped: stoppedService."));
+    }
+
+    @Test
+    public void testStoppingServiceOnAliveHost() throws ApiException {
+        hostsAre(
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("stoppingService", ApiHealthSummary.GOOD, ApiRoleState.STOPPING))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
+
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertTrue(extendedHostStatuses.statusReasonForHost(hostName("host1")).contains("The following services are stopped: stoppingService."));
+    }
+
+    @Test
+    public void testStoppedServiceOnDeadHostNotFlagged() throws ApiException {
+        hostsAre(
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD))
+                        .addRoleRefsItem(roleRef("stoppedService", ApiHealthSummary.GOOD, ApiRoleState.STOPPED))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
+
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertFalse(extendedHostStatuses.statusReasonForHost(hostName("host1")).contains("stopped"));
+    }
+
+    @Test
+    public void testStoppedServiceOnMaintenanceModeHostNotFlagged() throws ApiException {
+        hostsAre(
+                host("host1")
+                        .maintenanceMode(true)
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("stoppedService", ApiHealthSummary.GOOD, ApiRoleState.STOPPED))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
+
+        assertFalse(extendedHostStatuses.statusReasonForHost(hostName("host1")).contains("stopped"));
+    }
+
+    @Test
+    public void testBothBadHealthAndStoppedServices() throws ApiException {
+        hostsAre(
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("badService", ApiHealthSummary.BAD, ApiRoleState.STARTED))
+                        .addRoleRefsItem(roleRef("stoppedService", ApiHealthSummary.GOOD, ApiRoleState.STOPPED))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
+
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        String reason = extendedHostStatuses.statusReasonForHost(hostName("host1"));
+        assertTrue(reason.contains("The following services are in bad health: badService."));
+        assertTrue(reason.contains("The following services are stopped: stoppedService."));
+    }
+
+    @Test
+    public void testRunningServicesOnAliveHostStaysHealthy() throws ApiException {
+        hostsAre(
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("runningService", ApiHealthSummary.GOOD, ApiRoleState.STARTED))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
+
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+    }
+
+    @Test
+    public void testStoppedServiceNotFlaggedBelowVersionGate() throws ApiException {
+        hostsAre(
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("stoppedService", ApiHealthSummary.GOOD, ApiRoleState.STOPPED))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.11"));
+
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+    }
+
+    @Test
     public void filtersAppropriateHealthCheckForHost() throws ApiException {
         hostsAre(
                 host("host")
@@ -306,5 +406,13 @@ class ClouderaManagerHealthServiceTest {
                 .roleName("testRole")
                 .serviceName(serviceName)
                 .healthSummary(apiHealthSummary);
+    }
+
+    private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary, ApiRoleState roleState) {
+        return new ApiRoleRef()
+                .roleName("testRole")
+                .serviceName(serviceName)
+                .healthSummary(apiHealthSummary)
+                .roleStatus(roleState);
     }
 }
