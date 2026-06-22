@@ -138,7 +138,7 @@ dependencies {
   implementation group: 'software.amazon.awssdk',                 name: 'cloudformation',    version: awsSdkVersion
 
   implementation group: 'com.google.code.gson',          name: 'gson',                           version: gsonVersion
-  implementation (group: 'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev20260530-2.0.0'){
+  implementation (group: 'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev20260612-2.0.0'){
     exclude group: 'com.google.guava',  module: 'guava'
   }
   implementation group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev20260524-2.0.0'
