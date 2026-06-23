@@ -22,7 +22,7 @@ public class AnonymizerUtil {
                     + "key:[\"']|key=[\"']|key=|key\":\"|key:|key |"
                     + "credential:[\"']|credential=[\"']|credential=|credential\":\"|credential:|credential "
                     + ")([^\\s'\"]*)", REPLACEMENT),
-            //WASB
+            //Azure Blob Storage
             new ReplacePattern("(?i)(\\.blob\\.core\\.windows\\.net\":\")([^\\s'\"])*", REPLACEMENT),
             //CM
             new ReplacePattern("(\"name\":\\s*\"[^\"]*password\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT),

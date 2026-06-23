@@ -64,6 +64,6 @@ public class FileSystemResolver {
     }
 
     private boolean locationStartsWith(String path, FileSystemType probableFsTye) {
-        return path != null && path.startsWith(probableFsTye.getProtocol());
+        return probableFsTye.startsWithProtocol(path);
     }
 }
