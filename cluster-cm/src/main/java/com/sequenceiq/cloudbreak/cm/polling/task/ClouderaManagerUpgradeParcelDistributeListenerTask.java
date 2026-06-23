@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
@@ -47,5 +48,11 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTask extends Abstract
     @Override
     protected String getCommandName() {
         return "Distribute CDP Runtime parcel for upgrade.";
+    }
+
+    @Override
+    public Optional<String> additionalTimeoutErrorMessage() {
+        return Optional.of("Please check the Cloudera Manager UI for more details. " +
+                "To resolve this intermittent issue, you can manually delete, re-download, and redistribute the parcel.");
     }
 }
