@@ -2,12 +2,15 @@
 
 main() {
   set -ex -o pipefail
+  source $(pwd)/.github/actions/pull-request/changed-modules.sh
+  TASKS=$(changed_module_tasks spotbugsTest)
+  if [ -z "$TASKS" ]; then
+    echo "No changed Gradle modules; skipping spotbugsTest."
+    exit 0
+  fi
+  echo "Running spotbugsTest for:$TASKS"
   $(pwd)/gradlew -Penv=jenkins -b build.gradle --quiet \
-    check \
-    -x spotbugsMain \
-    -x checkstyleTest \
-    -x checkstyleMain \
-    -x test \
+    $TASKS \
     --no-daemon --quiet --parallel -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
 }
 
