@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -37,6 +36,7 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.util.XmlUtil;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
@@ -47,15 +47,13 @@ class ClassicClusterDatalakeServicesProvider {
 
     private static final String HDFS_SERVICE = "HDFS";
 
-    private static final XPathExpression PROPERTY_EXPRESSION;
-
-    static {
+    private static final ThreadLocal<XPathExpression> PROPERTY_EXPRESSION = ThreadLocal.withInitial(() -> {
         try {
-            PROPERTY_EXPRESSION = XPathFactory.newInstance().newXPath().compile("/configuration/property");
+            return XPathFactory.newInstance().newXPath().compile("/configuration/property");
         } catch (XPathExpressionException e) {
             throw new IllegalStateException("Failed to create property expression", e);
         }
-    }
+    });
 
     @Inject
     private ClassicClusterClouderaManagerApiClientProvider apiClientProvider;
@@ -144,8 +142,8 @@ class ClassicClusterDatalakeServicesProvider {
     private Map<String, String> parseConfigurationXml(InputStream inputStream) {
         try {
             Map<String, String> configuration = new HashMap<>();
-            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
-            NodeList nodes = (NodeList) PROPERTY_EXPRESSION.evaluate(document, XPathConstants.NODESET);
+            Document document = XmlUtil.parse(inputStream);
+            NodeList nodes = (NodeList) PROPERTY_EXPRESSION.get().evaluate(document, XPathConstants.NODESET);
             for (int i = 0; i < nodes.getLength(); i++) {
                 Element node = (Element) nodes.item(i);
                 String name = node.getElementsByTagName("name").item(0).getTextContent();
