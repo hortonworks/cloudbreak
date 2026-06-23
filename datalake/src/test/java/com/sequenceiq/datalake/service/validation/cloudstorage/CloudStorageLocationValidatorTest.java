@@ -37,6 +37,8 @@ public class CloudStorageLocationValidatorTest {
 
     private static final String S3_OBJECT_PATH = "s3a://bucket-name/folder/file";
 
+    private static final String WASB_OBJECT_PATH = "wasb://bucket-name/folder/file";
+
     private static final String ENV_REGION = "env-region";
 
     private static final String OTHER_REGION = "other-region";
@@ -81,6 +83,22 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(S3_OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
+
+        assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    public void validateWasb() {
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(CLOUD_CREDENTIAL)
+                .withObjectStoragePath(BUCKET_NAME)
+                .withRegion(ENV_REGION)
+                .build();
+        ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
+        when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        underTest.validate(WASB_OBJECT_PATH, FileSystemType.WASB, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }

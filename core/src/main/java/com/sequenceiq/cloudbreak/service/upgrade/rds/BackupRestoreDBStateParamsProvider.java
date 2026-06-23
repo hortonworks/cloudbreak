@@ -65,7 +65,7 @@ public class BackupRestoreDBStateParamsProvider {
     }
 
     private void setCloudStorageBackupParameters(String backupLocation, Map<String, String> upgradeParams, String backupInstanceProfile) {
-        if (StringUtils.isNotBlank(backupLocation) && FileSystemType.ADLS_GEN_2.startsWithProtocol(backupLocation)) {
+        if (StringUtils.isNotBlank(backupLocation) && backupLocation.startsWith(FileSystemType.ADLS_GEN_2.getProtocol())) {
             AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(backupLocation);
             upgradeParams.put(BACKUP_LOCATION_KEY, backupLocation);
             upgradeParams.put(ABFS_ACCOUNT_NAME_KEY, adlsGen2Config.getAccount());

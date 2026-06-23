@@ -16,10 +16,12 @@ import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelPr
 import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithSingleAdlsStorage;
 import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithSingleGcsStorage;
 import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithSingleS3Storage;
+import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithSingleWasbStorage;
 import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithTwoAdlsGen2Storage;
 import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithTwoAdlsStorage;
 import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithTwoGcsStorage;
 import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithTwoS3Storage;
+import static com.sequenceiq.cloudbreak.recipe.moduletest.RecipeModulTestModelProvider.testTemplateWithTwoWasbStorage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -59,10 +61,12 @@ class RecipeModulTest extends CentralRecipeContext {
                 Arguments.of("SingleCloudStorageInsertion", "SingleGcsCloudStorageInsertion", testTemplateWithSingleGcsStorage()),
                 Arguments.of("SingleCloudStorageInsertion", "SingleAbfsCloudStorageInsertion", testTemplateWithSingleAdlsGen2Storage()),
                 Arguments.of("SingleCloudStorageInsertion", "SingleAdlsCloudStorageInsertion", testTemplateWithSingleAdlsStorage()),
+                Arguments.of("SingleCloudStorageInsertion", "SingleWasbCloudStorageInsertion", testTemplateWithSingleWasbStorage()),
                 Arguments.of("MultiCloudStorageInsertion", "MultiS3CloudStorageInsertion", testTemplateWithTwoS3Storage()),
                 Arguments.of("MultiCloudStorageInsertion", "MultiGcsCloudStorageInsertion", testTemplateWithTwoGcsStorage()),
                 Arguments.of("MultiCloudStorageInsertion", "MultiAbfsCloudStorageInsertion", testTemplateWithTwoAdlsGen2Storage()),
                 Arguments.of("MultiCloudStorageInsertion", "MultiAdlsCloudStorageInsertion", testTemplateWithTwoAdlsStorage()),
+                Arguments.of("MultiCloudStorageInsertion", "MultiWasbCloudStorageInsertion", testTemplateWithTwoWasbStorage()),
                 Arguments.of("druidPropertyValidator", "druidPropertyValidator", testTemplateWithDruidRds()),
                 Arguments.of("sharedServiceCheckRds", "sharedServiceCheckRdsWithBothRdsExists", testTemplateWhenSharedServiceIsOnWithRangerAndHiveRds()),
                 Arguments.of("sharedServiceCheckRds", "sharedServiceCheckRdsWhenNoSharedService", testTemplateWithNoSharedServiceAndRds()),

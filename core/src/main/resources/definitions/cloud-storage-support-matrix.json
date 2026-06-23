@@ -22,6 +22,10 @@
       "provider" : "AZURE",
       "configEntries" : [
         {
+          "supportedFileSytem" : "WASB",
+          "minVersion" : "2.6.0"
+        },
+        {
           "supportedFileSytem" : "ADLS",
           "minVersion" : "2.6.0"
         },

@@ -12,10 +12,10 @@ printIfValid() {
 }
 
 function printLogic() {
-	if true; then
-		printIfValid "storage container:                          " "someContainer"
-		printIfValid "Attached cloud storage location parameters: " "1_file: [1_property: 1_test/test/end], 2_file: [2_property: 2_test/test/end], "
-		printIfValid "default file system?                        " "false"
+	if false; then
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.s3.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " ""
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.s3.defaultFs}}}"
 	elif false; then
 		printIfValid "service account email address:              " "{{{fileSystemConfigs.gcs.serviceAccountEmail}}}"
 		printIfValid "storage container:                          " "{{{fileSystemConfigs.gcs.storageContainer}}}"
@@ -36,13 +36,13 @@ function printLogic() {
 		printIfValid "storage container:                          " "{{{fileSystemConfigs.adls.storageContainer}}}"
 		printIfValid "Attached cloud storage location parameters: " ""
 		printIfValid "default file system?                        " "{{{fileSystemConfigs.adls.defaultFs}}}"
-	elif false; then
-		printIfValid "account key:                                " "{{{fileSystemConfigs.wasb.accountKey}}}"
-		printIfValid "account name:                               " "{{{fileSystemConfigs.wasb.accountName}}}"
-		printIfValid "storage container name:                     " "{{{fileSystemConfigs.wasb.storageContainerName}}}"
-		printIfValid "secure?                                     " "{{{fileSystemConfigs.wasb.secure}}}"
-		printIfValid "Attached cloud storage location parameters: " ""
-		printIfValid "default file system?                        " "{{{fileSystemConfigs.wasb.defaultFs}}}"
+	elif true; then
+		printIfValid "account key:                                " "SomeAccountKey"
+		printIfValid "account name:                               " "NameOfAccount"
+		printIfValid "storage container name:                     " "ContainerName"
+		printIfValid "secure?                                     " "true"
+		printIfValid "Attached cloud storage location parameters: " "1_file: [1_property: 1_test/test/end], 2_file: [2_property: 2_test/test/end], "
+		printIfValid "default file system?                        " "false"
 	fi
 }
 

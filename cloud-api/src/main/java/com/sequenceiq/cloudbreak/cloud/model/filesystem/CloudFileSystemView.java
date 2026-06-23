@@ -15,7 +15,8 @@ import com.sequenceiq.common.model.CloudIdentityType;
         @JsonSubTypes.Type(value = CloudAdlsView.class, name = "cloudAdlsView"),
         @JsonSubTypes.Type(value = CloudEfsView.class, name = "cloudEfsView"),
         @JsonSubTypes.Type(value = CloudGcsView.class, name = "cloudGcsView"),
-        @JsonSubTypes.Type(value = CloudS3View.class, name = "cloudS3View") })
+        @JsonSubTypes.Type(value = CloudS3View.class, name = "cloudS3View"),
+        @JsonSubTypes.Type(value = CloudWasbView.class, name = "cloudWasbView") })
 public abstract class CloudFileSystemView {
 
     private final CloudIdentityType cloudIdentityType;

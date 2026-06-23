@@ -10,10 +10,12 @@ import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 public class TemplateCoreTestUtil {
 
@@ -42,6 +44,23 @@ public class TemplateCoreTestUtil {
 
     public static S3FileSystemConfigurationsView s3FileSystemConfiguration(Collection<StorageLocationView> storageLocationViews) {
         return new S3FileSystemConfigurationsView(s3FileSystem(), storageLocationViews, false);
+    }
+
+    public static WasbFileSystem wasbFileSystem(boolean secure) {
+        WasbFileSystem wasbFileSystem = new WasbFileSystem();
+        wasbFileSystem.setAccountKey("accountkey");
+        wasbFileSystem.setAccountName("accountname");
+        wasbFileSystem.setSecure(secure);
+        return wasbFileSystem;
+    }
+
+    public static WasbFileSystemConfigurationsView wasbSecureFileSystemConfiguration(Collection<StorageLocationView> storageLocationViews) {
+        return new WasbFileSystemConfigurationsView(wasbFileSystem(true), storageLocationViews, false);
+    }
+
+    public static WasbFileSystemConfigurationsView wasbUnSecureFileSystemConfiguration(Collection<StorageLocationView> storageLocationViews) {
+        return new WasbFileSystemConfigurationsView(wasbFileSystem(false), storageLocationViews, false);
+
     }
 
     public static AdlsFileSystem adlsFileSystem() {

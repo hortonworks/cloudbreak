@@ -14,6 +14,7 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 
 class CloudStorageValidationUtilTest {
 
@@ -38,6 +39,19 @@ class CloudStorageValidationUtilTest {
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
         storageIdentityBase.setAdls(new AdlsCloudStorageV1Parameters());
+        cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase()));
+
+        boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
+
+        assertTrue(actual);
+    }
+
+    @Test
+    void testIsCloudStorageConfiguredWhenWasbNotNull() {
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
+        storageIdentityBase.setWasb(new WasbCloudStorageV1Parameters());
         cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
         cloudStorageRequest.setLocations(List.of(new StorageLocationBase()));
 

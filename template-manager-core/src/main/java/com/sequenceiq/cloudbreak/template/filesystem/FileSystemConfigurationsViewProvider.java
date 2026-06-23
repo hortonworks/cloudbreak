@@ -18,11 +18,13 @@ import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigur
 import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 @Service
@@ -84,6 +86,8 @@ public class FileSystemConfigurationsViewProvider {
         if (cloudStorage != null) {
             if (source.getType().isS3()) {
                 return s3IdentityToConfigView(locations, cloudStorage);
+            } else if (source.getType().isWasb()) {
+                return wasbIdentityToConfigView(locations);
             } else if (source.getType().isAdlsGen2()) {
                 return adlsGen2IdentityToConfigView(locations, cloudStorage);
             }
@@ -98,6 +102,8 @@ public class FileSystemConfigurationsViewProvider {
             return new GcsFileSystemConfigurationsView(source.getConfigurations().get(GcsFileSystem.class), locations, false);
         } else if (source.getType().isS3()) {
             return new S3FileSystemConfigurationsView(source.getConfigurations().get(S3FileSystem.class), locations, false);
+        } else if (source.getType().isWasb()) {
+            return new WasbFileSystemConfigurationsView(source.getConfigurations().get(WasbFileSystem.class), locations, false);
         } else if (source.getType().isAdlsGen2()) {
             return new AdlsGen2FileSystemConfigurationsView(source.getConfigurations().get(AdlsGen2FileSystem.class), locations, false);
         }
@@ -108,6 +114,11 @@ public class FileSystemConfigurationsViewProvider {
         S3FileSystem s3FileSystem = new S3FileSystem();
         s3FileSystem.setS3GuardDynamoTableName(cloudStorage.getS3GuardDynamoTableName());
         return new S3FileSystemConfigurationsView(s3FileSystem, locations, false);
+    }
+
+    private BaseFileSystemConfigurationsView wasbIdentityToConfigView(Set<StorageLocationView> locations) {
+        WasbFileSystem wasbFileSystem = new WasbFileSystem();
+        return new WasbFileSystemConfigurationsView(wasbFileSystem, locations, false);
     }
 
     private BaseFileSystemConfigurationsView adlsGen2IdentityToConfigView(Set<StorageLocationView> locations, CloudStorage cloudStorage) {

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.EfsIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.GcsIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.WasbIdentity;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
@@ -44,6 +45,7 @@ import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 
@@ -177,6 +179,9 @@ public class CloudStorageConverter {
                 cloudFileSystemView = cloudStorageParametersConverter.s3ToCloudView(storageIdentity);
                 setDynamoDBTableName((CloudS3View) cloudFileSystemView, cloudStorageRequest);
                 type = FileSystemType.S3;
+            } else if (storageIdentity.getWasb() != null) {
+                cloudFileSystemView = cloudStorageParametersConverter.wasbToCloudView(storageIdentity);
+                type = FileSystemType.WASB;
             } else if (storageIdentity.getAdlsGen2() != null) {
                 cloudFileSystemView = cloudStorageParametersConverter.adlsGen2ToCloudView(storageIdentity);
                 type = FileSystemType.ADLS_GEN_2;
@@ -200,6 +205,9 @@ public class CloudStorageConverter {
     }
 
     private void validateCloudFileSystemViews(List<CloudFileSystemView> cloudFileSystemViews, FileSystemType type) {
+        if (type == FileSystemType.WASB_INTEGRATED) {
+            throw new BadRequestException(type + " FileSystemType is not supported.");
+        }
         if (cloudFileSystemViews.size() > 1) {
             if (type != FileSystemType.S3 && type != FileSystemType.ADLS_GEN_2 && type != FileSystemType.GCS) {
                 throw new BadRequestException("Multiple identities for " + type + " is not supported yet.");
@@ -239,7 +247,10 @@ public class CloudStorageConverter {
     private StorageIdentityBase cloudIdentityToStorageIdentityBase(CloudIdentity cloudIdentity) {
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
         storageIdentityBase.setType(cloudIdentity.getIdentityType());
-        if (cloudIdentity.getS3Identity() != null) {
+        if (cloudIdentity.getWasbIdentity() != null) {
+            WasbCloudStorageV1Parameters parameters = wasbIdentityToParameters(cloudIdentity.getWasbIdentity());
+            storageIdentityBase.setWasb(parameters);
+        } else if (cloudIdentity.getS3Identity() != null) {
             S3CloudStorageV1Parameters parameters = s3IdentityToParameters(cloudIdentity.getS3Identity());
             storageIdentityBase.setS3(parameters);
         } else if (cloudIdentity.getAdlsGen2Identity() != null) {
@@ -258,6 +269,9 @@ public class CloudStorageConverter {
         if (cloudIdentity.getS3Identity() != null) {
             S3CloudStorageV1Parameters s3Parameters = s3IdentityToParameters(cloudIdentity.getS3Identity());
             storageIdentityRequest.setS3(s3Parameters);
+        } else if (cloudIdentity.getWasbIdentity() != null) {
+            WasbCloudStorageV1Parameters wasbParameters = wasbIdentityToParameters(cloudIdentity.getWasbIdentity());
+            storageIdentityRequest.setWasb(wasbParameters);
         } else if (cloudIdentity.getAdlsGen2Identity() != null) {
             AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = adlsGen2IdentityToParameters(cloudIdentity.getAdlsGen2Identity());
             storageIdentityRequest.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
@@ -279,6 +293,14 @@ public class CloudStorageConverter {
         S3CloudStorageV1Parameters s3Parameters = new S3CloudStorageV1Parameters();
         s3Parameters.setInstanceProfile(s3Identity.getInstanceProfile());
         return s3Parameters;
+    }
+
+    private WasbCloudStorageV1Parameters wasbIdentityToParameters(WasbIdentity wasbIdentity) {
+        WasbCloudStorageV1Parameters wasbParameters = new WasbCloudStorageV1Parameters();
+        wasbParameters.setAccountKey(wasbIdentity.getAccountKey());
+        wasbParameters.setAccountName(wasbIdentity.getAccountName());
+        wasbParameters.setSecure(wasbIdentity.isSecure());
+        return wasbParameters;
     }
 
     private AdlsGen2CloudStorageV1Parameters adlsGen2IdentityToParameters(AdlsGen2Identity adlsGen2Identity) {
@@ -316,6 +338,10 @@ public class CloudStorageConverter {
             EfsIdentity efsIdentity = identityRequestToEfs(storageIdentityRequest);
             cloudIdentity.setEfsIdentity(efsIdentity);
         }
+        if (storageIdentityRequest.getWasb() != null) {
+            WasbIdentity wasbIdentity = identityRequestToWasb(storageIdentityRequest);
+            cloudIdentity.setWasbIdentity(wasbIdentity);
+        }
         if (storageIdentityRequest.getAdlsGen2() != null) {
             AdlsGen2Identity identity = identityRequestToAdlsGen2(storageIdentityRequest);
             cloudIdentity.setAdlsGen2Identity(identity);
@@ -340,6 +366,14 @@ public class CloudStorageConverter {
         EfsIdentity efsIdentity = new EfsIdentity();
         efsIdentity.setInstanceProfile(storageIdentityRequest.getS3().getInstanceProfile());
         return efsIdentity;
+    }
+
+    private WasbIdentity identityRequestToWasb(StorageIdentityBase storageIdentityRequest) {
+        WasbIdentity wasbIdentity = new WasbIdentity();
+        wasbIdentity.setAccountKey(storageIdentityRequest.getWasb().getAccountKey());
+        wasbIdentity.setAccountName(storageIdentityRequest.getWasb().getAccountName());
+        wasbIdentity.setSecure(storageIdentityRequest.getWasb().isSecure());
+        return wasbIdentity;
     }
 
     private AdlsGen2Identity identityRequestToAdlsGen2(StorageIdentityBase storageIdentityRequest) {

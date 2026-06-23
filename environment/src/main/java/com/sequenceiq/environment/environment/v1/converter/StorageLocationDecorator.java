@@ -40,12 +40,7 @@ public class StorageLocationDecorator {
                         storageLocation);
             }
             if (fileSystemType != null) {
-                String protocol = fileSystemType.getProtocol();
-                if (FileSystemType.ADLS_GEN_2.equals(fileSystemType) && storageLocationAware.getAdlsGen2() != null
-                        && storageLocationAware.getAdlsGen2().isSecure()) {
-                    protocol = "abfss";
-                }
-                effectiveStorageLocation = protocol + PROTOCOL_SEPARATOR + effectiveStorageLocation;
+                effectiveStorageLocation = fileSystemType.getProtocol() + PROTOCOL_SEPARATOR + effectiveStorageLocation;
                 LOGGER.info("Input {} storage location without protocol: '{}'. Inferred location: '{}'.", locationType, storageLocation,
                         effectiveStorageLocation);
             }

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 
 class KnoxIdBrokerConfigProviderTest {
@@ -293,6 +294,52 @@ class KnoxIdBrokerConfigProviderTest {
     void getRoleConfigWhenIdBrokerAndAdlsGen2FileSystemAndValidCMVersionInvalidEntity() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("ADLS_GEN_2");
+
+        TemplatePreparationObject tpo = new Builder()
+                .withCloudPlatform(CloudPlatform.AZURE)
+                .withFileSystemConfigurationView(fileSystemConfigurationsView)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
+                .build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
+
+        Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
+        assertThat(configNameToValueMap).containsOnly(
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
+        );
+        Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
+        assertThat(configNameToVariableNameMap).isEmpty();
+    }
+
+    @Test
+    void getRoleConfigWhenIdBrokerAndWasbFileSystem() {
+        WasbFileSystemConfigurationsView fileSystemConfigurationsView = mock(WasbFileSystemConfigurationsView.class);
+        when(fileSystemConfigurationsView.getType()).thenReturn("WASB");
+
+        TemplatePreparationObject tpo = new Builder()
+                .withCloudPlatform(CloudPlatform.AZURE)
+                .withFileSystemConfigurationView(fileSystemConfigurationsView)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
+                .build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
+
+        Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
+        assertThat(configNameToValueMap).containsOnly(
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
+        );
+        Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
+        assertThat(configNameToVariableNameMap).isEmpty();
+    }
+
+    @Test
+    void getRoleConfigWhenIdBrokerAndWasbIntegratedFileSystem() {
+        BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
+        when(fileSystemConfigurationsView.getType()).thenReturn("WASB_INTEGRATED");
 
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)

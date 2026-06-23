@@ -7,16 +7,9 @@
       "description": "The directory where Zeppelin notebooks are saved",
       "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/zeppelin/notebook",
       "propertyDisplayName": "Zeppelin Notebooks Root Directory",
-      "relatedServices": [
-        "ZEPPELIN_SERVER"
-      ],
+      "relatedServices": ["ZEPPELIN_SERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "YARN_LOG",
@@ -25,16 +18,9 @@
       "description": "This is the directory where aggregated application logs will be stored by YARN",
       "defaultPath": "{{{ defaultPath }}}{{{#if-false datalakeCluster}}}{{{#if-false attachedCluster}}}/{{{ clusterName }}}{{{/if-false}}}{{{/if-false}}}/oplogs/yarn-app-logs",
       "propertyDisplayName": "YARN Application Logs",
-      "relatedServices": [
-        "RESOURCEMANAGER"
-      ],
+      "relatedServices": ["RESOURCEMANAGER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "HIVE_METASTORE_WAREHOUSE",
@@ -43,16 +29,9 @@
       "description": "Hive stores the table data for managed tables in the warehouse directory",
       "defaultPath": "{{{ defaultPath }}}/warehouse/tablespace/managed/hive",
       "propertyDisplayName": "Hive Warehouse Directory",
-      "relatedServices": [
-        "HIVEMETASTORE"
-      ],
+      "relatedServices": ["HIVEMETASTORE"],
       "requiredForAttachedCluster": false,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "HIVE_REPLICA_WAREHOUSE",
@@ -61,16 +40,9 @@
       "description": "Root directory on the replica warehouse where the repl sub-system will store jars from the primary warehouse",
       "defaultPath": "{{{ defaultPath }}}/hive_replica_functions_dir",
       "propertyDisplayName": "Hive Replica Warehouse Directory",
-      "relatedServices": [
-        "HIVEMETASTORE"
-      ],
+      "relatedServices": ["HIVEMETASTORE"],
       "requiredForAttachedCluster": false,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "HIVE_METASTORE_EXTERNAL_WAREHOUSE",
@@ -79,16 +51,9 @@
       "description": "Hive stores the table data for external tables in the warehouse directory",
       "defaultPath": "{{{ defaultPath }}}/warehouse/tablespace/external/hive",
       "propertyDisplayName": "Hive Warehouse Directory For External Tables",
-      "relatedServices": [
-        "HIVEMETASTORE"
-      ],
+      "relatedServices": ["HIVEMETASTORE"],
       "requiredForAttachedCluster": false,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "RANGER_AUDIT",
@@ -97,16 +62,9 @@
       "description": "This is the directory where audit logs will be stored by Ranger",
       "defaultPath": "{{{ defaultPath }}}/ranger/audit",
       "propertyDisplayName": "Ranger Audit Logs",
-      "relatedServices": [
-        "RANGER_ADMIN"
-      ],
+      "relatedServices": ["RANGER_ADMIN"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "HBASE_ROOT",
@@ -115,16 +73,9 @@
       "description": "This is the root director for hbase",
       "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/hbase",
       "propertyDisplayName": "HBase Root Directory",
-      "relatedServices": [
-        "MASTER"
-      ],
+      "relatedServices": ["MASTER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "PROFILER_SERVICE_FS_URI",
@@ -133,19 +84,9 @@
       "description": "This is the file system URI for Profiler Service",
       "defaultPath": "{{{ defaultPath }}}/dpprofiler",
       "propertyDisplayName": "Profiler Service file system URI",
-      "relatedServices": [
-        "DATA_DISCOVERY_SERVICE_AGENT",
-        "PROFILER_ADMIN_AGENT",
-        "PROFILER_METRICS_AGENT",
-        "PROFILER_SCHEDULER_AGENT"
-      ],
+      "relatedServices": ["DATA_DISCOVERY_SERVICE_AGENT", "PROFILER_ADMIN_AGENT", "PROFILER_METRICS_AGENT", "PROFILER_SCHEDULER_AGENT"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "DEFAULT_FS",
@@ -154,16 +95,9 @@
       "description": "This is the directory where all of service configured if HDFS does not exist on the cluster",
       "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}",
       "propertyDisplayName": "Default FS",
-      "relatedMissingServices": [
-        "NAMENODE"
-      ],
+      "relatedMissingServices": ["NAMENODE"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "S3",
-        "GCS",
-        "ADLS_GEN_2"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
       "type": "FLINK_HISTORYSERVER_ARCHIVE",
@@ -172,16 +106,9 @@
       "description": "Directory to monitor for completed jobs",
       "defaultPath": "{{{ defaultPath }}}/flink/{{{ clusterName }}}/applicationHistory",
       "propertyDisplayName": "History Server Archive Directory",
-      "relatedServices": [
-        "FLINK_HISTORY_SERVER"
-      ],
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "FLINK_JOBMANAGER_ARCHIVE",
@@ -190,16 +117,9 @@
       "description": "Directory to upload completed jobs to",
       "defaultPath": "{{{ defaultPath }}}/flink/{{{ clusterName }}}/applicationHistory",
       "propertyDisplayName": "JobManager Archive Directory",
-      "relatedServices": [
-        "FLINK_HISTORY_SERVER"
-      ],
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "FLINK_CHECKPOINTS",
@@ -208,16 +128,9 @@
       "description": "The default directory used for storing the data files and meta data of checkpoints",
       "defaultPath": "{{{ defaultPath }}}/flink/{{{ clusterName }}}/checkpoints",
       "propertyDisplayName": "State Checkpoints Directory",
-      "relatedServices": [
-        "FLINK_HISTORY_SERVER"
-      ],
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "FLINK_SAVEPOINTS",
@@ -226,16 +139,9 @@
       "description": "The default directory used for storing the data files and meta data of savepoints",
       "defaultPath": "{{{ defaultPath }}}/flink/{{{ clusterName }}}/savepoints",
       "propertyDisplayName": "State Savepoints Directory",
-      "relatedServices": [
-        "FLINK_HISTORY_SERVER"
-      ],
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "FLINK_HIGH_AVAILABILITY",
@@ -244,16 +150,9 @@
       "description": "File system path where Flink persists metadata in high-availability setups",
       "defaultPath": "{{{ defaultPath }}}/flink/{{{ clusterName }}}/ha",
       "propertyDisplayName": "High Availability Storage Directory",
-      "relatedServices": [
-        "FLINK_HISTORY_SERVER"
-      ],
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "ICEBERG_REPLICATION_CLOUD_ROOT",
@@ -262,16 +161,9 @@
       "description": "Iceberg Replication Cloud Root",
       "defaultPath": "{{{ defaultPath }}}",
       "propertyDisplayName": "Iceberg Replication Cloud Root",
-      "relatedServices": [
-        "ICEBERG_REPLICATION_ADMINSERVER"
-      ],
+      "relatedServices": ["ICEBERG_REPLICATION_ADMINSERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "NIFI_LOGS_REPLICATION",
@@ -280,16 +172,9 @@
       "description": "The directory where NiFi logs are saved",
       "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/nifi/logs",
       "propertyDisplayName": "NiFi Logs Root Directory",
-      "relatedServices": [
-        "NIFI_NODE"
-      ],
+      "relatedServices": ["NIFI_NODE"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": [
-        "ADLS",
-        "GCS",
-        "ADLS_GEN_2",
-        "S3"
-      ]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     }
   ]
 }

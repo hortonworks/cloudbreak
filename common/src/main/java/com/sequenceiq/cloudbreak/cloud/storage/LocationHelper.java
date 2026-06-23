@@ -24,7 +24,12 @@ public class LocationHelper {
 
     public static String getBucketName(Optional<FileSystemType> fileSystemType, String storageLocation) {
         if (fileSystemType.isPresent()) {
-            storageLocation = fileSystemType.get().stripProtocol(storageLocation);
+            // TODO: CB-33307 to properly handle abfss
+            if (storageLocation.contains("abfss://") && fileSystemType.get().isAdlsGen2()) {
+                storageLocation = storageLocation.replace(fileSystemType.get().getProtocol() + "s://", "");
+            } else {
+                storageLocation = storageLocation.replace(fileSystemType.get().getProtocol() + "://", "");
+            }
         }
         return storageLocation.split("/")[0];
     }

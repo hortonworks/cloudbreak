@@ -32,12 +32,14 @@ import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigur
 import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 class RecipeModulTestModelProvider {
 
@@ -132,6 +134,20 @@ class RecipeModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getAdlsConfigView(getStorageLocationViews(2)))
+                .build();
+    }
+
+    static TemplatePreparationObject testTemplateWithSingleWasbStorage() {
+        return getPreparedBuilder("master")
+                .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
+                .withFileSystemConfigurationView(getWasbConfigView(getStorageLocationViews(1)))
+                .build();
+    }
+
+    static TemplatePreparationObject testTemplateWithTwoWasbStorage() {
+        return getPreparedBuilder("master")
+                .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
+                .withFileSystemConfigurationView(getWasbConfigView(getStorageLocationViews(2)))
                 .build();
     }
 
@@ -259,6 +275,16 @@ class RecipeModulTestModelProvider {
         fs.setTenantId("412145-23523523-235235");
         fs.setStorageContainer("StorageContainer");
         return new AdlsFileSystemConfigurationsView(fs, locationViews, false);
+    }
+
+    private static WasbFileSystemConfigurationsView getWasbConfigView(Collection<StorageLocationView> locationViews) {
+        WasbFileSystem fs = new WasbFileSystem();
+        fs.setAccountKey("SomeAccountKey");
+        fs.setAccountName("NameOfAccount");
+        fs.setSecure(true);
+        fs.setStorageContainerName("ContainerName");
+        fs.setStorageContainer("StorageContainer");
+        return new WasbFileSystemConfigurationsView(fs, locationViews, false);
     }
 
     private static Collection<StorageLocationView> getStorageLocationViews(int quantity) {

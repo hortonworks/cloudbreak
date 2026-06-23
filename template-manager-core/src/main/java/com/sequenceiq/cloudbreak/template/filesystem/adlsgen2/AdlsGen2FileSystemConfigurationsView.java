@@ -77,6 +77,6 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
 
     @Override
     public String getProtocol() {
-        return secure ? "abfss" : "abfs";
+        return FileSystemType.ADLS_GEN_2.getProtocol();
     }
 }

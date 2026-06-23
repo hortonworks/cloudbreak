@@ -62,6 +62,12 @@ public class LoggingRequestValidator implements ConstraintValidator<ValidLogging
     }
 
     private boolean isValidPathPrefix(LoggingRequest value, FileSystemType fileSystemType) {
-        return fileSystemType.startsWithProtocol(value.getStorageLocation());
+        boolean valid = false;
+        for (String loggingProtocol : fileSystemType.getLoggingProtocol()) {
+            if (value.getStorageLocation().startsWith(loggingProtocol + "://")) {
+                valid = true;
+            }
+        }
+        return valid;
     }
 }

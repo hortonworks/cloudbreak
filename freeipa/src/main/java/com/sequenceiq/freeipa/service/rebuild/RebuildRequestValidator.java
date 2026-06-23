@@ -64,9 +64,9 @@ public class RebuildRequestValidator {
         } catch (Exception e) {
             throw new BadRequestException("Invalid storage location path: [" + storageLocation + "]");
         }
-        if (!fileSystemType.startsWithProtocol(storageLocation)) {
+        if (fileSystemType.getLoggingProtocol().stream().noneMatch(loggingProtocol -> storageLocation.startsWith(loggingProtocol + "://"))) {
             throw new BadRequestException("Invalid storage location path: [" + storageLocation +
-                    "]. It must start with one of the protocols: " + fileSystemType.getProtocols().stream().sorted().toList());
+                    "]. It must start with one of the protocols: " + fileSystemType.getLoggingProtocol().stream().sorted().toList());
         }
     }
 }

@@ -132,6 +132,7 @@ class EnvironmentValidatorServiceTest {
                 Arguments.of("/path/path\t", true),
                 Arguments.of("\n/path/path", true),
                 Arguments.of("/path/path\n", true),
+                Arguments.of("wasb://asdf/asdf-v/apps/hive/warehouse", true),
                 Arguments.of("s3a://asdf/asdf-v/apps/hive-something/", true),
                 Arguments.of("https://mystorageaccount.blob.core.windows.net/data/", true),
                 Arguments.of("gs://asdf/asdf-v/apps/hive-something/", true),

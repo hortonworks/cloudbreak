@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
@@ -393,9 +394,14 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public FileSystemType getFileSystemType() {
         AdlsCloudStorageV1Parameters adlsCloudStorageV1Parameters = new AdlsCloudStorageV1Parameters();
         AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = new AdlsGen2CloudStorageV1Parameters();
+        WasbCloudStorageV1Parameters wasbCloudStorageV1Parameters = new WasbCloudStorageV1Parameters();
         FileSystemType fileSystemType;
 
         switch (azureProperties.getCloudStorage().getFileSystemType()) {
+            case "WASB_INTEGRATED":
+            case "WASB":
+                fileSystemType = wasbCloudStorageV1Parameters.getType();
+                break;
             case "ADLS":
                 fileSystemType = adlsCloudStorageV1Parameters.getType();
                 break;
