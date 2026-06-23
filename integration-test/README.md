@@ -82,6 +82,11 @@ You should have a running [Cloudbreak](https://github.infra.cloudera.com/cloudbr
  *Note:*
  You should have a previously created YAML [test suite](https://github.infra.cloudera.com/cloudbreak/cloudbreak/tree/master/integration-test/src/main/resources/testsuites) file for your test, in this case `aws-sdx-upgrade-tests.yaml`
 
+### Run a selected E2E test in IntelliJ
+1. Copy [`integration-test/testng.env`](testng.env) to a path on your machine and fill in the required values.
+2. In IntelliJ, open the Run/Debug Configuration for the test, then go to **Edit configuration templates** → **TestNG** → **EnvFile** and load variables from your copy of `testng.env` (use the repo file only as a template).
+3. Run the test with the green play button.
+
 ## Code organization
 
 ### Test cases

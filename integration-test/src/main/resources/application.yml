@@ -22,7 +22,7 @@ crn:
 integrationtest:
   threadCount: 8
   parallel: methods
-  timeOut: 6000000
+  timeOut: 18000000
   command: suiteurls
   outputdir: .
   publicKeyFile:
@@ -90,7 +90,7 @@ integrationtest:
     userGroupName: testgroupb
     userGroupCrn: "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:testgroupb/b983b572-9774-4f8f-8377-861b511442de"
   testsuite:
-    pollingInterval: 1000
+    pollingInterval: 30000
     threadPoolSize: 10
     skipRemainingTestsAfterOneFailed: true
     cleanUpOnFailure: false
@@ -103,8 +103,9 @@ integrationtest:
   freeipaImageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
   gatewayPort: null
   imageValidation:
-    sourceCatalogName:
+    sourceCatalogName: cdp-default
     sourceCatalogUrl:
+    runAdditionalTests: false
   baseImageTest:
     sourceCatalogName: v3-test
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
@@ -354,10 +355,10 @@ integrationtest:
   gcp:
     baseimage:
       imageId:
-    availabilityZone: europe-west2-a
+    availabilityZone: us-west2-c
     externalDatabaseSslEnforcementSupported: false
-    region: europe-west2
-    location: europe-west2
+    region: us-west2
+    location: us-west2
     verticalScale:
       supported: true
       datalake:
@@ -375,6 +376,8 @@ integrationtest:
       noPublicIp: true
       noFirewallRules: true
       subnetId: private-us-west2
+      subnetIds:
+        - private-us-west2
     credential:
       type: json
       json:
