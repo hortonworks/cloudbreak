@@ -16,7 +16,7 @@
   "emailTo": "admin@example.com",
   "cloudStorage" : {
     "name": "teszt",
-    "type": "WASB",
+    "type": "ADLS_GEN_2",
     "defaultFs": true
   },
   "encryptionProfileCrn": "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123"

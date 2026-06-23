@@ -45,15 +45,6 @@ function printLogic() {
 	        printIfValid "property:                      " "{{{ fileSystemConfigs.adls.locations.[0].property }}}"
 	        printIfValid "value:                         " "{{{ fileSystemConfigs.adls.locations.[0].value }}}"
 	        printIfValid "default file system?           " "{{{ fileSystemConfigs.adls.defaultFs }}}"
-	    elif {{{#if fileSystemConfigs.wasb}}}true{{{else}}}false{{{/if}}}; then
-	        printIfValid "account key:                   " "{{{ fileSystemConfigs.wasb.accountKey }}}"
-	        printIfValid "account name:                  " "{{{ fileSystemConfigs.wasb.accountName }}}"
-	        printIfValid "storage container name:        " "{{{ fileSystemConfigs.wasb.storageContainerName }}}"
-	        printIfValid "configFile:                    " "{{{ fileSystemConfigs.wasb.locations.[0].configFile }}}"
-	        printIfValid "property:                      " "{{{ fileSystemConfigs.wasb.locations.[0].property }}}"
-	        printIfValid "value:                         " "{{{ fileSystemConfigs.wasb.locations.[0].value }}}"
-	        printIfValid "secure?                        " "{{{ fileSystemConfigs.wasb.secure }}}"
-	        printIfValid "default file system?           " "{{{ fileSystemConfigs.wasb.defaultFs }}}"
 	    fi
 	fi
 }

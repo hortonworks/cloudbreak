@@ -8,8 +8,6 @@ public class CloudIdentity {
 
     private CloudIdentityType identityType;
 
-    private WasbIdentity wasbIdentity;
-
     private S3Identity s3Identity;
 
     private EfsIdentity efsIdentity;
@@ -20,9 +18,7 @@ public class CloudIdentity {
 
     @JsonIgnore
     public FileSystemType getFileSystemType() {
-        if (wasbIdentity != null) {
-            return wasbIdentity.getType();
-        } else if (s3Identity != null) {
+        if (s3Identity != null) {
             return s3Identity.getType();
         } else if (efsIdentity != null) {
             return efsIdentity.getType();
@@ -31,7 +27,7 @@ public class CloudIdentity {
         } else if (gcsIdentity != null) {
             return gcsIdentity.getType();
         }
-        throw new IllegalStateException("No identity is present! WASB, ABFS, GCS or S3 identity should be stored.");
+        throw new IllegalStateException("No identity is present! ABFS, GCS or S3 identity should be stored.");
     }
 
     public CloudIdentityType getIdentityType() {
@@ -40,14 +36,6 @@ public class CloudIdentity {
 
     public void setIdentityType(CloudIdentityType identityType) {
         this.identityType = identityType;
-    }
-
-    public WasbIdentity getWasbIdentity() {
-        return wasbIdentity;
-    }
-
-    public void setWasbIdentity(WasbIdentity wasbIdentity) {
-        this.wasbIdentity = wasbIdentity;
     }
 
     public S3Identity getS3Identity() {

@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 
 @Component
 public class AzureFileSystemConfigProvider {
@@ -51,8 +50,6 @@ public class AzureFileSystemConfigProvider {
             fileSystemConfigurationsView.setAdlsTrackingClusterNameKey(uuid);
             fileSystemConfigurationsView.setAdlsTrackingClusterTypeKey(adlsTrackingTag);
             fileSystemConfigurationsView.setResourceGroupName(resourceGroupName);
-        } else if (fsConfiguration instanceof WasbFileSystemConfigurationsView) {
-            ((WasbFileSystemConfigurationsView) fsConfiguration).setResourceGroupName(resourceGroupName);
         }
         return fsConfiguration;
     }
