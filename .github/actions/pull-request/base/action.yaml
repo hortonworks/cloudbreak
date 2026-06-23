@@ -152,6 +152,15 @@ runs:
           cb/data/SEQ_PRIV_FILE SEQ_PRIV_FILE|SEQ_PRIV_FILE;
           cb/data/SONARQUBE SONAR_HOST | SONAR_HOST;
           cb/data/SONARQUBE SONAR_TOKEN | SONAR_TOKEN;
+    - name: set_gradle_user_home
+      shell: bash
+      # Pin GRADLE_USER_HOME to a stable location that actually exists on the
+      # ARC runners (the old /home/jenkins path was left over from Jenkins and
+      # never existed here, so the cache below was never saved). RUNNER_WORKSPACE
+      # is the parent of the checkout, so it survives the checkout's git-clean
+      # and lives on the large work volume. Gradle and the cache step below both
+      # use this exact path, so they can no longer drift apart.
+      run: echo "GRADLE_USER_HOME=${RUNNER_WORKSPACE}/.gradle" >> "$GITHUB_ENV"
     - name: cache_java_libs
       id: cache-java
       uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -159,8 +168,8 @@ runs:
         cache-name: cache-java-libs
       with:
         path: |
-          /home/jenkins/.gradle/caches
-          /home/jenkins/.gradle/wrapper
+          ${{ env.GRADLE_USER_HOME }}/caches
+          ${{ env.GRADLE_USER_HOME }}/wrapper
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
