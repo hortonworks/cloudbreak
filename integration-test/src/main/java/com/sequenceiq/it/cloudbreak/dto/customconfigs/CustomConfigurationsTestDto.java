@@ -20,9 +20,9 @@ public class CustomConfigurationsTestDto extends
     private static final String CUSTOM_CONFIGURATIONS_NAME = "CustomConfigurationsName";
 
     private static final Set<CustomConfigurationPropertyParameters> PROPERTIES =
-            Set.of(new CustomConfigurationPropertyParameters("hive_server2_transport_mode", "all", "hiveserver2", "hive_on_tez"),
+            Set.of(new CustomConfigurationPropertyParameters("hive_server2_transport_mode", "all", "HIVESERVER2", "HIVE_ON_TEZ"),
             new CustomConfigurationPropertyParameters("core_site_safety_valve",
-                    "<property><name>fs.s3a.fast.upload.buffer</name><value>disk</value></property>", null, "hdfs"));
+                    "<property><name>fs.s3a.fast.upload.buffer</name><value>disk</value></property>", null, "HDFS"));
 
     private CustomConfigurationsV4Responses customConfigsResponses;
 
