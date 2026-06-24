@@ -28,11 +28,13 @@ public class LogCollectorUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogCollectorUtil.class);
 
+    public static final List<String> SALT_ISSUE_LOGS = List.of("/var/log/saltboot.log", "/var/log/nginx/access.log", "/var/log/nginx/error.log",
+            "/var/log/salt/master", "/var/log/salt/minion", "/var/log/messages");
+
     private static final Map<String, List<String>> LOG_FILES_TO_COLLECT_ON_ISSUE =
             Map.of("There are missing nodes from salt network response", List.of("/var/log/saltboot.log", "/var/log/nginx/access.log", "/var/log/messages"),
-                    "There are missing nodes for file upload",
-                    List.of("/var/log/saltboot.log", "/var/log/nginx/access.log", "/var/log/nginx/error.log",
-                            "/var/log/salt/master", "/var/log/salt/minion", "/var/log/messages"),
+                    "There are missing nodes for file upload", SALT_ISSUE_LOGS,
+                    "Collecting minion IP addresses failed", SALT_ISSUE_LOGS,
                     "There are missing minions from salt response",
                     List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/salt/minion",
                             "/var/log/cloud-init.log", "/var/log/cloud-init-output.log"),
