@@ -14,9 +14,15 @@ import org.junit.jupiter.api.Test;
 
 class ConcurrencyLimitDecoratorTest {
 
-    private static final int CONCURRENCY_LIMIT = 1000;
+    private static final int CONCURRENCY_LIMIT = 100;
 
-    private static final int NUMBER_OF_TASKS = 5000;
+    private static final int NUMBER_OF_TASKS = 500;
+
+    private static final long TASK_SLEEP_MS = 200;
+
+    // NUMBER_OF_TASKS / CONCURRENCY_LIMIT = 5 waves, each gated by TASK_SLEEP_MS, so the decorator
+    // forces a hard floor of ~5 * 200ms = 1000ms (vs ~200ms if it failed to throttle).
+    private static final long MIN_EXPECTED_DURATION_MS = 900;
 
     @Test
     public void testConcurrencyLimitDecoratorWithVirtualThreads() {
@@ -26,7 +32,7 @@ class ConcurrencyLimitDecoratorTest {
             List<Future> list = IntStream.range(0, NUMBER_OF_TASKS)
                     .boxed()
                     .map(i -> executorService.submit(concurrencyLimitDecorator.apply(() -> {
-                        Thread.sleep(1000);
+                        Thread.sleep(TASK_SLEEP_MS);
                         return i;
                     })))
                     .toList();
@@ -38,7 +44,7 @@ class ConcurrencyLimitDecoratorTest {
                 }
             });
             long duration = System.currentTimeMillis() - startTime;
-            assertThat(duration, Matchers.greaterThan(4500L));
+            assertThat(duration, Matchers.greaterThan(MIN_EXPECTED_DURATION_MS));
         }
     }
 }

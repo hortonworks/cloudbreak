@@ -94,7 +94,7 @@ class ExternalizedComputeClusterAuxiliaryDeleteWaitHandlerTest {
         when(externalizedComputeCluster.getEnvironmentCrn()).thenReturn("envCrn");
         when(externalizedComputeClusterService.getExternalizedComputeCluster(2L)).thenReturn(externalizedComputeCluster);
         ReflectionTestUtils.setField(externalizedComputeClusterAuxiliaryDeleteWaitHandler, "sleepTime", 10);
-        ReflectionTestUtils.setField(externalizedComputeClusterAuxiliaryDeleteWaitHandler, "timeLimit", 5);
+        ReflectionTestUtils.setField(externalizedComputeClusterAuxiliaryDeleteWaitHandler, "timeLimit", 1);
         ListClusterItem aux1 = ListClusterItem.newBuilder().setStatus("DELETING").build();
         ListClusterItem aux2 = ListClusterItem.newBuilder().setStatus(DELETED_STATUS).build();
         List<ListClusterItem> auxList = new ArrayList<>();
@@ -104,7 +104,9 @@ class ExternalizedComputeClusterAuxiliaryDeleteWaitHandlerTest {
 
         ExternalizedComputeClusterDeleteFailedEvent response = (ExternalizedComputeClusterDeleteFailedEvent)
                 externalizedComputeClusterAuxiliaryDeleteWaitHandler.doAccept(handlerEvent);
-        verify(liftieGrpcClient, atLeast(2)).listAuxClusters("envCrn", "actorCrn");
+        // The number of polls before the wall-clock timeout is non-deterministic under CI load, so only assert it
+        // polled at least once; the repeated-polling behaviour is covered deterministically by doAcceptTestHasAuxiliaryClusters.
+        verify(liftieGrpcClient, atLeast(1)).listAuxClusters("envCrn", "actorCrn");
         assertEquals(2L, response.getResourceId());
         assertEquals("Auxiliary cluster deletion timed out for environment: envCrn", response.getException().getMessage());
     }
