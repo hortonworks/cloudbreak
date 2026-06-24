@@ -51,6 +51,7 @@ public class RedbeamsValidateUpgradeCleanupActions {
 
             @Override
             protected void doExecute(RedbeamsContext context, RedbeamsStartValidateUpgradeCleanupRequest payload, Map<Object, Object> variables) {
+                dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.VALIDATE_UPGRADE_CLEANUP_IN_PROGRESS);
                 sendEvent(context,
                         new ValidateUpgradeDatabaseServerCleanupRequest(
                                 context.getCloudContext(),

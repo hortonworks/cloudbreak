@@ -48,6 +48,7 @@ public class RedbeamsUpgradeActions {
 
             @Override
             protected void doExecute(RedbeamsContext context, RedbeamsStartUpgradeRequest payload, Map<Object, Object> variables) {
+                dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.UPGRADE_IN_PROGRESS);
                 TargetMajorVersion targetMajorVersion = payload.getTargetMajorVersion();
                 sendEvent(context,
                         new UpgradeDatabaseServerRequest(

@@ -31,7 +31,7 @@ import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.api.model.operation.OperationProgressStatus;
 import com.sequenceiq.flow.api.model.operation.OperationView;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
@@ -42,9 +42,8 @@ import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
 import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsValidateUpgradeEvent;
-import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.chain.RedbeamsUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartValidateUpgradeRequest;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
@@ -108,26 +107,23 @@ public class RedbeamsUpgradeServiceTest {
         when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
         UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
 
-        RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
-                upgradeDatabaseRequest.getTargetMajorVersion(), UpgradeDatabaseMigrationParams
-                .fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
-
-        when(flowManager.notify(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), redbeamsStartUpgradeRequest)).
-                thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+        String chainSelector = EventSelectorUtil.selector(RedbeamsUpgradeFlowChainTriggerEvent.class);
+        when(flowManager.notify(eq(chainSelector), any(RedbeamsUpgradeFlowChainTriggerEvent.class))).
+                thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "1"));
 
         UpgradeDatabaseResponse response = underTest.upgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
 
         verify(dbStackService).getByCrn(SERVER_CRN_STRING);
-        verify(dbStackStatusUpdater).updateStatus(1L, DetailedDBStackStatus.UPGRADE_REQUESTED);
 
         assertEquals("1", response.getFlowIdentifier().getPollableId());
         assertEquals(MajorVersion.VERSION_10, response.getCurrentVersion());
         assertNull(response.getReason());
 
-        ArgumentCaptor<RedbeamsStartUpgradeRequest> upgradeRequestArgumentCaptor = ArgumentCaptor.forClass(RedbeamsStartUpgradeRequest.class);
-        verify(flowManager).notify(eq(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector()), upgradeRequestArgumentCaptor.capture());
-        RedbeamsStartUpgradeRequest actualRedbeamsStartUpgradeRequest = upgradeRequestArgumentCaptor.getValue();
-        assertEquals(TARGET_MAJOR_VERSION, actualRedbeamsStartUpgradeRequest.getTargetMajorVersion());
+        ArgumentCaptor<RedbeamsUpgradeFlowChainTriggerEvent> chainTriggerArgumentCaptor =
+                ArgumentCaptor.forClass(RedbeamsUpgradeFlowChainTriggerEvent.class);
+        verify(flowManager).notify(eq(chainSelector), chainTriggerArgumentCaptor.capture());
+        RedbeamsUpgradeFlowChainTriggerEvent actualChainTriggerEvent = chainTriggerArgumentCaptor.getValue();
+        assertEquals(TARGET_MAJOR_VERSION, actualChainTriggerEvent.getTargetMajorVersion());
     }
 
     @Test
@@ -189,26 +185,24 @@ public class RedbeamsUpgradeServiceTest {
         UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
         when(operationService.getOperationProgressByResourceCrn(SERVER_CRN_STRING, false)).
                 thenReturn(getOperationViewWithStatus(OperationProgressStatus.FINISHED));
-        RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
-                upgradeDatabaseRequest.getTargetMajorVersion(), UpgradeDatabaseMigrationParams
-                .fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
 
-        when(flowManager.notify(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), redbeamsStartUpgradeRequest)).
-                thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+        String chainSelector = EventSelectorUtil.selector(RedbeamsUpgradeFlowChainTriggerEvent.class);
+        when(flowManager.notify(eq(chainSelector), any(RedbeamsUpgradeFlowChainTriggerEvent.class))).
+                thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "1"));
 
         UpgradeDatabaseResponse response = underTest.upgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
 
         verify(dbStackService).getByCrn(SERVER_CRN_STRING);
-        verify(dbStackStatusUpdater).updateStatus(1L, DetailedDBStackStatus.UPGRADE_REQUESTED);
 
         assertEquals("1", response.getFlowIdentifier().getPollableId());
         assertEquals(MajorVersion.VERSION_10, response.getCurrentVersion());
         assertNull(response.getReason());
 
-        ArgumentCaptor<RedbeamsStartUpgradeRequest> upgradeRequestArgumentCaptor = ArgumentCaptor.forClass(RedbeamsStartUpgradeRequest.class);
-        verify(flowManager).notify(eq(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector()), upgradeRequestArgumentCaptor.capture());
-        RedbeamsStartUpgradeRequest actualRedbeamsStartUpgradeRequest = upgradeRequestArgumentCaptor.getValue();
-        assertEquals(TARGET_MAJOR_VERSION, actualRedbeamsStartUpgradeRequest.getTargetMajorVersion());
+        ArgumentCaptor<RedbeamsUpgradeFlowChainTriggerEvent> chainTriggerArgumentCaptor =
+                ArgumentCaptor.forClass(RedbeamsUpgradeFlowChainTriggerEvent.class);
+        verify(flowManager).notify(eq(chainSelector), chainTriggerArgumentCaptor.capture());
+        RedbeamsUpgradeFlowChainTriggerEvent actualChainTriggerEvent = chainTriggerArgumentCaptor.getValue();
+        assertEquals(TARGET_MAJOR_VERSION, actualChainTriggerEvent.getTargetMajorVersion());
     }
 
     @Test

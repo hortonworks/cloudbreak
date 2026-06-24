@@ -5,6 +5,8 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsValidateUpgradeEvent;
@@ -21,6 +23,13 @@ public class RedbeamsStartValidateUpgradeRequest extends RedbeamsEvent {
             @JsonProperty("targetMajorVersion") TargetMajorVersion targetMajorVersion,
             @JsonProperty("migrationParams") UpgradeDatabaseMigrationParams migrationParams) {
         super(RedbeamsValidateUpgradeEvent.REDBEAMS_START_VALIDATE_UPGRADE_EVENT.selector(), resourceId);
+        this.targetMajorVersion = targetMajorVersion;
+        this.migrationParams = migrationParams;
+    }
+
+    public RedbeamsStartValidateUpgradeRequest(Long resourceId, TargetMajorVersion targetMajorVersion,
+            UpgradeDatabaseMigrationParams migrationParams, Promise<AcceptResult> accepted) {
+        super(RedbeamsValidateUpgradeEvent.REDBEAMS_START_VALIDATE_UPGRADE_EVENT.selector(), resourceId, accepted, false);
         this.targetMajorVersion = targetMajorVersion;
         this.migrationParams = migrationParams;
     }

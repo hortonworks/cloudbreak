@@ -50,6 +50,7 @@ public class RedbeamsValidateUpgradeActions {
 
             @Override
             protected void doExecute(RedbeamsContext context, RedbeamsStartValidateUpgradeRequest payload, Map<Object, Object> variables) {
+                dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.VALIDATE_UPGRADE_IN_PROGRESS);
                 TargetMajorVersion targetMajorVersion = payload.getTargetMajorVersion();
                 sendEvent(context,
                         new ValidateUpgradeDatabaseServerRequest(

@@ -18,16 +18,15 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.api.model.operation.OperationView;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
 import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsValidateUpgradeCleanupEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsValidateUpgradeEvent;
-import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.chain.RedbeamsUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartValidateUpgradeCleanupRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartValidateUpgradeRequest;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
@@ -40,9 +39,6 @@ public class RedbeamsUpgradeService {
 
     @Inject
     private DBStackService dbStackService;
-
-    @Inject
-    private DBStackStatusUpdater dbStackStatusUpdater;
 
     @Inject
     private RedbeamsFlowManager flowManager;
@@ -64,15 +60,15 @@ public class RedbeamsUpgradeService {
         UpgradeDatabaseResponse runningFlowResponse = validateRunningFlow(crn, dbStack, currentVersion, Optional.of(targetVersion));
         if (runningFlowResponse != null) {
             return runningFlowResponse;
+        } else {
+            networkBuilderService.updateNetworkSubnets(dbStack);
+            UpgradeDatabaseMigrationParams migrationParams =
+                    UpgradeDatabaseMigrationParams.fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer());
+            RedbeamsStartValidateUpgradeRequest startRequest = new RedbeamsStartValidateUpgradeRequest(dbStack.getId(),
+                        targetVersion, migrationParams);
+            FlowIdentifier flowId = flowManager.notify(RedbeamsValidateUpgradeEvent.REDBEAMS_START_VALIDATE_UPGRADE_EVENT.selector(), startRequest);
+            return new UpgradeDatabaseResponse(flowId, currentVersion);
         }
-
-        networkBuilderService.updateNetworkSubnets(dbStack);
-        dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.VALIDATE_UPGRADE_REQUESTED);
-        UpgradeDatabaseMigrationParams migrationParams = UpgradeDatabaseMigrationParams.fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer());
-        RedbeamsStartValidateUpgradeRequest startRequest = new RedbeamsStartValidateUpgradeRequest(dbStack.getId(),
-                    targetVersion, migrationParams);
-        FlowIdentifier flowId = flowManager.notify(RedbeamsValidateUpgradeEvent.REDBEAMS_START_VALIDATE_UPGRADE_EVENT.selector(), startRequest);
-        return new UpgradeDatabaseResponse(flowId, currentVersion);
     }
 
     public UpgradeDatabaseResponse validateUpgradeDatabaseServerCleanup(String crn) {
@@ -85,11 +81,12 @@ public class RedbeamsUpgradeService {
         UpgradeDatabaseResponse runningFlowResponse = validateRunningFlow(crn, dbStack, currentVersion, Optional.empty());
         if (runningFlowResponse != null) {
             return runningFlowResponse;
+        } else {
+            RedbeamsStartValidateUpgradeCleanupRequest startRequest = new RedbeamsStartValidateUpgradeCleanupRequest(dbStack.getId());
+            FlowIdentifier flowId = flowManager.notify(RedbeamsValidateUpgradeCleanupEvent.REDBEAMS_START_VALIDATE_UPGRADE_CLEANUP_EVENT.selector(),
+                    startRequest);
+            return new UpgradeDatabaseResponse(flowId, currentVersion);
         }
-
-        RedbeamsStartValidateUpgradeCleanupRequest startRequest = new RedbeamsStartValidateUpgradeCleanupRequest(dbStack.getId());
-        FlowIdentifier flowId = flowManager.notify(RedbeamsValidateUpgradeCleanupEvent.REDBEAMS_START_VALIDATE_UPGRADE_CLEANUP_EVENT.selector(), startRequest);
-        return new UpgradeDatabaseResponse(flowId, currentVersion);
     }
 
     public UpgradeDatabaseResponse upgradeDatabaseServer(String crn, UpgradeDatabaseRequest upgradeDatabaseRequest) {
@@ -104,14 +101,14 @@ public class RedbeamsUpgradeService {
         UpgradeDatabaseResponse runningFlowResponse = validateRunningFlow(crn, dbStack, currentVersion, Optional.of(targetVersion));
         if (runningFlowResponse != null) {
             return runningFlowResponse;
+        } else {
+            networkBuilderService.updateNetworkSubnets(dbStack);
+            String selector = EventSelectorUtil.selector(RedbeamsUpgradeFlowChainTriggerEvent.class);
+            RedbeamsUpgradeFlowChainTriggerEvent chainTriggerEvent = new RedbeamsUpgradeFlowChainTriggerEvent(selector, dbStack.getId(),
+                    targetVersion, UpgradeDatabaseMigrationParams.fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
+            FlowIdentifier flowId = flowManager.notify(selector, chainTriggerEvent);
+            return new UpgradeDatabaseResponse(flowId, currentVersion);
         }
-
-        networkBuilderService.updateNetworkSubnets(dbStack);
-        dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.UPGRADE_REQUESTED);
-        RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
-                targetVersion, UpgradeDatabaseMigrationParams.fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
-        FlowIdentifier flowId = flowManager.notify(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), redbeamsStartUpgradeRequest);
-        return new UpgradeDatabaseResponse(flowId, currentVersion);
     }
 
     private UpgradeDatabaseResponse validateRunningFlow(String crn, DBStack dbStack, MajorVersion currentVersion, Optional<TargetMajorVersion> targetVersion) {
@@ -122,11 +119,13 @@ public class RedbeamsUpgradeService {
             } else {
                 LOGGER.warn("[INVESTIGATE] DatabaseServer with crn {} has {} status but no running flows so re-triggering the upgrade flow now", crn,
                         dbStack.getStatus());
+                return null;
             }
         } else if (targetVersion.isPresent() && !isUpgradeNeeded(currentVersion, targetVersion.get())) {
             return handleAlreadyUpgraded(crn, currentVersion);
+        } else {
+            return null;
         }
-        return null;
     }
 
     private UpgradeDatabaseResponse handleAlreadyUpgraded(String crn, MajorVersion currentVersion) {
