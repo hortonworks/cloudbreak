@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
@@ -15,7 +16,7 @@ public abstract class AbstractAzureServiceClient {
         this.azureListResultFactory = azureListResultFactory;
     }
 
-    protected <T> T handleException(Supplier<T> function) {
+    protected <T> Optional<T> handleException(Supplier<T> function) {
         return azureExceptionHandler.handleException(function);
     }
 

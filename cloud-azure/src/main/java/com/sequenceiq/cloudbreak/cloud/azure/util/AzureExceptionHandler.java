@@ -38,7 +38,7 @@ public class AzureExceptionHandler {
 
     private static final int CONFLICT = 409;
 
-    public <T> T handleException(Supplier<T> function) {
+    public <T> Optional<T> handleException(Supplier<T> function) {
         return handleException(function, DEFAULT_EXCEPTION_HANDLER_PARAMETERS);
     }
 
@@ -47,13 +47,14 @@ public class AzureExceptionHandler {
     }
 
     public <T> T handleException(Supplier<T> function, T defaultValue, AzureExceptionHandlerParameters azureExceptionHandlerParameters) {
-        return Optional.ofNullable(handleException(function, azureExceptionHandlerParameters))
+        return handleException(function, azureExceptionHandlerParameters)
                 .orElse(defaultValue);
     }
 
-    private <T> T handleException(Supplier<T> function, AzureExceptionHandlerParameters azureExceptionHandlerParameters) {
+    private <T> Optional<T> handleException(Supplier<T> function, AzureExceptionHandlerParameters azureExceptionHandlerParameters) {
         try {
-            return function.get();
+            T result = function.get();
+            return Optional.ofNullable(result);
         } catch (MsalServiceException e) {
             LOGGER.warn("MsalServiceException has been thrown during azure operation", e);
             if (isUnauthorized(e) || isForbidden(e)) {
@@ -67,11 +68,11 @@ public class AzureExceptionHandler {
 
             if (azureExceptionHandlerParameters.isHandleAllExceptions()) {
                 LOGGER.debug("Handle all exceptions is turned on");
-                return null;
+                return Optional.empty();
             }
             if (azureExceptionHandlerParameters.isHandleNotFound() && isNotFound(me)) {
                 LOGGER.debug("Handle not found exception is turned on");
-                return null;
+                return Optional.empty();
             }
             throw me;
         }

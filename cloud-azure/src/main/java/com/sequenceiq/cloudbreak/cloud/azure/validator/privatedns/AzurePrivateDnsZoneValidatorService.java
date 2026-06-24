@@ -18,6 +18,7 @@ import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandlerParameters;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
@@ -60,7 +61,8 @@ public class AzurePrivateDnsZoneValidatorService {
 
     public ValidationResultBuilder privateDnsZoneConnectedToNetwork(AzureClient azureClient, String networkResourceGroupName,
             String networkName, ResourceId privateDnsZoneResourceId, ValidationResultBuilder resultBuilder) {
-        String networkId = azureClient.getNetworkByResourceGroup(networkResourceGroupName, networkName).id();
+        String networkId = azureClient.getNetworkByResourceGroup(networkResourceGroupName, networkName)
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch Network using network name: " + networkName)).id();
         List<String> connectedNetworks = azureClient.listNetworkLinksByPrivateDnsZoneName(
                         privateDnsZoneResourceId.subscriptionId(), privateDnsZoneResourceId.resourceGroupName(), privateDnsZoneResourceId.name())
                 .getStream(AZURE_HANDLE_ALL_EXCEPTIONS)

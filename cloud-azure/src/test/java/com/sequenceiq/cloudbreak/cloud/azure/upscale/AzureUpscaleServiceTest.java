@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -193,7 +194,7 @@ class AzureUpscaleServiceTest {
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
                 .withName("instance").withParameters(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
-        when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(templateDeployment))).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
         when(azureScaleUtilService.getArmTemplate(anyList(), anyString())).thenReturn(template);
@@ -283,7 +284,7 @@ class AzureUpscaleServiceTest {
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
                 .withName("instance").withParameters(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
-        when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(templateDeployment))).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
         when(azureScaleUtilService.getArmTemplate(anyList(), anyString())).thenReturn(template);
@@ -398,7 +399,7 @@ class AzureUpscaleServiceTest {
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
                 .withName("instance").withParameters(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
-        when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(templateDeployment))).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
         doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());

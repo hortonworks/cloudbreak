@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -181,7 +182,7 @@ public class AzureResourceConnectorTest {
         lenient().when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(image);
         lenient().when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
         lenient().when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
-        lenient().when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(instances);
+        lenient().when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(instances);
         lenient().when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
         lenient().when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
     }
@@ -206,7 +207,7 @@ public class AzureResourceConnectorTest {
     @Test
     public void testWhenTemplateDeploymentExistsAndInProgressThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.IN_PROGRESS);
         when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
 
@@ -226,6 +227,7 @@ public class AzureResourceConnectorTest {
     public void testWhenTemplateDeploymentExistsAndFinishedThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.CREATED);
         when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
 
@@ -336,7 +338,7 @@ public class AzureResourceConnectorTest {
         when(azureTemplateBuilder.buildLoadBalancer(eq(STACK_NAME), any(AzureCredentialView.class), any(AzureStackView.class), eq(cloudContext), eq(stack),
                 eq(AzureInstanceTemplateOperation.PROVISION))).thenReturn("{}");
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.IN_PROGRESS);
 
         underTest.launchLoadBalancers(ac, stack, notifier);

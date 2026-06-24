@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,7 +111,7 @@ class AzurePlatformResourcesTest {
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
         virtualMachineSizes.add(createVirtualMachineSize("Standard_DS2_v2", 20000));
         virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
-        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+        when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(Map.of());
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureAcceleratedNetworkValidator.isSupportedForVm(any(), anyMap())).thenReturn(true);
@@ -156,7 +157,7 @@ class AzurePlatformResourcesTest {
         virtualMachineSizes.add(d2sTypeWithoutResourceDisk);
         virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
         virtualMachineSizes.add(e64sVmTypeWithoutResourceDisk);
-        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+        when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         Map<String, List<String>> zoneInfo = new HashMap<>();
         zoneInfo.put("Standard_D2s_v4", List.of("1", "2"));
         zoneInfo.put("Standard_E64s_v4", List.of("2", "3"));
@@ -228,7 +229,7 @@ class AzurePlatformResourcesTest {
         Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
                 .collect(Collectors.toSet());
 
-        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+        when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
 
@@ -267,7 +268,7 @@ class AzurePlatformResourcesTest {
         Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
                 .collect(Collectors.toSet());
 
-        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+        when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
         when(azureHostEncryptionValidator.isVmSupported(any(), anyMap())).thenReturn(true);
@@ -302,7 +303,7 @@ class AzurePlatformResourcesTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
         virtualMachineSizes.add(createVirtualMachineSize("Standard_D8_v3", 20000));
-        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+        when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("Standard_D8_v3"));
 
@@ -318,7 +319,7 @@ class AzurePlatformResourcesTest {
                 .build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
-        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+        when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"));
 
@@ -327,7 +328,7 @@ class AzurePlatformResourcesTest {
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v3"));
 
-        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+        when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
 
         instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>());
 
@@ -428,7 +429,7 @@ class AzurePlatformResourcesTest {
         when(network.subnets()).thenReturn(Map.of("subnet", subnet));
         when(azureAddressPrefixProvider.getAddressPrefix(any())).thenReturn("10.0.0.0/16");
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
-        when(azureClient.getNetworkByResourceGroup("resourcegroup", "networkid")).thenReturn(network);
+        when(azureClient.getNetworkByResourceGroup("resourcegroup", "networkid")).thenReturn(Optional.of(network));
         CloudNetworks actualNetworks = underTest.networks(cloudCredential, region, filter);
         assertFalse(actualNetworks.getCloudNetworkResponses().get("westus2").isEmpty());
         verify(azureCloudSubnetParametersService).addPrivateEndpointNetworkPolicies(
@@ -451,8 +452,8 @@ class AzurePlatformResourcesTest {
         VirtualMachineSize vmB = mockVmSize("Standard_D2s_v3");
         VirtualMachineSize vmC = mockVmSize("Standard_D2_v6");
         Set<VirtualMachineSize> vmSizes = new HashSet<>(Arrays.asList(vmA, vmB, vmC));
-        when(azureClient.getVmTypes(REGION)).thenReturn(vmSizes);
-        when(azureClient.getVmTypes(REGION)).thenReturn(vmSizes);
+        when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(vmSizes));
+        when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(vmSizes));
 
         Map<String, List<String>> azs = new HashMap<>();
         azs.put("Standard_D4s_v3", Arrays.asList("1", "2"));

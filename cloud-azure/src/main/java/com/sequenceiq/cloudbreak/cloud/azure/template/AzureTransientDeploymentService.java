@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.template;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -27,8 +28,8 @@ public class AzureTransientDeploymentService {
         ResourceStatus deploymentStatus = client.getTemplateDeploymentStatus(resourceGroupName, deploymentName);
         if (deploymentStatus.isTransient()) {
             LOGGER.info("Template deployment {} has transient status {} , cancelling it now.", deploymentName, deploymentStatus);
-            Deployment deployment = client.getTemplateDeployment(resourceGroupName, deploymentName);
-            deployment.cancel();
+            Optional<Deployment> deployment = client.getTemplateDeployment(resourceGroupName, deploymentName);
+            deployment.orElseThrow(() -> new IllegalStateException("Deployment not found: " + deploymentName)).cancel();
             List<CloudResource> deployedResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
             LOGGER.info("Found resources to be removed: {}", deployedResources);
             return deployedResources;

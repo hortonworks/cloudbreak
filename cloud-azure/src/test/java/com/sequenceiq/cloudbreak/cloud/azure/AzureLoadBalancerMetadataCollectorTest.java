@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -77,7 +78,7 @@ public class AzureLoadBalancerMetadataCollectorTest {
         );
 
         when(azureClient.getLoadBalancerRules(eq(RESOURCE_GROUP), eq(LB_NAME))).thenReturn(rules);
-        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), anyString())).thenReturn(mock(AvailabilitySet.class));
+        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), anyString())).thenReturn(Optional.ofNullable(mock(AvailabilitySet.class)));
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName))).thenReturn(availabilitySetName);
 
         Map<String, Object> parameters = underTest.getParameters(ac, RESOURCE_GROUP, LB_NAME);
@@ -105,7 +106,7 @@ public class AzureLoadBalancerMetadataCollectorTest {
         );
 
         when(azureClient.getLoadBalancerRules(eq(RESOURCE_GROUP), eq(LB_NAME))).thenReturn(rules);
-        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), anyString())).thenReturn(mock(AvailabilitySet.class));
+        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), anyString())).thenReturn(Optional.ofNullable(mock(AvailabilitySet.class)));
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName0))).thenReturn(availabilitySetName0);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName1))).thenReturn(availabilitySetName1);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName2))).thenReturn(availabilitySetName2);
@@ -134,9 +135,9 @@ public class AzureLoadBalancerMetadataCollectorTest {
         expectedParameters.put(AzureLoadBalancerMetadataView.AVAILABILITY_SET_PREFIX + 2, availabilitySetName2);
 
         when(azureClient.getLoadBalancerRules(eq(RESOURCE_GROUP), eq(LB_NAME))).thenReturn(rules);
-        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName0))).thenReturn(mock(AvailabilitySet.class));
-        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName1))).thenReturn(null);
-        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName2))).thenReturn(mock(AvailabilitySet.class));
+        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName0))).thenReturn(Optional.ofNullable(mock(AvailabilitySet.class)));
+        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName1))).thenReturn(Optional.empty());
+        when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName2))).thenReturn(Optional.ofNullable(mock(AvailabilitySet.class)));
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName0))).thenReturn(availabilitySetName0);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName1))).thenReturn(availabilitySetName1);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName2))).thenReturn(availabilitySetName2);

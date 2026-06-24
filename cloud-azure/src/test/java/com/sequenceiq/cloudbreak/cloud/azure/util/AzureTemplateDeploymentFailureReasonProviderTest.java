@@ -47,7 +47,7 @@ class AzureTemplateDeploymentFailureReasonProviderTest {
 
     @Test
     void testGetFailureMessageShouldReturnErrorReasonFromFailedDeploymentOperation() {
-        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.provisioningState()).thenReturn("Failed");
         when(client.getTemplateDeploymentOperations(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deploymentOperations);
 
@@ -63,7 +63,7 @@ class AzureTemplateDeploymentFailureReasonProviderTest {
 
     @Test
     void testGetFailureMessageShouldReturnOptionalEmptyWhenTheDeploymentStatusIsNotFailed() {
-        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.provisioningState()).thenReturn("Succeeded");
 
         Optional<String> actual = underTest.getFailureMessage(RESOURCE_GROUP, DEPLOYMENT_NAME, client);
@@ -75,7 +75,7 @@ class AzureTemplateDeploymentFailureReasonProviderTest {
 
     @Test
     void testGetFailureMessageShouldReturnOptionalEmptyWhenThereIsNoFailedOperationFound() {
-        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.provisioningState()).thenReturn("Failed");
         when(client.getTemplateDeploymentOperations(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deploymentOperations);
 
@@ -90,7 +90,7 @@ class AzureTemplateDeploymentFailureReasonProviderTest {
 
     @Test
     void testGetFailureMessageShouldReturnOptionalEmptyWhenThereIsAFailedOperationWithoutErrorMessage() {
-        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.provisioningState()).thenReturn("Failed");
         when(client.getTemplateDeploymentOperations(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deploymentOperations);
 

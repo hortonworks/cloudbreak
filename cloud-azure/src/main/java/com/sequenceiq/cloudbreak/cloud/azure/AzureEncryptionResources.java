@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionParametersVali
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -104,24 +105,24 @@ public class AzureEncryptionResources implements EncryptionResources {
         String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(vaultKeyResource.getReference());
         if (managedIdentity != null) {
             try {
-                Identity identity = azureClient.getIdentityById(managedIdentity.getReference());
-                if (identity == null) {
+                Optional<Identity> identity = azureClient.getIdentityById(managedIdentity.getReference());
+                if (identity.isEmpty()) {
                     String identityNotFound = String.format("Managed identity does not exist: %s. Please fix the reference or " +
                             "create Managed identity as it is mandatory for CMK and retry the operation", managedIdentity.getReference());
 
                     LOGGER.error(identityNotFound);
                     throw new BadRequestException(identityNotFound);
                 }
-                Vault vault = azureClient.getKeyVault(vaultResourceGroupName, vaultName);
-                if (vault == null) {
+                Optional<Vault> vault = azureClient.getKeyVault(vaultResourceGroupName, vaultName);
+                if (vault.isEmpty()) {
                     String vaultNotFound = String.format("Vault with name \"%s\" in \"%s\" resource group either does not exist or user does not have " +
                             "permission to access it. Kindly check if the vault & encryption key exists and the correct encryption key URL is specified.",
                             vaultName, vaultResourceGroupName);
                     LOGGER.error(vaultNotFound);
                     throw new BadRequestException(vaultNotFound);
-                } else if (vault.roleBasedAccessControlEnabled()) {
-                    azurePermissionValidator.validateCMKManagedIdentityPermissions(azureClient, identity, vault);
-                } else if (!azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(vault.accessPolicies(), identity.principalId())) {
+                } else if (vault.get().roleBasedAccessControlEnabled()) {
+                    azurePermissionValidator.validateCMKManagedIdentityPermissions(azureClient, identity.get(), vault.get());
+                } else if (!azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(vault.get().accessPolicies(), identity.get().principalId())) {
                     String missingAccessPolicies = String.format(
                             "Missing Key Vault AccessPolicies (get key, wrap key, unwrap key) in %s key vault for %s managed identity",
                             vaultName, managedIdentity.getName());
@@ -259,7 +260,7 @@ public class AzureEncryptionResources implements EncryptionResources {
 
     private void checkAndCreateDesResourceGroupByName(CloudContext cloudContext, AzureClient azureClient, String desResourceGroupName, String region,
             Map<String, String> tags) {
-        ResourceGroup resourceGroup;
+        Optional<ResourceGroup> resourceGroup;
         if (azureClient.resourceGroupExists(desResourceGroupName)) {
             LOGGER.info("Resource group \"{}\" already exists, using it for creating disk encryption set.", desResourceGroupName);
             resourceGroup = azureClient.getResourceGroup(desResourceGroupName);
@@ -273,7 +274,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                 .withName(desResourceGroupName)
                 .withType(AZURE_RESOURCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
-                .withReference(resourceGroup.id())
+                .withReference(resourceGroup
+                        .orElseThrow(() -> new CloudbreakServiceException("Could not fetch resource group using resource group name")).id())
                 .build();
         persistenceNotifier.notifyAllocation(rgCloudResource, cloudContext);
     }
@@ -286,8 +288,8 @@ public class AzureEncryptionResources implements EncryptionResources {
         String diskEncryptionSetName = azureUtils.generateDesNameByNameAndId(
                 String.format("%s-DES-", cloudContext.getName()), request.getId());
         LOGGER.info("Checking if Disk Encryption Set \"{}\" exists", diskEncryptionSetName);
-        DiskEncryptionSetInner createdSet = azureClient.getDiskEncryptionSetByName(desResourceGroupName, diskEncryptionSetName);
-        if (createdSet == null) {
+        Optional<DiskEncryptionSetInner> createdSet = azureClient.getDiskEncryptionSetByName(desResourceGroupName, diskEncryptionSetName);
+        if (createdSet.isEmpty()) {
             if (!singleResourceGroup) {
                 LOGGER.info("Check and create resource group \"{}\" for disk encryption set", desResourceGroupName);
                 checkAndCreateDesResourceGroupByName(cloudContext, azureClient, desResourceGroupName, region, tags);
@@ -303,28 +305,31 @@ public class AzureEncryptionResources implements EncryptionResources {
         } else {
             LOGGER.info("Disk Encryption Set \"{}\" already exists, proceeding with the same", diskEncryptionSetName);
         }
-        createdSet = pollDiskEncryptionSetCreation(
+        if (createdSet.isEmpty()) {
+            throw new CloudbreakServiceException("Could not create disk encryption set");
+        }
+        createdSet = Optional.ofNullable(pollDiskEncryptionSetCreation(
                 authenticatedContext,
                 desResourceGroupName,
                 diskEncryptionSetName,
-                createdSet,
-                request.getUserManagedIdentity().isPresent());
+                createdSet.get(),
+                request.getUserManagedIdentity().isPresent()));
         // Neither of createdSet, createdSet.id() or createdSet.identity().principalId() can be null at this point; polling will fail otherwise
 
         CloudResource desCloudResource = CloudResource.builder()
                 .withName(diskEncryptionSetName)
                 .withType(AZURE_DISK_ENCRYPTION_SET)
-                .withReference(createdSet.id())
+                .withReference(createdSet.get().id())
                 .withStatus(CommonStatus.CREATED)
                 .build();
         persistenceNotifier.notifyAllocation(desCloudResource, cloudContext);
 
         return new CreatedDiskEncryptionSet.Builder()
-                .withDiskEncryptionSetId(createdSet.id())
-                .withDiskEncryptionSetPrincipalObjectId(createdSet.identity().principalId())
-                .withDiskEncryptionSetLocation(createdSet.location())
-                .withDiskEncryptionSetName(createdSet.name())
-                .withTags(createdSet.tags())
+                .withDiskEncryptionSetId(createdSet.get().id())
+                .withDiskEncryptionSetPrincipalObjectId(createdSet.get().identity().principalId())
+                .withDiskEncryptionSetLocation(createdSet.get().location())
+                .withDiskEncryptionSetName(createdSet.get().name())
+                .withTags(createdSet.get().tags())
                 .withDiskEncryptionSetResourceGroupName(desResourceGroupName)
                 .build();
     }
@@ -365,14 +370,14 @@ public class AzureEncryptionResources implements EncryptionResources {
         retryService.testWith2SecDelayMax15Times(() -> {
             try {
                 LOGGER.info("Checking if {} exists.", description);
-                DiskEncryptionSetInner existingDiskEncryptionSet = azureClient.getDiskEncryptionSetByName(desResourceGroupName, desName);
-                if (existingDiskEncryptionSet != null) {
+                Optional<DiskEncryptionSetInner> existingDiskEncryptionSet = azureClient.getDiskEncryptionSetByName(desResourceGroupName, desName);
+                if (existingDiskEncryptionSet.isPresent()) {
                     LOGGER.info("Deleting {}.", description);
                     azureClient.deleteDiskEncryptionSet(desResourceGroupName, desName);
                     LOGGER.info("Deleted {}.", description);
                     removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(azureClient, desResourceGroupName, desName,
-                            existingDiskEncryptionSet.activeKey().keyUrl(), existingDiskEncryptionSet.identity().principalId(),
-                            existingDiskEncryptionSet.activeKey().sourceVault().id());
+                            existingDiskEncryptionSet.get().activeKey().keyUrl(), existingDiskEncryptionSet.get().identity().principalId(),
+                            existingDiskEncryptionSet.get().activeKey().sourceVault().id());
                 } else {
                     LOGGER.info("No {} found to delete.", description);
                 }

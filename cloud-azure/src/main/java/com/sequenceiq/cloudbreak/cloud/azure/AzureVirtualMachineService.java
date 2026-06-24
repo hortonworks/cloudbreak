@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -32,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.util.ReactiveUtils;
@@ -43,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import reactor.core.publisher.Mono;
 
@@ -72,7 +75,11 @@ public class AzureVirtualMachineService {
 
     private List<VirtualMachine> getVirtualMachinesByPrivateInstanceIds(
             AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
-        List<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup).getWhile(vms -> !hasMissingVm(vms, privateInstanceIds));
+        Optional<AzureListResult<VirtualMachine>> virtualMachinesForResourceGroup = azureClient.getVirtualMachines(resourceGroup);
+        List<VirtualMachine> virtualMachines = Lists.newArrayList();
+        if (virtualMachinesForResourceGroup.isPresent()) {
+            virtualMachines = virtualMachinesForResourceGroup.get().getWhile(vms -> !hasMissingVm(vms, privateInstanceIds));
+        }
         if (virtualMachines != null && !virtualMachines.isEmpty()) {
             return virtualMachines;
         } else {
@@ -81,11 +88,11 @@ public class AzureVirtualMachineService {
             }
             LOGGER.info("We could not receive any VM in resource group. Let's try to fetch VMs by instance ids.");
             for (String privateInstanceId : privateInstanceIds) {
-                VirtualMachine virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
-                if (virtualMachineByResourceGroup == null) {
+                Optional<VirtualMachine> virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
+                if (virtualMachineByResourceGroup.isEmpty()) {
                     LOGGER.info("Could not find vm with private id: " + privateInstanceId);
                 } else {
-                    virtualMachines.add(virtualMachineByResourceGroup);
+                    virtualMachines.add(virtualMachineByResourceGroup.get());
                 }
             }
             return virtualMachines;
@@ -226,7 +233,9 @@ public class AzureVirtualMachineService {
         LOGGER.info("Collecting CDP instances for stack with resource crn: '{}'", resourceCrn);
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroup = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), cloudStack);
-        Map<String, VirtualMachine> vms = client.getVirtualMachines(resourceGroup).getStream()
+        Map<String, VirtualMachine> vms = client.getVirtualMachines(resourceGroup)
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch virtual machines using Resource Group"))
+                .getStream()
                 .filter(vm -> vm.tags().containsKey(RESOURCE_CRN.key()) && vm.tags().get(RESOURCE_CRN.key()).equals(resourceCrn))
                 .collect(Collectors.toMap(VirtualMachine::name, Function.identity()));
         vms.putAll(retrieveKnownInstancesFromProviderIfAnyMissing(knownInstanceIds, vms, client, resourceGroup));

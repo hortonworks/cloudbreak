@@ -16,6 +16,7 @@ import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollPredicateStateTask;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Component(DiskEncryptionSetCreationCheckerTask.NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -55,7 +56,8 @@ public class DiskEncryptionSetCreationCheckerTask extends PollPredicateStateTask
         String diskEncryptionSetName = checkerContext.getDiskEncryptionSetName();
         LOGGER.info("Waiting for the creation of Disk Encryption Set \"{}\" in Resource Group \"{}\" to complete", diskEncryptionSetName, resourceGroupName);
 
-        return azureClient.getDiskEncryptionSetByName(resourceGroupName, diskEncryptionSetName);
+        return azureClient.getDiskEncryptionSetByName(resourceGroupName, diskEncryptionSetName)
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch disk encryption set using disk encryption name: " + diskEncryptionSetName));
     }
 
 }

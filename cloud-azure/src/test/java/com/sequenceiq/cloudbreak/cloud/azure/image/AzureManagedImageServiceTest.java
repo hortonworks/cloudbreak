@@ -44,7 +44,7 @@ public class AzureManagedImageServiceTest {
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenSucceededOnProviderSide() {
         AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
-        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(image);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.ofNullable(image));
         ImageInner imageInner = mock(ImageInner.class);
         when(image.innerModel()).thenReturn(imageInner);
         when(imageInner.provisioningState()).thenReturn("Succeeded");
@@ -60,7 +60,7 @@ public class AzureManagedImageServiceTest {
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenUnknownOnProviderSide() {
         AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
-        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(image);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.ofNullable(image));
         ImageInner imageInner = mock(ImageInner.class);
         when(image.innerModel()).thenReturn(imageInner);
         when(imageInner.provisioningState()).thenReturn("Unknown");
@@ -75,7 +75,7 @@ public class AzureManagedImageServiceTest {
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenFailedOnProviderSide() {
         AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
-        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(image);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.ofNullable(image));
         ImageInner imageInner = mock(ImageInner.class);
         when(image.innerModel()).thenReturn(imageInner);
         when(imageInner.provisioningState()).thenReturn("Failed");
@@ -89,7 +89,7 @@ public class AzureManagedImageServiceTest {
     @Test
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenDoesNotExistOnProviderSide() {
         AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
-        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(null);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.empty());
 
         Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
 

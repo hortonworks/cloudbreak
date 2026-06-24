@@ -223,12 +223,12 @@ class AzureClientTest {
             if (createCallCount.getAndIncrement() == 0) {
                 throw concurrentWriteException;
             }
-            return expectedResourceGroup;
+            return Optional.of(expectedResourceGroup);
         });
 
-        ResourceGroup result = underTest.createResourceGroup(RESOURCE_GROUP_NAME, "westus2", Map.of());
+        Optional<ResourceGroup> result = underTest.createResourceGroup(RESOURCE_GROUP_NAME, "westus2", Map.of());
 
-        assertThat(result).isEqualTo(expectedResourceGroup);
+        assertThat(result).isEqualTo(Optional.of(expectedResourceGroup));
         assertThat(createCallCount.get()).isEqualTo(2);
         verify(azureExceptionHandler, times(1)).handleException(any(Supplier.class), eq(null));
     }

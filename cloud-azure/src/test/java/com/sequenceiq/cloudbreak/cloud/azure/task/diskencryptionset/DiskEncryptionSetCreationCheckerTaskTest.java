@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,7 +136,7 @@ class DiskEncryptionSetCreationCheckerTaskTest {
     @Test
     void doCallTestWhenSuccess() {
         DiskEncryptionSetInner des = mock(DiskEncryptionSetInner.class);
-        when(azureClient.getDiskEncryptionSetByName(RESOURCE_GROUP_NAME, DISK_ENCRYPTION_SET_NAME)).thenReturn(des);
+        when(azureClient.getDiskEncryptionSetByName(RESOURCE_GROUP_NAME, DISK_ENCRYPTION_SET_NAME)).thenReturn(Optional.ofNullable(des));
 
         DiskEncryptionSetInner result = underTest.doCall();
 

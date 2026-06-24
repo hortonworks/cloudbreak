@@ -45,7 +45,7 @@ public class AzureListResult<T> {
                 }
             }
             return result;
-        });
+        }).orElseGet(ArrayList::new);
     }
 
 }

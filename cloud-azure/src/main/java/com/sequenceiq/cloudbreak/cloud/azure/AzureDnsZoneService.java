@@ -4,6 +4,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -69,8 +70,8 @@ public class AzureDnsZoneService {
             try {
                 if (azureResourcePersistenceHelperService.isRequested(dnsZoneDeploymentId, AZURE_PRIVATE_DNS_ZONE)) {
                     LOGGER.debug("Dns zones ({}) already requested in resource group {}", cdpManagedDnsZones, resourceGroup);
-                    return azureCloudResourceService.getDeploymentCloudResources(azureResourceDeploymentHelperService.pollForCreation(
-                            authenticatedContext, checkerContext));
+                    return azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(azureResourceDeploymentHelperService.pollForCreation(
+                            authenticatedContext, checkerContext)));
                 } else {
                     LOGGER.debug("Dns zones ({}) are not requested yet in resource group {}, creating them..", cdpManagedDnsZones, resourceGroup);
 
@@ -78,7 +79,7 @@ public class AzureDnsZoneService {
                     Deployment deployment = createDnsZonesAndNetworkLinks(azureClient, azureNetworkId, resourceGroup, tags, cdpManagedDnsZones);
                     azureResourcePersistenceHelperService.updateCloudResource(
                             authenticatedContext, deploymentName, dnsZoneDeploymentId, CommonStatus.CREATED, AZURE_PRIVATE_DNS_ZONE);
-                    return azureCloudResourceService.getDeploymentCloudResources(deployment);
+                    return azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(deployment));
                 }
             } catch (CloudConnectorException e) {
                 LOGGER.warn("Deployment {} failed due to {}", deploymentName, e.getMessage());
@@ -89,11 +90,11 @@ public class AzureDnsZoneService {
                 // would cause edge case of inserting multiple db record violating the unique constraint
             } catch (DataAccessException e) {
                 LOGGER.warn("Polling {} deployment due to db unique constraint violation: {}", deploymentName, e.getMessage());
-                return azureCloudResourceService.getDeploymentCloudResources(azureResourceDeploymentHelperService.pollForCreation(
-                        authenticatedContext, checkerContext));
+                return azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(azureResourceDeploymentHelperService.pollForCreation(
+                        authenticatedContext, checkerContext)));
             }
         } else {
-            Deployment templateDeployment = azureClient.getTemplateDeployment(resourceGroup, deploymentName);
+            Optional<Deployment> templateDeployment = azureClient.getTemplateDeployment(resourceGroup, deploymentName);
             return azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
         }
     }

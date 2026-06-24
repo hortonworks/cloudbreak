@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -96,7 +97,7 @@ class AzureVirtualMachineServiceTest {
                 createVirtualMachine(INSTANCE_3)
         ));
 
-        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(Optional.of(virtualMachines));
 
         Map<String, VirtualMachine> actual = underTest.getVirtualMachinesByName(azureClient, RESOURCE_GROUP, privateInstanceIds);
 
@@ -110,7 +111,7 @@ class AzureVirtualMachineServiceTest {
         Set<String> privateInstanceIds = createPrivateInstanceIds();
         AzureListResult<VirtualMachine> virtualMachinesWithOnePage = createPagedList(List.of(createVirtualMachine(INSTANCE_1)));
 
-        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachinesWithOnePage);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(Optional.of(virtualMachinesWithOnePage));
 
         Map<String, VirtualMachine> actual = underTest.getVirtualMachinesByName(azureClient, RESOURCE_GROUP, privateInstanceIds);
 
@@ -123,8 +124,8 @@ class AzureVirtualMachineServiceTest {
         Set<String> privateInstanceIds = createPrivateInstanceIds();
         AzureListResult<VirtualMachine> virtualMachinesEmpty = createPagedList(List.of());
 
-        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachinesEmpty);
-        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(null);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(Optional.of(virtualMachinesEmpty));
+        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(Optional.empty());
 
 
         CloudConnectorException exception = assertThrows(
@@ -140,7 +141,7 @@ class AzureVirtualMachineServiceTest {
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
         AzureListResult<VirtualMachine> virtualMachines = createPagedList(List.of(createVirtualMachine(INSTANCE_1)));
-        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(Optional.of(virtualMachines));
 
         AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
 
@@ -159,9 +160,9 @@ class AzureVirtualMachineServiceTest {
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
         AzureListResult<VirtualMachine> virtualMachines = createPagedList(new ArrayList<>());
-        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(Optional.of(virtualMachines));
         VirtualMachine virtualMachine = createVirtualMachine(INSTANCE_1);
-        when(azureClient.getVirtualMachineByResourceGroup(RESOURCE_GROUP, INSTANCE_1)).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachineByResourceGroup(RESOURCE_GROUP, INSTANCE_1)).thenReturn(Optional.of(virtualMachine));
 
         AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
 
@@ -222,7 +223,7 @@ class AzureVirtualMachineServiceTest {
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
         AzureListResult<VirtualMachine> virtualMachines = createPagedList(List.of());
-        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(Optional.of(virtualMachines));
 
         AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
 
@@ -266,7 +267,7 @@ class AzureVirtualMachineServiceTest {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP);
-        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(vms);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(Optional.of(vms));
 
         List<InstanceCheckMetadata> result = underTest.collectCdpInstances(ac, RESOURCE_CRN, cloudStack, List.of());
 
@@ -290,8 +291,8 @@ class AzureVirtualMachineServiceTest {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP);
         when(azureClient.getVirtualMachines(RESOURCE_GROUP))
-                .thenReturn(vms1)
-                .thenReturn(vms2);
+                .thenReturn(Optional.of(vms1))
+                .thenReturn(Optional.of(vms2));
 
         List<InstanceCheckMetadata> result = underTest.collectCdpInstances(ac, RESOURCE_CRN, cloudStack, List.of(INSTANCE_3));
 

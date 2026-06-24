@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -59,7 +60,7 @@ public class AzureListResultTest {
     @Test
     void testGetWhile() {
         AzureListResult<String> azureListResult = new AzureListResult<>(pagedIterable, azureExceptionHandler);
-        when(azureExceptionHandler.handleException(any(Supplier.class))).thenReturn(List.of());
+        when(azureExceptionHandler.handleException(any(Supplier.class))).thenReturn(Optional.of(List.of()));
 
         azureListResult.getWhile(x -> true);
 

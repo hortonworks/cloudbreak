@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -83,12 +84,12 @@ public class AzureScaleUtilService {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
 
-        Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-        if (templateDeployment == null) {
+        Optional<Deployment> templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+        if (templateDeployment.isEmpty()) {
             LOGGER.info("TemplateDeployment with resourceGroupName {} and deploymentName {} not found. Rollback cancelled.", resourceGroupName, stackName);
             return;
         }
-        if (isTemplateDeploymentObsolete(preDeploymentTime, templateDeployment)) {
+        if (isTemplateDeploymentObsolete(preDeploymentTime, templateDeployment.get())) {
             LOGGER.info("TemplateDeployment with resourceGroupName {} and deploymentName {} is obsolete. Rollback cancelled.", resourceGroupName, stackName);
             return;
         }

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -123,7 +124,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     void testPrivateDnsZoneConnectedToNetworkWhenConnectedToEnvironmentNetwork() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Network network = getNetwork();
-        when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(network);
+        when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(Optional.of(network));
         List<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of(NETWORK_RESOURCE_ID));
         AzureListResult<VirtualNetworkLinkInner> azureListResult = mock(AzureListResult.class);
         when(azureListResult.getStream(AZURE_HANDLE_ALL_EXCEPTIONS)).thenReturn(virtualNetworkLinks.stream());
@@ -140,7 +141,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     void testPrivateDnsZoneConnectedToNetworkWhenNotConnectedToEnvironmentNetwork() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Network network = getNetwork();
-        when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(network);
+        when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(Optional.of(network));
         List<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of("anotherNetwork"));
         AzureListResult<VirtualNetworkLinkInner> azureListResult = mock(AzureListResult.class);
         when(azureListResult.getStream(AZURE_HANDLE_ALL_EXCEPTIONS)).thenReturn(virtualNetworkLinks.stream());

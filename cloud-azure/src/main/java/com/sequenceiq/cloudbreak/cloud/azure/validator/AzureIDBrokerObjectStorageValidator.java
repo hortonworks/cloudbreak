@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -93,24 +94,24 @@ public class AzureIDBrokerObjectStorageValidator {
             for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
                 CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) cloudFileSystemView;
                 String managedIdentityId = cloudFileSystem.getManagedIdentity();
-                Identity identity = client.getIdentityById(managedIdentityId);
+                Optional<Identity> identity = client.getIdentityById(managedIdentityId);
                 CloudIdentityType cloudIdentityType = cloudFileSystem.getCloudIdentityType();
-                if (identity != null) {
+                if (identity.isPresent()) {
                     if (ID_BROKER.equals(cloudIdentityType)) {
                         List<Identity> existingIdentities = client.listIdentities().getAll();
-                        validateIDBroker(client, identity, cloudFileSystem, singleResourceGroupName, accountId, existingIdentities, resultBuilder);
+                        validateIDBroker(client, identity.get(), cloudFileSystem, singleResourceGroupName, accountId, existingIdentities, resultBuilder);
                         if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) {
                             Set<Identity> existingServiceIdentities = getServiceIdentities(cloudFileSystem.getAccountMapping(), existingIdentities);
                             String actualBackupLocationBase = StringUtils.isNotEmpty(backupLocationBase) ? backupLocationBase : logsLocationBase;
                             validateLocation(client, existingServiceIdentities, actualBackupLocationBase, accountId, resultBuilder);
                         }
                     } else if (LOG.equals(cloudIdentityType)) {
-                        validateLocation(client, identity, logsLocationBase, accountId, resultBuilder);
+                        validateLocation(client, identity.get(), logsLocationBase, accountId, resultBuilder);
                         if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)
                                 && !objectStorageValidateRequest.getSkipLogRoleValidationforBackup()
                                 && StringUtils.isNotEmpty(backupLocationBase)
                                 && !backupLocationBase.equals(logsLocationBase)) {
-                            validateLocation(client, identity, backupLocationBase, accountId, resultBuilder);
+                            validateLocation(client, identity.get(), backupLocationBase, accountId, resultBuilder);
                         }
                     }
                 } else {
@@ -172,9 +173,11 @@ public class AzureIDBrokerObjectStorageValidator {
         List<RoleAssignmentInner> roleAssignments;
         Optional<ResourceGroup> singleResourceGroup;
         if (singleResourceGroupName != null) {
-            ResourceGroup resourceGroup = client.getResourceGroup(singleResourceGroupName);
-            roleAssignments = client.listRoleAssignmentsByScopeInner(resourceGroup.id());
-            singleResourceGroup = Optional.of(resourceGroup);
+            Optional<ResourceGroup> resourceGroup = client.getResourceGroup(singleResourceGroupName);
+            roleAssignments = client.listRoleAssignmentsByScopeInner(resourceGroup
+                    .orElseThrow(() -> new CloudConnectorException("Could not fetch resourcegroup using resourcegroup name: " + singleResourceGroupName))
+                    .id());
+            singleResourceGroup = resourceGroup;
         } else {
             roleAssignments = client.listRoleAssignments().getAll();
             singleResourceGroup = Optional.empty();

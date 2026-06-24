@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -97,13 +98,13 @@ public class AzureCloudResourceService {
                 List.of(AZURE_PRIVATE_ENDPOINT);
     }
 
-    public List<CloudResource> getDeploymentCloudResources(Deployment templateDeployment) {
-        if (templateDeployment == null) {
+    public List<CloudResource> getDeploymentCloudResources(Optional<Deployment> templateDeployment) {
+        if (templateDeployment.isEmpty()) {
             return List.of();
         }
-        DeploymentType deploymentType = getDeploymentType(templateDeployment);
+        DeploymentType deploymentType = getDeploymentType(templateDeployment.get());
 
-        List<CloudResource> resourceList = azureListResultFactory.list(templateDeployment.deploymentOperations())
+        List<CloudResource> resourceList = azureListResultFactory.list(templateDeployment.get().deploymentOperations())
                 .getStream()
                 .filter(Predicate.not(Predicate.isEqual(null)))
                 .filter(deploymentOperation -> Objects.nonNull(deploymentOperation.targetResource())
@@ -288,7 +289,8 @@ public class AzureCloudResourceService {
     }
 
     public List<CloudResource> getAttachedOsDiskResources(List<CloudResource> instanceList, String resourceGroupName, AzureClient client) {
-        AzureListResult<VirtualMachine> virtualMachines = client.getVirtualMachines(resourceGroupName);
+        AzureListResult<VirtualMachine> virtualMachines = client.getVirtualMachines(resourceGroupName)
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch virtual machines using resource group name: " + resourceGroupName));
         Map<String, CloudResource> instancesByName = new HashMap<>();
         instanceList.forEach(instance -> {
             if (Objects.nonNull(instance.getName())) {
@@ -333,7 +335,11 @@ public class AzureCloudResourceService {
         String networkResourceGroupName = azureUtils.getCustomResourceGroupName(network);
 
         if (subnetNameList.isEmpty()) {
-            Optional<Subnet> first = client.getSubnets(resourceGroupName, virtualNetwork).values().stream().findFirst();
+            Optional<Subnet> first = client.getSubnets(resourceGroupName, virtualNetwork)
+                    .orElseThrow(() -> new CloudbreakServiceException("Could not fetch subnets using resource group name and virtual network"))
+                    .values()
+                    .stream()
+                    .findFirst();
             if (first.isPresent()) {
                 Subnet subnet = first.get();
                 String subnetName = subnet.name();

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,8 +52,8 @@ public class AzureTransientDeploymentServiceTest {
     public void testEmptyTransientDeploymentCancelled() {
 
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(ResourceStatus.IN_PROGRESS);
-        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(Collections.emptyList());
+        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(Collections.emptyList());
 
         List<CloudResource> deployedResources = underTest.handleTransientDeployment(client, RESOURCE_GROUP, DEPLOYMENT_NAME);
 
@@ -69,8 +70,8 @@ public class AzureTransientDeploymentServiceTest {
         CloudResource ip1 = createCloudResource(IP_1, ResourceType.AZURE_PUBLIC_IP);
 
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(ResourceStatus.IN_PROGRESS);
-        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(vm1, storage1, ip1));
+        when(client.getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(List.of(vm1, storage1, ip1));
 
         List<CloudResource> deployedResources = underTest.handleTransientDeployment(client, RESOURCE_GROUP, DEPLOYMENT_NAME);
 

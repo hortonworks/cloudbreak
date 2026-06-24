@@ -76,8 +76,8 @@ public class AzureNetworkLinkService {
                 if (azureResourcePersistenceHelperService.isRequested(networkLinkDeploymentId, AZURE_VIRTUAL_NETWORK_LINK)) {
                     LOGGER.debug("Network links ({}) already requested in resource group {}", cdpManagedDnsZones, resourceGroup);
 
-                    return azureCloudResourceService.getDeploymentCloudResources(azureResourceDeploymentHelperService.pollForCreation(
-                            authenticatedContext, checkerContext));
+                    return azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(azureResourceDeploymentHelperService.pollForCreation(
+                            authenticatedContext, checkerContext)));
                 } else {
                     LOGGER.debug("Network links ({}) are not requested yet in resource group {}", cdpManagedDnsZones, resourceGroup);
 
@@ -86,8 +86,7 @@ public class AzureNetworkLinkService {
                     Optional<Deployment> missingNetworkLinks = createMissingNetworkLinks(azureClient, azureNetworkId, resourceGroup, tags, cdpManagedDnsZones);
                     azureResourcePersistenceHelperService.updateCloudResource(
                             authenticatedContext, deploymentName, networkLinkDeploymentId, CommonStatus.CREATED, AZURE_VIRTUAL_NETWORK_LINK);
-                    return missingNetworkLinks.map(azureCloudResourceService::getDeploymentCloudResources).orElse(null);
-
+                    return azureCloudResourceService.getDeploymentCloudResources(missingNetworkLinks);
                 }
             } catch (CloudConnectorException e) {
                 LOGGER.warn("Deployment {} failed due to {}", deploymentName, e.getMessage());
@@ -98,8 +97,8 @@ public class AzureNetworkLinkService {
                 // would cause edge case of inserting multiple db record violating the unique constraint
             } catch (DataAccessException e) {
                 LOGGER.warn("Polling {} deployment due to db unique constraint violation: {}", deploymentName, e.getMessage());
-                return azureCloudResourceService.getDeploymentCloudResources(azureResourceDeploymentHelperService.pollForCreation(
-                        authenticatedContext, checkerContext));
+                return azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(azureResourceDeploymentHelperService.pollForCreation(
+                        authenticatedContext, checkerContext)));
             }
         } else {
             LOGGER.debug("Dns zones ({}) and network links already deployed in resource group {}", cdpManagedDnsZones, resourceGroup);

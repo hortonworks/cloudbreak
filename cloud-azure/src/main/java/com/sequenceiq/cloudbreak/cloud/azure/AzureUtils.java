@@ -266,8 +266,8 @@ public class AzureUtils {
             Collection<String> subnetIds = getCustomSubnetIds(network);
             for (String subnetId : subnetIds) {
                 try {
-                    Subnet subnet = client.getSubnetProperties(resourceGroupName, networkId, subnetId);
-                    if (subnet == null) {
+                    Optional<Subnet> subnet = client.getSubnetProperties(resourceGroupName, networkId, subnetId);
+                    if (subnet.isEmpty()) {
                         throw new CloudConnectorException(
                                 String.format("Subnet [%s] is not found in resource group [%s] and network [%s]", subnetId, resourceGroupName, networkId)
                         );
@@ -542,9 +542,10 @@ public class AzureUtils {
         List<CloudLoadBalancer> cloudLoadBalancers = new ArrayList<>();
         for (CloudLoadBalancerMetadata loadBalancerMetadata : loadBalancers) {
             LOGGER.info("Describing load balancer: {}", loadBalancerMetadata.getName());
-            LoadBalancer loadBalancer = azureClient.getLoadBalancer(resourceGroupName, loadBalancerMetadata.getName());
-            if (loadBalancer != null) {
-                LoadBalancerSku loadBalancerSku = LoadBalancerSkuType.STANDARD.equals(loadBalancer.sku()) ? LoadBalancerSku.STANDARD : LoadBalancerSku.BASIC;
+            Optional<LoadBalancer> loadBalancer = azureClient.getLoadBalancer(resourceGroupName, loadBalancerMetadata.getName());
+            if (loadBalancer.isPresent()) {
+                LoadBalancerSku loadBalancerSku = LoadBalancerSkuType.STANDARD.equals(loadBalancer.get().sku())
+                        ? LoadBalancerSku.STANDARD : LoadBalancerSku.BASIC;
                 cloudLoadBalancers.add(new CloudLoadBalancer(loadBalancerMetadata.getType(), loadBalancerSku, false));
             }
         }
@@ -682,8 +683,8 @@ public class AzureUtils {
     }
 
     private void checkResourceIsDeleted(AzureClient azureClient, String resourceId, String resourceType) {
-        GenericResource resource = azureClient.getGenericResourceById(resourceId);
-        if (resource != null) {
+        Optional<GenericResource> resource = azureClient.getGenericResourceById(resourceId);
+        if (resource.isPresent()) {
             LOGGER.error("{} {} resource is still present after delete operation.", resourceType, resourceId);
         }
     }

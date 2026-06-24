@@ -176,11 +176,11 @@ class AzureIDBrokerObjectStorageValidatorTest {
 
     @BeforeEach
     void setup() {
-        lenient().when(client.getIdentityById(LOG_IDENTITY)).thenReturn(logger);
-        lenient().when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(assumer);
+        lenient().when(client.getIdentityById(LOG_IDENTITY)).thenReturn(Optional.of(logger));
+        lenient().when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(Optional.of(assumer));
         lenient().when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
         lenient().when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
-        lenient().when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
+        lenient().when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(Optional.of(resourceGroup));
         lenient().when(client.getStorageAccount(any(), any())).thenReturn(Optional.of(storageAccount));
         lenient().when(storageAccount.isHnsEnabled()).thenReturn(Boolean.TRUE);
         lenient().when(resourceGroup.id()).thenReturn(RESOURCE_GROUP_ID);
@@ -306,7 +306,7 @@ class AzureIDBrokerObjectStorageValidatorTest {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
-        when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(null);
+        when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(Optional.empty());
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
@@ -329,7 +329,7 @@ class AzureIDBrokerObjectStorageValidatorTest {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID);
-        when(client.getIdentityById(LOG_IDENTITY)).thenReturn(null);
+        when(client.getIdentityById(LOG_IDENTITY)).thenReturn(Optional.empty());
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest

@@ -187,7 +187,7 @@ public class AzureClient {
         azureRetryExecutor = new AzureRetryExecutor(azureExceptionHandler);
     }
 
-    public ResourceGroup getResourceGroup(String name) {
+    public Optional<ResourceGroup> getResourceGroup(String name) {
         return handleException(() -> azure.resourceGroups().getByName(name));
     }
 
@@ -201,7 +201,12 @@ public class AzureClient {
 
     public boolean resourceGroupExists(String name) {
         try {
-            return handleException(() -> azure.resourceGroups().contain(name));
+            Optional<Boolean> resourceGroupExists = handleException(() -> azure.resourceGroups().contain(name));
+            if (resourceGroupExists.isPresent()) {
+                return resourceGroupExists.get();
+            } else {
+                throw new CloudConnectorException("Failed to check if resource group with name: " + name + " exists or not");
+            }
         } catch (ManagementException e) {
             if (azureExceptionHandler.isForbidden(e)) {
                 LOGGER.info("Resource group {} does not exist or insufficient permission to access it", name, e);
@@ -215,14 +220,14 @@ public class AzureClient {
         handleException(() -> azure.resourceGroups().deleteByName(name));
     }
 
-    public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
-        return handleException(
+    public Optional<ResourceGroup> createResourceGroup(String name, String region, Map<String, String> tags) {
+        return Optional.ofNullable(handleException(
                 () -> azure.resourceGroups().define(name)
                         .withRegion(region)
                         .withTags(tags)
                         .create(),
                 () -> azure.resourceGroups().getByName(name)
-        );
+        ));
     }
 
     public Deployment createTemplateDeployment(String resourceGroupName, String deploymentName, String templateContent, String parameterContent) {
@@ -237,15 +242,20 @@ public class AzureClient {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }).orElseThrow(() -> new CloudConnectorException("Failed to create deployment for resource group: " +
+                resourceGroupName + " and deployment: " + deploymentName));
     }
 
     public boolean templateDeploymentExists(String resourceGroupName, String deploymentName) {
-        return handleException(() -> azure.deployments().checkExistence(resourceGroupName, deploymentName));
+        return handleException(() -> azure.deployments().checkExistence(resourceGroupName, deploymentName))
+                .orElseThrow(() -> new CloudConnectorException("Failed to check if the template " +
+                        "deployment with Name: " + deploymentName + " exists or not"));
     }
 
     public ResourceStatus getTemplateDeploymentStatus(String resourceGroupName, String deploymentName) {
-        return handleException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
+        return handleException(() -> getTemplateDeployment(resourceGroupName, deploymentName))
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch template deployment status for template deployment with Name: " +
+                        deploymentName))
                 .map(Deployment::provisioningState)
                 .map(AzureStatusMapper::mapResourceStatus)
                 .orElse(ResourceStatus.DELETED);
@@ -255,12 +265,14 @@ public class AzureClient {
         handleException(() -> azure.deployments().deleteByResourceGroup(resourceGroupName, deploymentName));
     }
 
-    public Deployment getTemplateDeployment(String resourceGroupName, String deploymentName) {
+    public Optional<Deployment> getTemplateDeployment(String resourceGroupName, String deploymentName) {
         return handleException(() -> azure.deployments().getByResourceGroup(resourceGroupName, deploymentName));
     }
 
     public AzureListResult<DeploymentOperation> getTemplateDeploymentOperations(String resourceGroupName, String deploymentName) {
-        return azureListResultFactory.list(getTemplateDeployment(resourceGroupName, deploymentName).deploymentOperations());
+        return azureListResultFactory.list(getTemplateDeployment(resourceGroupName, deploymentName)
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch deployment operation for deployment with Name: " + deploymentName))
+                .deploymentOperations());
     }
 
     public AzureListResult<StorageAccount> getStorageAccounts() {
@@ -268,14 +280,18 @@ public class AzureClient {
     }
 
     public StorageAccountKey getStorageAccountKey(String resourceGroup, String storageName) {
-        List<StorageAccountKey> keys = getStorageAccountByGroup(resourceGroup, storageName).getKeys();
+        Optional<StorageAccount> storageAccount = getStorageAccountByGroup(resourceGroup, storageName);
+        if (storageAccount.isEmpty()) {
+            throw new CloudConnectorException("Could not find storage account with name: " + storageName + " due to internal problem");
+        }
+        List<StorageAccountKey> keys = storageAccount.get().getKeys();
         if (CollectionUtils.isEmpty(keys)) {
             throw new CloudConnectorException("Not found access key for " + storageName + " storage account.");
         }
-        return keys.get(0);
+        return keys.getFirst();
     }
 
-    public StorageAccount getStorageAccountByGroup(String resourceGroup, String storageName) {
+    public Optional<StorageAccount> getStorageAccountByGroup(String resourceGroup, String storageName) {
         return handleException(() -> azure.storageAccounts().getByResourceGroup(resourceGroup, storageName));
     }
 
@@ -411,17 +427,19 @@ public class AzureClient {
         return azure.disks().getById(id);
     }
 
-    public Disk getDiskByName(String resourceGroupName, String diskName) {
+    public Optional<Disk> getDiskByName(String resourceGroupName, String diskName) {
         return handleException(() -> azure.disks().getByResourceGroup(resourceGroupName, diskName));
     }
 
     public Flux<String> deleteManagedDisksAsync(Collection<String> ids) {
         LOGGER.debug("delete managed disk: id={}", ids);
-        return handleException(() -> azure.disks().deleteByIdsAsync(ids));
+        return handleException(() -> azure.disks().deleteByIdsAsync(ids))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete the managed disks"));
     }
 
     public Mono<Void> deleteManagedDiskAsync(String resourceGroup, String name) {
-        return handleException(() -> azure.disks().deleteByResourceGroupAsync(resourceGroup, name));
+        return handleException(() -> azure.disks().deleteByResourceGroupAsync(resourceGroup, name))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete the managed disks"));
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
@@ -439,14 +457,14 @@ public class AzureClient {
         }
     }
 
-    public VirtualMachineCustomImage findImage(String resourceGroup, String imageName) {
+    public Optional<VirtualMachineCustomImage> findImage(String resourceGroup, String imageName) {
         LOGGER.debug("Searching custom image {} in resource group {}", imageName, resourceGroup);
         return azureExceptionHandler.handleException(() -> azure
                 .virtualMachineCustomImages()
                 .getByResourceGroup(resourceGroup, imageName));
     }
 
-    public VirtualMachineCustomImage createImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
+    public Optional<VirtualMachineCustomImage> createImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
         return handleException(() -> {
             LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
             if (!azure.resourceGroups().contain(resourceGroup)) {
@@ -549,20 +567,22 @@ public class AzureClient {
         }
     }
 
-    public AzureListResult<VirtualMachine> getVirtualMachines(String resourceGroup) {
+    public Optional<AzureListResult<VirtualMachine>> getVirtualMachines(String resourceGroup) {
         return handleException(() -> azureListResultFactory.listByResourceGroup(azure.virtualMachines(), resourceGroup));
     }
 
-    public VirtualMachine getVirtualMachineByResourceGroup(String resourceGroup, String vmName) {
+    public Optional<VirtualMachine> getVirtualMachineByResourceGroup(String resourceGroup, String vmName) {
         return handleException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
     }
 
-    public VirtualMachine getVirtualMachine(String vmId) {
+    public Optional<VirtualMachine> getVirtualMachine(String vmId) {
         return handleException(() -> azure.virtualMachines().getById(vmId));
     }
 
     public VirtualMachineInstanceView getVirtualMachineInstanceView(String resourceGroup, String vmName) {
-        return getVirtualMachineByResourceGroup(resourceGroup, vmName).instanceView();
+        return getVirtualMachineByResourceGroup(resourceGroup, vmName)
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch virtual machine instance view for VM with Name: " + vmName))
+                .instanceView();
     }
 
     public Set<AvailabilityZoneId> getAvailabilityZone(String resourceGroup, String vmName) {
@@ -580,50 +600,61 @@ public class AzureClient {
         return getVirtualMachineInstanceView(resourceGroup, vmName).platformFaultDomain();
     }
 
-    public AvailabilitySet getAvailabilitySet(String resourceGroup, String asName) {
+    public Optional<AvailabilitySet> getAvailabilitySet(String resourceGroup, String asName) {
         return handleException(() -> azure.availabilitySets().getByResourceGroup(resourceGroup, asName));
     }
 
     public Mono<Void> deleteLoadBalancerAsync(String resourceGroup, String loadBalancerName) {
-        return handleException(() -> azure.loadBalancers().deleteByResourceGroupAsync(resourceGroup, loadBalancerName));
+        return handleException(() -> azure.loadBalancers().deleteByResourceGroupAsync(resourceGroup, loadBalancerName))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete load balancers"));
     }
 
     public Mono<Void> deleteAvailabilitySetAsync(String resourceGroup, String asName) {
-        return handleException(() -> azure.availabilitySets().deleteByResourceGroupAsync(resourceGroup, asName));
+        return handleException(() -> azure.availabilitySets().deleteByResourceGroupAsync(resourceGroup, asName))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete availability set"));
     }
 
     public Mono<Void> deallocateVirtualMachineAsync(String resourceGroup, String vmName, Long timeboundInMs) {
         if (timeboundInMs == null) {
-            return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
+            return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName))
+                    .orElseThrow(() -> new CloudConnectorException("Could not deallocate virtual machines"));
         }
-        return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName).timeout(Duration.ofMillis(timeboundInMs)));
+        return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName).timeout(Duration.ofMillis(timeboundInMs)))
+                .orElseThrow(() -> new CloudConnectorException("Could not deallocate virtual machines"));
     }
 
     public Mono<Void> deleteVirtualMachine(String resourceGroup, String vmName) {
-        return handleException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName));
+        return handleException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete virtual machines"));
     }
 
     public Mono<Void> startVirtualMachineAsync(String resourceGroup, String vmName, Long timeboundInMs) {
         if (timeboundInMs == null) {
-            return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
+            return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName))
+                    .orElseThrow(() -> new CloudConnectorException("Could not start virtual machines"));
         }
-        return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName).timeout(Duration.ofMillis(timeboundInMs)));
+        return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName).timeout(Duration.ofMillis(timeboundInMs)))
+                .orElseThrow(() -> new CloudConnectorException("Could not start virtual machines"));
     }
 
     public Mono<Void> stopVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleException(() -> azure.virtualMachines().powerOffAsync(resourceGroup, vmName));
+        return handleException(() -> azure.virtualMachines().powerOffAsync(resourceGroup, vmName))
+                .orElseThrow(() -> new CloudConnectorException("Could not stop virtual machines"));
     }
 
     public Mono<Void> deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
-        return handleException(() -> azure.publicIpAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
+        return handleException(() -> azure.publicIpAddresses().deleteByResourceGroupAsync(resourceGroup, ipName))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete public ip address by names"));
     }
 
     public Flux<String> deleteSecurityGroupsAsync(Collection<String> ids) {
-        return handleException(() -> azure.networkSecurityGroups().deleteByIdsAsync(ids));
+        return handleException(() -> azure.networkSecurityGroups().deleteByIdsAsync(ids))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete security groups"));
     }
 
     public AzureListResult<PublicIpAddress> getPublicIpAddresses(String resourceGroup) {
-        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.publicIpAddresses(), resourceGroup));
+        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.publicIpAddresses(), resourceGroup))
+                .orElseThrow(() -> new CloudConnectorException("Could not get public ip addresses"));
     }
 
     public List<PublicIpAddress> getPublicIpAddresses(Collection<String> ids, String resourceGroup) {
@@ -635,7 +666,8 @@ public class AzureClient {
     }
 
     public AzureListResult<LoadBalancer> getLoadBalancers(String resourceGroup) {
-        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.loadBalancers(), resourceGroup));
+        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.loadBalancers(), resourceGroup))
+                .orElseThrow(() -> new CloudConnectorException("Could not get load balancers"));
     }
 
     public List<LoadBalancer> getLoadBalancers(Collection<String> ids, String resourceGroup) {
@@ -647,11 +679,13 @@ public class AzureClient {
     }
 
     public Mono<Void> deleteNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
-        return handleException(() -> azure.networkInterfaces().deleteByResourceGroupAsync(resourceGroup, networkInterfaceName));
+        return handleException(() -> azure.networkInterfaces().deleteByResourceGroupAsync(resourceGroup, networkInterfaceName))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete network interface"));
     }
 
     public AzureListResult<NetworkInterface> getNetworkInterfaces(String resourceGroup) {
-        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.networkInterfaces(), resourceGroup));
+        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.networkInterfaces(), resourceGroup))
+                .orElseThrow(() -> new CloudConnectorException("Could not get network interface"));
     }
 
     public List<NetworkInterface> getNetworkInterfaceListByNames(String resourceGroup, Collection<String> attachedNetworkInterfaces) {
@@ -662,30 +696,31 @@ public class AzureClient {
                 .collect(Collectors.toList());
     }
 
-    public NetworkInterfaces getNetworkInterfaces() {
+    public Optional<NetworkInterfaces> getNetworkInterfaces() {
         return handleException(azure::networkInterfaces);
     }
 
-    public Subnet getSubnetProperties(String resourceGroup, String virtualNetwork, String subnet) {
+    public Optional<Subnet> getSubnetProperties(String resourceGroup, String virtualNetwork, String subnet) {
         return handleException(() -> {
-            Network networkByResourceGroup = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
-            return networkByResourceGroup == null ? null : networkByResourceGroup.subnets().get(subnet);
+            Optional<Network> networkByResourceGroup = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
+            return networkByResourceGroup.map(network -> network.subnets().get(subnet)).orElse(null);
         });
     }
 
-    public Network getNetworkByResourceGroup(String resourceGroup, String virtualNetwork) {
+    public Optional<Network> getNetworkByResourceGroup(String resourceGroup, String virtualNetwork) {
         return handleException(() -> azure.networks().getByResourceGroup(resourceGroup, virtualNetwork));
     }
 
-    public Map<String, Subnet> getSubnets(String resourceGroup, String virtualNetwork) {
+    public Optional<Map<String, Subnet>> getSubnets(String resourceGroup, String virtualNetwork) {
         return handleException(() -> {
-            Network network = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
-            return network == null ? emptyMap() : network.subnets();
+            Optional<Network> network = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
+            return network.isEmpty() ? emptyMap() : network.get().subnets();
         });
     }
 
     public Flux<String> deleteNetworksAsync(Collection<String> networkIds) {
-        return handleException(() -> azure.networks().deleteByIdsAsync(networkIds));
+        return handleException(() -> azure.networks().deleteByIdsAsync(networkIds))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete networks"));
     }
 
     public void deleteNetworkInResourceGroup(String resourceGroup, String networkId) {
@@ -693,14 +728,16 @@ public class AzureClient {
     }
 
     public Flux<String> deleteStorageAccountsAsync(Collection<String> accountIds) {
-        return handleException(() -> azure.storageAccounts().deleteByIdsAsync(accountIds));
+        return handleException(() -> azure.storageAccounts().deleteByIdsAsync(accountIds))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete storage accounts"));
     }
 
     public Flux<String> deleteImagesAsync(Collection<String> imageIds) {
-        return handleException(() -> azure.virtualMachineCustomImages().deleteByIdsAsync(imageIds));
+        return handleException(() -> azure.virtualMachineCustomImages().deleteByIdsAsync(imageIds))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete images"));
     }
 
-    public NetworkSecurityGroups getSecurityGroups() {
+    public Optional<NetworkSecurityGroups> getSecurityGroups() {
         return handleException(azure::networkSecurityGroups);
     }
 
@@ -708,7 +745,7 @@ public class AzureClient {
         return azureListResultFactory.list(azure.networkSecurityGroups());
     }
 
-    public Set<VirtualMachineSize> getVmTypes(String region) throws ProviderAuthenticationFailedException {
+    public Optional<Set<VirtualMachineSize>> getVmTypes(String region) throws ProviderAuthenticationFailedException {
         return handleException(() -> {
             Set<VirtualMachineSize> resultList = new HashSet<>();
             if (region == null) {
@@ -733,7 +770,7 @@ public class AzureClient {
         return resultList;
     }
 
-    public LoadBalancer getLoadBalancer(String resourceGroupName, String loadBalancerName) {
+    public Optional<LoadBalancer> getLoadBalancer(String resourceGroupName, String loadBalancerName) {
         return handleException(() -> azure.loadBalancers().getByResourceGroup(resourceGroupName, loadBalancerName));
     }
 
@@ -760,7 +797,9 @@ public class AzureClient {
     }
 
     private List<AzureLoadBalancerFrontend> getLoadBalancerFrontends(String resourceGroupName, String loadBalancerName) {
-        List<String> idsAssociatedWithLoadBalancerPublicIps = getLoadBalancer(resourceGroupName, loadBalancerName).publicIpAddressIds();
+        List<String> idsAssociatedWithLoadBalancerPublicIps = getLoadBalancer(resourceGroupName, loadBalancerName)
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch load balancer using load balancer Name: " + loadBalancerName))
+                .publicIpAddressIds();
 
         List<AzureLoadBalancerFrontend> frontends = getPublicIpAddresses(resourceGroupName)
                 .getAll()
@@ -776,7 +815,9 @@ public class AzureClient {
 
     private List<AzureLoadBalancerFrontend> getLoadBalancerPrivateFrontends(String resourceGroupName, String loadBalancerName) {
         // The keys in this map are the names of the frontend load balancers.
-        Map<String, LoadBalancerFrontend> providerFrontends = getLoadBalancer(resourceGroupName, loadBalancerName).frontends();
+        Map<String, LoadBalancerFrontend> providerFrontends = getLoadBalancer(resourceGroupName, loadBalancerName)
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch load balancer using load balancer Name: " + loadBalancerName))
+                .frontends();
 
         List<AzureLoadBalancerFrontend> frontends = providerFrontends.entrySet().stream()
                 .filter(fe -> Objects.nonNull(fe.getValue().innerModel())
@@ -793,7 +834,9 @@ public class AzureClient {
     }
 
     public Map<String, LoadBalancingRule> getLoadBalancerRules(String resourceGroupName, String loadBalancerName) {
-        return getLoadBalancer(resourceGroupName, loadBalancerName).loadBalancingRules();
+        return getLoadBalancer(resourceGroupName, loadBalancerName)
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch load balancer using load balancer Name: " + loadBalancerName))
+                .loadBalancingRules();
     }
 
     public AzureListResult<Identity> listIdentities() {
@@ -809,7 +852,7 @@ public class AzureClient {
                 .collect(Collectors.toList());
     }
 
-    public Identity getIdentityById(String id) {
+    public Optional<Identity> getIdentityById(String id) {
         return handleException(() -> azure.identities().getById(id));
     }
 
@@ -818,7 +861,8 @@ public class AzureClient {
     }
 
     public RoleAssignments getRoleAssignments(AzureResourceManager azure) {
-        return handleException(() -> azure.identities().manager()).authorizationManager().roleAssignments();
+        return handleException(() -> azure.identities().manager())
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch identities for azure")).authorizationManager().roleAssignments();
     }
 
     public AzureListResult<RoleAssignment> listRoleAssignmentsByScope(String scope) {
@@ -841,7 +885,7 @@ public class AzureClient {
                 .manager()
                 .roleServiceClient()
                 .getRoleAssignments()
-                .list());
+                .list()).orElse(null);
     }
 
     public Subscription getCurrentSubscription() {
@@ -856,12 +900,12 @@ public class AzureClient {
         handleException(() -> azure.genericResources().deleteById(id));
     }
 
-    public GenericResource getGenericResourceById(String id) {
+    public Optional<GenericResource> getGenericResourceById(String id) {
         return handleException(() -> azure.genericResources().getById(id));
     }
 
     public String getServicePrincipalForResourceById(String referenceId) {
-        return handleException(() -> azure.genericResources().getById(referenceId).identity().principalId());
+        return handleException(() -> azure.genericResources().getById(referenceId).identity().principalId()).orElse(null);
     }
 
     public AzureListResult<PrivateDnsZone> getPrivateDnsZoneList() {
@@ -903,7 +947,7 @@ public class AzureClient {
 
     public VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName, String virtualNetworkLinkName) {
         return virtualNetworkLinkName == null ? null : handleException(() ->
-                privateDnsZoneManager.serviceClient().getVirtualNetworkLinks().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName));
+                privateDnsZoneManager.serviceClient().getVirtualNetworkLinks().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName)).orElse(null);
     }
 
     public boolean checkIfDnsZonesDeployed(String resourceGroupName, List<AzureManagedPrivateDnsZoneServiceType> services) {
@@ -949,13 +993,13 @@ public class AzureClient {
                         && networkLink.virtualNetworkLinkState().equals(VirtualNetworkLinkState.COMPLETED));
     }
 
-    private <T> T handleException(Supplier<T> function) {
+    private <T> Optional<T> handleException(Supplier<T> function) {
         return azureExceptionHandler.handleException(function);
     }
 
     private <T> T handleException(Supplier<T> function, Supplier<T> existingResourceSupplier) {
         return azureRetryExecutor.executeWithConcurrentWriteRetry(
-                () -> handleException(function),
+                () -> handleException(function).orElse(null),
                 existingResourceSupplier,
                 AzureClient.CREATE_MAX_RETRY,
                 AzureClient.CREATE_INITIAL_BACKOFF);
@@ -970,7 +1014,8 @@ public class AzureClient {
     }
 
     public Mono<Void> deleteGenericResourceByIdAsync(String id) {
-        return handleException(() -> azure.genericResources().deleteByIdAsync(id));
+        return handleException(() -> azure.genericResources().deleteByIdAsync(id))
+                .orElseThrow(() -> new CloudConnectorException("Could not delete generic resources by ID"));
     }
 
     private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl,
@@ -998,14 +1043,14 @@ public class AzureClient {
         return eSetId;
     }
 
-    public DiskEncryptionSetInner getDiskEncryptionSetByName(String resourceGroupName, String diskEncryptionSetName) {
+    public Optional<DiskEncryptionSetInner> getDiskEncryptionSetByName(String resourceGroupName, String diskEncryptionSetName) {
         return handleException(() ->
                 computeManager.serviceClient()
                         .getDiskEncryptionSets()
                         .getByResourceGroup(resourceGroupName, diskEncryptionSetName));
     }
 
-    public DiskEncryptionSetInner createDiskEncryptionSet(String diskEncryptionSetName, Optional<String> managedIdentity,
+    public Optional<DiskEncryptionSetInner> createDiskEncryptionSet(String diskEncryptionSetName, Optional<String> managedIdentity,
             String encryptionKeyUrl, String location, String resourceGroupName, String sourceVaultId, Map<String, String> tags) {
         return handleException(() -> {
             DiskEncryptionSetInner encryptionSet = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, managedIdentity, location, tags);
@@ -1015,12 +1060,12 @@ public class AzureClient {
         });
     }
 
-    public Vault getKeyVault(String resourceGroupName, String vaultName) {
+    public Optional<Vault> getKeyVault(String resourceGroupName, String vaultName) {
         return handleException(() -> azure.vaults().getByResourceGroup(resourceGroupName, vaultName));
     }
 
     public boolean keyVaultExists(String resourceGroupName, String vaultName) {
-        return getKeyVault(resourceGroupName, vaultName) != null;
+        return getKeyVault(resourceGroupName, vaultName).isPresent();
     }
 
     public Set<String> getDatabaseVersions(String region) {
@@ -1067,7 +1112,7 @@ public class AzureClient {
                     .getByResourceGroup(resourceGroupName, vaultName)
                     .accessPolicies();
             return isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, principalObjectId);
-        });
+        }).orElseThrow(() -> new CloudConnectorException("Could not validate access policies"));
     }
 
     public boolean isValidKeyVaultAccessPolicyListForServicePrincipal(List<AccessPolicy> accessPolicies, String principalObjectId) {
@@ -1143,7 +1188,7 @@ public class AzureClient {
                 LOGGER.error("Region is not provided so not fetching the zone information");
             }
             return zoneInfo;
-        });
+        }).orElse(null);
     }
 
     public Map<String, AzureVmCapabilities> getHostCapabilities(String region) throws ProviderAuthenticationFailedException {
@@ -1163,9 +1208,9 @@ public class AzureClient {
                         .collect(Collectors.toMap(ResourceSkuInner::name, sku -> new AzureVmCapabilities(sku.name(), sku.capabilities())));
             } else {
                 LOGGER.error("Region is not provided so not fetching the host encryption information");
-                return Map.of();
+                return Map.<String, AzureVmCapabilities>of();
             }
-        });
+        }).orElse(null);
     }
 
     public String getServicePrincipalId() {
@@ -1209,10 +1254,10 @@ public class AzureClient {
             if (operation.status().equals("Failed")) {
                 ManagementError error = operation.error();
                 LOGGER.warn("What-if analysis has failed with the following error: {}", error);
-                return Optional.of(error);
+                return error;
             } else {
                 LOGGER.debug("What-if analysis has been completed with the following status: {}", operation.status());
-                return Optional.empty();
+                return null;
             }
         });
     }
@@ -1270,7 +1315,8 @@ public class AzureClient {
     }
 
     public Map<String, String> getVirtualMachineTags(String resourceId) {
-        return handleException(() -> azure.virtualMachines().getById(resourceId).tags());
+        return handleException(() -> azure.virtualMachines().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get virtual machine tags"));
     }
 
     public void updateDiskTags(String resourceId, Map<String, String> tags) {
@@ -1284,7 +1330,8 @@ public class AzureClient {
     }
 
     public Map<String, String> getDiskTags(String resourceId) {
-        return handleException(() -> azure.disks().getById(resourceId).tags());
+        return handleException(() -> azure.disks().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get disk tags"));
     }
 
     public void updateAvailabilitySetTags(String resourceId, Map<String, String> tags) {
@@ -1298,7 +1345,8 @@ public class AzureClient {
     }
 
     public Map<String, String> getAvailabilitySetTags(String resourceId) {
-        return handleException(() -> azure.availabilitySets().getById(resourceId).tags());
+        return handleException(() -> azure.availabilitySets().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get availability set tags"));
     }
 
     public void updateNetworkSecurityGroupTags(String resourceId, Map<String, String> tags) {
@@ -1312,7 +1360,8 @@ public class AzureClient {
     }
 
     public Map<String, String> getNetworkSecurityGroupTags(String resourceId) {
-        return handleException(() -> azure.networkSecurityGroups().getById(resourceId).tags());
+        return handleException(() -> azure.networkSecurityGroups().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get network security group tags"));
     }
 
     public void updatePublicIpTags(String resourceId, Map<String, String> tags) {
@@ -1326,7 +1375,8 @@ public class AzureClient {
     }
 
     public Map<String, String> getPublicIpTags(String resourceId) {
-        return handleException(() -> azure.publicIpAddresses().getById(resourceId).tags());
+        return handleException(() -> azure.publicIpAddresses().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get public IP tags"));
     }
 
     public void updateResourceGroupTags(String resourceName, Map<String, String> tags) {
@@ -1340,7 +1390,8 @@ public class AzureClient {
     }
 
     public Map<String, String> getResourceGroupTags(String resourceName) {
-        return handleException(() -> azure.resourceGroups().getByName(resourceName).tags());
+        return handleException(() -> azure.resourceGroups().getByName(resourceName).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get resource group tags"));
     }
 
     public void updateNetworkInterfaceTags(String resourceId, Map<String, String> tags) {
@@ -1354,7 +1405,8 @@ public class AzureClient {
     }
 
     public Map<String, String> getNetworkInterfaceTags(String resourceId) {
-        return handleException(() -> azure.networkInterfaces().getById(resourceId).tags());
+        return handleException(() -> azure.networkInterfaces().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get network interface tags"));
     }
 
     public void updateLoadBalancerTags(String resourceId, Map<String, String> tags) {
@@ -1368,6 +1420,7 @@ public class AzureClient {
     }
 
     public Map<String, String> getLoadBalancerTags(String resourceId) {
-        return handleException(() -> azure.loadBalancers().getById(resourceId).tags());
+        return handleException(() -> azure.loadBalancers().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not fetch load balancer tags"));
     }
 }

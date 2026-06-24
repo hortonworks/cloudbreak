@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
@@ -165,7 +166,7 @@ public class AzureNetworkConnectorTest {
         when(azureClientService.getClient(networkCreationRequest.getCloudCredential())).thenReturn(azureClient);
         when(azureNetworkTemplateBuilder.build(networkCreationRequest, subnetRequests, resourceGroup.name())).thenReturn(TEMPLATE);
         when(azureClient.createTemplateDeployment(ENV_NAME, STACK_NAME, TEMPLATE, PARAMETER)).thenReturn(templateDeployment);
-        when(azureClient.createResourceGroup(ENV_NAME, REGION.value(), Collections.emptyMap())).thenReturn(resourceGroup);
+        when(azureClient.createResourceGroup(ENV_NAME, REGION.value(), Collections.emptyMap())).thenReturn(Optional.of(resourceGroup));
         when(resourceGroup.name()).thenReturn(ENV_NAME);
         when(templateDeployment.outputs()).thenReturn(outputs);
 
@@ -256,7 +257,7 @@ public class AzureNetworkConnectorTest {
     public void testDeleteNetworkWithSubnetsShouldDeleteTheStackAndTheResourceGroupWhenNotExistingNetwork() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, false);
 
-        when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
+        when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(Optional.ofNullable(mock(ResourceGroup.class)));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
@@ -269,7 +270,7 @@ public class AzureNetworkConnectorTest {
     public void testDeleteNetworkWithSubnetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, false);
 
-        when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
+        when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(Optional.ofNullable(mock(ResourceGroup.class)));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
         when(azureUtils.convertToCloudConnectorException(any(ManagementException.class), anyString())).thenReturn(new CloudConnectorException("text"));
         doThrow(createCloudException()).when(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
@@ -300,7 +301,7 @@ public class AzureNetworkConnectorTest {
         String resourceGroupName = "someNotExistingResourceGroupName";
         when(networkDeletionRequest.getResourceGroup()).thenReturn(resourceGroupName);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.getResourceGroup(resourceGroupName)).thenReturn(null);
+        when(azureClient.getResourceGroup(resourceGroupName)).thenReturn(Optional.empty());
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
 
@@ -323,7 +324,7 @@ public class AzureNetworkConnectorTest {
         when(azureClientService.getClient(credential)).thenReturn(azureClient);
         when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
         when(azureUtils.getCustomNetworkId(network)).thenReturn(networkId);
-        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(azureNetwork);
+        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(Optional.ofNullable(azureNetwork));
         when(azureNetwork.addressSpaces()).thenReturn(List.of(cidrBlock));
 
         NetworkCidr result = underTest.getNetworkCidr(network, credential);
@@ -342,7 +343,7 @@ public class AzureNetworkConnectorTest {
         when(azureClientService.getClient(credential)).thenReturn(azureClient);
         when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
         when(azureUtils.getCustomNetworkId(network)).thenReturn(networkId);
-        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(azureNetwork);
+        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(Optional.ofNullable(azureNetwork));
         when(azureNetwork.addressSpaces()).thenReturn(List.of());
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -368,7 +369,7 @@ public class AzureNetworkConnectorTest {
         when(azureClientService.getClient(credential)).thenReturn(azureClient);
         when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
         when(azureUtils.getCustomNetworkId(network)).thenReturn(networkId);
-        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(azureNetwork);
+        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(Optional.ofNullable(azureNetwork));
         when(azureNetwork.addressSpaces()).thenReturn(List.of(cidrBlock1, cidrBlock2));
 
         NetworkCidr result = underTest.getNetworkCidr(network, credential);
@@ -386,7 +387,7 @@ public class AzureNetworkConnectorTest {
         when(azureClientService.getClient(credential)).thenReturn(azureClient);
         when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
         when(azureUtils.getCustomNetworkId(network)).thenReturn(networkId);
-        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(null);
+        when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(Optional.empty());
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             underTest.getNetworkCidr(network, credential);

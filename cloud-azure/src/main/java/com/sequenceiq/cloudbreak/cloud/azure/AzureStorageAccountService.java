@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.LOCALLY_REDUND
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureStorage.IMAGES_CONTAINER;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -55,8 +56,8 @@ public class AzureStorageAccountService {
     private ResourceNotifier resourceNotifier;
 
     public void createStorageAccount(AuthenticatedContext ac, AzureClient client, String resourceGroup, String storageName, String region, CloudStack stack) {
-        StorageAccount storageAccount = client.getStorageAccountByGroup(resourceGroup, storageName);
-        if (storageAccount == null) {
+        Optional<StorageAccount> storageAccount = client.getStorageAccountByGroup(resourceGroup, storageName);
+        if (storageAccount.isEmpty()) {
             try {
                 LOGGER.info("Creating storage account: {}", storageName);
                 StorageAccount storage = armStorage.createStorage(client, storageName, LOCALLY_REDUNDANT, resourceGroup, region,

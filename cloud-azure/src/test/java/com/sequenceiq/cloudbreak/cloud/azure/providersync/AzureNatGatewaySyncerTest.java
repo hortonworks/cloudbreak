@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,7 +94,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(natGateway, network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.of(subnet));
         when(subnet.natGatewayId()).thenReturn(natGatewayId);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
         when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))
@@ -122,7 +123,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(natGateway, network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.of(subnet));
         when(subnet.natGatewayId()).thenReturn(null);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
         when(azureOutboundManager.updateNetworkOutbound(network, NOT_DEFINED))
@@ -151,7 +152,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(natGateway, network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(null);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.empty());
 
         // When
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
@@ -172,7 +173,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(null);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.empty());
 
         // When
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
@@ -194,7 +195,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.of(subnet));
         when(subnet.natGatewayId()).thenReturn(natGatewayId);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
         when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))
@@ -226,7 +227,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.of(subnet));
         when(subnet.natGatewayId()).thenReturn(null);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
 
@@ -311,7 +312,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(existingNatGateway, network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.of(subnet));
         when(subnet.natGatewayId()).thenReturn(natGatewayId);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
         when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))
@@ -349,7 +350,7 @@ class AzureNatGatewaySyncerTest {
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(existingNatGateway, network, subnetResource);
 
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
+        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(Optional.of(subnet));
         when(subnet.natGatewayId()).thenReturn(newNatGatewayId);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
         when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))

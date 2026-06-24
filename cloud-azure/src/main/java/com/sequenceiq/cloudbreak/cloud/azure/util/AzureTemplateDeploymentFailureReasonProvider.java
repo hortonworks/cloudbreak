@@ -10,6 +10,7 @@ import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Component
 public class AzureTemplateDeploymentFailureReasonProvider {
@@ -18,9 +19,12 @@ public class AzureTemplateDeploymentFailureReasonProvider {
 
     public Optional<String> getFailureMessage(String resourceGroupName, String deploymentName, AzureClient client) {
         try {
-            Deployment deployment = client.getTemplateDeployment(resourceGroupName, deploymentName);
-            LOGGER.debug("The status of the {} deployment is: {}", deploymentName, deployment.provisioningState());
-            if (!ResourceStatus.FAILED.equals(AzureStatusMapper.mapResourceStatus(deployment.provisioningState()))) {
+            Optional<Deployment> deployment = client.getTemplateDeployment(resourceGroupName, deploymentName);
+            if (deployment.isEmpty()) {
+                throw new CloudbreakServiceException("Could not fetch template deployment using resource group name and deployment name");
+            }
+            LOGGER.debug("The status of the {} deployment is: {}", deploymentName, deployment.get().provisioningState());
+            if (!ResourceStatus.FAILED.equals(AzureStatusMapper.mapResourceStatus(deployment.get().provisioningState()))) {
                 return Optional.empty();
             }
             return client.getTemplateDeploymentOperations(resourceGroupName, deploymentName).getAll()

@@ -51,7 +51,7 @@ public class AzureLoadBalancerMetadataCollector {
 
         portToAsMapping.forEach((port, availabilitySetName) -> {
             // Validate an availability set with the expected name actually exists
-            Optional<AvailabilitySet> availabilitySet = Optional.ofNullable(azureClient.getAvailabilitySet(resourceGroup, availabilitySetName));
+            Optional<AvailabilitySet> availabilitySet = azureClient.getAvailabilitySet(resourceGroup, availabilitySetName);
             if (availabilitySet.isPresent()) {
                 LOGGER.debug("Found availability set with name {}", availabilitySetName);
                 parameters.put(AzureLoadBalancerMetadataView.getAvailabilitySetParam(port), availabilitySetName);

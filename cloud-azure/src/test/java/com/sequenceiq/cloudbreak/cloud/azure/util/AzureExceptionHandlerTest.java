@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -86,7 +87,7 @@ public class AzureExceptionHandlerTest {
     void handleException() {
         Supplier<String> stringSupplier = () -> "This works";
 
-        String result = underTest.handleException(stringSupplier);
+        String result = underTest.handleException(stringSupplier).get();
 
         assertEquals("This works", result);
     }
@@ -97,9 +98,9 @@ public class AzureExceptionHandlerTest {
             throw getManagementException(HttpStatus.NOT_FOUND);
         };
 
-        String result = underTest.handleException(stringSupplier);
+        Optional<String> result = underTest.handleException(stringSupplier);
 
-        assertNull(result);
+        assertThat(result).isEmpty();
     }
 
     @Test

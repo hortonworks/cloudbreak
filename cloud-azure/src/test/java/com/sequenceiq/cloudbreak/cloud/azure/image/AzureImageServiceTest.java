@@ -139,7 +139,7 @@ public class AzureImageServiceTest {
 
     @Test
     public void testCreateCustomImageIfNotFoundAndSuccess() {
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(virtualMachineCustomImage);
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(Optional.of(virtualMachineCustomImage));
         when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
         when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
 
@@ -210,7 +210,7 @@ public class AzureImageServiceTest {
     public void testCreateCustomImageWhenDataIntegrityViolationException() {
         imagePresent(true);
 
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(virtualMachineCustomImage);
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(Optional.of(virtualMachineCustomImage));
         when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
         when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), any()))

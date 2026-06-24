@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
 
 @Component
@@ -105,7 +106,8 @@ public class AzureStackViewProvider {
                 retryService.testWith1SecDelayMax5Times(
                         () -> {
                             try {
-                                return client.getNetworkByResourceGroup(resourceGroup, networkId);
+                                return client.getNetworkByResourceGroup(resourceGroup, networkId)
+                                        .orElseThrow(() -> new CloudbreakServiceException("Could not get network using resource group and network ID"));
                             } catch (ProviderAuthenticationFailedException e) {
                                 throw e;
                             } catch (RuntimeException e) {

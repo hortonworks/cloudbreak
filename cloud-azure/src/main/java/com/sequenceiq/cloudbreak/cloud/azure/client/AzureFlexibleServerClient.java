@@ -45,13 +45,13 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
     }
 
     public ServerState getFlexibleServerStatus(String resourceGroupName, String serverName) {
-        Server server = getFlexibleServer(resourceGroupName, serverName);
-        if (server == null) {
+        Optional<Server> server = getFlexibleServer(resourceGroupName, serverName);
+        if (server.isEmpty()) {
             LOGGER.debug("Flexible server not found with name {} in resourcegroup {}", serverName, resourceGroupName);
             return UNKNOWN;
         } else {
-            LOGGER.debug("Flexible server status on Azure is {}", server.state());
-            return server.state() != null ? server.state() : UNKNOWN;
+            LOGGER.debug("Flexible server status on Azure is {}", server.get().state());
+            return server.get().state() != null ? server.get().state() : UNKNOWN;
         }
     }
 
@@ -65,21 +65,21 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
     }
 
     public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
-        Server server = getFlexibleServer(resourceGroupName, serverName);
-        if (server == null) {
+        Optional<Server> server = getFlexibleServer(resourceGroupName, serverName);
+        if (server.isEmpty()) {
             throwNotFound(resourceGroupName, serverName);
         } else {
-            handleException(() -> server.update().withAdministratorLoginPassword(newPassword).apply());
+            handleException(() -> server.get().update().withAdministratorLoginPassword(newPassword).apply());
         }
     }
 
     public void upgrade(String resourceGroupName, String serverName, String targetVersion) {
         if (StringUtils.isNotBlank(targetVersion) && ServerVersion.values().contains(ServerVersion.fromString(targetVersion))) {
-            Server server = getFlexibleServer(resourceGroupName, serverName);
-            if (server == null) {
+            Optional<Server> server = getFlexibleServer(resourceGroupName, serverName);
+            if (server.isEmpty()) {
                 throwNotFound(resourceGroupName, serverName);
             } else {
-                handleException(() -> server.update().withVersion(ServerVersion.fromString(targetVersion)).apply());
+                handleException(() -> server.get().update().withVersion(ServerVersion.fromString(targetVersion)).apply());
             }
         } else {
             throw new CloudConnectorException(String.format("Upgrading Azure PostgreSQL Flexible Server to version %s is not supported", targetVersion));
@@ -111,7 +111,7 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
         }
     }
 
-    public Server getFlexibleServer(String resourceGroupName, String serverName) {
+    public Optional<Server> getFlexibleServer(String resourceGroupName, String serverName) {
         return handleException(() -> postgreSqlFlexibleManager.servers().getByResourceGroup(resourceGroupName, serverName));
     }
 }

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -352,7 +353,7 @@ public class AzureVolumeResourceBuilderTest {
         when(azureListResult.getAll()).thenReturn(diskList);
         when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(azureListResult);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
-        when(azureClient.getVirtualMachine(eq("instance1"))).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachine(eq("instance1"))).thenReturn(Optional.ofNullable(virtualMachine));
         when(virtualMachine.name()).thenReturn("instance1");
         underTest.delete(context, auth, volumeSetResource);
 
@@ -403,7 +404,7 @@ public class AzureVolumeResourceBuilderTest {
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
                 .withName(VOLUME_NAME).withAvailabilityZone(AVAILABILITY_ZONE).build();
 
-        when(azureClient.getDiskByName(RESOURCE_GROUP, DISK_ID)).thenReturn(disk);
+        when(azureClient.getDiskByName(RESOURCE_GROUP, DISK_ID)).thenReturn(Optional.of(disk));
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
@@ -634,7 +635,7 @@ public class AzureVolumeResourceBuilderTest {
         }
 
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
-        when(azureClient.getVirtualMachine(eq(INSTANCE_ID))).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachine(eq(INSTANCE_ID))).thenReturn(Optional.ofNullable(virtualMachine));
         when(virtualMachine.name()).thenReturn(INSTANCE_ID);
 
         underTest.detachVolumes(auth, volumeSetResources);
@@ -725,7 +726,7 @@ public class AzureVolumeResourceBuilderTest {
             Disk disk = mock(Disk.class);
             when(disk.id()).thenReturn(String.format(MICROSOFT_DISK_PREFIX + "%s", diskIds.get(i)));
             mockDisks.add(disk);
-            when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq(diskIds.get(i)))).thenReturn(null);
+            when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq(diskIds.get(i)))).thenReturn(Optional.empty());
         }
 
         when(azureClient.createManagedDisk(any(AzureDisk.class))).thenAnswer(invocation -> {
@@ -806,9 +807,9 @@ public class AzureVolumeResourceBuilderTest {
         when(disk2.id()).thenReturn(MICROSOFT_DISK_PREFIX + "disk-2");
         when(disk3.id()).thenReturn(MICROSOFT_DISK_PREFIX + "disk-3");
 
-        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-1"))).thenReturn(null);
-        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-2"))).thenReturn(null);
-        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-3"))).thenReturn(null);
+        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-1"))).thenReturn(Optional.empty());
+        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-2"))).thenReturn(Optional.empty());
+        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-3"))).thenReturn(Optional.empty());
 
         when(azureClient.createManagedDisk(any(AzureDisk.class)))
                 .thenReturn(disk1)

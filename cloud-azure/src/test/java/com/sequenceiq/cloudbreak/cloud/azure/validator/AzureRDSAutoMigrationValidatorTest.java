@@ -12,6 +12,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,7 +80,7 @@ public class AzureRDSAutoMigrationValidatorTest {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn("rg");
         Server server = mock(Server.class);
         when(server.id()).thenReturn("serverId");
-        when(azureFlexibleServerClient.getFlexibleServer("rg", "serverId")).thenReturn(server);
+        when(azureFlexibleServerClient.getFlexibleServer("rg", "serverId")).thenReturn(Optional.of(server));
 
         AzureRDSAutoMigrationException azureRDSAutoMigrationException = assertThrows(AzureRDSAutoMigrationException.class,
                 () -> underTest.validate(authenticatedContext, databaseStack));

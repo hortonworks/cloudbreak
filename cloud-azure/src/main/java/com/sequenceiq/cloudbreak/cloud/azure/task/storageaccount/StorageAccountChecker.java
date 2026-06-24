@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.task.storageaccount;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -30,8 +32,8 @@ public class StorageAccountChecker extends PollBooleanStateTask {
     protected Boolean doCall() {
         LOGGER.info("Waiting for storage account to be created: {}", context.getStorageAccountName());
         AzureClient client = context.getAzureClient();
-        StorageAccount storageAccount = client.getStorageAccountByGroup(context.getResourceGroupName(), context.getStorageAccountName());
-        if (storageAccount == null || !ProvisioningState.SUCCEEDED.equals(storageAccount.provisioningState())) {
+        Optional<StorageAccount> storageAccount = client.getStorageAccountByGroup(context.getResourceGroupName(), context.getStorageAccountName());
+        if (storageAccount.isEmpty() || !ProvisioningState.SUCCEEDED.equals(storageAccount.get().provisioningState())) {
             LOGGER.info("Storage account creation not finished yet");
             return false;
         } else {

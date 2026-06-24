@@ -236,7 +236,7 @@ class AzureDatabaseResourceServiceTest {
         StorageProfile storageProfile = mock(StorageProfile.class);
         when(storageProfile.storageMB()).thenReturn(storageSizeGB * 1024);
         when(server.storageProfile()).thenReturn(storageProfile);
-        when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(server);
+        when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(Optional.of(server));
         ExternalDatabaseParameters actual = underTest.getExternalDatabaseParameters(ac, databaseStack);
         assertEquals(externalDatabaseStatus, actual.externalDatabaseStatus());
         assertEquals(storageSizeGB * 1024L, actual.storageSizeInMB());
@@ -256,7 +256,7 @@ class AzureDatabaseResourceServiceTest {
         Storage storage = mock(Storage.class);
         when(storage.storageSizeGB()).thenReturn(storageSizeGB);
         when(server.storage()).thenReturn(storage);
-        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(server);
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(Optional.of(server));
         ExternalDatabaseParameters actual = underTest.getExternalDatabaseParameters(ac, databaseStack);
         assertEquals(externalDatabaseStatus, actual.externalDatabaseStatus());
         assertEquals(storageSizeGB * 1024L, actual.storageSizeInMB());
@@ -272,14 +272,14 @@ class AzureDatabaseResourceServiceTest {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, migratedDbStack)).thenReturn(RESOURCE_GROUP_NAME);
         AzureSingleServerClient singleServerClientMock = mock(AzureSingleServerClient.class);
         when(client.getSingleServerClient()).thenReturn(singleServerClientMock);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(Optional.of(deployment));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(DELETED);
         if (hasException) {
             when(client.createTemplateDeployment(any(), any(), any(), any())).thenThrow(new CloudConnectorException("Error in provisioning database stack"));
         }
 
         com.azure.resourcemanager.postgresql.models.Server server = mock(com.azure.resourcemanager.postgresql.models.Server.class);
-        when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(server);
+        when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(Optional.ofNullable(server));
         when(server.userVisibleState()).thenReturn(DISABLED);
 
         lenient().when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
@@ -343,10 +343,10 @@ class AzureDatabaseResourceServiceTest {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, migratedDbStack)).thenReturn(RESOURCE_GROUP_NAME);
         AzureSingleServerClient singleServerClientMock = mock(AzureSingleServerClient.class);
         when(client.getSingleServerClient()).thenReturn(singleServerClientMock);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(Optional.of(deployment));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(DELETED);
         com.azure.resourcemanager.postgresql.models.Server server = mock(com.azure.resourcemanager.postgresql.models.Server.class);
-        when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(server);
+        when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(Optional.ofNullable(server));
         when(server.userVisibleState()).thenReturn(DISABLED);
 
         lenient().when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
@@ -504,8 +504,8 @@ class AzureDatabaseResourceServiceTest {
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(cloudResourceList);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(cloudResourceList);
         when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
@@ -554,8 +554,8 @@ class AzureDatabaseResourceServiceTest {
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(cloudResourceList);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(cloudResourceList);
         when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
@@ -603,8 +603,8 @@ class AzureDatabaseResourceServiceTest {
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(cloudResourceList);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(cloudResourceList);
         when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
@@ -656,8 +656,8 @@ class AzureDatabaseResourceServiceTest {
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(expectedCloudResourceList);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(expectedCloudResourceList);
         when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
@@ -764,8 +764,8 @@ class AzureDatabaseResourceServiceTest {
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(dbResource));
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(List.of(dbResource));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
@@ -795,8 +795,8 @@ class AzureDatabaseResourceServiceTest {
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(dbResource));
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(List.of(dbResource));
         Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, SINGLE_SERVER.name());
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
 
@@ -822,8 +822,8 @@ class AzureDatabaseResourceServiceTest {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         List<CloudResource> cloudResourceList = List.of(peResource, dzgResource);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(List.of(mock(CloudResource.class)));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getNetwork()).thenReturn(network);
@@ -846,7 +846,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         when(databaseStack.getNetwork()).thenReturn(network);
         when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
@@ -900,7 +900,7 @@ class AzureDatabaseResourceServiceTest {
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region")));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
@@ -936,7 +936,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         when(syncPollingScheduler.schedule(null)).thenReturn(new ResourcesStatePollerResult(null));
@@ -984,7 +984,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         doThrow(new Exception("msg")).when(syncPollingScheduler).schedule(null);
@@ -1003,7 +1003,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
@@ -1017,7 +1017,7 @@ class AzureDatabaseResourceServiceTest {
                 .thenReturn(new CloudConnectorException(exceptionMessage, managementException));
         ArrayList<CloudResource> resources = new ArrayList<>();
         resources.add(mock(CloudResource.class));
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(resources);
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(resources);
 
         Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
@@ -1033,7 +1033,7 @@ class AzureDatabaseResourceServiceTest {
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
         verify(azureUtils).convertToCloudConnectorException(managementException, exceptionMessage);
-        verify(azureCloudResourceService).getDeploymentCloudResources(deployment);
+        verify(azureCloudResourceService).getDeploymentCloudResources(Optional.of(deployment));
     }
 
     @Test
@@ -1044,7 +1044,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
-        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
@@ -1055,7 +1055,7 @@ class AzureDatabaseResourceServiceTest {
         doThrow(azureException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         ArrayList<CloudResource> resources = new ArrayList<>();
         resources.add(mock(CloudResource.class));
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(resources);
+        when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(resources);
 
         Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
@@ -1070,7 +1070,7 @@ class AzureDatabaseResourceServiceTest {
         verify(persistenceNotifier, times(5)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
-        verify(azureCloudResourceService).getDeploymentCloudResources(deployment);
+        verify(azureCloudResourceService).getDeploymentCloudResources(Optional.of(deployment));
     }
 
     @Test

@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.cloudbreak.util.IndexingDeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -270,11 +271,11 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     private Disk getOrCreateDisk(Volume originalVolume, CloudResource resource, AzureDisk diskTemplate, AzureClient client) {
         String diskName = getDiskName(originalVolume.getId());
-        Disk existingDisk = client.getDiskByName(diskTemplate.getResourceGroupName(), diskName);
-        if (existingDisk != null) {
+        Optional<Disk> existingDisk = client.getDiskByName(diskTemplate.getResourceGroupName(), diskName);
+        if (existingDisk.isPresent()) {
             LOGGER.info("Managed disk for resource group: {}, name: {} already exists: {}",
                     diskTemplate.getResourceGroupName(), originalVolume.getId(), existingDisk);
-            return existingDisk;
+            return existingDisk.get();
         } else {
             AzureDisk azureDisk = new AzureDisk(originalVolume.getId(), originalVolume.getSize(),
                     AzureDiskType.getByValue(originalVolume.getType()), diskTemplate.getRegion(),
@@ -368,7 +369,8 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         }
         LOGGER.info("VM disk map: {}", vmDiskMap);
         for (String vm : vmDiskMap.keySet()) {
-            VirtualMachine virtualMachine = client.getVirtualMachine(vm);
+            VirtualMachine virtualMachine = client.getVirtualMachine(vm)
+                    .orElseThrow(() -> new CloudbreakServiceException("Could not fetch Virtual machine: " + vm + " for detaching"));
             if (Objects.equals(virtualMachine.name(), instanceName)) {
                 try {
                     client.detachDisksFromVm(vmDiskMap.get(vm), virtualMachine);

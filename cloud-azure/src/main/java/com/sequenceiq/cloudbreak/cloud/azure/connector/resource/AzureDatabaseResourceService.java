@@ -259,7 +259,7 @@ public class AzureDatabaseResourceService {
             List<CloudResource> cloudResources = new ArrayList<>();
             boolean canaryDeployment = false;
             if (Objects.nonNull(deployment)) {
-                cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+                cloudResources = azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment));
                 canaryDeployment = isCanaryDeployment(cloudResources);
 
                 String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
@@ -282,7 +282,7 @@ public class AzureDatabaseResourceService {
         } catch (Retry.ActionFailedException e) {
             LOGGER.warn("Error during fetching database deployment", e);
             Deployment deployment = fetchDeployment(stackName, resourceGroupName, client);
-            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(deployment));
             boolean canaryDeployment = isCanaryDeployment(cloudResources);
             if (canaryDeployment) {
                 LOGGER.warn("Canary deployment failed and template retry exhausted, cleaning up resources {}", cloudResources);
@@ -298,20 +298,20 @@ public class AzureDatabaseResourceService {
 
     private Deployment fetchDeploymentWithRetry(String stackName, String resourceGroupName, AzureClient client) {
         return retryService.testWith2SecDelayMax5Times(() -> {
-            Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-            if (templateDeployment == null || templateDeployment.outputs() == null) {
+            Optional<Deployment> templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+            if (templateDeployment.isEmpty() || templateDeployment.get().outputs() == null) {
                 LOGGER.warn("Template deployment or it's output not found: {}", templateDeployment);
                 throw new Retry.ActionFailedException("Deployment or it's output not found");
             } else {
-                return templateDeployment;
+                return templateDeployment.get();
             }
         });
     }
 
     private Deployment fetchDeployment(String stackName, String resourceGroupName, AzureClient client) {
-        Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+        Optional<Deployment> templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
         LOGGER.warn("Template deployment: {}", templateDeployment);
-        return templateDeployment;
+        return templateDeployment.orElse(null);
     }
 
     private void createResourceGroupIfNotExists(AuthenticatedContext ac, DatabaseStack stack, AzureClient client, String resourceGroupName,
@@ -521,19 +521,19 @@ public class AzureDatabaseResourceService {
         ExternalDatabaseParameters externalDatabaseParameters;
         if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
             LOGGER.debug("Getting flexible server parameters from Azure for {} database", databaseServerView.getDbServerName());
-            Server server = client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, databaseServer.getServerId());
+            Optional<Server> server = client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, databaseServer.getServerId());
             externalDatabaseParameters = new ExternalDatabaseParameters(
-                    convertFlexibleStatus(server),
+                    convertFlexibleStatus(server.orElse(null)),
                     AzureDatabaseType.FLEXIBLE_SERVER,
-                    getFlexibleServerStorageSizeInMB(server));
+                    getFlexibleServerStorageSizeInMB(server.orElse(null)));
         } else {
             LOGGER.debug("Getting single server parameters from Azure for {} database", databaseServerView.getDbServerName());
-            com.azure.resourcemanager.postgresql.models.Server server =
+            Optional<com.azure.resourcemanager.postgresql.models.Server> server =
                     client.getSingleServerClient().getSingleServer(resourceGroupName, databaseServer.getServerId());
             externalDatabaseParameters = new ExternalDatabaseParameters(
-                    convertSingleStatus(server),
+                    convertSingleStatus(server.orElse(null)),
                     AzureDatabaseType.SINGLE_SERVER,
-                    getSingleServerStorageSizeInMB(server));
+                    getSingleServerStorageSizeInMB(server.orElse(null)));
         }
         LOGGER.debug("External database parameters: {}", externalDatabaseParameters);
         return externalDatabaseParameters;
@@ -703,8 +703,8 @@ public class AzureDatabaseResourceService {
 
     private void recreateCloudResourcesInDeployment(PersistenceNotifier persistenceNotifier, CloudContext cloudContext,
             String deploymentName, String resourceGroupName, AzureClient client) {
-        Deployment deployment = client.getTemplateDeployment(resourceGroupName, deploymentName);
-        if (deployment != null) {
+        Optional<Deployment> deployment = client.getTemplateDeployment(resourceGroupName, deploymentName);
+        if (deployment.isPresent()) {
             List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
             LOGGER.debug("Deployment {} has been found with the following cloud resources: {}", deploymentName, cloudResources);
             persistenceNotifier.notifyAllocations(cloudResources, cloudContext);

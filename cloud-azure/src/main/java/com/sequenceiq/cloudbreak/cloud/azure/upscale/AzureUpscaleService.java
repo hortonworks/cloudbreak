@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -123,7 +124,7 @@ public class AzureUpscaleService {
                     azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
 
-            templateResources.addAll(azureCloudResourceService.getDeploymentCloudResources(templateDeployment));
+            templateResources.addAll(azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(templateDeployment)));
             newInstances.addAll(azureCloudResourceService.getInstanceCloudResources(stackName, templateResources,
                     scaledGroups, resourceGroupName));
             if (!newInstances.isEmpty()) {

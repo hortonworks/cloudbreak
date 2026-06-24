@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -60,7 +62,9 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         AzureClient client = getAzureClient(auth);
-        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, cloudResourceInstance.getName());
+        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, cloudResourceInstance.getName())
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch virtual machine " +
+                        "using resource group name: " + resourceGroupName + " and cloud instance name: " + cloudResourceInstance.getName()));
         Set<String> diskIds = vm.dataDisks().values().stream().map(VirtualMachineDataDisk::id).collect(Collectors.toSet());
 
         CloudResource volumeSet = buildableResource.stream()
@@ -110,9 +114,12 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     }
 
     private void detachDiskFromVmByVmId(AzureClient client, Disk disk) {
-        VirtualMachine vm = client.getVirtualMachine(disk.virtualMachineId());
-        LOGGER.info("Going to detach disk ([id: {}]) from virtual machine ([name: {}])", disk.id(), vm.name());
-        client.detachDiskFromVm(disk.id(), client.getVirtualMachine(disk.virtualMachineId()));
+        Optional<VirtualMachine> vm = client.getVirtualMachine(disk.virtualMachineId());
+        if (vm.isEmpty()) {
+            throw new CloudbreakServiceException("Could not fetch virtual machine using virtual machine ID");
+        }
+        LOGGER.info("Going to detach disk ([id: {}]) from virtual machine ([name: {}])", disk.id(), vm.get().name());
+        client.detachDiskFromVm(disk.id(), vm.get());
     }
 
     private void attachDisksToVm(AzureClient client, List<AzureDiskWithLun> disks, VirtualMachine vm) {
@@ -129,7 +136,8 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         AzureClient client = getAzureClient(auth);
-        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, instance.getInstanceId());
+        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, instance.getInstanceId())
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch virtual machines using resource group name: " + resourceGroupName));
         Set<String> diskIds = vm.dataDisks().values().stream().map(VirtualMachineDataDisk::id).collect(Collectors.toSet());
 
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(volumeSet);

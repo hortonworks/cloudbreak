@@ -6,7 +6,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_VIRTUAL_NETWORK_
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCh
 import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationPoller;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -60,23 +61,25 @@ public class AzureResourceDeploymentHelperService {
             LOGGER.warn("Exception during polling: {}", e.getMessage());
         } finally {
             AzureClient azureClient = checkerContext.getAzureClient();
-            Deployment templateDeployment = azureClient.getTemplateDeployment(
+            Optional<Deployment> templateDeployment = azureClient.getTemplateDeployment(
                     checkerContext.getResourceGroupName(), checkerContext.getDeploymentName());
-            CommonStatus deploymentStatus = AzureStatusMapper.mapCommonStatus(templateDeployment.provisioningState());
+            CommonStatus deploymentStatus = AzureStatusMapper.mapCommonStatus(templateDeployment
+                    .orElseThrow(() -> new CloudbreakServiceException("Could not fetch template deployment for resource group: "
+                            + checkerContext.getResourceGroupName())).provisioningState());
             ResourceType resourceType = StringUtils.isEmpty(checkerContext.getNetworkId()) ? AZURE_PRIVATE_DNS_ZONE : AZURE_VIRTUAL_NETWORK_LINK;
             azureResourcePersistenceHelperService.updateCloudResource(
                     authenticatedContext, checkerContext.getDeploymentName(), checkerContext.getDeploymentId(), deploymentStatus, resourceType);
-            return templateDeployment;
+            return templateDeployment.orElse(null);
         }
     }
 
     public Network getAzureNetwork(AzureClient azureClient, String networkId, String networkResourceGroup) {
-        Network azureNetwork = azureClient.getNetworkByResourceGroup(networkResourceGroup, networkId);
-        if (Objects.isNull(azureNetwork)) {
+        Optional<Network> azureNetwork = azureClient.getNetworkByResourceGroup(networkResourceGroup, networkId);
+        if (azureNetwork.isEmpty()) {
             throw new CloudConnectorException(String.format("Azure network id lookup failed with network id %s in resource group %s", networkId,
                     networkResourceGroup));
         }
-        return azureNetwork;
+        return azureNetwork.get();
     }
 
     public Deployment deployTemplate(AzureClient azureClient, AzureDnsZoneDeploymentParameters parameters) {

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -131,7 +132,7 @@ public class AzureCloudResourceServiceTest {
         when(deployment.deploymentOperations()).thenReturn(operations);
         when(deployment.deploymentOperations().list()).thenReturn(operationList);
 
-        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(deployment);
+        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(Optional.of(deployment));
 
         assertEquals(15, cloudResourceList.size());
         assertEquals(AZURE_AVAILABILITY_SET, cloudResourceList.get(0).getType());
@@ -202,7 +203,7 @@ public class AzureCloudResourceServiceTest {
         when(operation.targetResource()).thenReturn(t);
         when(operation.provisioningState()).thenReturn("failed");
 
-        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(deployment);
+        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(Optional.of(deployment));
 
         assertEquals(1, cloudResourceList.size());
         CloudResource cloudResource = cloudResourceList.get(0);
@@ -225,7 +226,7 @@ public class AzureCloudResourceServiceTest {
         when(operation.targetResource()).thenReturn(t);
         when(operation.provisioningState()).thenReturn("succeeded");
 
-        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(deployment);
+        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(Optional.of(deployment));
 
         assertEquals(0, cloudResourceList.size());
     }
@@ -281,7 +282,7 @@ public class AzureCloudResourceServiceTest {
         when(managedDiskParameters.id()).thenReturn("diskId1");
         when(osDisk.name()).thenReturn("diskName1");
 
-        when(azureClient.getVirtualMachines("resourceGroupName")).thenReturn(virtualMachines);
+        when(azureClient.getVirtualMachines("resourceGroupName")).thenReturn(Optional.of(virtualMachines));
 
         List<CloudResource> osDiskResources = underTest.getAttachedOsDiskResources(List.of(vm1, vm2, vm3), "resourceGroupName", azureClient);
 
@@ -326,7 +327,7 @@ public class AzureCloudResourceServiceTest {
         when(mockedSubnet.parent()).thenReturn(mockedNetwork);
         when(mockedNetwork.name()).thenReturn(virtualNetwork);
         Map subnets = mock(HashMap.class);
-        when(client.getSubnets(resourceGroupName, virtualNetwork)).thenReturn(subnets);
+        when(client.getSubnets(resourceGroupName, virtualNetwork)).thenReturn(Optional.ofNullable(subnets));
         when(subnets.values()).thenReturn(List.of(mockedSubnet));
 
         List<CloudResource> resources = underTest.collectAndSaveNetworkAndSubnet(

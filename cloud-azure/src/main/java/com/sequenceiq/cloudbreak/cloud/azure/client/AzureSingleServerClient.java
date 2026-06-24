@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,27 +26,27 @@ public class AzureSingleServerClient extends AbstractAzureServiceClient {
     }
 
     public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
-        Server singleServer = getSingleServer(resourceGroupName, serverName);
-        if (singleServer == null) {
+        Optional<Server> singleServer = getSingleServer(resourceGroupName, serverName);
+        if (singleServer.isEmpty()) {
             String message = String.format("Single server not found with name %s in resource group %s", serverName, resourceGroupName);
             LOGGER.warn(message);
             throw new CloudConnectorException(message);
         } else {
-            handleException(() -> singleServer.update().withAdministratorLoginPassword(newPassword).apply());
+            handleException(() -> singleServer.get().update().withAdministratorLoginPassword(newPassword).apply());
         }
     }
 
     public ServerState getSingleServerStatus(String resourceGroupName, String serverName) {
-        Server server = getSingleServer(resourceGroupName, serverName);
-        if (server == null) {
+        Optional<Server> server = getSingleServer(resourceGroupName, serverName);
+        if (server.isEmpty()) {
             LOGGER.debug("Single server not found with name {} in resourcegroup {}", serverName, resourceGroupName);
             return UNKNOWN;
         } else {
-            return server.userVisibleState() != null ? server.userVisibleState() : UNKNOWN;
+            return server.get().userVisibleState() != null ? server.get().userVisibleState() : UNKNOWN;
         }
     }
 
-    public Server getSingleServer(String resourceGroupName, String serverName) {
+    public Optional<Server> getSingleServer(String resourceGroupName, String serverName) {
         return handleException(() -> postgreSqlManager.servers().getByResourceGroup(resourceGroupName, serverName));
     }
 }

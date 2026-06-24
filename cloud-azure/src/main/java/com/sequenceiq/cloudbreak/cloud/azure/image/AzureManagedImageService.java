@@ -22,9 +22,9 @@ public class AzureManagedImageService {
     public Optional<VirtualMachineCustomImage> findVirtualMachineCustomImage(AzureImageInfo azureImageInfo, AzureClient client) {
         String imageName = azureImageInfo.getImageNameWithRegion();
         String resourceGroup = azureImageInfo.getResourceGroup();
-        VirtualMachineCustomImage image = client.findImage(resourceGroup, imageName);
-        if (image != null && image.innerModel() != null) {
-            return getImageByState(imageName, resourceGroup, image);
+        Optional<VirtualMachineCustomImage> image = client.findImage(resourceGroup, imageName);
+        if (image.isPresent() && image.get().innerModel() != null) {
+            return getImageByState(imageName, resourceGroup, image.get());
         } else {
             LOGGER.debug("Custom image {} is not present in resource group {}", imageName, resourceGroup);
             return Optional.empty();

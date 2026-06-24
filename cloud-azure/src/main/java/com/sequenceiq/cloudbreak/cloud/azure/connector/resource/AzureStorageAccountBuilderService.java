@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Service
@@ -47,7 +48,8 @@ public class AzureStorageAccountBuilderService {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, storageAccountName, template, parameters);
                 LOGGER.debug("Created template deployment for storage account: {}", templateDeployment.exportTemplate().template());
             }
-            return client.getStorageAccountByGroup(resourceGroupName, storageAccountName);
+            return client.getStorageAccountByGroup(resourceGroupName, storageAccountName)
+                    .orElseThrow(() -> new CloudbreakServiceException("Could not fetch storage account using storage account name: " + storageAccountName));
         } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Storage account creation");
         } catch (Exception e) {

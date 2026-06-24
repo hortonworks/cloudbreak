@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -105,10 +106,10 @@ class AzureEncryptionResourcesValidationTest {
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(azureClient.getVaultNameFromEncryptionKeyUrl("keyVaultReference")).thenReturn("vaultName");
         Identity identity = mock(Identity.class);
-        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(identity);
+        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(Optional.ofNullable(identity));
         Vault vault = mock(Vault.class);
         when(vault.roleBasedAccessControlEnabled()).thenReturn(true);
-        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(vault);
+        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(Optional.of(vault));
         // WHEN
         underTest.validateEncryptionParameters(validationRequest);
         // THEN
@@ -128,10 +129,10 @@ class AzureEncryptionResourcesValidationTest {
         when(azureClient.getVaultNameFromEncryptionKeyUrl("keyVaultReference")).thenReturn("vaultName");
         Identity identity = mock(Identity.class);
         when(identity.principalId()).thenReturn("id");
-        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(identity);
+        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(Optional.of(identity));
         Vault vault = mock(Vault.class);
         when(vault.accessPolicies()).thenReturn(List.of());
-        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(vault);
+        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(Optional.of(vault));
         when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(List.of(), "id")).thenReturn(true);
         // WHEN
         underTest.validateEncryptionParameters(validationRequest);
@@ -167,7 +168,7 @@ class AzureEncryptionResourcesValidationTest {
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(azureClient.getVaultNameFromEncryptionKeyUrl("keyVaultReference")).thenReturn("vaultName");
         Identity identity = mock(Identity.class);
-        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(null);
+        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(Optional.empty());
         // WHEN
         BadRequestException actualException = assertThrows(BadRequestException.class,
                 () -> underTest.validateEncryptionParameters(validationRequest));
@@ -187,9 +188,9 @@ class AzureEncryptionResourcesValidationTest {
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(azureClient.getVaultNameFromEncryptionKeyUrl("keyVaultReference")).thenReturn("vaultName");
         Identity identity = mock(Identity.class);
-        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(identity);
+        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(Optional.ofNullable(identity));
         Vault vault = mock(Vault.class);
-        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(null);
+        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(Optional.empty());
         // WHEN
         BadRequestException actualException = assertThrows(BadRequestException.class,
                 () -> underTest.validateEncryptionParameters(validationRequest));
@@ -209,10 +210,10 @@ class AzureEncryptionResourcesValidationTest {
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(azureClient.getVaultNameFromEncryptionKeyUrl("keyVaultReference")).thenReturn("vaultName");
         Identity identity = mock(Identity.class);
-        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(identity);
+        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(Optional.ofNullable(identity));
         Vault vault = mock(Vault.class);
         when(vault.roleBasedAccessControlEnabled()).thenReturn(true);
-        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(vault);
+        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(Optional.of(vault));
         Throwable expectedException = new RuntimeException("exception");
         doThrow(expectedException).when(azurePermissionValidator).validateCMKManagedIdentityPermissions(azureClient, identity, vault);
         // WHEN
@@ -234,9 +235,9 @@ class AzureEncryptionResourcesValidationTest {
         when(azureClient.getVaultNameFromEncryptionKeyUrl("keyVaultReference")).thenReturn("vaultName");
         Identity identity = mock(Identity.class);
         when(identity.principalId()).thenReturn("id");
-        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(identity);
+        when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(Optional.of(identity));
         Vault vault = mock(Vault.class);
-        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(vault);
+        when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(Optional.ofNullable(vault));
         when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(List.of(), "id")).thenReturn(false);
         // WHEN
         BadRequestException actualException = assertThrows(BadRequestException.class,

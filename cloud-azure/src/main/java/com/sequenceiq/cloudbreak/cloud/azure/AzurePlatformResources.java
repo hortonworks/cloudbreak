@@ -38,6 +38,7 @@ import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroups;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.google.common.base.Splitter;
@@ -84,9 +85,9 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
-import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
 @Service
 public class AzurePlatformResources implements PlatformResources {
@@ -142,11 +143,11 @@ public class AzurePlatformResources implements PlatformResources {
         String resourceGroupName = filters.get(RESOURCE_GROUP_NAME);
         if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(resourceGroupName)) {
             LOGGER.info("Query network with id '{}' and resource group {}", networkId, resourceGroupName);
-            Network network = client.getNetworkByResourceGroup(resourceGroupName, networkId);
-            if (network != null) {
+            Optional<Network> network = client.getNetworkByResourceGroup(resourceGroupName, networkId);
+            if (network.isPresent()) {
                 LOGGER.info("Network was successfully queried for network with id '{}' and resource group {}: {}",
-                        networkId, resourceGroupName, network);
-                addToResultIfRegionsAreMatch(region, result, network);
+                        networkId, resourceGroupName, network.get());
+                addToResultIfRegionsAreMatch(region, result, network.get());
             } else {
                 LOGGER.info("Network with id '{}' does not exist in resource group {}", networkId, resourceGroupName);
             }
@@ -230,13 +231,17 @@ public class AzurePlatformResources implements PlatformResources {
 
     private NetworkSecurityGroup getNetworkSecurityGroup(AzureClient client, String groupId) {
         try {
-            NetworkSecurityGroup networkSecurityGroup = client.getSecurityGroups().getById(groupId);
+            Optional<NetworkSecurityGroups> networkSecurityGroups = client.getSecurityGroups();
+            if (networkSecurityGroups.isEmpty()) {
+                throw new CloudbreakServiceException("Could not find network security groups");
+            }
+            NetworkSecurityGroup networkSecurityGroup = networkSecurityGroups.get().getById(groupId);
             if (networkSecurityGroup == null) {
-                throw new PermanentlyFailedException("Nothing found on Azure with id: " + groupId);
+                throw new CloudbreakServiceException("Nothing found on Azure with id: " + groupId);
             }
             return networkSecurityGroup;
         } catch (InvalidParameterException e) {
-            throw new PermanentlyFailedException(e.getMessage(), e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
@@ -300,7 +305,8 @@ public class AzurePlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachinesNonExtended(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
-        Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
+        Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value())
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch VM types using region"));
         vmTypes = vmTypes.stream()
                 .filter(filterOutV6Instances())
                 .collect(Collectors.toSet());
@@ -471,7 +477,8 @@ public class AzurePlatformResources implements PlatformResources {
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         try {
             AzureClient client = azureClientService.getClient(ac.getCloudCredential());
-            Set<VirtualMachineSize> vmTypes = client.getVmTypes(ac.getCloudContext().getLocation().getRegion().value());
+            Set<VirtualMachineSize> vmTypes = client.getVmTypes(ac.getCloudContext().getLocation().getRegion().value())
+                    .orElseThrow(() -> new CloudbreakServiceException("Could not fetch VM types using Region"));
 
             Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = vmTypes.stream()
                     .filter(vmType -> instanceTypes.contains(vmType.name()))

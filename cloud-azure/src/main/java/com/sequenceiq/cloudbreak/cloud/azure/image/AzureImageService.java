@@ -62,8 +62,7 @@ public class AzureImageService {
         AzureManagedImageCreationCheckerContext checkerContext = new AzureManagedImageCreationCheckerContext(azureImageInfo, client);
         try {
             saveImage(ac, azureImageInfo.getImageNameWithRegion(), azureImageInfo.getImageId());
-            customImage = Optional.of(
-                    client.createImage(azureImageInfo.getImageNameWithRegion(), azureImageInfo.getResourceGroup(), fromVhdUri, azureImageInfo.getRegion()));
+            customImage = client.createImage(azureImageInfo.getImageNameWithRegion(), azureImageInfo.getResourceGroup(), fromVhdUri, azureImageInfo.getRegion());
         } catch (ManagementException e) {
             LOGGER.warn("Exception when creating custom image", e);
             customImage = handleCustomImageCreationException(azureImageInfo, ac, client, checkerContext, e);

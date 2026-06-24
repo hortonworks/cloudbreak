@@ -87,9 +87,9 @@ public class AzureNatGatewaySyncer implements ProviderResourceSyncer<ResourceTyp
             return result;
         }
 
-        Subnet subnetProperties = retrieveSubnetProperties(client, context);
-        if (subnetProperties != null) {
-            processNatGatewaySyncForOutbound(context, subnetProperties, result);
+        Optional<Subnet> subnetProperties = retrieveSubnetProperties(client, context);
+        if (subnetProperties.isPresent()) {
+            processNatGatewaySyncForOutbound(context, subnetProperties.get(), result);
         } else {
             LOGGER.warn("Subnet {} not found, this should not happen", context.getSubnet().getReference());
         }
@@ -112,7 +112,7 @@ public class AzureNatGatewaySyncer implements ProviderResourceSyncer<ResourceTyp
                 context.getNetwork(), context.getResourceGroup(), context.getSubnet());
     }
 
-    private Subnet retrieveSubnetProperties(AzureClient client, ResourceContext context) {
+    private Optional<Subnet> retrieveSubnetProperties(AzureClient client, ResourceContext context) {
         return client.getSubnetProperties(
                 context.getResourceGroup(),
                 context.getNetwork().getName(),

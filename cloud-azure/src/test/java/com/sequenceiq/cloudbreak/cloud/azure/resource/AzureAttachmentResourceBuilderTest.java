@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -82,7 +83,7 @@ public class AzureAttachmentResourceBuilderTest {
         when(virtualMachine.dataDisks()).thenReturn(Map.of());
         when(auth.getCloudContext()).thenReturn(mock(CloudContext.class));
         when(auth.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
-        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(Optional.of(virtualMachine));
         when(azureClient.getDiskById(any())).thenReturn(disk);
         when(disk.id()).thenReturn("diskid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("resourceGroup");
@@ -111,7 +112,7 @@ public class AzureAttachmentResourceBuilderTest {
         when(virtualMachine.dataDisks()).thenReturn(Map.of());
         when(auth.getCloudContext()).thenReturn(mock(CloudContext.class));
         when(auth.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
-        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(Optional.of(virtualMachine));
         when(azureClient.getDiskById(any())).thenReturn(disk);
         when(disk.id()).thenReturn("diskid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("resourceGroup");
@@ -142,7 +143,7 @@ public class AzureAttachmentResourceBuilderTest {
         when(virtualMachine.dataDisks()).thenReturn(Map.of());
         when(auth.getCloudContext()).thenReturn(mock(CloudContext.class));
         when(auth.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
-        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(Optional.of(virtualMachine));
         when(azureClient.getDiskById(any())).thenReturn(disk);
         when(disk.id()).thenReturn("diskid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("resourceGroup");
@@ -246,7 +247,7 @@ public class AzureAttachmentResourceBuilderTest {
         when(virtualMachine.dataDisks()).thenReturn(vmDisks);
         when(auth.getCloudContext()).thenReturn(cloudContext);
         when(auth.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
-        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(Optional.of(virtualMachine));
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn("resourceGroup");
         underTest.attachDisks(cloudInstance, auth, cloudResource, cloudStack);
@@ -279,7 +280,7 @@ public class AzureAttachmentResourceBuilderTest {
         when(virtualMachine.dataDisks()).thenReturn(vmDisks);
         when(auth.getCloudContext()).thenReturn(cloudContext);
         when(auth.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
-        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(Optional.of(virtualMachine));
         Disk disk = mock(Disk.class);
         when(disk.id()).thenReturn("disk");
         when(azureClient.getDiskById("disk")).thenReturn(disk);

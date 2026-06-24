@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationReq
 import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Service
@@ -169,7 +171,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         String region = networkRequest.getRegion().value();
         Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
         String resourceGroupName = networkRequest.getResourceGroup();
-        ResourceGroup resourceGroup;
+        Optional<ResourceGroup> resourceGroup;
         if (StringUtils.isNotEmpty(resourceGroupName)) {
             LOGGER.debug("Fetching existing resource group {}", resourceGroupName);
             resourceGroup = azureClient.getResourceGroup(resourceGroupName);
@@ -180,11 +182,12 @@ public class AzureNetworkConnector implements NetworkConnector {
                     UUID.randomUUID().toString());
             resourceGroup = azureClient.createResourceGroup(resourceGroupNameForCreation, region, tags);
         }
-        return resourceGroup;
+        return resourceGroup
+                .orElseThrow(() -> new CloudbreakServiceException("Could not find or create resource group using resource group name: " + resourceGroupName));
     }
 
     private boolean resourceGroupExists(AzureClient azureClient, NetworkDeletionRequest networkDeletionRequest) {
-        if (azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup()) == null) {
+        if (azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup()).isEmpty()) {
             LOGGER.debug("No resource group found on cloud provider (Azure) with name: \"{}\"", networkDeletionRequest.getResourceGroup());
             return false;
         } else {
@@ -197,13 +200,13 @@ public class AzureNetworkConnector implements NetworkConnector {
         AzureClient azureClient = azureClientService.getClient(credential);
         String resourceGroupName = azureUtils.getCustomResourceGroupName(network);
         String networkId = azureUtils.getCustomNetworkId(network);
-        com.azure.resourcemanager.network.models.Network networkByResourceGroup = azureClient.getNetworkByResourceGroup(resourceGroupName, networkId);
-        if (networkByResourceGroup == null || networkByResourceGroup.addressSpaces().isEmpty()) {
+        Optional<com.azure.resourcemanager.network.models.Network> networkByResourceGroup = azureClient.getNetworkByResourceGroup(resourceGroupName, networkId);
+        if (networkByResourceGroup.isEmpty() || networkByResourceGroup.get().addressSpaces().isEmpty()) {
             throw new BadRequestException(String.format("Network could not be fetched from Azure with Resource Group name: %s and VNET id: %s. " +
                             "Please make sure that the name of the VNET is correct and is present in the Resource Group specified.",
                     resourceGroupName, networkId));
         }
-        List<String> networkCidrs = networkByResourceGroup.addressSpaces();
+        List<String> networkCidrs = networkByResourceGroup.get().addressSpaces();
         if (networkCidrs.size() > 1) {
             LOGGER.info("More than one network CIDRs for Resource Group name: {} and network id: {}. We will use the first one: {}",
                     resourceGroupName, networkId, networkCidrs.getFirst());

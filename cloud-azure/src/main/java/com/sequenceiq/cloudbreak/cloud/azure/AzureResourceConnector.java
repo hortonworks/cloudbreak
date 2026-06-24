@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.retry.Retry.ActionFailedException;
@@ -166,9 +167,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
                 instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
             } else {
-                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                LOGGER.debug("Get template deployment for launch as it exists: {}", templateDeployment.exportTemplate().template());
-                instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                Optional<Deployment> templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                LOGGER.debug("Get template deployment for launch as it exists: {}", templateDeployment
+                        .orElseThrow(() -> new CloudbreakServiceException("Could not fetch template deployment for resource group: "
+                                + resourceGroupName + " and stack: " + stackName)).exportTemplate().template());
+                instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment.orElse(null));
             }
             resourcesPersisted = true;
             Network network = stack.getNetwork();
@@ -184,10 +187,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
         } finally {
             if (!resourcesPersisted) {
-                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                if (templateDeployment != null && templateDeployment.exportTemplate() != null) {
-                    LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
-                    persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                Optional<Deployment> templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                if (templateDeployment.isPresent() && templateDeployment.get().exportTemplate() != null) {
+                    LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.get().exportTemplate().template());
+                    persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment.get());
                 }
             }
         }
@@ -303,7 +306,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         LOGGER.info("Template for attaching public IP addresses and add LBs: {}", template);
         Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
         persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
-        return azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
+        return azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(templateDeployment));
     }
 
     private void createLbTemplateDeployment(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier, String stackName,
@@ -318,9 +321,13 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 LOGGER.debug("Created template deployment for Load Balancer launch: {}", templateDeployment.exportTemplate().template());
                 persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
             } else {
-                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                LOGGER.debug("Get template deployment for Load Balancer launch as it exists: {}", templateDeployment.exportTemplate().template());
-                persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                Optional<Deployment> templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                LOGGER.debug("Get template deployment for Load Balancer launch as it exists: {}", templateDeployment
+                        .orElseThrow(() -> new CloudbreakServiceException("Could not get template deployment for stack: " + stackName))
+                        .exportTemplate()
+                        .template());
+                persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment
+                        .orElseThrow(() -> new CloudbreakServiceException("Could not get template deployment for stack: " + stackName)));
             }
             resourcesPersisted = true;
         } catch (ManagementException e) {
@@ -330,10 +337,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             throw new CloudConnectorException(String.format("Error in provisioning load balancer %s: %s", stackName, e.getMessage()));
         } finally {
             if (!resourcesPersisted) {
-                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                if (templateDeployment != null && templateDeployment.exportTemplate() != null) {
-                    LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
-                    persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                Optional<Deployment> templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                if (templateDeployment.isPresent() && templateDeployment.get().exportTemplate() != null) {
+                    LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.get().exportTemplate().template());
+                    persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment.get());
                 }
             }
         }
@@ -350,7 +357,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResource> allResourcesToPersist = new ArrayList<>();
         List<CloudResource> instances;
         try {
-            List<CloudResource> templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
+            List<CloudResource> templateResources = azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(templateDeployment));
             LOGGER.debug("Template resources retrieved: {} for {}", templateResources, stackName);
             allResourcesToPersist.addAll(templateResources);
             instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
@@ -451,8 +458,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             String resourceGroupName = resource.getName();
             CloudResourceStatus templateResourceStatus;
             if (client.templateDeploymentExists(resourceGroupName, stackName)) {
-                Deployment resourceGroupDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                templateResourceStatus = azureUtils.getTemplateStatus(resource, resourceGroupDeployment, client, stackName);
+                Optional<Deployment> resourceGroupDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                templateResourceStatus = azureUtils.getTemplateStatus(resource, resourceGroupDeployment.orElse(null), client, stackName);
             } else {
                 templateResourceStatus = new CloudResourceStatus(resource, ResourceStatus.DELETED);
             }

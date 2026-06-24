@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -32,21 +34,21 @@ public class AzureRDSAutoMigrationValidator {
         if (azureDatabaseServerView.getAzureDatabaseType() == AzureDatabaseType.SINGLE_SERVER) {
             String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), dbStack);
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-            Server server = getFlexibleServer(client, resourceGroupName, dbStack.getDatabaseServer().getServerId());
-            if (server != null) {
+            Optional<Server> server = getFlexibleServer(client, resourceGroupName, dbStack.getDatabaseServer().getServerId());
+            if (server.isPresent()) {
                 String errorMsg = String.format(ERROR_MSG_TEMPLATE, dbStack.getDatabaseServer().getServerId());
                 LOGGER.warn(errorMsg);
-                throw new AzureRDSAutoMigrationException(errorMsg, new AzureRDSAutoMigrationParams(AzureDatabaseType.FLEXIBLE_SERVER, server.id()));
+                throw new AzureRDSAutoMigrationException(errorMsg, new AzureRDSAutoMigrationParams(AzureDatabaseType.FLEXIBLE_SERVER, server.get().id()));
             }
         }
     }
 
-    private Server getFlexibleServer(AzureClient client, String resourceGroupName, String serverId) {
+    private Optional<Server> getFlexibleServer(AzureClient client, String resourceGroupName, String serverId) {
         try {
             return client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, serverId);
         } catch (RuntimeException any) {
             LOGGER.warn("Exception during getting flexible server from azure", any);
-            return null;
+            return Optional.empty();
         }
     }
 }
