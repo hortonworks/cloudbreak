@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHos
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHostCertificatesRotationSuccess;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
+import com.sequenceiq.cloudbreak.service.cluster.CertificateExpirationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.ssh.SshKeyService;
@@ -61,6 +62,9 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
     @Inject
     private SecretRotationSaltService saltService;
 
+    @Inject
+    private CertificateExpirationService certExpirationService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterHostCertificatesRotationRequest.class);
@@ -77,12 +81,20 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
         Selectable result;
         try {
             StackDto stackDto = stackDtoService.getById(request.getResourceId());
-            if (StringUtils.equals(stackDto.getPlatformVariant(), CloudConstants.AWS_NATIVE_GOV) &&
-                    CertificateRotationType.ALL.equals(request.getCertificateRotationType())) {
-                LOGGER.info("In case of GOV cloud and CMCA rotation, CB cannot rely on CM API, since CM agent heartbeat is failing, " +
-                        "because of strict SSL verification, thus CM command is also failing, " +
-                        "so executing hosts' certificate rotation for agents manually using salt.");
-                saltService.executeSaltState(stackDto, stackDto.getAllFunctioningNodes().stream().map(Node::getHostname).collect(Collectors.toSet()),
+            boolean autoTlsSetupNeeded = certExpirationService.validateCertificateFullyExpired(stackDto);
+            boolean govCloudCmcaRotation = Strings.CS.equals(stackDto.getPlatformVariant(), CloudConstants.AWS_NATIVE_GOV)
+                    && CertificateRotationType.ALL.equals(request.getCertificateRotationType());
+            if (autoTlsSetupNeeded || govCloudCmcaRotation) {
+                if (autoTlsSetupNeeded) {
+                    LOGGER.info("Host certificates are expired. Regenerating agent tokens on CM server and rotating certs via salt.");
+                    saltService.executeSaltStateOnPrimaryGateway(stackDto, List.of("cloudera.manager.rotate.host-cert-expired-token-generation"));
+                } else {
+                    LOGGER.info("In case of GOV cloud and CMCA rotation, CB cannot rely on CM API, since CM agent heartbeat is failing, " +
+                            "because of strict SSL verification, thus CM command is also failing, " +
+                            "so executing hosts' certificate rotation for agents manually using salt.");
+                }
+                saltService.executeSaltState(stackDto,
+                        stackDto.getAllFunctioningNodes().stream().map(Node::getHostname).collect(Collectors.toSet()),
                         List.of("cloudera.manager.rotate.host-cert-manual-renewal"));
             } else {
                 checkNotNull(stackDto);

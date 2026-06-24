@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.CertificateExpirationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
@@ -117,6 +118,9 @@ public class ClusterCommonService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private CertificateExpirationService certExpirationService;
 
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
         StackDto stackDto = stackDtoService.getByCrn(crn);
@@ -339,9 +343,10 @@ public class ClusterCommonService {
 
     public CertificatesRotationV4Response rotateAutoTlsCertificates(NameOrCrn nameOrCrn, String accountId,
             CertificatesRotationV4Request certificatesRotationV4Request) {
-        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+        StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        StackView stack = stackDto.getStack();
         MDCBuilder.buildMdcContext(stack);
-        validateOperationOnStack(stack, "Certificates rotation");
+        validateOperationOnStackForCertRotation(stackDto);
         FlowIdentifier flowIdentifier = clusterOperationService.rotateAutoTlsCertificates(stack.getId(), stack.getResourceCrn(), certificatesRotationV4Request);
         return new CertificatesRotationV4Response(flowIdentifier);
     }
@@ -365,13 +370,18 @@ public class ClusterCommonService {
         return updateRecipeService.detachRecipeFromCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
     }
 
-    private void validateOperationOnStack(StackView stack, String operationDescription) {
-        if (!stack.isAvailable()) {
-            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. %s can only be made when the underlying stack is 'AVAILABLE'.",
-                    stack.getName(), stack.getStatus(), operationDescription));
-        } else if (stack.isDatalake() && instanceMetaDataService.anyInstanceStopped(stack.getId())) {
-            throw new BadRequestException(String.format("Please start all stopped instances in Datalake. " +
-                    "%s can only be made when all your nodes in running state.", operationDescription));
+    private void validateOperationOnStackForCertRotation(StackDto stackDto) {
+        if (stackDto.getStack().isStopped()) {
+            throw new BadRequestException(String.format("Stack '%s' is in STOPPED state. Certificates rotation cannot be performed.", stackDto.getName()));
+        } else if (!stackDto.isAvailable() && !certExpirationService.isCertFullyExpired(stackDto.getCluster()) &&
+                !certExpirationService.hasUnhealthyHosts(stackDto)) {
+            throw new BadRequestException(String.format(
+                    "Stack '%s' is currently in '%s' state. Certificates rotation can only be performed " +
+                            "when the stack is AVAILABLE or the host certificates are fully expired.",
+                    stackDto.getName(), stackDto.getStatus()));
+        } else if (stackDto.getStack().isDatalake() && instanceMetaDataService.anyInstanceStopped(stackDto.getId())) {
+            throw new BadRequestException("Please start all stopped instances. " +
+                    "Certificates rotation can only be made when all nodes are in running state.");
         }
     }
 
@@ -381,7 +391,7 @@ public class ClusterCommonService {
         if (deleteRequest != null) {
             return clusterOperationService.deleteVolumes(stack.getId(), deleteRequest);
         } else {
-            LOGGER.info("Invalid cluster update request received. Stack id: {}",  stack.getId());
+            LOGGER.info("Invalid cluster update request received. Stack id: {}", stack.getId());
             throw new BadRequestException("Invalid update cluster request!");
         }
     }
@@ -392,7 +402,7 @@ public class ClusterCommonService {
         if (addVolumesRequest != null) {
             return clusterOperationService.addVolumes(stack.getId(), addVolumesRequest);
         } else {
-            LOGGER.info("Invalid cluster update request received. Stack id: {}",  stack.getId());
+            LOGGER.info("Invalid cluster update request received. Stack id: {}", stack.getId());
             throw new BadRequestException("Invalid update cluster request!");
         }
     }

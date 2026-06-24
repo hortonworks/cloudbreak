@@ -102,6 +102,64 @@ public class ExtendedHostStatusesTest {
         assertTrue(providerCalled.get());
     }
 
+    @Test
+    public void testIsAnyUnhealthyOrMissingWithTypeReturnsFalseWhenAllHealthy() {
+        ExtendedHostStatuses underTest = new ExtendedHostStatuses(Map.of(
+                TEST_HOST, Set.of(createHealthCheck(HOST, HEALTHY)),
+                TEST_HOST_2, Set.of(createHealthCheck(HOST, HEALTHY))));
+        assertFalse(underTest.isAnyUnhealthyOrMissingWithType(HOST));
+    }
+
+    @Test
+    public void testIsAnyUnhealthyOrMissingWithTypeReturnsTrueWhenOneUnhealthy() {
+        ExtendedHostStatuses underTest = new ExtendedHostStatuses(Map.of(
+                TEST_HOST, Set.of(createHealthCheck(HOST, HEALTHY)),
+                TEST_HOST_2, Set.of(createHealthCheck(HOST, UNHEALTHY))));
+        assertTrue(underTest.isAnyUnhealthyOrMissingWithType(HOST));
+    }
+
+    @Test
+    public void testIsAnyUnhealthyOrMissingWithTypeReturnsTrueWhenHostCheckMissing() {
+        ExtendedHostStatuses underTest = new ExtendedHostStatuses(Map.of(
+                TEST_HOST, Set.of(createHealthCheck(HOST, HEALTHY)),
+                TEST_HOST_2, Set.of(createHealthCheck(SERVICES, HEALTHY))));
+        assertTrue(underTest.isAnyUnhealthyOrMissingWithType(HOST));
+    }
+
+    @Test
+    public void testIsAnyUnhealthyOrMissingWithTypeReturnsFalseForEmptyMap() {
+        ExtendedHostStatuses underTest = new ExtendedHostStatuses(Map.of());
+        assertFalse(underTest.isAnyUnhealthyOrMissingWithType(HOST));
+    }
+
+    @Test
+    public void testIsAnyUnhealthyOrMissingWithTypeHandlesNullSet() {
+        Map<HostName, Set<HealthCheck>> map = Maps.newHashMap();
+        map.put(TEST_HOST, NULL_SET);
+        ExtendedHostStatuses underTest = new ExtendedHostStatuses(map);
+        assertFalse(underTest.isAnyUnhealthyOrMissingWithType(HOST));
+    }
+
+    @Test
+    public void testIsAnyUnhealthyOrMissingWithTypeReturnsTrueWhenEmptyHealthChecks() {
+        ExtendedHostStatuses underTest = new ExtendedHostStatuses(Map.of(
+                TEST_HOST, Set.of()));
+        assertTrue(underTest.isAnyUnhealthyOrMissingWithType(HOST));
+    }
+
+    @Test
+    public void testIsAnyUnhealthyOrMissingWithTypeCertificate() {
+        assertFalse(new ExtendedHostStatuses(Map.of(
+                TEST_HOST, Set.of(createHealthCheck(CERTIFICATE, HEALTHY))))
+                .isAnyUnhealthyOrMissingWithType(CERTIFICATE));
+        assertTrue(new ExtendedHostStatuses(Map.of(
+                TEST_HOST, Set.of(createHealthCheck(CERTIFICATE, UNHEALTHY))))
+                .isAnyUnhealthyOrMissingWithType(CERTIFICATE));
+        assertTrue(new ExtendedHostStatuses(Map.of(
+                TEST_HOST, Set.of(createHealthCheck(HOST, HEALTHY))))
+                .isAnyUnhealthyOrMissingWithType(CERTIFICATE));
+    }
+
     private HealthCheck createHealthCheck(HealthCheckType type, HealthCheckResult result) {
         return new HealthCheck(type, result, Optional.empty(), List.of());
     }

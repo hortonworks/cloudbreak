@@ -1,9 +1,8 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -49,9 +48,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.ClusterCommonService;
-import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.CertificateExpirationService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -108,6 +107,9 @@ public class ClusterCommonServiceTest {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
+    private CertificateExpirationService certExpirationService;
+
+    @Mock
     private ClusterService clusterService;
 
     @Mock
@@ -147,44 +149,96 @@ public class ClusterCommonServiceTest {
     @Test
     public void testRotateAutoTlsCertificatesWithStoppedInstances() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackDto stackDto = mock(StackDto.class);
         StackView stack = mock(StackView.class);
-        when(stack.isAvailable()).thenReturn(true);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.isAvailable()).thenReturn(true);
+        when(stackDto.getId()).thenReturn(STACK_ID);
         when(stack.isDatalake()).thenReturn(true);
-        when(instanceMetaDataService.anyInstanceStopped(any())).thenReturn(true);
-        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        when(instanceMetaDataService.anyInstanceStopped(STACK_ID)).thenReturn(true);
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
+
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request));
-        assertEquals("Please start all stopped instances in Datalake. Certificates rotation can only be made when all your nodes in running state.",
+        assertEquals("Please start all stopped instances. Certificates rotation can only be made when all nodes are in running state.",
                 badRequestException.getMessage());
     }
 
     @Test
     public void testRotateAutoTls() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackDto stackDto = mock(StackDto.class);
         StackView stack = mock(StackView.class);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.isAvailable()).thenReturn(true);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.isAvailable()).thenReturn(true);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
 
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
-        when(clusterOperationService.rotateAutoTlsCertificates(STACK_ID, null, certificatesRotationV4Request)).thenReturn(flowIdentifier);
-        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        when(clusterOperationService.rotateAutoTlsCertificates(STACK_ID, STACK_CRN, certificatesRotationV4Request)).thenReturn(flowIdentifier);
         underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request);
-        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(STACK_ID, null, certificatesRotationV4Request);
+        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(STACK_ID, STACK_CRN, certificatesRotationV4Request);
     }
 
     @Test
-    public void testRotateAutoTlsCertificatesWithNodeFailure() {
+    public void testRotateAutoTlsCertificatesWithNodeFailureAndCertExpiredIsAllowed() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackDto stackDto = mock(StackDto.class);
         StackView stack = mock(StackView.class);
-        when(stack.getName()).thenReturn("cluster");
-        when(stack.getStatus()).thenReturn(Status.NODE_FAILURE);
-        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        ClusterView cluster = mock(ClusterView.class);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.isAvailable()).thenReturn(false);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(certExpirationService.isCertFullyExpired(cluster)).thenReturn(true);
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
+
+        CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
+        when(clusterOperationService.rotateAutoTlsCertificates(STACK_ID, STACK_CRN, certificatesRotationV4Request)).thenReturn(flowIdentifier);
+        underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request);
+        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(STACK_ID, STACK_CRN, certificatesRotationV4Request);
+    }
+
+    @Test
+    public void testRotateAutoTlsCertificatesWithStoppedClusterIsBlocked() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackDto stackDto = mock(StackDto.class);
+        StackView stack = mock(StackView.class);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stack.isStopped()).thenReturn(true);
+        when(stackDto.getName()).thenReturn("cluster");
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
+
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request));
-        assertEquals("Stack 'cluster' is currently in 'NODE_FAILURE' state. Certificates rotation can only be made when the underlying stack is 'AVAILABLE'.",
+        assertEquals("Stack 'cluster' is in STOPPED state. Certificates rotation cannot be performed.",
                 badRequestException.getMessage());
+        verifyNoInteractions(certExpirationService);
+    }
+
+    @Test
+    public void testRotateAutoTlsCertificatesWithUnhealthyHostsIsAllowed() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackDto stackDto = mock(StackDto.class);
+        StackView stack = mock(StackView.class);
+        ClusterView cluster = mock(ClusterView.class);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.isAvailable()).thenReturn(false);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(certExpirationService.isCertFullyExpired(cluster)).thenReturn(false);
+        when(certExpirationService.hasUnhealthyHosts(stackDto)).thenReturn(true);
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
+
+        CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
+        when(clusterOperationService.rotateAutoTlsCertificates(STACK_ID, STACK_CRN, certificatesRotationV4Request)).thenReturn(flowIdentifier);
+        underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request);
+        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(STACK_ID, STACK_CRN, certificatesRotationV4Request);
     }
 
     @Test

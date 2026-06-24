@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Script for CM agent certificate expiration validation
+# Possible exit codes:
+# 0 - valid certificate
+# 1 - certificate is expired
+# 2 - invalid or missing certificate
+# 3 - CM agent certificate configuration error
+
+CONFIG_FILE="/etc/cloudera-scm-agent/config.ini"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Certificate check error: CM agent config file not found: $CONFIG_FILE, automatic certificate rotation is not possible" >&2
+  exit 3
+fi
+
+CERT_FILE=$(grep "^client_cert_file" "$CONFIG_FILE" | cut -d'=' -f2 | tr -d ' ')
+
+if [ -z "$CERT_FILE" ]; then
+  echo "Certificate check error: CM agent client_cert_file parameter not found in $CONFIG_FILE, automatic certificate rotation is not possible" >&2
+  exit 3
+fi
+
+if [ ! -f "$CERT_FILE" ]; then
+  echo "Certificate check error: Certificate file not found: $CERT_FILE, automatic certificate rotation is not possible" >&2
+  exit 2
+fi
+
+if ! openssl x509 -noout -in "$CERT_FILE" 2>/dev/null; then
+  echo "Certificate check error: Certificate is invalid: $CERT_FILE, automatic certificate rotation is not possible" >&2
+  exit 2
+fi
+
+if openssl x509 -checkend 0 -noout -in "$CERT_FILE" 2>/dev/null; then
+  echo "Certificate is valid: $CERT_FILE"
+  exit 0
+else
+  echo "Certificate check error: Certificate is expired: $CERT_FILE" >&2
+  exit 1
+fi

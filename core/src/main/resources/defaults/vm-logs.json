@@ -350,6 +350,10 @@
     "label": "generate_agent_token"
   },
   {
+    "path": "/var/log/cm_agent_check_cert_expiration.log",
+    "label": "cm_agent_check_cert_expiration"
+  },
+  {
     "path": "/var/log/jumpgate/access.log",
     "label": "jumpgate_agent_access"
   },
