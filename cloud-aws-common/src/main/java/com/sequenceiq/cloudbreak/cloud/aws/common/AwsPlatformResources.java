@@ -553,20 +553,25 @@ public class AwsPlatformResources implements PlatformResources {
         Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
 
-        //create securitygroup filter view
         PlatformResourceSecurityGroupFilterView filter = new PlatformResourceSecurityGroupFilterView(filters);
-
         DescribeSecurityGroupsRequest.Builder describeSecurityGroupsRequestBuilder = DescribeSecurityGroupsRequest.builder();
-        // If the filtervalue is provided then we should filter only for those securitygroups
+
+        List<Filter> awsFilters = new ArrayList<>();
         if (!Strings.isNullOrEmpty(filter.getVpcId())) {
-            describeSecurityGroupsRequestBuilder.filters(Filter.builder().name("vpc-id").values(singletonList(filter.getVpcId())).build());
+            awsFilters.add(Filter.builder().name("vpc-id").values(singletonList(filter.getVpcId())).build());
         }
-        if (!Strings.isNullOrEmpty(filter.getGroupId())) {
+        // Prefer the group-ID filter (not the groupIds request parameter) when a set of IDs is provided:
+        // groupIds raises Ec2Exception (InvalidGroup.NotFound) on the first missing ID, which prevents callers
+        // from telling missing-vs-present. A filter simply returns whichever groups exist.
+        if (!CollectionUtils.isEmpty(filter.getGroupIds())) {
+            awsFilters.add(Filter.builder().name("group-id").values(filter.getGroupIds()).build());
+        } else if (!Strings.isNullOrEmpty(filter.getGroupId())) {
             describeSecurityGroupsRequestBuilder.groupIds(filter.getGroupId());
         }
         if (!Strings.isNullOrEmpty(filter.getGroupName())) {
             describeSecurityGroupsRequestBuilder.groupNames(filter.getGroupName());
         }
+        describeSecurityGroupsRequestBuilder.filters(awsFilters);
 
         for (SecurityGroup securityGroup : fetchSecurityGroups(ec2Client, describeSecurityGroupsRequestBuilder.build())) {
             Map<String, Object> properties = new HashMap<>();

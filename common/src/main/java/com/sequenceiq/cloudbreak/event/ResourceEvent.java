@@ -872,6 +872,8 @@ public enum ResourceEvent {
     STALE_STATUS_NOTIFICATION("stale.status.notification"),
     IMAGE_VALIDATION_FAILED("stack.image.validation"),
     DISK_VALIDATION_FAILED("stack.disk.validation.failed"),
+    STACK_SECURITY_GROUP_VALIDATION_FAILED("stack.securitygroup.validation.failed"),
+    STACK_SECURITY_GROUP_VALIDATION_FINISHED("stack.securitygroup.validation.finished"),
     AWS_LARGE_CLUSTER_START("spi.aws.start.large.cluster"),
     STACK_VALIDATING_SELINUX("stack.validating.selinux.mode"),
     STACK_CHANGING_SELINUX("stack.changing.selinux.mode"),

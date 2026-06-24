@@ -685,4 +685,34 @@ public class AwsPlatformResourcesTest {
         assertThat(result.getRegionDefaultInstanceTypeMap().get(region)).isEqualTo("db.m5.large");
         assertThat(result.getRegionAvailableInstanceTypes()).isEmpty();
     }
+
+    @Test
+    public void testSecurityGroupsUsesGroupIdFilterWhenGroupIdsProvided() {
+        software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse response =
+                software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse.builder()
+                        .securityGroups(software.amazon.awssdk.services.ec2.model.SecurityGroup.builder()
+                                .groupId("sg-present").groupName("present").vpcId("vpc-1").build())
+                        .build();
+        org.mockito.ArgumentCaptor<software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest> requestCaptor =
+                org.mockito.ArgumentCaptor.forClass(software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest.class);
+        when(amazonEC2Client.describeSecurityGroups(requestCaptor.capture())).thenReturn(response);
+
+        Map<String, String> filters = Map.of(
+                com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView.GROUP_IDS_KEY,
+                "sg-present,sg-missing");
+        com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups result = underTest.securityGroups(cloudCredential, region, filters);
+
+        assertEquals(Set.of("sg-present"),
+                result.getCloudSecurityGroupsResponses().values().stream()
+                        .flatMap(java.util.Set::stream)
+                        .map(com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup::getGroupId)
+                        .collect(java.util.stream.Collectors.toSet()));
+        software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest sentRequest = requestCaptor.getValue();
+        assertTrue(sentRequest.groupIds() == null || sentRequest.groupIds().isEmpty(),
+                "Request must NOT use the .groupIds(...) parameter — it 400s on missing IDs and destroys the diagnostic");
+        assertTrue(sentRequest.filters().stream()
+                        .anyMatch(f -> "group-id".equals(f.name()) && java.util.List.of("sg-present", "sg-missing").containsAll(f.values())
+                                && f.values().containsAll(java.util.List.of("sg-present", "sg-missing"))),
+                "Request must use a Filter(\"group-id\", ids) so missing ids return normally instead of throwing");
+    }
 }

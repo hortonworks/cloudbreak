@@ -17,6 +17,9 @@ import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeE
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_LB_DELETED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_LB_PROVISIONED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_METADATA_COLLECTED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINALIZED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.INIT_STATE;
@@ -30,6 +33,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeS
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.PREPARE_UPGRADE_LB_PROVISION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.PREPARE_UPGRADE_METADATA_COLLECTION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.PREPARE_UPGRADE_PREPARE_IMAGE_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_RESULT_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.PREPARE_UPGRADE_SET_FALLBACK_IMAGE_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeState.PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_STATE;
 
@@ -55,9 +60,19 @@ public class PrepareUpgradeFlowConfig
             new Builder<PrepareUpgradeState, PrepareUpgradeEvent>().defaultFailureEvent(PREPARE_UPGRADE_FAILURE_EVENT)
 
             .from(INIT_STATE)
-            .to(PREPARE_UPGRADE_PREPARE_IMAGE_STATE)
+            .to(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_STATE)
             .event(PREPARE_UPGRADE_EVENT)
             .noFailureEvent()
+
+            .from(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_STATE)
+            .to(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_RESULT_STATE)
+            .event(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINISHED_EVENT)
+            .failureEvent(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FAILED_EVENT)
+
+            .from(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_RESULT_STATE)
+            .to(PREPARE_UPGRADE_PREPARE_IMAGE_STATE)
+            .event(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINALIZED_EVENT)
+            .defaultFailureEvent()
 
             .from(PREPARE_UPGRADE_PREPARE_IMAGE_STATE)
             .to(PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_STATE)

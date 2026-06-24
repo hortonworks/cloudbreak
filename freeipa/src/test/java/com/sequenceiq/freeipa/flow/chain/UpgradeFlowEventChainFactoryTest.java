@@ -51,6 +51,8 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
+import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
+import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
@@ -667,6 +669,64 @@ class UpgradeFlowEventChainFactoryTest {
 
         eventQueue.getQueue().addAll(restrainedQueueData);
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, eventQueue);
+    }
+
+    @Test
+    void testFlowChainCreationWithMigrationPropagatesNeedMigrationToPrepareUpgrade() {
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID,
+                imageSettingsRequest, false, true, "AWS_NATIVE", null, null);
+        when(stackService.getByIdWithListsInTransaction(eq(STACK_ID))).thenReturn(createStack(false, false));
+        when(instanceGroupService.findGroupNamesByStackId(eq(STACK_ID))).thenReturn(Set.of("master"));
+
+        FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
+        Queue<Selectable> queue = eventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
+        // 13 events for the non-migration variant (testFlowChainCreation)
+        // + 2 pre-scale native SG creation migration events (one for the PGW pass, one for the non-PGW pass)
+        // + 2 trailing CloudFormation-cleanup migration events (one for each pass).
+        assertEquals(17, queue.size());
+
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
+        assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
+
+        PrepareUpgradeTriggerEvent prepareUpgradeTriggerEvent = (PrepareUpgradeTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
+        assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isNeedMigration(), "needMigration must propagate to the prepare-upgrade trigger");
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent.selector());
+        assertFalse(saltUpdateTriggerEvent.isFinalChain());
+
+        ImageChangeEvent imageChangeEvent = (ImageChangeEvent) queue.poll();
+        assertEquals(IMAGE_CHANGE_EVENT.event(), imageChangeEvent.selector());
+
+        // PGW pass: pre-scale migration (creates native SG), upscale, change-PGW, downscale, then trailing CloudFormation-cleanup migration.
+        AwsVariantMigrationTriggerEvent pgwPreScale = (AwsVariantMigrationTriggerEvent) queue.poll();
+        assertEquals(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), pgwPreScale.selector());
+        assertTrue(queue.poll() instanceof UpscaleEvent);
+        assertTrue(queue.poll() instanceof ChangePrimaryGatewayEvent);
+        assertTrue(queue.poll() instanceof DownscaleEvent);
+        AwsVariantMigrationTriggerEvent pgwCleanup = (AwsVariantMigrationTriggerEvent) queue.poll();
+        assertEquals(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), pgwCleanup.selector());
+
+        // Non-PGW pass: pre-scale migration (creates native SG), upscale + downscale per replica, then trailing CloudFormation-cleanup.
+        AwsVariantMigrationTriggerEvent nonPgwPreScale = (AwsVariantMigrationTriggerEvent) queue.poll();
+        assertEquals(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), nonPgwPreScale.selector());
+        assertTrue(queue.poll() instanceof UpscaleEvent);
+        assertTrue(queue.poll() instanceof DownscaleEvent);
+        assertTrue(queue.poll() instanceof UpscaleEvent);
+        assertTrue(queue.poll() instanceof DownscaleEvent);
+        AwsVariantMigrationTriggerEvent nonPgwCleanup = (AwsVariantMigrationTriggerEvent) queue.poll();
+        assertEquals(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), nonPgwCleanup.selector());
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
+        assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+
+        eventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, eventQueue, "WITH_AWS_VARIANT_MIGRATION");
     }
 
     @Test

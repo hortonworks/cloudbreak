@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PREPARE_UPGR
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CLUSTER_OPERATION;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_FINISHED_EVENT;
@@ -14,12 +15,16 @@ import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeE
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_LB_CONFIGURATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_LB_DB_CLEANUP_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINALIZED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -33,11 +38,15 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.event.resource.validation.SecurityGroupValidationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.validation.SecurityGroupValidationResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -52,6 +61,7 @@ import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
+import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
@@ -71,6 +81,7 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.action.CheckImageAction;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
+import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -89,15 +100,125 @@ public class PrepareUpgradeActions {
 
     private static final String FAILURE_EXCEPTION = "FAILURE_EXCEPTION";
 
+    private static final String PREPARE_UPGRADE_TRIGGER_EVENT = "PREPARE_UPGRADE_TRIGGER_EVENT";
+
     private static final String IMAGE = "IMAGE";
 
     private static final String FALLBACK_IMAGE_NAME = "FALLBACK_IMAGE_NAME";
 
     private static final String IMAGE_IDENTIFIER_PARAMETER = "IMAGE_IDENTIFIER_PARAMETER";
 
+    private static final String MISSING_SECURITY_GROUPS_ERROR = "Upgrade cannot start: security group(s) %s referenced "
+            + "in FreeIPA metadata do not exist. Update security group metadata or restore the groups before retrying.";
+
+    private static final String VPC_MISMATCH_ERROR = "Upgrade cannot start: security group(s) %s referenced in FreeIPA "
+            + "metadata do not belong to the environment VPC. Update security group metadata before retrying.";
+
+    private static final String VALIDATION_IN_PROGRESS_REASON = "Validating security groups before upgrade";
+
+    @Bean(name = "PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_STATE")
+    public Action<?, ?> prepareUpgradeSecurityGroupValidation() {
+        return new AbstractPrepareUpgradeAction<>(PrepareUpgradeTriggerEvent.class) {
+
+            @Inject
+            private PrepareUpgradeSecurityGroupValidationRequestProvider requestProvider;
+
+            @Inject
+            private CredentialService credentialService;
+
+            @Inject
+            private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
+
+            @Override
+            protected void prepareExecution(PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+                setOperationId(variables, payload.getOperationId());
+                variables.put(PREPARE_UPGRADE_TRIGGER_EVENT, payload);
+            }
+
+            @Override
+            protected void doExecute(StackContext context, PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+                Long stackId = payload.getResourceId();
+                Stack stack = context.getStack();
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_PREPARE_UPGRADE_STARTED);
+                if (!payload.isNeedMigration() || !CloudPlatform.AWS.name().equals(stack.getCloudPlatform())) {
+                    LOGGER.debug("Skipping security group validation for stack {} (needMigration={}, platform={})",
+                            stackId, payload.isNeedMigration(), stack.getCloudPlatform());
+                    sendEvent(context, PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINISHED_EVENT.event(),
+                            new SecurityGroupValidationResult(stackId, Set.of(), Set.of()));
+                } else {
+                    Set<String> securityGroupIds = requestProvider.collectSecurityGroupIds(stack);
+                    if (securityGroupIds.isEmpty()) {
+                        LOGGER.debug("No security group IDs to validate for FreeIPA stack {}, short-circuiting SG validation", stackId);
+                        sendEvent(context, PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINISHED_EVENT.event(),
+                                new SecurityGroupValidationResult(stackId, Set.of(), Set.of()));
+                    } else {
+                        stackUpdater().updateStackStatus(stack, CLUSTER_OPERATION, VALIDATION_IN_PROGRESS_REASON);
+                        String vpcId = requestProvider.resolveAwsVpcId(stack.getEnvironmentCrn());
+                        ExtendedCloudCredential extendedCloudCredential = credentialToExtendedCloudCredentialConverter.convert(
+                                credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
+                        SecurityGroupValidationRequest request = new SecurityGroupValidationRequest(
+                                context.getCloudContext(),
+                                context.getCloudCredential(),
+                                extendedCloudCredential,
+                                context.getCloudContext().getLocation().getRegion().getRegionName(),
+                                securityGroupIds,
+                                vpcId);
+                        sendEvent(context, request.selector(), request);
+                    }
+                }
+            }
+
+            @Override
+            protected Object getFailurePayload(PrepareUpgradeTriggerEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new SecurityGroupValidationResult(ex.getMessage(), ex, payload.getResourceId());
+            }
+        };
+    }
+
+    @Bean(name = "PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_RESULT_STATE")
+    public Action<?, ?> prepareUpgradeSecurityGroupValidationResult() {
+        return new AbstractPrepareUpgradeAction<>(SecurityGroupValidationResult.class) {
+
+            @Override
+            protected void doExecute(StackContext context, SecurityGroupValidationResult payload, Map<Object, Object> variables) {
+                Long stackId = payload.getResourceId();
+                if (payload.getStatus() == EventStatus.FAILED) {
+                    stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.UPGRADE_VALIDATION_FAILED,
+                            payload.getStatusReason() != null ? payload.getStatusReason() : "Security group validation failed");
+                    sendEvent(context, PREPARE_UPGRADE_FAILURE_EVENT.event(), new PrepareUpgradeFailureEvent(stackId, VALIDATION,
+                            new CloudbreakServiceException(payload.getStatusReason() != null
+                                    ? payload.getStatusReason()
+                                    : "Security group validation failed")));
+                } else {
+                    Set<String> missing = payload.getMissingSecurityGroupIds();
+                    Set<String> notInNetwork = payload.getNotInNetworkSecurityGroupIds();
+                    if (!missing.isEmpty()) {
+                        LOGGER.warn("Prepare upgrade SG validation failed for FreeIPA stack {} due to missing security groups: {}", stackId, missing);
+                        String errorReason = String.format(MISSING_SECURITY_GROUPS_ERROR, formatSecurityGroupIds(missing));
+                        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.UPGRADE_VALIDATION_FAILED, errorReason);
+                        sendEvent(context, PREPARE_UPGRADE_FAILURE_EVENT.event(),
+                                new PrepareUpgradeFailureEvent(stackId, VALIDATION, new CloudbreakServiceException(errorReason)));
+                    } else if (!notInNetwork.isEmpty()) {
+                        LOGGER.warn("Prepare upgrade SG validation failed for FreeIPA stack {} due to VPC mismatch: {}", stackId, notInNetwork);
+                        String errorReason = String.format(VPC_MISMATCH_ERROR, formatSecurityGroupIds(notInNetwork));
+                        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.UPGRADE_VALIDATION_FAILED, errorReason);
+                        sendEvent(context, PREPARE_UPGRADE_FAILURE_EVENT.event(),
+                                new PrepareUpgradeFailureEvent(stackId, VALIDATION, new CloudbreakServiceException(errorReason)));
+                    } else {
+                        sendEvent(context, new StackEvent(PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINALIZED_EVENT.event(), stackId));
+                    }
+                }
+            }
+
+            private String formatSecurityGroupIds(Set<String> securityGroupIds) {
+                return securityGroupIds.stream().sorted().collect(Collectors.joining(", ", "[", "]"));
+            }
+        };
+    }
+
     @Bean(name = "PREPARE_UPGRADE_PREPARE_IMAGE_STATE")
     public AbstractPrepareUpgradeAction<?> prepareImage() {
-        return new AbstractPrepareUpgradeAction<>(PrepareUpgradeTriggerEvent.class) {
+        return new AbstractPrepareUpgradeAction<>(StackEvent.class) {
             @Inject
             private ImageService imageService;
 
@@ -108,18 +229,13 @@ public class PrepareUpgradeActions {
             private ImageConverter imageConverter;
 
             @Override
-            protected void prepareExecution(PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
-                setOperationId(variables, payload.getOperationId());
-            }
-
-            @Override
-            protected void doExecute(StackContext context, PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                PrepareUpgradeTriggerEvent trigger = (PrepareUpgradeTriggerEvent) variables.get(PREPARE_UPGRADE_TRIGGER_EVENT);
                 Stack stack = context.getStack();
                 getStackUpdater().updateStackStatus(stack, CLUSTER_OPERATION, "Preparing image on cloud provider side");
-                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_PREPARE_UPGRADE_STARTED);
                 CloudContext cloudContext = context.getCloudContext();
 
-                Pair<ImageWrapper, String> imageWrapperAndName = imageService.fetchImageWrapperAndName(stack, payload.getImageSettingsRequest());
+                Pair<ImageWrapper, String> imageWrapperAndName = imageService.fetchImageWrapperAndName(stack, trigger.getImageSettingsRequest());
                 String regionName = cloudContext.getLocation().getRegion().value();
                 String platform = cloudContext.getPlatform().getValue();
                 String fallbackImageName = null;
@@ -143,7 +259,7 @@ public class PrepareUpgradeActions {
             }
 
             @Override
-            protected Object getFailurePayload(PrepareUpgradeTriggerEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new PrepareImageResult(ex, payload.getResourceId());
             }
         };
@@ -424,6 +540,7 @@ public class PrepareUpgradeActions {
             @Override
             protected void initPayloadConverterMap(List<PayloadConverter<PrepareUpgradeFailureEvent>> payloadConverters) {
                 payloadConverters.add(new PrepareImageResultToPrepareUpgradeFailureConverter());
+                payloadConverters.add(new SecurityGroupValidationResultToPrepareUpgradeFailureConverter());
             }
         };
     }
@@ -471,6 +588,11 @@ public class PrepareUpgradeActions {
                 getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(),
                         FREEIPA_PREPARE_UPGRADE_FAILED, List.of(errorReason));
                 sendEvent(context, new StackEvent(PREPARE_UPGRADE_FAILURE_HANDLED_EVENT.event(), stackId));
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new SecurityGroupValidationResultToStackEventConverter());
             }
         };
     }

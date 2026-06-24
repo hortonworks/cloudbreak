@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.prepareupgrade;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.validation.SecurityGroupValidationResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageFallbackRequiredResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -14,6 +15,9 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFall
 
 public enum PrepareUpgradeEvent implements FlowEvent {
     PREPARE_UPGRADE_EVENT,
+    PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINISHED_EVENT(CloudPlatformResult.selector(SecurityGroupValidationResult.class)),
+    PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FAILED_EVENT(CloudPlatformResult.failureSelector(SecurityGroupValidationResult.class)),
+    PREPARE_UPGRADE_SECURITY_GROUP_VALIDATION_FINALIZED_EVENT,
     PREPARE_UPGRADE_IMAGE_PREPARATION_FINISHED_EVENT(CloudPlatformResult.selector(PrepareImageResult.class)),
     PREPARE_UPGRADE_IMAGE_PREPARATION_FAILED_EVENT(CloudPlatformResult.failureSelector(PrepareImageResult.class)),
     PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_FINISHED_EVENT,

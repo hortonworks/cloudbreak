@@ -200,6 +200,12 @@ class PrepareUpgradeFlowIntegrationTest {
     @MockitoBean
     private StackProvisionService stackProvisionService;
 
+    @MockitoBean
+    private PrepareUpgradeSecurityGroupValidationRequestProvider prepareUpgradeSecurityGroupValidationRequestProvider;
+
+    @MockitoBean
+    private com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
+
     @Mock
     private AuthenticatedContext ac;
 

@@ -47,19 +47,19 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleSt
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DiskValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ImageValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.SecurityGroupValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
-import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.disk.config.DiskValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.image.config.ImageValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.validate.securitygroup.config.SecurityGroupValidationEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -71,12 +71,13 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.AwsRepairSecurityGroupValidationTriggerService;
+import com.sequenceiq.cloudbreak.service.stack.AwsVariantMigrationRepairTriggerService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -125,7 +126,10 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
 
     @Inject
-    private StackUpgradeService stackUpgradeService;
+    private AwsVariantMigrationRepairTriggerService awsVariantMigrationRepairTriggerService;
+
+    @Inject
+    private AwsRepairSecurityGroupValidationTriggerService awsRepairSecurityGroupValidationTriggerService;
 
     @Inject
     private ScalingHardLimitsService scalingHardLimitsService;
@@ -212,6 +216,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         flowTriggers.add(new ImageValidationTriggerEvent(ImageValidationEvent.IMAGE_VALIDATION_EVENT.event(), event.getResourceId()));
         flowTriggers.add(new DiskValidationTriggerEvent(DiskValidationEvent.DISK_VALIDATION_EVENT.event(), event.getResourceId(),
                 repairableGroupsWithHostNames));
+        addUpfrontSecurityGroupValidationFlows(event, stackDto, repairableGroupsWithHostNames, flowTriggers);
         if (!stoppedInstances.isEmpty() && stackView.getType().equals(StackType.WORKLOAD)) {
             addClusterScaleTriggerEventIfNeeded(stackView, flowTriggers, stoppedInstances, hostGroup);
         }
@@ -401,12 +406,24 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         if (!repairableGroupsWithHostNames.isEmpty()) {
             flowTriggers.add(downscaleEvent(singlePrimaryGW, event, repairableGroupsWithHostNames));
             LOGGER.info("Downscale event added for: {}", repairableGroupsWithHostNames);
-            for (Entry<String, Set<String>> groupWithHostNames : repairableGroupsWithHostNames.entrySet()) {
-                addAwsNativeEventMigrationIfNeeded(flowTriggers, event, groupWithHostNames.getKey(), stackDto);
+            if (awsVariantMigrationRepairTriggerService.shouldRunAwsVariantMigration(event, stackDto)) {
+                for (Entry<String, Set<String>> groupWithHostNames : repairableGroupsWithHostNames.entrySet()) {
+                    flowTriggers.add(awsVariantMigrationRepairTriggerService.createMigrationTriggerEvent(
+                            event.getResourceId(), groupWithHostNames.getKey()));
+                }
             }
             flowTriggers.add(fullUpscaleEvent(event, repairableGroupsWithHostNames, singlePrimaryGW,
                     event.isRestartServices(), isKerberosSecured(stackDto.getStack()), event.isRollingRestartEnabled()));
             LOGGER.info("Upscale event added for: {}", repairableGroupsWithHostNames);
+        }
+    }
+
+    private void addUpfrontSecurityGroupValidationFlows(ClusterRepairTriggerEvent event, StackDto stackDto,
+            Map<String, Set<String>> repairableGroupsWithHostNames, Queue<Selectable> flowTriggers) {
+        if (!repairableGroupsWithHostNames.isEmpty() && awsRepairSecurityGroupValidationTriggerService.shouldRunSecurityGroupValidation(stackDto)) {
+            LOGGER.debug("Up-front security group validation flow added to cluster repair");
+            flowTriggers.add(new SecurityGroupValidationTriggerEvent(
+                    SecurityGroupValidationEvent.SECURITY_GROUP_VALIDATION_EVENT.event(), event.getResourceId()));
         }
     }
 
@@ -421,28 +438,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         } else {
             return false;
         }
-    }
-
-    void addAwsNativeEventMigrationIfNeeded(Queue<Selectable> flowTriggers, ClusterRepairTriggerEvent event, String groupName, StackDto stackDto) {
-        String triggeredVariant = event.getTriggeredStackVariant();
-        Set<String> discoveryFqdnsToRepair = event.getFailedNodesMap().entrySet().stream()
-                .flatMap(entry -> entry.getValue().stream())
-                .collect(Collectors.toSet());
-        if (event.isUpgrade() || stackUpgradeService.allNodesSelectedForRepair(stackDto, discoveryFqdnsToRepair)) {
-            String originalPlatformVariant = stackDto.getPlatformVariant();
-            LOGGER.debug("Upgrade flow or all the nodes selected for repair, checking that the variant migration is triggerable from " +
-                            "original: '{}' to new: '{}', groupName: '{}'", originalPlatformVariant, triggeredVariant, groupName);
-            if (stackUpgradeService.awsVariantMigrationIsFeasible(stackDto.getStack(), triggeredVariant)) {
-                LOGGER.info("Migration variant is needed from '{}' to: '{}', groupName: '{}'", originalPlatformVariant, triggeredVariant, groupName);
-                flowTriggers.add(awsVariantMigrationTriggerEvent(event.getResourceId(), groupName));
-            }
-        } else {
-            LOGGER.debug("Don't need to migrate the stack, variant: {}, groupName: {}", triggeredVariant, groupName);
-        }
-    }
-
-    private AwsVariantMigrationTriggerEvent awsVariantMigrationTriggerEvent(Long resourceId, String groupName) {
-        return new AwsVariantMigrationTriggerEvent(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), resourceId, groupName);
     }
 
     private StackEvent downscaleEvent(boolean primaryGatewaySelected, ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames) {

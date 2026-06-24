@@ -60,9 +60,7 @@ public class AwsVariantMigrationFlowConfig extends StackStatusFinalizerAbstractF
 
     @Override
     public AwsVariantMigrationEvent[] getInitEvents() {
-        return new AwsVariantMigrationEvent[]{
-                CREATE_RESOURCES_EVENT
-        };
+        return new AwsVariantMigrationEvent[]{CREATE_RESOURCES_EVENT};
     }
 
     @Override
