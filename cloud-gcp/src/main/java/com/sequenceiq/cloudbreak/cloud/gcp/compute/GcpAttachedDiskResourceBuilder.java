@@ -208,7 +208,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
-        if (!volumeSetAttributes.getDeleteOnTermination()) {
+        if (!Boolean.TRUE.equals(volumeSetAttributes.getDeleteOnTermination())) {
             resource.setStatus(CommonStatus.DETACHED);
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);

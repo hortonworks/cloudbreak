@@ -115,6 +115,8 @@ public enum ResourceType {
             ELASTIC_LOAD_BALANCER_LISTENER,
             ELASTIC_LOAD_BALANCER_TARGET_GROUP);
 
+    private static final List<ResourceType> VOLUME_SET_TYPES = List.of(AWS_VOLUMESET, GCP_ATTACHED_DISKSET, AZURE_VOLUMESET, OPENSTACK_ATTACHED_DISK);
+
     private final CommonResourceType commonResourceType;
 
     private final boolean taggable;
@@ -154,5 +156,9 @@ public enum ResourceType {
 
     public static Set<ResourceType> getAwsLbResourceTypes() {
         return AWS_LB_RESOURCE_TYPES;
+    }
+
+    public static boolean isVolumeSet(ResourceType resourceType) {
+        return VOLUME_SET_TYPES.contains(resourceType);
     }
 }

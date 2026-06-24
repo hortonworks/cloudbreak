@@ -2,11 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -37,6 +40,7 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Disks;
+import com.google.api.services.compute.Compute.Disks.Delete;
 import com.google.api.services.compute.Compute.Disks.Get;
 import com.google.api.services.compute.Compute.Disks.Insert;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
@@ -49,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.AbstractGcpBaseResourceChecker;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -69,6 +74,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -99,6 +106,12 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     @Mock
     private Get get;
+
+    @Mock
+    private Delete delete;
+
+    @Mock
+    private PersistenceNotifier resourceNotifier;
 
     @Mock
     private GcpStackUtil gcpStackUtil;
@@ -299,5 +312,50 @@ public class GcpAttachedDiskResourceBuilderTest {
         assertEquals(GcpDiskType.LOCAL_SSD.value(), vol3.getType());
         assertEquals(CloudVolumeUsageType.GENERAL, vol3.getCloudVolumeUsageType());
 
+    }
+
+    @Test
+    void deletePreservesDiskForReattachmentWhenDeleteOnTerminationIsFalse() throws Exception {
+        CloudResource resource = volumeSetResource(false);
+
+        assertThrows(PreserveResourceException.class, () -> underTest.delete(context, auth, resource));
+
+        assertEquals(CommonStatus.DETACHED, resource.getStatus());
+        // the flag is flipped to true so a subsequent (forced) deletion actually removes the disk
+        assertTrue(resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDeleteOnTermination());
+        verify(resourceNotifier).notifyUpdate(resource, auth.getCloudContext());
+        verify(disks, never()).delete(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void deleteRemovesDiskWhenDeleteOnTerminationIsTrue() throws Exception {
+        Operation operation = new Operation();
+        operation.setName("delete-operation");
+        operation.setHttpErrorStatusCode(null);
+        when(disks.delete(anyString(), anyString(), anyString())).thenReturn(delete);
+        when(delete.execute()).thenReturn(operation);
+
+        CloudResource resource = volumeSetResource(true);
+
+        CloudResource result = underTest.delete(context, auth, resource);
+
+        assertNotNull(result);
+        verify(disks, atLeastOnce()).delete("projectId", "az1", "vol-1");
+        assertFalse(((List<?>) result.getParameter(AbstractGcpBaseResourceChecker.OPERATION_ID, List.class)).isEmpty());
+        verify(resourceNotifier, never()).notifyUpdate(any(), any());
+    }
+
+    private CloudResource volumeSetResource(boolean deleteOnTermination) {
+        List<VolumeSetAttributes.Volume> volumes =
+                List.of(new VolumeSetAttributes.Volume("vol-1", "/dev/sdb", 100, "pd-ssd", CloudVolumeUsageType.GENERAL));
+        VolumeSetAttributes attributes = new VolumeSetAttributes("az1", deleteOnTermination, "", "", volumes, null);
+        Map<String, Object> params = new HashMap<>();
+        params.put(CloudResource.ATTRIBUTES, attributes);
+        return CloudResource.builder()
+                .withType(ResourceType.GCP_ATTACHED_DISKSET)
+                .withStatus(CommonStatus.CREATED)
+                .withName("disk")
+                .withParameters(params)
+                .build();
     }
 }

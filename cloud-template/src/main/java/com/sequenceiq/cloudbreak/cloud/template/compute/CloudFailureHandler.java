@@ -27,11 +27,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class CloudFailureHandler {
@@ -44,11 +47,16 @@ public class CloudFailureHandler {
 
     private static final String CLOUD_PROVIDER_RESOURCE_ROLLBACK_FAILED = "CLOUD_PROVIDER_ROLLBACK_FAILED";
 
+    private static final String CLOUD_PROVIDER_RESOURCE_ROLLBACK_CLEANUP = "CLOUD_PROVIDER_RESOURCE_ROLLBACK_CLEANUP";
+
     @Inject
     private ComputeResourceService computeResourceService;
 
     @Inject
     private Optional<CloudbreakEventService> cloudbreakEventService;
+
+    @Inject
+    private PersistenceNotifier persistenceNotifier;
 
     public void rollbackIfNecessary(CloudFailureContext cloudFailureContext, Map<CloudResourceStatus, Group> failedResources,
             Map<CloudResourceStatus, Group> allResources, Integer requestedNodeCount) {
@@ -84,7 +92,7 @@ public class CloudFailureHandler {
                 } else if (!failures.isEmpty()) {
                     LOGGER.info("Successful nodes ({}) exceed threshold ({}). Rolling back failed nodes and proceeding.",
                             successfulNodeCount, stx.getThreshold());
-                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale());
+                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale(), stx.isRepair());
                 }
                 break;
             case PERCENTAGE:
@@ -95,7 +103,7 @@ public class CloudFailureHandler {
                     rollbackEverythingAndThrowException(failedResources, allResources, stx, auth, ctx);
                 } else if (!failures.isEmpty()) {
                     LOGGER.info("Success percentage ({}) exceeds threshold ({}). Rolling back failed nodes and proceeding.", successPercentage, threshold);
-                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale());
+                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale(), stx.isRepair());
                 }
                 break;
             case BEST_EFFORT:
@@ -104,7 +112,7 @@ public class CloudFailureHandler {
                     rollbackEverythingAndThrowException(failedResources, allResources, stx, auth, ctx);
                 } else {
                     LOGGER.info("Successful node count ({}) is positive. Rolling back failed nodes and proceeding.", successfulNodeCount);
-                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale());
+                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale(), stx.isRepair());
                 }
                 break;
             default:
@@ -139,7 +147,7 @@ public class CloudFailureHandler {
     private void rollbackEverythingAndThrowException(Map<CloudResourceStatus, Group> failedResources, Map<CloudResourceStatus, Group> resourceStatuses,
             ScaleContext stx, AuthenticatedContext auth, ResourceBuilderContext ctx) {
         Set<Long> rollbackIds = resourceStatuses.keySet().stream().map(CloudResourceStatus::getPrivateId).collect(Collectors.toSet());
-        doRollback(auth, resourceStatuses, rollbackIds, ctx, stx.getUpscale());
+        doRollback(auth, resourceStatuses, rollbackIds, ctx, stx.getUpscale(), stx.isRepair());
         throwRolledbackException(failedResources.keySet());
     }
 
@@ -160,7 +168,7 @@ public class CloudFailureHandler {
     }
 
     private void handleExceptions(AuthenticatedContext auth, Map<CloudResourceStatus, Group> allResources,
-            ResourceBuilderContext ctx, Collection<Long> ids, Boolean upscale) {
+            ResourceBuilderContext ctx, Collection<Long> ids, Boolean upscale, boolean repair) {
         Set<CloudResourceStatus> cloudResourceStatuses = allResources.keySet();
         List<CloudResource> resources = new ArrayList<>(cloudResourceStatuses.size());
         for (CloudResourceStatus exception : cloudResourceStatuses) {
@@ -171,12 +179,12 @@ public class CloudFailureHandler {
         }
         if (!resources.isEmpty()) {
             LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resources.size());
-            doRollback(auth, allResources, ids, ctx, upscale);
+            doRollback(auth, allResources, ids, ctx, upscale, repair);
         }
     }
 
     private void doRollback(AuthenticatedContext auth, Map<CloudResourceStatus, Group> allResources, Collection<Long> rollbackIds,
-            ResourceBuilderContext ctx, Boolean upscale) {
+            ResourceBuilderContext ctx, Boolean upscale, boolean repair) {
         LOGGER.info("Rollback resources for the following private ids: {}", rollbackIds);
 
         List<Group> groups = allResources.values().stream().distinct().toList();
@@ -190,6 +198,7 @@ public class CloudFailureHandler {
                     .filter(cloudResourceStatus -> ResourceStatus.FAILED.equals(cloudResourceStatus.getStatus()))
                     .collect(Collectors.toList()));
             Set<CloudResource> deletableCloudResources = getUniqueCloudResources(resourceStatuses, rollbackIds);
+            forceDeleteOnTermination(deletableCloudResources, auth, repair);
             LOGGER.debug("Rollback cloud resources: {}", deletableCloudResources);
             List<CloudResourceStatus> deleteStatuses = computeResourceService.deleteResources(ctx, auth, deletableCloudResources, false, false);
 
@@ -200,6 +209,42 @@ public class CloudFailureHandler {
                 LOGGER.warn("Resource deletion failed. Failed resources: {}", failedResourcesWithReason);
                 fireResourceDeletionFailedEvent(auth, failedResourcesWithReason);
             }
+            fireResourceCleanupEvent(auth, deleteStatuses);
+        }
+    }
+
+    private void forceDeleteOnTermination(Collection<CloudResource> resources, AuthenticatedContext auth, boolean repair) {
+        if (repair) {
+            LOGGER.info("Operation is a repair, preserving all volume sets for reattachment to the rebuilt nodes");
+            return;
+        }
+        List<CloudResource> flippedResources = new ArrayList<>();
+        for (CloudResource resource : resources) {
+            if (ResourceType.isVolumeSet(resource.getType())) {
+                VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+                if (volumeSetAttributes != null && !Boolean.TRUE.equals(volumeSetAttributes.getDeleteOnTermination())) {
+                    LOGGER.info("Forcing deletion of orphaned volume set '{}' (discoveryFQDN={}) to avoid leaking an unattached disk", resource.getName(),
+                            volumeSetAttributes.getDiscoveryFQDN());
+                    volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
+                    resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
+                    flippedResources.add(resource);
+                }
+            }
+        }
+        if (!flippedResources.isEmpty()) {
+            persistenceNotifier.notifyUpdates(flippedResources, auth.getCloudContext());
+        }
+    }
+
+    private void fireResourceCleanupEvent(AuthenticatedContext auth, List<CloudResourceStatus> deleteStatuses) {
+        String cleanedUpResources = deleteStatuses.stream()
+                .filter(cloudResourceStatus -> ResourceStatus.DELETED.equals(cloudResourceStatus.getStatus()))
+                .map(cloudResourceStatus -> cloudResourceStatus.getCloudResource().getDetailedInfo())
+                .collect(Collectors.joining(", "));
+        if (!cleanedUpResources.isEmpty() && cloudbreakEventService.isPresent()) {
+            LOGGER.info("Cleaned up resources during rollback: {}", cleanedUpResources);
+            cloudbreakEventService.get().fireCloudbreakEvent(auth.getCloudContext().getId(),
+                    CLOUD_PROVIDER_RESOURCE_ROLLBACK_CLEANUP, ResourceEvent.CLOUD_PROVIDER_RESOURCE_ROLLBACK_CLEANUP, List.of(cleanedUpResources));
         }
     }
 
@@ -242,10 +287,17 @@ public class CloudFailureHandler {
 
         private final Long threshold;
 
+        private final boolean repair;
+
         public ScaleContext(Boolean upscale, AdjustmentType adjustmentType, Long threshold) {
+            this(upscale, adjustmentType, threshold, false);
+        }
+
+        public ScaleContext(Boolean upscale, AdjustmentType adjustmentType, Long threshold, boolean repair) {
             this.upscale = upscale;
             this.adjustmentType = adjustmentType;
             this.threshold = threshold;
+            this.repair = repair;
         }
 
         public Boolean getUpscale() {
@@ -258,6 +310,10 @@ public class CloudFailureHandler {
 
         public Long getThreshold() {
             return threshold;
+        }
+
+        public boolean isRepair() {
+            return repair;
         }
     }
 }

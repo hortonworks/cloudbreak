@@ -690,6 +690,7 @@ public enum ResourceEvent {
     CLOUD_PROVIDER_VALIDATION_WARNING("cluster.provider.validation.warning"),
     CLOUD_PROVIDER_RESOURCE_CREATION_FAILED("cluster.provider.resource.creation.failed"),
     CLOUD_PROVIDER_RESOURCE_ROLLBACK_FAILED("cluster.provider.resource.rollback.failed"),
+    CLOUD_PROVIDER_RESOURCE_ROLLBACK_CLEANUP("cluster.provider.resource.rollback.cleanup"),
 
     STACK_RETRY_FLOW_START("retry.flow.start"),
 

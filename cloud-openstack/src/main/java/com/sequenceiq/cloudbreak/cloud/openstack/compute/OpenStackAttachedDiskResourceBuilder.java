@@ -164,7 +164,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
             LOGGER.info("About to delete volume: [{}]", resource);
             VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             if (volumeSetAttributes != null) {
-                if (volumeSetAttributes.getDeleteOnTermination()) {
+                if (Boolean.TRUE.equals(volumeSetAttributes.getDeleteOnTermination())) {
                     deleteVolume(auth, resource, volumeSetAttributes, osClient);
                 } else {
                     preserveVolume(auth, resource, volumeSetAttributes, osClient);

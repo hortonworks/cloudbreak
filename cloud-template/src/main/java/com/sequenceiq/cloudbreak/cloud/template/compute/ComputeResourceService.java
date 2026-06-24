@@ -327,7 +327,8 @@ public class ComputeResourceService {
                 try {
                     ctx.setBuild(false);
                     CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
-                            new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
+                            new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold(),
+                                    adjustmentTypeAndThreshold.isRepair()), ctx);
                     cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedGroupCloudResourceStatus, groupCloudResourceStatuses,
                             getNewNodeCount(groups));
                     results.addAll(resourceStatuses);

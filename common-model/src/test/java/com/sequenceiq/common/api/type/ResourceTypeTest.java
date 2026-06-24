@@ -20,6 +20,9 @@ class ResourceTypeTest {
     private static final Set<ResourceType> CANARY_TYPES = EnumSet.of(ResourceType.RDS_HOSTNAME_CANARY, ResourceType.AZURE_DATABASE_CANARY,
             ResourceType.AZURE_PRIVATE_ENDPOINT_CANARY, ResourceType.AZURE_DNS_ZONE_GROUP_CANARY);
 
+    private static final Set<ResourceType> VOLUME_SET_TYPES = EnumSet.of(ResourceType.AWS_VOLUMESET, ResourceType.GCP_ATTACHED_DISKSET,
+            ResourceType.AZURE_VOLUMESET, ResourceType.OPENSTACK_ATTACHED_DISK);
+
     static Iterable<?> resourceTypesDataProvider() {
         return Arrays.stream(ResourceType.values())
                 .filter(type -> !TEMPLATE_TYPES.contains(type))
@@ -71,5 +74,25 @@ class ResourceTypeTest {
     @MethodSource("canaryTypesDataProvider")
     void getCommonResourceTypeTestWhenCANARY(ResourceType resourceType) {
         assertThat(resourceType.getCommonResourceType()).isEqualTo(CommonResourceType.CANARY);
+    }
+
+    static Iterable<?> volumeSetTypesDataProvider() {
+        return VOLUME_SET_TYPES;
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("volumeSetTypesDataProvider")
+    void isVolumeSetTestWhenTrue(ResourceType resourceType) {
+        assertThat(ResourceType.isVolumeSet(resourceType)).isTrue();
+    }
+
+    static Iterable<?> notVolumeSetTypesDataProvider() {
+        return Arrays.stream(ResourceType.values()).filter(type -> !VOLUME_SET_TYPES.contains(type)).collect(Collectors.toList());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("notVolumeSetTypesDataProvider")
+    void isVolumeSetTestWhenFalse(ResourceType resourceType) {
+        assertThat(ResourceType.isVolumeSet(resourceType)).isFalse();
     }
 }

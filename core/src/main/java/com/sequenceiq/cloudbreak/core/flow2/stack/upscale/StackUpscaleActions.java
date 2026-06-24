@@ -290,6 +290,10 @@ public class StackUpscaleActions {
                     Integer exactNumber = hostGroupWithInstanceCountToCreate.values().stream().reduce(0, Integer::sum);
                     adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, exactNumber.longValue());
                 }
+                // Carry the repair intent to the cloud-layer rollback (CloudFailureHandler) so a failed repair preserves the reattachable disk
+                // instead of force-deleting it as an orphan (CB-33485). A fresh copy avoids mutating the flow-variable-backed context object.
+                adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(
+                        adjustmentTypeWithThreshold.getAdjustmentType(), adjustmentTypeWithThreshold.getThreshold(), repair);
                 LOGGER.info("Adjustment type with threshold for upscale request: {}", adjustmentTypeWithThreshold);
                 String triggeredVariant = (String) variables.get(TRIGGERED_VARIANT);
                 boolean migrationNeed = stackUpgradeService.awsVariantMigrationIsFeasible(stack.getStack(), triggeredVariant);

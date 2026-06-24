@@ -13,13 +13,21 @@ public class AdjustmentTypeWithThreshold {
 
     private Long threshold;
 
+    private boolean repair;
+
+    public AdjustmentTypeWithThreshold(AdjustmentType adjustmentType, Long threshold) {
+        this(adjustmentType, threshold, false);
+    }
+
     @JsonCreator
     public AdjustmentTypeWithThreshold(
             @JsonProperty("adjustmentType") AdjustmentType adjustmentType,
-            @JsonProperty("threshold") Long threshold) {
+            @JsonProperty("threshold") Long threshold,
+            @JsonProperty("repair") boolean repair) {
 
         this.adjustmentType = adjustmentType;
         this.threshold = threshold;
+        this.repair = repair;
     }
 
     public AdjustmentType getAdjustmentType() {
@@ -38,11 +46,20 @@ public class AdjustmentTypeWithThreshold {
         this.threshold = threshold;
     }
 
+    public boolean isRepair() {
+        return repair;
+    }
+
+    public void setRepair(boolean repair) {
+        this.repair = repair;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", AdjustmentTypeWithThreshold.class.getSimpleName() + "[", "]")
                 .add("adjustmentType=" + adjustmentType)
                 .add("threshold=" + threshold)
+                .add("repair=" + repair)
                 .toString();
     }
 
@@ -54,12 +71,12 @@ public class AdjustmentTypeWithThreshold {
             return false;
         } else {
             AdjustmentTypeWithThreshold that = (AdjustmentTypeWithThreshold) o;
-            return adjustmentType == that.adjustmentType && Objects.equals(threshold, that.threshold);
+            return adjustmentType == that.adjustmentType && Objects.equals(threshold, that.threshold) && repair == that.repair;
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(adjustmentType, threshold);
+        return Objects.hash(adjustmentType, threshold, repair);
     }
 }
