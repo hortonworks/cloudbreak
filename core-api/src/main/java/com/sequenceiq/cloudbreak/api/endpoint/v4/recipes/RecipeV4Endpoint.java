@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.recipes;
 import java.util.Set;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -47,7 +48,7 @@ public interface RecipeV4Endpoint {
     @Operation(summary = RecipeOpDescription.LIST_BY_WORKSPACE_INTERNAL, description = Notes.RECIPE_NOTES,
             operationId = "listRecipesByWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RecipeViewV4Responses listInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    RecipeViewV4Responses listInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("name/{name}")
@@ -63,7 +64,7 @@ public interface RecipeV4Endpoint {
     @Operation(summary = RecipeOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, description = Notes.RECIPE_NOTES,
             operationId = "getRecipeInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RecipeV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("accountId") String accountId,
+    RecipeV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("accountId") @NotEmpty String accountId,
             @PathParam("name") @NotNull String name);
 
     @GET
@@ -88,7 +89,7 @@ public interface RecipeV4Endpoint {
     @Operation(summary = RecipeOpDescription.CREATE_IN_WORKSPACE_INTERNAL, description = Notes.RECIPE_NOTES,
             operationId = "createRecipeInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RecipeV4Response postInternal(@QueryParam("accountId") String accountId,
+    RecipeV4Response postInternal(@QueryParam("accountId") @NotEmpty String accountId,
             @PathParam("workspaceId") Long workspaceId, @Valid RecipeV4Request request);
 
     @DELETE

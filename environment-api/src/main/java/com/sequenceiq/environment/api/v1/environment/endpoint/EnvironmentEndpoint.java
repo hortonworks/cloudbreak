@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -140,7 +141,7 @@ public interface EnvironmentEndpoint {
     @Operation(summary = EnvironmentOpDescription.INTERNAL_LIST, description = ENVIRONMENT_NOTES,
             operationId = "internalListEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SimpleEnvironmentResponses listInternal(@QueryParam("accountId") String accountId);
+    SimpleEnvironmentResponses listInternal(@QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("/name/{name}/change_credential")

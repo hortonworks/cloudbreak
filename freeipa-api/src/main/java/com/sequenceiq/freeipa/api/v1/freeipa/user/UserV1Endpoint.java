@@ -69,7 +69,7 @@ public interface UserV1Endpoint {
             operationId = "internalGetSyncOperationStatusV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus getSyncOperationStatusInternal(
-            @QueryParam("accountId") String accountId, @QueryParam("operationId") @NotNull String operationId);
+            @QueryParam("accountId") @NotEmpty String accountId, @QueryParam("operationId") @NotNull String operationId);
 
     @GET
     @Path("lastStatus")

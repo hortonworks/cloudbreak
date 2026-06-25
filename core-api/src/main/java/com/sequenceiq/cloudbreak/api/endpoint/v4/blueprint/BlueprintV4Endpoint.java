@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.doc.Notes.BLUEPRINT_NOTES;
 import java.util.Set;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -59,7 +60,7 @@ public interface BlueprintV4Endpoint {
     @Operation(summary = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, description = BLUEPRINT_NOTES,
             operationId = "getBlueprintInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    BlueprintV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("accountId") String accountId,
+    BlueprintV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("accountId") @NotEmpty String accountId,
             @PathParam("name") @NotNull String name);
 
     @GET
@@ -84,7 +85,7 @@ public interface BlueprintV4Endpoint {
     @Operation(summary = BlueprintOpDescription.CREATE_IN_WORKSPACE_INTERNAL, description = BLUEPRINT_NOTES,
             operationId = "createBlueprintInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    BlueprintV4Response postInternal(@QueryParam("accountId") String accountId,  @PathParam("workspaceId") Long workspaceId,
+    BlueprintV4Response postInternal(@QueryParam("accountId") @NotEmpty String accountId,  @PathParam("workspaceId") Long workspaceId,
             @Valid BlueprintV4Request request);
 
     @DELETE

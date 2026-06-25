@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SdxSecretRotationCleanupProgressRequest {
 
     @ResourceCrn
+    @NotEmpty
     @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE)
     @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String crn;

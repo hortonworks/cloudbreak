@@ -116,7 +116,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_GET_BY_ENVID_AND_ACCOUNTID,
             description = FreeIpaNotes.FREEIPA_NOTES, operationId = "internalGetFreeIpaByEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DescribeFreeIpaResponse describeInternal(@QueryParam("environment") String environmentCrn, @QueryParam("accountId") String accountId);
+    DescribeFreeIpaResponse describeInternal(@QueryParam("environment") String environmentCrn, @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("/all")
@@ -134,7 +134,7 @@ public interface FreeIpaV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<DescribeFreeIpaResponse> describeAllInternal(
             @QueryParam("environment") String environmentCrn,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("/list")
@@ -150,7 +150,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_LIST_BY_ACCOUNT, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "internalListFreeIpaClustersByAccountV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<ListFreeIpaResponse> listInternal(@QueryParam("accountId") String accountId);
+    List<ListFreeIpaResponse> listInternal(@QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("health")
@@ -223,7 +223,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_CLEANUP, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "internalCleanupV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    OperationStatus internalCleanup(@Valid CleanupRequest request, @QueryParam("accountId") String accountId);
+    OperationStatus internalCleanup(@Valid CleanupRequest request, @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("start")
@@ -420,7 +420,7 @@ public interface FreeIpaV1Endpoint {
             operationId = "getUsedSubnetsByEnvironment",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @PUT
     @Path("/modify_root_volume")

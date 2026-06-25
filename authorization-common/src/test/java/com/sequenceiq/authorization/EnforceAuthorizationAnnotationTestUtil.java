@@ -14,6 +14,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +22,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -54,6 +57,8 @@ import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
 public class EnforceAuthorizationAnnotationTestUtil {
+
+    private static final Set<Class<? extends Annotation>> MANDATORY_ANNOTATIONS = Set.of(NotEmpty.class, PathParam.class);
 
     private static final Map<Class<? extends Annotation>, Function<Method, Optional<String>>> METHOD_VALIDATORS =
             ImmutableMap.<Class<? extends Annotation>, Function<Method, Optional<String>>>builder()
@@ -181,6 +186,21 @@ public class EnforceAuthorizationAnnotationTestUtil {
         return evaluateResult(method, count, errorMessageCommon);
     }
 
+    private static boolean hasMandatoryAnnotatedParam(Class<? extends Annotation> annotation, Set<Class<? extends Annotation>> mandatoryAnnotations,
+            Class<?> type, Method method) {
+        if (hasParam(annotation, type, method).isPresent()) {
+            return false;
+        }
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            if (parameters[i].isAnnotationPresent(annotation) && type.equals(parameters[i].getType())) {
+                Set<Class<? extends Annotation>> foundAnnotations = collectParameterAnnotationTypes(method, i);
+                return mandatoryAnnotations.stream().anyMatch(foundAnnotations::contains);
+            }
+        }
+        return false;
+    }
+
     public static Function<Method, Optional<String>> hasInternalOnlyRequiredAnnotation() {
         return method -> {
             boolean hasRequiredAnnotation = hasInternalOnlyRequiredMethodParameter(method)
@@ -189,9 +209,14 @@ public class EnforceAuthorizationAnnotationTestUtil {
             if (hasRequiredAnnotation) {
                 return Optional.empty();
             } else {
-                return Optional.of(invalid(method, String.format("One of the following annotations are missing to use @InternalOnly annotation: %s",
-                        Set.of(RequestObject.class.getSimpleName(), ResourceCrn.class.getSimpleName(), AccountId.class.getSimpleName(),
-                                InitiatorUserCrn.class.getSimpleName(), AccountIdNotNeeded.class.getSimpleName()))));
+                return Optional.of(invalid(method, String.format("One of the following annotations are missing to use @InternalOnly annotation: %s. "
+                                + "Mark at least one of these parameters as required (@NotEmpty or @PathParam). "
+                                + "For @RequestObject parameters, mark the @ResourceCrn field/getter with @NotEmpty.",
+                        Set.of(RequestObject.class.getSimpleName() + " with @ResourceCrn field/getter",
+                                ResourceCrn.class.getSimpleName(),
+                                AccountId.class.getSimpleName(),
+                                InitiatorUserCrn.class.getSimpleName(),
+                                AccountIdNotNeeded.class.getSimpleName()))));
             }
         };
     }
@@ -202,19 +227,25 @@ public class EnforceAuthorizationAnnotationTestUtil {
                 .findAny();
         if (requestObjectParam.isPresent()) {
             Class<?> requestObjectType = requestObjectParam.get().getType();
-            boolean hasFieldWithResourceCrn = Arrays.stream(requestObjectType.getDeclaredFields())
-                    .anyMatch(field -> field.isAnnotationPresent(ResourceCrn.class) && String.class.equals(field.getType()));
+            boolean hasFieldWithResourceCrn = getAllFields(requestObjectType).stream()
+                    .anyMatch(field -> field.isAnnotationPresent(ResourceCrn.class) && String.class.equals(field.getType())
+                            && field.isAnnotationPresent(NotEmpty.class));
             boolean hasProperMethodWithResourceCrn = Arrays.stream(requestObjectType.getMethods()).anyMatch(aMethod ->
-                    aMethod.isAnnotationPresent(ResourceCrn.class) && aMethod.getParameterCount() == 0 && String.class.equals(aMethod.getReturnType()));
+                    aMethod.isAnnotationPresent(ResourceCrn.class) && aMethod.getParameterCount() == 0 && String.class.equals(aMethod.getReturnType())
+                            && aMethod.isAnnotationPresent(NotEmpty.class));
             return hasFieldWithResourceCrn || hasProperMethodWithResourceCrn;
         }
         return false;
     }
 
+    private static List<Field> getAllFields(Class<?> clazz) {
+        return Arrays.asList(FieldUtils.getAllFields(clazz));
+    }
+
     private static boolean hasInternalOnlyRequiredMethodParameter(Method method) {
-        return hasParam(ResourceCrn.class, String.class, method).isEmpty()
-                || hasParam(AccountId.class, String.class, method).isEmpty()
-                || hasParam(InitiatorUserCrn.class, String.class, method).isEmpty();
+        return hasMandatoryAnnotatedParam(ResourceCrn.class, MANDATORY_ANNOTATIONS, String.class, method)
+                || hasMandatoryAnnotatedParam(AccountId.class, MANDATORY_ANNOTATIONS, String.class, method)
+                || hasMandatoryAnnotatedParam(InitiatorUserCrn.class, MANDATORY_ANNOTATIONS, String.class, method);
     }
 
     private static Function<Method, Optional<String>> anyCollectionFrom(Class<? extends Annotation> annotation, GenericType... genericTypes) {
@@ -305,6 +336,49 @@ public class EnforceAuthorizationAnnotationTestUtil {
         } catch (Exception e) {
             errorMessages.add(String.format("Error regarding %s in %s#%s: %s %s", annotation.path(),
                     method.getDeclaringClass().getSimpleName(), method.getName(), e.getClass().getSimpleName(), e.getMessage()));
+        }
+    }
+
+    private static Set<Class<? extends Annotation>> collectParameterAnnotationTypes(Method method, int paramIndex) {
+        Set<Class<? extends Annotation>> result = new HashSet<>();
+        collectFromHierarchy(method, paramIndex, result);
+        return result;
+    }
+
+    private static void collectFromHierarchy(Method method, int paramIndex, Set<Class<? extends Annotation>> result) {
+        String name = method.getName();
+        Class<?>[] paramTypes = method.getParameterTypes();
+
+        for (Annotation a : method.getParameters()[paramIndex].getAnnotations()) {
+            result.add(a.annotationType());
+        }
+
+        Class<?> clazz = method.getDeclaringClass().getSuperclass();
+        while (clazz != null && clazz != Object.class) {
+            try {
+                Method superMethod = clazz.getDeclaredMethod(name, paramTypes);
+                for (Annotation a : superMethod.getParameters()[paramIndex].getAnnotations()) {
+                    result.add(a.annotationType());
+                }
+            } catch (NoSuchMethodException ignored) {
+            }
+            clazz = clazz.getSuperclass();
+        }
+
+        collectFromInterfaces(method.getDeclaringClass(), name, paramTypes, paramIndex, result);
+    }
+
+    private static void collectFromInterfaces(Class<?> clazz, String name, Class<?>[] paramTypes,
+            int paramIndex, Set<Class<? extends Annotation>> result) {
+        for (Class<?> iface : clazz.getInterfaces()) {
+            try {
+                Method ifaceMethod = iface.getDeclaredMethod(name, paramTypes);
+                for (Annotation a : ifaceMethod.getParameters()[paramIndex].getAnnotations()) {
+                    result.add(a.annotationType());
+                }
+            } catch (NoSuchMethodException ignored) {
+            }
+            collectFromInterfaces(iface, name, paramTypes, paramIndex, result);
         }
     }
 

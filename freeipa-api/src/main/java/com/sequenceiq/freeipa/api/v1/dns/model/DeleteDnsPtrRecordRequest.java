@@ -7,7 +7,6 @@ import static com.sequenceiq.freeipa.api.v1.dns.model.DnsRecordRegexpPatterns.DN
 
 import jakarta.validation.GroupSequence;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.QueryParam;
 
@@ -32,7 +31,7 @@ public class DeleteDnsPtrRecordRequest {
 
     @QueryParam("environment")
     @ResourceCrn
-    @NotNull
+    @NotEmpty
     @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     private String environmentCrn;

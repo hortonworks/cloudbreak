@@ -147,7 +147,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "updateClusterCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void updateClusterCrn(@QueryParam("environmentCrn") String environmentCrn, @QueryParam("currentClusterCrn") String currentClusterCrn,
-            @QueryParam("newClusterCrn") String newClusterCrn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("newClusterCrn") String newClusterCrn, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("internal/managed")
@@ -156,7 +156,7 @@ public interface DatabaseServerV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerStatusV4Response createInternal(
             @Valid @Parameter(description = DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn
     );
 
     @POST
@@ -166,7 +166,7 @@ public interface DatabaseServerV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerStatusV4Response createNonUniqueInternal(
             @Valid @Parameter(description = DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn
     );
 
     @PUT
@@ -324,7 +324,7 @@ public interface DatabaseServerV4Endpoint {
             description = Notes.DatabaseNotes.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, operationId = "getUsedSubnetsByEnvironment",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @PUT
     @Path("{crn}/validate_upgrade")
@@ -352,7 +352,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "rotateSecrets",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSecret(@Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST)
-            RotateDatabaseServerSecretV4Request request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            RotateDatabaseServerSecretV4Request request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("internal/sync_outdated_secrets")
@@ -372,7 +372,7 @@ public interface DatabaseServerV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressResponse getSecretRotationProgress(
             @QueryParam("secretType") @ValidSecretType(allowedTypes = RedbeamsSecretType.class) @NotEmpty String secretType,
-            @ValidCrn(resource = DATABASE_SERVER) @QueryParam("dbServerCrn") String dbServerCrn);
+            @ValidCrn(resource = DATABASE_SERVER) @QueryParam("dbServerCrn") @NotEmpty String dbServerCrn);
 
     @POST
     @Path("get_certificate_status")
@@ -382,7 +382,7 @@ public interface DatabaseServerV4Endpoint {
     DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
             @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.DATABASE_SERVER_CERTIFICATE_REQUEST)
             DatabaseServerCertificateStatusV4Request request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn
     );
 
     @POST
@@ -393,7 +393,7 @@ public interface DatabaseServerV4Endpoint {
     ClusterDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatusByStackCrns(
             @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.DATABASE_SERVER_CERTIFICATE_REQUEST)
             ClusterDatabaseServerCertificateStatusV4Request request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn
     );
 
     @PUT

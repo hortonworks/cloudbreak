@@ -7,6 +7,7 @@
 .gradle
 .vscode
 gradle
+.claude
 
 # IDEA
 .idea

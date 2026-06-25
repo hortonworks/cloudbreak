@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.database;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -28,5 +29,5 @@ public interface DatabaseConfigV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get database config", operationId = "getDbConfig",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DbConnectionParamsV4Response getDbConfig(@QueryParam("stackCrn") @NotNull String stackCrn, @QueryParam("databaseType") @NotNull DatabaseType databaseType);
+    DbConnectionParamsV4Response getDbConfig(@QueryParam("stackCrn") @NotEmpty String stackCrn, @QueryParam("databaseType") @NotNull DatabaseType databaseType);
 }
