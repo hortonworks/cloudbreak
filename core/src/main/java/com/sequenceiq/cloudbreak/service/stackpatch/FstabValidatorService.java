@@ -1,11 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
-import static com.sequenceiq.common.api.type.ResourceType.AWS_VOLUMESET;
-import static com.sequenceiq.common.api.type.ResourceType.AZURE_VOLUMESET;
-import static com.sequenceiq.common.api.type.ResourceType.GCP_ATTACHED_DISKSET;
+import static com.sequenceiq.cloudbreak.constant.CloudbreakConstants.VOLUME_RESOURCE_TYPE_BY_PLATFORM;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -33,18 +28,11 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.ResourceSyncUtil;
 import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class FstabValidatorService extends ExistingStackPatchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FstabValidatorService.class);
-
-    private static final Map<String, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(
-            AZURE.name(), AZURE_VOLUMESET,
-            AWS.name(), AWS_VOLUMESET,
-            GCP.name(), GCP_ATTACHED_DISKSET
-    );
 
     private static final EnumSet<Status> PATCH_ALLOWED_STATUSES = EnumSet.of(Status.AVAILABLE, Status.NODE_FAILURE);
 
@@ -73,9 +61,9 @@ public class FstabValidatorService extends ExistingStackPatchService {
         boolean affected = false;
         LOGGER.info("Checking if fstab validation stack patch should be run for stack: {}, stack id: {}",
                 stack.getStack().getName(), stack.getId());
-        if (CLOUD_RESOURCE_TYPE_CONSTANTS.containsKey(stack.getCloudPlatform())) {
+        if (VOLUME_RESOURCE_TYPE_BY_PLATFORM.containsKey(stack.getCloudPlatform())) {
             List<Resource> volumeSetResources = resourceService.findAllByStackIdAndResourceTypeIn(stack.getId(),
-                    List.of(CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())));
+                    List.of(VOLUME_RESOURCE_TYPE_BY_PLATFORM.get(stack.getCloudPlatform())));
             stack.setResources(new HashSet<>(volumeSetResources));
             if (!volumeSetResources.isEmpty()) {
                 try {
@@ -105,10 +93,15 @@ public class FstabValidatorService extends ExistingStackPatchService {
 
     @Override
     boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+        String cloudPlatform = stack.getCloudPlatform();
+        if (!VOLUME_RESOURCE_TYPE_BY_PLATFORM.containsKey(cloudPlatform)) {
+            LOGGER.info("Fstab validation patch is not supported for platform {}, skipping.", cloudPlatform);
+            return true;
+        }
         boolean applied = true;
         try {
             List<Resource> volumeSetResources = resourceService.findAllByStackIdAndResourceTypeIn(stack.getId(),
-                    List.of(CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())));
+                    List.of(VOLUME_RESOURCE_TYPE_BY_PLATFORM.get(cloudPlatform)));
             stack.setResources(new HashSet<>(volumeSetResources));
             if (!volumeSetResources.isEmpty()) {
                 Map<String, String> saltFstabInfo = resourceSyncUtil.getFstabInformation(stack.getId());

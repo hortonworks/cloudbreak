@@ -1,10 +1,7 @@
 package com.sequenceiq.cloudbreak.job.disk;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.constant.CloudbreakConstants.VOLUME_RESOURCE_TYPE_BY_PLATFORM;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_FAILED;
-import static com.sequenceiq.common.api.type.ResourceType.AWS_VOLUMESET;
-import static com.sequenceiq.common.api.type.ResourceType.AZURE_VOLUMESET;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Collections;
@@ -34,16 +31,10 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.ResourceSyncUtil;
 import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.ProviderSyncState;
 
 @Service
 public class DiskSyncService {
-
-    public static final Map<String, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(
-            AZURE.name(), AZURE_VOLUMESET,
-            AWS.name(), AWS_VOLUMESET
-    );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiskSyncService.class);
 
@@ -69,6 +60,11 @@ public class DiskSyncService {
     private StackUpdater stackUpdater;
 
     public void syncResources(StackDto stackDto, DiskSyncMode diskSyncMode) {
+        String cloudPlatform = stackDto.getCloudPlatform();
+        if (!VOLUME_RESOURCE_TYPE_BY_PLATFORM.containsKey(cloudPlatform)) {
+            LOGGER.info("Disk sync is not supported for platform {}, skipping.", cloudPlatform);
+            return;
+        }
         Stack stack = stackService.getByIdWithLists(stackDto.getId());
         DetailedStackStatus stackStatus = stack.getDetailedStatus();
         try {
@@ -77,7 +73,7 @@ public class DiskSyncService {
             }
             boolean alreadyReported = stackDto.getStack().getProviderSyncStates().contains(ProviderSyncState.DISK_MISMATCH_FOUND);
             List<Resource> volumeSetResources = resourceService.findAllByStackIdAndResourceTypeIn(stackDto.getId(),
-                    List.of(CLOUD_RESOURCE_TYPE_CONSTANTS.get(stackDto.getCloudPlatform())));
+                    List.of(VOLUME_RESOURCE_TYPE_BY_PLATFORM.get(stackDto.getCloudPlatform())));
             Map<String, List<VolumeRecord>> cloudMetadata = diskInstanceInfoCollector.getCloudMetadataMap(stackDto);
             Map<String, String> fqdnInstanceIdMap = getFqdnInstanceIdMap(stackDto);
             Map<String, InstanceResourceDto> saltInfoMap = diskInstanceInfoCollector.getAndParseSaltInfo(stackDto, fqdnInstanceIdMap, cloudMetadata,

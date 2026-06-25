@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.diskupdate;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.constant.CloudbreakConstants.isVolumeSetResourceForPlatform;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.DiskResizeEvent.DISK_RESIZE_TRIGGER_EVENT;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -113,6 +116,9 @@ public class DiskUpdateService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
+
     public boolean isDiskTypeChangeSupported(String platform) {
         return cloudParameterCache.isDiskTypeChangeSupported(platform);
     }
@@ -120,12 +126,13 @@ public class DiskUpdateService {
     public void updateDiskTypeAndSize(String group, String volumeType, int size, List<Volume> volumesToUpdate, Long stackId) throws Exception {
         StackDto stackDto = stackDtoService.getById(stackId);
         validateDiskUpdateRequest(volumeType, size, CloudPlatform.valueOf(stackDto.getCloudPlatform()), stackDto.getResourceCrn());
+        List<CloudResource> cloudResources = getCloudResourcesToUpdate(stackDto, group);
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(stackDto.getCloudPlatform()),
                 Variant.variant(stackDto.getPlatformVariant()));
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
         AuthenticatedContext ac = getAuthenticatedContext(cloudConnector, stackDto);
         List<String> volumeIds = volumesToUpdate.stream().map(Volume::getId).toList();
-        cloudConnector.volumeConnector().updateDiskVolumes(ac, volumeIds, volumeType, size);
+        cloudConnector.volumeConnector().updateDiskVolumes(ac, volumeIds, volumeType, size, cloudResources);
         for (Resource resource : stackDto.getDiskResources()) {
             Optional<VolumeSetAttributes> optionalVolumeSetAttributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class);
             if (group.equals(resource.getInstanceGroup()) && optionalVolumeSetAttributes.isPresent()) {
@@ -143,6 +150,14 @@ public class DiskUpdateService {
         LOGGER.info("Updated resources for disk update flow::{}", stackDto.getDiskResources());
         resourceService.saveAll(stackDto.getDiskResources());
         updateTemplate(stackId, group, volumeType, size);
+    }
+
+    private List<CloudResource> getCloudResourcesToUpdate(StackDto stackDto, String group) {
+        return stackDto.getResources().stream()
+                .filter(res -> group.equals(res.getInstanceGroup()))
+                .filter(res -> isVolumeSetResourceForPlatform(stackDto.getCloudPlatform(), res.getResourceType()))
+                .map(resourceToCloudResourceConverter::convert)
+                .toList();
     }
 
     private void updateVolumeTypeAndSize(String volumeType, int size, VolumeSetAttributes.Volume volume) {

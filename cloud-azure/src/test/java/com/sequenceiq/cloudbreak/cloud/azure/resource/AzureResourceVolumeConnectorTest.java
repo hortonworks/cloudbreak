@@ -98,7 +98,7 @@ class AzureResourceVolumeConnectorTest {
     @Test
     void testUpdateDiskVolumes() {
         List<String> volumeIds = List.of("test-vol-1");
-        underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100);
+        underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100, List.of());
         verify(azureVolumeResourceBuilder).modifyVolumes(authenticatedContext, volumeIds, "test", 100);
     }
 
@@ -107,7 +107,7 @@ class AzureResourceVolumeConnectorTest {
         List<String> volumeIds = List.of("test-vol-1");
         doThrow(new RuntimeException("TEST")).when(azureVolumeResourceBuilder).modifyVolumes(authenticatedContext, volumeIds, "test", 100);
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100));
+                () -> underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100, List.of()));
         assertEquals("TEST", exception.getMessage());
         verify(azureVolumeResourceBuilder).modifyVolumes(authenticatedContext, volumeIds, "test", 100);
     }

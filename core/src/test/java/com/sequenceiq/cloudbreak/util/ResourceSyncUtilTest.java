@@ -288,6 +288,18 @@ class ResourceSyncUtilTest {
     }
 
     @Test
+    void testGetFstabInformationReturnsEmptyForUnsupportedPlatform() {
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn("OPENSTACK");
+        when(stackService.getByIdWithLists(1L)).thenReturn(stack);
+
+        Map<String, String> result = underTest.getFstabInformation(1L);
+
+        assertTrue(result.isEmpty());
+        verify(resourceService, never()).findAllByStackIdAndResourceTypeIn(any(), anyList());
+    }
+
+    @Test
     void testGetFstabInformationThrowsException() {
         Stack stack = mock(Stack.class);
         when(stack.getCloudPlatform()).thenReturn("AWS");

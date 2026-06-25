@@ -176,6 +176,14 @@ class FstabValidatorServiceTest {
         assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(stack));
     }
 
+    @Test
+    void testDoApplyWhenUnsupportedCloudProvider() throws ExistingStackPatchApplyException {
+        stack.setCloudPlatform("YARN");
+
+        assertTrue(underTest.doApply(stack));
+        verify(resourceService, never()).findAllByStackIdAndResourceTypeIn(anyLong(), anyList());
+    }
+
     private Resource createVolumeSetResource(String fstab) {
         Resource resource = new Resource();
         resource.setInstanceId(INSTANCE_ID);

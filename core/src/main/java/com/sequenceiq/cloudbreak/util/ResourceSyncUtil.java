@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.util;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType.DATABASE;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType.GENERAL;
+import static com.sequenceiq.cloudbreak.constant.CloudbreakConstants.VOLUME_RESOURCE_TYPE_BY_PLATFORM;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_FSTAB_MISMATCH_FOUND;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_VOLUME_MISMATCH_FOUND;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND;
-import static com.sequenceiq.cloudbreak.job.disk.DiskSyncService.CLOUD_RESOURCE_TYPE_CONSTANTS;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
@@ -242,8 +242,13 @@ public class ResourceSyncUtil {
 
     public Map<String, String> getFstabInformation(Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
+        String cloudPlatform = stack.getCloudPlatform();
+        if (!VOLUME_RESOURCE_TYPE_BY_PLATFORM.containsKey(cloudPlatform)) {
+            LOGGER.info("Fstab information is not supported for platform {}, returning empty map.", cloudPlatform);
+            return Map.of();
+        }
         List<Resource> volumeSetResources = resourceService.findAllByStackIdAndResourceTypeIn(stackId,
-            List.of(CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())));
+            List.of(VOLUME_RESOURCE_TYPE_BY_PLATFORM.get(cloudPlatform)));
         stack.setResources(new HashSet<>(volumeSetResources));
         Set<Node> nodesWithDiskData = new HashSet<>(stackUtil.collectNodesWithDiskData(stack));
         GatewayConfig primaryGateway = gatewayConfigService.getPrimaryGatewayConfig(stack);

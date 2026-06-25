@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.constant.CloudbreakConstants.isVolumeSetResourceForPlatform;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.stream.Collectors.toList;
 
@@ -40,7 +41,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -69,7 +69,6 @@ import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AddVolumesService {
@@ -79,9 +78,6 @@ public class AddVolumesService {
     private static final Set<String> BLACKLISTED_ROLES = ImmutableSet.of("DATANODE", "ZEPPELIN_SERVER", "KAFKA_BROKER",
             "SCHEMA_REGISTRY_SERVER", "STREAMS_MESSAGING_MANAGER_SERVER", "SERVER", "NIFI_NODE", "NAMENODE", "STATESTORE",
             "CATALOGSERVER", "KUDU_MASTER", "KUDU_TSERVER", "SOLR_SERVER", "NIFI_REGISTRY_SERVER", "HUE_LOAD_BALANCER", "KNOX_GATEWAY", "GATEWAY");
-
-    private static final Map<String, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(CloudPlatform.AZURE.name(), ResourceType.AZURE_VOLUMESET,
-            CloudPlatform.AWS.name(), ResourceType.AWS_VOLUMESET);
 
     @Inject
     private StackUtil stackUtil;
@@ -345,8 +341,7 @@ public class AddVolumesService {
         List<CloudResource> cloudResourcesToBeDeleted = stack.getResources().stream().filter(resource -> null != resource.getInstanceGroup()
                         && null != resource.getInstanceId()
                         && createdVolumesByInstancesMap.containsKey(resource.getInstanceId())
-                        && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())
-                        && CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform()).equals(resource.getResourceType()))
+                        && isVolumeSetResourceForPlatform(stack.getCloudPlatform(), resource.getResourceType()))
                 .map(resource -> {
                     VolumeSetAttributes attributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class).get();
                     attributes.setVolumes(createdVolumesByInstancesMap.get(resource.getInstanceId()));

@@ -80,7 +80,8 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) {
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            List<CloudResource> cloudResources) {
         LOGGER.info("Calling update volumes in AzureVolumeResourceBuilder for volumes : {} : to disk type : {} and size : {}", volumeIds,
                 diskType, size);
         azureVolumeResourceBuilder.modifyVolumes(authenticatedContext, volumeIds, diskType, size);

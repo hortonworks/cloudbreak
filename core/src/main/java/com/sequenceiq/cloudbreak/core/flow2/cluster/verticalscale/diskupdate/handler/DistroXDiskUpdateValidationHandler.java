@@ -1,17 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.handler;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DATAHUB_DISK_UPDATE_VALIDATION_FAILED;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.constant.CloudbreakConstants.isVolumeSetResourceForPlatform;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateHandlerSelectors.DATAHUB_DISK_UPDATE_VALIDATION_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_EVENT;
-import static com.sequenceiq.common.api.type.ResourceType.AWS_VOLUMESET;
-import static com.sequenceiq.common.api.type.ResourceType.AZURE_VOLUMESET;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
@@ -39,7 +35,6 @@ import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -47,11 +42,6 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHandler<DistroXDiskUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXDiskUpdateValidationHandler.class);
-
-    private static final Map<String, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(
-            AZURE.name(), AZURE_VOLUMESET,
-            AWS.name(), AWS_VOLUMESET
-    );
 
     @Inject
     private StackDtoService stackDtoService;
@@ -150,8 +140,7 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
             DiskTypes cloudPlatformDiskTypes) throws IOException {
         List<Resource> resources = stack.getResources().stream()
                 .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(group)
-                        && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())
-                        && CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform()).equals(res.getResourceType())
+                        && isVolumeSetResourceForPlatform(stack.getCloudPlatform(), res.getResourceType())
                 ).toList();
         List<VolumeSetAttributes.Volume> attachedVolumes = new ArrayList<>();
         for (Resource resource : resources) {

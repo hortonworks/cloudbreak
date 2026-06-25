@@ -83,7 +83,7 @@ public class AwsNativeResourceVolumeConnectorTest {
 
     @Test
     public void testUpdateDiskVolumes() throws Exception {
-        underTest.updateDiskVolumes(authenticatedContext, List.of("TEST-VOLUME"), "TEST", 100);
+        underTest.updateDiskVolumes(authenticatedContext, List.of("TEST-VOLUME"), "TEST", 100, List.of());
         verify(awsCommonDiskUpdateService).modifyVolumes(authenticatedContext, List.of("TEST-VOLUME"), "TEST", 100);
     }
 
@@ -92,7 +92,7 @@ public class AwsNativeResourceVolumeConnectorTest {
         doThrow(AwsServiceException.builder().message("TEST").build()).when(awsCommonDiskUpdateService).modifyVolumes(authenticatedContext,
                 List.of("TEST-VOLUME"), "TEST", 100);
         AwsServiceException exception = assertThrows(AwsServiceException.class, () -> underTest.updateDiskVolumes(authenticatedContext,
-                List.of("TEST-VOLUME"), "TEST", 100));
+                List.of("TEST-VOLUME"), "TEST", 100, List.of()));
         assertEquals("TEST", exception.getMessage());
     }
 

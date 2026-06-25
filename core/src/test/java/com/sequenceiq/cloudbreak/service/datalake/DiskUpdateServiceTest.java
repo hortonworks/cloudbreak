@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -118,6 +120,9 @@ class DiskUpdateServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @InjectMocks
     private DiskUpdateService underTest;
@@ -250,7 +255,7 @@ class DiskUpdateServiceTest {
         underTest.updateDiskTypeAndSize("master", "st1", 200, List.of(volume), stackId);
 
         verify(templateService).savePure(template);
-        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200));
+        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200), any());
         verify(resourceService).saveAll(any());
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
@@ -271,7 +276,7 @@ class DiskUpdateServiceTest {
         underTest.updateDiskTypeAndSize("master", "st1", 200, List.of(volume1), 1L);
 
         verify(templateService).savePure(template);
-        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200));
+        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200), any());
         ArgumentCaptor<List<Resource>> saveResourcesCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveResourcesCaptor.capture());
         List<VolumeSetAttributes.Volume> volResult = saveResourcesCaptor.getValue().get(0).getAttributes().get(VolumeSetAttributes.class)
@@ -303,6 +308,7 @@ class DiskUpdateServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.updateDiskTypeAndSize("master", "test", 200, List.of(), stackId));
         assertEquals("Resizing Disk for Azure is not enabled for this account", badRequestException.getMessage());
+        verify(resourceToCloudResourceConverter, never()).convert(any());
     }
 
     @Test

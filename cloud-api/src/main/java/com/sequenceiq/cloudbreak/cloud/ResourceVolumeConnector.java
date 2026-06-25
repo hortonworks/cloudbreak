@@ -46,9 +46,12 @@ public interface ResourceVolumeConnector {
      * @param volumeIds contains the list of cloud volumes being modified
      * @param diskType desired disk type of EBS volumes being modified
      * @param size desired disk size of EBS volumes being modified
+     * @param cloudResources the disk resources being modified; carries provider-specific details such as the
+     *                       availability zone required by zonal resize APIs (e.g. GCP)
      * @throws Exception in case of any error
      */
-    default void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+    default void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            List<CloudResource> cloudResources) throws Exception {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

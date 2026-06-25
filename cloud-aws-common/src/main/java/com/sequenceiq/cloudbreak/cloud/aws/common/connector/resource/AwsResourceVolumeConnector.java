@@ -50,7 +50,8 @@ public class AwsResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            List<CloudResource> cloudResources) throws Exception {
         LOGGER.debug("Calling update volumes in AwsCommonDiskUpdateService for volumes : {} : to disk type : {} and size : {}", volumeIds,
                 diskType, size);
         awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
