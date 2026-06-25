@@ -76,4 +76,14 @@ public interface SdxInternalEndpoint {
             @Valid UpdateTrustedRealmRequest request,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @PUT
+    @Path("crn/{crn}/salt_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Initiates a SaltStack update on the datalake",
+            operationId = "updateInternalSdxSalt",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateSalt(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }

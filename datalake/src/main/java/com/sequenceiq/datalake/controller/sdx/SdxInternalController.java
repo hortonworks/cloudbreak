@@ -17,6 +17,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.ProxyConfigService;
+import com.sequenceiq.datalake.service.sdx.SaltService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.TrustedRealmService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
@@ -45,6 +46,9 @@ public class SdxInternalController implements SdxInternalEndpoint {
 
     @Inject
     private TrustedRealmService trustedRealmService;
+
+    @Inject
+    private SaltService saltService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -86,5 +90,12 @@ public class SdxInternalController implements SdxInternalEndpoint {
             @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         return trustedRealmService.updateTrustedRealm(sdxCluster, request);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier updateSalt(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        SdxCluster sdxCluster = sdxService.getByCrn(crn);
+        return saltService.updateSalt(sdxCluster);
     }
 }

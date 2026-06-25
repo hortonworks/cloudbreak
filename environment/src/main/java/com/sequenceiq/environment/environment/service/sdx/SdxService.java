@@ -154,4 +154,16 @@ public class SdxService {
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
+
+    public FlowIdentifier updateSalt(String datalakeCrn) {
+        try {
+            LOGGER.debug("Calling SDX salt update by CRN {}", datalakeCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    initiatorUserCrn -> sdxInternalEndpoint.updateSalt(datalakeCrn, initiatorUserCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to update salt on SDX cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
 }

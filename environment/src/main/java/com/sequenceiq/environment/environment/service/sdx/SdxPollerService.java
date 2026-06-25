@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.service.sdx;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_PROXY_CONFIG_MODIFICATION_IN_PROGRESS;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_UPDATE_TRUSTED_REALM_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.SALT_UPDATE_IN_PROGRESS;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,6 +41,8 @@ public class SdxPollerService {
     private static final Set<SdxClusterStatusResponse> SKIP_UPDATE_TRUSTED_REALM = Set.of(DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS,
             DATALAKE_UPDATE_TRUSTED_REALM_FAILED);
 
+    private static final Set<SdxClusterStatusResponse> SKIP_SALT_UPDATE = Set.of(SALT_UPDATE_IN_PROGRESS);
+
     @Value("${env.stop.polling.attempt:360}")
     private Integer attempt;
 
@@ -72,6 +75,11 @@ public class SdxPollerService {
             UpdateTrustedRealmRequest request) {
         executeSdxOperationAndStartPolling(envId, environmentName, SKIP_UPDATE_TRUSTED_REALM,
                 sdxCrn -> sdxService.updateTrustedRealm(sdxCrn, request));
+    }
+
+    public void updateSaltOnAttachedDatalakeClusters(Long envId, String environmentName) {
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_SALT_UPDATE,
+                sdxService::updateSalt);
     }
 
     private void executeSdxOperationAndStartPolling(Long envId, String environmentName, Set<SdxClusterStatusResponse> skipStatuses,

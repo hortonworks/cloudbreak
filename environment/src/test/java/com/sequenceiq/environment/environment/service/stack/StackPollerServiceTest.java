@@ -287,6 +287,63 @@ class StackPollerServiceTest {
         assertThat(result).isEmpty();
     }
 
+    // ---- updateSaltOnDatahubStacks ----
+
+    @Test
+    void updateSaltOnDatahubStacksFiltersOutDatalakes() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        StackViewV4Response datahub = createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE);
+        datahub.setStackType(StackType.WORKLOAD.name());
+        StackViewV4Response datalake = createNamedStackViewV4Response(STACK_NAME_2, Status.AVAILABLE);
+        datalake.setStackType(StackType.DATALAKE.name());
+        responsesSet.add(datahub);
+        responsesSet.add(datalake);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<FlowIdentifier> expectedIds = List.of(new FlowIdentifier(FlowType.FLOW, "flow-1"));
+        when(stackPollerProvider.saltUpdateOnStacksPoller(List.of(STACK_NAME_1), ENVIRONMENT_ID))
+                .thenReturn(() -> AttemptResults.finishWith(expectedIds));
+
+        List<FlowIdentifier> result = underTest.updateSaltOnDatahubStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN);
+
+        assertThat(result).isEqualTo(expectedIds);
+    }
+
+    @Test
+    void updateSaltOnDatahubStacksReturnsNullWhenOnlyDatalakesExist() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        StackViewV4Response datalake = createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE);
+        datalake.setStackType(StackType.DATALAKE.name());
+        responsesSet.add(datalake);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<FlowIdentifier> result = underTest.updateSaltOnDatahubStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void updateSaltOnDatahubStacksSkipsStoppedDatahubs() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        StackViewV4Response runningDatahub = createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE);
+        runningDatahub.setStackType(StackType.WORKLOAD.name());
+        StackViewV4Response stoppedDatahub = createNamedStackViewV4Response(STACK_NAME_2, Status.STOPPED);
+        stoppedDatahub.setStackType(StackType.WORKLOAD.name());
+        responsesSet.add(runningDatahub);
+        responsesSet.add(stoppedDatahub);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<FlowIdentifier> expectedIds = List.of(new FlowIdentifier(FlowType.FLOW, "flow-1"));
+        when(stackPollerProvider.saltUpdateOnStacksPoller(List.of(STACK_NAME_1), ENVIRONMENT_ID))
+                .thenReturn(() -> AttemptResults.finishWith(expectedIds));
+
+        List<FlowIdentifier> result = underTest.updateSaltOnDatahubStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN);
+
+        assertThat(result).isEqualTo(expectedIds);
+    }
+
+    // ---- updateUserDefinedTags ----
+
     @Test
     void updateUserDefinedTagsWhenDataLakeNeedsToBeUpdated() {
         Map<String, String> userDefinedTags = Map.of("custom", "value");

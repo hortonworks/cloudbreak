@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -89,6 +90,14 @@ public class StackPollerService {
                 stackPollerProvider.saltUpdateOnStacksPoller(stackNames, envId));
     }
 
+    public List<FlowIdentifier> updateSaltOnDatahubStacks(Long envId, String envCrn) {
+        List<String> stackNames = getUpdatableStacks(envCrn, StackViewV4Response::getName,
+                stack -> StackType.WORKLOAD.name().equals(stack.getStackType()));
+        LOGGER.info("Datahub stack names which will be salt-updated: {}", stackNames);
+        return startStackUpdatePolling(stackNames,
+                stackPollerProvider.saltUpdateOnStacksPoller(stackNames, envId));
+    }
+
     private List<FlowIdentifier> startStackUpdatePolling(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
         if (CollectionUtils.isNotEmpty(stackNames)) {
             try {
@@ -132,6 +141,11 @@ public class StackPollerService {
     }
 
     public List<String> getUpdatableStacks(String envCrn, Function<StackViewV4Response, String> requestedAttributeMapper) {
+        return getUpdatableStacks(envCrn, requestedAttributeMapper, stack -> true);
+    }
+
+    public List<String> getUpdatableStacks(String envCrn, Function<StackViewV4Response, String> requestedAttributeMapper,
+            Predicate<StackViewV4Response> additionalFilter) {
         StackViewV4Responses stackViewV4Responses = stackV4Endpoint.list(0L, envCrn, false);
         List<String> responseToLog = Optional.ofNullable(stackViewV4Responses.getResponses()).orElse(List.of()).stream()
                 .map(response -> String.format("[Name: %s; Crn: %s; Status: %s, ClusterStatus: %s]",
@@ -140,6 +154,7 @@ public class StackPollerService {
         LOGGER.info("Stacks returned for update: {}", responseToLog);
         return stackViewV4Responses.getResponses().stream()
                 .filter(stack -> !SKIPPED_STATES.contains(stack.getCluster().getStatus()))
+                .filter(additionalFilter)
                 .map(requestedAttributeMapper)
                 .collect(Collectors.toList());
     }

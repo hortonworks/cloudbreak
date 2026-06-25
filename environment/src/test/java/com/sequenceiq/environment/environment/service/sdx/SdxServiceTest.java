@@ -125,6 +125,27 @@ class SdxServiceTest {
         verify(webApplicationExceptionMessageExtractor).getErrorMessage(cause);
     }
 
+    @Test
+    void updateSaltSuccess() {
+        when(sdxInternalEndpoint.updateSalt(SDX_CRN, CURRENT_USER_CRN)).thenReturn(flowIdentifier);
+        FlowIdentifier result = doAsCurrentUserCrn(() -> underTest.updateSalt(SDX_CRN));
+
+        assertThat(result).isEqualTo(flowIdentifier);
+        verify(sdxInternalEndpoint).updateSalt(SDX_CRN, CURRENT_USER_CRN);
+    }
+
+    @Test
+    void updateSaltFailure() {
+        WebApplicationException cause = new WebApplicationException("cause");
+        when(sdxInternalEndpoint.updateSalt(SDX_CRN, CURRENT_USER_CRN)).thenThrow(cause);
+
+        assertThatThrownBy(() -> doAsCurrentUserCrn(() -> underTest.updateSalt(SDX_CRN)))
+                .isInstanceOf(SdxOperationFailedException.class)
+                .hasCause(cause)
+                .hasMessage(EXTRACTED_MESSAGE);
+        verify(webApplicationExceptionMessageExtractor).getErrorMessage(cause);
+    }
+
     private <T> T doAsCurrentUserCrn(Supplier<T> callable) {
         return ThreadBasedUserCrnProvider.doAs(CURRENT_USER_CRN, callable);
     }
