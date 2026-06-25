@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -77,6 +78,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetup
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupUpdatePillarDataHandler;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupValidationHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -167,6 +169,9 @@ class TrustSetupFlowIntegrationTest {
     private CrossRealmTrustService crossRealmTrustService;
 
     @MockBean
+    private EnvironmentService environmentService;
+
+    @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
 
     @MockBean
@@ -205,6 +210,7 @@ class TrustSetupFlowIntegrationTest {
         ig.setInstanceMetaData(Set.of(instanceMetaData));
         stack.setInstanceGroups(Set.of(ig));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(environmentService.getEnvironmentType(ENVIRONMENT_CRN)).thenReturn(EnvironmentType.HYBRID);
     }
 
     @Test
@@ -241,6 +247,28 @@ class TrustSetupFlowIntegrationTest {
         successDetails.getAdditionalDetails().put("MESSAGE", List.of("Pillar data update finished successfully"));
         successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
         operationUpdateVerify.verify(operationService).completeOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+    }
+
+    @Test
+    void testAddCrossRealmTrustForPublicCloudWhenSuccessful() {
+        when(environmentService.getEnvironmentType(ENVIRONMENT_CRN)).thenReturn(EnvironmentType.PUBLIC_CLOUD);
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults()
+                .addTaskResult(new TaskResult(TaskResultType.INFO, "Success", Map.of())));
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        testFlow();
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Prepare IPA server");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Configuring DNS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Updating pillar data");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Adding cross-realm trust");
+        stackStatusVerify.verify(stackUpdater)
+                .updateStackStatus(stack, DetailedStackStatus.AVAILABLE, "Cross-realm trust setup finished");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService, times(5)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
     }
 
     @Test
