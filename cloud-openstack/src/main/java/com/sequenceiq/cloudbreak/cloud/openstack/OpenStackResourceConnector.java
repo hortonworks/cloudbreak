@@ -79,11 +79,6 @@ public class OpenStackResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
-        throw new UnsupportedOperationException("Disk volume update is not supported on OpenStack!");
-    }
-
-    @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception {
         createKeyPair(auth, stack, openStackClient.createOSClient(auth));

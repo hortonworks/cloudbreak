@@ -114,11 +114,6 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
-        awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
-    }
-
-    @Override
     protected List<CloudResource> collectProviderSpecificResources(List<CloudResource> resources, List<CloudInstance> vms) {
         return List.of();
     }

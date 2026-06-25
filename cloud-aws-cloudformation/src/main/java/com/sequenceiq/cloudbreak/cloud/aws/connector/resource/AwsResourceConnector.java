@@ -305,11 +305,6 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
-        awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
-    }
-
-    @Override
     public void updateTag(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> userDefinedTags) {
         try {
             awsResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
