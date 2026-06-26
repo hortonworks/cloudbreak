@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,14 @@ public interface TagUpdateStrategy {
     Set<ResourceType> supportedTypes();
 
     void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) throws IOException;
+
+    default boolean isBatchUpdateSupported() {
+        return false;
+    }
+
+    default void batchUpdateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 
     default boolean tagsAlreadyUpToDate(Map<String, String> existingTags, Map<String, String> newTags) {
         Map<String, String> existing = existingTags != null ? existingTags : Map.of();

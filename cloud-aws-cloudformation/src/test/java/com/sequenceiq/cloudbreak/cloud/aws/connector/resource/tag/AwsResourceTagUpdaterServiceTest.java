@@ -59,7 +59,7 @@ class AwsResourceTagUpdaterServiceTest {
     void testUpdateTagsAwsRootDisk() throws IOException {
         CloudResource cloudResource = buildResource(AWS_ROOT_DISK, INSTANCE_ID, null);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verify(ec2Strategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
         verifyNoMoreInteractions(cloudFormationStrategy);
@@ -69,26 +69,26 @@ class AwsResourceTagUpdaterServiceTest {
     void testUpdateTagsCloudFormationStack() throws IOException {
         CloudResource cloudResource = buildResource(CLOUDFORMATION_STACK, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verify(cloudFormationStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
         verifyNoMoreInteractions(ec2Strategy);
     }
 
     @Test
-    void testUpdateTagsUnsupportedType() throws IOException {
+    void testUpdateTagsUnsupportedType() {
         CloudResource cloudResource = buildResource(AWS_EFS, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verifyNoMoreInteractions(ec2Strategy, cloudFormationStrategy);
     }
 
     @Test
-    void testUpdateTagsNotTaggableResourceType() throws IOException {
+    void testUpdateTagsNotTaggableResourceType() {
         CloudResource cloudResource = buildResource(AWS_LAUNCHCONFIGURATION, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verifyNoMoreInteractions(ec2Strategy, cloudFormationStrategy);
     }
@@ -99,7 +99,7 @@ class AwsResourceTagUpdaterServiceTest {
         doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS));
+        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

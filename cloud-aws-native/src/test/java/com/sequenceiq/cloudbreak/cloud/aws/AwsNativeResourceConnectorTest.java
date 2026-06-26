@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -201,7 +200,7 @@ public class AwsNativeResourceConnectorTest {
     }
 
     @Test
-    void testUpdateTags() throws IOException {
+    void testUpdateTags() {
         CloudResource awsInstance = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE)
                 .withName("awsInstance")
@@ -221,9 +220,7 @@ public class AwsNativeResourceConnectorTest {
 
         underTest.updateTags(ac, List.of(awsInstance, awsVolumeSet, loadBalancer), userDefinedTags);
 
-        verify(awsNativeResourceTagUpdaterService).updateTags(ac, awsInstance, userDefinedTags);
-        verify(awsNativeResourceTagUpdaterService).updateTags(ac, awsVolumeSet, userDefinedTags);
-        verify(awsNativeResourceTagUpdaterService).updateTags(ac, loadBalancer, userDefinedTags);
+        verify(awsNativeResourceTagUpdaterService).updateTags(ac, List.of(awsInstance, awsVolumeSet, loadBalancer), userDefinedTags);
     }
 
     @ParameterizedTest

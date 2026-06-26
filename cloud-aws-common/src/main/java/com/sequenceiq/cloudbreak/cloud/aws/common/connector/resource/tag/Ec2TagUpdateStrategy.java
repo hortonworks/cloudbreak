@@ -11,6 +11,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AWS_SNAPSHOT;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_SSH_KEY;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_VOLUMESET;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
@@ -45,6 +47,10 @@ import software.amazon.awssdk.services.ec2.model.Volume;
 public class Ec2TagUpdateStrategy implements TagUpdateStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Ec2TagUpdateStrategy.class);
+
+    private static final int TAG_UPDATE_BATCH_SIZE = 1000;
+
+    private static final int DESCRIBE_BATCH_SIZE = 200;
 
     @Inject
     private CommonAwsClient commonAwsClient;
@@ -70,8 +76,7 @@ public class Ec2TagUpdateStrategy implements TagUpdateStrategy {
         };
 
         if (resourcesToUpdate.isEmpty()) {
-            LOGGER.info("Tags for resource {} of type {} are already up to date, skipping update.",
-                    cloudResource.getName(), cloudResource.getType());
+            LOGGER.info("Tags for resource {} of type {} are already up to date, skipping update.", cloudResource.getName(), cloudResource.getType());
             return;
         }
 
@@ -83,45 +88,100 @@ public class Ec2TagUpdateStrategy implements TagUpdateStrategy {
                 .build());
     }
 
-    private List<String> resolveVolumeIdsToUpdate(AmazonEc2Client ec2Client,
-            String instanceId, Map<String, String> newTags) {
-        DescribeVolumesResponse response = ec2Client.describeVolumes(
-                DescribeVolumesRequest.builder()
-                        .filters(Filter.builder()
-                                .name("attachment.instance-id")
-                                .values(instanceId)
-                                .build())
-                        .build());
+    @Override
+    public boolean isBatchUpdateSupported() {
+        return true;
+    }
 
-        return response.volumes().stream()
-                .filter(volume -> !tagsAlreadyUpToDate(toTagMap(volume.tags()), newTags))
-                .map(Volume::volumeId)
+    @Override
+    public void batchUpdateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
+        AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
+
+        List<String> resourcesToUpdate = new ArrayList<>();
+
+        Map<ResourceType, List<CloudResource>> cloudResourcesByType = cloudResources.stream()
+                .collect(Collectors.groupingBy(CloudResource::getType));
+
+        cloudResourcesByType.forEach((type, resources) -> {
+            switch (type) {
+                case AWS_ROOT_DISK, AWS_VOLUMESET -> {
+                    List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).distinct().toList();
+                    resourcesToUpdate.addAll(resolveVolumeIdsToUpdate(ec2Client, instanceIds, tags));
+                }
+                case AWS_INSTANCE -> {
+                    List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).toList();
+                    resourcesToUpdate.addAll(filterResourcesToUpdate(ec2Client, instanceIds, tags));
+                }
+                default -> {
+                    List<String> refs = resources.stream().map(CloudResource::getReference).toList();
+                    resourcesToUpdate.addAll(filterResourcesToUpdate(ec2Client, refs, tags));
+                }
+            }
+        });
+
+        if (resourcesToUpdate.isEmpty()) {
+            LOGGER.info("Tags for all {} EC2 resources are already up to date, skipping update.", cloudResources.size());
+            return;
+        }
+
+        Collection<Tag> ec2Tags = awsTaggingService.prepareEc2Tags(tags);
+
+        Lists.partition(resourcesToUpdate, TAG_UPDATE_BATCH_SIZE).forEach(batch ->
+                ec2Client.createTags(CreateTagsRequest.builder()
+                        .resources(batch)
+                        .tags(ec2Tags)
+                        .build())
+        );
+    }
+
+    private List<String> resolveVolumeIdsToUpdate(AmazonEc2Client ec2Client,
+            List<String> instanceIds, Map<String, String> newTags) {
+        return Lists.partition(instanceIds, DESCRIBE_BATCH_SIZE).stream()
+                .flatMap(batch -> {
+                    DescribeVolumesResponse response = ec2Client.describeVolumes(
+                            DescribeVolumesRequest.builder()
+                                    .filters(Filter.builder()
+                                            .name("attachment.instance-id")
+                                            .values(batch)
+                                            .build())
+                                    .build());
+                    return response.volumes().stream()
+                            .filter(volume -> !tagsAlreadyUpToDate(toTagMap(volume.tags()), newTags))
+                            .map(Volume::volumeId);
+                })
                 .toList();
     }
 
     private List<String> filterResourcesToUpdate(AmazonEc2Client ec2Client,
             List<String> resourceIds, Map<String, String> newTags) {
-        DescribeTagsResponse response = ec2Client.describeTags(
-                DescribeTagsRequest.builder()
-                        .filters(Filter.builder()
-                                .name("resource-id")
-                                .values(resourceIds)
-                                .build())
-                        .build());
+        return Lists.partition(resourceIds, DESCRIBE_BATCH_SIZE).stream()
+                .flatMap(batch -> {
+                    DescribeTagsResponse response = ec2Client.describeTags(
+                            DescribeTagsRequest.builder()
+                                .filters(Filter.builder()
+                                    .name("resource-id")
+                                    .values(batch)
+                                    .build())
+                                .build());
 
-        Map<String, Map<String, String>> existingTagsByResource = response.tags().stream()
-                .collect(Collectors.groupingBy(
-                        TagDescription::resourceId,
-                        Collectors.toMap(TagDescription::key, TagDescription::value)
-                ));
+                    Map<String, Map<String, String>> existingTagsByResource = response.tags().stream()
+                            .collect(Collectors.groupingBy(
+                                TagDescription::resourceId,
+                                Collectors.toMap(TagDescription::key, TagDescription::value)
+                            ));
 
-        return resourceIds.stream()
-                .filter(resourceId -> {
-                    Map<String, String> existingTags = existingTagsByResource
-                            .getOrDefault(resourceId, Map.of());
-                    return !tagsAlreadyUpToDate(existingTags, newTags);
+                    return batch.stream()
+                            .filter(resourceId -> {
+                                Map<String, String> existingTags = existingTagsByResource.getOrDefault(resourceId, Map.of());
+                                return !tagsAlreadyUpToDate(existingTags, newTags);
+                            });
                 })
                 .toList();
+    }
+
+    private List<String> resolveVolumeIdsToUpdate(AmazonEc2Client ec2Client,
+            String instanceId, Map<String, String> newTags) {
+        return resolveVolumeIdsToUpdate(ec2Client, List.of(instanceId), newTags);
     }
 
     private Map<String, String> toTagMap(List<Tag> tags) {

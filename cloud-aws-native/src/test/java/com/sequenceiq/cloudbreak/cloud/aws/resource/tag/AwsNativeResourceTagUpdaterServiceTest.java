@@ -51,12 +51,13 @@ class AwsNativeResourceTagUpdaterServiceTest {
     }
 
     @Test
-    void testUpdateTagsAwsInstance() throws IOException {
+    void testUpdateTagsAwsInstance() {
         CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+        when(ec2Strategy.isBatchUpdateSupported()).thenReturn(true);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
-        verify(ec2Strategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        verify(ec2Strategy).batchUpdateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
         verifyNoMoreInteractions(elbStrategy);
     }
 
@@ -64,17 +65,17 @@ class AwsNativeResourceTagUpdaterServiceTest {
     void testUpdateTagsAwsLoadBalancer() throws IOException {
         CloudResource cloudResource = buildResource(ResourceType.ELASTIC_LOAD_BALANCER, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verify(elbStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
         verifyNoMoreInteractions(ec2Strategy);
     }
 
     @Test
-    void testUpdateTagsUnsupportedType() throws IOException {
+    void testUpdateTagsUnsupportedType() {
         CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verifyNoMoreInteractions(ec2Strategy, elbStrategy);
     }
@@ -85,7 +86,7 @@ class AwsNativeResourceTagUpdaterServiceTest {
         doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS));
+        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

@@ -53,7 +53,7 @@ class AzureResourceTagUpdaterServiceTest {
     void testUpdateTagsAzureInstance() throws IOException {
         CloudResource cloudResource = buildResource(ResourceType.AZURE_INSTANCE, INSTANCE_ID, null);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verify(instanceStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
         verifyNoMoreInteractions(diskStrategy);
@@ -63,26 +63,26 @@ class AzureResourceTagUpdaterServiceTest {
     void testUpdateTagsAzureDisk() throws IOException {
         CloudResource cloudResource = buildResource(ResourceType.AZURE_DISK, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verify(diskStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
         verifyNoMoreInteractions(instanceStrategy);
     }
 
     @Test
-    void testUpdateTagsUnsupportedType() throws IOException {
+    void testUpdateTagsUnsupportedType() {
         CloudResource cloudResource = buildResource(ResourceType.AZURE_SUBNET, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verifyNoMoreInteractions(instanceStrategy, diskStrategy);
     }
 
     @Test
-    void testUpdateTagsNotTaggableResourceType() throws IOException {
+    void testUpdateTagsNotTaggableResourceType() {
         CloudResource cloudResource = buildResource(ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verifyNoMoreInteractions(instanceStrategy, diskStrategy);
     }
@@ -93,7 +93,7 @@ class AzureResourceTagUpdaterServiceTest {
         doThrow(new RuntimeException("Azure error")).when(instanceStrategy)
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS));
+        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

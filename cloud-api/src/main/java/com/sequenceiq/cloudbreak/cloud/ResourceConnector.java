@@ -487,22 +487,18 @@ public interface ResourceConnector {
             LOGGER.debug("Skip updating user defined tags on cloud resources because user defined tags are empty.");
             return;
         }
-        for (CloudResource cloudResource : cloudResources) {
-            LOGGER.info("Updating tags for cloud resource: {} with type: {} with tags: {}",
-                    cloudResource.getName(), cloudResource.getType(), tags);
-            updateTag(authenticatedContext, cloudResource, tags);
-        }
+        updateCloudResourcesTags(authenticatedContext, cloudResources, tags);
     }
 
     /**
-     * Updates the tags of a single cloud resource.
+     * Updates the tags of cloud resources.
      * Providers override this method to call their specific tag updater service.
      *
      * @param authenticatedContext the authenticated context
-     * @param cloudResource the cloud resource to update
+     * @param cloudResources cloud resources to update
      * @param tags the tags to apply
      */
-    default void updateTag(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
+    default void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

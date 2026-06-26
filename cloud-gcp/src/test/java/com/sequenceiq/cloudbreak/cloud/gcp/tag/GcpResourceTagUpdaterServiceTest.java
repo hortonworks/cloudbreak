@@ -61,9 +61,10 @@ class GcpResourceTagUpdaterServiceTest {
     @Test
     void testUpdateTagsGcpInstance() throws IOException {
         CloudResource cloudResource = buildResource(GCP_INSTANCE, INSTANCE_ID, null);
+        when(instanceStrategy.isBatchUpdateSupported()).thenReturn(false);
         when(gcpLabelUtil.createLabelsFromTagsMap(USER_DEFINED_TAGS)).thenReturn(USER_DEFINED_TAGS);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verify(instanceStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
         verifyNoMoreInteractions(diskStrategy);
@@ -72,9 +73,10 @@ class GcpResourceTagUpdaterServiceTest {
     @Test
     void testUpdateTagsGcpDisk() throws IOException {
         CloudResource cloudResource = buildResource(GCP_DISK, null, RESOURCE_REFERENCE);
+        when(diskStrategy.isBatchUpdateSupported()).thenReturn(false);
         when(gcpLabelUtil.createLabelsFromTagsMap(USER_DEFINED_TAGS)).thenReturn(USER_DEFINED_TAGS);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verify(diskStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
         verifyNoMoreInteractions(instanceStrategy);
@@ -84,7 +86,7 @@ class GcpResourceTagUpdaterServiceTest {
     void testUpdateTagsUnsupportedType() throws IOException {
         CloudResource cloudResource = buildResource(GCP_SUBNET, null, RESOURCE_REFERENCE);
 
-        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS);
 
         verifyNoMoreInteractions(instanceStrategy, diskStrategy);
     }
@@ -95,7 +97,7 @@ class GcpResourceTagUpdaterServiceTest {
         doThrow(new RuntimeException("GCP error")).when(instanceStrategy)
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS));
+        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

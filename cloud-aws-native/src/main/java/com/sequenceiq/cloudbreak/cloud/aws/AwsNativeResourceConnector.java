@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -151,14 +150,8 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public void updateTag(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> userDefinedTags) {
-        try {
-            awsNativeResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
-            LOGGER.debug("Successfully updated tags for cloud resource: {} with type: {}", cloudResource.getName(), cloudResource.getType());
-        } catch (Exception e) {
-            throw new CloudbreakRuntimeException(String.format("Failed to update tags for resource: %s with type: %s", cloudResource.getName(),
-                    cloudResource.getType()), e);
-        }
+    public void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
+        awsNativeResourceTagUpdaterService.updateTags(authenticatedContext, cloudResources, tags);
     }
 
     @Override

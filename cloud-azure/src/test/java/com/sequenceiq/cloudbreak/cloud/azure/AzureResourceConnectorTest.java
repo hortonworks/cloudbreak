@@ -391,13 +391,13 @@ public class AzureResourceConnectorTest {
                 .withName("azureLoadBalancer")
                 .build();
 
+        List<CloudResource> cloudResources = List.of(azureInstance, azureDisk, azureLoadBalancer);
+
         Map<String, String> userDefinedTags = Map.of("custom", "value");
 
-        underTest.updateTags(ac, List.of(azureInstance, azureDisk, azureLoadBalancer), userDefinedTags);
+        underTest.updateTags(ac, cloudResources, userDefinedTags);
 
-        verify(azureResourceTagUpdaterService).updateTags(ac, azureInstance, userDefinedTags);
-        verify(azureResourceTagUpdaterService).updateTags(ac, azureDisk, userDefinedTags);
-        verify(azureResourceTagUpdaterService).updateTags(ac, azureLoadBalancer, userDefinedTags);
+        verify(azureResourceTagUpdaterService).updateTags(ac, cloudResources, userDefinedTags);
     }
 
     @ParameterizedTest

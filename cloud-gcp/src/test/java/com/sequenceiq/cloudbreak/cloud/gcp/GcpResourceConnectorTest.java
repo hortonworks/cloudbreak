@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -254,7 +253,7 @@ public class GcpResourceConnectorTest {
     }
 
     @Test
-    void testUpdateTags() throws IOException {
+    void testUpdateTags() {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudResource cloudResource1 = cloudResource("test-1", GCP_INSTANCE);
         CloudResource cloudResource2 = cloudResource("test-2", GCP_INSTANCE);
@@ -263,8 +262,7 @@ public class GcpResourceConnectorTest {
 
         underTest.updateTags(authenticatedContext, cloudResources, userDefinedTags);
 
-        verify(gcpResourceTagUpdaterService).updateTags(authenticatedContext, cloudResource1, userDefinedTags);
-        verify(gcpResourceTagUpdaterService).updateTags(authenticatedContext, cloudResource2, userDefinedTags);
+        verify(gcpResourceTagUpdaterService).updateTags(authenticatedContext, cloudResources, userDefinedTags);
     }
 
     @ParameterizedTest

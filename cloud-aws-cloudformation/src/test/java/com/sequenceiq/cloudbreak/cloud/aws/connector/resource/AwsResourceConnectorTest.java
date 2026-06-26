@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +116,7 @@ class AwsResourceConnectorTest {
     }
 
     @Test
-    void testUpdateTags() throws IOException {
+    void testUpdateTags() {
         AuthenticatedContext ac = mock(AuthenticatedContext.class);
         CloudResource cloudFormationStack = CloudResource.builder()
                 .withType(CLOUDFORMATION_STACK)
@@ -138,9 +137,7 @@ class AwsResourceConnectorTest {
 
         underTest.updateTags(ac, List.of(cloudFormationStack, awsVolumeSet, awsRootDisk), userDefinedTags);
 
-        verify(awsResourceTagUpdaterService).updateTags(ac, cloudFormationStack, userDefinedTags);
-        verify(awsResourceTagUpdaterService).updateTags(ac, awsVolumeSet, userDefinedTags);
-        verify(awsResourceTagUpdaterService).updateTags(ac, awsRootDisk, userDefinedTags);
+        verify(awsResourceTagUpdaterService).updateTags(ac, List.of(cloudFormationStack, awsVolumeSet, awsRootDisk), userDefinedTags);
     }
 
     @ParameterizedTest

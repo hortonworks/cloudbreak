@@ -59,7 +59,6 @@ import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.retry.Retry.ActionFailedException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -618,14 +617,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public void updateTag(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> userDefinedTags) {
-        try {
-            azureResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
-            LOGGER.info("Successfully updated tags for cloud resource: {} with type: {}", cloudResource.getName(), cloudResource.getType());
-        } catch (Exception e) {
-            throw new CloudbreakRuntimeException(String.format("Failed to update tags for resource: %s with type: %s", cloudResource.getName(),
-                    cloudResource.getType()), e);
-        }
+    public void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
+        azureResourceTagUpdaterService.updateTags(authenticatedContext, cloudResources, tags);
     }
 
     @Override
