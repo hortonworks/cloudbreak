@@ -16,8 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
-import com.sequenceiq.cloudbreak.clusterproxy.TokenCertInfo;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
@@ -31,9 +29,6 @@ class GatewayServiceTest {
     @Mock
     private GatewayRepository gatewayRepository;
 
-    @Mock
-    private ClusterProxySecretProvider clusterProxySecretProvider;
-
     @InjectMocks
     private GatewayService underTest;
 
@@ -44,18 +39,12 @@ class GatewayServiceTest {
         input.setId(GATEWAY_ID);
         when(gatewayRepository.findById(GATEWAY_ID)).thenReturn(Optional.of(input));
         when(gatewayRepository.save(input)).thenReturn(input);
-        when(clusterProxySecretProvider.generateSignKeys()).thenReturn(
-                new TokenCertInfo(
-                        "testSignKey",
-                        "testSignPub",
-                        "testSignCert",
-                        "testSignTokenCert")
-        );
+
         underTest.generateAndUpdateSignKeys(input);
 
-        assertEquals("testSignKey", input.getSignKey());
-        assertEquals("testSignPub", input.getSignPub());
-        assertEquals("testSignCert", input.getSignCert());
+        assertNotNull(input.getSignPub());
+        assertNotNull(input.getSignCert());
+        assertNotNull(input.getSignKey());
         verify(gatewayRepository, times(1)).save(input);
     }
 
@@ -68,28 +57,15 @@ class GatewayServiceTest {
     void testGenerateSignKeys() {
         Gateway input = new Gateway();
         input.setId(GATEWAY_ID);
-        when(clusterProxySecretProvider.generateSignKeys()).thenReturn(
-                new TokenCertInfo(
-                        "testSignKey",
-                        "testSignPub",
-                        "testSignCert",
-                        "testSignTokenCert")
-        );
-
         Gateway gatewayWithKeys = underTest.generateSignKeys(input);
-
-        assertEquals("testSignKey", gatewayWithKeys.getSignKey());
         assertNotNull(gatewayWithKeys.getSignKeySecret());
         assertEquals(gatewayWithKeys.getSignKeySecret().getRaw(), gatewayWithKeys.getSignKey());
-        assertEquals("testSignPub", gatewayWithKeys.getSignPub());
         assertNotNull(gatewayWithKeys.getSignPubSecret());
         assertEquals(gatewayWithKeys.getSignPubSecret().getRaw(), gatewayWithKeys.getSignPub());
         assertEquals(gatewayWithKeys.getSignPubDeprecated(), gatewayWithKeys.getSignPub());
-        assertEquals("testSignCert", gatewayWithKeys.getSignCert());
         assertNotNull(gatewayWithKeys.getSignCertSecret());
         assertEquals(gatewayWithKeys.getSignCertSecret().getRaw(), gatewayWithKeys.getSignCert());
         assertEquals(gatewayWithKeys.getSignCertDeprecated(), gatewayWithKeys.getSignCert());
-        assertEquals("testSignTokenCert", gatewayWithKeys.getTokenCert());
     }
 
     @Test

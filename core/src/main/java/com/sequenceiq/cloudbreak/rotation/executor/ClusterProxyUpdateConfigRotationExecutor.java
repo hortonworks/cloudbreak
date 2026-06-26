@@ -6,14 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyUpdateConfigRotationContext;
-import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
-import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -26,15 +23,6 @@ public class ClusterProxyUpdateConfigRotationExecutor extends AbstractRotationEx
 
     @Inject
     private ClusterProxyService clusterProxyService;
-
-    @Inject
-    private GatewayService gatewayService;
-
-    @Inject
-    private ClusterProxySecretProvider clusterProxySecretProvider;
-
-    @Inject
-    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Override
     protected void rotate(ClusterProxyUpdateConfigRotationContext rotationContext) {

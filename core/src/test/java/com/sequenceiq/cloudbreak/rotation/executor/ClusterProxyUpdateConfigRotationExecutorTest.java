@@ -52,4 +52,5 @@ class ClusterProxyUpdateConfigRotationExecutorTest {
 
         verify(clusterProxyService).updateClusterConfigWithKnoxSecretLocation(1L, "secretPath");
     }
+
 }
