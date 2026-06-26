@@ -2,10 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsUpdateService;
@@ -15,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 @Service
 public class AwsImageUpdateService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsImageUpdateService.class);
 
     @Inject
     private AwsLaunchConfigurationUpdateService awsLaunchConfigurationUpdateService;
@@ -24,7 +29,12 @@ public class AwsImageUpdateService {
 
     public void updateImage(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource) {
         String cfTemplate = stack.getTemplate();
-        if (cfTemplate.contains(AwsUpdateService.LAUNCH_CONFIGURATION)) {
+        if (StringUtils.isEmpty(cfTemplate)) {
+            String cfResourceName = Optional.ofNullable(cfResource).map(CloudResource::getName).orElse(null);
+            String stackName = authenticatedContext.getCloudContext().getName();
+            LOGGER.warn("CloudStack template is null, which indicates metadata corruption, skipping image update for stack: '{}' and CF resource name: '{}'",
+                    stackName, cfResourceName);
+        } else if (cfTemplate.contains(AwsUpdateService.LAUNCH_CONFIGURATION)) {
             awsLaunchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource,
                     Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
         } else if (cfTemplate.contains(AwsUpdateService.LAUNCH_TEMPLATE)) {
