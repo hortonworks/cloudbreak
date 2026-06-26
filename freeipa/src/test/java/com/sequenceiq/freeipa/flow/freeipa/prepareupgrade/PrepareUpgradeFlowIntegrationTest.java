@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
@@ -73,6 +74,7 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerConfigurationService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerCreationService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerMetadataCollectionService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceAttributeUtil;
@@ -148,6 +150,9 @@ class PrepareUpgradeFlowIntegrationTest {
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
     @MockitoBean
+    private FreeIpaLoadBalancerProvisionCondition freeIpaLoadBalancerProvisionCondition;
+
+    @MockitoBean
     private FreeIpaLoadBalancerCreationService freeIpaLoadBalancerCreationService;
 
     @MockitoBean
@@ -203,6 +208,7 @@ class PrepareUpgradeFlowIntegrationTest {
     public void testSuccessfulAwsFlowWithLbCreation() throws Exception {
         stack.setCloudPlatform("AWS");
         when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+        when(freeIpaLoadBalancerProvisionCondition.loadBalancerProvisionEnabled(STACK_ID, FreeIpaLoadBalancerType.INTERNAL_NLB)).thenReturn(true);
 
         LoadBalancer loadBalancer = new LoadBalancer();
         when(freeIpaLoadBalancerConfigurationService.createLoadBalancerConfiguration(eq(STACK_ID), any())).thenReturn(loadBalancer);
@@ -253,6 +259,7 @@ class PrepareUpgradeFlowIntegrationTest {
     public void testMetadataCollectionFailsAndCleanupHappens() throws Exception {
         stack.setCloudPlatform("AWS");
         when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+        when(freeIpaLoadBalancerProvisionCondition.loadBalancerProvisionEnabled(STACK_ID, FreeIpaLoadBalancerType.INTERNAL_NLB)).thenReturn(true);
 
         LoadBalancer loadBalancer = new LoadBalancer();
         when(freeIpaLoadBalancerConfigurationService.createLoadBalancerConfiguration(eq(STACK_ID), any())).thenReturn(loadBalancer);
@@ -304,9 +311,30 @@ class PrepareUpgradeFlowIntegrationTest {
     }
 
     @Test
+    public void testAwsWithLbProvisionNotEnabledSkipsLbCreation() {
+        stack.setCloudPlatform("AWS");
+        when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+        when(freeIpaLoadBalancerProvisionCondition.loadBalancerProvisionEnabled(STACK_ID, FreeIpaLoadBalancerType.INTERNAL_NLB)).thenReturn(false);
+
+        testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, AVAILABLE,
+                "FreeIPA upgrade preparation completed");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verifyNoInteractions(freeIpaLoadBalancerConfigurationService);
+        verify(freeIpaLoadBalancerService, never()).save(any());
+        verifyNoInteractions(freeIpaLoadBalancerCreationService);
+        verifyNoInteractions(freeIpaLoadBalancerMetadataCollectionService);
+        verify(operationService).completeOperation(eq(ACCOUNT_ID), eq(OPERATION_ID), eq(List.of()), eq(List.of()));
+    }
+
+    @Test
     public void testLbDeletionSuccessPerformsDbCleanup() throws Exception {
         stack.setCloudPlatform("AWS");
         when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+        when(freeIpaLoadBalancerProvisionCondition.loadBalancerProvisionEnabled(STACK_ID, FreeIpaLoadBalancerType.INTERNAL_NLB)).thenReturn(true);
 
         LoadBalancer loadBalancer = new LoadBalancer();
         when(freeIpaLoadBalancerConfigurationService.createLoadBalancerConfiguration(eq(STACK_ID), any())).thenReturn(loadBalancer);

@@ -40,6 +40,8 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
+import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent;
+import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
@@ -84,10 +86,15 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
-        assertEquals(12, queue.size());
+        assertEquals(13, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
         assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
+
+        PrepareUpgradeTriggerEvent prepareUpgradeTriggerEvent = (PrepareUpgradeTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
+        assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -196,10 +203,15 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
-        assertEquals(7, queue.size());
+        assertEquals(8, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
         assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
+
+        PrepareUpgradeTriggerEvent prepareUpgradeTriggerEvent = (PrepareUpgradeTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
+        assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -257,10 +269,15 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
-        assertEquals(8, queue.size());
+        assertEquals(9, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
         assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
+
+        PrepareUpgradeTriggerEvent prepareUpgradeTriggerEvent = (PrepareUpgradeTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
+        assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -325,10 +342,15 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
-        assertEquals(10, queue.size());
+        assertEquals(11, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
         assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
+
+        PrepareUpgradeTriggerEvent prepareUpgradeTriggerEvent = (PrepareUpgradeTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
+        assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -414,10 +436,15 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
-        assertEquals(13, queue.size());
+        assertEquals(14, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
         assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
+
+        PrepareUpgradeTriggerEvent prepareUpgradeTriggerEvent = (PrepareUpgradeTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
+        assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -531,10 +558,15 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
-        assertEquals(13, queue.size());
+        assertEquals(14, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
         assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
+
+        PrepareUpgradeTriggerEvent prepareUpgradeTriggerEvent = (PrepareUpgradeTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
+        assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
 
         SecretRotationFlowChainTriggerEvent secretRotationTriggerEvent = (SecretRotationFlowChainTriggerEvent) queue.poll();
         assertEquals(STACK_ID, secretRotationTriggerEvent.getResourceId());

@@ -26,6 +26,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeFailureCleanupComplete;
@@ -41,6 +42,7 @@ import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeTr
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerConfigurationService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
@@ -64,6 +66,9 @@ public class PrepareUpgradeActions {
             @Inject
             private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
+            @Inject
+            private FreeIpaLoadBalancerProvisionCondition freeIpaLoadBalancerProvisionCondition;
+
             @Override
             protected void prepareExecution(PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 setOperationId(variables, payload.getOperationId());
@@ -79,6 +84,9 @@ public class PrepareUpgradeActions {
                     sendEvent(context, new StackEvent(PREPARE_UPGRADE_FINISHED_EVENT.event(), stackId));
                 } else if (freeIpaLoadBalancerService.findByStackId(stackId).isPresent()) {
                     LOGGER.debug("LoadBalancer already exists for stack, permission already validated");
+                    sendEvent(context, new StackEvent(PREPARE_UPGRADE_FINISHED_EVENT.event(), stackId));
+                } else if (!freeIpaLoadBalancerProvisionCondition.loadBalancerProvisionEnabled(stackId, FreeIpaLoadBalancerType.INTERNAL_NLB)) {
+                    LOGGER.debug("LoadBalancer creation is not enabled for stack, skipping LB creation");
                     sendEvent(context, new StackEvent(PREPARE_UPGRADE_FINISHED_EVENT.event(), stackId));
                 } else {
                     variables.put(TEST_LB_CREATED, true);

@@ -47,6 +47,8 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerProvisioningMode;
+import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent;
+import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
@@ -93,6 +95,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
         flowEventChain.addAll(createInitEvent(event));
+        flowEventChain.addAll(createPrepareUpgradeEvent(event));
         flowEventChain.addAll(createLoadBalancerCreationFlowIfNecessary(event));
         flowEventChain.addAll(createSaltSecretRotationFlow(event.getResourceId()));
         flowEventChain.addAll(createSaltUpdateNonChainedFlow(event));
@@ -106,24 +109,16 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
+    private List<PrepareUpgradeTriggerEvent> createPrepareUpgradeEvent(UpgradeEvent event) {
+        return List.of(new PrepareUpgradeTriggerEvent(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), event.getResourceId(), event.getOperationId()));
+    }
+
     private List<Selectable> createInitEvent(UpgradeEvent event) {
-        return List.of(
-                new FlowChainInitPayload(
-                        getName(),
-                        event.getResourceId(),
-                        event.accepted()
-                )
-        );
+        return List.of(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
     }
 
     private List<Selectable> createFinalizeFlow(UpgradeEvent event) {
-        return List.of(
-                new FlowChainFinalizePayload(
-                        getName(),
-                        event.getResourceId(),
-                        event.accepted()
-                )
-        );
+        return List.of(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
     }
 
     private Set<String> groupNames(UpgradeEvent event) {
