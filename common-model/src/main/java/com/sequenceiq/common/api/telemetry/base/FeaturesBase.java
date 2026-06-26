@@ -15,11 +15,6 @@ public abstract class FeaturesBase implements Serializable {
     @Schema(description = TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private FeatureSetting workloadAnalytics;
 
-    @Deprecated
-    @JsonProperty("clusterLogsCollection")
-    @Schema(description = TelemetryModelDescription.TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED)
-    private FeatureSetting clusterLogsCollection;
-
     @JsonProperty("monitoring")
     @Schema(description = TelemetryModelDescription.TELEMETRY_CLUSTER_MONITORING_ENABLED)
     private FeatureSetting monitoring;
@@ -34,16 +29,6 @@ public abstract class FeaturesBase implements Serializable {
 
     public void setWorkloadAnalytics(FeatureSetting workloadAnalytics) {
         this.workloadAnalytics = workloadAnalytics;
-    }
-
-    @Deprecated
-    public FeatureSetting getClusterLogsCollection() {
-        return clusterLogsCollection;
-    }
-
-    @Deprecated
-    public void setClusterLogsCollection(FeatureSetting clusterLogsCollection) {
-        this.clusterLogsCollection = clusterLogsCollection;
     }
 
     public FeatureSetting getMonitoring() {
