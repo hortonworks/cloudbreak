@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
@@ -14,6 +16,8 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 
 @Service
 public class AwsRdsUpgradeValidatorService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsUpgradeValidatorService.class);
 
     @Inject
     private AwsRdsUpgradeValidatorProvider awsRdsUpgradeValidatorProvider;
@@ -33,6 +37,11 @@ public class AwsRdsUpgradeValidatorService {
         AmazonRdsClient amazonRdsClient = awsClient.createRdsClient(authenticatedContext);
         String dbInstanceIdentifier = databaseStack.getDatabaseServer().getServerId();
         RdsInfo rdsInfo = awsRdsUpgradeSteps.getRdsInfo(amazonRdsClient, dbInstanceIdentifier);
-        awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(amazonRdsClient, targetMajorVersion, rdsInfo.getRdsEngineVersion());
+        if (awsRdsUpgradeValidatorProvider.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)) {
+            awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(amazonRdsClient, targetMajorVersion, rdsInfo.getRdsEngineVersion());
+        } else {
+            LOGGER.info("RDS {} is already on or above target major version {}, skipping upgrade target availability validation.",
+                    dbInstanceIdentifier, targetMajorVersion.getMajorVersion());
+        }
     }
 }

@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -13,11 +15,15 @@ import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -70,6 +76,34 @@ public class AwsImageUpdateServiceTest {
         verify(awsLaunchTemplateUpdateService).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName),
                 eq(Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME, LaunchTemplateField.ROOT_DISK_PATH, "")), eq(stack));
         verify(awsLaunchConfigurationUpdateService, never()).updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME));
+    }
+
+    @ParameterizedTest
+    @EmptySource
+    @NullSource
+    void shouldSkipImageUpdateWhenTemplateIsNull(String template) {
+        when(stack.getTemplate()).thenReturn(template);
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getName()).thenReturn("stackname");
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+
+        assertDoesNotThrow(() -> underTest.updateImage(ac, stack, cfResource));
+
+        verifyNoInteractions(awsLaunchConfigurationUpdateService);
+        verifyNoInteractions(awsLaunchTemplateUpdateService);
+    }
+
+    @Test
+    void shouldSkipImageUpdateWhenTemplateIsNullAndCfResourceIsNull() {
+        when(stack.getTemplate()).thenReturn(null);
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getName()).thenReturn("stackname");
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+
+        assertDoesNotThrow(() -> underTest.updateImage(ac, stack, null));
+
+        verifyNoInteractions(awsLaunchConfigurationUpdateService);
+        verifyNoInteractions(awsLaunchTemplateUpdateService);
     }
 
     @Test
