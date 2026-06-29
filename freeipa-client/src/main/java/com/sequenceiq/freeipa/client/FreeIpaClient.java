@@ -669,11 +669,15 @@ public class FreeIpaClient {
             RPCResponse<T> response = (RPCResponse<T>) jsonRpcHttpClient.invoke(method, List.of(flags, parameterMap), type);
             LOGGER.debug("Response object: {}", response);
             if (response == null) {
-                // TODO CDPCP-1028 investigate why invoke returns null instead of throwing an exception
-                // when the cluster-proxy request times out.
-                throw new NullPointerException("JSON-RPC response is null");
+                // jsonrpc4j returns null when the HTTP response body has no valid JSON-RPC result or error field.
+                // This typically occurs when Cluster Proxy times out (504) and returns a non-RPC error body,
+                // or when the response stream is empty. Treat as a retryable timeout error.
+                String message = String.format("Invoke FreeIPA failed: null JSON-RPC response (likely upstream timeout), method=%s", method);
+                LOGGER.warn(message);
+                throw new RetryableFreeIpaClientException(message, new Exception("Timeout or malformed response from jsonrpc4j"));
+            } else {
+                return response;
             }
-            return response;
         } catch (ClusterProxyException e) {
             String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
