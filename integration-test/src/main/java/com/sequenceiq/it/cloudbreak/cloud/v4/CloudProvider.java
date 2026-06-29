@@ -225,6 +225,8 @@ public interface CloudProvider {
 
     String getVariant();
 
+    List<String> getDistroXVariants();
+
     String getFreeIpaUpgradeImageId();
 
     String getFreeIpaCentos7UpgradeImageId();

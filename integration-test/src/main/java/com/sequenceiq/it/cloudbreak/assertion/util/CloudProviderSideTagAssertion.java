@@ -3,14 +3,20 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.dyngr.Polling;
+import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.common.api.tag.response.MapToTaggedResponseAdapter;
@@ -35,6 +41,10 @@ import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 public class CloudProviderSideTagAssertion {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderSideTagAssertion.class);
+
+    private static final int ATTEMPT_NUMBER = 20;
+
+    private static final int SLEEP_TIME = 30;
 
     private final CloudProviderProxy cloudProviderProxy;
 
@@ -120,5 +130,72 @@ public class CloudProviderSideTagAssertion {
             throw new TestFailException(String.format(" Tag validation is not possible, because of %s instance ids: %s null or contains null ", resourceName,
                     instanceIds));
         }
+    }
+
+    public Assertion<EnvironmentTestDto, EnvironmentClient> verifyUserDefinedTags(Map<String, String> userDefinedTags) {
+        return (testContext, testDto, client) -> {
+            String envCrn = testDto.getResponse().getCrn();
+            CloudFunctionality cloudFunctionality = cloudProviderProxy.getCloudFunctionality();
+
+            AtomicReference<Map<String, Map<String, String>>> lastResources = new AtomicReference<>(Map.of());
+            AtomicReference<Map<String, List<String>>> lastFailedResources = new AtomicReference<>(Map.of());
+
+            try {
+                Polling.stopAfterAttempt(ATTEMPT_NUMBER)
+                        .waitPeriodly(SLEEP_TIME, TimeUnit.SECONDS)
+                        .stopIfException(false)
+                        .run(() -> {
+                            Map<String, Map<String, String>> resources = cloudFunctionality.getAllResourcesAndTagsForEnvironment(envCrn);
+                            lastResources.set(resources);
+                            if (resources.isEmpty() || resources.containsKey(null) || resources.containsValue(null)) {
+                                LOGGER.info("Tag validation is not yet possible, because of ARN list: {} empty, null or contains null; retrying", resources);
+                                return AttemptResults.justContinue();
+                            }
+                            Map<String, List<String>> failedResources = collectMissingTags(resources, userDefinedTags, cloudFunctionality);
+                            lastFailedResources.set(failedResources);
+                            if (failedResources.isEmpty()) {
+                                LOGGER.info("Tag validation succeeded for all {} environment resources.", resources.size());
+                                return AttemptResults.finishWith(null);
+                            }
+                            LOGGER.info("Tag validation not yet complete, {} / {} resources missing tags; retrying",
+                                    failedResources.size(), resources.size());
+                            return AttemptResults.justContinue();
+                        });
+            } catch (PollerStoppedException e) {
+                Map<String, Map<String, String>> resources = lastResources.get();
+                Map<String, List<String>> failedResources = lastFailedResources.get();
+                if (resources == null || resources.isEmpty() || resources.containsKey(null) || resources.containsValue(null)) {
+                    LOGGER.error("Tag validation is not possible, because of ARN list: {} null or contains null!", resources);
+                    throw new TestFailException(String.format(" Tag validation is not possible, because of ARN list: %s null or contains null ",
+                            resources), e);
+                }
+                failedResources.forEach((arn, missingTags) ->
+                        LOGGER.error("TAG VALIDATION FAILED: ARN: {} is missing tags: {}", arn, missingTags));
+                throw new TestFailException(String.format(
+                        "Tag validation failed for %d out of %d resources. Resources with missing tags: %s",
+                        failedResources.size(), resources.size(), failedResources), e);
+            }
+            return testDto;
+        };
+    }
+
+    private Map<String, List<String>> collectMissingTags(Map<String, Map<String, String>> resources,
+            Map<String, String> userDefinedTags, CloudFunctionality cloudFunctionality) {
+        Map<String, List<String>> failedResources = new HashMap<>();
+        resources.forEach((arn, tags) -> {
+            LOGGER.info("Verifying ARN: {} with tags: {}", arn, tags);
+            List<String> missingTags = userDefinedTags.entrySet().stream()
+                    .filter(tag -> {
+                        String transformedKey = cloudFunctionality.transformTagKeyOrValue(tag.getKey());
+                        String transformedValue = cloudFunctionality.transformTagKeyOrValue(tag.getValue());
+                        return !transformedValue.equals(tags.get(transformedKey));
+                    })
+                    .map(entry -> entry.getKey() + "=" + entry.getValue())
+                    .collect(Collectors.toList());
+            if (!missingTags.isEmpty()) {
+                failedResources.put(arn, missingTags);
+            }
+        });
+        return failedResources;
     }
 }

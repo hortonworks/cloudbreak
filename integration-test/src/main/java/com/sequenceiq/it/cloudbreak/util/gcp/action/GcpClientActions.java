@@ -33,6 +33,9 @@ import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
+import com.google.cloud.asset.v1.AssetServiceClient;
+import com.google.cloud.asset.v1.ResourceSearchResult;
+import com.google.cloud.asset.v1.SearchAllResourcesRequest;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.BlobListOption;
@@ -44,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.cloudbreak.service.retry.RetryService;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.util.gcp.GcpResources;
 import com.sequenceiq.it.cloudbreak.util.gcp.client.GcpClient;
 
 @Component
@@ -53,6 +57,8 @@ public class GcpClientActions extends GcpClient {
     protected static final int POLLING_INTERVAL = 10000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpClientActions.class);
+
+    private static final String CLOUDERA_ENVIRONMENT_LABEL_KEY = "cloudera-environment-resource-name";
 
     @Inject
     private RetryService retryService;
@@ -482,5 +488,33 @@ public class GcpClientActions extends GcpClient {
             }
         }
         return availabilityZoneMap;
+    }
+
+    public Map<String, Map<String, String>> getResourcesAndTagsByEnvironmentCrnAndResourceTypes(
+            String envCrn, List<GcpResources> resourceTypes) {
+
+        Map<String, Map<String, String>> resourcesAndLabels = new HashMap<>();
+        String envCrnSuffix = envCrn.substring(envCrn.lastIndexOf(':') + 1);
+
+        Set<String> uniqueAssetTypes = resourceTypes.stream()
+                .map(GcpResources::getResourceType)
+                .collect(Collectors.toSet());
+
+        LOGGER.info("Fetching GCP resources for environment CRN: {}, asset types: {}", envCrn, uniqueAssetTypes);
+
+        try (AssetServiceClient client = buildAsset()) {
+            SearchAllResourcesRequest request = SearchAllResourcesRequest.newBuilder()
+                    .setScope("projects/" + getProjectId())
+                    .setQuery("labels." + CLOUDERA_ENVIRONMENT_LABEL_KEY + ":\"" + envCrnSuffix + "\"")
+                    .addAllAssetTypes(uniqueAssetTypes)
+                    .build();
+
+            for (ResourceSearchResult result : client.searchAllResources(request).iterateAll()) {
+                resourcesAndLabels.put(result.getName(), new HashMap<>(result.getLabelsMap()));
+            }
+        }
+
+        LOGGER.info("Fetched {} resources for environment CRN: {}", resourcesAndLabels.size(), envCrn);
+        return resourcesAndLabels;
     }
 }

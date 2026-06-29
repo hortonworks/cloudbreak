@@ -229,4 +229,8 @@ public interface CloudFunctionality {
             String command) {
         throw new TestFailException("Not implemented for Cloud Provider!");
     }
+
+    default Map<String, Map<String, String>> getAllResourcesAndTagsForEnvironment(String envCrn) {
+        throw new TestFailException("Not implemented for Cloud Provider!");
+    }
 }
