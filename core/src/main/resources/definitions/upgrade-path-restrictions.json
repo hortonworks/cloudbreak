@@ -1,6 +1,6 @@
 [
-  { "from": "*",            "to": "7.2.18.1100",  "entitlement_override": "mitigateReleaseFailure7218P1100" },
-  { "from": "7.3.1.800",   "to": "7.3.2.0" },
+  { "from": "*",           "to": "7.2.18.1100",  "entitlement_override": "mitigateReleaseFailure7218P1100" },
+  { "from": "7.3.1.800+",  "to": "7.3.2.0" },
   { "from": "7.2.18.1200", "to": "7.3.2.0" },
   { "from": "7.2.18.1100", "to": "7.2.18.0-1099" },
   { "from": "7.2.18.1100", "to": "7.2.18.1101+" },
