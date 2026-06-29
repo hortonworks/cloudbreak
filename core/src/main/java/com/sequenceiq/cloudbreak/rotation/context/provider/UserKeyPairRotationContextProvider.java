@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.repository.StackAuthenticationRepository;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.RotationNodeValidationService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -44,6 +45,9 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
     @Inject
     private UserKeyPairSaltStateRunRotationContextGenerator userKeyPairSaltStateRunRotationContextGenerator;
 
+    @Inject
+    private RotationNodeValidationService rotationNodeValidationService;
+
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> result = Maps.newHashMap();
@@ -63,6 +67,7 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
             DetailedEnvironmentResponse environment) {
         CustomJobRotationContext.CustomJobRotationContextBuilder customJobRotationContextBuilder = CustomJobRotationContext.builder();
         customJobRotationContextBuilder.withResourceCrn(resourceCrn);
+        customJobRotationContextBuilder.withPreValidateJob(() -> rotationNodeValidationService.validateNoStoppedInstances(stack, getSecret()));
         if (changedKeyPair) {
             customJobRotationContextBuilder.withRotationJob(() -> stackAuthenticationRepository
                     .save(updateAuthentication(stack.getStackAuthentication(), environment.getAuthentication())));

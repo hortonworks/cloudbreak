@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceR
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
+import com.sequenceiq.cloudbreak.rotation.RotationNodeValidationService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -55,6 +56,9 @@ public class IdBrokerCertRotationContextProvider extends AbstractKnoxCertRotatio
     @Inject
     private ExitCriteriaProvider exitCriteriaProvider;
 
+    @Inject
+    private RotationNodeValidationService rotationNodeValidationService;
+
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceId) {
         Map<SecretRotationStep, RotationContext> result = new HashMap<>();
@@ -81,13 +85,14 @@ public class IdBrokerCertRotationContextProvider extends AbstractKnoxCertRotatio
         result.put(SALT_PILLAR, getSaltPillarRotationContext(stack.getResourceCrn(), clusterHostServiceRunner.getIdBrokerPillarProperties(newIdBroker)));
         result.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack, gatewayConfigService, exitCriteriaProvider.get(stack)));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));
-        result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), idBroker));
+        result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), stack, idBroker));
         return result;
     }
 
-    private RotationContext getCustomJobRotationContext(String resourceCrn, IdBroker idBroker) {
+    private RotationContext getCustomJobRotationContext(String resourceCrn, StackDto stack, IdBroker idBroker) {
         CustomJobRotationContextBuilder customJobRotationContextBuilder = CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
+                .withPreValidateJob(() -> rotationNodeValidationService.validateNoStoppedInstances(stack, getSecret()))
                 .withRotationJob(() -> {
                     idBrokerService.setLegacyFieldsForServiceRollback(idBroker.getId());
                 })
