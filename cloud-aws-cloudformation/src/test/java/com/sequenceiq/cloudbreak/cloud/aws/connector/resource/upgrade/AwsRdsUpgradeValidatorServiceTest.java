@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -86,12 +87,26 @@ public class AwsRdsUpgradeValidatorServiceTest {
         when(rdsInfo.getRdsEngineVersion()).thenReturn(rdsEngineVersion);
 
         when(awsRdsUpgradeSteps.getRdsInfo(amazonRdsClient, "db-instance-id")).thenReturn(rdsInfo);
+        when(awsRdsUpgradeValidatorProvider.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
         when(awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(amazonRdsClient, targetMajorVersion, rdsEngineVersion))
                 .thenReturn(null);
 
         underTest.validateUpgradeDatabaseServer(authenticatedContext, databaseStack, targetMajorVersion);
 
         verify(awsRdsUpgradeValidatorProvider).getHighestUpgradeTargetVersion(amazonRdsClient, targetMajorVersion, rdsEngineVersion);
+    }
+
+    @Test
+    void testValidateVersionUpgradeSupportedSkipsTargetLookupWhenRdsAlreadyOnTargetVersion() {
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseStack.getDatabaseServer().getServerId()).thenReturn("db-instance-id");
+        when(awsClient.createRdsClient(any())).thenReturn(amazonRdsClient);
+        when(awsRdsUpgradeSteps.getRdsInfo(amazonRdsClient, "db-instance-id")).thenReturn(rdsInfo);
+        when(awsRdsUpgradeValidatorProvider.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(false);
+
+        underTest.validateUpgradeDatabaseServer(authenticatedContext, databaseStack, targetMajorVersion);
+
+        verify(awsRdsUpgradeValidatorProvider, never()).getHighestUpgradeTargetVersion(any(), any(), any());
     }
 
 }
