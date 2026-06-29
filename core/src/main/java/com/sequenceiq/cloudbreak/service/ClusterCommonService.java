@@ -315,9 +315,15 @@ public class ClusterCommonService {
                     stack.getName(), status);
             LOGGER.info(message);
             throw new BadRequestException(message);
-        } else {
-            return clusterOperationService.updateSalt(stack.getId(), skipHighstate);
         }
+        boolean hasStoppedNodes = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId()).stream()
+                .anyMatch(im -> InstanceStatus.STOPPED.equals(im.getInstanceStatus()));
+        if (hasStoppedNodes) {
+            throw new BadRequestException(String.format(
+                    "SaltStack update cannot be initiated as stack '%s' has stopped nodes. All functioning nodes must be in running state.",
+                    stack.getName()));
+        }
+        return clusterOperationService.updateSalt(stack.getId(), skipHighstate);
     }
 
     public FlowIdentifier updatePillarConfiguration(NameOrCrn nameOrCrn, String accountId) {

@@ -302,6 +302,7 @@ public class ClusterCommonServiceTest {
         when(stack.getStatus()).thenReturn(Status.AVAILABLE);
         when(stack.getId()).thenReturn(STACK_ID);
         when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(STACK_ID)).thenReturn(Set.of());
         when(clusterOperationService.updateSalt(STACK_ID, true)).thenReturn(flowIdentifier);
 
         FlowIdentifier flowIdentifier = underTest.updateSalt(nameOrCrn, ACCOUNT_ID, true);
@@ -309,6 +310,25 @@ public class ClusterCommonServiceTest {
         verify(clusterOperationService, times(1)).updateSalt(STACK_ID, true);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("1", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    public void testSaltUpdateThrowsBadRequestWhenStoppedNodesExist() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackView stack = mock(StackView.class);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getName()).thenReturn("stack-name");
+        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        InstanceMetaData stoppedInstance = new InstanceMetaData();
+        stoppedInstance.setInstanceStatus(InstanceStatus.STOPPED);
+        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(STACK_ID)).thenReturn(Set.of(stoppedInstance));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest.updateSalt(nameOrCrn, ACCOUNT_ID, false));
+
+        verifyNoInteractions(clusterOperationService);
+        assertEquals("SaltStack update cannot be initiated as stack 'stack-name' has stopped nodes. " +
+                "All functioning nodes must be in running state.", ex.getMessage());
     }
 
     @ParameterizedTest
