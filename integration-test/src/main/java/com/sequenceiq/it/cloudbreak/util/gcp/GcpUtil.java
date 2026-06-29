@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.gcp;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,5 +97,31 @@ public class GcpUtil {
 
     public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
         return gcpClientActions.listAvailabilityZonesForVms(instanceZoneMap);
+    }
+
+    public Map<String, Map<String, String>> getAllResourcesAndTagsForEnvironment(String envCrn) {
+        LOGGER.info("TAG VALIDATION: Getting tags for all resource types for env CRN: {}", envCrn);
+        List<GcpResources> allResources = Arrays.asList(GcpResources.values());
+        Map<String, Map<String, String>> result =
+                gcpClientActions.getResourcesAndTagsByEnvironmentCrnAndResourceTypes(envCrn, allResources);
+        Arrays.stream(GcpResources.values()).forEach(resourceType -> {
+            long count = countResourceIdsMatchingType(result.keySet(), resourceType);
+            LOGGER.info("TAG VALIDATION: Got {} resources of type {} ({}) for the Environment",
+                    count, resourceType.name(), resourceType.getResourceType());
+        });
+        LOGGER.info("TAG VALIDATION: Got {} total resources for env CRN: {}", result.size(), envCrn);
+        return result;
+    }
+
+    private long countResourceIdsMatchingType(Set<String> resourceIds, GcpResources resourceType) {
+        String[] typeParts = resourceType.getResourceType().toLowerCase().split("/");
+        String serviceDomain = typeParts[0];
+        String resourceKind = typeParts[1];
+        return resourceIds.stream()
+                .filter(id -> {
+                    String lowerId = id.toLowerCase();
+                    return lowerId.contains("//" + serviceDomain + "/") && lowerId.contains("/" + resourceKind);
+                })
+                .count();
     }
 }

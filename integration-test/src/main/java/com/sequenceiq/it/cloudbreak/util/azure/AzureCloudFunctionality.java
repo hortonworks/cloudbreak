@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
+import com.sequenceiq.it.cloudbreak.util.azure.azurerm.AzureResourceManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurevm.action.AzureClientActions;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
@@ -34,6 +35,9 @@ public class AzureCloudFunctionality implements CloudFunctionality {
 
     @Inject
     private AzureCloudBlobUtil azureCloudBlobUtil;
+
+    @Inject
+    private AzureResourceManagerUtil azureResourceManagerUtil;
 
     @Inject
     private SshJUtil sshJUtil;
@@ -189,5 +193,10 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     public List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
             String command) {
         return sshJUtil.executeSshCommandsOnInstances(instanceGroups, hostGroupNames, privateKeyFilePath, command);
+    }
+
+    @Override
+    public Map<String, Map<String, String>> getAllResourcesAndTagsForEnvironment(String envCrn) {
+        return azureResourceManagerUtil.getAllResourcesAndTagsForEnvironment(envCrn);
     }
 }

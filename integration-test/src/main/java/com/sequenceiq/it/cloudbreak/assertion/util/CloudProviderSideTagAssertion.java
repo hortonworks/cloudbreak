@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,5 +121,47 @@ public class CloudProviderSideTagAssertion {
             throw new TestFailException(String.format(" Tag validation is not possible, because of %s instance ids: %s null or contains null ", resourceName,
                     instanceIds));
         }
+    }
+
+    public Assertion<EnvironmentTestDto, EnvironmentClient> verifyUserDefinedTags(Map<String, String> userDefinedTags) {
+        return (testContext, testDto, client) -> {
+            String envCrn = testDto.getResponse().getCrn();
+            CloudFunctionality cloudFunctionality = cloudProviderProxy.getCloudFunctionality();
+
+            Map<String, Map<String, String>> resources = cloudFunctionality.getAllResourcesAndTagsForEnvironment(envCrn);
+            LOGGER.info("Verifying all tags for environment resources.\n Number of resources: {}.\n Custom tags: {}.", resources.size(), userDefinedTags);
+            if (!resources.isEmpty() && !resources.containsKey(null) && !resources.containsValue(null)) {
+                Map<String, List<String>> failedResources = new HashMap<>();
+
+                resources.forEach((arn, tags) -> {
+                    LOGGER.info("Verifying ARN: {} with tags: {}", arn, tags);
+                    List<String> missingTags = userDefinedTags.entrySet().stream()
+                            .filter(tag -> {
+                                String transformedKey = cloudFunctionality.transformTagKeyOrValue(tag.getKey());
+                                String transformedValue = cloudFunctionality.transformTagKeyOrValue(tag.getValue());
+                                return !transformedValue.equals(tags.get(transformedKey));
+                            })
+                            .map(entry -> entry.getKey() + "=" + entry.getValue())
+                            .collect(Collectors.toList());
+
+                    if (!missingTags.isEmpty()) {
+                        failedResources.put(arn, missingTags);
+                    }
+                });
+
+                if (!failedResources.isEmpty()) {
+                    failedResources.forEach((arn, missingTags) ->
+                            LOGGER.error("TAG VALIDATION FAILED: ARN: {} is missing tags: {}", arn, missingTags));
+                    throw new TestFailException(String.format(
+                            "Tag validation failed for %d out of %d resources. Resources with missing tags: %s",
+                            failedResources.size(), resources.size(), failedResources));
+                }
+            } else {
+                LOGGER.error("Tag validation is not possible, because of ARN list: {} null or contains null!", resources);
+                throw new TestFailException(String.format(" Tag validation is not possible, because of ARN list: %s null or contains null ",
+                        resources));
+            }
+            return testDto;
+        };
     }
 }

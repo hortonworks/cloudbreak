@@ -439,6 +439,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public List<String> getDistroXVariants() {
+        return List.of("AWS_NATIVE", "AWS");
+    }
+
+    @Override
     public String getStorageOptimizedInstanceType() {
         return awsProperties.getStorageOptimizedInstance().getType();
     }

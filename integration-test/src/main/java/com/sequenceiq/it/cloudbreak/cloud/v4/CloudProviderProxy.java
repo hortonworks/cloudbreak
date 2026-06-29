@@ -485,6 +485,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public List<String> getDistroXVariants() {
+        return delegate.getDistroXVariants();
+    }
+
+    @Override
     public String getStorageOptimizedInstanceType() {
         return delegate.getStorageOptimizedInstanceType();
     }
