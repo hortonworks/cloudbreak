@@ -623,10 +623,10 @@ class ClouderaManagerModificationServiceTest extends ClouderaManagerModification
     }
 
     @Test
-    public void testEnableZookeeperMigrationMode() {
-        underTest.enableZookeeperMigrationMode(stack);
+    public void testConfigureZookeeperToKraftMigration() {
+        underTest.configureZookeeperToKraftMigration(stack);
 
-        verify(clouderaManagerKraftMigrationService).enableZookeeperMigrationMode(eq(v31Client), eq(stack));
+        verify(clouderaManagerKraftMigrationService).configureZookeeperToKraftMigration(eq(v31Client), eq(stack));
     }
 
     @Test

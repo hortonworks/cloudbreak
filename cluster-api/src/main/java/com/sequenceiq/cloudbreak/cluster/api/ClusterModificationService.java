@@ -25,7 +25,7 @@ public interface ClusterModificationService {
 
     List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException;
 
-    void enableZookeeperMigrationMode(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
+    void configureZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
 
     void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
 

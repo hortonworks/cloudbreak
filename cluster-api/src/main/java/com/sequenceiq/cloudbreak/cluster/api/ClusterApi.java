@@ -55,7 +55,7 @@ public interface ClusterApi {
     }
 
     default void enableZookeeperMigrationMode(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
-        clusterModificationService().enableZookeeperMigrationMode(stackDtoDelegate);
+        clusterModificationService().configureZookeeperToKraftMigration(stackDtoDelegate);
     }
 
     default void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {

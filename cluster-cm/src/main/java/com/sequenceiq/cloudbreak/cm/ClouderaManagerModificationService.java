@@ -252,8 +252,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void enableZookeeperMigrationMode(StackDtoDelegate stackDtoDelegate) {
-        clouderaManagerKraftMigrationService.enableZookeeperMigrationMode(v31Client, stackDtoDelegate);
+    public void configureZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) {
+        clouderaManagerKraftMigrationService.configureZookeeperToKraftMigration(v31Client, stackDtoDelegate);
     }
 
     @Override

@@ -56,9 +56,15 @@ public class ClouderaManagerKraftMigrationService {
 
     private static final String KRAFT_ROLE_TYPE = "KRAFT";
 
-    private static final String KRAFT_PROPERTIES_ROLE_SAFETY_VALVE = "kraft.properties_role_safety_valve";
+    private static final String KRAFT_PROPERTIES_ROLE_SAFETY_VALVE_KEY = "kraft.properties_role_safety_valve";
 
-    private static final String ZOOKEEPER_MIGRATION_ENABLE_CONF_VALUE = "zookeeper.metadata.migration.enable=true";
+    private static final String KRAFT_PROPERTIES_ROLE_SAFETY_VALVE_VALUE = """
+            zookeeper.metadata.migration.enable=true
+            log.dirs=/hadoopfs/fs1/kraft""".stripIndent();
+
+    private static final String METADATA_LOG_DIR_PROPERTY = "metadata.log.dir";
+
+    private static final String METADATA_LOG_DIR_VALUE = "/hadoopfs/fs1/kraft";
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
@@ -75,7 +81,7 @@ public class ClouderaManagerKraftMigrationService {
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
-    public void enableZookeeperMigrationMode(ApiClient client, StackDtoDelegate stackDtoDelegate) {
+    public void configureZookeeperToKraftMigration(ApiClient client, StackDtoDelegate stackDtoDelegate) {
         String clusterName = stackDtoDelegate.getCluster().getName();
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
@@ -85,13 +91,14 @@ public class ClouderaManagerKraftMigrationService {
                     String roleConfigGroupName = configService.getRoleConfigGroupNameByTypeAndServiceName(KRAFT_ROLE_TYPE, clusterName, serviceName,
                             roleConfigGroupsResourceApi);
                     configService.modifyRoleConfigGroup(client, clusterName, serviceName, roleConfigGroupName,
-                            Map.of(KRAFT_PROPERTIES_ROLE_SAFETY_VALVE, ZOOKEEPER_MIGRATION_ENABLE_CONF_VALUE));
+                            Map.of(KRAFT_PROPERTIES_ROLE_SAFETY_VALVE_KEY, KRAFT_PROPERTIES_ROLE_SAFETY_VALVE_VALUE,
+                                    METADATA_LOG_DIR_PROPERTY, METADATA_LOG_DIR_VALUE));
                 } catch (ApiException e) {
                     LOGGER.debug("Error when retrieving {} for service {} in cluster {}.", KRAFT_ROLE_TYPE, serviceName, clusterName, e);
                     throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
                 }
             }, () -> {
-                LOGGER.info("{} service name is missing, skip modifying the {} property.", KAFKA_SERVICE_TYPE, KRAFT_PROPERTIES_ROLE_SAFETY_VALVE);
+                LOGGER.info("{} service name is missing, skip modifying the {} property.", KAFKA_SERVICE_TYPE, KRAFT_PROPERTIES_ROLE_SAFETY_VALVE_KEY);
                 throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", KAFKA_SERVICE_TYPE));
             });
     }
@@ -232,7 +239,7 @@ public class ClouderaManagerKraftMigrationService {
      * For each host running a ZooKeeper role, this method ensures a matching {@code KRaft} role exists on the Kafka
      * service in Cloudera Manager. New roles are created in {@link ApiRoleState#STOPPED} state so controllers are
      * provisioned but not started; starting and migration are handled by later flow steps
-     * ({@link #enableZookeeperMigrationMode}, {@link #migrateZookeeperToKraft}, and related commands).
+     * ({@link #configureZookeeperToKraftMigration}, {@link #migrateZookeeperToKraft}, and related commands).
      * <p>
      * The operation is idempotent: hosts that already have a KRaft role on Kafka are skipped, and the method returns
      * without calling CM when every Zookeeper host is already covered or when no Zookeeper roles are present.
