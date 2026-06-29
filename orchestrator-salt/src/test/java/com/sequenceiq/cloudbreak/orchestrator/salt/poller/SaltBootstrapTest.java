@@ -110,7 +110,7 @@ class SaltBootstrapTest {
 
         BootstrapParams params = new BootstrapParams();
         SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, List.of(saltConnector), gatewayConfigs, targets,
-                params));
+                targets, params));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         saltBootstrap.call();
@@ -134,7 +134,7 @@ class SaltBootstrapTest {
         targets.add(new Node(missingNodeIp, null, null, "hg"));
 
         SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, List.of(saltConnector), gatewayConfigs, targets,
-                new BootstrapParams()));
+                targets, new BootstrapParams()));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         assertThatThrownBy(saltBootstrap::call)
@@ -177,7 +177,8 @@ class SaltBootstrapTest {
         targets.add(new Node("10.0.0.3", null, null, "hg"));
 
         BootstrapParams params = new BootstrapParams();
-        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, saltConnectors, gatewayConfigs, targets, params));
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, saltConnectors, gatewayConfigs, targets, targets,
+                params));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         saltBootstrap.call();
@@ -217,7 +218,7 @@ class SaltBootstrapTest {
         targets.add(new Node(missingNodeIp, null, null, "hg"));
 
         SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, saltConnectors, gatewayConfigs, targets,
-                new BootstrapParams()));
+                targets, new BootstrapParams()));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         // All three IPs will be considered missing because each was absent from at least one response

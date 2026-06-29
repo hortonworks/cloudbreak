@@ -25,7 +25,7 @@ public class SaltBootstrapFactory {
     private MinionUtil minionUtil;
 
     public SaltBootstrap of(SaltConnector sc, Collection<SaltConnector> saltConnectors, List<GatewayConfig> allGatewayConfigs,
-            Set<Node> targets, BootstrapParams params) {
-        return new SaltBootstrap(saltStateService, minionUtil, sc, saltConnectors, allGatewayConfigs, targets, params);
+            Set<Node> targets, Set<Node> knownNodes, BootstrapParams params) {
+        return new SaltBootstrap(saltStateService, minionUtil, sc, saltConnectors, allGatewayConfigs, targets, knownNodes, params);
     }
 }

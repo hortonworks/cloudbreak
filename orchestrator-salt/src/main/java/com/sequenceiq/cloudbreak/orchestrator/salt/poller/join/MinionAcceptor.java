@@ -35,7 +35,9 @@ public class MinionAcceptor {
 
     private final Collection<SaltConnector> saltConnectors;
 
-    private final List<Minion> minions;
+    private final List<Minion> requiredMinions;
+
+    private final List<Minion> knownMinions;
 
     private final MinionFingerprintMatcher fingerprintMatcher;
 
@@ -43,43 +45,45 @@ public class MinionAcceptor {
 
     private final SaltStateService saltStateService;
 
-    public MinionAcceptor(Collection<SaltConnector> saltConnectors, List<Minion> minions, MinionFingerprintMatcher fingerprintMatcher,
-            FingerprintCollector fingerprintCollector, SaltStateService saltStateService) {
+    /**
+     * @param requiredMinions the minions that must be present on the master (the bootstrap targets); used only for the must-be-present check.
+     * @param knownMinions all minions known to the cluster; used for rogue-detection and acceptance. MUST be a superset of {@code requiredMinions},
+     *                      otherwise a legitimate target minion would be treated as unexpected and its key deleted.
+     */
+    public MinionAcceptor(Collection<SaltConnector> saltConnectors, List<Minion> requiredMinions, List<Minion> knownMinions,
+            MinionFingerprintMatcher fingerprintMatcher, FingerprintCollector fingerprintCollector, SaltStateService saltStateService) {
         this.saltConnectors = saltConnectors;
-        this.minions = minions;
+        this.requiredMinions = requiredMinions;
+        this.knownMinions = knownMinions;
         this.fingerprintMatcher = fingerprintMatcher;
         this.fingerprintCollector = fingerprintCollector;
         this.saltStateService = saltStateService;
     }
 
     public void acceptMinions() throws CloudbreakOrchestratorFailedException {
-        boolean removedAnyMinion = false;
+        boolean removedConflictingMinion = false;
         for (SaltConnector sc : saltConnectors) {
             LOGGER.info("Running for master: [{}]", sc.getHostname());
-            MinionKeysOnMasterResponse minionKeysOnMaster = fetchMinionsFromMaster(sc, minions);
-            List<String> unacceptedMinions = minionKeysOnMaster.getUnacceptedMinions();
+            MinionKeysOnMasterResponse minionKeysOnMaster = fetchMinionsFromMaster(sc, requiredMinions);
+            List<String> unacceptedMinions = new ArrayList<>(minionKeysOnMaster.getUnacceptedMinions());
             List<String> deniedMinions = minionKeysOnMaster.getDeniedMinions();
-            List<String> removedUnacceptedMinions = cleanupMinionIds(sc, deniedMinions, unacceptedMinions);
-            removedAnyMinion = removedAnyMinion || !removedUnacceptedMinions.isEmpty();
-            unacceptedMinions = unacceptedMinions.stream().filter(not(removedUnacceptedMinions::contains)).collect(Collectors.toList());
+            List<String> conflictingMinions = removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions);
+            removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
+            List<String> unexpectedMinions = removeMinionIdsThatAreNotExpected(sc, unacceptedMinions);
+            removedConflictingMinion = removedConflictingMinion || !conflictingMinions.isEmpty();
+            unacceptedMinions = unacceptedMinions.stream()
+                    .filter(not(conflictingMinions::contains))
+                    .filter(not(unexpectedMinions::contains))
+                    .collect(Collectors.toList());
             if (!unacceptedMinions.isEmpty()) {
                 proceedWithAcceptingMinions(sc, unacceptedMinions);
             } else {
                 LOGGER.info("No unaccepted minions found on master: [{}]", sc.getHostname());
             }
         }
-        if (removedAnyMinion) {
+        if (removedConflictingMinion) {
             throw new CloudbreakOrchestratorFailedException("Minion(s) were removed, restart bootstrap to ensure all minion present");
         }
-    }
-
-    private List<String> cleanupMinionIds(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
-            throws CloudbreakOrchestratorFailedException {
-        ArrayList<String> removedUnacceptedMinions = new ArrayList<String>();
-        removedUnacceptedMinions.addAll(removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions));
-        removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
-        removedUnacceptedMinions.addAll(removeMinionIdsThatAreNotExpected(sc, unacceptedMinions));
-        return removedUnacceptedMinions;
     }
 
     private List<String> removeMinionIdsInBothDeniedAndUnacceptedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
@@ -135,7 +139,7 @@ public class MinionAcceptor {
 
     private List<String> removeMinionIdsThatAreNotExpected(SaltConnector sc, List<String> unacceptedMinions)
             throws CloudbreakOrchestratorFailedException {
-        List<String> expectedMinionIds = minions.stream().map(Minion::getId).collect(Collectors.toList());
+        List<String> expectedMinionIds = knownMinions.stream().map(Minion::getId).collect(Collectors.toList());
         List<String> unexpectedMinionIds = unacceptedMinions.stream()
                 .filter(not(expectedMinionIds::contains))
                 .collect(Collectors.toList());
@@ -149,7 +153,7 @@ public class MinionAcceptor {
     private void proceedWithAcceptingMinions(SaltConnector sc, List<String> unacceptedMinions) throws CloudbreakOrchestratorFailedException {
         LOGGER.info("There are unaccepted minions on master: {}", unacceptedMinions);
         Map<String, String> fingerprintsFromMaster = fetchFingerprintsFromMaster(sc, unacceptedMinions);
-        List<Minion> minionsToAccept = minions.stream().filter(minion -> unacceptedMinions.contains(minion.getId())).collect(Collectors.toList());
+        List<Minion> minionsToAccept = knownMinions.stream().filter(minion -> unacceptedMinions.contains(minion.getId())).collect(Collectors.toList());
         LOGGER.info("Processing the following minions so they are accepted on the master: {}",
                 minionsToAccept.stream().map(Minion::getId).collect(Collectors.toList()));
         if (!minionsToAccept.isEmpty()) {

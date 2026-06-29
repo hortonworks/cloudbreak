@@ -234,7 +234,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltStateService.stopMasters(sc, gatewayTargets);
                 params.setRestartNeeded(true);
             }
-            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, params);
+            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, targets, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
@@ -426,7 +426,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSaltKeys(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
-            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, nodes, params);
+            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, nodes, allNodes, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {

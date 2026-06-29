@@ -220,7 +220,7 @@ class SaltOrchestratorTest {
         saltConnectors = List.of(saltConnector);
         lenient().when(saltService.createSaltConnector(anyCollection())).thenReturn(saltConnectors);
         lenient().when(saltService.getPrimaryGatewayConfig(anyList())).thenReturn(gatewayConfig);
-        lenient().when(saltBootstrapFactory.of(any(), anyCollection(), anyList(), anySet(), any())).thenReturn(saltBootstrap);
+        lenient().when(saltBootstrapFactory.of(any(), anyCollection(), anyList(), anySet(), anySet(), any())).thenReturn(saltBootstrap);
         lenient().when(saltStateService.bootstrap(eq(saltConnector), any(), any(), eq(targets))).thenReturn(genericResponses);
     }
 
@@ -235,7 +235,7 @@ class SaltOrchestratorTest {
 
         verify(saltRunner, times(8)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
-        verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
+        verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets), eq(targets),
                 eq(bootstrapParams));
     }
 
@@ -310,7 +310,7 @@ class SaltOrchestratorTest {
         verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltRunner, times(7)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltBootstrapFactory, times(1))
-                .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
+                .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(targets), eq(bootstrapParams));
     }
 
     @Test

@@ -44,6 +44,8 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final Set<Node> originalTargets;
 
+    private final Set<Node> knownNodes;
+
     private final BootstrapParams params;
 
     private final SaltStateService saltStateService;
@@ -58,12 +60,13 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         To work around this, a Factory class is introduced that instantiates SaltBootstrap and now the factory method can be verified.
      */
     SaltBootstrap(SaltStateService saltStateService, MinionUtil minionUtil, SaltConnector sc, Collection<SaltConnector> saltConnectors,
-            List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params) {
+            List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> knownNodes, BootstrapParams params) {
         this.sc = sc;
         this.saltConnectors = saltConnectors;
         this.allGatewayConfigs = allGatewayConfigs;
         originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
+        this.knownNodes = knownNodes;
         this.params = params;
         this.saltStateService = saltStateService;
         this.minionUtil = minionUtil;
@@ -157,15 +160,16 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     }
 
     protected MinionAcceptor createMinionAcceptor() {
-        List<Minion> minions = createMinionsFromOriginalTargets();
+        List<Minion> requiredMinions = createMinions(originalTargets);
+        List<Minion> knownMinions = createMinions(knownNodes);
         return params.isSaltBootstrapFpSupported() ?
-                new MinionAcceptor(saltConnectors, minions, new EqualMinionFpMatcher(), new FingerprintFromSbCollector(), saltStateService)
-                : new MinionAcceptor(saltConnectors, minions, new AcceptAllFpMatcher(), new DummyFingerprintCollector(), saltStateService);
+                new MinionAcceptor(saltConnectors, requiredMinions, knownMinions, new EqualMinionFpMatcher(), new FingerprintFromSbCollector(), saltStateService)
+                : new MinionAcceptor(saltConnectors, requiredMinions, knownMinions, new AcceptAllFpMatcher(), new DummyFingerprintCollector(), saltStateService);
     }
 
-    private List<Minion> createMinionsFromOriginalTargets() {
+    private List<Minion> createMinions(Set<Node> nodes) {
         List<String> gatewayPrivateIps = getGatewayPrivateIps();
-        return originalTargets.stream()
+        return nodes.stream()
                 .map(ot -> minionUtil.createMinion(ot, gatewayPrivateIps, params.isRestartNeededFlagSupported(), params.isRestartNeeded()))
                 .collect(Collectors.toList());
     }
