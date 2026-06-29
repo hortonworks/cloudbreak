@@ -51,6 +51,7 @@ import com.sequenceiq.flow.cleanup.InMemoryCleanup;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.exception.FlowNotFoundException;
@@ -74,6 +75,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     @Resource
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
+
+    @Resource
+    private List<FlowEventChainFactory<?>> flowEventChainFactories;
 
     @Resource
     private Set<String> failHandledEvents;
@@ -175,6 +179,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
             if (flowChainId != null) {
                 if (flow.isFlowFailed()) {
+                    tryCallOnFlowChainFailure(flowEventContext, flowChainId);
                     flowChains.removeFullFlowChain(flowChainId, false);
                     finalizerCallback.ifPresent(callback -> callback.onFinalize(flowEventContext.getResourceId()));
                 } else {
@@ -195,6 +200,29 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 .filter(flowConfiguration -> flow.getFlowConfigClass().equals(flowConfiguration.getClass()))
                 .findFirst()
                 .map(FlowConfiguration::getFinalizerCallBack);
+    }
+
+    private void tryCallOnFlowChainFailure(FlowEventContext flowEventContext, String flowChainId) {
+        String flowChainType = flowChainLogService.getFlowChainType(flowChainId);
+        if (flowChainType == null) {
+            LOGGER.debug("No flow chain type stored for chain [{}], skipping onFlowChainFailure callback", flowChainId);
+            return;
+        }
+        String leafChainType = flowChainType.substring(flowChainType.lastIndexOf('/') + 1);
+        Optional<FlowEventChainFactory<?>> factory = flowEventChainFactories.stream()
+                .filter(f -> f.getName().equals(leafChainType))
+                .findFirst();
+        if (factory.isEmpty()) {
+            LOGGER.debug("No FlowEventChainFactory matched leaf chain type [{}] (full chain type [{}]), skipping onFlowChainFailure callback",
+                    leafChainType, flowChainType);
+            return;
+        }
+        try {
+            LOGGER.info("Invoking onFlowChainFailure on [{}] for resource [{}], chain [{}]", leafChainType, flowEventContext.getResourceId(), flowChainId);
+            factory.get().onFlowChainFailure(flowEventContext);
+        } catch (Exception e) {
+            LOGGER.error("Flow chain failure callback failed for chain type [{}]", flowChainType, e);
+        }
     }
 
     private AcceptResult handleNewFlowRequest(FlowEventContext flowEventContext, Map<Object, Object> contextParams)
@@ -390,8 +418,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private void handleFlowControlEvent(FlowEventContext flowEventContext, Map<Object, Object> contextParams) throws TransactionExecutionException {
         String flowId = flowEventContext.getFlowId();
-        String key =  flowEventContext.getKey();
-        String flowChainId =  flowEventContext.getFlowChainId();
+        String key = flowEventContext.getKey();
+        String flowChainId = flowEventContext.getFlowChainId();
         Payload payload = flowEventContext.getPayload();
         LOGGER.debug("flow control event arrived: key: {}, flowid: {}, usercrn: {}, payload: {}",
                 key, flowId, flowEventContext.getFlowTriggerUserCrn(), payload);

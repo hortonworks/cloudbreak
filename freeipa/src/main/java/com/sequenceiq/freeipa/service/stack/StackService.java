@@ -260,6 +260,14 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stackRepository.setTunnelByStackId(stackId, tunnel);
     }
 
+    public int updateMultiAzByStackId(Long stackId, boolean multiAz) {
+        return stackRepository.updateMultiAzByStackId(stackId, multiAz);
+    }
+
+    public int updateVariantByStackId(Long stackId, String variant) {
+        return stackRepository.updateVariantByStackId(stackId, variant);
+    }
+
     @Override
     public Optional<Boolean> computeMonitoringEnabled(Stack entity) {
         Telemetry telemetry = entity.getTelemetry();

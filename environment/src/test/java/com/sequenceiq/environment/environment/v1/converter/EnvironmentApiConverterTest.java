@@ -639,6 +639,8 @@ class EnvironmentApiConverterTest {
         request.setAdminGroupName("cb-admin");
         request.setProxy(new ProxyRequest());
         request.setAws(createAwsRequest());
+        request.setFreeIpaEnableMultiAz(Boolean.TRUE);
+        request.setFreeIpaPlatformVariant("AWS_NATIVE");
         return request;
     }
 

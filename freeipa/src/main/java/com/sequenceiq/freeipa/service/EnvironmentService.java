@@ -27,11 +27,32 @@ public class EnvironmentService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    public void setFreeIpaPlatformVariant(String envCrn, String targetVariant) {
+        LOGGER.debug("Setting freeIpaPlatformVariant to {} on {} environment.", targetVariant, envCrn);
+        EnvironmentEditRequest environmentEditRequest = new EnvironmentEditRequest();
+        environmentEditRequest.setFreeIpaPlatformVariant(targetVariant);
+
+        editEnvironment(envCrn, environmentEditRequest);
+    }
+
+    public void setFreeIpaEnableMultiAz(String envCrn) {
+        LOGGER.debug("Setting freeIpaEnableMultiAz to true on {} environment.", envCrn);
+        EnvironmentEditRequest environmentEditRequest = new EnvironmentEditRequest();
+        environmentEditRequest.setFreeIpaEnableMultiAz(Boolean.TRUE);
+
+        editEnvironment(envCrn, environmentEditRequest);
+    }
+
     public void setFreeIpaNodeCount(String envCrn, int nodeCount) {
+        LOGGER.debug("Modifying freeIpa count to {} on {} environment.", nodeCount, envCrn);
+        EnvironmentEditRequest environmentEditRequest = new EnvironmentEditRequest();
+        environmentEditRequest.setFreeIpaNodeCount(nodeCount);
+
+        editEnvironment(envCrn, environmentEditRequest);
+    }
+
+    private void editEnvironment(String envCrn, EnvironmentEditRequest environmentEditRequest) {
         try {
-            EnvironmentEditRequest environmentEditRequest = new EnvironmentEditRequest();
-            environmentEditRequest.setFreeIpaNodeCount(nodeCount);
-            LOGGER.debug("Modifying freeIpa count to {} on {} environment.", nodeCount, envCrn);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> environmentEndpoint.editByCrn(envCrn, environmentEditRequest)
             );
@@ -41,7 +62,7 @@ public class EnvironmentService {
                     throw new BadRequestException(String.format("Environment not found by environment CRN: %s", envCrn), e);
                 }
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-                throw new CloudbreakServiceException(String.format("Failed to get environment: %s", errorMessage), e);
+                throw new CloudbreakServiceException(String.format("Failed to update environment: %s", errorMessage), e);
             }
         }
     }

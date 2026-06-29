@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.converter.stack;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ import com.sequenceiq.freeipa.converter.image.ImageEntityToImageDetailsConverter
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupToInstanceGroupDetailsConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -61,8 +64,8 @@ public class StackToStackDetailsConverter {
         Set<InstanceGroup> instanceGroups = instanceGroupService.findByStackId(source.getId());
         stackDetails.setMultiAz(getMultiAz(instanceGroups));
         stackDetails.setInstanceGroups(instanceGroups.stream()
-                        .map(e -> instanceGroupToInstanceGroupDetailsConverter.convert(e))
-                        .collect(Collectors.toList()));
+                .map(e -> instanceGroupToInstanceGroupDetailsConverter.convert(e))
+                .collect(Collectors.toList()));
         stackDetails.setTags(source.getTags());
         convertImage(stackDetails, source);
         stackDetails.setLoadBalancerType(getLoadBalancerType(source.getId()));
@@ -81,11 +84,12 @@ public class StackToStackDetailsConverter {
     }
 
     private List<String> getSubnetIds(InstanceGroup instanceGroup) {
-        Json attributes = instanceGroup.getInstanceGroupNetwork().getAttributes();
-        if (attributes != null && attributes.getMap() != null) {
-            return (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, List.of());
-        }
-        return List.of();
+        Map<String, Object> attributes = Optional.ofNullable(instanceGroup)
+                .map(InstanceGroup::getInstanceGroupNetwork)
+                .map(InstanceGroupNetwork::getAttributes)
+                .map(Json::getMap)
+                .orElse(Map.of());
+        return (List<String>) attributes.getOrDefault(NetworkConstants.SUBNET_IDS, List.of());
     }
 
     private void convertImage(StackDetails stackDetails, Stack stack) {

@@ -52,6 +52,6 @@ public class FreeIpaMigrationV1Controller implements FreeIpaMigrationV1Endpoint 
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
 
-        return multiAzMigrationService.triggerMultiAzMigration(accountId, stack);
+        return multiAzMigrationService.triggerMultiAzMigration(environmentCrn, accountId, stack);
     }
 }

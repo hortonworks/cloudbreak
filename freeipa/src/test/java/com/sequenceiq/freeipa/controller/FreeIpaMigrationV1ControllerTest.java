@@ -57,7 +57,7 @@ class FreeIpaMigrationV1ControllerTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(TestConstants.ENV_CRN, TestConstants.ACCOUNT_ID)).thenReturn(stack);
         when(multiAzMigrationValidationService.validateMultiAzMigrationRequest(TestConstants.ENV_CRN, TestConstants.ACCOUNT_ID, stack))
                 .thenReturn(ValidationResult.empty());
-        when(multiAzMigrationService.triggerMultiAzMigration(TestConstants.ACCOUNT_ID, stack)).thenReturn(response);
+        when(multiAzMigrationService.triggerMultiAzMigration(TestConstants.ENV_CRN, TestConstants.ACCOUNT_ID, stack)).thenReturn(response);
 
         FreeIpaMultiAzMigrationV1Request request = new FreeIpaMultiAzMigrationV1Request();
         request.setEnvironmentCrn(TestConstants.ENV_CRN);

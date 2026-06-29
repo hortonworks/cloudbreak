@@ -205,6 +205,14 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("UPDATE Stack s SET s.tunnel = :tunnel WHERE s.id = :id")
     int setTunnelByStackId(@Param("id") Long id, @Param("tunnel") Tunnel tunnel);
 
+    @Modifying
+    @Query("UPDATE Stack s SET s.multiAz = :multiAz WHERE s.id = :id")
+    int updateMultiAzByStackId(@Param("id") Long id, @Param("multiAz") boolean multiAz);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.platformvariant = :variant WHERE s.id = :id")
+    int updateVariantByStackId(@Param("id") Long id, @Param("variant") String variant);
+
     @Query("SELECT s.accountId FROM Stack s WHERE s.id = :id")
     Optional<String> findAccountIdByStackId(@Param("id") Long id);
 

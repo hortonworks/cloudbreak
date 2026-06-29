@@ -18,9 +18,11 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 
 @Service
@@ -86,10 +88,24 @@ public class MultiAzMigrationValidationService {
     }
 
     private ValidationResult validateStackMultiAzFlag(Stack stack) {
-        if (stack.isMultiAz()) {
+        if (stack.isMultiAz() && !isPreviousMigrationFailed(stack)) {
             return ValidationResult.ofError("The FreeIPA is already multi-AZ enabled, no need to start the multi-AZ migration.");
         }
         return ValidationResult.empty();
+    }
+
+    /**
+     * A stack whose previous multi-AZ migration failed keeps {@code multiAz=true} (set in
+     * {@code MultiAzMigrationInitHandler} at the start of the migration) and its detailed status set to
+     * {@link DetailedStackStatus#MULTI_AZ_MIGRATION_FAILED} by
+     * {@code MultiAzMigrationFlowEventChainFactory#onFlowChainFailure}. Such stacks are allowed to retry the
+     * migration; healthy multi-AZ stacks continue to be rejected.
+     */
+    private boolean isPreviousMigrationFailed(Stack stack) {
+        return Optional.ofNullable(stack.getStackStatus())
+                .map(StackStatus::getDetailedStackStatus)
+                .filter(DetailedStackStatus.MULTI_AZ_MIGRATION_FAILED::equals)
+                .isPresent();
     }
 
     private ValidationResult validateVariantSupported(Stack stack) {

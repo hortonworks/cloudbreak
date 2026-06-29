@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.flow.stack.migration;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_STARTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent.AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent.AWS_VARIANT_MIGRATION_FINALIZED_EVENT;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -25,9 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.migration.aws.DeleteCloudF
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.flow.core.PayloadConverter;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.CloudPlatformResponseToStackFailureConverter;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -35,6 +34,7 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
 import com.sequenceiq.freeipa.metrics.MetricType;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -48,6 +48,9 @@ public class AwsVariantMigrationActions {
 
     @Inject
     private FreeIpaMetricService metricService;
+
+    @Inject
+    private EnvironmentService environmentService;
 
     @Bean(name = "CREATE_RESOURCES_STATE")
     public Action<?, ?> createResources() {
@@ -70,8 +73,7 @@ public class AwsVariantMigrationActions {
     public Action<?, ?> deleteCloudFormation() {
         return new AbstractAwsVariantMigrationAction<>(CreateResourcesResult.class) {
             @Override
-            protected void doExecute(AwsVariantMigrationFlowContext context, CreateResourcesResult payload, Map<Object, Object> variables)
-                    throws Exception {
+            protected void doExecute(AwsVariantMigrationFlowContext context, CreateResourcesResult payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
@@ -91,13 +93,13 @@ public class AwsVariantMigrationActions {
                 if (payload.isCloudFormationTemplateDeleted()) {
                     LOGGER.debug("Variant will be changed");
                     stackUpdater.updateVariant(payload.getResourceId(), CloudConstants.AWS_NATIVE);
+                    environmentService.setFreeIpaPlatformVariant(context.getStack().getEnvironmentCrn(), CloudConstants.AWS_NATIVE);
                     LOGGER.info("Variant changed to AWS_NATIVE");
                     metricService.incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_SUCCESSFUL, context.getStack());
                 } else {
                     LOGGER.info("Variant won't be changed because the CF template exists");
                 }
-                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(),
-                        FREEIPA_AWS_VARIANT_MIGRATION_FINISHED);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_FINISHED);
                 sendEvent(context);
             }
 
@@ -130,11 +132,11 @@ public class AwsVariantMigrationActions {
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 LOGGER.info(message, payload.getException());
                 String statusReason = "AWS variant migration failed. " + errorReason;
-                stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, statusReason);
-                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_FAILED,
-                        List.of(errorReason));
-                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_FAILED, List.of(statusReason));
-                operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                Operation operation = operationService.failOperation(stack.getAccountId(), getOperationId(variables), message,
+                        List.of(successDetails), List.of(failureDetails));
+                updateFailedStackStatusIfApplicable(stack, operation, statusReason);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_FAILED, List.of(errorReason));
+                sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, statusReason);
                 metricService.incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, stack, payload.getException());
                 sendEvent(context, AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT.event(), payload);
             }

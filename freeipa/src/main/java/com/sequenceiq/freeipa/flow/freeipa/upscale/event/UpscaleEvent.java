@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +25,8 @@ public class UpscaleEvent extends StackEvent {
 
     private final String triggeredVariant;
 
+    private final Set<String> instanceIdsBeingReplaced;
+
     @JsonCreator
     public UpscaleEvent(
             @JsonProperty("selector") String selector,
@@ -34,7 +37,8 @@ public class UpscaleEvent extends StackEvent {
             @JsonProperty("chained") boolean chained,
             @JsonProperty("finalChain") boolean finalChain,
             @JsonProperty("operationId") String operationId,
-            @JsonProperty("triggeredVariant") String triggeredVariant) {
+            @JsonProperty("triggeredVariant") String triggeredVariant,
+            @JsonProperty("instanceIdsBeingReplaced") Set<String> instanceIdsBeingReplaced) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
         this.instanceCountByGroup = instanceCountByGroup;
@@ -43,6 +47,20 @@ public class UpscaleEvent extends StackEvent {
         this.finalChain = finalChain;
         this.operationId = operationId;
         this.triggeredVariant = triggeredVariant;
+        this.instanceIdsBeingReplaced = instanceIdsBeingReplaced == null ? Set.of() : Set.copyOf(instanceIdsBeingReplaced);
+    }
+
+    public UpscaleEvent(
+            String selector,
+            Long stackId,
+            ArrayList<String> instanceIds,
+            Integer instanceCountByGroup,
+            Boolean repair,
+            boolean chained,
+            boolean finalChain,
+            String operationId,
+            String triggeredVariant) {
+        this(selector, stackId, instanceIds, instanceCountByGroup, repair, chained, finalChain, operationId, triggeredVariant, Set.of());
     }
 
     public List<String> getInstanceIds() {
@@ -73,6 +91,10 @@ public class UpscaleEvent extends StackEvent {
         return triggeredVariant;
     }
 
+    public Set<String> getInstanceIdsBeingReplaced() {
+        return instanceIdsBeingReplaced;
+    }
+
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(UpscaleEvent.class, other,
@@ -92,6 +114,7 @@ public class UpscaleEvent extends StackEvent {
                 ", operationId='" + operationId + '\'' +
                 ", chained=" + chained +
                 ", finalChain=" + finalChain +
+                ", instanceIdsBeingReplaced=" + instanceIdsBeingReplaced +
                 "} " + super.toString();
     }
 }

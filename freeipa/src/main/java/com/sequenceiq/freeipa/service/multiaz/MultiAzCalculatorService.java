@@ -101,12 +101,16 @@ public class MultiAzCalculatorService {
     }
 
     public Map<String, String> filterSubnetByLeastUsedAz(InstanceGroup instanceGroup, Map<String, String> subnetAzPairs) {
+        return filterSubnetByLeastUsedAz(instanceGroup, subnetAzPairs, Set.of());
+    }
+
+    public Map<String, String> filterSubnetByLeastUsedAz(InstanceGroup instanceGroup, Map<String, String> subnetAzPairs, Set<String> excludeInstanceIds) {
         Set<String> subnetIdsConfiguredOnInstanceGroup = collectSubnetIds(instanceGroup);
         Map<String, List<String>> azSubnetPairs = createAzSubnetPairsFromSubnetAzPairs(subnetAzPairs, subnetIdsConfiguredOnInstanceGroup);
         Map<String, Integer> azUsage = new HashMap<>();
         Set<String> azs = azSubnetPairs.keySet();
         azs.forEach(az -> azUsage.computeIfAbsent(az, k -> 0));
-        collectCurrentAzUsage(instanceGroup, azUsage, subnetAzPairs);
+        collectCurrentAzUsage(instanceGroup, azUsage, subnetAzPairs, excludeInstanceIds);
         Integer numberOfInstanceInAnAz = searchTheSmallestInstanceCountForUsage(azUsage);
         String leastUsedAz = searchTheSmallestUsedID(azUsage, numberOfInstanceInAnAz);
         Set<String> subnetsForLeastUsedAz = new HashSet<>(azSubnetPairs.get(leastUsedAz));
@@ -126,8 +130,13 @@ public class MultiAzCalculatorService {
         return ret;
     }
 
-    private void collectCurrentAzUsage(InstanceGroup instanceGroup, Map<String, Integer> azUsage, Map<String, String> subnetAzPairs) {
+    private void collectCurrentAzUsage(InstanceGroup instanceGroup, Map<String, Integer> azUsage, Map<String, String> subnetAzPairs,
+            Set<String> excludeInstanceIds) {
         for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+            if (excludeInstanceIds.contains(instanceMetaData.getInstanceId())) {
+                LOGGER.debug("Excluding instance '{}' from AZ occupancy: it is scheduled for replacement.", instanceMetaData.getInstanceId());
+                continue;
+            }
             String subnetId = instanceMetaData.getSubnetId();
             if (!isNullOrEmpty(subnetId)) {
                 String az = subnetAzPairs.get(subnetId);
@@ -167,10 +176,14 @@ public class MultiAzCalculatorService {
     }
 
     public Map<String, Integer> calculateCurrentSubnetUsage(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup) {
+        return calculateCurrentSubnetUsage(subnetAzPairs, instanceGroup, Set.of());
+    }
+
+    public Map<String, Integer> calculateCurrentSubnetUsage(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<String> excludeInstanceIds) {
         Set<String> subnetIds = collectSubnetIds(instanceGroup);
         LOGGER.debug("Subnet ids used for availability zone selection: {}", subnetIds);
         Map<String, Integer> emptySubnetUsage = initializeSubnetUsage(subnetAzPairs, subnetIds);
-        return collectCurrentSubnetUsage(instanceGroup, emptySubnetUsage);
+        return collectCurrentSubnetUsage(instanceGroup, emptySubnetUsage, excludeInstanceIds);
     }
 
     private Integer searchTheSmallestInstanceCountForUsage(Map<String, Integer> usage) {
@@ -200,14 +213,21 @@ public class MultiAzCalculatorService {
         return emptySubnetUsage;
     }
 
-    private Map<String, Integer> collectCurrentSubnetUsage(InstanceGroup instanceGroup, Map<String, Integer> subnetUsage) {
+    private Map<String, Integer> collectCurrentSubnetUsage(InstanceGroup instanceGroup, Map<String, Integer> subnetUsage, Set<String> excludeInstanceIds) {
         Map<String, Integer> subnetCurrentUsage = new HashMap<>(subnetUsage);
         instanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                .filter(im -> shouldNotBeExcluded(im, excludeInstanceIds))
                 .map(InstanceMetaData::getSubnetId)
                 .filter(StringUtils::isNotBlank)
                 .forEach(subnetId -> subnetCurrentUsage.computeIfPresent(subnetId, (key, currentCount) -> ++currentCount));
         LOGGER.debug("Current subnet usage: {}", subnetCurrentUsage);
         return subnetCurrentUsage;
+    }
+
+    private static boolean shouldNotBeExcluded(InstanceMetaData instanceMetaData, Set<String> excludeInstanceIds) {
+        return excludeInstanceIds == null
+                || instanceMetaData.getInstanceId() == null
+                || !excludeInstanceIds.contains(instanceMetaData.getInstanceId());
     }
 
     private Set<String> collectSubnetIds(InstanceGroup instanceGroup) {
@@ -272,7 +292,7 @@ public class MultiAzCalculatorService {
         }
     }
 
-    public void populateAvailabilityZonesForInstances(Stack stack, InstanceGroup instanceGroup) {
+    public void populateAvailabilityZonesForInstances(Stack stack, InstanceGroup instanceGroup, Map<String, String> subnetAzPairs) {
         if (stack.isMultiAz()) {
             Set<String> availabilityZones = instanceGroup.getInstanceGroupNetwork() != null ? availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(
                     instanceGroup.getInstanceGroupNetwork().getAttributes()) : Collections.emptySet();
@@ -283,9 +303,11 @@ public class MultiAzCalculatorService {
                 LOGGER.debug("Initialized zoneToNodeCountMap {}", zoneToNodeCountMap);
                 for (InstanceMetaData instance : instanceMetaDataSets) {
                     if (instance.getAvailabilityZone() == null) {
-                        String availabilityZone = Collections.min(zoneToNodeCountMap.entrySet(), Map.Entry.comparingByValue()).getKey();
-                        zoneToNodeCountMap.put(availabilityZone, zoneToNodeCountMap.get(availabilityZone) + 1);
-                        instance.setAvailabilityZone(availabilityZone);
+                        String availabilityZone = resolveAvailabilityZoneForInstance(instance, subnetAzPairs, availabilityZones, zoneToNodeCountMap);
+                        if (availabilityZone != null) {
+                            zoneToNodeCountMap.merge(availabilityZone, 1L, Long::sum);
+                            instance.setAvailabilityZone(availabilityZone);
+                        }
                     }
                     LOGGER.debug("Availability Zones for instance {} is {}", instance.getInstanceId(), instance.getAvailabilityZone());
                 }
@@ -295,6 +317,20 @@ public class MultiAzCalculatorService {
         } else {
             LOGGER.debug("Multi AZ is not enabled for {}", stack.getName());
         }
+    }
+
+    private String resolveAvailabilityZoneForInstance(InstanceMetaData instance, Map<String, String> subnetAzPairs, Set<String> availabilityZones,
+            Map<String, Long> zoneToNodeCountMap) {
+        String subnetId = instance.getSubnetId();
+        if (StringUtils.isNotBlank(subnetId) && subnetAzPairs != null) {
+            String azFromSubnet = subnetAzPairs.get(subnetId);
+            if (StringUtils.isNotBlank(azFromSubnet) && availabilityZones.contains(azFromSubnet)) {
+                LOGGER.debug("Availability zone for instance {} derived from subnet {}: {}", instance.getInstanceId(), subnetId, azFromSubnet);
+                return azFromSubnet;
+            }
+            LOGGER.debug("Subnet {} has no matching availability zone in group AZs {}; falling back to least-used AZ selection", subnetId, availabilityZones);
+        }
+        return Collections.min(zoneToNodeCountMap.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
     public AvailabilityZoneConnector getAvailabilityZoneConnector(Stack stack) {
@@ -326,9 +362,12 @@ public class MultiAzCalculatorService {
 
     private String getDocumentationLink(CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
-            case AZURE : return "https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support";
-            case GCP :  return "https://cloud.google.com/docs/geography-and-regions";
-            default : return "";
+            case AZURE:
+                return "https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support";
+            case GCP:
+                return "https://cloud.google.com/docs/geography-and-regions";
+            default:
+                return "";
         }
     }
 

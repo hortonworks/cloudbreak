@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.flow.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -30,7 +30,13 @@ public abstract class AbstractStackAction<S extends FlowState, E extends FlowEve
         extends AbstractAction<S, E, C, P> {
 
     private static final Map<OperationType, ResourceEvent> FAILED_OPERATION_RESOURCE_EVENT_MAP = Map.of(
-            OperationType.UPGRADE, FREEIPA_UPGRADE_FAILED
+            OperationType.UPGRADE, ResourceEvent.FREEIPA_UPGRADE_FAILED,
+            OperationType.MIGRATE_TO_MULTI_AZ, ResourceEvent.FREEIPA_MULTI_AZ_MIGRATION_FAILED
+    );
+
+    private static final Map<OperationType, DetailedStackStatus> FAILED_OPERATION_STACK_STATUS_MAP = Map.of(
+            OperationType.UPGRADE, DetailedStackStatus.UPGRADE_FAILED,
+            OperationType.MIGRATE_TO_MULTI_AZ, DetailedStackStatus.MULTI_AZ_MIGRATION_FAILED
     );
 
     @Inject
@@ -73,6 +79,15 @@ public abstract class AbstractStackAction<S extends FlowState, E extends FlowEve
             ResourceEvent event = FAILED_OPERATION_RESOURCE_EVENT_MAP.get(operationType);
             if (event != null) {
                 getEventService().sendEventAndNotification(stack, flowTriggerUserCrn, event, List.of(errorReason));
+            }
+        }
+    }
+
+    protected void updateFailedStackStatusIfApplicable(Stack stack, Operation operation, String statusReason) {
+        if (operation != null) {
+            DetailedStackStatus status = FAILED_OPERATION_STACK_STATUS_MAP.get(operation.getOperationType());
+            if (status != null) {
+                stackUpdater.updateStackStatus(stack, status, statusReason);
             }
         }
     }

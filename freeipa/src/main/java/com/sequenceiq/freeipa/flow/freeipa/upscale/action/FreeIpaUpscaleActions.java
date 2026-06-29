@@ -200,6 +200,7 @@ public class FreeIpaUpscaleActions {
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinalChain());
                 setInstanceIds(variables, payload.getInstanceIds());
+                setInstanceIdsBeingReplaced(variables, payload.getInstanceIdsBeingReplaced());
                 instanceGroupAttributeAndStackTemplateUpdater.updateInstanceGroupAttributesAndTemplateIfDefaultDifferent(context, stack);
                 sendEvent(context, UPSCALE_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
@@ -268,7 +269,8 @@ public class FreeIpaUpscaleActions {
                         .filter(im -> instanceIdsToRemove.contains(im.getInstanceId()) && Objects.nonNull(im.getSubnetId()))
                         .collect(Collectors.toList());
                 LOGGER.debug("Instances to replace and keep the AZ: {}", instancesToRemove);
-                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, instancesToRemove);
+                Set<String> instanceIdsBeingReplaced = getInstanceIdsBeingReplaced(variables);
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, instancesToRemove, instanceIdsBeingReplaced);
                 assignNewSecretsToNewInstances(updatedStack, createdSecretResourceIds, variables);
                 List<CloudResource> cloudResources = resourceService.findAllByStackId(stack.getId()).stream()
                         .map(resource -> resourceConverter.convert(resource))

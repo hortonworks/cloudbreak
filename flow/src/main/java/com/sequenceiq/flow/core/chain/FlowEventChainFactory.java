@@ -2,6 +2,7 @@ package com.sequenceiq.flow.core.chain;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.api.model.operation.OperationType;
+import com.sequenceiq.flow.core.FlowEventContext;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.FlowToOperationNameConverter;
 
@@ -21,5 +22,12 @@ public interface FlowEventChainFactory<P extends Payload> {
 
     default String getOperationName() {
         return FlowToOperationNameConverter.toOperationName(getClass().getSimpleName().replace("FlowEventChainFactory", ""));
+    }
+
+    /**
+     * Is called when a flow running in a flowchain is finalized after a failure
+     * @param flowEventContext flowEventContext
+     */
+    default void onFlowChainFailure(FlowEventContext flowEventContext) {
     }
 }

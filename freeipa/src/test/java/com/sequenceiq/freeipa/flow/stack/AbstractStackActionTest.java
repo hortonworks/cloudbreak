@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_MULTI_AZ_MIGRATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -22,16 +23,21 @@ import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
+import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractStackActionTest {
 
     @Mock
     private EventSenderService eventSenderService;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @Mock
     private Stack stack;
@@ -42,6 +48,7 @@ class AbstractStackActionTest {
     void setUp() {
         underTest = new TestAction();
         ReflectionTestUtils.setField(underTest, "eventService", eventSenderService);
+        ReflectionTestUtils.setField(underTest, "stackUpdater", stackUpdater);
     }
 
     @Test
@@ -55,6 +62,16 @@ class AbstractStackActionTest {
     }
 
     @Test
+    void sendsMultiAzMigrationNotificationWhenOperationTypeIsMigrateToMultiAz() {
+        Operation operation = new Operation();
+        operation.setOperationType(OperationType.MIGRATE_TO_MULTI_AZ);
+
+        underTest.callSendFailedOperationNotificationIfApplicable(stack, "user", operation, "boom");
+
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq("user"), eq(FREEIPA_MULTI_AZ_MIGRATION_FAILED), eq(List.of("boom")));
+    }
+
+    @Test
     void doesNotSendNotificationWhenOperationTypeNotMapped() {
         Operation operation = new Operation();
         operation.setOperationType(OperationType.REPAIR);
@@ -62,6 +79,43 @@ class AbstractStackActionTest {
         underTest.callSendFailedOperationNotificationIfApplicable(stack, "user", operation, "boom");
 
         verify(eventSenderService, never()).sendEventAndNotification(any(), any(), any(), any());
+    }
+
+    @Test
+    void updatesStackStatusToUpgradeFailedWhenOperationTypeIsUpgrade() {
+        Operation operation = new Operation();
+        operation.setOperationType(OperationType.UPGRADE);
+
+        underTest.callUpdateFailedStackStatusIfApplicable(stack, operation, "boom");
+
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, "boom");
+    }
+
+    @Test
+    void updatesStackStatusToMultiAzMigrationFailedWhenOperationTypeIsMigrateToMultiAz() {
+        Operation operation = new Operation();
+        operation.setOperationType(OperationType.MIGRATE_TO_MULTI_AZ);
+
+        underTest.callUpdateFailedStackStatusIfApplicable(stack, operation, "boom");
+
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.MULTI_AZ_MIGRATION_FAILED, "boom");
+    }
+
+    @Test
+    void doesNotUpdateStackStatusWhenOperationTypeNotMapped() {
+        Operation operation = new Operation();
+        operation.setOperationType(OperationType.REPAIR);
+
+        underTest.callUpdateFailedStackStatusIfApplicable(stack, operation, "boom");
+
+        verify(stackUpdater, never()).updateStackStatus(any(Stack.class), any(DetailedStackStatus.class), any());
+    }
+
+    @Test
+    void doesNotUpdateStackStatusWhenOperationIsNull() {
+        underTest.callUpdateFailedStackStatusIfApplicable(stack, null, "boom");
+
+        verify(stackUpdater, never()).updateStackStatus(any(Stack.class), any(DetailedStackStatus.class), any());
     }
 
     private static class TestAction extends AbstractStackAction<DummyState, DummyEvent, CommonContext, DummyPayload> {
@@ -72,6 +126,10 @@ class AbstractStackActionTest {
 
         void callSendFailedOperationNotificationIfApplicable(Stack stack, String flowTriggerUserCrn, Operation operation, String errorReason) {
             sendFailedOperationNotificationIfApplicable(stack, flowTriggerUserCrn, operation, errorReason);
+        }
+
+        void callUpdateFailedStackStatusIfApplicable(Stack stack, Operation operation, String statusReason) {
+            updateFailedStackStatusIfApplicable(stack, operation, statusReason);
         }
 
         @Override

@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.chain;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -29,6 +30,8 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
 
     protected static final String INSTANCE_COUNT_BY_GROUP = "INSTANCE_COUNT_BY_GROUP";
 
+    protected static final String INSTANCE_IDS_BEING_REPLACED = "INSTANCE_IDS_BEING_REPLACED";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommonChainAction.class);
 
     @Inject
@@ -39,7 +42,7 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     }
 
     protected void setInstanceIds(Map<Object, Object> variables, List<String> instanceIds) {
-        variables.put(INSTANCE_IDS, instanceIds);
+        variables.put(INSTANCE_IDS, instanceIds != null ? instanceIds : List.of());
     }
 
     protected List<String> getInstanceIds(Map<Object, Object> variables) {
@@ -76,6 +79,14 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
 
     protected Integer getInstanceCountByGroup(Map<Object, Object> variables) {
         return (Integer) variables.get(INSTANCE_COUNT_BY_GROUP);
+    }
+
+    protected void setInstanceIdsBeingReplaced(Map<Object, Object> variables, Set<String> instanceIdsBeingReplaced) {
+        variables.put(INSTANCE_IDS_BEING_REPLACED, instanceIdsBeingReplaced != null ? instanceIdsBeingReplaced : Set.of());
+    }
+
+    protected Set<String> getInstanceIdsBeingReplaced(Map<Object, Object> variables) {
+        return (Set<String>) variables.get(INSTANCE_IDS_BEING_REPLACED);
     }
 
     protected void enableStatusChecker(Stack stack, String reason) {

@@ -51,6 +51,10 @@ public class EnvironmentEditDto {
 
     private final Integer freeipaNodeCount;
 
+    private final Boolean freeIpaEnableMultiAz;
+
+    private final String freeIpaPlatformVariant;
+
     private final EnvironmentHybridDto environmentHybridDto;
 
     public EnvironmentEditDto(Builder builder) {
@@ -73,6 +77,8 @@ public class EnvironmentEditDto {
         this.cloudPlatform = builder.cloudPlatform;
         this.dataServices = builder.dataServices;
         this.freeipaNodeCount = builder.freeipaNodeCount;
+        this.freeIpaEnableMultiAz = builder.freeIpaEnableMultiAz;
+        this.freeIpaPlatformVariant = builder.freeIpaPlatformVariant;
         this.environmentHybridDto = builder.environmentHybridDto;
     }
 
@@ -152,6 +158,14 @@ public class EnvironmentEditDto {
         return freeipaNodeCount;
     }
 
+    public Boolean getFreeIpaEnableMultiAz() {
+        return freeIpaEnableMultiAz;
+    }
+
+    public String getFreeIpaPlatformVariant() {
+        return freeIpaPlatformVariant;
+    }
+
     public EnvironmentHybridDto getEnvironmentHybridDto() {
         return environmentHybridDto;
     }
@@ -182,6 +196,8 @@ public class EnvironmentEditDto {
                 ", cloudPlatform=" + cloudPlatform +
                 ", dataServices=" + dataServices +
                 ", freeipaNodeCount=" + freeipaNodeCount +
+                ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz +
+                ", freeIpaPlatformVariant=" + freeIpaPlatformVariant +
                 ", environmentHybridDto=" + environmentHybridDto +
                 '}';
     }
@@ -224,6 +240,10 @@ public class EnvironmentEditDto {
         private EnvironmentDataServices dataServices;
 
         private Integer freeipaNodeCount;
+
+        private Boolean freeIpaEnableMultiAz;
+
+        private String freeIpaPlatformVariant;
 
         private EnvironmentHybridDto environmentHybridDto;
 
@@ -327,6 +347,16 @@ public class EnvironmentEditDto {
 
         public Builder withFreeipaNodeCount(Integer freeipaNodeCount) {
             this.freeipaNodeCount = freeipaNodeCount;
+            return this;
+        }
+
+        public Builder withFreeIpaEnableMultiAz(Boolean freeIpaEnableMultiAz) {
+            this.freeIpaEnableMultiAz = freeIpaEnableMultiAz;
+            return this;
+        }
+
+        public Builder withFreeIpaPlatformVariant(String freeIpaPlatformVariant) {
+            this.freeIpaPlatformVariant = freeIpaPlatformVariant;
             return this;
         }
 

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -278,8 +279,9 @@ public class FreeIpaCreationService {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-            multiAzCalculatorService.calculateByRoundRobin(multiAzCalculatorService.prepareSubnetAzMap(environment), instanceGroup, stack);
-            multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup);
+            Map<String, String> subnetAzMap = multiAzCalculatorService.prepareSubnetAzMap(environment);
+            multiAzCalculatorService.calculateByRoundRobin(subnetAzMap, instanceGroup, stack);
+            multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
         }
     }
 }

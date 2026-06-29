@@ -81,6 +81,12 @@ public class EnvironmentEditRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_NODE_COUNT)
     private Integer freeIpaNodeCount;
 
+    @Schema(description = EnvironmentModelDescription.FREEIPA_ENABLE_MULTI_AZ)
+    private Boolean freeIpaEnableMultiAz;
+
+    @Schema(description = EnvironmentModelDescription.FREEIPA_PLATFORM_VARIANT)
+    private String freeIpaPlatformVariant;
+
     public String getDescription() {
         return description;
     }
@@ -209,6 +215,22 @@ public class EnvironmentEditRequest implements Serializable {
         this.freeIpaNodeCount = freeIpaNodeCount;
     }
 
+    public Boolean getFreeIpaEnableMultiAz() {
+        return freeIpaEnableMultiAz;
+    }
+
+    public void setFreeIpaEnableMultiAz(Boolean freeIpaEnableMultiAz) {
+        this.freeIpaEnableMultiAz = freeIpaEnableMultiAz;
+    }
+
+    public String getFreeIpaPlatformVariant() {
+        return freeIpaPlatformVariant;
+    }
+
+    public void setFreeIpaPlatformVariant(String freeIpaPlatformVariant) {
+        this.freeIpaPlatformVariant = freeIpaPlatformVariant;
+    }
+
     public HybridEnvironmentRequest getHybridEnvironment() {
         return hybridEnvironment;
     }
@@ -236,6 +258,8 @@ public class EnvironmentEditRequest implements Serializable {
                 ", tags=" + tags +
                 ", dataServices=" + dataServices +
                 ", freeipaNodeCount=" + freeIpaNodeCount +
+                ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz +
+                ", freeIpaPlatformVariant='" + freeIpaPlatformVariant + '\'' +
                 ", hybridEnvironment=" + hybridEnvironment +
                 '}';
     }

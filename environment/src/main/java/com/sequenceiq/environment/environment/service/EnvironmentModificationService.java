@@ -169,6 +169,8 @@ public class EnvironmentModificationService {
         editFreeIPA(editDto, environment);
         editDataServices(editDto, environment);
         editFreeIpaNodeCount(editDto, environment);
+        editFreeIpaEnableMultiAz(editDto, environment);
+        editFreeIpaPlatformVariant(editDto, environment);
         editTags(editDto, environment);
         validationBuilder.merge(environmentValidatorService.validateTags(editDto));
 
@@ -606,6 +608,19 @@ public class EnvironmentModificationService {
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
+        }
+    }
+
+    private void editFreeIpaEnableMultiAz(EnvironmentEditDto editDto, Environment environment) {
+        Boolean freeIpaEnableMultiAz = editDto.getFreeIpaEnableMultiAz();
+        if (freeIpaEnableMultiAz != null) {
+            environment.setFreeIpaEnableMultiAz(freeIpaEnableMultiAz);
+        }
+    }
+
+    private void editFreeIpaPlatformVariant(EnvironmentEditDto editDto, Environment environment) {
+        if (editDto.getFreeIpaPlatformVariant() != null) {
+            environment.setFreeIpaPlatformVariant(editDto.getFreeIpaPlatformVariant());
         }
     }
 

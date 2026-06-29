@@ -57,9 +57,11 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.dto.Credential;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
@@ -70,6 +72,7 @@ import com.sequenceiq.freeipa.flow.stack.migration.handler.CreateResourcesHandle
 import com.sequenceiq.freeipa.flow.stack.migration.handler.DeleteCloudFormationHandler;
 import com.sequenceiq.freeipa.flow.stack.migration.handler.service.ResourceRecreator;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -165,6 +168,9 @@ class AwsVariantMigrationFlowIntegrationTest {
     @MockitoBean
     private ResourceRecreator resourceRecreator;
 
+    @MockitoBean
+    private EnvironmentService environmentService;
+
     @BeforeEach
     void setup() {
         Stack stack = new Stack();
@@ -205,6 +211,9 @@ class AwsVariantMigrationFlowIntegrationTest {
         String cfError = "Cannot delete stack: there is a dependent object";
         when(resourceRetriever.findByStatusAndTypeAndStack(eq(CommonStatus.CREATED), eq(ResourceType.CLOUDFORMATION_STACK), anyLong()))
                 .thenThrow(new RuntimeException(cfError));
+        Operation upgradeOperation = new Operation();
+        upgradeOperation.setOperationType(OperationType.UPGRADE);
+        when(operationService.failOperation(eq(ACCOUNT_ID), any(), anyString(), any(), any())).thenReturn(upgradeOperation);
 
         FlowIdentifier flowIdentifier = triggerFlow();
         letItFlow(flowIdentifier);

@@ -196,6 +196,9 @@ public class EnvironmentModelDescription {
     public static final String HYBRID_ENVIRONMENT = "Hybrid environment related requests";
 
     public static final String FREEIPA_NODE_COUNT = "FreeIPA node count of the environment";
+    public static final String FREEIPA_ENABLE_MULTI_AZ =
+            "Controls the FreeIPA multi-AZ flag for the environment: true enables multi-AZ, false disables it, null leaves it unchanged.";
+    public static final String FREEIPA_PLATFORM_VARIANT = "FreeIPA platform variant of the environment";
 
     public static final String ENVIRONMENT_ENABLE_SECRET_ENCRYPTION = "True if the secret encryption feature is enabled for the environment.";
 

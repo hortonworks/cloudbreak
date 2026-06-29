@@ -130,16 +130,14 @@ public class StackUpdater {
                 || !Objects.equals(statusReason, stack.getStackStatus().getStatusReason());
     }
 
-    public void updateVariant(Long resourceId, String variant) {
-        LOGGER.debug("Update variant for stack to variant of {}", variant);
-        Stack stack = stackService.getStackById(resourceId);
-        if (!variant.equals(stack.getPlatformvariant())) {
-            LOGGER.debug("The new stack variant and old stack variant are different, update it");
-            stack.setPlatformvariant(variant);
-            stackService.save(stack);
-        } else {
-            LOGGER.info("The variant was already set to {}", variant);
-        }
+    public void updateVariant(Long stackId, String variant) {
+        LOGGER.debug("Update variant for stack [{}] to {}", stackId, variant);
+        stackService.updateVariantByStackId(stackId, variant);
+    }
+
+    public void updateMultiAzEnabled(Long stackId, boolean multiAzEnabled) {
+        LOGGER.debug("Update multiAz for stack [{}] to {}", stackId, multiAzEnabled);
+        stackService.updateMultiAzByStackId(stackId, multiAzEnabled);
     }
 
     public void updateSupportedImdsVersion(Long stackId, InstanceMetadataUpdateType updateType) {

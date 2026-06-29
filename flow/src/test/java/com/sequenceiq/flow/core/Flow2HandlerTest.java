@@ -14,12 +14,14 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.context.ApplicationContext;
 import org.springframework.statemachine.ExtendedState;
 import org.springframework.statemachine.StateMachine;
@@ -60,6 +63,7 @@ import com.sequenceiq.flow.core.FlowState.FlowStateConstants;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
@@ -165,6 +169,12 @@ class Flow2HandlerTest {
     @Mock
     private List<FlowConfiguration<?>> flowConfigs;
 
+    @Spy
+    private List<FlowEventChainFactory<?>> flowEventChainFactories = new ArrayList<>();
+
+    @Mock
+    private FlowEventChainFactory<Payload> mockFlowEventChainFactory;
+
     private FlowState flowState;
 
     private Event<? extends Payload> dummyEvent;
@@ -181,6 +191,8 @@ class Flow2HandlerTest {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
         }).when(transactionService).required(any(Runnable.class));
+        // @InjectMocks cannot reach @Resource-annotated List fields, so wire the spy explicitly.
+        ReflectionTestUtils.setField(underTest, "flowEventChainFactories", flowEventChainFactories);
     }
 
     @Test
@@ -506,6 +518,138 @@ class Flow2HandlerTest {
         verify(runningFlows, never()).put(any(Flow.class), isNull());
         verify(flowChains, times(1)).removeFullFlowChain(anyString(), anyBoolean());
         verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any(), any());
+    }
+
+    @Test
+    void testFlowFinalFlowFailedWithChainTypeCallsOnFlowChainFailure() throws TransactionExecutionException {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        given(mockFlowEventChainFactory.getName()).willReturn("TestChainFactory");
+        given(flowChainLogService.getFlowChainType("FLOW_CHAIN_ID")).willReturn("TestChainFactory");
+        flowEventChainFactories.add(mockFlowEventChainFactory);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_TYPE, "TestChainFactory");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
+
+        underTest.accept(dummyEvent);
+
+        ArgumentCaptor<FlowEventContext> contextCaptor = ArgumentCaptor.forClass(FlowEventContext.class);
+        verify(mockFlowEventChainFactory, times(1)).onFlowChainFailure(contextCaptor.capture());
+        assertEquals(STACK_ID, contextCaptor.getValue().getResourceId());
+        assertEquals(FLOW_TRIGGER_USERCRN, contextCaptor.getValue().getFlowTriggerUserCrn());
+        verify(flowChains, times(1)).removeFullFlowChain(anyString(), anyBoolean());
+    }
+
+    @Test
+    void testFlowFinalFlowFailedWithNestedChainTypeUsesLeafSegment() throws TransactionExecutionException {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        FlowEventChainFactory<Payload> rootFactory = mock(FlowEventChainFactory.class);
+        given(rootFactory.getName()).willReturn("RootChainFactory");
+        given(mockFlowEventChainFactory.getName()).willReturn("ChildChainFactory");
+        given(flowChainLogService.getFlowChainType("FLOW_CHAIN_ID")).willReturn("RootChainFactory/ChildChainFactory");
+        flowEventChainFactories.add(rootFactory);
+        flowEventChainFactories.add(mockFlowEventChainFactory);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_TYPE, "RootChainFactory/ChildChainFactory");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
+
+        underTest.accept(dummyEvent);
+
+        ArgumentCaptor<FlowEventContext> contextCaptor = ArgumentCaptor.forClass(FlowEventContext.class);
+        verify(mockFlowEventChainFactory, times(1)).onFlowChainFailure(contextCaptor.capture());
+        verify(rootFactory, never()).onFlowChainFailure(any());
+        assertEquals(STACK_ID, contextCaptor.getValue().getResourceId());
+        assertEquals(FLOW_TRIGGER_USERCRN, contextCaptor.getValue().getFlowTriggerUserCrn());
+    }
+
+    @Test
+    void testFlowFinalFlowFailedWithDeeplyNestedChainTypeUsesLeafSegment() throws TransactionExecutionException {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        FlowEventChainFactory<Payload> rootFactory = mock(FlowEventChainFactory.class);
+        given(rootFactory.getName()).willReturn("A");
+        FlowEventChainFactory<Payload> middleFactory = mock(FlowEventChainFactory.class);
+        given(middleFactory.getName()).willReturn("B");
+        given(mockFlowEventChainFactory.getName()).willReturn("C");
+        given(flowChainLogService.getFlowChainType("FLOW_CHAIN_ID")).willReturn("A/B/C");
+        flowEventChainFactories.add(rootFactory);
+        flowEventChainFactories.add(middleFactory);
+        flowEventChainFactories.add(mockFlowEventChainFactory);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_TYPE, "A/B/C");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
+
+        underTest.accept(dummyEvent);
+
+        verify(mockFlowEventChainFactory, times(1)).onFlowChainFailure(any());
+        verify(rootFactory, never()).onFlowChainFailure(any());
+        verify(middleFactory, never()).onFlowChainFailure(any());
+    }
+
+    @Test
+    void testFlowFinalFlowFailedWithNestedChainTypeDoesNotInvokeRootFactoryWhenLeafFactoryMissing() throws TransactionExecutionException {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        given(mockFlowEventChainFactory.getName()).willReturn("RootChainFactory");
+        given(flowChainLogService.getFlowChainType("FLOW_CHAIN_ID")).willReturn("RootChainFactory/UnknownChildChainFactory");
+        flowEventChainFactories.add(mockFlowEventChainFactory);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_TYPE, "RootChainFactory/UnknownChildChainFactory");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
+
+        underTest.accept(dummyEvent);
+
+        verify(mockFlowEventChainFactory, never()).onFlowChainFailure(any());
+        verify(flowChains, times(1)).removeFullFlowChain(anyString(), anyBoolean());
+    }
+
+    @Test
+    void testFlowFinalFlowFailedWithNoMatchingFactoryNoCallbackFires() throws TransactionExecutionException {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        given(mockFlowEventChainFactory.getName()).willReturn("OtherChainFactory");
+        given(flowChainLogService.getFlowChainType("FLOW_CHAIN_ID")).willReturn("UnknownChainFactory");
+        flowEventChainFactories.add(mockFlowEventChainFactory);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_TYPE, "UnknownChainFactory");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
+
+        underTest.accept(dummyEvent);
+
+        verify(mockFlowEventChainFactory, never()).onFlowChainFailure(any());
+        verify(flowChains, times(1)).removeFullFlowChain(anyString(), anyBoolean());
+    }
+
+    @Test
+    void testFlowFinalFlowFailedChainCallbackThrowsButFinalizerStillRuns() throws TransactionExecutionException {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        given(mockFlowEventChainFactory.getName()).willReturn("TestChainFactory");
+        given(flowChainLogService.getFlowChainType("FLOW_CHAIN_ID")).willReturn("TestChainFactory");
+        doThrow(new RuntimeException("callback failure"))
+                .when(mockFlowEventChainFactory).onFlowChainFailure(any());
+        flowEventChainFactories.add(mockFlowEventChainFactory);
+
+        FlowFinalizerCallback finalizerCallback = mock(FlowFinalizerCallback.class);
+        doReturn(finalizerCallback).when(flowConfig).getFinalizerCallBack();
+        ReflectionTestUtils.setField(underTest, "flowConfigs", List.of(flowConfig));
+        doReturn(flowConfig.getClass()).when(flow).getFlowConfigClass();
+
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_TYPE, "TestChainFactory");
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
+
+        underTest.accept(dummyEvent);
+
+        verify(mockFlowEventChainFactory, times(1)).onFlowChainFailure(any());
+        verify(finalizerCallback, times(1)).onFinalize(eq(STACK_ID));
     }
 
     @Test

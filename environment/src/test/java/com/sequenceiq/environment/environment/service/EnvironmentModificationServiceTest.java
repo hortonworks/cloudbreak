@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,6 +27,9 @@ import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -970,6 +974,47 @@ class EnvironmentModificationServiceTest {
         verify(environmentService).save(savedCaptor.capture());
         Environment saved = savedCaptor.getValue();
         assertThat(saved.getTags()).isEqualTo(tags);
+    }
+
+    @NullSource
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testEditFreeIpaEnableMultiAz(Boolean freeIpaEnableMultiAz) {
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withFreeIpaEnableMultiAz(freeIpaEnableMultiAz)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+
+        environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
+
+        if (Boolean.TRUE.equals(freeIpaEnableMultiAz)) {
+            assertTrue(environment.isFreeIpaEnableMultiAz());
+        } else {
+            assertFalse(environment.isFreeIpaEnableMultiAz());
+        }
+    }
+
+    @NullSource
+    @ValueSource(strings = {"AWS_NATIVE", "AZURE", "GCP"})
+    @ParameterizedTest
+    void testEditFreeIpaPlatformVariant(String freeIpaPlatformVariant) {
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withFreeIpaPlatformVariant(freeIpaPlatformVariant)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        environment.setFreeIpaPlatformVariant("AWS");
+
+        environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
+
+        if (freeIpaPlatformVariant != null) {
+            assertEquals(freeIpaPlatformVariant, environment.getFreeIpaPlatformVariant());
+        } else {
+            assertEquals("AWS", environment.getFreeIpaPlatformVariant());
+        }
     }
 
     private Environment environmentMock() {

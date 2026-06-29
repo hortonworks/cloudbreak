@@ -387,6 +387,24 @@ public class StackUpdaterTest {
     }
 
     @Test
+    void testUpdateVariantShouldDelegateToRepositoryUpdate() {
+        underTest.updateVariant(STACK_ID, "NEW_VARIANT");
+
+        verify(stackService, times(1)).updateVariantByStackId(STACK_ID, "NEW_VARIANT");
+        verify(stackService, never()).save(any(Stack.class));
+    }
+
+    @Test
+    void testUpdateMultiAzEnabledShouldDelegateToRepositoryUpdate() {
+        stack.setMultiAz(false);
+
+        underTest.updateMultiAzEnabled(STACK_ID, true);
+
+        verify(stackService, times(1)).updateMultiAzByStackId(STACK_ID, true);
+        verify(stackService, never()).save(any(Stack.class));
+    }
+
+    @Test
     void testUpdateUserDefinedTags() {
         Stack stack = new Stack();
         String resourceCrn = "resourceCrn";

@@ -128,6 +128,11 @@ public class InstanceMetaDataService {
     }
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, List<InstanceMetaData> instancesToRemove) {
+        return saveInstanceAndGetUpdatedStack(stack, cloudInstances, instancesToRemove, new HashSet<>());
+    }
+
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, List<InstanceMetaData> instancesToRemove,
+            Set<String> excludeInstanceIds) {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         Json image = new Json(imageService.getCloudImageByStackId(stack.getId()));
         DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn()),
@@ -139,7 +144,7 @@ public class InstanceMetaDataService {
             InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), instancesPerGroupEntry.getKey());
             if (instanceGroup != null) {
                 Map<String, String> subnetAzMap = multiAzCalculatorService.prepareSubnetAzMap(environment);
-                Map<String, Integer> currentSubnetUsage = multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup);
+                Map<String, Integer> currentSubnetUsage = multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup, excludeInstanceIds);
                 for (CloudInstance cloudInstance : instancesPerGroupEntry.getValue()) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     Long privateId = cloudInstance.getTemplate().getPrivateId();
@@ -158,7 +163,8 @@ public class InstanceMetaDataService {
                     }
                     if (StringUtils.isBlank(instanceMetaData.getSubnetId()) && !subnetAzMap.isEmpty()) {
                         LOGGER.debug("Calculate new subnet and AZ for private id: {}", privateId);
-                        Map<String, String> filteredSubnetsByLeastUsedAz = multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap);
+                        Map<String, String> filteredSubnetsByLeastUsedAz = multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap,
+                                excludeInstanceIds);
                         multiAzCalculatorService.updateSubnetIdForSingleInstanceIfEligible(filteredSubnetsByLeastUsedAz, currentSubnetUsage, instanceMetaData,
                                 instanceGroup, stack);
                     } else if (StringUtils.isNoneBlank(instanceMetaData.getSubnetId())) {
@@ -168,7 +174,7 @@ public class InstanceMetaDataService {
                         LOGGER.debug("Subnet and AZ calculation skipped, because the subnetAzMap is empty");
                     }
                     instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
-                    multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup);
+                    multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
                     instanceMetaDataRepository.save(instanceMetaData);
                     LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);
                 }

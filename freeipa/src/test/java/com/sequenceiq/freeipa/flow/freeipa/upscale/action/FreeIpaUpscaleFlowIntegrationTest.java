@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -408,7 +409,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
     @Test
     public void testUpscaleFailedNodeCountChanged() throws Exception {
-        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(any(), anyList(), anyList())).thenAnswer(new Answer<Stack>() {
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(any(), anyList(), anyList(), anySet())).thenAnswer(new Answer<Stack>() {
             @Override
             public Stack answer(InvocationOnMock invocation) throws Throwable {
                 List<CloudInstance> argument = invocation.getArgument(1, List.class);

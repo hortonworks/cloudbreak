@@ -39,7 +39,7 @@ public interface OperationRepository extends JpaRepository<Operation, Long> {
             SELECT s FROM Operation s
             WHERE s.accountId = :accountId
                 AND (:operationType IS NULL OR s.operationType = :operationType)
-                AND s.environmentList LIKE CONCAT('%', :environmentCrn, '%')
+                AND s.environmentList LIKE CONCAT('%', CAST(:environmentCrn AS string), '%')
             ORDER BY startTime DESC
     """)
     Optional<Operation> findLatestByEnvironmentCrnAndOperationType(

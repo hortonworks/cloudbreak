@@ -141,8 +141,8 @@ public class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzMap = Map.of("aSubnetId", "anAvailabilityZoneId");
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
         Map<String, Integer> subnetUsage = Map.of();
-        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subnetUsage);
-        when(multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap)).thenReturn(subnetAzMap);
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup, Set.of())).thenReturn(subnetUsage);
+        when(multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap, Set.of())).thenReturn(subnetAzMap);
 
         Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, Collections.emptyList());
 
@@ -153,9 +153,39 @@ public class InstanceMetaDataServiceTest {
                 .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
-        verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
+        verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, Set.of());
         verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup, stack);
-        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup);
+        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
+    }
+
+    @Test
+    public void testSaveInstanceAndGetUpdatedStackForwardsExcludeInstanceIdsToMultiAzCalculator() {
+        Stack stack = initializeStackWithInstanceGroup();
+        InstanceGroup instanceGroup = stack.getInstanceGroups().stream().findFirst().get();
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setHostname("ipa");
+        freeIpa.setDomain("dom");
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        InstanceTemplate template = mock(InstanceTemplate.class);
+        when(template.getGroupName()).thenReturn(GROUP_NAME);
+        when(template.getPrivateId()).thenReturn(INSTANCE_PRIVATE_ID_3);
+        List<CloudInstance> cloudInstances = List.of(new CloudInstance(INSTANCE_ID_3, template, null, "subnet-1", "az1"));
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_ID)).thenReturn(environmentResponse);
+        Map<String, String> subnetAzMap = Map.of("aSubnetId", "anAvailabilityZoneId");
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
+        Map<String, Integer> subnetUsage = Map.of();
+        Set<String> excludeInstanceIds = Set.of(INSTANCE_ID_1);
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup, excludeInstanceIds)).thenReturn(subnetUsage);
+        when(multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap, excludeInstanceIds)).thenReturn(subnetAzMap);
+
+        Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, Collections.emptyList(), excludeInstanceIds);
+
+        InstanceGroup actualInstanceGroup = actualStack.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
+        verify(multiAzCalculatorService).calculateCurrentSubnetUsage(subnetAzMap, actualInstanceGroup, excludeInstanceIds);
+        verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, excludeInstanceIds);
+        verify(multiAzCalculatorService, never()).calculateCurrentSubnetUsage(subnetAzMap, actualInstanceGroup, Set.of());
+        verify(multiAzCalculatorService, never()).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, Set.of());
     }
 
     @Test
@@ -175,7 +205,7 @@ public class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzMap = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
         Map<String, Integer> subnetUsage = Map.of();
-        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subnetUsage);
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup, Set.of())).thenReturn(subnetUsage);
         com.sequenceiq.cloudbreak.cloud.model.Image image =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("a", Map.of(), "b", "v", "", "cat", "nmame", "id", Map.of(), "2019-10-24", 1571884856L, null);
         when(imageService.getCloudImageByStackId(STACK_ID)).thenReturn(image);
@@ -190,10 +220,10 @@ public class InstanceMetaDataServiceTest {
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
         assertEquals(image.getImageId(), instanceMetaData.getImage().getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId());
-        verify(multiAzCalculatorService, times(0)).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
+        verify(multiAzCalculatorService, times(0)).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, Set.of());
         verify(multiAzCalculatorService, times(0)).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData,
                 actualInstanceGroup, null);
-        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup);
+        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
     }
 
     @Test
@@ -222,7 +252,7 @@ public class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzMap = Map.of("aSubnetId", "anAvailabilityZoneId");
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
         Map<String, Integer> subnetUsage = Map.of();
-        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subnetUsage);
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup, Set.of())).thenReturn(subnetUsage);
 
         Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, List.of(im1, im2));
 
@@ -235,8 +265,8 @@ public class InstanceMetaDataServiceTest {
                         validateAzAndSubnet(im2, im);
                     }
                 });
-        verify(multiAzCalculatorService, never()).filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap);
-        verify(multiAzCalculatorService, times(2)).populateAvailabilityZonesForInstances(stack, instanceGroup);
+        verify(multiAzCalculatorService, never()).filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap, Set.of());
+        verify(multiAzCalculatorService, times(2)).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
     }
 
     @Test

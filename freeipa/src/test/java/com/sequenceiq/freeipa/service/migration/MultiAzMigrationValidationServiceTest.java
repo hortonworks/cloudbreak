@@ -27,10 +27,12 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 
 @ExtendWith(MockitoExtension.class)
@@ -125,16 +127,21 @@ class MultiAzMigrationValidationServiceTest {
 
     static Object[][] stackMultiAzFlagScenarios() {
         return new Object[][]{
-                // testCaseName, alreadyMultiAz, expectError, errorFragment
-                {"stack already multi-AZ", true, true, Optional.of("already multi-AZ enabled")},
-                {"stack not yet multi-AZ", false, false, Optional.empty()},
+                // testCaseName, alreadyMultiAz, detailedStatus, expectError, errorFragment
+                {"stack already multi-AZ with AVAILABLE status", true, DetailedStackStatus.AVAILABLE, true, Optional.of("already multi-AZ enabled")},
+                {"stack already multi-AZ with UPDATE_COMPLETE status", true, DetailedStackStatus.UPDATE_COMPLETE, true, Optional.of("already multi-AZ enabled")},
+                {"stack already multi-AZ but previous migration failed - retry allowed",
+                        true, DetailedStackStatus.MULTI_AZ_MIGRATION_FAILED, false, Optional.empty()},
+                {"stack already multi-AZ with null detailed status", true, null, true, Optional.of("already multi-AZ enabled")},
+                {"stack not yet multi-AZ", false, DetailedStackStatus.AVAILABLE, false, Optional.empty()},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("stackMultiAzFlagScenarios")
-    void testValidateStackMultiAzFlag(String name, boolean alreadyMultiAz, boolean expectError, Optional<String> errorFragment) {
-        Stack stack = createStack(AWS_NATIVE_VARIANT, alreadyMultiAz, true, Set.of(availableInstance("i-001")), null);
+    void testValidateStackMultiAzFlag(String name, boolean alreadyMultiAz, DetailedStackStatus detailedStatus,
+            boolean expectError, Optional<String> errorFragment) {
+        Stack stack = createStack(AWS_NATIVE_VARIANT, alreadyMultiAz, true, Set.of(availableInstance("i-001")), null, detailedStatus);
 
         ValidationResult result = underTest.validateMultiAzMigrationRequest(ENV_CRN, ACCOUNT_ID, stack);
 
@@ -235,12 +242,22 @@ class MultiAzMigrationValidationServiceTest {
     }
 
     private Stack createStack(String variant, boolean multiAz, boolean available, Set<InstanceMetaData> instances, ImageEntity image) {
+        return createStack(variant, multiAz, available, instances, image, null);
+    }
+
+    private Stack createStack(String variant, boolean multiAz, boolean available, Set<InstanceMetaData> instances, ImageEntity image,
+            DetailedStackStatus detailedStatus) {
         Stack stack = mock(Stack.class);
         when(stack.getPlatformvariant()).thenReturn(variant);
         when(stack.isMultiAz()).thenReturn(multiAz);
         when(stack.isAvailable()).thenReturn(available);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instances);
         lenient().when(stack.getImage()).thenReturn(image);
+        if (detailedStatus != null) {
+            StackStatus stackStatus = mock(StackStatus.class);
+            lenient().when(stackStatus.getDetailedStackStatus()).thenReturn(detailedStatus);
+            lenient().when(stack.getStackStatus()).thenReturn(stackStatus);
+        }
         return stack;
     }
 

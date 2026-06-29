@@ -987,7 +987,10 @@ public enum ResourceEvent {
     FREEIPA_REBOOT_FAILED("freeipa.reboot.failed"),
     FREEIPA_REFRESH_ENTITLEMENT_STARTED("freeipa.refresh.entitlement.started"),
     FREEIPA_REFRESH_ENTITLEMENT_FINISHED("freeipa.refresh.entitlement.finished"),
-    FREEIPA_REFRESH_ENTITLEMENT_FAILED("freeipa.refresh.entitlement.failed");
+    FREEIPA_REFRESH_ENTITLEMENT_FAILED("freeipa.refresh.entitlement.failed"),
+    FREEIPA_MULTI_AZ_MIGRATION_STARTED("freeipa.multi.az.migration.started"),
+    FREEIPA_MULTI_AZ_MIGRATION_FINISHED("freeipa.multi.az.migration.finished"),
+    FREEIPA_MULTI_AZ_MIGRATION_FAILED("freeipa.multi.az.migration.failed");
 
     private final String message;
 
