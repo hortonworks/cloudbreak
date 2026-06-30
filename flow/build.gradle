@@ -45,7 +45,7 @@ dependencies {
   testImplementation group: 'com.h2database',                    name: 'h2',                             version: h2databaseVersion
   testImplementation group: 'org.testcontainers',                name: 'postgresql',                     version: testContainersVersion
   testImplementation group: 'org.testcontainers',                name: 'junit-jupiter',                  version: testContainersVersion
-  testImplementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                    version: '5.6.1'
+  testImplementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                    version: '5.6.2'
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')
 }
