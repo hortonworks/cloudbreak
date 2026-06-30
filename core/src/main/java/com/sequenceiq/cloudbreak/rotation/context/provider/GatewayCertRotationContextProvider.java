@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
@@ -32,8 +33,6 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext.CustomJobRotationContextBuilder;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
-import com.sequenceiq.cloudbreak.service.ClusterProxyRotationService;
-import com.sequenceiq.cloudbreak.service.TokenCertInfo;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -53,10 +52,10 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
     private ClusterHostServiceRunner clusterHostServiceRunner;
 
     @Inject
-    private ClusterProxyRotationService clusterProxyRotationService;
+    private ClusterProxyService clusterProxyService;
 
     @Inject
-    private ClusterProxyService clusterProxyService;
+    private ClusterProxySecretProvider clusterProxySecretProvider;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
@@ -70,7 +69,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
                 .orElseThrow(() -> new CloudbreakRuntimeException(format("Cannot find Gateway in database, cluster id %s", stack.getCluster().getId())));
         Gateway fullGateway = gatewayService.getById(gateway.getId()).orElseThrow(() -> new SecretRotationException("Gateway cannot be found!"));
         GatewayView newGatewaySecrets = gatewayService.generateSignKeys(new Gateway());
-        validateKnoxSecretRef(readConfigResponse.getKnoxSecretRef(), gateway.getTokenKeySecret().getSecret());
+        validateKnoxSecretRef(readConfigResponse.getKnoxSecretRef(), gateway.getSignKeySecret().getSecret());
 
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(stack.getResourceCrn())
@@ -104,11 +103,10 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
 
         Map<SecretMarker, String> tokenSecretMap = Collections.emptyMap();
         if (shouldGenerateNewTokenCert(readConfigResponse)) {
-            TokenCertInfo tokenCertInfo = clusterProxyRotationService.generateTokenCert();
             tokenSecretMap = Map.of(
-                    SecretMarker.GATEWAY_TOKEN_CERT, tokenCertInfo.base64DerCert(),
-                    SecretMarker.GATEWAY_TOKEN_PUB, tokenCertInfo.publicKey(),
-                    SecretMarker.GATEWAY_TOKEN_KEY, tokenCertInfo.privateKey());
+                    SecretMarker.GATEWAY_TOKEN_CERT, newGatewaySecrets.getTokenCert(),
+                    SecretMarker.GATEWAY_TOKEN_PUB, newGatewaySecrets.getTokenPubSecret().getRaw(),
+                    SecretMarker.GATEWAY_TOKEN_KEY, newGatewaySecrets.getTokenKey());
         }
         result.putAll(signSecretMap);
         result.putAll(tokenSecretMap);
@@ -132,7 +130,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
     private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, Gateway gateway) {
         return ClusterProxyUpdateConfigRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withKnoxSecretPath(() -> clusterProxyRotationService.generateClusterProxySecretFormat(gateway.getTokenKeySecret().getSecret()))
+                .withKnoxSecretPath(() -> clusterProxySecretProvider.generateClusterProxySecretFormat(gateway.getSignKeySecret().getSecret()))
                 .build();
     }
 

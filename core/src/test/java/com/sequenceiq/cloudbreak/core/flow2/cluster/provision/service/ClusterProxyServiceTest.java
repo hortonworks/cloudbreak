@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Config;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
@@ -99,13 +100,15 @@ class ClusterProxyServiceTest {
     @Mock
     private StackUpdater stackUpdater;
 
+    @Mock
+    private ClusterProxySecretProvider clusterProxySecretProvider;
+
     @InjectMocks
     private ClusterProxyService underTest;
 
     @Test
     void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException, JsonProcessingException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
-        response.setX509Unwrapped("X509PublicKey");
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
@@ -114,7 +117,6 @@ class ClusterProxyServiceTest {
         ConfigRegistrationResponse registrationResponse =
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.registerCluster(stack));
 
-        assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
         ArgumentCaptor<ConfigRegistrationRequest> configRegistrationRequestArgumentCaptor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         verify(clusterProxyRegistrationClient).registerConfig(configRegistrationRequestArgumentCaptor.capture());
         ConfigRegistrationRequest requestSent = configRegistrationRequestArgumentCaptor.getValue();
@@ -341,14 +343,11 @@ class ClusterProxyServiceTest {
     @Test
     void shouldNotRegisterSSHTunnelInfoIfCCMIsDisabled() throws ClusterProxyException, JsonProcessingException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
-        response.setX509Unwrapped("X509PublicKey");
-
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
         ConfigRegistrationResponse registrationResponse = underTest.registerCluster(testStack());
 
-        assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
         ArgumentCaptor<ConfigRegistrationRequest> configRegistrationRequestArgumentCaptor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         verify(clusterProxyRegistrationClient).registerConfig(configRegistrationRequestArgumentCaptor.capture());
         ConfigRegistrationRequest requestSent = configRegistrationRequestArgumentCaptor.getValue();
@@ -369,8 +368,13 @@ class ClusterProxyServiceTest {
     @Test
     void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException, JsonProcessingException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
+        when(clusterProxySecretProvider.generateClusterProxySecretFormat("vaulturl")).thenReturn("vaulturl");
 
-        ConfigUpdateRequest request = new ConfigUpdateRequest(STACK_CRN, "https://1.2.3.4/test-cluster");
+        ConfigUpdateRequest request = new ConfigUpdateRequest(
+                STACK_CRN,
+                "https://1.2.3.4/test-cluster",
+                "vaulturl"
+        );
 
         underTest.registerGatewayConfiguration(STACK_ID);
         verify(clusterProxyRegistrationClient).updateConfig(request);
@@ -508,6 +512,8 @@ class ClusterProxyServiceTest {
     private Stack testStackWithKnox() throws JsonProcessingException {
         Stack stack = testStack();
         Gateway gateway = new Gateway();
+        Secret secret = new Secret("vaultsecret", "vaulturl");
+        gateway.setSignKeySecret(secret);
         gateway.setPath("test-cluster");
         stack.getCluster().setGateway(gateway);
         return stack;

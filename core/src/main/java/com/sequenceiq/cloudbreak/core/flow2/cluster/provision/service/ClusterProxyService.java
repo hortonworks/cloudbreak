@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
@@ -75,27 +77,28 @@ public class ClusterProxyService {
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
+    @Inject
+    private ClusterProxySecretProvider clusterProxySecretProvider;
+
     public ReadConfigResponse readConfig(StackView stack) {
         return clusterProxyRegistrationClient.readConfig(stack.getResourceCrn());
     }
 
     public ConfigRegistrationResponse registerCluster(Stack stack) {
-        ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
-        ConfigRegistrationResponse configRegistrationResponse = clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
+        ConfigRegistrationResponse configRegistrationResponse =
+                clusterProxyRegistrationClient.registerConfig(createProxyConfigRequest(stack));
         stackUpdater.updateClusterProxyRegisteredFlag(stack, true);
         return configRegistrationResponse;
     }
 
     public ConfigRegistrationResponse reRegisterCluster(Stack stack) {
-        ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack);
-        return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
+        return clusterProxyRegistrationClient.registerConfig(createProxyConfigReRegisterRequest(stack));
     }
 
-    public void updateClusterConfigWithKnoxSecretLocation(Long stackId, String knoxSecretPath) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        String knoxUrl = stack.getTunnel().useCcmV2OrJumpgate() ? knoxUrlForCcmV2(stack) : knoxUrlForNoCcmAndCcmV1(stack);
-        ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl, knoxSecretPath);
-        clusterProxyRegistrationClient.updateConfig(request);
+    public void updateClusterConfigWithKnoxSecretLocation(Long stackId, String knoxSecretPathAsVaultTokenPath) {
+        clusterProxyRegistrationClient.updateConfig(
+                createConfigUpdateRequest(stackService.getByIdWithListsInTransaction(stackId), knoxSecretPathAsVaultTokenPath)
+        );
     }
 
     public void registerGatewayConfiguration(Long stackId) {
@@ -121,9 +124,7 @@ public class ClusterProxyService {
     }
 
     private void registerGateway(Stack stack) {
-        String knoxUrl = stack.getTunnel().useCcmV2OrJumpgate() ? knoxUrlForCcmV2(stack) : knoxUrlForNoCcmAndCcmV1(stack);
-        ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl);
-        clusterProxyRegistrationClient.updateConfig(request);
+        clusterProxyRegistrationClient.updateConfig(createConfigUpdateRequest(stack));
     }
 
     public void deregisterCluster(Stack stack) {
@@ -135,7 +136,8 @@ public class ClusterProxyService {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
                 .withServices(serviceConfigs(stack))
-                .withAccountId(getAccountId(stack));
+                .withAccountId(getAccountId(stack))
+                .withKnoxSecretRef(getTokenVaultPath(stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
@@ -146,12 +148,37 @@ public class ClusterProxyService {
         return requestBuilder.build();
     }
 
+    private ConfigUpdateRequest createConfigUpdateRequest(Stack stack) {
+        return createConfigUpdateRequest(stack, getTokenVaultPath(stack));
+    }
+
+    private ConfigUpdateRequest createConfigUpdateRequest(Stack stack, String knoxSecretPathAsVaultTokenPath) {
+        return new ConfigUpdateRequest(
+                stack.getResourceCrn(),
+                stack.getTunnel().useCcmV2OrJumpgate() ? knoxUrlForCcmV2(stack) : knoxUrlForNoCcmAndCcmV1(stack),
+                knoxSecretPathAsVaultTokenPath
+        );
+    }
+
+    private String getTokenVaultPath(Stack stack) {
+        Gateway gateway = stack.getCluster().getGateway();
+        if (gateway == null || gateway.getSignKeySecret() == null) {
+            return null;
+        }
+        String tokenSecret = gateway.getSignKeySecret().getSecret();
+        if (StringUtils.isNotBlank(tokenSecret)) {
+            return clusterProxySecretProvider.generateClusterProxySecretFormat(tokenSecret);
+        }
+        return null;
+    }
+
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
                 .withServices(serviceConfigs(stack))
                 .withKnoxUrl(knoxUrlForNoCcmAndCcmV1(stack))
-                .withAccountId(getAccountId(stack));
+                .withAccountId(getAccountId(stack))
+                .withKnoxSecretRef(getTokenVaultPath(stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {

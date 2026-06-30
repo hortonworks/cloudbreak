@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.gateway;
 
 import java.security.KeyPair;
-import java.security.cert.X509Certificate;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -11,7 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
+import com.sequenceiq.cloudbreak.clusterproxy.TokenCertInfo;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
@@ -29,6 +30,9 @@ public class GatewayService {
 
     @Inject
     private ClusterProxyRotationService clusterProxyRotationService;
+
+    @Inject
+    private ClusterProxySecretProvider clusterProxySecretProvider;
 
     public Gateway save(Gateway gateway) {
         gateway.setGatewayPort(Integer.valueOf(httpsPort));
@@ -55,19 +59,17 @@ public class GatewayService {
     }
 
     public Gateway generateSignKeys(Gateway gateway) {
-        KeyPair identityKey = PkiUtil.generateKeypair();
-        KeyPair signKeyPair = PkiUtil.generateKeypair();
-        X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKeyPair);
+        TokenCertInfo tokenCertInfo = clusterProxySecretProvider.generateSignKeys();
 
-        String signKey = PkiUtil.convert(identityKey.getPrivate());
-        String signPub = PkiUtil.convertPemPublicKey(identityKey.getPublic());
-        String signCert = PkiUtil.convert(cert);
-        gateway.setSignKey(signKey);
-        gateway.setSignPub(signPub);
-        gateway.setSignCert(signCert);
+        gateway.setSignKey(tokenCertInfo.privateKey());
+        gateway.setSignPub(tokenCertInfo.publicKey());
+        gateway.setSignCert(tokenCertInfo.signCert());
+        gateway.setTokenCert(tokenCertInfo.base64DerCert());
+        gateway.setTokenPubSecret(tokenCertInfo.publicKey());
+        gateway.setTokenKeySecret(tokenCertInfo.privateKey());
         //in case of service rollback we need this for another release
-        gateway.setSignPubDeprecated(signPub);
-        gateway.setSignCertDeprecated(signCert);
+        gateway.setSignPubDeprecated(tokenCertInfo.publicKey());
+        gateway.setSignCertDeprecated(tokenCertInfo.signCert());
         return gateway;
     }
 

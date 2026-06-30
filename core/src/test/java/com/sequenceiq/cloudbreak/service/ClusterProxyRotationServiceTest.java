@@ -1,10 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -172,26 +169,6 @@ class ClusterProxyRotationServiceTest {
                 () -> underTest.readClusterProxyTokenKeys(readConfigResponse));
         assertEquals("Cannot read JWK format token keys from cluster-proxy.", e.getMessage());
         assertEquals("Cannot read jwk from cluster-proxy, unknown encoding: 'unknown'", e.getCause().getMessage());
-    }
-
-    @Test
-    void generateTokenCert() {
-        TokenCertInfo keyAndCert = underTest.generateTokenCert();
-        assertNotNull(keyAndCert.base64DerCert());
-        assertNotNull(keyAndCert.privateKey());
-        assertNotNull(keyAndCert.publicKey());
-        assertFalse(keyAndCert.toString().contains("privateKey"));
-        assertTrue(keyAndCert.toString().contains(("publicKey")));
-    }
-
-    @Test
-    void generateClusterProxySecretFormat() {
-        String secretJson = "{\"enginePath\":\"secret\"," +
-                "\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
-                "\"path\":\"cb/secretPath\"}";
-        String clusterProxySecretFormat = underTest.generateClusterProxySecretFormat(secretJson);
-
-        assertEquals("cb/secretPath:secret", clusterProxySecretFormat);
     }
 
 }

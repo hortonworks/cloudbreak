@@ -7,12 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
-import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationFailed;
@@ -61,15 +58,7 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
                 LOGGER.info("Cluster Proxy integration is DISABLED, skipping registering with Cluster Proxy service. Cluster CRN: {}", stack.getResourceCrn());
                 return new ClusterProxyRegistrationSuccess(request.getResourceId());
             }
-            ConfigRegistrationResponse registerResponse = clusterProxyService.registerCluster(stack);
-            Cluster cluster = stack.getCluster();
-            if (cluster.hasGateway()) {
-                LOGGER.debug("Updating Gateway for cluster {} in environment {} with public key certificate retrieved from Cluster Proxy",
-                        cluster.getId(), stack.getEnvironmentCrn());
-                Gateway gateway = cluster.getGateway();
-                gateway.setTokenCert(registerResponse.getX509Unwrapped());
-                gatewayService.save(gateway);
-            }
+            clusterProxyService.registerCluster(stack);
             return new ClusterProxyRegistrationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Error occurred when registering cluster {} in environment {} to cluster proxy",
