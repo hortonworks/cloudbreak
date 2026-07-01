@@ -34,18 +34,24 @@ public class SdxUpgradeValidator {
     @Inject
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
-    public void validateRollingUpgradeByClusterShape(SdxUpgradeRequest request, SdxClusterShape clusterShape) {
+    public void validateRollingUpgradeByClusterShape(SdxUpgradeRequest request, SdxClusterShape clusterShape, String userCrn) {
         boolean rollingUpgradeEnabled = Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
         if (rollingUpgradeEnabled) {
-            if (SdxClusterShape.ENTERPRISE.equals(clusterShape) ||
-                    (skipRollingUpgradeValidationEnabled() && (clusterShape.isHA() || SdxClusterShape.CUSTOM.equals(clusterShape)))) {
-                LOGGER.debug("Allowing rolling upgrade for {} cluster shape", clusterShape.name());
+            if (rollingUpgradeSupported(clusterShape, userCrn)) {
+                LOGGER.info("Allowing rolling upgrade for {} cluster shape", clusterShape.name());
             } else {
                 String message = String.format("Rolling upgrade is not supported for %s cluster shape.", clusterShape.name());
                 LOGGER.warn(message);
                 throw new BadRequestException(message);
             }
         }
+    }
+
+    private boolean rollingUpgradeSupported(SdxClusterShape clusterShape, String userCrn) {
+        String accountId = Crn.safeFromString(userCrn).getAccountId();
+        return SdxClusterShape.ENTERPRISE.equals(clusterShape)
+                || (skipRollingUpgradeValidationEnabled() && (clusterShape.isHA() || SdxClusterShape.CUSTOM.equals(clusterShape)))
+                || (entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(accountId) && SdxClusterShape.ENTERPRISE_WITHOUT_HBASE.equals(clusterShape));
     }
 
     private boolean skipRollingUpgradeValidationEnabled() {

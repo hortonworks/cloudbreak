@@ -160,7 +160,7 @@ public class SdxRuntimeUpgradeService {
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
         sdxUpgradeValidator.verifyPaywallAccess(userCrn, upgradeRequest);
         return upgradePreparation ? initSdxUpgradePreparation(sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
-                : initSdxUpgrade(sdxUpgradeResponse, upgradeRequest, cluster);
+                : initSdxUpgrade(sdxUpgradeResponse, upgradeRequest, cluster, userCrn);
     }
 
     private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeRequest, SdxCluster cluster, String userCrn, boolean upgradePreparation) {
@@ -182,9 +182,9 @@ public class SdxRuntimeUpgradeService {
         return request;
     }
 
-    private SdxUpgradeResponse initSdxUpgrade(SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request, SdxCluster cluster) {
+    private SdxUpgradeResponse initSdxUpgrade(SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request, SdxCluster cluster, String userCrn) {
         List<ImageInfoV4Response> upgradeCandidates = sdxUpgradeResponse.getUpgradeCandidates();
-        sdxUpgradeValidator.validateRollingUpgradeByClusterShape(request, cluster.getClusterShape());
+        sdxUpgradeValidator.validateRollingUpgradeByClusterShape(request, cluster.getClusterShape(), userCrn);
         String targetImageId = determineImageId(request, upgradeCandidates);
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, targetImageId);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);

@@ -25,6 +25,9 @@ public class OrderedOSUpgradeRequestProvider {
     @Inject
     private EnterpriseOrderedOSUpgrade enterpriseOrderedOSUpgrade;
 
+    @Inject
+    private EnterpriseWithoutHdfsHbaseOrderedOSUpgrade enterpriseWithoutHdfsHbaseOrderedOSUpgrade;
+
     public OrderedOSUpgradeSetRequest createDatalakeOrderedOSUpgradeSetRequest(StackV4Response stackV4Response, String targetImageId,
             SdxClusterShape clusterShape) {
         LOGGER.debug("Creating OrderedOSUpgradeSetRequest for rolling OS upgrade");
@@ -41,6 +44,8 @@ public class OrderedOSUpgradeRequestProvider {
     private AbstractOrderedOSUpgrade getOrderedOSUpgradeByShape(SdxClusterShape clusterShape) {
         if (SdxClusterShape.ENTERPRISE.equals(clusterShape)) {
             return enterpriseOrderedOSUpgrade;
+        } else if (SdxClusterShape.ENTERPRISE_WITHOUT_HBASE.equals(clusterShape)) {
+            return enterpriseWithoutHdfsHbaseOrderedOSUpgrade;
         } else {
             return defaultOrderedOSUpgrade;
         }

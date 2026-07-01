@@ -59,9 +59,9 @@ class SdxUpgradeValidatorTest {
         lenient().when(entitlementService.isSkipRollingUpgradeValidationEnabled(ACCOUNT_ID)).thenReturn(skipRollingUpgradeValidationEnabled);
 
         if (shouldThrowValidationException) {
-            assertThrows(BadRequestException.class, () -> doAs(USER_CRN, () -> underTest.validateRollingUpgradeByClusterShape(request, clusterShape)));
+            assertThrows(BadRequestException.class, () -> doAs(USER_CRN, () -> underTest.validateRollingUpgradeByClusterShape(request, clusterShape, USER_CRN)));
         } else {
-            assertDoesNotThrow(() -> doAs(USER_CRN, () -> underTest.validateRollingUpgradeByClusterShape(request, clusterShape)));
+            assertDoesNotThrow(() -> doAs(USER_CRN, () -> underTest.validateRollingUpgradeByClusterShape(request, clusterShape, USER_CRN)));
         }
     }
 
@@ -83,6 +83,47 @@ class SdxUpgradeValidatorTest {
                 Arguments.of(true,  SdxClusterShape.CONTAINERIZED,  true, true)
 
         );
+    }
+
+    @ParameterizedTest(name = "[{index}] Cluster shape: {0} skipRollingUpgradeValidationEnabled: {1} withoutHBaseAndHDFSEntitlementEnabled: {2} "
+            + "should throw validation exception: {3}")
+    @MethodSource("provideShapesWithoutHBaseAndHDFSParameters")
+    void testValidateRollingUpgradeForShapesWithoutHBaseAndHDFS(SdxClusterShape clusterShape, boolean skipRollingUpgradeValidationEnabled,
+            boolean withoutHBaseAndHDFSEntitlementEnabled, boolean shouldThrowValidationException) {
+
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        request.setRollingUpgradeEnabled(true);
+        lenient().when(entitlementService.isSkipRollingUpgradeValidationEnabled(ACCOUNT_ID)).thenReturn(skipRollingUpgradeValidationEnabled);
+        lenient().when(entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(ACCOUNT_ID)).thenReturn(withoutHBaseAndHDFSEntitlementEnabled);
+
+        if (shouldThrowValidationException) {
+            assertThrows(BadRequestException.class, () -> doAs(USER_CRN, () -> underTest.validateRollingUpgradeByClusterShape(request, clusterShape, USER_CRN)));
+        } else {
+            assertDoesNotThrow(() -> doAs(USER_CRN, () -> underTest.validateRollingUpgradeByClusterShape(request, clusterShape, USER_CRN)));
+        }
+    }
+
+    private static Stream<Arguments> provideShapesWithoutHBaseAndHDFSParameters() {
+        return Stream.of(
+                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false, false, true),
+                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false, true,  false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true,  false, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true,  true,  false),
+
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false, false, true),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false, true,  true),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, true,  true,  true)
+        );
+    }
+
+    @Test
+    void testValidateRollingUpgradeForEnterpriseWithoutHBaseWhenRollingUpgradeDisabled() {
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        request.setRollingUpgradeEnabled(false);
+
+        assertDoesNotThrow(() -> doAs(USER_CRN,
+                () -> underTest.validateRollingUpgradeByClusterShape(request, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, USER_CRN)));
+        verifyNoInteractions(entitlementService);
     }
 
     @Test
