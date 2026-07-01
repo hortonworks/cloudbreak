@@ -52,6 +52,22 @@ jobs:
       - name: execute
         uses: ./.github/actions/pull-request/unit-test
 
+  bootstrap-cert-filter-test:
+    permissions: write-all
+    name: Bootstrap Cert Filter Test
+    runs-on: [cb-ubuntu22]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: compile and run ImportCertsTest
+        run: |
+          javac -d /tmp/import-certs-test docker-common/bootstrap/ImportCerts.java docker-common/test/ImportCertsTest.java
+          java -cp /tmp/import-certs-test ImportCertsTest
+      - name: check per-service ImportCerts.java copies are in sync
+        run: java docker-common/bootstrap/Sync.java --check
+
   checkstyle-main:
     permissions: write-all
     name: Checkstyle Main

@@ -25,6 +25,7 @@ RUN ( unzip datalake.jar schema/* -d / ) || \
 
 # Install starter script for the Datalake application
 COPY bootstrap/start_datalake_app.sh /
+COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_datalake_api.sh /
 
 ENTRYPOINT ["/start_datalake_app.sh"]

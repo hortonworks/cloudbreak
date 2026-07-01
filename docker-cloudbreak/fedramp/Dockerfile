@@ -25,6 +25,7 @@ RUN ( unzip cloudbreak.jar schema/* -d / ) || \
 
 # Install starter script for the Cloudbreak application
 COPY bootstrap/start_cloudbreak_app.sh /
+COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_cloudbreak_api.sh /
 
 ENTRYPOINT ["/start_cloudbreak_app.sh"]

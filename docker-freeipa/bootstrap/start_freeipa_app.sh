@@ -12,54 +12,9 @@ set -e
 : ${MOCK_INFRASTRUCTURE_CERT_DIR:=/certs/mock-infrastructure}
 : ${CRYPTOSENSE_ENABLED:=false}
 
-echo "Importing certificates to the default Java certificate  trust store."
+echo "Importing certificates to the default Java certificate trust store."
 
-import_cert_with_alias_to_trust_store() {
-  cert_dir=$1
-  cert=$2
-
-  echo "Adding certificate from file $cert_dir/$cert to trust store $JAVA_HOME/lib/security/cacerts"
-  if keytool -import -alias "$cert" -noprompt -file "$cert_dir/$cert" -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit; then
-      echo "Certificate added to default Java trust store with alias $cert."
-  else
-      echo "WARNING: Failed to add $cert to trust store."
-  fi
-}
-
-import_certs_from_dir_to_keystore() {
-  cert_dir_param=$1
-
-  if [ -d "$cert_dir_param" ]; then
-      echo "Starting to process certificates in $cert_dir_param directory."
-      for cert in $(ls -A "$cert_dir_param"); do
-          echo "checking file $cert_dir_param/$cert"
-          if [ -f "$cert_dir_param/$cert" ]; then
-              echo "It is a file checking for number of certificate entries $cert_dir_param/$cert"
-              number_of_certs=$(grep -c 'END CERTIFICATE' "$cert_dir_param/$cert" || true)
-              if [ "$number_of_certs" -gt 1 ]; then
-                  echo "Splitting $cert_dir_param/$cert into multiple certificate files as it contains $number_of_certs certificates"
-                  cert_bundle_dir="/${cert%.pem}/"
-                  mkdir -p "$cert_bundle_dir"
-                  awk 'split_after==1{n++;split_after=0} /-----END CERTIFICATE-----/ {split_after=1} {print > "'"${cert_bundle_dir}"'cert" n ".pem"}' "$cert_dir_param/$cert"
-                  for certbundle_part in $(ls -A "$cert_bundle_dir"); do
-                      import_cert_with_alias_to_trust_store "$cert_bundle_dir" "$certbundle_part"
-                  done;
-              else
-                  echo "import single cert from single file $cert_dir_param/$cert"
-                  import_cert_with_alias_to_trust_store "$cert_dir_param" "$cert"
-              fi
-          else
-            echo "it is not file: $cert_dir_param/$cert"
-          fi
-      done
-  else
-      echo "NOT an existing directory $cert_dir_param"
-  fi
-}
-
-import_certs_from_dir_to_keystore $TRUSTED_CERT_DIR
-import_certs_from_dir_to_keystore $SERVICE_SPECIFIC_CERT_DIR
-import_certs_from_dir_to_keystore $MOCK_INFRASTRUCTURE_CERT_DIR
+java /ImportCerts.java "$JAVA_HOME/lib/security/cacerts" changeit "$TRUSTED_CERT_DIR" "$SERVICE_SPECIFIC_CERT_DIR" "$MOCK_INFRASTRUCTURE_CERT_DIR"
 
 JACOCO_AGENT_OPTIONS=""
 if [ "${JACOCO_AGENT_ENABLED:-false}" = true ]; then

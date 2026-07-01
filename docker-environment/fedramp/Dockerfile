@@ -25,6 +25,7 @@ RUN ( unzip environment.jar schema/* -d / ) || \
 
 # Install starter script for the Environment application
 COPY bootstrap/start_environment_app.sh /
+COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_environment_api.sh /
 
 ENTRYPOINT ["/start_environment_app.sh"]

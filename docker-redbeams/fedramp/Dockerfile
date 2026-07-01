@@ -25,6 +25,7 @@ RUN ( unzip redbeams.jar schema/* -d / ) || \
 
 # Install starter script for the Redbeams application
 COPY bootstrap/start_redbeams_app.sh /
+COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_redbeams_api.sh /
 
 ENTRYPOINT ["/start_redbeams_app.sh"]

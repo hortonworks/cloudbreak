@@ -25,6 +25,7 @@ RUN ( unzip freeipa.jar schema/* -d / ) || \
 
 # Install starter script for the FreeIpa application
 COPY bootstrap/start_freeipa_app.sh /
+COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_freeipa_api.sh /
 
 ENTRYPOINT ["/start_freeipa_app.sh"]

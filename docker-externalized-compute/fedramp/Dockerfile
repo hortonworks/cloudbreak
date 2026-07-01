@@ -25,6 +25,7 @@ RUN ( unzip externalized-compute.jar schema/* -d / ) || \
 
 # Install starter script for the Externalized Compute application
 COPY bootstrap/start_externalizedcompute_app.sh /
+COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_externalizedcompute_api.sh /
 
 ENTRYPOINT ["/start_externalizedcompute_app.sh"]

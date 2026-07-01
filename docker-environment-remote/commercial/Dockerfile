@@ -26,5 +26,6 @@ RUN ( unzip remote-environment.jar schema/* -d / ) || \
 
 # Install starter script for the Remote Environment application
 COPY bootstrap/start_remoteenvironment_app.sh /
+COPY bootstrap/ImportCerts.java /
 
 ENTRYPOINT ["/start_remoteenvironment_app.sh"]
