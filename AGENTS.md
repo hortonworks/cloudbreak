@@ -61,7 +61,7 @@ Pull requests run GitHub Actions (see `.github/workflows/pull-request.yaml`):
 3. **Namespace**: Use `jakarta.*`, not `javax.*`, for persistence, validation, and servlet APIs.
 4. **Import order**: static imports, then `java.*`, `javax.*`, `jakarta.*`, `org.*`, `com.*`, then all other imports — each group separated by a blank line.
 5. **Configuration**: Use `application.yml` for service configuration.
-6. **Documentation**: See `README-devnotes.md` for environment setup and `README.md` for full coding guidelines.
+6. **Documentation**: See `README-devnotes.md` for environment setup and `README.md` for full coding guidelines. To profile a running service JVM with JProfiler in Kubernetes (and the FIPS "Attach" workaround), see `docs/profiling-jprofiler-on-kubernetes.md`.
 
 ## External resources
 

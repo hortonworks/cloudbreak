@@ -631,6 +631,10 @@ Setting the `spring.threads.virtual.enabled` to `true` configures:
 
 to use virtual threads.
 
+## Profiling a running service with JProfiler
+
+To profile a Cloudbreak service JVM running in a Kubernetes pod with JProfiler — including the workaround for the FIPS image that makes the normal GUI "Attach" fail with a `nanoxml` `NullPointerException` — see [docs/profiling-jprofiler-on-kubernetes.md](docs/profiling-jprofiler-on-kubernetes.md).
+
 ## Command Line
 
 ### Running Cloudbreak from the Command Line

@@ -5,7 +5,19 @@ description: Jira Cloud conventions for Cloudbreak — project keys, Team field 
 
 # Cloudbreak Jira playbook
 
-Use this playbook when answering Jira questions, writing JQL, or using Atlassian MCP/API against **CB**. Do not assume it is loaded for generic coding tasks; open **`.agent/skills/cb-jira/SKILL.md`** when Jira context is needed.
+Use this playbook when answering Jira questions, writing JQL, or using `acli`, the Atlassian MCP, or the REST API against **CB**. Do not assume it is loaded for generic coding tasks; open **`.agent/skills/cb-jira/SKILL.md`** when Jira context is needed.
+
+## Access (tooling & auth)
+
+Two ways to talk to Jira Cloud (`https://cloudera.atlassian.net`):
+
+- **`acli` (Atlassian CLI) — preferred when available.** `acli jira workitem create|edit|assign|search|comment|view`. Authenticate with `acli jira auth` (OAuth), or with an API token exported as `JIRA_EMAIL` + `JIRA_TOKEN` environment variables.
+- **Atlassian MCP** (via the Docker MCP gateway) — alternative when `acli` isn't set up.
+
+`acli` gotchas in CB:
+
+- **Team (`customfield_10001`) can only be set at *create*** — pass it in `--from-json` under `additionalAttributes` (e.g. `{"customfield_10001": "<team-id>"}`); `workitem edit` rejects `additionalAttributes`. Verify it stuck with JQL (below), not `workitem view` (which under-reports custom fields).
+- **Assign to a real person, not the OAuth principal.** `--assignee @me` can fail with *"cannot be assigned issues"* because the OAuth identity isn't an assignable CB user; assign by the person's account id or email instead: `acli jira workitem assign --key CB-XXXXX --assignee <email|accountId>`.
 
 ## Project
 
