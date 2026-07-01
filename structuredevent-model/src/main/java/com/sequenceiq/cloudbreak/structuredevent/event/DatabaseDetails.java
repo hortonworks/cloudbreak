@@ -14,6 +14,8 @@ public class DatabaseDetails implements Serializable {
 
     private String attributes;
 
+    private boolean dbSslEnabled;
+
     public String getEngineVersion() {
         return engineVersion;
     }
@@ -38,12 +40,21 @@ public class DatabaseDetails implements Serializable {
         this.attributes = attributes;
     }
 
+    public boolean isDbSslEnabled() {
+        return dbSslEnabled;
+    }
+
+    public void setDbSslEnabled(boolean dbSslEnabled) {
+        this.dbSslEnabled = dbSslEnabled;
+    }
+
     @Override
     public String toString() {
         return "DatabaseDetails{" +
                 "engineVersion='" + engineVersion + '\'' +
                 ", availabilityType='" + availabilityType + '\'' +
                 ", attributes='" + attributes + '\'' +
+                ", dbSslEnabled='" + dbSslEnabled + '\'' +
                 '}';
     }
 }

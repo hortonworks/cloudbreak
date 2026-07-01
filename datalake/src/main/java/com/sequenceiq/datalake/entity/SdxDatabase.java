@@ -40,6 +40,8 @@ public class SdxDatabase {
 
     private String databaseEngineVersion;
 
+    private Boolean dbSslEnabled;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
@@ -101,6 +103,14 @@ public class SdxDatabase {
         return SdxDatabaseAvailabilityType.hasExternalDatabase(getDatabaseAvailabilityType());
     }
 
+    public Boolean getDbSslEnabled() {
+        return dbSslEnabled;
+    }
+
+    public void setDbSslEnabled(Boolean dbSslEnabled) {
+        this.dbSslEnabled = dbSslEnabled;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -110,6 +120,7 @@ public class SdxDatabase {
         return createDatabase == that.createDatabase &&
                 Objects.equals(id, that.id) &&
                 databaseAvailabilityType == that.databaseAvailabilityType &&
+                dbSslEnabled == that.dbSslEnabled &&
                 Objects.equals(databaseCrn, that.databaseCrn) &&
                 Objects.equals(databaseEngineVersion, that.databaseEngineVersion) &&
                 Objects.equals(attributes, that.attributes);
@@ -117,7 +128,8 @@ public class SdxDatabase {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, databaseAvailabilityType, createDatabase, databaseCrn, databaseEngineVersion, attributes);
+        return Objects.hash(id, databaseAvailabilityType, createDatabase, databaseCrn, databaseEngineVersion,
+                attributes, dbSslEnabled);
     }
     //CHECKSTYLE:ON
 }

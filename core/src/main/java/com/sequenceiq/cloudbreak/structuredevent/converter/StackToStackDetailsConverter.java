@@ -120,6 +120,7 @@ public class StackToStackDetailsConverter {
                 } else {
                     databaseDetails.setAvailabilityType(Optional.ofNullable(db.getExternalDatabaseAvailabilityType()).map(Enum::name).orElse(UNKNONW));
                 }
+                databaseDetails.setDbSslEnabled(cluster.getDbSslEnabled() == null ? Boolean.FALSE : cluster.getDbSslEnabled());
             });
         }
         return databaseDetails;

@@ -1,11 +1,16 @@
 package com.sequenceiq.datalake.events;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +19,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
@@ -30,8 +39,10 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
@@ -55,6 +66,15 @@ class DatalakeStructuredFlowEventFactoryTest {
     private SdxStatusRepository mockSdxStatusRepository;
 
     @Mock
+    private StackService stackService;
+
+    @Mock
+    private SdxDatabaseRepository sdxDatabaseRepository;
+
+    @Mock
+    private AccountIdService accountIdService;
+
+    @Mock
     private SdxStatusEntity mockSdxStatusEntity;
 
     @Mock
@@ -67,6 +87,9 @@ class DatalakeStructuredFlowEventFactoryTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(underTest, "stackService", stackService);
+        ReflectionTestUtils.setField(underTest, "sdxDatabaseRepository", sdxDatabaseRepository);
+        ReflectionTestUtils.setField(underTest, "accountIdService", accountIdService);
         cluster = createSdxCluster();
         setUpSdxStatusEntity(cluster);
         lenient().when(mockNodeConfig.getId()).thenReturn("nodeId");
@@ -74,6 +97,7 @@ class DatalakeStructuredFlowEventFactoryTest {
         lenient().when(mockClock.getCurrentTimeMillis()).thenReturn(TIMESTAMP);
         lenient().when(mockFlowDetails.getFlowState()).thenReturn(DatalakeStatusEnum.RUNNING.name());
         lenient().when(mockSdxStatusRepository.findFirstByDatalakeIsOrderByIdDesc(eq(cluster))).thenReturn(mockSdxStatusEntity);
+        lenient().when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn("accountId");
     }
 
     @Test
@@ -130,6 +154,7 @@ class DatalakeStructuredFlowEventFactoryTest {
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
         sdxDatabase.setDatabaseEngineVersion("1");
+        sdxDatabase.setDbSslEnabled(false);
         sdxCluster.setSdxDatabase(sdxDatabase);
         StackV4Request stackRequest = new StackV4Request();
         stackRequest.setAzure(new AzureStackV4Parameters());
@@ -137,6 +162,63 @@ class DatalakeStructuredFlowEventFactoryTest {
 
 
         return sdxCluster;
+    }
+
+    @Test
+    void testDbSslEnabledWhenAlreadySet() {
+        cluster.getSdxDatabase().setDbSslEnabled(true);
+
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+
+        DatabaseDetails databaseDetails = result.getPayload().getDatabaseDetails();
+        assertTrue(databaseDetails.isDbSslEnabled());
+        verify(stackService, never()).getDetail(any(), any(), any());
+        verify(sdxDatabaseRepository, never()).save(any());
+    }
+
+    @Test
+    void testDbSslEnabledWhenNullAndStackReturnsTrue() {
+        cluster.getSdxDatabase().setDbSslEnabled(null);
+        StackV4Response stackResponse = new StackV4Response();
+        ClusterV4Response clusterResponse = new ClusterV4Response();
+        clusterResponse.setDbSSLEnabled(true);
+        stackResponse.setCluster(clusterResponse);
+        doReturn(stackResponse).when(stackService).getDetail(any(), any(), any());
+
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+
+        DatabaseDetails databaseDetails = result.getPayload().getDatabaseDetails();
+        assertTrue(databaseDetails.isDbSslEnabled());
+        assertEquals(true, cluster.getSdxDatabase().getDbSslEnabled());
+        verify(sdxDatabaseRepository).save(cluster.getSdxDatabase());
+    }
+
+    @Test
+    void testDbSslEnabledWhenNullAndStackReturnsFalse() {
+        cluster.getSdxDatabase().setDbSslEnabled(null);
+        StackV4Response stackResponse = new StackV4Response();
+        ClusterV4Response clusterResponse = new ClusterV4Response();
+        clusterResponse.setDbSSLEnabled(false);
+        stackResponse.setCluster(clusterResponse);
+        doReturn(stackResponse).when(stackService).getDetail(any(), any(), any());
+
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+
+        DatabaseDetails databaseDetails = result.getPayload().getDatabaseDetails();
+        assertFalse(databaseDetails.isDbSslEnabled());
+        assertEquals(false, cluster.getSdxDatabase().getDbSslEnabled());
+        verify(sdxDatabaseRepository).save(cluster.getSdxDatabase());
+    }
+
+    @Test
+    void testDbSslEnabledWhenNullAndStackReturnsNull() {
+        cluster.getSdxDatabase().setDbSslEnabled(null);
+
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+
+        DatabaseDetails databaseDetails = result.getPayload().getDatabaseDetails();
+        assertFalse(databaseDetails.isDbSslEnabled());
+        verify(sdxDatabaseRepository, never()).save(any());
     }
 
     private void setUpSdxStatusEntity(SdxCluster cluster) {

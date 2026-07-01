@@ -2514,6 +2514,13 @@ message CDPFreeIPAStatus {
     CANCEL_TRUST_SETUP_FINISHED = 47;
     // The status when rolling back cross-realm trust on CDP FreeIPA is failed
     CANCEL_TRUST_SETUP_FAILED = 48;
+
+    // The status when multi-AZ migration for CDP FreeIPA is started.
+    MULTI_AZ_MIGRATION_STARTED = 49;
+    // The status when multi-AZ migration for CDP FreeIPA is finished.
+    MULTI_AZ_MIGRATION_FINISHED = 50;
+    // The status when multi-AZ migration for CDP FreeIPA has failed.
+    MULTI_AZ_MIGRATION_FAILED = 51;
   }
 }
 
@@ -3081,6 +3088,9 @@ message CDPDatabaseDetails {
   string availabilityType = 2;
   // various provider specific attributes. eg: {"AZURE_DATABASE_TYPE":"FLEXIBLE_SERVER"}
   string attributes = 3;
+  // SSL enabled or not
+  bool sslEnabled = 4;
+
 }
 
 message CDPClusterDetails {
@@ -8160,3 +8170,4 @@ message CDPCBNotificationSentEvent {
   // notification form factor
   NotificationFormFactor.Value notificationFormFactor = 13;
 }
+

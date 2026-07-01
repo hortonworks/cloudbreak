@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.events;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.FLOW;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -31,8 +34,10 @@ import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredFlowEventF
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 
 /**
  * This class lets the Datalake module handle Flow Structured Events.
@@ -61,6 +66,15 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
     @Inject
     private SdxStatusRepository sdxStatusRepository;
 
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private SdxDatabaseRepository sdxDatabaseRepository;
+
+    @Inject
+    private AccountIdService accountIdService;
+
     @Value("${info.app.version:}")
     private String serviceVersion;
 
@@ -87,7 +101,7 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
     private DatalakeDetails createDatalakeDetails(SdxCluster sdxCluster, SdxStatusEntity sdxStatus) {
         DatalakeDetails datalakeDetails = new DatalakeDetails();
         SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
-        datalakeDetails.setDatabaseDetails(createDatabaseDetails(sdxDatabase));
+        datalakeDetails.setDatabaseDetails(createDatabaseDetails(sdxCluster, sdxDatabase));
         datalakeDetails.setRazEnabled(sdxCluster.isRangerRazEnabled());
         datalakeDetails.setMultiAzEnabled(sdxCluster.isEnableMultiAz());
         datalakeDetails.setStatus(sdxStatus.getStatus().name());
@@ -129,12 +143,34 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
         return null;
     }
 
-    private DatabaseDetails createDatabaseDetails(SdxDatabase sdxDatabase) {
+    private DatabaseDetails createDatabaseDetails(SdxCluster sdxCluster, SdxDatabase sdxDatabase) {
         DatabaseDetails databaseDetails = new DatabaseDetails();
         databaseDetails.setAvailabilityType(sdxDatabase.getDatabaseAvailabilityType().name());
         databaseDetails.setAttributes(Optional.ofNullable(sdxDatabase.getAttributes()).map(Json::getValue).orElse(""));
         databaseDetails.setEngineVersion(sdxDatabase.getDatabaseEngineVersion());
+        databaseDetails.setDbSslEnabled(resolveDbSslEnabled(sdxCluster, sdxDatabase));
         return databaseDetails;
+    }
+
+    private boolean resolveDbSslEnabled(SdxCluster sdxCluster, SdxDatabase sdxDatabase) {
+        if (sdxDatabase.getDbSslEnabled() != null) {
+            return sdxDatabase.getDbSslEnabled();
+        }
+        try {
+            StackV4Response stackResponse = stackService.getDetail(
+                    sdxCluster.getClusterName(),
+                    Collections.emptySet(),
+                    accountIdService.getAccountIdFromResourceCrn(sdxCluster.getResourceCrn()));
+            if (stackResponse != null && stackResponse.getCluster() != null) {
+                boolean sslEnabled = stackResponse.getCluster().isDbSSLEnabled();
+                sdxDatabase.setDbSslEnabled(sslEnabled);
+                sdxDatabaseRepository.save(sdxDatabase);
+                return sslEnabled;
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to query stack for dbSslEnabled flag for cluster {}", sdxCluster.getClusterName(), e);
+        }
+        return false;
     }
 
     private CDPOperationDetails makeCdpOperationDetails(Long resourceId, SdxCluster sdxCluster) {
