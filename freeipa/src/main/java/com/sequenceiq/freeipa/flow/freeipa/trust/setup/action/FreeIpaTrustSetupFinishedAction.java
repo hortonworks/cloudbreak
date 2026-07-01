@@ -51,7 +51,7 @@ public class FreeIpaTrustSetupFinishedAction extends FreeIpaTrustSetupBaseAction
         if (environmentType.isHybrid()) {
             updateStatuses(stack, TRUST_SETUP_FINISH_REQUIRED, "Prepare cross-realm trust finished", TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
         } else {
-            updateStatuses(stack, AVAILABLE, "Cross-realm trust setup finished", TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
+            updateStatuses(stack, AVAILABLE, "Cross-realm trust setup finished", TrustStatus.TRUST_ACTIVE);
         }
         crossRealmTrustService.updateTrustRelationshipTypeByStackId(stack.getId(), TrustRelationshipType.ONE_WAY);
         getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_SETUP_TRUST_FINISHED);

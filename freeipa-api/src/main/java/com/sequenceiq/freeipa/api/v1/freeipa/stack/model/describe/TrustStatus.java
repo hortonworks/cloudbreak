@@ -18,7 +18,8 @@ public enum TrustStatus {
 
     public static final Collection<TrustStatus> FREEIPA_CROSS_REALM_SETUP_FINISH_ENABLE_STATUSES = List.of(
             TRUST_SETUP_FINISH_REQUIRED,
-            TRUST_SETUP_FINISH_FAILED);
+            TRUST_SETUP_FINISH_FAILED,
+            TRUST_ACTIVE);
 
     public static final Collection<TrustStatus> SYNC_ENABLED_STATUSES = List.of(
             TRUST_ACTIVE,

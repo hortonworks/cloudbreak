@@ -70,7 +70,8 @@ public class TrustManagementService {
 
     private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_FINISH = Set.of(
             TrustStatus.TRUST_SETUP_FINISH_REQUIRED,
-            TrustStatus.TRUST_SETUP_FINISH_FAILED
+            TrustStatus.TRUST_SETUP_FINISH_FAILED,
+            TrustStatus.TRUST_ACTIVE
     );
 
     private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS = Set.of(

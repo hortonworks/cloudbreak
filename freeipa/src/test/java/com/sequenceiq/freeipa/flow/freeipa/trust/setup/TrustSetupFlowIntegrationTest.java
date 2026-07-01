@@ -268,7 +268,7 @@ class TrustSetupFlowIntegrationTest {
 
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService, times(5)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
-        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_ACTIVE);
     }
 
     @Test
