@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -192,6 +194,8 @@ public class CommonClusterManagerProperties {
     public static class UpgradeProperties {
         private Map<String, String> matrix;
 
+        private Map<String, List<String>> runtimeImageRepositoryVersionExclusions = new HashMap<>();
+
         private String currentHARuntimeVersion;
 
         private String currentGovHARuntimeVersion;
@@ -222,6 +226,14 @@ public class CommonClusterManagerProperties {
 
         public void setMatrix(Map<String, String> matrix) {
             this.matrix = matrix;
+        }
+
+        public Map<String, List<String>> getRuntimeImageRepositoryVersionExclusions() {
+            return runtimeImageRepositoryVersionExclusions;
+        }
+
+        public void setRuntimeImageRepositoryVersionExclusions(Map<String, List<String>> runtimeImageRepositoryVersionExclusions) {
+            this.runtimeImageRepositoryVersionExclusions = runtimeImageRepositoryVersionExclusions;
         }
 
         public String getCurrentGovHARuntimeVersion() {

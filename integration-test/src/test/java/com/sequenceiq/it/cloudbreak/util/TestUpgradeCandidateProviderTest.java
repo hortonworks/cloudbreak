@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class TestUpgradeCandidateProviderTest {
@@ -24,6 +28,9 @@ public class TestUpgradeCandidateProviderTest {
     @BeforeMethod
     public void setUp() {
         underTest = new TestUpgradeCandidateProvider();
+        CommonClusterManagerProperties properties = new CommonClusterManagerProperties();
+        properties.getUpgrade().setRuntimeImageRepositoryVersionExclusions(Map.of("7.3.1", List.of(".p900.")));
+        ReflectionTestUtils.setField(underTest, "commonClusterManagerProperties", properties);
     }
 
     @Test
@@ -135,6 +142,29 @@ public class TestUpgradeCandidateProviderTest {
         assertEquals(result.getRight(), "new-image");
     }
 
+    @Test
+    public void testExcludedByRuntimeRuleWhenRuntimeRuleMatchesRepositoryVersion() {
+        ImageV4Response image = createImage("service-pack", "7.13.1.706", "76410574", "80138085", 1779357927L);
+        image.setStackDetails(createStackDetailsWithRepositoryVersion("7.3.1-1.cdh7.3.1.p900.80138085"));
+
+        assertTrue(underTest.excludedByRuntimeRule("7.3.1", image));
+    }
+
+    @Test
+    public void testExcludedByRuntimeRuleWhenRuntimeHasNoRules() {
+        ImageV4Response image = createImage("service-pack", "7.13.1.706", "76410574", "80138085", 1779357927L);
+        image.setStackDetails(createStackDetailsWithRepositoryVersion("7.3.1-1.cdh7.3.1.p900.80138085"));
+
+        assertFalse(underTest.excludedByRuntimeRule("7.3.2", image));
+    }
+
+    @Test
+    public void testExcludedByRuntimeRuleWhenRepositoryVersionMissing() {
+        ImageV4Response image = createImage("service-pack", "7.13.1.706", "76410574", "80138085", 1779357927L);
+
+        assertFalse(underTest.excludedByRuntimeRule("7.3.1", image));
+    }
+
     private ImageV4Response createImage(String uuid, String cmVersion, String cmBuildNumber, String cdhBuildNumber, Long created) {
         ImageV4Response image = new ImageV4Response();
         image.setUuid(uuid);
@@ -145,5 +175,14 @@ public class TestUpgradeCandidateProviderTest {
                 ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), cdhBuildNumber
         ));
         return image;
+    }
+
+    private BaseStackDetailsV4Response createStackDetailsWithRepositoryVersion(String repositoryVersion) {
+        BaseStackRepoDetailsV4Response stackRepo = new BaseStackRepoDetailsV4Response();
+        stackRepo.setStack(Map.of("repository-version", repositoryVersion));
+
+        BaseStackDetailsV4Response stackDetails = new BaseStackDetailsV4Response();
+        stackDetails.setRepository(stackRepo);
+        return stackDetails;
     }
 }

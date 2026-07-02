@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -14,10 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.Architecture;
@@ -165,10 +169,30 @@ public class TestUpgradeCandidateProvider {
         String region = testContext.getCloudProvider().region();
         return images.getCdhImages().stream()
                 .filter(image -> image.getVersion().equals(currentUpgradeRuntimeVersion))
+                .filter(image -> !excludedByRuntimeRule(currentUpgradeRuntimeVersion, image))
                 .filter(image -> image.getImageSetsByProvider().containsKey(provider))
                 .filter(image -> image.getImageSetsByProvider().get(provider).containsKey(region) || !CloudPlatform.AWS.equalsIgnoreCase(provider))
                 .sorted(Comparator.comparing(ImageV4Response::getCreated))
                 .toList();
+    }
+
+    boolean excludedByRuntimeRule(String runtimeVersion, ImageV4Response image) {
+        String repositoryVersion = getRepositoryVersion(image);
+        if (repositoryVersion == null) {
+            return false;
+        }
+        List<String> repositoryVersionExclusions = commonClusterManagerProperties.getUpgrade().getRuntimeImageRepositoryVersionExclusions()
+                .getOrDefault(runtimeVersion, List.of());
+        return repositoryVersionExclusions.stream().anyMatch(repositoryVersion::contains);
+    }
+
+    private String getRepositoryVersion(ImageV4Response image) {
+        return Optional.ofNullable(image)
+                .map(ImageV4Response::getStackDetails)
+                .map(BaseStackDetailsV4Response::getRepository)
+                .map(BaseStackRepoDetailsV4Response::getStack)
+                .map(stackRepo -> stackRepo.get(StackRepoDetails.REPOSITORY_VERSION))
+                .orElse(null);
     }
 
     boolean hasDifferentBuildNumber(ImageV4Response current, ImageV4Response target) {

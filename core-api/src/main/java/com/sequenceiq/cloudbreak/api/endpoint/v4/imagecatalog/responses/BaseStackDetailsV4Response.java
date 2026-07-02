@@ -13,6 +13,9 @@ public class BaseStackDetailsV4Response implements JsonEntity {
     @JsonProperty
     private String stackBuildNumber;
 
+    @JsonProperty
+    private BaseStackRepoDetailsV4Response repository;
+
     public String getVersion() {
         return version;
     }
@@ -29,11 +32,20 @@ public class BaseStackDetailsV4Response implements JsonEntity {
         this.stackBuildNumber = stackBuildNumber;
     }
 
+    public BaseStackRepoDetailsV4Response getRepository() {
+        return repository;
+    }
+
+    public void setRepository(BaseStackRepoDetailsV4Response repository) {
+        this.repository = repository;
+    }
+
     @Override
     public String toString() {
         return "BaseStackDetailsV4Response{" +
                 "version='" + version + '\'' +
                 ", stackBuildNumber='" + stackBuildNumber + '\'' +
+                ", repository=" + repository +
                 '}';
     }
 }

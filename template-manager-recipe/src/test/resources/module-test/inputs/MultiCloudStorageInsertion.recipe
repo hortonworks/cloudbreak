@@ -13,29 +13,29 @@ printIfValid() {
 
 function printLogic() {
 	if {{{#if fileSystemConfigs.s3}}}true{{{else}}}false{{{/if}}}; then
-		printIfValid "storage container:                          " "{{{ fileSystemConfigs.s3.storageContainer}}}"
-		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.s3.locations}}}{{{ this.configFile }}}: [{{{ this.property }}}: {{{ this.value }}}], {{{/each}}}"
-		printIfValid "default file system?                        " "{{{ fileSystemConfigs.s3.defaultFs }}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.s3.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.s3.locations}}}{{{this.configFile}}}: [{{{this.property}}}: {{{this.value}}}], {{{/each}}}"
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.s3.defaultFs}}}"
 	elif {{{#if fileSystemConfigs.gcs}}}true{{{else}}}false{{{/if}}}; then
-		printIfValid "service account email address:              " "{{{ fileSystemConfigs.gcs.serviceAccountEmail }}}"
-		printIfValid "storage container:                          " "{{{ fileSystemConfigs.gcs.storageContainer}}}"
-		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.gcs.locations}}}{{{ this.configFile }}}: [{{{ this.property }}}: {{{ this.value }}}], {{{/each}}}"
-		printIfValid "default file system?                        " "{{{ fileSystemConfigs.gcs.defaultFs }}}"
+		printIfValid "service account email address:              " "{{{fileSystemConfigs.gcs.serviceAccountEmail}}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.gcs.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.gcs.locations}}}{{{this.configFile}}}: [{{{this.property}}}: {{{this.value}}}], {{{/each}}}"
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.gcs.defaultFs}}}"
 	elif {{{#if fileSystemConfigs.adls_gen_2}}}true{{{else}}}false{{{/if}}}; then
-		printIfValid "account key:                                " "{{{ fileSystemConfigs.adls_gen_2.accountKey }}}"
-		printIfValid "account name:                               " "{{{ fileSystemConfigs.adls_gen_2.accountName }}}"
-		printIfValid "storage container name:                     " "{{{ fileSystemConfigs.adls_gen_2.storageContainerName }}}"
-		printIfValid "storage container:                          " "{{{ fileSystemConfigs.adls_gen_2.storageContainer}}}"
-		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.adladls_gen_2sGen2.locations}}}{{{ this.configFile }}}: [{{{ this.property }}}: {{{ this.value }}}], {{{/each}}}"
-		printIfValid "default file system?                        " "{{{ fileSystemConfigs.adls_gen_2.defaultFs }}}"
+		printIfValid "account key:                                " "{{{fileSystemConfigs.adls_gen_2.accountKey}}}"
+		printIfValid "account name:                               " "{{{fileSystemConfigs.adls_gen_2.accountName}}}"
+		printIfValid "storage container name:                     " "{{{fileSystemConfigs.adls_gen_2.storageContainerName}}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.adls_gen_2.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.adladls_gen_2sGen2.locations}}}{{{this.configFile}}}: [{{{this.property}}}: {{{this.value}}}], {{{/each}}}"
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.adls_gen_2.defaultFs}}}"
 	elif {{{#if fileSystemConfigs.adls}}}true{{{else}}}false{{{/if}}}; then
-		printIfValid "account name:                               " "{{{ fileSystemConfigs.adls.accountName }}}"
-		printIfValid "client ID:                                  " "{{{ fileSystemConfigs.adls.clientId }}}"
-		printIfValid "credential:                                 " "{{{ fileSystemConfigs.adls.credential }}}"
-		printIfValid "tenant ID:                                  " "{{{ fileSystemConfigs.adls.tenantId }}}"
-		printIfValid "storage container:                          " "{{{ fileSystemConfigs.adls.storageContainer}}}"
-		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.adls.locations}}}{{{ this.configFile }}}: [{{{ this.property }}}: {{{ this.value }}}], {{{/each}}}"
-		printIfValid "default file system?                        " "{{{ fileSystemConfigs.adls.defaultFs }}}"
+		printIfValid "account name:                               " "{{{fileSystemConfigs.adls.accountName}}}"
+		printIfValid "client ID:                                  " "{{{fileSystemConfigs.adls.clientId}}}"
+		printIfValid "credential:                                 " "{{{fileSystemConfigs.adls.credential}}}"
+		printIfValid "tenant ID:                                  " "{{{fileSystemConfigs.adls.tenantId}}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.adls.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " "{{{#each fileSystemConfigs.adls.locations}}}{{{this.configFile}}}: [{{{this.property}}}: {{{this.value}}}], {{{/each}}}"
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.adls.defaultFs}}}"
 	fi
 }
 
