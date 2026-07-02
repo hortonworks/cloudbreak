@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
+import java.util.HashMap;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
@@ -36,6 +39,11 @@ public class ImageToImageV4ResponseConverter {
             BaseStackDetailsV4Response stackDetailsResponse = new BaseStackDetailsV4Response();
             stackDetailsResponse.setStackBuildNumber(stackDetails.getStackBuildNumber());
             stackDetailsResponse.setVersion(stackDetails.getVersion());
+            if (stackDetails.getRepo() != null && stackDetails.getRepo().getStack() != null) {
+                BaseStackRepoDetailsV4Response stackRepoDetailsResponse = new BaseStackRepoDetailsV4Response();
+                stackRepoDetailsResponse.setStack(new HashMap<>(stackDetails.getRepo().getStack()));
+                stackDetailsResponse.setRepository(stackRepoDetailsResponse);
+            }
             result.setStackDetails(stackDetailsResponse);
         }
 

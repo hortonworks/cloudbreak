@@ -143,6 +143,9 @@ integrationtest:
     distroXUpgrade3rdPartyCurrentGovVersion: 7.3.1
     distroXUpgradeTargetVersion: 7.3.2
     distroXUpgrade3rdPartyTargetVersion: 7.3.2
+    runtimeImageRepositoryVersionExclusions:
+      7.3.1:
+        - ".p900."
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
   upgradeDatabaseServer:
     runtimeVersion: 7.3.1
