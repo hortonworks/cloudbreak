@@ -101,7 +101,7 @@ public class DiskUsageSyncService {
                 updateRequest.setSize(newSize);
                 if (entitlementService.isDbDiskAutoResizeEnabled(stack.getAccountId())) {
                     logResizeEvent(stack.getId(), newSize);
-                    flowManager.triggerStackUpdateDisks(stack, updateRequest);
+                    flowManager.triggerStackUpdateDisks(stack, updateRequest, false);
                 } else {
                     LOGGER.info("Embedded DB disk auto resize not entitled for account {}. On stack {} " +
                                     "the actual usage is {}% of {}GB. If entitled, it would be increased to {}GB.",

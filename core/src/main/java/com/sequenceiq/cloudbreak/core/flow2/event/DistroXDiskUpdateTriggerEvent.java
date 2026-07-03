@@ -23,6 +23,8 @@ public class DistroXDiskUpdateTriggerEvent extends StackEvent {
 
     private final String diskType;
 
+    private final boolean diskTypeChangeRequested;
+
     private final Long stackId;
 
     private final String clusterName;
@@ -45,12 +47,14 @@ public class DistroXDiskUpdateTriggerEvent extends StackEvent {
             @JsonProperty("volumeType") String volumeType,
             @JsonProperty("size") int size,
             @JsonProperty("group") String group,
-            @JsonProperty("diskType") String diskType) {
+            @JsonProperty("diskType") String diskType,
+            @JsonProperty("diskTypeChangeRequested") boolean diskTypeChangeRequested) {
         super(selector, resourceId, accepted);
         this.volumeType = volumeType;
         this.size = size;
         this.group = group;
         this.diskType = diskType;
+        this.diskTypeChangeRequested = diskTypeChangeRequested;
         this.clusterName = clusterName;
         this.accountId = accountId;
         this.volumesToBeUpdated = volumesToBeUpdated;
@@ -94,6 +98,10 @@ public class DistroXDiskUpdateTriggerEvent extends StackEvent {
         return diskType;
     }
 
+    public boolean isDiskTypeChangeRequested() {
+        return diskTypeChangeRequested;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DistroXDiskUpdateTriggerEvent.class.getSimpleName() + "[", "]")
@@ -101,6 +109,7 @@ public class DistroXDiskUpdateTriggerEvent extends StackEvent {
                 .add("size=" + size)
                 .add("group='" + group + "'")
                 .add("diskType='" + diskType + "'")
+                .add("diskTypeChangeRequested=" + diskTypeChangeRequested)
                 .add("stackId=" + stackId)
                 .add("clusterName='" + clusterName + "'")
                 .add("accountId='" + accountId + "'")
@@ -139,6 +148,8 @@ public class DistroXDiskUpdateTriggerEvent extends StackEvent {
         private String group;
 
         private String diskType;
+
+        private boolean diskTypeChangeRequested;
 
         private Builder() {
         }
@@ -203,6 +214,11 @@ public class DistroXDiskUpdateTriggerEvent extends StackEvent {
             return this;
         }
 
+        public Builder withDiskTypeChangeRequested(boolean diskTypeChangeRequested) {
+            this.diskTypeChangeRequested = diskTypeChangeRequested;
+            return this;
+        }
+
         public DistroXDiskUpdateTriggerEvent build() {
             return new DistroXDiskUpdateTriggerEvent(
                     selector,
@@ -216,7 +232,8 @@ public class DistroXDiskUpdateTriggerEvent extends StackEvent {
                     volumeType,
                     size,
                     group,
-                    diskType);
+                    diskType,
+                    diskTypeChangeRequested);
         }
     }
 }

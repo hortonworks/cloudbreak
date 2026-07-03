@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.STACK_START_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
@@ -20,6 +22,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.eve
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXDiskUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 class UpdateDistroxDiskFlowEventChainFactoryTest {
 
@@ -37,19 +41,6 @@ class UpdateDistroxDiskFlowEventChainFactoryTest {
 
     private static final String ACCOUNT_ID = "test-account";
 
-    private static final DistroXDiskUpdateTriggerEvent TRIGGER_EVENT = DistroXDiskUpdateTriggerEvent.builder()
-            .withSelector(DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT)
-            .withResourceId(STACK_ID)
-            .withClusterName(CLUSTER_NAME)
-            .withAccountId(ACCOUNT_ID)
-            .withCloudPlatform(CloudPlatform.AWS.name())
-            .withStackId(STACK_ID)
-            .withVolumeType(VOLUME_TYPE)
-            .withSize(SIZE)
-            .withGroup(GROUP)
-            .withDiskType(DISK_TYPE)
-            .build();
-
     @InjectMocks
     private UpdateDistroxDiskFlowEventChainFactory underTest;
 
@@ -65,19 +56,75 @@ class UpdateDistroxDiskFlowEventChainFactoryTest {
     }
 
     @Test
-    void testCreateFlowTriggerEventQueue() {
-        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(TRIGGER_EVENT);
-        assertEquals(TRIGGER_EVENT, flowTriggerEventQueue.getTriggerEvent());
+    void testCreateFlowTriggerEventQueueForNonGcpDoesNotStopAndStartStack() {
+        DistroXDiskUpdateTriggerEvent triggerEvent = triggerEvent(CloudPlatform.AWS.name(), true);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
+        assertEquals(triggerEvent, flowTriggerEventQueue.getTriggerEvent());
 
         Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
-        assertEquals(2, queue.size());
-
+        assertEquals(4, queue.size());
+        assertInstanceOf(FlowChainInitPayload.class, queue.remove());
         assertSaltUpdateEvent(queue.remove());
         assertDistroXDiskUpdateEvent(queue.remove());
+        assertInstanceOf(FlowChainFinalizePayload.class, queue.remove());
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueForGcpDiskTypeChangeStopsAndStartsStack() {
+        DistroXDiskUpdateTriggerEvent triggerEvent = triggerEvent(CloudPlatform.GCP.name(), true);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
+        assertEquals(triggerEvent, flowTriggerEventQueue.getTriggerEvent());
+
+        Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+        assertEquals(6, queue.size());
+        assertInstanceOf(FlowChainInitPayload.class, queue.remove());
+        assertSaltUpdateEvent(queue.remove());
+        assertStackEvent(queue.remove(), STACK_STOP_EVENT.event());
+        assertDistroXDiskUpdateEvent(queue.remove());
+        assertStackEvent(queue.remove(), STACK_START_EVENT.event());
+        assertInstanceOf(FlowChainFinalizePayload.class, queue.remove());
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueForGcpSizeOnlyChangeDoesNotStopAndStartStack() {
+        DistroXDiskUpdateTriggerEvent triggerEvent = triggerEvent(CloudPlatform.GCP.name(), false);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
+
+        Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+        assertEquals(4, queue.size());
+        assertInstanceOf(FlowChainInitPayload.class, queue.remove());
+        assertSaltUpdateEvent(queue.remove());
+        assertDistroXDiskUpdateEvent(queue.remove());
+        assertInstanceOf(FlowChainFinalizePayload.class, queue.remove());
+    }
+
+    private DistroXDiskUpdateTriggerEvent triggerEvent(String cloudPlatform, boolean diskTypeChangeRequested) {
+        return DistroXDiskUpdateTriggerEvent.builder()
+                .withSelector(DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT)
+                .withResourceId(STACK_ID)
+                .withClusterName(CLUSTER_NAME)
+                .withAccountId(ACCOUNT_ID)
+                .withCloudPlatform(cloudPlatform)
+                .withStackId(STACK_ID)
+                .withVolumeType(VOLUME_TYPE)
+                .withSize(SIZE)
+                .withGroup(GROUP)
+                .withDiskType(DISK_TYPE)
+                .withDiskTypeChangeRequested(diskTypeChangeRequested)
+                .build();
     }
 
     private void assertSaltUpdateEvent(Selectable event) {
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.selector());
+        assertInstanceOf(StackEvent.class, event);
+        assertEquals(STACK_ID, event.getResourceId());
+    }
+
+    private void assertStackEvent(Selectable event, String selector) {
+        assertEquals(selector, event.selector());
         assertInstanceOf(StackEvent.class, event);
         assertEquals(STACK_ID, event.getResourceId());
     }

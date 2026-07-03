@@ -30,12 +30,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -71,6 +73,8 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -101,6 +105,7 @@ import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -614,7 +619,7 @@ class StackOperationServiceTest {
     }
 
     @Test
-    void testStackUpdateDisks() {
+    void testStackUpdateDisksWithoutVolumeTypeIsSizeOnly() {
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
@@ -622,7 +627,84 @@ class StackOperationServiceTest {
         updateRequest.setGroup("TEST");
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
-        verify(flowManager).triggerStackUpdateDisks(stack, updateRequest);
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
+    }
+
+    @Test
+    void testStackUpdateDisksDetectsDiskTypeChangeWhenRequestedTypeDiffersFromCurrent() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeType(stack, "TEST", "gp2");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("gp3");
+        underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
+
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(true));
+    }
+
+    @Test
+    void testStackUpdateDisksIsSizeOnlyWhenRequestedTypeMatchesCurrent() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeType(stack, "TEST", "gp2");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("GP2");
+        underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
+
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
+    }
+
+    @Test
+    void testStackUpdateDisksDetectsDiskTypeChangeForHeterogeneousGroupWhenAnyTypeDiffers() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeTypes(stack, "TEST", "gp2", "gp3");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("gp3");
+        underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
+
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(true));
+    }
+
+    @Test
+    void testStackUpdateDisksIsSizeOnlyWhenCurrentTypeCannotBeResolved() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(null);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("gp3");
+        underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
+
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
+    }
+
+    private void mockCurrentVolumeType(StackDto stack, String group, String volumeType) {
+        mockCurrentVolumeTypes(stack, group, volumeType);
+    }
+
+    private void mockCurrentVolumeTypes(StackDto stack, String group, String... volumeTypes) {
+        Set<VolumeTemplate> volumeTemplates = Arrays.stream(volumeTypes)
+                .map(type -> {
+                    VolumeTemplate volumeTemplate = new VolumeTemplate();
+                    volumeTemplate.setVolumeType(type);
+                    return volumeTemplate;
+                })
+                .collect(Collectors.toSet());
+        Template template = new Template();
+        template.setVolumeTemplates(volumeTemplates);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        when(instanceGroupView.getTemplate()).thenReturn(template);
+        InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
+        when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroupView);
+        when(stack.getInstanceGroupByInstanceGroupName(group)).thenReturn(instanceGroupDto);
     }
 
     @Test

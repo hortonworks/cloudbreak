@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseSer
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -590,7 +591,45 @@ public class StackOperationService {
         convertInputGroupToLowerCase(updateRequest);
         validateDiskUpdate(updateRequest, accountId);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        return flowManager.triggerStackUpdateDisks(stack, updateRequest);
+        boolean diskTypeChangeRequested = isDiskTypeChangeRequested(stack, updateRequest);
+        validatePlatformAndRequest(diskTypeChangeRequested, stack.getCloudPlatform());
+        return flowManager.triggerStackUpdateDisks(stack, updateRequest, diskTypeChangeRequested);
+    }
+
+    private void validatePlatformAndRequest(boolean diskTypeChangeRequested, String cloudPlatform) {
+        if ((CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform) || AZURE.name().equalsIgnoreCase(cloudPlatform))
+            && diskTypeChangeRequested) {
+            throw new BadRequestException("Changing Volume Type is not supported for " + cloudPlatform + ".");
+        }
+    }
+
+    /**
+     * A disk update is a type change (as opposed to a bare size resize) when a volume type is requested and at least
+     * one of the group's disks currently has a different type.
+     */
+    private boolean isDiskTypeChangeRequested(StackDto stack, DiskUpdateRequest updateRequest) {
+        String requestedVolumeType = updateRequest.getVolumeType();
+        if (StringUtils.isEmpty(requestedVolumeType)) {
+            return false;
+        }
+        List<String> currentVolumeTypes = currentVolumeTypes(stack, updateRequest.getGroup());
+        if (currentVolumeTypes.isEmpty()) {
+            LOGGER.warn("Could not resolve the current volume type(s) for group {} on stack {}; treating the disk update as a size-only change.",
+                    updateRequest.getGroup(), stack.getName());
+            return false;
+        }
+        return currentVolumeTypes.stream().anyMatch(currentType -> !requestedVolumeType.equalsIgnoreCase(currentType));
+    }
+
+    private List<String> currentVolumeTypes(StackDto stack, String group) {
+        InstanceGroupDto instanceGroup = stack.getInstanceGroupByInstanceGroupName(group);
+        if (instanceGroup == null || instanceGroup.getInstanceGroup() == null || instanceGroup.getInstanceGroup().getTemplate() == null) {
+            return List.of();
+        }
+        return instanceGroup.getInstanceGroup().getTemplate().getVolumeTemplates().stream()
+                .map(VolumeTemplate::getVolumeType)
+                .filter(StringUtils::isNotEmpty)
+                .toList();
     }
 
     private void validateDiskUpdate(DiskUpdateRequest updateRequest, String accountId) {

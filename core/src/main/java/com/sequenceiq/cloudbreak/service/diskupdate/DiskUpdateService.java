@@ -301,6 +301,12 @@ public class DiskUpdateService {
             if (StringUtils.isEmpty(volumeType) && size == 0) {
                 throw new BadRequestException("Volume Type or Disk Size must be specified for AWS disk modification.");
             }
+        } else if (cloudPlatform == CloudPlatform.GCP) {
+            if (StringUtils.isNotEmpty(volumeType)) {
+                throw new BadRequestException("Changing disk type is not available for GCP");
+            } else if (size <= 0) {
+                throw new BadRequestException("Disk Size must be specified for GCP disk resize.");
+            }
         }
     }
 

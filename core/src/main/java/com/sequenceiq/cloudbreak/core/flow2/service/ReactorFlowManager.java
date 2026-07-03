@@ -554,7 +554,7 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, event);
     }
 
-    public FlowIdentifier triggerStackUpdateDisks(StackDto stack, DiskUpdateRequest updateRequest) {
+    public FlowIdentifier triggerStackUpdateDisks(StackDto stack, DiskUpdateRequest updateRequest, boolean diskTypeChangeRequested) {
         String selector = FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT;
         Long stackId = stack.getId();
         updateRequest.setGroup(updateRequest.getGroup().toLowerCase(Locale.ROOT));
@@ -566,6 +566,8 @@ public class ReactorFlowManager {
                 .withVolumeType(updateRequest.getVolumeType())
                 .withSize(updateRequest.getSize())
                 .withDiskType(updateRequest.getDiskType().name())
+                .withDiskTypeChangeRequested(diskTypeChangeRequested)
+                .withCloudPlatform(stack.getCloudPlatform())
                 .withClusterName(stack.getCluster().getResourceName())
                 .withAccountId(stack.getAccountId())
                 .withSelector(selector)

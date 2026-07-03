@@ -5,8 +5,9 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.STACK_START_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState;
@@ -27,6 +29,8 @@ import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.Cluste
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 @Component
 public class UpdateDistroxDiskFlowEventChainFactory implements FlowEventChainFactory<DistroXDiskUpdateTriggerEvent>, ClusterUseCaseAware {
@@ -56,30 +60,45 @@ public class UpdateDistroxDiskFlowEventChainFactory implements FlowEventChainFac
         LOGGER.debug("Creating flow trigger event queue for data hub disk update with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
-        flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
-        flowEventChain.addAll(getDistroXDiskUpdateEvent(event));
+        boolean gcpDiskTypeChange = isGcpDiskTypeChangeRequested(event);
+        flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
+        flowEventChain.add(getSaltUpdateTriggerEvent(event));
+        if (gcpDiskTypeChange) {
+            flowEventChain.add(new StackEvent(STACK_STOP_EVENT.event(), event.getResourceId()));
+        }
+        flowEventChain.add(getDistroXDiskUpdateEvent(event));
+        if (gcpDiskTypeChange) {
+            flowEventChain.add(new StackEvent(STACK_START_EVENT.event(), event.getResourceId()));
+        }
+        flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
 
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
-    private List<StackEvent> getSaltUpdateTriggerEvent(DistroXDiskUpdateTriggerEvent event) {
-        return List.of(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
+    /**
+     * A GCP disk type change cannot be done in place, so it requires stop &rarr; recreate disks &rarr; start. True only
+     * when the cluster is on GCP and the update is a type change (decided upstream in {@code StackOperationService}).
+     */
+    private boolean isGcpDiskTypeChangeRequested(DistroXDiskUpdateTriggerEvent event) {
+        return CloudPlatform.GCP.name().equalsIgnoreCase(event.getCloudPlatform()) && event.isDiskTypeChangeRequested();
     }
 
-    private List<StackEvent> getDistroXDiskUpdateEvent(DistroXDiskUpdateTriggerEvent event) {
-        return List.of(
-                DistroXDiskUpdateEvent.builder()
-                        .withResourceId(event.getResourceId())
-                        .withStackId(event.getStackId())
-                        .withGroup(event.getGroup())
-                        .withVolumeType(event.getVolumeType())
-                        .withSize(event.getSize())
-                        .withDiskType(event.getDiskType())
-                        .withClusterName(event.getClusterName())
-                        .withAccountId(event.getAccountId())
-                        .withSelector(DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.selector())
-                        .withAccepted(event.accepted())
-                        .build()
-        );
+    private StackEvent getSaltUpdateTriggerEvent(DistroXDiskUpdateTriggerEvent event) {
+        return new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted());
+    }
+
+    private DistroXDiskUpdateEvent getDistroXDiskUpdateEvent(DistroXDiskUpdateTriggerEvent event) {
+        return DistroXDiskUpdateEvent.builder()
+                .withResourceId(event.getResourceId())
+                .withStackId(event.getStackId())
+                .withGroup(event.getGroup())
+                .withVolumeType(event.getVolumeType())
+                .withSize(event.getSize())
+                .withDiskType(event.getDiskType())
+                .withClusterName(event.getClusterName())
+                .withAccountId(event.getAccountId())
+                .withSelector(DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.selector())
+                .withAccepted(event.accepted())
+                .build();
     }
 }

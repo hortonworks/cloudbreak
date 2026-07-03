@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.Modi
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -224,7 +225,7 @@ class ReactorFlowManagerTest {
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
         diskUpdateRequest.setGroup("test");
         diskUpdateRequest.setDiskType(DiskType.ADDITIONAL_DISK);
-        underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);
+        underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest, false);
         underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE, null);
         underTest.triggerInstanceMetadataUpdate(stackDto, InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED);
         underTest.triggerRefreshEntitlementParams(STACK_ID, "CRN", Collections.emptyMap(), Boolean.FALSE);
@@ -404,10 +405,11 @@ class ReactorFlowManagerTest {
         doReturn(DiskType.ADDITIONAL_DISK).when(diskUpdateRequest).getDiskType();
         ClusterView clusterView = mock(ClusterView.class);
         doReturn(clusterView).when(stackDto).getCluster();
-        underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);
+        underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest, true);
         ArgumentCaptor<DistroXDiskUpdateTriggerEvent> eventCaptor = ArgumentCaptor.forClass(DistroXDiskUpdateTriggerEvent.class);
         verify(reactorNotifier).notify(eq(1L), eq(FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT), eventCaptor.capture());
         assertEquals(stackDto.getId(), eventCaptor.getValue().getStackId());
+        assertTrue(eventCaptor.getValue().isDiskTypeChangeRequested());
     }
 
     @Test

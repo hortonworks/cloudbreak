@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.job.diskusage;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -122,7 +123,7 @@ class DiskUsageSyncServiceTest {
 
         underTest.checkDbDisk(stack);
 
-        verify(flowManager, never()).triggerStackUpdateDisks(any(), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 
     @Test
@@ -133,7 +134,7 @@ class DiskUsageSyncServiceTest {
         underTest.checkDbDisk(stack);
 
         ArgumentCaptor<DiskUpdateRequest> captor = ArgumentCaptor.forClass(DiskUpdateRequest.class);
-        verify(flowManager, times(1)).triggerStackUpdateDisks(eq(stack), captor.capture());
+        verify(flowManager, times(1)).triggerStackUpdateDisks(eq(stack), captor.capture(), eq(false));
         assert captor.getValue().getSize() == 200 + DISK_INCREMENT_SIZE;
     }
 
@@ -145,7 +146,7 @@ class DiskUsageSyncServiceTest {
         underTest.checkDbDisk(stack);
 
         ArgumentCaptor<DiskUpdateRequest> captor = ArgumentCaptor.forClass(DiskUpdateRequest.class);
-        verify(flowManager, times(1)).triggerStackUpdateDisks(eq(stack), captor.capture());
+        verify(flowManager, times(1)).triggerStackUpdateDisks(eq(stack), captor.capture(), eq(false));
         assert captor.getValue().getSize() == 200 + DISK_INCREMENT_SIZE;
     }
 
@@ -157,7 +158,7 @@ class DiskUsageSyncServiceTest {
         underTest.checkDbDisk(stack);
 
         ArgumentCaptor<DiskUpdateRequest> captor = ArgumentCaptor.forClass(DiskUpdateRequest.class);
-        verify(flowManager, times(1)).triggerStackUpdateDisks(eq(stack), captor.capture());
+        verify(flowManager, times(1)).triggerStackUpdateDisks(eq(stack), captor.capture(), eq(false));
         assert captor.getValue().getSize() == MAX_DISK_SIZE;
     }
 
@@ -168,7 +169,7 @@ class DiskUsageSyncServiceTest {
 
         underTest.checkDbDisk(stack);
 
-        verify(flowManager, never()).triggerStackUpdateDisks(eq(stack), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(eq(stack), any(), anyBoolean());
     }
 
     @Test
@@ -181,7 +182,7 @@ class DiskUsageSyncServiceTest {
 
         underTest.checkDbDisk(stack);
 
-        verify(flowManager, never()).triggerStackUpdateDisks(any(), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 
     @Test
@@ -190,7 +191,7 @@ class DiskUsageSyncServiceTest {
         when(hostOrchestrator.getDatabaseDiskUsagePercentage(gatewayConfig, PRIMARY_GW_FQDN)).thenThrow(new CloudbreakOrchestratorFailedException("Error"));
 
         assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
-        verify(flowManager, never()).triggerStackUpdateDisks(any(), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 
     @Test
@@ -201,7 +202,7 @@ class DiskUsageSyncServiceTest {
 
         assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
 
-        verify(flowManager, never()).triggerStackUpdateDisks(any(), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 
     @Test
@@ -210,7 +211,7 @@ class DiskUsageSyncServiceTest {
         when(stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack)).thenReturn(true);
 
         assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
-        verify(flowManager, never()).triggerStackUpdateDisks(any(), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 
     @Test
@@ -252,7 +253,7 @@ class DiskUsageSyncServiceTest {
         when(instanceGroupView.getTemplate()).thenReturn(template);
         when(template.getVolumeTemplates()).thenReturn(Set.of(dbVolume));
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        lenient().when(flowManager.triggerStackUpdateDisks(any(), any())).thenReturn(flowIdentifier);
+        lenient().when(flowManager.triggerStackUpdateDisks(any(), any(), anyBoolean())).thenReturn(flowIdentifier);
         lenient().doNothing().when(flowMessageService).fireEventAndLog(anyLong(), anyString(), any(), anyString(), anyString());
     }
 }

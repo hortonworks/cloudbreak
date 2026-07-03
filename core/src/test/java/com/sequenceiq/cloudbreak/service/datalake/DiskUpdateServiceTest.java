@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
@@ -329,6 +330,60 @@ class DiskUpdateServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.updateDiskTypeAndSize("master", "test", 200, List.of(), stackId));
         assertEquals("Changing Volume Type is not supported for Azure", badRequestException.getMessage());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeVolumeTypeSpecifiedForGcp() throws Exception {
+        Long stackId = 1L;
+        StackDto stack = mock(StackDto.class);
+        doReturn("GCP").when(stack).getCloudPlatform();
+        doReturn(stack).when(stackDtoService).getById(stackId);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.updateDiskTypeAndSize("master", "pd-ssd", 200, List.of(), stackId));
+        assertEquals("Changing disk type is not available for GCP", badRequestException.getMessage());
+        verify(resourceToCloudResourceConverter, never()).convert(any());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeMissingSizeForGcp() throws Exception {
+        Long stackId = 1L;
+        StackDto stack = mock(StackDto.class);
+        doReturn("GCP").when(stack).getCloudPlatform();
+        doReturn(stack).when(stackDtoService).getById(stackId);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.updateDiskTypeAndSize("master", null, 0, List.of(), stackId));
+        assertEquals("Disk Size must be specified for GCP disk resize.", badRequestException.getMessage());
+        verify(resourceToCloudResourceConverter, never()).convert(any());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeResizeForGcp() throws Exception {
+        Long stackId = 1L;
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
+        ResourceVolumeConnector gcpResourceVolumeConnector = mock(ResourceVolumeConnector.class);
+        doReturn(gcpResourceVolumeConnector).when(cloudConnector).volumeConnector();
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        when(platformParameters.diskTypes()).thenReturn(mock(DiskTypes.class));
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
+        StackDto stack = mock(StackDto.class);
+        doReturn("GCP").when(stack).getPlatformVariant();
+        doReturn("GCP").when(stack).getCloudPlatform();
+        Workspace workspace = mock(Workspace.class);
+        doReturn(workspace).when(stack).getWorkspace();
+        doReturn(stackId).when(workspace).getId();
+        doReturn("crn:cdp:iam:us-west-1:someworkspace:user:someuser").when(stack).getResourceCrn();
+        Authenticator authenticator = mock(Authenticator.class);
+        doReturn(authenticator).when(cloudConnector).authentication();
+        doReturn(stack).when(stackDtoService).getById(stackId);
+        Volume volume = mock(Volume.class);
+        doReturn("vol-1").when(volume).getId();
+
+        underTest.updateDiskTypeAndSize("master", null, 200, List.of(volume), stackId);
+
+        verify(gcpResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), any(), eq(200), any());
     }
 
     private void setUpForDiskResize(AwsResourceVolumeConnector awsResourceVolumeConnector, Template template) {

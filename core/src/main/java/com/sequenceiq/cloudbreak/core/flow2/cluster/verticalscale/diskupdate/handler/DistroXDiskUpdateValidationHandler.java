@@ -121,6 +121,7 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
         return attachedVolumes
                 .stream()
                 .filter(e -> !isEphemeral(diskTypes, e))
+                .filter(e -> !isLocalSsd(diskTypes, e))
                 .map(this::convertToVolume)
                 .toList();
     }
@@ -175,5 +176,9 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
 
     private boolean isEphemeral(DiskTypes diskTypes, VolumeSetAttributes.Volume volume) {
         return VolumeParameterType.EPHEMERAL.equals(diskTypes.diskMapping().get(volume.getType()));
+    }
+
+    private boolean isLocalSsd(DiskTypes diskTypes, VolumeSetAttributes.Volume volume) {
+        return VolumeParameterType.LOCAL_SSD.equals(diskTypes.diskMapping().get(volume.getType()));
     }
 }
