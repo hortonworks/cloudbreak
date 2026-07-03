@@ -215,7 +215,7 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
         return CloudPlatform.AZURE;
     }
 
-    private AzureDatabaseType getAzureDatabaseType(Map<String, Object> attributes) {
+    public AzureDatabaseType getAzureDatabaseType(Map<String, Object> attributes) {
         String dbTypeStr = (String) attributes.get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY);
         return AzureDatabaseType.safeValueOf(dbTypeStr);
     }

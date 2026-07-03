@@ -27,9 +27,11 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -37,10 +39,13 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.util.MajorVersionComparator;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -78,6 +83,9 @@ public class RdsUpgradeService {
 
     @Inject
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Inject
+    private AzureDatabaseServerParameterDecorator azureDatabaseServerParameterDecorator;
 
     public void checkUpgradeRds(NameOrCrn nameOrCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -121,13 +129,24 @@ public class RdsUpgradeService {
         validateStackStatus(stack);
         validateAttachedDatahubsAreNotRunning(stack, accountId);
         validateRdsIsAvailableForUpgrade(databaseServer);
-        validatePostgresServiceStopDisabledForAzure(stack, accountId);
+        validatePostgresServiceStopDisabledForAzure(stack, accountId, databaseServer.getMajorVersion(), stack.getDatabaseId());
     }
 
-    private void validatePostgresServiceStopDisabledForAzure(StackView stack, String accountId) {
+    private void validatePostgresServiceStopDisabledForAzure(StackView stack, String accountId, MajorVersion majorVersion, Long databaseId) {
+        MajorVersionComparator versionComparator = new MajorVersionComparator();
         if (CloudPlatform.AZURE.name().equalsIgnoreCase(stack.getCloudPlatform())
-                && entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(accountId)) {
-            throw new BadRequestException("Azure external database cannot be upgraded if 'CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP' entitlement is enabled");
+                && entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(accountId)
+                && versionComparator.compare(majorVersion, MajorVersion.VERSION_11) < 1) {
+            AzureDatabaseType azureDatabaseType = databaseService.findById(databaseId)
+                    .map(Database::getAttributes)
+                    .map(Json::getMap)
+                    .map(azureDatabaseServerParameterDecorator::getAzureDatabaseType)
+                    .orElse(AzureDatabaseType.SINGLE_SERVER);
+            if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
+                throw new BadRequestException("Azure external database cannot be upgraded if 'CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP' entitlement is enabled");
+            } else {
+                LOGGER.debug("Validation is skipped for Flexible server with version: {}", majorVersion.getMajorVersion());
+            }
         }
     }
 

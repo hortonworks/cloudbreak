@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -46,8 +48,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -56,6 +60,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -63,6 +68,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -130,6 +136,9 @@ class RdsUpgradeServiceTest {
     @Mock
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
 
+    @Mock
+    private AzureDatabaseServerParameterDecorator azureDatabaseServerParameterDecorator;
+
     @InjectMocks
     private RdsUpgradeService underTest;
 
@@ -181,6 +190,65 @@ class RdsUpgradeServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () -> doAsAndThrow(USER_CRN,
                 () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)));
 
+        verifyNoInteractions(reactorFlowManager);
+        assertThat(exception.getMessage())
+                .isEqualTo("Azure external database cannot be upgraded if 'CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP' entitlement is enabled");
+    }
+
+    @Test
+    void testUpgradeRdsOnAzureFlexibleServerAndSkipServicesAndCmStopEnabledThenSuccess() {
+        TargetMajorVersion target = VERSION14;
+        Stack stack = createStack(Status.AVAILABLE);
+        stack.setCloudPlatform("AZURE");
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
+        Database database = mock(Database.class);
+        Json attributes = mock(Json.class);
+        when(database.getAttributes()).thenReturn(attributes);
+        when(attributes.getMap()).thenReturn(Map.of());
+
+        when(databaseService.findById(isNull())).thenReturn(Optional.of(database));
+        when(azureDatabaseServerParameterDecorator.getAzureDatabaseType(Map.of())).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
+        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_11));
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, target.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
+        when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(target.getMajorVersion());
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(target), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
+
+        RdsUpgradeV4Response response = doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), target, false));
+
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(target), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
+        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
+        assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
+    }
+
+    @Test
+    void testUpgradeRdsOnAzureSingleServerAndSkipServicesAndCmStopEnabledThenFailure() {
+        Stack stack = createStack(Status.AVAILABLE);
+        stack.setCloudPlatform("AZURE");
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
+        Database database = mock(Database.class);
+        Json attributes = mock(Json.class);
+        when(database.getAttributes()).thenReturn(attributes);
+        when(attributes.getMap()).thenReturn(Map.of());
+
+        when(databaseService.findById(isNull())).thenReturn(Optional.of(database));
+        when(azureDatabaseServerParameterDecorator.getAzureDatabaseType(Map.of())).thenReturn(AzureDatabaseType.SINGLE_SERVER);
+        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
+        when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(TARGET_VERSION.getMajorVersion());
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> doAsAndThrow(USER_CRN,
+                () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)));
+
+        verify(azureDatabaseServerParameterDecorator).getAzureDatabaseType(Map.of());
         verifyNoInteractions(reactorFlowManager);
         assertThat(exception.getMessage())
                 .isEqualTo("Azure external database cannot be upgraded if 'CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP' entitlement is enabled");
