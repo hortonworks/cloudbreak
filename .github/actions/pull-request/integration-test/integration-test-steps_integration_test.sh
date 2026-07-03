@@ -8,7 +8,9 @@ main() {
     -x checkstyleMain \
     -x checkstyleTest \
     -x spotbugsMain \
-    -x spotbugsTest --no-daemon -PintegrationTest >> build.log
+    -x spotbugsTest \
+    -x spotlessApply \
+    -x spotlessCheck --no-daemon -PintegrationTest >> build.log
 
   rm -rf integration-test/integcb/.deps
   rm -rf integration-test/integcb/.schema
