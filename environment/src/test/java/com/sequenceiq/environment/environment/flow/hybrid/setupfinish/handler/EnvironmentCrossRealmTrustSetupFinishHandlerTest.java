@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_FAILED;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_HANDLER;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.BIDIRECTIONAL_TRUST_SETUP_HANDLER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -101,7 +101,7 @@ class EnvironmentCrossRealmTrustSetupFinishHandlerTest {
     @Test
     void testSelectorReturnsCorrectValue() {
         String selector = handler.selector();
-        assertEquals(SETUP_FINISH_TRUST_HANDLER.selector(), selector);
+        assertEquals(BIDIRECTIONAL_TRUST_SETUP_HANDLER.selector(), selector);
     }
 
     @Test

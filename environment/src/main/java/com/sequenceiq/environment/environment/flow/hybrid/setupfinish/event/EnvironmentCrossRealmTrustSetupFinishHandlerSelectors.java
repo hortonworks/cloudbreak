@@ -5,8 +5,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 public enum EnvironmentCrossRealmTrustSetupFinishHandlerSelectors implements FlowEvent {
 
     SETUP_FINISH_TRUST_VALIDATION_HANDLER,
-    SETUP_FINISH_TRUST_HANDLER,
-    SETUP_FINISH_TRUST_UPDATE_STACKS_HANDLER;
+    BIDIRECTIONAL_TRUST_SETUP_HANDLER;
 
     @Override
     public String event() {

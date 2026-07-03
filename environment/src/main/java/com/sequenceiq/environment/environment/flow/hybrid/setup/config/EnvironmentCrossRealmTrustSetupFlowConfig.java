@@ -5,13 +5,17 @@ import static com.sequenceiq.environment.environment.flow.hybrid.setup.Environme
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_KDC_CONFIG_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_UPDATE_STACKS_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FAILED_TRUST_SETUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FINALIZE_TRUST_SETUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FINISH_TRUST_SETUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.HANDLED_FAILED_TRUST_SETUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_KDC_CONFIG_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_UPDATE_STACKS_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_VALIDATION_EVENT;
 
 import java.util.List;
@@ -46,6 +50,16 @@ public class EnvironmentCrossRealmTrustSetupFlowConfig extends AbstractFlowConfi
             .defaultFailureEvent()
 
             .from(TRUST_SETUP_STATE)
+            .to(TRUST_SETUP_KDC_CONFIG_STATE)
+            .event(TRUST_SETUP_KDC_CONFIG_EVENT)
+            .defaultFailureEvent()
+
+            .from(TRUST_SETUP_KDC_CONFIG_STATE)
+            .to(TRUST_SETUP_UPDATE_STACKS_STATE)
+            .event(TRUST_SETUP_UPDATE_STACKS_EVENT)
+            .defaultFailureEvent()
+
+            .from(TRUST_SETUP_UPDATE_STACKS_STATE)
             .to(TRUST_SETUP_FINISHED_STATE)
             .event(FINISH_TRUST_SETUP_EVENT)
             .defaultFailureEvent()

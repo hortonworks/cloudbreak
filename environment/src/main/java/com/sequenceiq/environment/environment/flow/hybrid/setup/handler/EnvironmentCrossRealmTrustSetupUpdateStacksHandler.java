@@ -1,8 +1,8 @@
-package com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler;
+package com.sequenceiq.environment.environment.flow.hybrid.setup.handler;
 
-import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_UPDATE_STACKS_HANDLER;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINISH_TRUST_SETUP_FINISH_EVENT;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FAILED;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupHandlerSelectors.TRUST_SETUP_UPDATE_STACKS_HANDLER;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FINISH_TRUST_SETUP_EVENT;
 
 import java.util.List;
 import java.util.Locale;
@@ -24,8 +24,8 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoBase;
 import com.sequenceiq.environment.environment.flow.MultipleFlowsResultEvaluator;
-import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishEvent;
-import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishFailedEvent;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupFailedEvent;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
@@ -37,9 +37,9 @@ import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler extends ExceptionCatcherEventHandler<EnvironmentCrossRealmTrustSetupFinishEvent> {
+public class EnvironmentCrossRealmTrustSetupUpdateStacksHandler extends ExceptionCatcherEventHandler<EnvironmentCrossRealmTrustSetupEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCrossRealmTrustSetupUpdateStacksHandler.class);
 
     @Value("${env.saltupdate.datahub.polling.attempt:45}")
     private Integer attempt;
@@ -59,7 +59,7 @@ public class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler extends Ex
 
     private final SdxPollerService sdxPollerService;
 
-    protected EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler(DatahubPollerProvider datahubPollerProvider,
+    protected EnvironmentCrossRealmTrustSetupUpdateStacksHandler(DatahubPollerProvider datahubPollerProvider,
             MultipleFlowsResultEvaluator multipleFlowsResultEvaluator, EnvironmentService environmentService, ClusterService clusterService,
             FreeIpaService freeIpaService, SdxPollerService sdxPollerService) {
         this.datahubPollerProvider = datahubPollerProvider;
@@ -72,18 +72,18 @@ public class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler extends Ex
 
     @Override
     public String selector() {
-        return SETUP_FINISH_TRUST_UPDATE_STACKS_HANDLER.selector();
+        return TRUST_SETUP_UPDATE_STACKS_HANDLER.selector();
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnvironmentCrossRealmTrustSetupFinishEvent> event) {
-        return new EnvironmentCrossRealmTrustSetupFinishFailedEvent(event.getData(), e, TRUST_SETUP_FINISH_FAILED);
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnvironmentCrossRealmTrustSetupEvent> event) {
+        return new EnvironmentCrossRealmTrustSetupFailedEvent(event.getData(), e, TRUST_SETUP_FAILED);
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent<EnvironmentCrossRealmTrustSetupFinishEvent> event) {
-        LOGGER.debug("In EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler.accept");
-        EnvironmentCrossRealmTrustSetupFinishEvent data = event.getData();
+    protected Selectable doAccept(HandlerEvent<EnvironmentCrossRealmTrustSetupEvent> event) {
+        LOGGER.debug("In EnvironmentCrossRealmTrustSetupUpdateStacksHandler.accept");
+        EnvironmentCrossRealmTrustSetupEvent data = event.getData();
         try {
             Optional<EnvironmentDto> environmentDto = environmentService.findById(data.getResourceId());
             EnvironmentType environmentType = environmentDto.map(EnvironmentDtoBase::getEnvironmentType).orElse(EnvironmentType.PUBLIC_CLOUD);
@@ -106,14 +106,13 @@ public class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler extends Ex
             List<FlowIdentifier> datahubFlowIds = clusterService.triggerUpdateTrustedRealmOnDatahubs(envCrn, request);
             waitForFlowIds(data.getResourceId(), datahubFlowIds);
 
-            return EnvironmentCrossRealmTrustSetupFinishEvent.builder()
-                    .withSelector(FINISH_TRUST_SETUP_FINISH_EVENT.selector())
-                    .withResourceCrn(data.getResourceCrn())
-                    .withResourceId(data.getResourceId())
-                    .withResourceName(data.getResourceName())
+            LOGGER.debug("FINISH_TRUST_SETUP_EVENT event sent");
+            return data.toBuilder()
+                    .withSelector(FINISH_TRUST_SETUP_EVENT.selector())
                     .build();
         } catch (Exception e) {
-            return new EnvironmentCrossRealmTrustSetupFinishFailedEvent(data, e, TRUST_SETUP_FINISH_FAILED);
+            LOGGER.debug("TRUST_SETUP_FAILED event sent");
+            return new EnvironmentCrossRealmTrustSetupFailedEvent(data, e, TRUST_SETUP_FAILED);
         }
     }
 

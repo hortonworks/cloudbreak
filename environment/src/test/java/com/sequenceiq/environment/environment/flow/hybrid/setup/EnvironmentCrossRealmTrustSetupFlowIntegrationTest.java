@@ -3,7 +3,9 @@ package com.sequenceiq.environment.environment.flow.hybrid.setup;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FAILED;
@@ -12,7 +14,9 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SET
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_KDC_CONFIG_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_UPDATE_STACKS_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_VALIDATION_STATE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -41,14 +46,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -81,16 +87,22 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.flow.MultipleFlowsResultEvaluator;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.action.EnvironmentCrossRealmTrustSetupActions;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.config.EnvironmentCrossRealmTrustSetupFlowConfig;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentCrossRealmTrustSetupHandler;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentCrossRealmTrustSetupKdcConfigHandler;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentCrossRealmTrustSetupUpdateStacksHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentValidateCrossRealmTrustSetupHandler;
+import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.ClusterAvailabilityValidator;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
+import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
@@ -99,10 +111,8 @@ import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
-import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
@@ -114,6 +124,11 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.notification.WebSocketNotificationService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -133,55 +148,124 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
     @Inject
     private FlowRegister flowRegister;
 
-    @Inject
+    @MockitoBean
     private FlowLogRepository flowLogRepository;
 
     @Inject
     private EnvironmentReactorFlowManager environmentReactorFlowManager;
 
-    @MockBean
+    @MockitoBean
     private FlowOperationStatsRepository flowOperationStatsRepository;
 
-    @MockBean
+    @MockitoBean
     private FlowCancelService flowCancelService;
 
-    @MockBean
+    @MockitoBean
     private FlowUsageSender flowUsageSender;
 
-    @MockBean
-    private FlowEventCommonListener flowEventCommonListener;
-
-    @MockBean
-    private FlowEventListener flowEventListener;
-
-    @MockBean
+    @MockitoBean
     private MeterRegistry meterRegistry;
 
-    @MockBean
+    @MockitoBean
     private NodeConfig nodeConfig;
 
-    @MockBean
+    @MockitoBean
     private OperationService operationService;
 
-    @MockBean
+    @MockitoBean
     private NodeValidator nodeValidator;
 
-    @MockBean
+    @MockitoBean
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaService freeIpaService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaPollerService freeIpaPollerService;
 
-    @MockBean
+    @MockitoBean
     private StackService stackService;
 
-    @MockBean
+    @MockitoBean
+    private StackV4Endpoint stackV4Endpoint;
+
+    @MockitoBean
+    private DatahubPollerProvider datahubPollerProvider;
+
+    @MockitoBean
+    private MultipleFlowsResultEvaluator multipleFlowsResultEvaluator;
+
+    @MockitoBean
+    private ClusterService clusterService;
+
+    @MockitoBean
     private ClusterAvailabilityValidator clusterAvailabilityValidator;
 
-    @Inject
+    @MockitoBean
+    private SdxPollerService sdxPollerService;
+
+    @MockitoBean
+    private PlatformParameterService platformParameterService;
+
+    @MockitoBean
+    private EnvironmentDtoConverter environmentDtoConverter;
+
+    @MockitoBean
+    private GrpcUmsClient grpcUmsClient;
+
+    @MockitoBean
+    private RoleCrnGenerator roleCrnGenerator;
+
+    @MockitoBean
+    private ExperienceConnectorService experienceConnectorService;
+
+    @MockitoBean
+    private ManagedChannelWrapper channelWrapper;
+
+    @MockitoBean
+    private UmsClientConfig umsClientConfig;
+
+    @MockitoBean
+    private ApplicationFlowInformation applicationFlowInformation;
+
+    @MockitoBean
+    private FlowChainLogRepository flowChainLogRepository;
+
+    @MockitoBean
+    private EnvironmentMetricService environmentMetricService;
+
+    @MockitoBean
+    private OwnerAssignmentService ownerAssignmentService;
+
+    @MockitoBean
+    private WebSocketNotificationService webSocketNotificationService;
+
+    @MockitoBean
+    private Client client;
+
+    @MockitoBean
+    private SecretService secretService;
+
+    @MockitoBean
+    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @MockitoBean
+    private TransactionalScheduler scheduler;
+
+    @MockitoBean
+    private FlowOperationStatisticsService flowOperationStatisticsService;
+
+    @MockitoBean
+    private CcmResourceTerminationListener ccmResourceTerminationListener;
+
+    @MockitoBean
+    private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
+
+    @MockitoBean
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
+
+    @MockitoBean
     private EnvironmentService environmentService;
 
     private Environment environment;
@@ -196,11 +280,27 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
 
         EnvironmentDto hybridEnvironmentDto = mock(EnvironmentDto.class);
         when(hybridEnvironmentDto.getEnvironmentType()).thenReturn(EnvironmentType.HYBRID);
+        when(hybridEnvironmentDto.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
         when(environmentService.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(hybridEnvironmentDto));
+        when(clusterService.getStackCrnsForConfigUpdate(any())).thenReturn(List.of());
+
+        clearInvocations(environmentStatusUpdateService, flowLogRepository);
+    }
+
+    private void mockFreeIpaDescribeForTrustSetup() {
+        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
+        TrustResponse trust = new TrustResponse();
+        trust.setTrustStatus(TrustStatus.TRUST_SETUP_FINISH_REQUIRED.name());
+        trust.setRealm("REALM");
+        describeFreeIpaResponse.setTrust(trust);
+        describeFreeIpaResponse.setStatus(Status.AVAILABLE);
+        describeFreeIpaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
     }
 
     @Test
     void testPrepareCrossRealmTrustV1WhenSuccessful() {
+        mockFreeIpaDescribeForTrustSetup();
         testFlowV1();
         InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
 
@@ -221,6 +321,20 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED),
+                eq(TRUST_SETUP_KDC_CONFIG_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED),
+                eq(TRUST_SETUP_UPDATE_STACKS_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
                 eq(TRUST_SETUP_FINISH_REQUIRED),
                 eq(ENVIRONMENT_SETUP_TRUST_FINISHED),
                 eq(TRUST_SETUP_FINISHED_STATE)
@@ -229,6 +343,7 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
 
     @Test
     void testPrepareCrossRealmTrustV2WhenSuccessful() {
+        mockFreeIpaDescribeForTrustSetup();
         testFlowV2();
         InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
 
@@ -249,6 +364,20 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED),
+                eq(TRUST_SETUP_KDC_CONFIG_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED),
+                eq(TRUST_SETUP_UPDATE_STACKS_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
                 eq(TRUST_SETUP_FINISH_REQUIRED),
                 eq(ENVIRONMENT_SETUP_TRUST_FINISHED),
                 eq(TRUST_SETUP_FINISHED_STATE)
@@ -257,8 +386,21 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
 
     @Test
     void testPrepareCrossRealmTrustV2MitWhenSuccessfulSetsAvailable() {
+        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
+        TrustResponse trust = new TrustResponse();
+        trust.setTrustStatus(TrustStatus.TRUST_SETUP_FINISH_REQUIRED.name());
+        trust.setRealm("REALM");
+        describeFreeIpaResponse.setTrust(trust);
+        describeFreeIpaResponse.setStatus(Status.AVAILABLE);
+        describeFreeIpaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        when(freeIpaService.describe(ENVIRONMENT_CRN))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(describeFreeIpaResponse));
+
         EnvironmentDto publicCloudEnvironmentDto = mock(EnvironmentDto.class);
         when(publicCloudEnvironmentDto.getEnvironmentType()).thenReturn(EnvironmentType.PUBLIC_CLOUD);
+        when(publicCloudEnvironmentDto.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
         when(environmentService.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(publicCloudEnvironmentDto));
 
         FlowIdentifier flowIdentifier = triggerFlowV2Mit();
@@ -280,6 +422,20 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
                 eq(TRUST_SETUP_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_TRUST_STARTED),
                 eq(TRUST_SETUP_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED),
+                eq(TRUST_SETUP_KDC_CONFIG_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED),
+                eq(TRUST_SETUP_UPDATE_STACKS_STATE)
         );
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
@@ -427,6 +583,8 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
             CommonMetricService.class,
             EnvironmentCrossRealmTrustSetupActions.class,
             EnvironmentCrossRealmTrustSetupHandler.class,
+            EnvironmentCrossRealmTrustSetupKdcConfigHandler.class,
+            EnvironmentCrossRealmTrustSetupUpdateStacksHandler.class,
             EnvironmentValidateCrossRealmTrustSetupHandler.class,
             WebApplicationExceptionMessageExtractor.class,
             EnvironmentCrossRealmTrustSetupFlowConfig.class,
@@ -444,72 +602,6 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
             "com.sequenceiq.flow",
     })
     static class Config {
-
-        @MockBean
-        EnvironmentService environmentService;
-
-        @MockBean
-        PlatformParameterService platformParameterService;
-
-        @MockBean
-        EnvironmentDtoConverter environmentDtoConverter;
-
-        @MockBean
-        GrpcUmsClient grpcUmsClient;
-
-        @MockBean
-        RoleCrnGenerator roleCrnGenerator;
-
-        @MockBean
-        ExperienceConnectorService experienceConnectorService;
-
-        @MockBean
-        ManagedChannelWrapper channelWrapper;
-
-        @MockBean
-        UmsClientConfig umsClientConfig;
-
-        @MockBean
-        private FlowLogRepository flowLogRepository;
-
-        @MockBean
-        private ApplicationFlowInformation applicationFlowInformation;
-
-        @MockBean
-        private FlowChainLogRepository flowChainLogRepository;
-
-        @MockBean
-        private EnvironmentMetricService environmentMetricService;
-
-        @MockBean
-        private OwnerAssignmentService ownerAssignmentService;
-
-        @MockBean
-        private WebSocketNotificationService webSocketNotificationService;
-
-        @MockBean
-        private Client client;
-
-        @MockBean
-        private SecretService secretService;
-
-        @MockBean
-        private FreeIpaV1Endpoint freeIpaV1Endpoint;
-
-        @MockBean
-        private TransactionalScheduler scheduler;
-
-        @MockBean
-        private FlowOperationStatisticsService flowOperationStatisticsService;
-
-        @MockBean
-        private CcmResourceTerminationListener ccmResourceTerminationListener;
-
-        @MockBean
-        private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
-
-        @MockBean
-        private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
         @Bean
         public EventBus reactor(ExecutorService threadPoolExecutor) {

@@ -1,11 +1,10 @@
 package com.sequenceiq.environment.environment.flow.hybrid.setupfinish.config;
 
 
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.BIDIRECTIONAL_TRUST_SETUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FAILED_TRUST_SETUP_FINISH_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINALIZE_TRUST_SETUP_FINISH_EVENT;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINISH_TRUST_SETUP_FINISH_EVENT;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_EVENT;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINISH_BIDIRECTIONAL_TRUST_SETUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_VALIDATION_EVENT;
 
 import java.util.List;
@@ -35,18 +34,13 @@ public class EnvironmentCrossRealmTrustSetupFinishFlowConfig extends AbstractFlo
             .defaultFailureEvent()
 
             .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATION_STATE)
-            .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE)
-            .event(TRUST_SETUP_FINISH_EVENT)
+            .to(EnvironmentCrossRealmTrustSetupFinishState.BIDIRECTIONAL_TRUST_SETUP_STATE)
+            .event(BIDIRECTIONAL_TRUST_SETUP_EVENT)
             .defaultFailureEvent()
 
-            .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE)
-            .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_UPDATE_STACKS_STATE)
-            .event(TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT)
-            .defaultFailureEvent()
-
-            .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_UPDATE_STACKS_STATE)
+            .from(EnvironmentCrossRealmTrustSetupFinishState.BIDIRECTIONAL_TRUST_SETUP_STATE)
             .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE)
-            .event(FINISH_TRUST_SETUP_FINISH_EVENT)
+            .event(FINISH_BIDIRECTIONAL_TRUST_SETUP_EVENT)
             .defaultFailureEvent()
 
             .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE)

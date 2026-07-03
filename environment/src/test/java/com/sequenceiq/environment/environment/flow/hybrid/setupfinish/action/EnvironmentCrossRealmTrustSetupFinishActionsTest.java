@@ -131,8 +131,8 @@ class EnvironmentCrossRealmTrustSetupFinishActionsTest {
     }
 
     @Test
-    void testCrossRealmTrustSetupInFreeIpaAction() throws Exception {
-        Action<?, ?> action = configureAction(() -> actions.crossRealmFinishInFreeIpaAction());
+    void testBidirectionalTrustSetupAction() throws Exception {
+        Action<?, ?> action = configureAction(() -> actions.bidirectionalTrustSetupAction());
 
         action.execute(stateContext);
 

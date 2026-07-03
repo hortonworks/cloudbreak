@@ -2,8 +2,8 @@ package com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_FAILED;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_HANDLER;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.BIDIRECTIONAL_TRUST_SETUP_HANDLER;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINISH_BIDIRECTIONAL_TRUST_SETUP_EVENT;
 
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
 
     @Override
     public String selector() {
-        return SETUP_FINISH_TRUST_HANDLER.selector();
+        return BIDIRECTIONAL_TRUST_SETUP_HANDLER.selector();
     }
 
     @Override
@@ -51,19 +51,19 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
 
     @Override
     protected Selectable doAccept(HandlerEvent<EnvironmentCrossRealmTrustSetupFinishEvent> event) {
-        LOGGER.debug("In EnvironmentSetupFinishCrossRealmTrustHandler.accept");
+        LOGGER.debug("In EnvironmentCrossRealmTrustSetupFinishHandler.accept");
         EnvironmentCrossRealmTrustSetupFinishEvent data = event.getData();
         try {
             Optional<DescribeFreeIpaResponse> freeIpaResponseOptional = freeIpaService.describe(data.getResourceCrn());
             if (freeIpaResponseOptional.isPresent()) {
                 DescribeFreeIpaResponse freeIpa = freeIpaResponseOptional.get();
                 if (freeIpa.getStatus() == null || freeIpa.getAvailabilityStatus() == null) {
-                    throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, Setup finish interrupted.");
-                } else if (!crossRealmTrustSetupFinishCanBeTriggered(freeIpa)) {
-                    throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to Finish Cross Realm setup. Current state is: " +
-                            freeIpa.getStatus().name());
+                    throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, bidirectional trust setup interrupted.");
+                } else if (!bidirectionalTrustSetupCanBeTriggered(freeIpa)) {
+                    throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state for bidirectional trust setup. Current trust state is: " +
+                            freeIpa.getTrust().getTrustStatus());
                 } else {
-                    LOGGER.info("FreeIPA Cross Realm Trust setup finished.");
+                    LOGGER.info("FreeIPA bidirectional trust setup triggered.");
                     FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest = new FinishSetupCrossRealmTrustRequest();
                     finishCrossRealmTrustRequest.setEnvironmentCrn(data.getResourceCrn());
                     freeIpaPollerService.waitForCrossRealmFinish(
@@ -72,9 +72,9 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
                             finishCrossRealmTrustRequest);
                 }
             }
-            LOGGER.debug("TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT event sent");
+            LOGGER.debug("FINISH_BIDIRECTIONAL_TRUST_SETUP_EVENT event sent");
             return EnvironmentCrossRealmTrustSetupFinishEvent.builder()
-                    .withSelector(TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT.selector())
+                    .withSelector(FINISH_BIDIRECTIONAL_TRUST_SETUP_EVENT.selector())
                     .withResourceCrn(data.getResourceCrn())
                     .withResourceId(data.getResourceId())
                     .withResourceName(data.getResourceName())
@@ -85,7 +85,7 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
         }
     }
 
-    private boolean crossRealmTrustSetupFinishCanBeTriggered(DescribeFreeIpaResponse freeIpa) {
+    private boolean bidirectionalTrustSetupCanBeTriggered(DescribeFreeIpaResponse freeIpa) {
         if (freeIpa.getTrust() != null && StringUtils.isNotBlank(freeIpa.getTrust().getTrustStatus())) {
             TrustStatus trustStatus = TrustStatus.valueOf(freeIpa.getTrust().getTrustStatus());
             if (trustStatus.isCrossRealmFinishable()) {

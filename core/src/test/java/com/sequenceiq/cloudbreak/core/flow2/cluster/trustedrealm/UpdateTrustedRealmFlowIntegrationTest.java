@@ -183,6 +183,25 @@ class UpdateTrustedRealmFlowIntegrationTest {
     }
 
     @Test
+    void testUpdateTrustedRealmWhenCurrentValueIsEmptyString() {
+        when(clusterService.getClusterServiceConfigValue(any(), any(ClusterServiceConfigurationLookup.class)))
+                .thenReturn(Optional.of(""));
+        doNothing().when(clusterService).updateClusterServiceConfiguration(any(), any(ClusterServiceConfigurationUpdate.class));
+
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+
+        assertFlowFinalized();
+        ArgumentCaptor<ClusterServiceConfigurationUpdate> updateCaptor = ArgumentCaptor.forClass(ClusterServiceConfigurationUpdate.class);
+        verify(clusterService, times(1)).updateClusterServiceConfiguration(any(), updateCaptor.capture());
+        String updatedValue = updateCaptor.getValue().getServiceConfigurations().get(0).getValue();
+        assertFalse(updatedValue.startsWith(","), "Updated value should not start with a comma when current value is empty");
+        assertTrue(updatedValue.equals(REALM), "Updated value should be the realm only when current value is empty");
+        verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
+    }
+
+    @Test
     void testUpdateTrustedRealmWhenRealmAlreadyConfigured() {
         when(clusterService.getClusterServiceConfigValue(any(), any(ClusterServiceConfigurationLookup.class)))
                 .thenReturn(Optional.of(REALM));
@@ -286,6 +305,21 @@ class UpdateTrustedRealmFlowIntegrationTest {
         verify(clusterService, times(1)).updateClusterServiceConfiguration(eq(NameOrCrn.ofCrn(STACK_CRN)), updateCaptor.capture());
         String updatedValue = updateCaptor.getValue().getServiceConfigurations().get(0).getValue();
         assertNull(updatedValue, "Value should be null so CM reverts trusted_realms to its default");
+        verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testRemoveTrustedRealmWhenCurrentValueIsEmptyString() {
+        when(clusterService.getClusterServiceConfigValue(any(), any(ClusterServiceConfigurationLookup.class)))
+                .thenReturn(Optional.of(""));
+
+        FlowIdentifier flowIdentifier = triggerFlow(true);
+        letItFlow(flowIdentifier);
+
+        assertFlowFinalized();
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, true);
+        verify(clusterService, never()).updateClusterServiceConfiguration(any(), any());
         verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
         verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
     }

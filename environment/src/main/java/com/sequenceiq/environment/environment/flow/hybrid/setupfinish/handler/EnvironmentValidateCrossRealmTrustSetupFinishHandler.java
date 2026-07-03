@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_FAILED;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_VALIDATION_HANDLER;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.BIDIRECTIONAL_TRUST_SETUP_EVENT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +34,10 @@ public class EnvironmentValidateCrossRealmTrustSetupFinishHandler extends Except
     protected Selectable doAccept(HandlerEvent<EnvironmentCrossRealmTrustSetupFinishEvent> event) {
         LOGGER.debug("In EnvironmentValidateSetupFinishCrossRealmTrustHandler.accept");
         try {
-            LOGGER.debug("CROSS_REALM_TRUST_SETUP_FINISH_EVENT event sent");
+            LOGGER.debug("BIDIRECTIONAL_TRUST_SETUP_EVENT event sent");
             return EnvironmentCrossRealmTrustSetupFinishEvent
                     .builder()
-                    .withSelector(TRUST_SETUP_FINISH_EVENT.selector())
+                    .withSelector(BIDIRECTIONAL_TRUST_SETUP_EVENT.selector())
                     .withResourceCrn(event.getData().getResourceCrn())
                     .withResourceId(event.getData().getResourceId())
                     .withResourceName(event.getData().getResourceName())

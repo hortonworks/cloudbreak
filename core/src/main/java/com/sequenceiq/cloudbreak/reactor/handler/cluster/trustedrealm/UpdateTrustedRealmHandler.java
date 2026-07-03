@@ -79,13 +79,14 @@ public class UpdateTrustedRealmHandler extends ExceptionCatcherEventHandler<Upda
 
     private void addRealm(Long stackId, String realm, NameOrCrn nameOrCrn, Optional<String> currentValue) {
         LOGGER.info("Adding trusted realm '{}' on CM for stack {}", realm, stackId);
-        boolean realmAlreadyConfigured = currentValue.map(val -> Arrays.stream(val.split(","))
+        Optional<String> nonBlankValue = currentValue.filter(val -> !val.isBlank());
+        boolean realmAlreadyConfigured = nonBlankValue.map(val -> Arrays.stream(val.split(","))
                 .map(String::trim)
                 .anyMatch(r -> r.equalsIgnoreCase(realm))).orElse(false);
         if (realmAlreadyConfigured) {
             LOGGER.info("Realm '{}' is already configured in trusted_realms for stack {}, skipping update", realm, stackId);
         } else {
-            String newValue = currentValue.map(val -> val + "," + realm).orElse(realm);
+            String newValue = nonBlankValue.map(val -> val + "," + realm).orElse(realm);
             writeConfig(nameOrCrn, newValue);
             LOGGER.info("Successfully updated trusted_realms to '{}' for stack {}", newValue, stackId);
         }
@@ -93,16 +94,17 @@ public class UpdateTrustedRealmHandler extends ExceptionCatcherEventHandler<Upda
 
     private void removeRealm(Long stackId, String realm, NameOrCrn nameOrCrn, Optional<String> currentValue) {
         LOGGER.info("Removing trusted realm '{}' from CM for stack {}", realm, stackId);
-        boolean realmPresent = currentValue.map(val -> Arrays.stream(val.split(","))
+        Optional<String> nonBlankValue = currentValue.filter(val -> !val.isBlank());
+        boolean realmPresent = nonBlankValue.map(val -> Arrays.stream(val.split(","))
                 .map(String::trim)
                 .anyMatch(r -> r.equalsIgnoreCase(realm))).orElse(false);
         if (!realmPresent) {
             LOGGER.info("Realm '{}' is not present in trusted_realms for stack {}, skipping removal", realm, stackId);
         } else {
-            String filtered = currentValue
+            String filtered = nonBlankValue
                     .map(val -> Arrays.stream(val.split(","))
                             .map(String::trim)
-                            .filter(r -> !r.equalsIgnoreCase(realm))
+                            .filter(r -> !r.isEmpty() && !r.equalsIgnoreCase(realm))
                             .collect(Collectors.joining(",")))
                     .orElse("");
             // Pass null when no realms remain so CM reverts the config to its default value instead of storing an empty string.

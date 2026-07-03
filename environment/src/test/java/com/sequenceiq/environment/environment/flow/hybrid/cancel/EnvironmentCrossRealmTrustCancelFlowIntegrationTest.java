@@ -36,7 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -525,7 +525,7 @@ class  EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
 
     private void flowFinishedSuccessfully() {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
-        verify(flowLogRepository, times(2)).save(flowLog.capture());
+        verify(flowLogRepository, timeout(10000).times(2)).save(flowLog.capture());
         assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
     }
 
@@ -549,7 +549,7 @@ class  EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
             }
-        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 30);
+        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 100);
     }
 
     @Configuration

@@ -878,6 +878,8 @@ public enum ResourceEvent {
 
     ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED("environment.setup.cross.realm.trust.validation.started"),
     ENVIRONMENT_SETUP_TRUST_STARTED("environment.setup.cross.realm.trust.started"),
+    ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED("environment.setup.cross.realm.trust.kdc.config.started"),
+    ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED("environment.setup.cross.realm.trust.update.stacks.started"),
     ENVIRONMENT_SETUP_TRUST_FINISHED("environment.setup.cross.realm.trust.finished"),
     ENVIRONMENT_SETUP_TRUST_VALIDATION_FAILED("environment.setup.cross.realm.trust.validation.failed"),
     ENVIRONMENT_SETUP_TRUST_FAILED("environment.setup.cross.realm.trust.failed"),
