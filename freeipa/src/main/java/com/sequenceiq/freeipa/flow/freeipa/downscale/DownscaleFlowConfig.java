@@ -39,6 +39,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.S
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STOP_TELEMETRY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FOR_DELETION_REQUEST_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.VERIFY_REPLICATION_CLEANUP_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.VERIFY_REPLICATION_CLEANUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE;
@@ -59,6 +61,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNS
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_METADATA_FOR_DELETION_REQUEST_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_METADATA_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_VERIFY_REPLICATION_CLEANUP_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.STARTING_DOWNSCALE_STATE;
@@ -156,9 +159,13 @@ public class DownscaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<
                     .event(DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT)
                     .failureEvent(DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT)
 
-                    .from(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE).to(DOWNSCALE_FINISHED_STATE)
+                    .from(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE).to(DOWNSCALE_VERIFY_REPLICATION_CLEANUP_STATE)
                     .event(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT)
                     .failureEvent(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT)
+
+                    .from(DOWNSCALE_VERIFY_REPLICATION_CLEANUP_STATE).to(DOWNSCALE_FINISHED_STATE)
+                    .event(VERIFY_REPLICATION_CLEANUP_FINISHED_EVENT)
+                    .failureEvent(VERIFY_REPLICATION_CLEANUP_FAILED_EVENT)
 
                     .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE)
                     .event(DOWNSCALE_FINISHED_EVENT)

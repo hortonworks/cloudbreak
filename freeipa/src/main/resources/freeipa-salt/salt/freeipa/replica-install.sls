@@ -21,5 +21,6 @@ install-freeipa-replica:
     - unless: test -f /var/log/freeipa_install-executed
     - require:
         - file: /opt/salt/scripts/freeipa_replica_install.sh
+        - file: /opt/salt/scripts/freeipa_check_replication_cleanup.sh
         - file: /etc/resolv.conf.install
         - file: /opt/salt/scripts/initdnarange.py

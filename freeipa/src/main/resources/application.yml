@@ -180,6 +180,9 @@ freeipa:
   serverrole.polling:
     interval: 20
     delaymin: 15
+  replication.cleanup.polling:
+    timeout-sec: 600
+    interval-sec: 10
   loadbalancer:
     health-check:
       port: 5080

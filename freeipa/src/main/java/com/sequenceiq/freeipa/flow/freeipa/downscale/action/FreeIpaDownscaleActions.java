@@ -67,6 +67,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHos
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.replicationcleanup.VerifyReplicationCleanupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stophealthagent.StopHealthAgentRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
@@ -450,6 +451,19 @@ public class FreeIpaDownscaleActions {
                     sendEvent(context, DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT.selector(),
                             new DownscaleFailureEvent(stack.getId(), "Updating environment stack config", Set.of(), Map.of(), e));
                 }
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_VERIFY_REPLICATION_CLEANUP_STATE")
+    public Action<?, ?> verifyReplicationCleanupAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                stackUpdater.updateStackStatus(context.getStack(), getInProgressStatus(variables), "Verifying replication cleanup");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
+                VerifyReplicationCleanupRequest request = new VerifyReplicationCleanupRequest(cleanupEvent);
+                sendEvent(context, request);
             }
         };
     }

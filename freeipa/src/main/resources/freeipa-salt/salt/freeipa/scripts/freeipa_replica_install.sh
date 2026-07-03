@@ -25,6 +25,13 @@ install -m644 /etc/resolv.conf.install /etc/resolv.conf
 
 ipa-server-install --unattended --uninstall --ignore-topology-disconnect --ignore-last-of-role
 
+if [ -x /opt/salt/scripts/freeipa_check_replication_cleanup.sh ]; then
+  echo "Waiting for FreeIPA replication cleanup on peer $FREEIPA_TO_REPLICATE before re-joining as $FQDN"
+  LDAP_URI="ldap://$FREEIPA_TO_REPLICATE" TARGET_HOSTS="$FQDN" FPW="$FPW" /opt/salt/scripts/freeipa_check_replication_cleanup.sh
+else
+  echo "Replication cleanup check script not present (cluster predates the feature); skipping cleanup gate before re-joining as $FQDN"
+fi
+
 ipa-client-install \
   --server "$FREEIPA_TO_REPLICATE" \
   --realm "$REALM" \

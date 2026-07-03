@@ -11,6 +11,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateD
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.replicationcleanup.VerifyReplicationCleanupResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationFailed;
@@ -49,6 +50,8 @@ public enum DownscaleFlowEvent implements FlowEvent {
     DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT("DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT"),
     DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT("DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT"),
     DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT("DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT"),
+    VERIFY_REPLICATION_CLEANUP_FINISHED_EVENT(EventSelectorUtil.selector(VerifyReplicationCleanupResponse.class)),
+    VERIFY_REPLICATION_CLEANUP_FAILED_EVENT("VERIFY_REPLICATION_CLEANUP_FAILED_EVENT"),
     DOWNSCALE_FINISHED_EVENT("DOWNSCALE_FINISHED_EVENT"),
     FAILURE_EVENT("DOWNSCALE_FAILURE_EVENT"),
     FAIL_HANDLED_EVENT("DOWNSCALE_FAIL_HANDLED_EVENT");
