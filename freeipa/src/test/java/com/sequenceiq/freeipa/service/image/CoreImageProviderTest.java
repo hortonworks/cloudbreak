@@ -48,6 +48,8 @@ class CoreImageProviderTest {
 
     private static final String OS_TYPE = "os type";
 
+    private static final String SOURCE_IMAGE_ID = "source image id";
+
     private static final String VM_IMAGE_REFERENCE = "vm image";
 
     private static final Map<String, Map<String, String>> VM_IMAGES = Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, VM_IMAGE_REFERENCE));
@@ -108,6 +110,7 @@ class CoreImageProviderTest {
         assertEquals(UUID, image.getUuid());
         assertEquals(OS_TYPE, image.getOsType());
         assertEquals(VM_IMAGE_REFERENCE, image.getImageSetsByProvider().get(PLATFORM).get(REGION));
+        assertEquals(SOURCE_IMAGE_ID, image.getSourceImageId());
     }
 
     @Test
@@ -173,6 +176,7 @@ class CoreImageProviderTest {
         response.setUuid(UUID);
         response.setOsType(OS_TYPE);
         response.setImageSetsByProvider(VM_IMAGES);
+        response.setSourceImageId(SOURCE_IMAGE_ID);
 
         return response;
     }

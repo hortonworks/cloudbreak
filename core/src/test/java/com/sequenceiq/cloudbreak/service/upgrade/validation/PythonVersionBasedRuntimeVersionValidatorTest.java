@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
-import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,9 +45,6 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
     @Mock
     private CurrentImagePackageProvider currentImagePackageProvider;
 
-    @Mock
-    private CurrentImageUsageCondition currentImageUsageCondition;
-
     @ParameterizedTest(name = "Current runtime: {0} contains Python 3.8: {1} current image used on instances: {2}, "
             + "Stack type: {3}, Target runtime: {4} contains Python 3.8: {5}, Os upgrade: {6}, Permitting upgrade: {7}")
     @MethodSource("testScenariosProvider")
@@ -61,7 +57,6 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
         when(stack.getType()).thenReturn(stackType);
         lenient().when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, CDH_IMAGES_FROM_CATALOG, PYTHON38))
                 .thenReturn(allInstanceContainsPython);
-        lenient().when(currentImageUsageCondition.isCurrentImageUsedOnInstances(STACK_ID, currentImage.getImageId())).thenReturn(currentImageContainsPython);
 
         assertEquals(expectedValue, underTest.isUpgradePermittedForRuntime(stack, CDH_IMAGES_FROM_CATALOG, currentImage, targetImage));
     }

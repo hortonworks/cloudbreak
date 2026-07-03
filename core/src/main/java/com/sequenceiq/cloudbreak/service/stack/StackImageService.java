@@ -102,24 +102,25 @@ public class StackImageService {
         try {
             Image currentImage = componentConfigProviderService.getImage(stack.getId());
             ImageCatalog sourceImageCatalog = imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), currentImage.getImageCatalogName());
+            String sourceImageId = currentImage.getImageId();
             if (imageCatalogService.isCustomImageCatalog(sourceImageCatalog)) {
-                throw new CloudbreakServiceException(
-                        String.format("Current image catalog '%s' is a non-JSON based one. Image catalog change is not supported.",
-                                sourceImageCatalog.getName()));
+                sourceImageId = imageCatalogService.getSourceImageId(sourceImageCatalog, sourceImageId);
+                LOGGER.info("Source image catalog '{}' is a DB-based custom catalog; resolving the target image via source image id '{}' "
+                        + "instead of the custom image id '{}'.", sourceImageCatalog.getName(), sourceImageId, currentImage.getImageId());
             }
 
             ImageCatalog targetImageCatalog = imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), imageCatalog);
+            StatedImage targetImage;
             if (imageCatalogService.isCustomImageCatalog(targetImageCatalog)) {
-                throw new CloudbreakServiceException(String.format("Migrating from a JSON based catalog '%s' to a non-JSON based one '%s' is not supported.",
-                        sourceImageCatalog.getName(), targetImageCatalog.getName()));
+                targetImage = imageCatalogService.getCustomImageBySourceImageId(targetImageCatalog, sourceImageId);
+            } else {
+                targetImage = imageCatalogService.getImage(
+                        stack.getWorkspace().getId(),
+                        targetImageCatalog.getImageCatalogUrl(),
+                        targetImageCatalog.getName(),
+                        sourceImageId
+                );
             }
-
-            StatedImage targetImage = imageCatalogService.getImage(
-                    stack.getWorkspace().getId(),
-                    targetImageCatalog.getImageCatalogUrl(),
-                    targetImageCatalog.getName(),
-                    currentImage.getImageId()
-            );
             replaceStackImageComponent(stack, targetImage);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed to change the image catalog.", e);

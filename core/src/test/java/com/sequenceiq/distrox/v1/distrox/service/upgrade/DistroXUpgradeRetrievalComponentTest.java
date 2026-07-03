@@ -337,7 +337,7 @@ public class DistroXUpgradeRetrievalComponentTest {
         when(imageCatalogService.getAllCdhImages(any(), any(), any(), any())).thenReturn(imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM));
         when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM), PYTHON38)).thenReturn(
                 true);
-        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any(), any())).thenReturn(true);
     }
 
     @Test
@@ -366,7 +366,7 @@ public class DistroXUpgradeRetrievalComponentTest {
     void testUpgradeClusterByNameWhenTheCurrentIs7216WithoutPython() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.16", CLOUD_PLATFORM, CENTOS7);
         setupImageCatalogMocks(currentCatalogImage);
-        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any(), any())).thenReturn(false);
         when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM), PYTHON38))
                 .thenReturn(false);
 
@@ -527,7 +527,7 @@ public class DistroXUpgradeRetrievalComponentTest {
     void testUpgradeClusterByNameWhenTheCurrentIs7217WithoutOsUpgrade() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.17", CLOUD_PLATFORM, CENTOS7);
         setupImageCatalogMocks(currentCatalogImage);
-        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any(), any())).thenReturn(false);
         when(currentImageUsageCondition.getOSUsedByInstances(STACK_ID)).thenReturn(Set.of(CENTOS7));
         when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(any())).thenReturn(parcelAvailabilityResponse);
         when(parcelAvailabilityResponse.getStatus()).thenReturn(200);

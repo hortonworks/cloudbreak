@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.CustomImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
@@ -69,6 +70,11 @@ public class CloudbreakApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
     @Override
     public ImageCatalogV4Endpoint imageCatalogV4Endpoint() {
         return getEndpoint(ImageCatalogV4Endpoint.class);
+    }
+
+    @Override
+    public CustomImageCatalogV4Endpoint customImageCatalogV4Endpoint() {
+        return getEndpoint(CustomImageCatalogV4Endpoint.class);
     }
 
     @Override

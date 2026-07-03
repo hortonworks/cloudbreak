@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.CustomImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
@@ -44,6 +45,8 @@ public interface CloudbreakClient {
     BlueprintV4Endpoint blueprintV4Endpoint();
 
     ImageCatalogV4Endpoint imageCatalogV4Endpoint();
+
+    CustomImageCatalogV4Endpoint customImageCatalogV4Endpoint();
 
     CloudbreakInfoV4Endpoint cloudbreakInfoV4Endpoint();
 

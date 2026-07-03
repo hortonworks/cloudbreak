@@ -34,6 +34,8 @@ public class Image {
 
     private static final String TAGS_PROPERTY = "tags";
 
+    private static final String SOURCE_IMAGE_ID_PROPERTY = "sourceImageId";
+
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final long created;
 
@@ -60,6 +62,8 @@ public class Image {
 
     private final Map<String, String> tags;
 
+    private final String sourceImageId;
+
     @JsonCreator
     public Image(
             @JsonProperty(CREATED_PROPERTY) Long created,
@@ -72,7 +76,8 @@ public class Image {
             @JsonProperty(PACKAGE_VERSIONS_PROPERTY) Map<String, String> packageVersions,
             @JsonProperty(ADVERTISED_PROPERTY) boolean advertised,
             @JsonProperty(ARCHITECTURE_PROPERTY) String architecture,
-            @JsonProperty(TAGS_PROPERTY) Map<String, String> tags) {
+            @JsonProperty(TAGS_PROPERTY) Map<String, String> tags,
+            @JsonProperty(SOURCE_IMAGE_ID_PROPERTY) String sourceImageId) {
         this.created = Objects.requireNonNullElse(created, 0L);
         this.date = date;
         this.description = description;
@@ -84,21 +89,17 @@ public class Image {
         this.advertised = advertised;
         this.architecture = architecture;
         this.tags = tags == null ? Map.of() : tags;
+        this.sourceImageId = sourceImageId;
+    }
+
+    public Image(Long created, String date, String description, String os, String uuid, Map<String, Map<String, String>> imageSetsByProvider, String osType,
+            Map<String, String> packageVersions, boolean advertised, String architecture, Map<String, String> tags) {
+        this(created, date, description, os, uuid, imageSetsByProvider, osType, packageVersions, advertised, architecture, tags, null);
     }
 
     public Image(Long created, String date, String description, String os, String uuid, Map<String, Map<String, String>> imageSetsByProvider, String osType,
             Map<String, String> packageVersions, boolean advertised, String architecture) {
-        this.created = Objects.requireNonNullElse(created, 0L);
-        this.date = date;
-        this.description = description;
-        this.os = os;
-        this.osType = osType;
-        this.uuid = uuid;
-        this.imageSetsByProvider = imageSetsByProvider;
-        this.packageVersions = packageVersions;
-        this.advertised = advertised;
-        this.architecture = architecture;
-        this.tags = Map.of();
+        this(created, date, description, os, uuid, imageSetsByProvider, osType, packageVersions, advertised, architecture, Map.of(), null);
     }
 
     @JsonProperty(CREATED_PROPERTY)
@@ -156,6 +157,11 @@ public class Image {
         return tags;
     }
 
+    @JsonProperty(SOURCE_IMAGE_ID_PROPERTY)
+    public String getSourceImageId() {
+        return sourceImageId;
+    }
+
     // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -176,14 +182,15 @@ public class Image {
                 && Objects.equals(imageSetsByProvider, image.imageSetsByProvider)
                 && Objects.equals(packageVersions, image.packageVersions)
                 && Objects.equals(architecture, image.architecture)
-                && Objects.equals(tags, image.tags);
+                && Objects.equals(tags, image.tags)
+                && Objects.equals(sourceImageId, image.sourceImageId);
     }
     // CHECKSTYLE:ON
 
     @Override
     public int hashCode() {
         return Objects.hash(created, date, description, os, osType, uuid, imageSetsByProvider,
-                packageVersions, advertised, architecture, tags);
+                packageVersions, advertised, architecture, tags, sourceImageId);
     }
 
     @Override
@@ -200,6 +207,7 @@ public class Image {
         sb.append(", advertised=").append(advertised);
         sb.append(", architecture='").append(architecture).append('\'');
         sb.append(", tags=").append(tags);
+        sb.append(", sourceImageId='").append(sourceImageId).append('\'');
         sb.append('}');
         return sb.toString();
     }

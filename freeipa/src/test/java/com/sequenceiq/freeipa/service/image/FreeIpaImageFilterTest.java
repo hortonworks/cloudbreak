@@ -190,12 +190,45 @@ class FreeIpaImageFilterTest {
         return new FreeIpaImageFilterSettings(null, null, currentOs,  targetOs, region, platform, allowMajorOsUpgrade, Architecture.X86_64, tagFilters);
     }
 
+    @Test
+    void filterImagesShouldMatchBySourceImageIdWhenFlagIsEnabled() {
+        String currentImageId = "3b945b5d-1a47-412d-a438-8a7da6e73cad";
+        String customImageId = "a1804635-b1cb-4cd4-93c6-c44fb57e0a14";
+        Image customImage = createImageWithSourceImageId(customImageId, REDHAT_8, AWS, REGION_1, currentImageId);
+        Image unrelatedImage = createImage("other-image", REDHAT_8, AWS, REGION_1);
+        List<Image> candidateImages = List.of(customImage, unrelatedImage);
+        FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(currentImageId, null, REDHAT_8, REDHAT_8, REGION_1, AWS, false,
+                Architecture.X86_64, Map.of(), true);
+
+        List<Image> result = underTest.filterImages(candidateImages, imageFilterSettings);
+
+        assertThat(result).containsExactly(customImage);
+    }
+
+    @Test
+    void filterImagesShouldNotMatchBySourceImageIdWhenFlagIsDisabled() {
+        String currentImageId = "3b945b5d-1a47-412d-a438-8a7da6e73cad";
+        String customImageId = "a1804635-b1cb-4cd4-93c6-c44fb57e0a14";
+        Image customImage = createImageWithSourceImageId(customImageId, REDHAT_8, AWS, REGION_1, currentImageId);
+        List<Image> candidateImages = List.of(customImage);
+        FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(currentImageId, null, REDHAT_8, REDHAT_8, REGION_1, AWS, false,
+                Architecture.X86_64);
+
+        List<Image> result = underTest.filterImages(candidateImages, imageFilterSettings);
+
+        assertThat(result).isEmpty();
+    }
+
     private Image createImage(String imageId, String os, String platform, String region) {
         return createImage(imageId, os, platform, region, Map.of());
     }
 
     private Image createImage(String imageId, String os, String platform, String region, Map<String, String> tags) {
         return new Image(null, null, null, os, imageId, Map.of(platform, Map.of(region, "imageName")), null, null, true, "x86_64", tags);
+    }
+
+    private Image createImageWithSourceImageId(String imageId, String os, String platform, String region, String sourceImageId) {
+        return new Image(null, null, null, os, imageId, Map.of(platform, Map.of(region, "imageName")), null, null, true, "x86_64", Map.of(), sourceImageId);
     }
 
 }

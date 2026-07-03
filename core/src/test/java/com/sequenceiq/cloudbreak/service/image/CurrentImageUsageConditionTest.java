@@ -41,66 +41,6 @@ public class CurrentImageUsageConditionTest {
     private ImageConverter imageConverter;
 
     @Test
-    public void testFilterCurrentImageShouldReturnTrueWhenThereAreInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(NEW_IMAGE, OLD_IMAGE);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
-    }
-
-    @Test
-    public void testFilterCurrentImageShouldReturnTrueWhenThereAreNoInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(NEW_IMAGE, NEW_IMAGE);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertTrue(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
-    }
-
-    @Test
-    public void testFilterCurrentImageShouldReturnFalseWhenOneOfTheImageJsonIsNull() {
-        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
-        nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(NEW_IMAGE);
-        instanceMetaData.add(nullImageInstanceMetadata);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertTrue(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
-    }
-
-    @Test
-    public void testFilterCurrentImageShouldReturnTrueWhenOneOfTheImageJsonIsNullButTheOtherIsOnOldImage() {
-        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
-        nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(OLD_IMAGE);
-        instanceMetaData.add(nullImageInstanceMetadata);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
-    }
-
-    @Test
-    public void testFilterCurrentImageShouldReturnFalseWhenBothOfTheImageJsonIsNull() {
-        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
-        nullImageInstanceMetadata.setImage(new Json(null));
-        InstanceMetaData nullImageInstanceMetadata2 = new InstanceMetaData();
-        nullImageInstanceMetadata2.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = Set.of(nullImageInstanceMetadata, nullImageInstanceMetadata2);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
-    }
-
-    @Test
     public void testIsCurrentOsUsedOnInstancesShouldReturnTrueWhenAllInstanceUsingTheSameOS() {
         Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithOs(OsType.CENTOS7, OsType.CENTOS7, OsType.CENTOS7);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
@@ -120,6 +60,46 @@ public class CurrentImageUsageConditionTest {
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
 
+    @Test
+    public void testThreeArgMatchesByImageNameWhenImageIdDiffers() {
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImageAndName(OLD_IMAGE, "ami-shared");
+        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertTrue(underTest.isCurrentImageUsedOnInstances(STACK_ID, "ami-shared", NEW_IMAGE));
+    }
+
+    @Test
+    public void testThreeArgMatchesByImageIdWhenImageNameDiffers() {
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImageAndName(NEW_IMAGE, "ami-old");
+        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertTrue(underTest.isCurrentImageUsedOnInstances(STACK_ID, "ami-new", NEW_IMAGE));
+    }
+
+    @Test
+    public void testThreeArgReturnsFalseWhenNeitherMatches() {
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImageAndName(OLD_IMAGE, "ami-old");
+        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, "ami-new", NEW_IMAGE));
+    }
+
+    @Test
+    public void testThreeArgHandlesNullImageNameSafely() {
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(NEW_IMAGE);
+        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertTrue(underTest.isCurrentImageUsedOnInstances(STACK_ID, null, NEW_IMAGE));
+    }
+
+    @Test
+    public void testThreeArgReturnsFalseWhenBothImageNameNullAndImageIdDiffers() {
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(OLD_IMAGE);
+        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, null, NEW_IMAGE));
+    }
+
     private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId, OsType osType) {
         return Image.builder().withImageId(imageId).withOs(osType.getOs()).withOsType(osType.getOsType()).build();
     }
@@ -133,6 +113,14 @@ public class CurrentImageUsageConditionTest {
             instanceMetaDataSet.add(instanceMetaData);
         }
         return instanceMetaDataSet;
+    }
+
+    private Set<InstanceMetaData> createInstanceMetaDataWithImageAndName(String imageId, String imageName) {
+        InstanceMetaData imd = new InstanceMetaData();
+        imd.setInstanceId("instance-0");
+        imd.setImage(new Json(Image.builder().withImageId(imageId).withImageName(imageName)
+                .withOs(OsType.CENTOS7.getOs()).withOsType(OsType.CENTOS7.getOsType()).build()));
+        return new HashSet<>(Set.of(imd));
     }
 
     private Set<InstanceMetaData> createInstanceMetaDataWithOs(OsType... osTypes) {

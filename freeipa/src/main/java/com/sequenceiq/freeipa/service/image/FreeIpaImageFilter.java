@@ -45,7 +45,9 @@ public class FreeIpaImageFilter {
                     .filter(img -> filterTags(imageFilterSettings, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
                     //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
-                    .filter(img -> hasSameUuid(imageFilterSettings.currentImageId(), img) || isMatchingImageIdInRegion(imageFilterSettings, img))
+                    .filter(img -> hasSameUuid(imageFilterSettings.currentImageId(), img)
+                            || (imageFilterSettings.matchBySourceImageId() && hasMatchingSourceImageId(imageFilterSettings.currentImageId(), img))
+                            || isMatchingImageIdInRegion(imageFilterSettings, img))
                     .collect(Collectors.toList());
         } else {
             String platform = imageFilterSettings.platform();
@@ -133,6 +135,10 @@ public class FreeIpaImageFilter {
 
     private boolean hasSameUuid(String imageId, Image img) {
         return img.getUuid().equalsIgnoreCase(imageId);
+    }
+
+    private boolean hasMatchingSourceImageId(String imageId, Image img) {
+        return StringUtils.isNotBlank(img.getSourceImageId()) && img.getSourceImageId().equalsIgnoreCase(imageId);
     }
 
     public Optional<Image> findMostRecentImage(List<Image> compatibleImages) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,12 +28,14 @@ public class CurrentImageUsageCondition {
     @Inject
     private ImageConverter imageConverter;
 
-    public boolean isCurrentImageUsedOnInstances(Long stackId, String currentImageId) {
+    public boolean isCurrentImageUsedOnInstances(Long stackId, String currentImageName, String currentImageId) {
+        Objects.requireNonNull(currentImageId, "currentImageId");
         Map<String, Image> imageByInstances = getImagesByInstance(stackId);
-        LOGGER.debug("The current image of the stack: {}. The available images on instances: {}", currentImageId, imageByInstances);
+        LOGGER.debug("Checking current image usage on instances. imageName: {}, imageId: {}, instances: {}",
+                currentImageName, currentImageId, imageByInstances);
         return !imageByInstances.isEmpty() && imageByInstances.values().stream()
-                .map(Image::getImageId)
-                .allMatch(imageIdOnInstance -> imageIdOnInstance.equals(currentImageId));
+                .allMatch(instanceImage -> (currentImageName != null && currentImageName.equals(instanceImage.getImageName()))
+                        || currentImageId.equals(instanceImage.getImageId()));
     }
 
     public Set<OsType> getOSUsedByInstances(Long stackId) {

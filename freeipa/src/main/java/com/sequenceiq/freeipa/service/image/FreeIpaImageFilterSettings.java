@@ -13,7 +13,21 @@ public record FreeIpaImageFilterSettings(
         String platform,
         boolean allowMajorOsUpgrade,
         Architecture architecture,
-        Map<String, String> tagFilters) {
+        Map<String, String> tagFilters,
+        boolean matchBySourceImageId) {
+
+    public FreeIpaImageFilterSettings(
+            String currentImageId,
+            String catalog,
+            String currentOs,
+            String targetOs,
+            String region,
+            String platform,
+            boolean allowMajorOsUpgrade,
+            Architecture architecture,
+            Map<String, String> tagFilters) {
+        this(currentImageId, catalog, currentOs, targetOs, region, platform, allowMajorOsUpgrade, architecture, tagFilters, false);
+    }
 
     public FreeIpaImageFilterSettings(
             String currentImageId,
@@ -24,26 +38,9 @@ public record FreeIpaImageFilterSettings(
             String platform,
             boolean allowMajorOsUpgrade,
             Architecture architecture) {
-        this(
-                currentImageId,
-                catalog,
-                currentOs,
-                targetOs,
-                region,
-                platform,
-                allowMajorOsUpgrade,
-                architecture,
-                Map.of()
-        );
+        this(currentImageId, catalog, currentOs, targetOs, region, platform, allowMajorOsUpgrade, architecture, Map.of(), false);
     }
 
-    /**
-     * Creates a copy of the current record with only the currentImageId parameter.
-     * All other fields are preserved from the current instance.
-     *
-     * @param imageId the new currentImageId
-     * @return a new FreeIpaImageFilterSettings instance with the updated currentImageId
-     */
     public FreeIpaImageFilterSettings withImageId(String imageId) {
         return new FreeIpaImageFilterSettings(
                 imageId,
@@ -54,7 +51,23 @@ public record FreeIpaImageFilterSettings(
                 this.platform,
                 this.allowMajorOsUpgrade,
                 this.architecture,
-                this.tagFilters
+                this.tagFilters,
+                this.matchBySourceImageId
+        );
+    }
+
+    public FreeIpaImageFilterSettings withMatchBySourceImageId(boolean matchBySourceImageId) {
+        return new FreeIpaImageFilterSettings(
+                this.currentImageId,
+                this.catalog,
+                this.currentOs,
+                this.targetOs,
+                this.region,
+                this.platform,
+                this.allowMajorOsUpgrade,
+                this.architecture,
+                this.tagFilters,
+                matchBySourceImageId
         );
     }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,8 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -40,9 +40,15 @@ class ImageCatalogChangeServiceTest {
 
     private static final String IMAGE_ID = "image-id";
 
+    private static final String SOURCE_IMAGE_ID = "source-image-id";
+
     private static final String OS = "centos7";
 
     private static final String STACK_NAME = "stack-name";
+
+    private static final String REGION = "us-west-1";
+
+    private static final String PLATFORM = "AWS";
 
     private static final Stack STACK = new Stack();
 
@@ -55,16 +61,21 @@ class ImageCatalogChangeServiceTest {
     @Mock
     private FlowLogService flowLogService;
 
+    @Mock
+    private FreeipaPlatformStringTransformer platformStringTransformer;
+
     @InjectMocks
     private ImageCatalogChangeService underTest;
 
     @Captor
-    private ArgumentCaptor<ImageSettingsRequest> imageSettingsCaptor;
+    private ArgumentCaptor<FreeIpaImageFilterSettings> filterSettingsCaptor;
 
     @BeforeAll
     static void init() {
         STACK.setId(STACK_ID);
         STACK.setName(STACK_NAME);
+        STACK.setRegion(REGION);
+        STACK.setCloudPlatform(PLATFORM);
         final ImageEntity image = new ImageEntity();
         image.setImageId(IMAGE_ID);
         image.setOs(OS);
@@ -74,6 +85,7 @@ class ImageCatalogChangeServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(STACK);
+        lenient().when(platformStringTransformer.getPlatformString(STACK)).thenReturn(PLATFORM);
     }
 
     @Test
@@ -95,7 +107,9 @@ class ImageCatalogChangeServiceTest {
 
     @Test
     void shouldFailWhenImageIsNotPresentInNewCatalog() {
-        when(imageService.changeImage(eq(STACK), any())).thenThrow(ImageNotFoundException.class);
+        Image current = currentImage(null);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+        when(imageService.changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class))).thenThrow(ImageNotFoundException.class);
 
         assertThatThrownBy(() -> underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG))
                 .isInstanceOf(CloudbreakServiceException.class)
@@ -103,13 +117,52 @@ class ImageCatalogChangeServiceTest {
     }
 
     @Test
-    void shouldCallChangeImageWhenEverythingIsValid() {
+    void shouldCallChangeImageWithStoredImageIdWhenCurrentImageIsNotFromCustomCatalog() {
+        Image current = currentImage(null);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+
         underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG);
 
-        verify(imageService).changeImage(eq(STACK), imageSettingsCaptor.capture());
-        assertThat(imageSettingsCaptor.getValue())
-                .returns(IMAGE_CATALOG, ImageSettingsBase::getCatalog)
-                .returns(IMAGE_ID, ImageSettingsBase::getId)
-                .returns(OS, ImageSettingsBase::getOs);
+        verify(imageService).changeImage(eq(STACK), filterSettingsCaptor.capture());
+        FreeIpaImageFilterSettings settings = filterSettingsCaptor.getValue();
+        assertThat(settings.currentImageId()).isEqualTo(IMAGE_ID);
+        assertThat(settings.catalog()).isEqualTo(IMAGE_CATALOG);
+        assertThat(settings.currentOs()).isEqualTo(OS);
+        assertThat(settings.matchBySourceImageId()).isTrue();
+    }
+
+    @Test
+    void shouldResolveTargetViaSourceImageIdWhenCurrentImageIsFromCustomCatalog() {
+        Image current = currentImage(SOURCE_IMAGE_ID);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+
+        underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG);
+
+        verify(imageService).changeImage(eq(STACK), filterSettingsCaptor.capture());
+        FreeIpaImageFilterSettings settings = filterSettingsCaptor.getValue();
+        assertThat(settings.currentImageId()).isEqualTo(SOURCE_IMAGE_ID);
+        assertThat(settings.catalog()).isEqualTo(IMAGE_CATALOG);
+        assertThat(settings.currentOs()).isEqualTo(OS);
+        assertThat(settings.matchBySourceImageId()).isTrue();
+    }
+
+    @Test
+    void shouldFallBackToStoredImageIdWhenCurrentImageCannotBeResolved() {
+        when(imageService.getImageForStack(STACK)).thenThrow(ImageNotFoundException.class);
+
+        underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG);
+
+        verify(imageService).changeImage(eq(STACK), filterSettingsCaptor.capture());
+        FreeIpaImageFilterSettings settings = filterSettingsCaptor.getValue();
+        assertThat(settings.currentImageId()).isEqualTo(IMAGE_ID);
+        assertThat(settings.catalog()).isEqualTo(IMAGE_CATALOG);
+        assertThat(settings.currentOs()).isEqualTo(OS);
+        assertThat(settings.matchBySourceImageId()).isTrue();
+    }
+
+    private Image currentImage(String sourceImageId) {
+        Image image = mock(Image.class);
+        lenient().when(image.getSourceImageId()).thenReturn(sourceImageId);
+        return image;
     }
 }

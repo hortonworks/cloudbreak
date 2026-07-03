@@ -95,6 +95,14 @@ public class ImageService {
         return imageRepository.save(imageEntity);
     }
 
+    public ImageEntity changeImage(Stack stack, FreeIpaImageFilterSettings imageFilterSettings) {
+        LOGGER.info("Change image using filter settings: {}", imageFilterSettings);
+        Pair<ImageWrapper, String> imageWrapperAndNamePair = fetchImageWrapperAndName(imageFilterSettings);
+        ImageEntity imageEntity = updateImageWithNewValues(stack, imageWrapperAndNamePair.getLeft(), imageWrapperAndNamePair.getRight());
+        LOGGER.info("New image entity: {}", imageEntity);
+        return imageRepository.save(imageEntity);
+    }
+
     public Pair<ImageWrapper, String> fetchImageWrapperAndName(FreeIpaImageFilterSettings imageFilterSettings) {
         String region = imageFilterSettings.region();
         String platformString = imageFilterSettings.platform();
@@ -305,7 +313,8 @@ public class ImageService {
                 source.getPackageVersions(),
                 true,
                 source.getArchitecture(),
-                source.getTags()
+                source.getTags(),
+                source.getSourceImageId()
         );
     }
 

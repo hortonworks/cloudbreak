@@ -1151,6 +1151,49 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
+    public void testGetSourceImageIdShouldReturnCustomizedImageIdForCustomImage() throws CloudbreakImageNotFoundException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setName(CUSTOM_CATALOG_NAME);
+        imageCatalog.setCustomImages(Set.of(getCustomImage(ImageType.RUNTIME, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL)));
+
+        String actual = underTest.getSourceImageId(imageCatalog, CUSTOM_IMAGE_ID);
+
+        assertEquals("5b60b723-4beb-40b0-5cba-47ea9c9b6e53", actual);
+    }
+
+    @Test
+    public void testGetSourceImageIdShouldThrowImageNotFoundExceptionWhenCustomImageMissing() {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setName(CUSTOM_CATALOG_NAME);
+        imageCatalog.setCustomImages(emptySet());
+
+        assertThrows(CloudbreakImageNotFoundException.class, () -> underTest.getSourceImageId(imageCatalog, CUSTOM_IMAGE_ID));
+    }
+
+    @Test
+    public void testGetCustomImageBySourceImageIdShouldThrowWhenMultipleMatchesExist() {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setName(CUSTOM_CATALOG_NAME);
+        CustomImage image1 = getCustomImage(ImageType.RUNTIME, "source-id-1", CUSTOM_BASE_PARCEL_URL);
+        CustomImage image2 = getCustomImage(ImageType.RUNTIME, "source-id-1", CUSTOM_BASE_PARCEL_URL);
+        image2.setName("another-custom-image");
+        imageCatalog.setCustomImages(Set.of(image1, image2));
+
+        assertThatThrownBy(() -> underTest.getCustomImageBySourceImageId(imageCatalog, "source-id-1"))
+                .isInstanceOf(CloudbreakImageCatalogException.class)
+                .hasMessageContaining("Found 2 custom images");
+    }
+
+    @Test
+    public void testGetCustomImageBySourceImageIdShouldThrowWhenNoMatchExists() {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setName(CUSTOM_CATALOG_NAME);
+        imageCatalog.setCustomImages(Set.of(getCustomImage(ImageType.RUNTIME, "different-source", CUSTOM_BASE_PARCEL_URL)));
+
+        assertThrows(CloudbreakImageNotFoundException.class, () -> underTest.getCustomImageBySourceImageId(imageCatalog, "source-id-1"));
+    }
+
+    @Test
     public void testFindAllByIdsWithDefaultsInCaseOfCustomCatalogsOnly() {
 
         Set<ImageCatalog> imageCatalogs = getImageCatalogs();

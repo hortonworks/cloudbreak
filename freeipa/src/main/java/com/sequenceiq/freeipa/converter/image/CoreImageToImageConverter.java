@@ -18,6 +18,7 @@ public class CoreImageToImageConverter {
                 source.getPackageVersions(),
                 source.isAdvertised(),
                 source.getArchitecture(),
-                source.getTags());
+                source.getTags(),
+                source.getSourceImageId());
     }
 }

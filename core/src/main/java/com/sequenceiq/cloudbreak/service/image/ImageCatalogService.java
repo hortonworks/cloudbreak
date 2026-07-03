@@ -821,6 +821,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return getCustomStatedImage(imageCatalog, imageId);
     }
 
+    public String getSourceImageId(ImageCatalog imageCatalog, String imageId) throws CloudbreakImageNotFoundException {
+        return getCustomImage(imageCatalog, imageId)
+                .map(CustomImage::getCustomizedImageId)
+                .orElseThrow(() -> new CloudbreakImageNotFoundException(
+                        String.format("Could not find any custom image with id: '%s' in catalog: '%s'", imageId, imageCatalog.getName())));
+    }
+
     private StatedImage getCustomStatedImage(ImageCatalog imageCatalog, String imageId)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Optional<CustomImage> optionalCustomImage = getCustomImage(imageCatalog, imageId);
@@ -841,6 +848,28 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private Optional<CustomImage> getCustomImage(ImageCatalog imageCatalog, String imageId) {
         return imageCatalog.getCustomImages().stream().filter(i -> i.getName().equalsIgnoreCase(imageId)).findFirst();
+    }
+
+    public StatedImage getCustomImageBySourceImageId(ImageCatalog imageCatalog, String sourceImageId)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        List<CustomImage> matches = imageCatalog.getCustomImages().stream()
+                .filter(ci -> ci.getCustomizedImageId().equalsIgnoreCase(sourceImageId))
+                .toList();
+        if (matches.isEmpty()) {
+            throw new CloudbreakImageNotFoundException(
+                    String.format("Could not find any custom image with source image id '%s' in catalog '%s'",
+                            sourceImageId, imageCatalog.getName()));
+        }
+        if (matches.size() > 1) {
+            throw new CloudbreakImageCatalogException(
+                    String.format("Found %d custom images referencing source image id '%s' in catalog '%s'; expected exactly one. " +
+                                    "Remove the duplicates using 'cdp imagecatalog delete-freeipa-image' or 'cdp imagecatalog delete-runtime-image'.",
+                            matches.size(), sourceImageId, imageCatalog.getName()));
+        }
+        CustomImage customImage = matches.get(0);
+        StatedImage sourceImage = getSourceImageByImageType(customImage);
+        return customImageProvider.mergeSourceImageAndCustomImageProperties(sourceImage, customImage,
+                imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
     }
 
     public StatedImage getSourceImageByImageType(CustomImage customImage)

@@ -56,6 +56,8 @@ public class StackImageServiceTest {
 
     private static final String IMAGE_ID = "image id";
 
+    private static final String SOURCE_IMAGE_ID = "source image id";
+
     private static final String IMAGE_NAME = "image name";
 
     private static final String SOURCE_IMAGE_CATALOG = "source image catalog";
@@ -267,32 +269,88 @@ public class StackImageServiceTest {
     }
 
     @Test
-    public void testCustomImageCatalogIsNotSupportedToChangeTheExistingCatalog() throws Exception {
+    public void testChangeImageCatalogToCustomCatalogResolvesViaSourceImageId() throws Exception {
         ImageCatalog targetImageCatalog = mock(ImageCatalog.class);
         ImageCatalog sourceImageCatalog = mock(ImageCatalog.class);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(stack.getCloudPlatform());
+
+        Image targetImage = anImage("custom-uuid");
+        StatedImage targetStatedImage = StatedImage.statedImage(targetImage, null, TARGET_IMAGE_CATALOG);
 
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(anImageComponent());
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), SOURCE_IMAGE_CATALOG)).thenReturn(sourceImageCatalog);
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), TARGET_IMAGE_CATALOG)).thenReturn(targetImageCatalog);
         when(imageCatalogService.isCustomImageCatalog(sourceImageCatalog)).thenReturn(false);
         when(imageCatalogService.isCustomImageCatalog(targetImageCatalog)).thenReturn(true);
+        when(imageCatalogService.getCustomImageBySourceImageId(targetImageCatalog, IMAGE_ID)).thenReturn(targetStatedImage);
+        when(imageService.determineImageName(stack.getCloudPlatform().toLowerCase(Locale.ROOT), imageCatalogPlatform,
+                stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
+                .thenReturn(imageCatalogPlatform);
 
-        assertThrows(CloudbreakServiceException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
+        victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG);
 
-        verifyNoMoreInteractions(componentConfigProviderService);
+        verify(imageCatalogService).getCustomImageBySourceImageId(targetImageCatalog, IMAGE_ID);
+        verify(componentConfigProviderService).replaceImageComponentWithNew(componentArgumentCaptor.capture());
+        com.sequenceiq.cloudbreak.cloud.model.Image newImage
+                = componentArgumentCaptor.getValue().getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class);
+        assertEquals(TARGET_IMAGE_CATALOG, newImage.getImageCatalogName());
+        assertEquals("custom-uuid", newImage.getImageId());
     }
 
     @Test
-    public void testCustomImageCatalogIsNotSupportedToBeChanged() throws Exception {
+    public void testChangeImageCatalogFromCustomCatalogResolvesTargetViaSourceImageId() throws Exception {
+        ImageCatalog targetImageCatalog = mock(ImageCatalog.class);
+        ImageCatalog sourceImageCatalog = mock(ImageCatalog.class);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(stack.getCloudPlatform());
+
+        Image targetImage = anImage(SOURCE_IMAGE_ID);
+        StatedImage targetStatedImage = StatedImage.statedImage(targetImage, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG);
+
+        when(componentConfigProviderService.getImage(stack.getId())).thenReturn(anImageComponent());
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), SOURCE_IMAGE_CATALOG)).thenReturn(sourceImageCatalog);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), TARGET_IMAGE_CATALOG)).thenReturn(targetImageCatalog);
+        when(imageCatalogService.isCustomImageCatalog(sourceImageCatalog)).thenReturn(true);
+        when(imageCatalogService.isCustomImageCatalog(targetImageCatalog)).thenReturn(false);
+        when(imageCatalogService.getSourceImageId(sourceImageCatalog, IMAGE_ID)).thenReturn(SOURCE_IMAGE_ID);
+        when(targetImageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
+        when(targetImageCatalog.getImageCatalogUrl()).thenReturn(TARGET_IMAGE_CATALOG_URL);
+        when(imageCatalogService.getImage(WORKSPACE_ID, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, SOURCE_IMAGE_ID)).thenReturn(targetStatedImage);
+        when(imageService.determineImageName(stack.getCloudPlatform().toLowerCase(Locale.ROOT), imageCatalogPlatform,
+                stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
+                .thenReturn(imageCatalogPlatform);
+
+        victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG);
+
+        verify(imageCatalogService).getSourceImageId(sourceImageCatalog, IMAGE_ID);
+        verify(imageCatalogService).getImage(WORKSPACE_ID, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, SOURCE_IMAGE_ID);
+        verify(componentConfigProviderService).replaceImageComponentWithNew(componentArgumentCaptor.capture());
+        com.sequenceiq.cloudbreak.cloud.model.Image newImage
+                = componentArgumentCaptor.getValue().getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class);
+        assertEquals(TARGET_IMAGE_CATALOG, newImage.getImageCatalogName());
+        assertEquals(SOURCE_IMAGE_ID, newImage.getImageId());
+    }
+
+    @Test
+    public void testChangeImageCatalogFromCustomCatalogFailsWhenSourceImageMissingFromTargetCatalog() throws Exception {
+        ImageCatalog targetImageCatalog = mock(ImageCatalog.class);
         ImageCatalog sourceImageCatalog = mock(ImageCatalog.class);
 
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(anImageComponent());
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), SOURCE_IMAGE_CATALOG)).thenReturn(sourceImageCatalog);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), TARGET_IMAGE_CATALOG)).thenReturn(targetImageCatalog);
         when(imageCatalogService.isCustomImageCatalog(sourceImageCatalog)).thenReturn(true);
+        when(imageCatalogService.isCustomImageCatalog(targetImageCatalog)).thenReturn(false);
+        when(imageCatalogService.getSourceImageId(sourceImageCatalog, IMAGE_ID)).thenReturn(SOURCE_IMAGE_ID);
+        when(targetImageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
+        when(targetImageCatalog.getImageCatalogUrl()).thenReturn(TARGET_IMAGE_CATALOG_URL);
+        when(imageCatalogService.getImage(WORKSPACE_ID, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, SOURCE_IMAGE_ID))
+                .thenThrow(new CloudbreakImageNotFoundException(
+                        String.format("Could not find any image with id: '%s' in catalog: '%s'", SOURCE_IMAGE_ID, TARGET_IMAGE_CATALOG)));
 
-        assertThrows(CloudbreakServiceException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
-
-        verifyNoMoreInteractions(componentConfigProviderService);
+        assertThrows(NotFoundException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
+        verify(userDataService, times(0)).makeSureUserDataIsMigrated(anyLong());
     }
 
     private Component createImageComponent() {
