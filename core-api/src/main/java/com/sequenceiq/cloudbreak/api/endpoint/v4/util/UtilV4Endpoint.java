@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.util;
 
 import static com.sequenceiq.common.api.util.versionchecker.VersionCheckerModelDescription.CHECK_CLIENT_VERSION;
 
-import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -13,17 +12,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImagesListV4Response;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDescription;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsValidationOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SecurityRuleOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -66,14 +62,6 @@ public interface UtilV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true),
             description = "Define stack version at least at patch level eg. 2.6.0")
     CloudStorageSupportedV4Responses getCloudStorageMatrix(@QueryParam("stackVersion") String stackVersion);
-
-    @POST
-    @Path("validate_repository")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION,
-            description = Notes.REPOSITORY_CONFIGS_VALIDATION_NOTES, operationId = "repositoryConfigsValidationV4",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RepoConfigValidationV4Response repositoryConfigValidationRequest(@Valid RepoConfigValidationV4Request repoConfigValidationV4Request);
 
     @GET
     @Path("default_security_rules")
