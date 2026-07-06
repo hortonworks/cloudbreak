@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.platformresource.model;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -20,17 +21,35 @@ public class PlatformDatabaseCapabilitiesResponse {
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private final String latestDatabaseEngineVersion;
 
-    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
-            Map<String, Map<String, List<String>>> regionUpgradeVersions, String latestDatabaseEngineVersion) {
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private final Map<String, Set<DatabaseVmTypeResponse>> databaseVmTypes;
+
+    public PlatformDatabaseCapabilitiesResponse(
+            Map<String, List<String>> includedRegions,
+            Map<String, String> regionDefaultInstances,
+            Map<String, Map<String, List<String>>> regionUpgradeVersions,
+            String latestDatabaseEngineVersion,
+            Map<String, Set<DatabaseVmTypeResponse>> databaseVmTypes) {
         this.includedRegions = includedRegions;
         this.regionDefaultInstances = regionDefaultInstances;
         this.regionUpgradeVersions = regionUpgradeVersions;
         this.latestDatabaseEngineVersion = latestDatabaseEngineVersion;
+        this.databaseVmTypes = databaseVmTypes;
     }
 
-    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
+    public PlatformDatabaseCapabilitiesResponse(
+            Map<String, List<String>> includedRegions,
+            Map<String, String> regionDefaultInstances,
+            Map<String, Map<String, List<String>>> regionUpgradeVersions,
             String latestDatabaseEngineVersion) {
-        this(includedRegions, regionDefaultInstances, new HashMap<>(), latestDatabaseEngineVersion);
+        this(includedRegions, regionDefaultInstances, regionUpgradeVersions, latestDatabaseEngineVersion, new HashMap<>());
+    }
+
+    public PlatformDatabaseCapabilitiesResponse(
+            Map<String, List<String>> includedRegions,
+            Map<String, String> regionDefaultInstances,
+            String latestDatabaseEngineVersion) {
+        this(includedRegions, regionDefaultInstances, new HashMap<>(), latestDatabaseEngineVersion, new HashMap<>());
     }
 
     public PlatformDatabaseCapabilitiesResponse() {
@@ -38,9 +57,10 @@ public class PlatformDatabaseCapabilitiesResponse {
         this.includedRegions = new HashMap<>();
         this.regionDefaultInstances = new HashMap<>();
         this.latestDatabaseEngineVersion = null;
+        this.databaseVmTypes = new HashMap<>();
     }
 
-    public  Map<String, List<String>> getIncludedRegions() {
+    public Map<String, List<String>> getIncludedRegions() {
         return includedRegions;
     }
 
@@ -56,6 +76,10 @@ public class PlatformDatabaseCapabilitiesResponse {
         return latestDatabaseEngineVersion;
     }
 
+    public Map<String, Set<DatabaseVmTypeResponse>> getDatabaseVmTypes() {
+        return databaseVmTypes;
+    }
+
     @Override
     public String toString() {
         return "PlatformDatabaseCapabilitiesResponse{" +
@@ -63,6 +87,7 @@ public class PlatformDatabaseCapabilitiesResponse {
                 ", regionDefaultInstances=" + regionDefaultInstances +
                 ", regionUpgradeVersions=" + regionUpgradeVersions +
                 ", latestDatabaseEngineVersion='" + latestDatabaseEngineVersion + '\'' +
+                ", databaseVmTypes=" + databaseVmTypes +
                 '}';
     }
 }

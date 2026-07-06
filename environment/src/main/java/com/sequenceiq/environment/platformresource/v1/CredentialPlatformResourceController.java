@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -47,6 +48,7 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseVmtypesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
@@ -165,6 +167,37 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
         LOGGER.info("Resp /platform_resources/machine_types, request: {}, cloudVmTypes: {}, response: {}", request, cloudVmTypes, response);
+        return response;
+    }
+
+    @Override
+    @CustomPermissionCheck
+    public PlatformDatabaseVmtypesResponse getDatabaseVmTypesByCredential(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone,
+            CdpResourceType resourceType,
+            String architecture) {
+        customCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
+        String accountId = getAccountId();
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                null,
+                Map.of(ARCHITECTURE, Optional.ofNullable(architecture).orElse(Architecture.X86_64.getName())),
+                null,
+                null,
+                CdpResourceType.DATABASE);
+        LOGGER.info("Get /platform_resources/database_machine_types, request: {}", request);
+        CloudDatabaseVmTypes cloudVmTypes = platformParameterService.getDatabaseVmTypesByCredential(request);
+        PlatformDatabaseVmtypesResponse response = cloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter.convert(cloudVmTypes);
+        LOGGER.info("Resp /platform_resources/database_machine_types, request: {}, cloudVmTypes: {}, response: {}", request, cloudVmTypes, response);
         return response;
     }
 

@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformRequirementsResponse;
@@ -92,10 +93,18 @@ public class EnvironmentRequirementService {
         CloudDatabaseVmTypes armVms = platformParameterService.getDatabaseVmTypesByCredential(getARMRequest(platformResourceRequest));
 
         Set<String> vmTypes = new HashSet<>();
-        vmTypes.addAll(x86Vms.getCloudDatabaseVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
-        vmTypes.addAll(armVms.getCloudDatabaseVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
+        vmTypes.addAll(x86Vms.getCloudDatabaseVmResponses().values()
+                .stream()
+                .flatMap(Set::stream)
+                .map(StringType::value)
+                .collect(toSet()));
+        vmTypes.addAll(armVms.getCloudDatabaseVmResponses().values()
+                .stream()
+                .flatMap(Set::stream)
+                .map(StringType::value)
+                .collect(toSet()));
 
-        return vmTypes.stream().collect(toSet());
+        return new HashSet<>(vmTypes);
     }
 
     private Set<String> getInstanceTypesInRegion(PlatformResourceRequest platformResourceRequest) {
