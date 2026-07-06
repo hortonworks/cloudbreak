@@ -29,6 +29,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
@@ -285,7 +286,8 @@ public class EnvironmentModificationService {
 
     private void editTags(EnvironmentEditDto editDto, Environment environment) {
         if (MapUtils.isNotEmpty(editDto.getUserDefinedTags())) {
-            environment.setTags(environmentTagsDtoConverter.getTags(editDto));
+            EnvironmentTags environmentTags = environment.getEnvironmentTags();
+            environment.setTags(environmentTagsDtoConverter.getTags(editDto, environmentTags));
             environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, editDto.getUserDefinedTags());
         }
     }

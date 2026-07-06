@@ -11,18 +11,24 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
@@ -159,6 +165,62 @@ class EnvironmentTagsDtoConverterTest {
         assertThat(badRequestException).hasMessage("Error validating tags");
     }
 
+    @Test
+    void getTagsWithEditDtoShouldPreserveExistingTags() throws Exception {
+        EnvironmentTags existingTags = new EnvironmentTags(Map.of("existingKey", "existingValue"), Map.of());
+        EnvironmentEditDto editDto = createMockEnvironmentEditDto(Map.of("newKey", "newValue"));
+        when(crnUserDetailsService.getUmsUser(any())).thenReturn(createMockUserDetails());
+
+        Json result = underTest.getTags(editDto, existingTags);
+
+        Map<String, String> userDefinedTags = extractUserDefinedTags(result);
+        assertThat(userDefinedTags)
+                .containsEntry("existingKey", "existingValue")
+                .containsEntry("newKey", "newValue")
+                .hasSize(2);
+    }
+
+    @Test
+    void getTagsWithEditDtoRequestTagShouldOverwriteExistingTag() throws Exception {
+        EnvironmentTags existingTags = new EnvironmentTags(Map.of("existingKey", "existingValue"), Map.of());
+        EnvironmentEditDto editDto = createMockEnvironmentEditDto(Map.of("existingKey", "existingValue2"));
+        when(crnUserDetailsService.getUmsUser(any())).thenReturn(createMockUserDetails());
+
+        Json result = underTest.getTags(editDto, existingTags);
+
+        Map<String, String> userDefinedTags = extractUserDefinedTags(result);
+        assertThat(userDefinedTags)
+                .containsEntry("existingKey", "existingValue2")
+                .hasSize(1);
+    }
+
+    @ParameterizedTest
+    @MethodSource("environmentAndRequestTagsProvider")
+    void getTagsWithEditDtoShouldHandleNullOrEmptyEnvironmentAndRequestTags(EnvironmentTags environmentTags, Map<String, String> requestTags,
+            Map<String, String> expetedTags) throws Exception {
+        EnvironmentEditDto editDto = createMockEnvironmentEditDto(requestTags);
+        when(crnUserDetailsService.getUmsUser(any())).thenReturn(createMockUserDetails());
+
+        Json result = underTest.getTags(editDto, environmentTags);
+
+        Map<String, String> userDefinedTags = extractUserDefinedTags(result);
+        assertThat(userDefinedTags).containsExactlyInAnyOrderEntriesOf(expetedTags);
+    }
+
+    private static Stream<Arguments> environmentAndRequestTagsProvider() {
+        Map<String, String> existingKeyMap = Map.of("existingKey", "existingValue");
+
+        return Stream.of(
+                Arguments.of(null, Map.of(), Map.of()),
+                Arguments.of(null, existingKeyMap, existingKeyMap),
+                Arguments.of(new EnvironmentTags(Map.of(), Map.of()), Map.of(), Map.of()),
+                Arguments.of(new EnvironmentTags(Map.of(), Map.of()), existingKeyMap, existingKeyMap),
+
+                Arguments.of(new EnvironmentTags(existingKeyMap, Map.of()), null, existingKeyMap),
+                Arguments.of(new EnvironmentTags(existingKeyMap, Map.of()), Map.of(), existingKeyMap)
+        );
+    }
+
     private EnvironmentCreationDto createMockEnvironmentCreationDto() {
         return EnvironmentCreationDto.builder()
                 .withAccountId("accountid")
@@ -167,6 +229,21 @@ class EnvironmentTagsDtoConverterTest {
                 .withCloudPlatform("platform")
                 .withTags(Map.of("user1", "value1"))
                 .build();
+    }
+
+    private EnvironmentEditDto createMockEnvironmentEditDto(Map<String, String> userDefinedTags) {
+        return EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withCreator(CREATOR)
+                .withCrn(RESOURCE_CRN)
+                .withCloudPlatform(CLOUD_PLATFORM_AWS)
+                .withUserDefinedTags(userDefinedTags)
+                .build();
+    }
+
+    private Map<String, String> extractUserDefinedTags(Json json) throws Exception {
+            JsonNode node = JsonUtil.readValue(json.getValue(), JsonNode.class);
+            return JsonUtil.readValue(node.get("userDefinedTags").toString(), Map.class);
     }
 
     private Map<String, String> createMockUserDefinedTags() {

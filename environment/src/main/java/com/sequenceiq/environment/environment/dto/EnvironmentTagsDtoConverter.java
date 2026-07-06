@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,12 +61,21 @@ public class EnvironmentTagsDtoConverter {
                 creationDto.getTags());
     }
 
-    public Json getTags(EnvironmentEditDto editDto) {
+    public Json getTags(EnvironmentEditDto editDto, EnvironmentTags environmentTags) {
+        Map<String, String> existingUserDefinedTags = Optional.ofNullable(environmentTags)
+                .map(EnvironmentTags::getUserDefinedTags)
+                .orElse(Map.of());
         return getTags(editDto.getAccountId(),
                 editDto.getCreator(),
                 editDto.getCrn(),
                 editDto.getCloudPlatform(),
-                editDto.getUserDefinedTags());
+                mergeTags(existingUserDefinedTags, editDto.getUserDefinedTags()));
+    }
+
+    private Map<String, String> mergeTags(Map<String, String> existingTags, Map<String, String> newTags) {
+        Map<String, String> mergedTags = existingTags != null ? new HashMap<>(existingTags) : new HashMap<>();
+        mergedTags.putAll(Optional.ofNullable(newTags).orElse(Map.of()));
+        return mergedTags;
     }
 
     private Json getTags(String accountId, String creator, String crn, String cloudPlatform, Map<String, String> userDefinedTags) {

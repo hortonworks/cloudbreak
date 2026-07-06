@@ -43,6 +43,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
@@ -960,7 +961,7 @@ class EnvironmentModificationServiceTest {
         Environment environment = new Environment();
         environment.setAccountId(ACCOUNT_ID);
 
-        when(environmentTagsDtoConverter.getTags(environmentEditDto)).thenReturn(tags);
+        when(environmentTagsDtoConverter.getTags(eq(environmentEditDto), any(EnvironmentTags.class))).thenReturn(tags);
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
