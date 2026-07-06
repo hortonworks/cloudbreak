@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -48,6 +49,8 @@ class DiskUsageSyncServiceTest {
     private static final String PRIMARY_GW_FQDN = "pgw.example.com";
 
     private static final String PRIMARY_GW_GROUP_NAME = "master";
+
+    private static final String ACCOUNT_ID = "1234";
 
     private static final long STACK_ID = 1L;
 
@@ -75,6 +78,9 @@ class DiskUsageSyncServiceTest {
     @Mock
     private StackUtil stackUtil;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private DiskUsageSyncService underTest;
 
@@ -97,6 +103,8 @@ class DiskUsageSyncServiceTest {
     void setUp() throws CloudbreakOrchestratorFailedException {
         lenient().when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
+        lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
+        lenient().when(entitlementService.isDbDiskAutoResizeEnabled(ACCOUNT_ID)).thenReturn(true);
         lenient().when(stack.getDatabase()).thenReturn(database);
         lenient().when(diskUsageSyncConfig.getDbDiskUsageThresholdPercentage()).thenReturn(DB_DISK_USAGE_THRESHOLD);
         lenient().when(diskUsageSyncConfig.getDiskIncrementSize()).thenReturn(DISK_INCREMENT_SIZE);
@@ -186,10 +194,10 @@ class DiskUsageSyncServiceTest {
     }
 
     @Test
-    @DisplayName("Test that checkDbDisk doesn't trigger the resize flow in case of dryRun")
-    void testCheckDbDiskDryRun() throws CloudbreakOrchestratorFailedException {
+    @DisplayName("Test that checkDbDisk doesn't trigger the resize flow when the entitlement is disabled")
+    void testCheckDbDiskEntitlementDisabled() throws CloudbreakOrchestratorFailedException {
         setupForResize(DB_DISK_USAGE_THRESHOLD + 1, 200);
-        when(diskUsageSyncConfig.isDryRun()).thenReturn(true);
+        when(entitlementService.isDbDiskAutoResizeEnabled(ACCOUNT_ID)).thenReturn(false);
 
         assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
 
