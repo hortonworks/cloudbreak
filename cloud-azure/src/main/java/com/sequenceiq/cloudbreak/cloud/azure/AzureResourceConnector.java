@@ -121,6 +121,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Inject
     private AzureResourceTagUpdaterService azureResourceTagUpdaterService;
 
+    @Inject
+    private AzureFallbackAwareDeploymentService azureFallbackAwareDeploymentService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
@@ -131,12 +134,15 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         AzureClient client = ac.getParameter(AzureClient.class);
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
         String template;
+        String customImageId = null;
+        AzureMarketplaceImage marketplaceImageForTemplate = null;
 
         Image stackImage = stack.getImage();
         if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
             LOGGER.debug("Launching with Azure Marketplace image {}", stackImage);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
             signIfAllowed(stack, azureCredentialView, azureMarketplaceImage, client);
+            marketplaceImageForTemplate = azureMarketplaceImage;
             template = azureTemplateBuilder.build(stackName, null, azureCredentialView, azureStackView,
                     cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         } else {
@@ -148,12 +154,12 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                         azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
                 azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
             }
-            String customImageId = image.getId();
+            customImageId = image.getId();
             boolean hasSourceImagePlan = azureImageFormatValidator.hasSourceImagePlan(stackImage);
             signSourceImageIfExists(stack, azureCredentialView, client, stackImage, hasSourceImagePlan);
+            marketplaceImageForTemplate = hasSourceImagePlan ? azureMarketplaceImageProviderService.getSourceImage(stackImage) : null;
             template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, hasSourceImagePlan ?
-                            azureMarketplaceImageProviderService.getSourceImage(stackImage) : null);
+                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, marketplaceImageForTemplate);
         }
 
         String parameters = azureTemplateBuilder.buildParameters();
@@ -162,7 +168,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         try {
             List<CloudResource> instances;
             if (shouldCreateTemplateDeployment(stackName, resourceGroupName, client)) {
-                Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+                Deployment templateDeployment = azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(
+                        new AzureTemplateDeploymentRequest(client, resourceGroupName, stackName,
+                                template, parameters, azureStackView, cloudContext, stack, azureCredentialView, customImageId,
+                                AzureInstanceTemplateOperation.PROVISION, marketplaceImageForTemplate));
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
                 instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
             } else {

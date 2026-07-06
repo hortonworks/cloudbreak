@@ -121,7 +121,7 @@ public class AzureUpscaleService {
             CloudResource armTemplate = azureScaleUtilService.getArmTemplate(resources, stackName);
 
             Deployment templateDeployment =
-                    azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
+                    azureTemplateDeploymentService.getTemplateDeploymentWithFallback(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
 
             templateResources.addAll(azureCloudResourceService.getDeploymentCloudResources(Optional.ofNullable(templateDeployment)));

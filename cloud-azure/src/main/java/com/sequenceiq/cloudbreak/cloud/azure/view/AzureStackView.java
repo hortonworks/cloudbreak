@@ -94,6 +94,21 @@ public class AzureStackView {
         return instanceGroupNames;
     }
 
+    public void applyFlavorOverrides(Map<String, String> flavorByGroupName) {
+        if (flavorByGroupName == null || flavorByGroupName.isEmpty()) {
+            return;
+        }
+        for (List<AzureInstanceView> instances : instancesByGroupType.values()) {
+            for (int i = 0; i < instances.size(); i++) {
+                AzureInstanceView current = instances.get(i);
+                String override = flavorByGroupName.get(current.getGroupName());
+                if (override != null) {
+                    instances.set(i, current.toBuilder().withFlavorOverride(override).build());
+                }
+            }
+        }
+    }
+
     private String getInstanceSubnetId(CloudInstance instance, AzureSubnetStrategy subnetStrategy) {
         String stored = instance.getSubnetId();
         if (StringUtils.isNoneBlank(stored)) {

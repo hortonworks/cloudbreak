@@ -21,19 +21,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.core.management.exception.ManagementError;
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureFallbackAwareDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStackViewProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateDeploymentRequest;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -75,6 +80,9 @@ class AzureTemplateDeploymentServiceTest {
 
     @Mock
     private AzureStackViewProvider azureStackViewProvider;
+
+    @Mock
+    private AzureFallbackAwareDeploymentService azureFallbackAwareDeploymentService;
 
     @InjectMocks
     private AzureTemplateDeploymentService underTest;
@@ -130,6 +138,70 @@ class AzureTemplateDeploymentServiceTest {
             verify(azureTemplateBuilder).build(eq("stack1"), any(), any(), any(), any(), any(), any(),
                     hasSourceImagePlan ? eq(azureMarketplaceImage) : eq(null));
         }
+    }
+
+    @Test
+    void getTemplateDeploymentWithFallbackRoutesThroughFallbackService() {
+        CloudStack stack = mock(CloudStack.class);
+        Image image = mock(Image.class);
+        CloudContext cloudContext = CloudContext.Builder.builder().withId(1L).build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, new CloudCredential());
+        AzureStackView stackView = mock(AzureStackView.class);
+        Deployment deployment = mock(Deployment.class);
+
+        when(stack.getImage()).thenReturn(image);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("rg1");
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(false);
+        lenient().when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(false);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(new AzureImage("1", "image1", true));
+        when(azureTemplateBuilder.build(eq("stack1"), any(), any(), any(), any(), any(), eq(AzureInstanceTemplateOperation.UPSCALE), any()))
+                .thenReturn("template");
+        when(azureTemplateBuilder.buildParameters()).thenReturn("params");
+        when(retry.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        when(azureUtils.getStackName(any())).thenReturn("stack1");
+        ArgumentCaptor<AzureTemplateDeploymentRequest> requestCaptor = ArgumentCaptor.forClass(AzureTemplateDeploymentRequest.class);
+        when(azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(requestCaptor.capture())).thenReturn(deployment);
+        AzureClient client = mock(AzureClient.class);
+
+        Deployment result = underTest.getTemplateDeploymentWithFallback(client, stack, ac, stackView, AzureInstanceTemplateOperation.UPSCALE);
+
+        assertEquals(deployment, result);
+        AzureTemplateDeploymentRequest request = requestCaptor.getValue();
+        assertEquals("stack1", request.stackName());
+        assertEquals("rg1", request.resourceGroupName());
+        assertEquals("template", request.initialTemplate());
+        assertEquals("params", request.parameters());
+        assertEquals(AzureInstanceTemplateOperation.UPSCALE, request.operation());
+        assertEquals(client, request.client());
+        assertEquals(stackView, request.azureStackView());
+    }
+
+    @Test
+    void getTemplateDeploymentWithFallbackTranslatesPowerStateFailureToActionFailedException() {
+        CloudStack stack = mock(CloudStack.class);
+        Image image = mock(Image.class);
+        CloudContext cloudContext = CloudContext.Builder.builder().withId(1L).build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, new CloudCredential());
+        AzureStackView stackView = mock(AzureStackView.class);
+
+        when(stack.getImage()).thenReturn(image);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("rg1");
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(false);
+        lenient().when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(false);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(new AzureImage("1", "image1", true));
+        when(azureTemplateBuilder.build(eq("stack1"), any(), any(), any(), any(), any(), any(), any())).thenReturn("template");
+        when(retry.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        when(azureUtils.getStackName(any())).thenReturn("stack1");
+        ManagementError top = AzureTestUtils.managementError("DeploymentFailed", "wrap");
+        ManagementError detail = AzureTestUtils.managementError(null, "Please check the power state later");
+        AzureTestUtils.setDetails(top, List.of(detail));
+        ManagementException power = new ManagementException("boom", null, top);
+        when(azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(any(AzureTemplateDeploymentRequest.class))).thenThrow(power);
+
+        Retry.ActionFailedException thrown = assertThrows(Retry.ActionFailedException.class,
+                () -> underTest.getTemplateDeploymentWithFallback(mock(AzureClient.class), stack, ac, stackView, AzureInstanceTemplateOperation.UPSCALE));
+
+        assertEquals("VMs not started in time.", thrown.getMessage());
     }
 
     @Test

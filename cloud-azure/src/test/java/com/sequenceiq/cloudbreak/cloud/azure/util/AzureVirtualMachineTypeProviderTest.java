@@ -52,8 +52,22 @@ public class AzureVirtualMachineTypeProviderTest {
     }
 
     @Test
-    public void testGetVmTypesShouldThrowExceptionWhenAFlavourIsMissing() {
-        Map<String, List<AzureInstanceView>> instanceGroups = createInstanceGroupsWithAMissingFlavour();
+    public void testGetVmTypesShouldReturnFlavorOverrideWhenSetSoTheMapMatchesTemplateLookup() {
+        AzureInstanceView masterWithOverride = createAzureInstanceView("master", STANDARD_E16A_V3)
+                .toBuilder()
+                .withFlavorOverride(STANDARD_D15_V2)
+                .build();
+        Map<String, List<AzureInstanceView>> instanceGroups = Map.of("CORE", List.of(masterWithOverride));
+        AzureStackView azureStackView = createAzureStackView(instanceGroups);
+
+        Set<String> actual = underTest.getVmTypes(azureStackView);
+
+        assertEquals(Set.of(STANDARD_D15_V2), actual);
+    }
+
+    @Test
+    public void testGetVmTypesShouldThrowExceptionWhenAFlavorIsMissing() {
+        Map<String, List<AzureInstanceView>> instanceGroups = createInstanceGroupsWithAMissingFlavor();
         AzureStackView azureStackView = createAzureStackView(instanceGroups);
 
         assertThrows(IllegalArgumentException.class, () -> underTest.getVmTypes(azureStackView));
@@ -76,7 +90,7 @@ public class AzureVirtualMachineTypeProviderTest {
         return Map.of("CORE", coreInstances, "GATEWAY", gatewayInstances);
     }
 
-    private Map<String, List<AzureInstanceView>> createInstanceGroupsWithAMissingFlavour() {
+    private Map<String, List<AzureInstanceView>> createInstanceGroupsWithAMissingFlavor() {
         List<AzureInstanceView> coreInstances = List.of(
                 createAzureInstanceView("leader", null),
                 createAzureInstanceView("master", STANDARD_E16A_V3),
@@ -87,8 +101,8 @@ public class AzureVirtualMachineTypeProviderTest {
         return Map.of("CORE", coreInstances, "GATEWAY", gatewayInstances);
     }
 
-    private AzureInstanceView createAzureInstanceView(String groupName, String flavour) {
-        InstanceTemplate instanceTemplate = new InstanceTemplate(flavour, groupName, null,
+    private AzureInstanceView createAzureInstanceView(String groupName, String flavor) {
+        InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, groupName, null,
                 Collections.emptyList(), null, Collections.emptyMap(), null, null, TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null, "subnet-1", "az1");
         return AzureInstanceView.builder(cloudInstance).build();

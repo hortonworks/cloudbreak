@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -148,6 +149,9 @@ public class AzureResourceConnectorTest {
     private AzureResourceTagUpdaterService azureResourceTagUpdaterService;
 
     @Mock
+    private AzureFallbackAwareDeploymentService azureFallbackAwareDeploymentService;
+
+    @Mock
     private List<ProviderResourceSyncer> providerResourceSyncers;
 
     private List<CloudResource> instances;
@@ -185,12 +189,13 @@ public class AzureResourceConnectorTest {
         lenient().when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(instances);
         lenient().when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
         lenient().when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
+        lenient().when(azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(any(AzureTemplateDeploymentRequest.class)))
+                .thenReturn(deployment);
     }
 
     @Test
     public void testWhenTemplateDeploymentDoesNotExistThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
-        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(false);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
@@ -202,6 +207,14 @@ public class AzureResourceConnectorTest {
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
         verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
+        ArgumentCaptor<AzureTemplateDeploymentRequest> requestCaptor = ArgumentCaptor.forClass(AzureTemplateDeploymentRequest.class);
+        verify(azureFallbackAwareDeploymentService, times(1)).createTemplateDeploymentWithFallback(requestCaptor.capture());
+        AzureTemplateDeploymentRequest capturedRequest = requestCaptor.getValue();
+        assertEquals(client, capturedRequest.client());
+        assertEquals(RESOURCE_GROUP_NAME, capturedRequest.resourceGroupName());
+        assertEquals(STACK_NAME, capturedRequest.stackName());
+        assertEquals(stack, capturedRequest.cloudStack());
+        assertEquals(AzureInstanceTemplateOperation.PROVISION, capturedRequest.operation());
     }
 
     @Test
@@ -226,7 +239,6 @@ public class AzureResourceConnectorTest {
     @Test
     public void testWhenTemplateDeploymentExistsAndFinishedThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
-        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.CREATED);
         when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
@@ -237,7 +249,14 @@ public class AzureResourceConnectorTest {
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
                 any(CloudStack.class), eq(adjustmentTypeWithThreshold), any(), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
-        verify(client, times(1)).createTemplateDeployment(any(), any(), any(), any());
+        ArgumentCaptor<AzureTemplateDeploymentRequest> requestCaptor = ArgumentCaptor.forClass(AzureTemplateDeploymentRequest.class);
+        verify(azureFallbackAwareDeploymentService, times(1)).createTemplateDeploymentWithFallback(requestCaptor.capture());
+        AzureTemplateDeploymentRequest capturedRequest = requestCaptor.getValue();
+        assertEquals(client, capturedRequest.client());
+        assertEquals(RESOURCE_GROUP_NAME, capturedRequest.resourceGroupName());
+        assertEquals(STACK_NAME, capturedRequest.stackName());
+        assertEquals(stack, capturedRequest.cloudStack());
+        assertEquals(AzureInstanceTemplateOperation.PROVISION, capturedRequest.operation());
         verify(client, times(1)).getTemplateDeployment(any(), any());
         verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
@@ -246,7 +265,6 @@ public class AzureResourceConnectorTest {
     @Test
     public void testWhenMarketplaceImageThenTemplateBuilderUsesMarketplaceImage() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
-        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(true);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
@@ -259,7 +277,6 @@ public class AzureResourceConnectorTest {
     @Test
     public void testWhenMarketplaceImageThenTemplateBuilderUsesMarketplaceImageGlobalSettingOff() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
-        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(true);
         when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.FALSE.toString()));
 
@@ -277,7 +294,6 @@ public class AzureResourceConnectorTest {
         AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version", true);
 
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
-        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(false);
         when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(true);
         when(azureMarketplaceImageProviderService.getSourceImage(imageModel)).thenReturn(azureMarketplaceImage);
