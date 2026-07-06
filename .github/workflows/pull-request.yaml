@@ -245,7 +245,21 @@ jobs:
     permissions: write-all
     name: Aws Test
     runs-on: [cb-ubuntu22-large]
-    timeout-minutes: 90
+    timeout-minutes: 120
+    needs:
+      - unit-test
+      - bootstrap-cert-filter-test
+      - checkstyle-main
+      - checkstyle-test
+      - spotbugs-test
+      - spotbugs-main
+      - swagger-compatiblity
+      - component-test
+      - config-change-integration-test
+      - schema-compatibility-test
+      - integration-test
+      - fedramp-integration-test
+      - real-ums-test
     steps:
       - name: checkout
         uses: actions/checkout@v3

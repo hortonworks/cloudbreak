@@ -21,7 +21,27 @@ public class PullRequestE2ETest extends AbstractE2ETest {
             when    = "Pull Request check happens",
             then    = "all freeipa and environment must came up"
     )
-    public void testSimpleCreation(TestContext testContext) {
-        createDefaultEnvironment(testContext);
+    public void testSimpleEnvironmentWithFreeipa(TestContext testContext) {
+        createEnvironment(testContext, Boolean.TRUE, 1);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given   = "Deploy Datalake",
+            when    = "Pull Request check happens",
+            then    = "environment and datalake must came up"
+    )
+    public void testSimpleDatalake(TestContext testContext) {
+        createDefaultDatalake(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given   = "Deploy Distrox",
+            when    = "Pull Request check happens",
+            then    = "environment datalake and datahub must came up"
+    )
+    public void testSimpleDatahub(TestContext testContext) {
+        createDefaultDatahub(testContext);
     }
 }

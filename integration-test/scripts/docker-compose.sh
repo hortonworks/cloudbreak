@@ -184,6 +184,12 @@ echo -e "\n\033[1;96m--- Test output would be too long, stored in the \033[1;93m
 
 echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
+echo "--- Post-test cbreak container status ---"
+docker ps -a -f "name=cbreak" \
+  --format "table {{.Names}}\t{{.Status}}\t{{.State}}\t{{.Image}}"
+docker ps -a -f "name=cbreak" -f status=exited -f status=dead \
+  --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
+
 echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"
 if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
   sudo mkdir -p ./test-output
