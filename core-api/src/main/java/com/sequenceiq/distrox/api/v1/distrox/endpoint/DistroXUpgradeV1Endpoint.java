@@ -120,7 +120,7 @@ public interface DistroXUpgradeV1Endpoint {
     @Operation(summary = "Upgrades the distrox cluster internal", operationId = "upgradeDistroxClusterInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXUpgradeV1Response upgradeClusterByNameInternal(@PathParam("name") String name, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled);
 
     @POST
     @Path("internal/crn/{crn}/upgrade")
@@ -138,7 +138,7 @@ public interface DistroXUpgradeV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
-            @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("internal/{crn}/os_upgrade_by_upgrade_sets")

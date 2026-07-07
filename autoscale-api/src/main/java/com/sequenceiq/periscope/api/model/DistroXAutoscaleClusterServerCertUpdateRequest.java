@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
@@ -12,10 +13,12 @@ public class DistroXAutoscaleClusterServerCertUpdateRequest implements Json {
 
     @ResourceCrn
     @Schema(description = ClusterJsonsProperties.STACK_CRN)
-    private @NotNull String crn;
+    @NotEmpty
+    private String crn;
 
     @Schema(description = ClusterJsonsProperties.NEW_SERVER_CERT)
-    private @NotNull String newServerCert;
+    @NotNull
+    private String newServerCert;
 
     public DistroXAutoscaleClusterServerCertUpdateRequest() {
     }

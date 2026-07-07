@@ -578,10 +578,6 @@ public class ModelDescriptions {
         public static final String GATEWAY = "security rules for gateway type";
     }
 
-    public static class RepositoryConfigValidationDescription {
-        public static final String FIELDS = "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not";
-    }
-
     public static class UtilDescription {
         public static final String STORAGE_NAME = "Storage name of the path";
         public static final String ACCOUNT_NAME = "Account name of the path";

@@ -109,7 +109,7 @@ public interface AutoscaleV4Endpoint {
     @Operation(summary = StackOpDescription.GET_INTERNAL_AUTOSCALE_BY_NAME,
             description = Notes.STACK_NOTES, operationId = "getInternalAutoscaleClusterByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    AutoscaleStackV4Response getInternalAutoscaleClusterByName(@PathParam("name") String name, @QueryParam("accountId") String accountId);
+    AutoscaleStackV4Response getInternalAutoscaleClusterByName(@PathParam("name") String name, @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("/stack/crn/{crn}")

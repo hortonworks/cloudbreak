@@ -108,7 +108,7 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "list SDX clusters internally", operationId = "listSdxInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<SdxClusterResponse> internalList(@QueryParam("accountId") String accountId);
+    List<SdxClusterResponse> internalList(@QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("{name}")
