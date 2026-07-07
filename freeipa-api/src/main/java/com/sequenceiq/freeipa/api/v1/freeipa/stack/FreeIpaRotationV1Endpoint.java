@@ -76,5 +76,5 @@ public interface FreeIpaRotationV1Endpoint {
     @Operation(summary = "Get rotation progress information", operationId = "getProgress",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressResponse getProgress(@QueryParam("secretType") @ValidSecretType(allowedTypes = FreeIpaSecretType.class) @NotEmpty String secretType,
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

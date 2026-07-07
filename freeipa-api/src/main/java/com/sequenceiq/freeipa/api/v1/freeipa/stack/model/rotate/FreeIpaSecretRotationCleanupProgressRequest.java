@@ -19,6 +19,7 @@ public class FreeIpaSecretRotationCleanupProgressRequest {
 
     @ResourceCrn
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @NotEmpty
     private String environmentCrn;
 
     @ValidSecretType(allowedTypes = { FreeIpaSecretType.class })

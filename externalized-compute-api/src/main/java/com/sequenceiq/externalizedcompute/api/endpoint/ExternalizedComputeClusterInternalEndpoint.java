@@ -43,7 +43,7 @@ public interface ExternalizedComputeClusterInternalEndpoint {
             operationId = "createExternalizedComputeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier create(@Valid ExternalizedComputeClusterInternalRequest request,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @Path("reinitialize")
     @POST
@@ -52,7 +52,7 @@ public interface ExternalizedComputeClusterInternalEndpoint {
             operationId = "reInitializeExternalizedComputeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier reInitialize(@Valid ExternalizedComputeClusterRequest request,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("force") boolean force);
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @QueryParam("force") boolean force);
 
     @DELETE
     @Path("{environmentCrn}/{name}")
@@ -62,7 +62,7 @@ public interface ExternalizedComputeClusterInternalEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier delete(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn, @PathParam("name") @NotEmpty String name,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @PathParam("name") @NotEmpty String name,
             @QueryParam("force") boolean force);
 
     @GET
@@ -89,7 +89,7 @@ public interface ExternalizedComputeClusterInternalEndpoint {
     @Path("validate_credential/{credentialName}")
     @Produces(MediaType.APPLICATION_JSON)
     ExternalizedComputeClusterCredentialValidationResponse validateCredential(@NotEmpty @PathParam("credentialName") String credentialName,
-            @NotEmpty @QueryParam("region") String region, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("region") @NotEmpty String region, @InitiatorUserCrn @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("{environmentCrn}/validate_credential/{credentialName}")
@@ -97,6 +97,6 @@ public interface ExternalizedComputeClusterInternalEndpoint {
     ExternalizedComputeClusterCredentialValidationResponse validateCredential(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
             @NotEmpty @PathParam("credentialName") String credentialName,
-            @NotEmpty @QueryParam("region") String region,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("region") @NotEmpty String region,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }

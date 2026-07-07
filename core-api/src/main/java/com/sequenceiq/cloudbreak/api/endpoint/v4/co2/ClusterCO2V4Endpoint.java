@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.co2;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -31,12 +32,12 @@ public interface ClusterCO2V4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = OperationDescriptions.CO2OpDescription.LIST, description = Notes.CLUSTER_CO2_NOTES, operationId = "listClusterCO2V4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCO2Response list(List<String> clusterCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    RealTimeCO2Response list(List<String> clusterCrns, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("environment")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = OperationDescriptions.CO2OpDescription.LIST_BY_ENV, description = Notes.CLUSTER_CO2_NOTES, operationId = "listClusterCO2ByEnvV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCO2Response listByEnv(ClusterCO2V4Request clusterCO2V4Request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    RealTimeCO2Response listByEnv(ClusterCO2V4Request clusterCO2V4Request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }

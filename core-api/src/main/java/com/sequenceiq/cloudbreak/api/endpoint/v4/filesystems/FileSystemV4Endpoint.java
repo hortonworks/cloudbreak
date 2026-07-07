@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -55,5 +56,5 @@ public interface FileSystemV4Endpoint {
             @NotNull @QueryParam("fileSystemType") String fileSystemType,
             @QueryParam("attachedCluster") @DefaultValue("false") Boolean attachedCluster,
             @QueryParam("secure") @DefaultValue("false") Boolean secure,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 }

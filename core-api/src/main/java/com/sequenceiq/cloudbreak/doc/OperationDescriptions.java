@@ -254,10 +254,6 @@ public class OperationDescriptions {
         public static final String GET_DEFAULT_SECURITY_RULES = "get default security rules";
     }
 
-    public static class RepositoryConfigsValidationOpDescription {
-        public static final String POST_REPOSITORY_CONFIGS_VALIDATION = "validate repository configs fields, check their availability";
-    }
-
     public static class AuditOpDescription {
         public static final String LIST_IN_WORKSPACE = "List audit events for the given workspace. Please use the API filter by resource crn, " +
                 "because the resource type and id combination is deprecated.";

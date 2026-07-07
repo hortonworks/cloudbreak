@@ -3,6 +3,7 @@ package com.sequenceiq.flow.api;
 import java.util.List;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
@@ -53,7 +54,7 @@ public interface FlowEndpoint {
     @Operation(summary = "Get last flow log for resource by resource name", description = "Flow log operations",
             operationId = "getLastFlowByResourceName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowLogResponse getLastFlowByResourceName(@QueryParam ("accountId") String accountId, @PathParam("resourceName") String resourceName);
+    FlowLogResponse getLastFlowByResourceName(@QueryParam("accountId") @NotEmpty String accountId, @PathParam("resourceName") String resourceName);
 
     @GET
     @Path("/logs/resource/crn/{resourceCrn}/last")
@@ -69,7 +70,7 @@ public interface FlowEndpoint {
     @Operation(summary = "Get flow logs for resource by resource name", description = "Flow log operations",
             operationId = "getFlowLogsByResourceName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<FlowLogResponse> getFlowLogsByResourceName(@QueryParam ("accountId") String accountId, @PathParam("resourceName") String resourceName);
+    List<FlowLogResponse> getFlowLogsByResourceName(@QueryParam("accountId") @NotEmpty String accountId, @PathParam("resourceName") String resourceName);
 
     @GET
     @Path("/logs/resource/crn/{resourceCrn}")

@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.endpoint;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -28,6 +29,6 @@ public interface DatabaseConfigEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get datalake database config", operationId = "getDatalakeDbConfig",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DbConnectionParamsV4Response getDbConfig(@QueryParam("datalakeCrn") @NotNull String datalakeCrn,
+    DbConnectionParamsV4Response getDbConfig(@QueryParam("datalakeCrn") @NotEmpty String datalakeCrn,
             @QueryParam("databaseType") @NotNull DatabaseType databaseType);
 }
