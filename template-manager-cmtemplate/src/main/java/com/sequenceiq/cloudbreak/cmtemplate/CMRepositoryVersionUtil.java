@@ -90,6 +90,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_13_2_10000 = () -> "7.13.2.10000";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_13_2_20000 = () -> "7.13.2.20000";
+
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_7 = () -> "7.2.7";
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_9 = () -> "7.2.9";
@@ -130,11 +132,19 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CDPD_VERSION_7_2_11 = () -> "7.2.11";
 
-    public static final Map<CloudPlatform, Versioned> MIN_CM_VERSION_FOR_RAZ = new HashMap<>() {
+    public static final Map<CloudPlatform, Versioned> MIN_CM_VERSION_FOR_RAZ_DATALAKE = new HashMap<>() {
         {
             put(AWS, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2);
             put(AZURE, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2);
             put(GCP, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_11_0);
+        }
+    };
+
+    public static final Map<CloudPlatform, Versioned> MIN_CM_VERSION_FOR_RAZ_DATAHUB = new HashMap<>() {
+        {
+            put(AWS, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2);
+            put(AZURE, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2);
+            put(GCP, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2_20000);
         }
     };
 
@@ -245,7 +255,16 @@ public class CMRepositoryVersionUtil {
     public static boolean isRazConfigurationSupported(String cmVersion, CloudPlatform cloudPlatform, StackType stackType) {
         LOGGER.info("CM Version {} is compared for Raz support for {} in {}", cmVersion, cloudPlatform, stackType);
         return isRazSupportedForCloudAndStack(cloudPlatform, stackType)
-                && isVersionNewerOrEqualThanLimited(cmVersion, (MIN_CM_VERSION_FOR_RAZ).get(cloudPlatform));
+                && isVersionNewerOrEqualThanLimited(cmVersion, getRazSupportedRuntimeVersion(cloudPlatform, stackType));
+    }
+
+    private static Versioned getRazSupportedRuntimeVersion(CloudPlatform cloudPlatform, StackType stackType) {
+        switch (stackType) {
+            case DATALAKE:
+                return MIN_CM_VERSION_FOR_RAZ_DATALAKE.get(cloudPlatform);
+            default:
+                return MIN_CM_VERSION_FOR_RAZ_DATAHUB.get(cloudPlatform);
+        }
     }
 
     public static boolean isHmsRangerServiceNameRequired(String cdhVersion) {
