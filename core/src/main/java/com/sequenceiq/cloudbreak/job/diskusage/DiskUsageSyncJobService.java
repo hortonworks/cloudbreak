@@ -17,8 +17,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
@@ -51,9 +49,6 @@ public class DiskUsageSyncJobService implements JobSchedulerService {
 
     @Inject
     private StackDtoService stackService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Override
     public String getJobGroup() {
@@ -94,37 +89,30 @@ public class DiskUsageSyncJobService implements JobSchedulerService {
     }
 
     private void scheduleJob(DiskUsageSyncJobAdapter resource) {
-        String stackCrn = resource.getJobResource().getRemoteResourceId();
-        String accountId = Crn.safeFromString(stackCrn).getAccountId();
         String stackId = resource.getJobResource().getLocalId();
         StackDto stack = stackService.getById(Long.valueOf(stackId));
 
-        if (entitlementService.isDbDiskAutoResizeEnabled(accountId)) {
-            if (stack.getType() == StackType.DATALAKE) {
-                LOGGER.debug("Skip scheduling database disk usage sync job, stack is a Datalake: {}", stack.getResourceCrn());
-            } else if (stack.getDatabase() == null || stack.getDatabase().getExternalDatabaseAvailabilityType() == null) {
-                LOGGER.warn("Skip scheduling database disk usage sync job, database type can't be determined for stack: {}", stack.getResourceCrn());
-            } else if (!stack.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded()) {
-                LOGGER.debug("Skip scheduling database disk usage sync job, external database is used for stack: {}", stack.getResourceCrn());
-            } else {
-                JobDetail jobDetail = buildJobDetail(resource);
-                Trigger trigger = buildJobTrigger(jobDetail);
-                try {
-                    JobKey jobKey = jobDetail.getKey();
-                    if (scheduler.getJobDetail(jobKey) != null) {
-                        LOGGER.info("Unscheduling disk usage sync checker job for stack with key: '{}' and group: '{}'",
-                                jobKey.getName(), jobKey.getGroup());
-                        deregister(jobKey);
-                    }
-                    LOGGER.debug("Scheduling disk usage sync job for stack {}", resource.getJobResource().getRemoteResourceId());
-                    scheduler.scheduleJob(jobDetail, trigger);
-                } catch (Exception e) {
-                    LOGGER.error("Error during scheduling disk usage sync job: {}", jobDetail, e);
-                }
-            }
+        if (stack.getType() == StackType.DATALAKE) {
+            LOGGER.debug("Skip scheduling database disk usage sync job, stack is a Datalake: {}", stack.getResourceCrn());
+        } else if (stack.getDatabase() == null || stack.getDatabase().getExternalDatabaseAvailabilityType() == null) {
+            LOGGER.warn("Skip scheduling database disk usage sync job, database type can't be determined for stack: {}", stack.getResourceCrn());
+        } else if (!stack.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded()) {
+            LOGGER.debug("Skip scheduling database disk usage sync job, external database is used for stack: {}", stack.getResourceCrn());
         } else {
-            LOGGER.info("Skipping scheduling disk usage sync job for stack with CRN: {}, as DB disk auto resize is not enabled for account: {}",
-                    stackCrn, accountId);
+            JobDetail jobDetail = buildJobDetail(resource);
+            Trigger trigger = buildJobTrigger(jobDetail);
+            try {
+                JobKey jobKey = jobDetail.getKey();
+                if (scheduler.getJobDetail(jobKey) != null) {
+                    LOGGER.info("Unscheduling disk usage sync checker job for stack with key: '{}' and group: '{}'",
+                            jobKey.getName(), jobKey.getGroup());
+                    deregister(jobKey);
+                }
+                LOGGER.debug("Scheduling disk usage sync job for stack {}", resource.getJobResource().getRemoteResourceId());
+                scheduler.scheduleJob(jobDetail, trigger);
+            } catch (Exception e) {
+                LOGGER.error("Error during scheduling disk usage sync job: {}", jobDetail, e);
+            }
         }
     }
 

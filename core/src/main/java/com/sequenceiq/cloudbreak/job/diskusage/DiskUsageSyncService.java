@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -46,6 +47,9 @@ public class DiskUsageSyncService {
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void checkDbDisk(StackDto stack) {
         try {
@@ -95,14 +99,13 @@ public class DiskUsageSyncService {
             Integer newSize = getNewSize(stack, currentSize, usage);
             if (newSize != null) {
                 updateRequest.setSize(newSize);
-                if (diskUsageSyncConfig.isDryRun()) {
-                    LOGGER.info("[DRY-RUN] Embedded DB disk resize simulation for stack {}. " +
-                                    "Actual usage is {}% of {}GB. In a real run, it would be increased to {}GB, " +
-                                    "but now we are just testing the logic.",
-                            stack.getResourceCrn(), usage, currentSize, newSize);
-                } else {
+                if (entitlementService.isDbDiskAutoResizeEnabled(stack.getAccountId())) {
                     logResizeEvent(stack.getId(), newSize);
                     flowManager.triggerStackUpdateDisks(stack, updateRequest);
+                } else {
+                    LOGGER.info("Embedded DB disk auto resize not entitled for account {}. On stack {} " +
+                                    "the actual usage is {}% of {}GB. If entitled, it would be increased to {}GB.",
+                            stack.getAccountId(), stack.getResourceCrn(), usage, currentSize, newSize);
                 }
             }
         }

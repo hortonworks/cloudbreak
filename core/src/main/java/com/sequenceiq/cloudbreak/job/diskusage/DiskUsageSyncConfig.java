@@ -26,9 +26,6 @@ public class DiskUsageSyncConfig {
     @Value("${diskusage-sync.maxsize:1000}")
     private int maxDiskSize;
 
-    @Value("${diskusage-sync.dryrun}")
-    private boolean dryRun;
-
     public int getIntervalInMinutes() {
         return intervalInMinutes;
     }
@@ -51,9 +48,5 @@ public class DiskUsageSyncConfig {
 
     public int getMaxDiskSize() {
         return maxDiskSize;
-    }
-
-    public boolean isDryRun() {
-        return dryRun;
     }
 }
