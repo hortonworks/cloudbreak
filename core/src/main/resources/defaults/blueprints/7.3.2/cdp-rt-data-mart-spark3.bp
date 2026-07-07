@@ -22,11 +22,7 @@
           {
             "refName": "hdfs-DATANODE-BASE",
             "roleType": "DATANODE",
-            "configs" : [ {
-              "name" : "dfs_datanode_max_locked_memory",
-              "value" : "0",
-              "autoConfig" : false
-            } ],
+            "configs" : [],
             "base": true
           },
           {

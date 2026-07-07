@@ -14,10 +14,6 @@
             "roleType": "SERVER",
             "configs": [
               {
-                "name": "zookeeper_server_java_heapsize",
-                "value": "8589934592"
-              },
-              {
                 "name": "maxClientCnxns",
                 "value": "200"
               }

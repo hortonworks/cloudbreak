@@ -19,13 +19,6 @@
             "displayName": null,
             "configs": [
               {
-                "name": "zookeeper_server_java_heapsize",
-                "value": "1073741824",
-                "ref": null,
-                "variable": null,
-                "autoConfig": false
-              },
-              {
                 "name": "maxClientCnxns",
                 "value": "200",
                 "ref": null,

@@ -122,14 +122,6 @@
                 "value": "true"
               },
               {
-                "name": "java.arg.3",
-                "value": "-Xmx16g"
-              },
-              {
-                "name": "java.arg.2",
-                "value": "-Xms8g"
-              },
-              {
                 "name": "java.arg.tmp.dir",
                 "value": "${nifi.working.directory}/tmp"
               },

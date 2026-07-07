@@ -191,10 +191,6 @@
               {
                 "name": "atlas_ssl_exclude_protocols",
                 "value": "TLSv1,TLSv1.1"
-              },
-              {
-                "name": "atlas_max_heap_size",
-                "value": 8192
               }
             ],
             "refName": "atlas-ATLAS_SERVER-BASE",
@@ -218,10 +214,6 @@
               {
                 "name": "atlas_ssl_exclude_protocols",
                 "value": "TLSv1,TLSv1.1"
-              },
-              {
-                "name": "atlas_max_heap_size",
-                "value": 11776
               }
             ],
             "refName": "atlas-ATLAS_SERVER-EXTERNAL",
@@ -253,14 +245,6 @@
               {
                 "name": "solr_java_opts",
                 "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
-              },
-              {
-                "name": "solr_java_heapsize",
-                "value": 8589934592
-              },
-              {
-                "name": "solr_java_direct_memory_size",
-                "value": 1073741824
               }
             ],
             "refName": "solr-SOLR_SERVER-BASE",
@@ -276,14 +260,6 @@
               {
                 "name": "solr_java_opts",
                 "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
-              },
-              {
-                "name": "solr_java_heapsize",
-                "value": 12348030976
-              },
-              {
-                "name": "solr_java_direct_memory_size",
-                "value": 1073741824
               }
             ],
             "refName": "solr-SOLR_SERVER-EXTERNAL",
@@ -328,10 +304,6 @@
           {
             "base": false,
             "configs": [
-              {
-                "name": "broker_max_heap_size",
-                "value": 3072
-              },
               {
                 "name": "ssl_enabled",
                 "value": "true"
@@ -404,27 +376,13 @@
           },
           {
             "base": true,
-            "configs": [
-              {
-                "name": "hive_metastore_java_heapsize",
-                "value": 8589934592
-              }
-            ],
+            "configs": [],
             "refName": "hive-HIVEMETASTORE-BASE",
             "roleType": "HIVEMETASTORE"
           },
           {
             "base": false,
-            "configs": [
-              {
-                "name": "hive_metastore_java_heapsize",
-                "value": 12348030976
-              },
-              {
-                "name": "hive_metastore_server_max_message_size",
-                "value": 1234803097
-              }
-            ],
+            "configs": [],
             "refName": "hive-HIVEMETASTORE-EXTERNAL",
             "roleType": "HIVEMETASTORE"
           }
