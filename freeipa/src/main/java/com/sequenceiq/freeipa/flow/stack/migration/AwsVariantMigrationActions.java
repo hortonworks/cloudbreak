@@ -24,10 +24,12 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.migration.aws.DeleteCloudF
 import com.sequenceiq.cloudbreak.cloud.event.resource.migration.aws.DeleteCloudFormationResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.stack.CloudPlatformResponseToStackFailureConverter;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
@@ -112,6 +114,11 @@ public class AwsVariantMigrationActions {
 
             @Inject
             private OperationService operationService;
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackFailureEvent>> payloadConverters) {
+                payloadConverters.add(new CloudPlatformResponseToStackFailureConverter());
+            }
 
             @Override
             protected void doExecute(AwsVariantMigrationFlowContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
