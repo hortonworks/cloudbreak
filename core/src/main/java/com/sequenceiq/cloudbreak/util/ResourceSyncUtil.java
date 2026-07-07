@@ -83,7 +83,8 @@ public class ResourceSyncUtil {
     @Inject
     private ResourceService resourceService;
 
-    public void updateResource(List<Resource> resourceList, Map<String, InstanceResourceDto> saltInfoMap, StackDto stack, DiskSyncMode diskSyncMode) {
+    public boolean updateResource(List<Resource> resourceList, Map<String, InstanceResourceDto> saltInfoMap, StackDto stack, DiskSyncMode diskSyncMode,
+        boolean suppressEvents) {
         List<Resource> updatedResources = new ArrayList<>();
         for (Resource res : resourceList) {
             String instanceId = res.getInstanceId();
@@ -94,7 +95,7 @@ public class ResourceSyncUtil {
             }
             if (instanceInfo != null) {
                 List<VolumeSetAttributes.Volume> syncedVolumes = syncResourceDisks(stack, volumeSetAttribute.getVolumes(),
-                        instanceInfo.getVolumes(), instanceId, res.getId());
+                        instanceInfo.getVolumes(), instanceId, res.getId(), suppressEvents);
                 LOGGER.info("Synced volumes for resource id {}, instance id {}, volumes - {}", res.getId(), instanceId, syncedVolumes);
                 if (!syncedVolumes.isEmpty()) {
                     LOGGER.info("Resource volumes updated: resource id {}, instance id {}, original volumes - {}, synced volumes - {}", res.getId(),
@@ -105,7 +106,7 @@ public class ResourceSyncUtil {
                 String fstabFromLsblk = createFstabFromLsblk(instanceInfo);
                 LOGGER.info("DiskSyncJob: Created fstab from lsblk on instance: {}, fstab: {}", instanceId, fstabFromLsblk);
                 instanceInfo.setFstab(fstabFromLsblk);
-                boolean updated = syncFstab(instanceInfo, volumeSetAttribute, stack.getId(), res.getId(), instanceId, stack.getStatus().name());
+                boolean updated = syncFstab(instanceInfo, volumeSetAttribute, stack.getId(), res.getId(), instanceId, stack.getStatus().name(), suppressEvents);
                 if (updated) {
                     LOGGER.info("Fstab updated: resource id {}, instance id {}, original fstab - {}, synced fstab - {}", res.getId(),
                         instanceId, volumeSetAttribute.getFstab(), fstabFromLsblk);
@@ -121,6 +122,7 @@ public class ResourceSyncUtil {
         if (diskSyncMode.equals(DiskSyncMode.PERSIST) && !updatedResources.isEmpty()) {
             resourceService.saveAll(updatedResources);
         }
+        return !updatedResources.isEmpty();
     }
 
     public String createFstabFromLsblk(InstanceResourceDto lsblkInfo) {
@@ -133,13 +135,15 @@ public class ResourceSyncUtil {
     }
 
     public boolean syncFstab(InstanceResourceDto instanceInfo, VolumeSetAttributes volumeSetAttributeFromDB,
-        Long stackId, Long resourceId, String instanceId, String stackStatus) {
+        Long stackId, Long resourceId, String instanceId, String stackStatus, boolean suppressEvents) {
         String normalizedFstabFromDB = normalizeFstab(volumeSetAttributeFromDB.getFstab());
         if (getMountedVolumesCount(instanceInfo.getFstab()) != getMountedVolumesCount(normalizedFstabFromDB)) {
             LOGGER.info("Found fstab mismatch in Resource table: saved fstab: {} and actual fstab created from lsblk: {}",
                 normalizedFstabFromDB, instanceInfo.getFstab());
-            eventService.fireCloudbreakEvent(stackId, stackStatus, DISK_SYNC_FSTAB_MISMATCH_FOUND,
-                    Arrays.asList(instanceId, normalizedFstabFromDB, instanceInfo.getFstab(), String.valueOf(resourceId)));
+            if (!suppressEvents) {
+                eventService.fireCloudbreakEvent(stackId, stackStatus, DISK_SYNC_FSTAB_MISMATCH_FOUND,
+                        Arrays.asList(instanceId, normalizedFstabFromDB, instanceInfo.getFstab(), String.valueOf(resourceId)));
+            }
             return true;
         }
         return false;
@@ -161,7 +165,7 @@ public class ResourceSyncUtil {
 
     @VisibleForTesting
     List<VolumeSetAttributes.Volume> syncResourceDisks(StackDto stack, List<VolumeSetAttributes.Volume> databaseList,
-        List<InstanceResourceDto.VolumeDto> saltDisks, String instanceId, Long resourceId) {
+        List<InstanceResourceDto.VolumeDto> saltDisks, String instanceId, Long resourceId, boolean suppressEvents) {
         List<VolumeSetAttributes.Volume> existingDisksOnInstance = saltDisks.stream()
             .map(saltDisk -> new VolumeSetAttributes.Volume(
                 saltDisk.volumeId(),
@@ -173,8 +177,10 @@ public class ResourceSyncUtil {
             .toList();
         if (databaseList != null && !volumeListsMatch(databaseList, existingDisksOnInstance)) {
             LOGGER.info("Found volume mismatch in Resource table: saved resources : {} and actual resources are : {}", databaseList, existingDisksOnInstance);
-            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), DISK_SYNC_VOLUME_MISMATCH_FOUND,
-                Arrays.asList(instanceId, databaseList.toString(), existingDisksOnInstance.toString(), String.valueOf(resourceId)));
+            if (!suppressEvents) {
+                eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), DISK_SYNC_VOLUME_MISMATCH_FOUND,
+                    Arrays.asList(instanceId, databaseList.toString(), existingDisksOnInstance.toString(), String.valueOf(resourceId)));
+            }
             return existingDisksOnInstance;
         }
         return Collections.emptyList();
@@ -230,7 +236,7 @@ public class ResourceSyncUtil {
             // 2. Ensure line has at least Device and MountPoint columns
             .filter(columns -> columns.length >= 2)
             // 3. Match the mount point column (index 1)
-            .filter(columns -> columns[1].startsWith("/hadoopfs/fs") || columns[1].startsWith("/dbfs") || columns[1].startsWith("/hadoopfs/ephfs"))
+            .filter(columns -> columns[1].startsWith("/hadoopfs/fs") || columns[1].startsWith("/dbfs"))
             .count();
     }
 
@@ -254,8 +260,9 @@ public class ResourceSyncUtil {
         }
     }
 
-    public void checkForUnmountedVolumes(Map<String, InstanceResourceDto> saltInfoMap, Map<String, String> fqdnInstanceIdMap,
-        Map<String, List<VolumeRecord>> cloudMetadata, Stack stack) {
+    public boolean checkForUnmountedVolumes(Map<String, InstanceResourceDto> saltInfoMap, Map<String, String> fqdnInstanceIdMap,
+        Map<String, List<VolumeRecord>> cloudMetadata, Stack stack, boolean suppressEvents) {
+        boolean mismatchDetected = false;
         Map<String, Long> saltLsblkDiskCountsPerInstanceIdMap = countHadoopMountsPerServer(saltInfoMap);
         Map<String, Integer> cloudProviderFqdnVolumeCountMap = fqdnInstanceIdMap.entrySet().stream()
             .collect(toMap(
@@ -280,11 +287,15 @@ public class ResourceSyncUtil {
 
                 if (saltCount < cloudCount) {
                     LOGGER.info("Found unmounted disks for {} in group {}. Cloud: {}, Salt: {}", fqdn, group, cloudCount, saltCount);
-                    eventService.fireCloudbreakEvent(stack.getId(), stack.getDetailedStatus().name(), DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND,
-                            Arrays.asList(fqdn, group, String.valueOf(cloudCount), String.valueOf(saltCount)));
+                    mismatchDetected = true;
+                    if (!suppressEvents) {
+                        eventService.fireCloudbreakEvent(stack.getId(), stack.getDetailedStatus().name(), DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND,
+                                Arrays.asList(fqdn, group, String.valueOf(cloudCount), String.valueOf(saltCount)));
+                    }
                     // Add Mounting logic here if needed
                 }
             }
         }
+        return mismatchDetected;
     }
 }
