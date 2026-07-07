@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -215,7 +216,7 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
-        CustomImage actual = victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, expected);
+        CustomImage actual = victim.createOrUpdateCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, expected);
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
 
         assertNotEquals(IMAGE_NAME, actual.getName());
@@ -228,6 +229,98 @@ public class CustomImageCatalogServiceTest {
         assertEquals(REGION, actualVmImage.getRegion());
         assertEquals(IMAGE_REFERENCE, actualVmImage.getImageReference());
         assertEquals(actual, actualVmImage.getCustomImage());
+    }
+
+    @Test
+    public void testCreateCustomImageUpdatesExistingWhenSameSourceAndType() throws TransactionService.TransactionExecutionException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        CustomImage existingImage = new CustomImage();
+        existingImage.setName("existing-uuid");
+        existingImage.setCustomizedImageId(CUSTOMIZED_IMAGE_ID);
+        existingImage.setImageType(ImageType.RUNTIME);
+        existingImage.setBaseParcelUrl("old parcel url");
+        VmImage oldVmImage = new VmImage();
+        oldVmImage.setRegion("us-west-1");
+        oldVmImage.setImageReference("ami-old");
+        oldVmImage.setCustomImage(existingImage);
+        existingImage.setVmImage(new HashSet<>(Set.of(oldVmImage)));
+        imageCatalog.getCustomImages().add(existingImage);
+
+        CustomImage incomingImage = aCustomImage();
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
+
+        CustomImage actual = victim.createOrUpdateCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, incomingImage);
+
+        assertEquals(1, imageCatalog.getCustomImages().size());
+        assertEquals("existing-uuid", actual.getName());
+        assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
+        assertEquals(1, actual.getVmImage().size());
+        VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
+        assertEquals(REGION, actualVmImage.getRegion());
+        assertEquals(IMAGE_REFERENCE, actualVmImage.getImageReference());
+        assertEquals(actual, actualVmImage.getCustomImage());
+    }
+
+    @Test
+    public void testCreateCustomImageRemovesDuplicatesWhenMultipleExistForSameSourceAndType() throws TransactionService.TransactionExecutionException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        CustomImage olderDuplicate = new CustomImage();
+        olderDuplicate.setName("older-duplicate-uuid");
+        olderDuplicate.setCustomizedImageId(CUSTOMIZED_IMAGE_ID);
+        olderDuplicate.setImageType(ImageType.RUNTIME);
+        olderDuplicate.setVmImage(new HashSet<>(Set.of()));
+        ReflectionTestUtils.setField(olderDuplicate, "created", 1000L);
+        imageCatalog.getCustomImages().add(olderDuplicate);
+
+        CustomImage newerDuplicate = new CustomImage();
+        newerDuplicate.setName("newer-duplicate-uuid");
+        newerDuplicate.setCustomizedImageId(CUSTOMIZED_IMAGE_ID);
+        newerDuplicate.setImageType(ImageType.RUNTIME);
+        newerDuplicate.setVmImage(new HashSet<>(Set.of()));
+        ReflectionTestUtils.setField(newerDuplicate, "created", 2000L);
+        imageCatalog.getCustomImages().add(newerDuplicate);
+
+        CustomImage incomingImage = aCustomImage();
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
+
+        CustomImage actual = victim.createOrUpdateCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, incomingImage);
+
+        assertEquals(1, imageCatalog.getCustomImages().size());
+        assertEquals("newer-duplicate-uuid", actual.getName());
+        assertEquals(1, actual.getVmImage().size());
+    }
+
+    @Test
+    public void testCreateCustomImageCreatesNewWhenSameSourceButDifferentType() throws TransactionService.TransactionExecutionException {
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+
+        ImageCatalog imageCatalog = new ImageCatalog();
+        CustomImage existingImage = new CustomImage();
+        existingImage.setName("existing-uuid");
+        existingImage.setCustomizedImageId(CUSTOMIZED_IMAGE_ID);
+        existingImage.setImageType(ImageType.FREEIPA);
+        imageCatalog.getCustomImages().add(existingImage);
+
+        CustomImage incomingImage = aCustomImage();
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
+
+        CustomImage actual = victim.createOrUpdateCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, incomingImage);
+
+        assertEquals(2, imageCatalog.getCustomImages().size());
+        assertNotEquals("existing-uuid", actual.getName());
+        assertEquals(ImageType.RUNTIME, actual.getImageType());
     }
 
     @Test
@@ -244,7 +337,7 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getSourceImageByImageType(customImage)).thenThrow(new CloudbreakImageCatalogException(""));
 
 
-        assertThrows(NotFoundException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, customImage));
+        assertThrows(NotFoundException.class, () -> victim.createOrUpdateCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, customImage));
     }
 
     @Test
@@ -256,7 +349,7 @@ public class CustomImageCatalogServiceTest {
                 .when(transactionService).required(any(Supplier.class));
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
-        assertThrows(BadRequestException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, null));
+        assertThrows(BadRequestException.class, () -> victim.createOrUpdateCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, null));
     }
 
     @Test
