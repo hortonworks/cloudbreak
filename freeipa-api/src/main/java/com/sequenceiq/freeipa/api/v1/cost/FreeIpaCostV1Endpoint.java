@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.api.v1.cost;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -30,6 +31,6 @@ public interface FreeIpaCostV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.COST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "listFreeIpaCostV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCostResponse list(List<String> environmentCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    RealTimeCostResponse list(List<String> environmentCrns, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
 }

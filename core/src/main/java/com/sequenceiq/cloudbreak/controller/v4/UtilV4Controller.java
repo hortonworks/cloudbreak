@@ -17,10 +17,8 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventBaseV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
@@ -34,7 +32,6 @@ import com.sequenceiq.cloudbreak.converter.SupportedExternalDatabaseServiceEntry
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.image.UsedImagesProvider;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
@@ -55,9 +52,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private FileSystemSupportMatrixService fileSystemSupportMatrixService;
-
-    @Inject
-    private RepositoryConfigValidationService validationService;
 
     @Inject
     private ProviderPreferencesService providerPreferencesService;
@@ -111,12 +105,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @DisableCheckPermissions
     public CloudStorageSupportedV4Responses getCloudStorageMatrix(String stackVersion) {
         return new CloudStorageSupportedV4Responses(fileSystemSupportMatrixService.getCloudStorageMatrix(stackVersion));
-    }
-
-    @Override
-    @DisableCheckPermissions
-    public RepoConfigValidationV4Response repositoryConfigValidationRequest(RepoConfigValidationV4Request repoConfigValidationV4Request) {
-        return validationService.validate(repoConfigValidationV4Request);
     }
 
     @Override

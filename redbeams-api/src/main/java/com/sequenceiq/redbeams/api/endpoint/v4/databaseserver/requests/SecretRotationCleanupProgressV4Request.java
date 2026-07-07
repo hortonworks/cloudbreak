@@ -18,6 +18,7 @@ public class SecretRotationCleanupProgressV4Request {
 
     @ResourceCrn
     @ValidCrn(resource = { CrnResourceDescriptor.DATABASE_SERVER })
+    @NotEmpty
     private String crn;
 
     @ValidSecretType(allowedTypes = { RedbeamsSecretType.class })

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.doc.Notes.IMAGE_CATALOG_NOTES;
 import java.util.Set;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -67,7 +68,7 @@ public interface ImageCatalogV4Endpoint {
     ImageCatalogV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("withImages") @DefaultValue("false") Boolean withImages,
             @QueryParam("applyVersionBasedFiltering") @DefaultValue("true") Boolean applyVersionBasedFiltering,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("crn/{crn}")
@@ -192,7 +193,7 @@ public interface ImageCatalogV4Endpoint {
             operationId = "getSingleImageByNameAndIdInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ImageV4Response getSingleImageByCatalogNameAndImageIdInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("imageId") String imageId, @QueryParam("accountId") String accountId) throws Exception;
+            @QueryParam("imageId") String imageId, @QueryParam("accountId") @NotEmpty String accountId) throws Exception;
 
     @GET
     @Path("image/{imageId}")

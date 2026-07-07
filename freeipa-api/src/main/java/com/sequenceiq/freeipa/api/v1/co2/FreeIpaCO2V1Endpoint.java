@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.api.v1.co2;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -29,5 +30,5 @@ public interface FreeIpaCO2V1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = FreeIpaOperationDescriptions.CO2, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "listFreeIpaCO2V1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCO2Response list(List<String> environmentCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    RealTimeCO2Response list(List<String> environmentCrns, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }

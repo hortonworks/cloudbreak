@@ -66,5 +66,5 @@ public interface SdxRotationEndpoint {
     @Operation(summary = "Get rotation progress information", operationId = "getProgress",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressResponse getProgress(@QueryParam("secretType") @ValidSecretType(allowedTypes = DatalakeSecretType.class) @NotEmpty String secretType,
-            @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @QueryParam("datalakeCrn") String datalakeCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @QueryParam("datalakeCrn") @NotEmpty String datalakeCrn);
 }

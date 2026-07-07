@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.api.v2.freeipa.crossrealm;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -32,7 +33,7 @@ public interface TrustV2Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.SETUP_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "prepareCrossRealmTrustV2", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
-    PrepareCrossRealmTrustResponse setup(@Valid PrepareCrossRealmTrustV2Request request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    PrepareCrossRealmTrustResponse setup(@Valid PrepareCrossRealmTrustV2Request request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("/add")
@@ -42,5 +43,5 @@ public interface TrustV2Endpoint {
             useReturnTypeSchema = true))
     AddCrossRealmTrustV2Response addTrust(
             @Valid AddCrossRealmTrustV2Request request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }
