@@ -38,6 +38,7 @@ import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 import com.sequenceiq.redbeams.sync.DBStackJobService;
+import com.sequenceiq.redbeams.sync.provider.RdsProviderSyncJobService;
 
 @Configuration
 public class RedbeamsProvisionActions {
@@ -55,6 +56,9 @@ public class RedbeamsProvisionActions {
 
     @Inject
     private DBStackJobService dbStackJobService;
+
+    @Inject
+    private RdsProviderSyncJobService rdsProviderSyncJobService;
 
     @Bean(name = "ALLOCATE_DATABASE_SERVER_STATE")
     public Action<?, ?> allocateDatabaseServer() {
@@ -108,7 +112,10 @@ public class RedbeamsProvisionActions {
                 metricService.incrementMetricCounter(MetricType.DB_PROVISION_FINISHED, dbStack);
 
                 dbStack.ifPresentOrElse(
-                        db -> dbStackJobService.schedule(db.getId()),
+                        db -> {
+                            dbStackJobService.schedule(db.getId());
+                            rdsProviderSyncJobService.schedule(db.getId());
+                        },
                         () -> LOGGER.info("DBStack was not present, could not start autosync service")
                 );
             }

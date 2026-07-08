@@ -1,8 +1,5 @@
 package com.sequenceiq.redbeams.sync;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.common.model.AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
 import static java.util.Optional.ofNullable;
@@ -20,24 +17,16 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
-import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
-import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.dto.Credential;
-import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
@@ -51,16 +40,7 @@ public class DBStackStatusSyncService {
             List.of(ExternalDatabaseStatus.DELETE_IN_PROGRESS, ExternalDatabaseStatus.DELETED, ExternalDatabaseStatus.UNKNOWN);
 
     @Inject
-    private CredentialService credentialService;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
-    private DBStackToDatabaseStackConverter databaseStackConverter;
+    private DBStackConnector dbStackConnector;
 
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
@@ -117,24 +97,10 @@ public class DBStackStatusSyncService {
 
     private DetailedDBStackStatus getDetailedStatusFromProvider(DBStack dbStack) {
         try {
-            Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
-            String accountId = dbStack.getOwnerCrn().getAccountId();
-            CloudContext cloudContext = CloudContext.Builder.builder()
-                    .withId(dbStack.getId())
-                    .withName(dbStack.getName())
-                    .withCrn(dbStack.getResourceCrn())
-                    .withPlatform(dbStack.getCloudPlatform())
-                    .withVariant(dbStack.getPlatformVariant())
-                    .withLocation(location)
-                    .withUserName(dbStack.getUserName())
-                    .withAccountId(accountId)
-                    .build();
-            Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
-            CloudCredential cloudCredential = credentialConverter.convert(credential);
-
-            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
-            DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
+            DBStackConnector.ConnectedDatabaseStack connected = dbStackConnector.connect(dbStack);
+            CloudConnector connector = connected.connector();
+            AuthenticatedContext ac = connected.authenticatedContext();
+            DatabaseStack databaseStack = connected.databaseStack();
 
             Optional<ExternalDatabaseStatus> databaseStatusOptional = ofNullable(connector.resources().getDatabaseServerStatusFailFast(ac, databaseStack));
             Boolean externalDatabaseDeleted = databaseStatusOptional.map(ExternalDatabaseStatus.DELETED::equals).orElse(false);

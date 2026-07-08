@@ -525,7 +525,9 @@ public class AzureDatabaseResourceService {
             externalDatabaseParameters = new ExternalDatabaseParameters(
                     convertFlexibleStatus(server.orElse(null)),
                     AzureDatabaseType.FLEXIBLE_SERVER,
-                    getFlexibleServerStorageSizeInMB(server.orElse(null)));
+                    getFlexibleServerStorageSizeInMB(server.orElse(null)),
+                    getFlexibleServerInstanceType(server.orElse(null)),
+                    getFlexibleServerVersion(server.orElse(null)));
         } else {
             LOGGER.debug("Getting single server parameters from Azure for {} database", databaseServerView.getDbServerName());
             Optional<com.azure.resourcemanager.postgresql.models.Server> server =
@@ -533,7 +535,9 @@ public class AzureDatabaseResourceService {
             externalDatabaseParameters = new ExternalDatabaseParameters(
                     convertSingleStatus(server.orElse(null)),
                     AzureDatabaseType.SINGLE_SERVER,
-                    getSingleServerStorageSizeInMB(server.orElse(null)));
+                    getSingleServerStorageSizeInMB(server.orElse(null)),
+                    getSingleServerInstanceType(server.orElse(null)),
+                    getSingleServerVersion(server.orElse(null)));
         }
         LOGGER.debug("External database parameters: {}", externalDatabaseParameters);
         return externalDatabaseParameters;
@@ -566,6 +570,34 @@ public class AzureDatabaseResourceService {
                 .map(Server::storage)
                 .map(Storage::storageSizeGB)
                 .map(size -> size * GB_TO_MB)
+                .orElse(null);
+    }
+
+    private String getFlexibleServerInstanceType(Server server) {
+        return Optional.ofNullable(server)
+                .map(Server::sku)
+                .map(com.azure.resourcemanager.postgresqlflexibleserver.models.Sku::name)
+                .orElse(null);
+    }
+
+    private String getFlexibleServerVersion(Server server) {
+        return Optional.ofNullable(server)
+                .map(Server::version)
+                .map(Objects::toString)
+                .orElse(null);
+    }
+
+    private String getSingleServerInstanceType(com.azure.resourcemanager.postgresql.models.Server server) {
+        return Optional.ofNullable(server)
+                .map(com.azure.resourcemanager.postgresql.models.Server::sku)
+                .map(com.azure.resourcemanager.postgresql.models.Sku::name)
+                .orElse(null);
+    }
+
+    private String getSingleServerVersion(com.azure.resourcemanager.postgresql.models.Server server) {
+        return Optional.ofNullable(server)
+                .map(com.azure.resourcemanager.postgresql.models.Server::version)
+                .map(Objects::toString)
                 .orElse(null);
     }
 

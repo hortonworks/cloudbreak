@@ -236,11 +236,15 @@ class AzureDatabaseResourceServiceTest {
         StorageProfile storageProfile = mock(StorageProfile.class);
         when(storageProfile.storageMB()).thenReturn(storageSizeGB * 1024);
         when(server.storageProfile()).thenReturn(storageProfile);
+        when(server.sku()).thenReturn(new com.azure.resourcemanager.postgresql.models.Sku().withName("GP_Gen5_4"));
+        when(server.version()).thenReturn(com.azure.resourcemanager.postgresql.models.ServerVersion.fromString("11"));
         when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(Optional.of(server));
         ExternalDatabaseParameters actual = underTest.getExternalDatabaseParameters(ac, databaseStack);
         assertEquals(externalDatabaseStatus, actual.externalDatabaseStatus());
         assertEquals(storageSizeGB * 1024L, actual.storageSizeInMB());
         assertEquals(AzureDatabaseType.SINGLE_SERVER, actual.databaseType());
+        assertEquals("GP_Gen5_4", actual.instanceType());
+        assertEquals("11", actual.engineVersion());
     }
 
     @ParameterizedTest
@@ -256,11 +260,15 @@ class AzureDatabaseResourceServiceTest {
         Storage storage = mock(Storage.class);
         when(storage.storageSizeGB()).thenReturn(storageSizeGB);
         when(server.storage()).thenReturn(storage);
+        when(server.sku()).thenReturn(new com.azure.resourcemanager.postgresqlflexibleserver.models.Sku().withName("Standard_E4ds_v4"));
+        when(server.version()).thenReturn(com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion.fromString("16"));
         when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(Optional.of(server));
         ExternalDatabaseParameters actual = underTest.getExternalDatabaseParameters(ac, databaseStack);
         assertEquals(externalDatabaseStatus, actual.externalDatabaseStatus());
         assertEquals(storageSizeGB * 1024L, actual.storageSizeInMB());
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, actual.databaseType());
+        assertEquals("Standard_E4ds_v4", actual.instanceType());
+        assertEquals("16", actual.engineVersion());
     }
 
     @ParameterizedTest

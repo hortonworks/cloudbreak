@@ -218,8 +218,7 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Override
     public ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
-        ExternalDatabaseStatus databaseStatus = awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
-        return new ExternalDatabaseParameters(databaseStatus, null, null);
+        return awsRdsStatusLookupService.getExternalDatabaseParameters(authenticatedContext, stack);
     }
 
     @Override

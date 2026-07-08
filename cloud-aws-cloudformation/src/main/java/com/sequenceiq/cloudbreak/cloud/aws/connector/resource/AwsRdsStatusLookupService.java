@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 
 import software.amazon.awssdk.services.rds.model.DbInstanceNotFoundException;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
@@ -38,6 +39,21 @@ public class AwsRdsStatusLookupService {
                 .map(i -> getExternalDatabaseStatus(i.dbInstanceStatus()))
                 .findFirst()
                 .get();
+    }
+
+    public ExternalDatabaseParameters getExternalDatabaseParameters(AuthenticatedContext ac, DatabaseStack dbStack) {
+        DescribeDbInstancesResponse describeDBInstancesResponse = getDescribeDBInstancesResponseInternal(ac, dbStack, "RDS Querying ExternalDatabaseParameters",
+                "DB Instance does not exist: {}");
+
+        if (describeDBInstancesResponse == null) {
+            return new ExternalDatabaseParameters(ExternalDatabaseStatus.DELETED, null, null, null, null);
+        }
+        return describeDBInstancesResponse.dbInstances()
+                .stream()
+                .findFirst()
+                .map(instance -> new ExternalDatabaseParameters(getExternalDatabaseStatus(instance.dbInstanceStatus()), null, null,
+                        instance.dbInstanceClass(), instance.engineVersion()))
+                .orElseGet(() -> new ExternalDatabaseParameters(ExternalDatabaseStatus.DELETED, null, null, null, null));
     }
 
     private DescribeDbInstancesResponse getDescribeDBInstancesResponseInternal(AuthenticatedContext ac, DatabaseStack dbStack, String preDescribeMessage,

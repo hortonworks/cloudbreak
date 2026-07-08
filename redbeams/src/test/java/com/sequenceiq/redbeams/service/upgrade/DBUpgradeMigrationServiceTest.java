@@ -86,7 +86,7 @@ public class DBUpgradeMigrationServiceTest {
 
         // When
         DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector, null, null,
-                new ExternalDatabaseParameters(ExternalDatabaseStatus.STARTED, AzureDatabaseType.SINGLE_SERVER, 200 * GB_TO_MB));
+                new ExternalDatabaseParameters(ExternalDatabaseStatus.STARTED, AzureDatabaseType.SINGLE_SERVER, 200 * GB_TO_MB, null, null));
 
         // Then
         assertNotNull(result);
@@ -117,7 +117,7 @@ public class DBUpgradeMigrationServiceTest {
 
         // When
         DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector, null, null,
-                new ExternalDatabaseParameters(ExternalDatabaseStatus.STARTED, AzureDatabaseType.SINGLE_SERVER, 300 * 1024L));
+                new ExternalDatabaseParameters(ExternalDatabaseStatus.STARTED, AzureDatabaseType.SINGLE_SERVER, 300 * 1024L, null, null));
 
         // Then
         assertNotNull(result);
@@ -150,7 +150,8 @@ public class DBUpgradeMigrationServiceTest {
 
         // When
         DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector,
-                cloudCredential, cloudPlatformVariant, new ExternalDatabaseParameters(ExternalDatabaseStatus.STARTED, AzureDatabaseType.SINGLE_SERVER, null));
+                cloudCredential, cloudPlatformVariant,
+                new ExternalDatabaseParameters(ExternalDatabaseStatus.STARTED, AzureDatabaseType.SINGLE_SERVER, null, null, null));
 
         // Then
         assertNotNull(result);

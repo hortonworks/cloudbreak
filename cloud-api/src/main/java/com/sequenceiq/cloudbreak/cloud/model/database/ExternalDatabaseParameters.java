@@ -6,5 +6,7 @@ import com.sequenceiq.common.model.DatabaseType;
 public record ExternalDatabaseParameters(
         ExternalDatabaseStatus externalDatabaseStatus,
         DatabaseType databaseType,
-        Long storageSizeInMB) {
+        Long storageSizeInMB,
+        String instanceType,
+        String engineVersion) {
 }

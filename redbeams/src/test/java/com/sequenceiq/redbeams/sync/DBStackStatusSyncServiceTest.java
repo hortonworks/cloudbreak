@@ -7,6 +7,7 @@ import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -25,32 +26,21 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
-import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
-import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
-import com.sequenceiq.redbeams.dto.Credential;
-import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
@@ -76,25 +66,10 @@ public class DBStackStatusSyncServiceTest {
     private DatabaseStack databaseStack;
 
     @Mock
-    private CredentialService credentialService;
-
-    @Mock
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Mock
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Mock
     private DBStackStatusUpdater dbStackStatusUpdater;
 
     @Mock
-    private CloudCredential cloudCredential;
-
-    @Mock
     private CloudConnector cloudConnector;
-
-    @Mock
-    private Authenticator authenticator;
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -103,19 +78,13 @@ public class DBStackStatusSyncServiceTest {
     private ResourceConnector resourceConnector;
 
     @Mock
-    private Credential credential;
-
-    @Mock
     private DBStack dbStack;
-
-    @Mock
-    private Crn crn;
 
     @Mock
     private DBStackJobService dbStackJobService;
 
     @Mock
-    private DBStackToDatabaseStackConverter databaseStackConverter;
+    private DBStackConnector dbStackConnector;
 
     @Mock
     private DatabaseServer dbServer;
@@ -128,8 +97,6 @@ public class DBStackStatusSyncServiceTest {
 
     @Mock
     private DBStackService dbStackService;
-
-    private ArgumentCaptor<CloudContext> cloudContextArgumentCaptor;
 
     @InjectMocks
     private DBStackStatusSyncService victim;
@@ -156,20 +123,9 @@ public class DBStackStatusSyncServiceTest {
     @BeforeEach
     public void initTests() {
         MockitoAnnotations.initMocks(this);
-        cloudContextArgumentCaptor = ArgumentCaptor.forClass(CloudContext.class);
-
-        when(dbStack.getEnvironmentId()).thenReturn(ENVIRONMENT_ID);
-        when(dbStack.getResourceCrn()).thenReturn(CrnTestUtil.getDatabaseServerCrnBuilder()
-                .setAccountId("acc")
-                .setResource("resource")
-                .build().toString());
-        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_ID)).thenReturn(credential);
-        when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
-        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-        when(cloudConnector.authentication()).thenReturn(authenticator);
-        when(authenticator.authenticate(cloudContextArgumentCaptor.capture(), Mockito.eq(cloudCredential))).thenReturn(authenticatedContext);
+        when(dbStackConnector.connect(dbStack))
+                .thenReturn(new DBStackConnector.ConnectedDatabaseStack(cloudConnector, authenticatedContext, databaseStack));
         when(cloudConnector.resources()).thenReturn(resourceConnector);
-        when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
     }
 
     @ParameterizedTest
@@ -177,9 +133,8 @@ public class DBStackStatusSyncServiceTest {
     public void testStatusUpdate(Status savedStatus, ExternalDatabaseStatus externalDatabaseStatus, DetailedDBStackStatus newDetailedDBStackStatus)
             throws Exception {
         when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(externalDatabaseStatus);
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(savedStatus);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
 
         victim.sync(dbStack);
 
@@ -199,10 +154,9 @@ public class DBStackStatusSyncServiceTest {
                 .thenReturn(ExternalDatabaseStatus.DELETED)
                 .thenReturn(ExternalDatabaseStatus.STARTED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
-        when(dbStack.getName()).thenReturn(DB_NAME);
+        lenient().when(dbStack.getName()).thenReturn(DB_NAME);
         when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(dbStack.getDatabaseServer()).thenReturn(dbServer);
@@ -228,10 +182,9 @@ public class DBStackStatusSyncServiceTest {
                 .thenReturn(ExternalDatabaseStatus.STARTED)
                 .thenReturn(ExternalDatabaseStatus.STARTED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
-        when(dbStack.getName()).thenReturn(DB_NAME);
+        lenient().when(dbStack.getName()).thenReturn(DB_NAME);
         when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(dbStack.getDatabaseServer()).thenReturn(dbServer);
@@ -257,10 +210,9 @@ public class DBStackStatusSyncServiceTest {
                 .thenReturn(ExternalDatabaseStatus.DELETED)
                 .thenReturn(ExternalDatabaseStatus.STARTED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
-        when(dbStack.getName()).thenReturn(DB_NAME);
+        lenient().when(dbStack.getName()).thenReturn(DB_NAME);
         when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(dbStack.getDatabaseServer()).thenReturn(dbServer);
@@ -286,10 +238,9 @@ public class DBStackStatusSyncServiceTest {
                 .thenReturn(ExternalDatabaseStatus.DELETED)
                 .thenReturn(ExternalDatabaseStatus.DELETED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
-        when(dbStack.getName()).thenReturn(DB_NAME);
+        lenient().when(dbStack.getName()).thenReturn(DB_NAME);
         when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(dbStack.getDatabaseServer()).thenReturn(dbServer);
@@ -309,9 +260,8 @@ public class DBStackStatusSyncServiceTest {
     public void shouldReturnDeletedOnProviderSideWhenProviderDeleted()
             throws Exception {
         when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETED);
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
 
         victim.sync(dbStack);
 
@@ -323,9 +273,8 @@ public class DBStackStatusSyncServiceTest {
     public void shouldReturnDeleteInProgressWhenProviderDeleting()
             throws Exception {
         when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETE_IN_PROGRESS);
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
 
         victim.sync(dbStack);
 
@@ -337,9 +286,8 @@ public class DBStackStatusSyncServiceTest {
     public void shouldNotUpdateStatusWhenProviderDeletingAndAlreadyDeleteInProgress()
             throws Exception {
         when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETE_IN_PROGRESS);
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
-        when(dbStack.getOwnerCrn()).thenReturn(crn);
 
         victim.sync(dbStack);
 

@@ -79,6 +79,11 @@ redbeams:
 
   ssl:
     enabled: true
+  rds-provider-sync:
+    enabled: true
+    update: true
+    enabled-providers: AWS,AZURE
+    interval-in-minutes: 1440
 spring:
   application:
     name: RedbeamsService

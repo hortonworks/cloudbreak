@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 
 import software.amazon.awssdk.services.rds.model.DBInstance;
 import software.amazon.awssdk.services.rds.model.DbInstanceNotFoundException;
@@ -96,6 +97,35 @@ public class AwsRdsStatusLookupServiceTest {
 
     private DescribeDbInstancesResponse createResponse(String dbInstanceStatus) {
         return DescribeDbInstancesResponse.builder().dbInstances(DBInstance.builder().dbInstanceStatus(dbInstanceStatus).build()).build();
+    }
+
+    @Test
+    public void getExternalDatabaseParametersShouldReturnInstanceTypeAndVersion() {
+        DescribeDbInstancesResponse response = DescribeDbInstancesResponse.builder()
+                .dbInstances(DBInstance.builder()
+                        .dbInstanceStatus(DB_INSTANCE_STATUS_STARTED)
+                        .dbInstanceClass("db.r5.large")
+                        .engineVersion("14.8")
+                        .build())
+                .build();
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenReturn(response);
+
+        ExternalDatabaseParameters result = victim.getExternalDatabaseParameters(authenticatedContext, dbStack);
+
+        assertEquals(ExternalDatabaseStatus.STARTED, result.externalDatabaseStatus());
+        assertEquals("db.r5.large", result.instanceType());
+        assertEquals("14.8", result.engineVersion());
+    }
+
+    @Test
+    public void getExternalDatabaseParametersShouldReturnDeletedWhenInstanceNotFound() {
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(DbInstanceNotFoundException.class);
+
+        ExternalDatabaseParameters result = victim.getExternalDatabaseParameters(authenticatedContext, dbStack);
+
+        assertEquals(ExternalDatabaseStatus.DELETED, result.externalDatabaseStatus());
+        assertNull(result.instanceType());
+        assertNull(result.engineVersion());
     }
 
     @Test
