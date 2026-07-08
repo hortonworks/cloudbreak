@@ -36,32 +36,27 @@ runs:
       run: |-
         cd integration-test
         make compress-results
+    # Upload could be trimmed further with upload-artifact v4's store-only mode (compression-level: 0),
+    # but v4 is not supported on our internal GitHub Enterprise Server, so we stay on the vendored v3.
     - name: integration_test_collect_service_artifacts
       uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
       if: ${{ always() }}
       with:
         name: integration-test-cb-service-logs-artifact
         retention-days: 5
+        # Both archives are already gzipped by compress-results.sh.
+        # The service logs (cloudbreak/datalake/environment/freeipa/redbeams/...) live inside
+        # integcb-logs.tar.gz; the loose gateway/cluster-proxy/thunderhead logs are in gateway-logs.tar.gz.
         path: |
           integration-test/integcb-logs.tar.gz
-          integration-test/cloudbreak.log
-          integration-test/datalake.log
-          integration-test/redbeams.log
-          integration-test/environment.log
-          integration-test/freeipa.log
-          integration-test/thunderhead-mock.log
-          integration-test/jumpgate-interop.log
-          integration-test/jumpgate-admin.log
-          integration-test/jumpgate-proxy.log
-          integration-test/dev-gateway.log
-          integration-test/core-gateway.log
-          integration-test/envoy.log
+          integration-test/gateway-logs.tar.gz
     - name: integration_test_collect_test_artifacts
       uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
       if: ${{ always() }}
       with:
         name: integration-test-suites_log-artifact
         retention-days: 5
+        # Already gzipped by compress-results.
         path: |
           integration-test/suites.tar.gz
     - name: integration_test_collect_test_result_artifacts
@@ -70,6 +65,7 @@ runs:
       with:
         name: integration-test-test-output-artifact
         retention-days: 5
+        # Already gzipped by compress-results.
         path: |
           integration-test/test-output.tar.gz
     - name: integration_test_collect_test_console_output_artifacts
@@ -78,5 +74,6 @@ runs:
       with:
         name: integration-test-test_console_output-artifact
         retention-days: 5
+        # Already gzipped by compress-results.
         path: |
-          integration-test/test.out
+          integration-test/test-console-output.tar.gz
