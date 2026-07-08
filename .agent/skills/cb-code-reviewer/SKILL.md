@@ -11,8 +11,10 @@ The dimensions reviewers raise most, in order: **reuse/duplication, refactoring,
 
 ## How to review
 
+> **Skip generated files.** Do not pull any file under a directory named `generated` (e.g. `src/generated/`) into context or review it. These are machine-produced artifacts (protobuf, JOOQ, OpenAPI stubs, etc.) — comments on them are noise and the files are not maintained by hand.
+
 1. **Scope first.** Flag anything not needed for the ticket — removing unnecessary/unrelated changes is one of the most frequent comments. If the PR mixes a refactor (renames, reformatting, new-lines for params) with the feature, ask to split it into a separate PR.
-2. **Go file by file** against the dimensions below.
+2. **Go file by file** against the dimensions below, skipping any file whose path contains a `generated` directory segment.
 3. **Phrase findings as questions/requests**, not commands — the house style leans heavily on questions. "Shouldn't we…", "Can we…", "Could you… please?", "Are you sure…?". Mark minor items `nit:`. Use ```` ```suggestion ```` blocks for concrete fixes.
 4. **Separate blockers from nits.** Correctness bugs, auth holes, breaking changes, flow deadlocks, missing tests for new logic → request changes. Naming, log level, indentation → nit.
 5. **Link, don't assert.** Point at the existing pattern with an exact `master` link (`https://github.infra.cloudera.com/cloudbreak/cloudbreak/blob/master/…#Lnn`) or the Jira ticket that explains the history.
