@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 class RecipeModulTest extends CentralRecipeContext {
 
-    static final String RECIPE_UPDATER_TEST_INPUTS = "module-test/inputs";
+    private static final String RECIPE_UPDATER_TEST_INPUTS = "module-test/inputs";
 
     private static final String RECIPE_UPDATER_TEST_OUTPUTS = "module-test/outputs";
 

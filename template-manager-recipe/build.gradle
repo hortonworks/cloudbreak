@@ -34,7 +34,6 @@ dependencies {
         exclude group: 'org.hamcrest'
     }
     testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
-    testImplementation 'net.javacrumbs.json-unit:json-unit:5.1.2'
     testImplementation project(path: ':template-manager-core', configuration: 'tests')
     testImplementation project(path: ':core-model', configuration: 'tests')
 }
