@@ -189,7 +189,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = CREATE_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "postStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    StackV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid StackV4Request request, @QueryParam("accountId") String accountId);
+    StackV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid StackV4Request request, @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("internal")
@@ -198,7 +198,7 @@ public interface StackV4Endpoint {
             operationId = "postStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response postInternal(@PathParam("workspaceId") Long workspaceId, @Valid StackV4Request request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("{name}")
@@ -206,7 +206,7 @@ public interface StackV4Endpoint {
     @Operation(summary = GET_BY_NAME_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "getStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("entries") Set<String> entries,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("{name}/withResources")
@@ -214,7 +214,7 @@ public interface StackV4Endpoint {
     @Operation(summary = GET_BY_NAME_WITH_RESOURCES_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "getStackInWorkspaceV4WithResources",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response getWithResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("entries") Set<String> entries,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("crn/{crn}/withResources")
@@ -236,7 +236,7 @@ public interface StackV4Endpoint {
     @Operation(summary = DELETE_BY_NAME_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "deleteStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("forced") @DefaultValue("false") boolean forced, @QueryParam("accountId") String accountId);
+            @QueryParam("forced") @DefaultValue("false") boolean forced, @QueryParam("accountId") @NotEmpty String accountId);
 
     @DELETE
     @Path("internal/{name}")
@@ -245,7 +245,7 @@ public interface StackV4Endpoint {
             operationId = "deleteStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("{name}/update_name_crn_type")
@@ -254,7 +254,7 @@ public interface StackV4Endpoint {
             operationId = "updateNameCrnAndType",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void updateNameAndCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("newName") String newName, @QueryParam("newCrn") String newCrn,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @QueryParam("newName") String newName, @QueryParam("newCrn") String newCrn,
             @QueryParam("retainOriginalName") @DefaultValue("false") boolean retainOriginalName);
 
     @PUT
@@ -264,7 +264,7 @@ public interface StackV4Endpoint {
             operationId = "updateLoadBalancerPEMDNS",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void updateLoadBalancerPEMDNS(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("{name}/update_load_balancer_dns_ipa")
@@ -273,7 +273,7 @@ public interface StackV4Endpoint {
             operationId = "updateLoadBalancerIPADNS",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void updateLoadBalancerIPADNS(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("{name}/sync")
@@ -281,7 +281,7 @@ public interface StackV4Endpoint {
     @Operation(summary = SYNC_BY_NAME_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "syncStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier sync(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("internal/{name}/sync_cm")
@@ -289,7 +289,7 @@ public interface StackV4Endpoint {
     @Operation(summary = SYNC_CM_BY_NAME_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "syncCmInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier syncCm(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid ClouderaManagerSyncV4Request syncRequest);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @Valid ClouderaManagerSyncV4Request syncRequest);
 
     @POST
     @Path("{name}/retry")
@@ -298,7 +298,7 @@ public interface StackV4Endpoint {
             operationId = "retryStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier retry(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("{name}/retry")
@@ -307,7 +307,7 @@ public interface StackV4Endpoint {
             operationId = "listRetryableFlowsV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<RetryableFlowResponse> listRetryableFlows(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("{name}/stop")
@@ -315,7 +315,7 @@ public interface StackV4Endpoint {
     @Operation(summary = STOP_BY_NAME_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "stopStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStop(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("internal/{name}/stop")
@@ -324,7 +324,7 @@ public interface StackV4Endpoint {
             operationId = "stopStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStopInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("{name}/start")
@@ -332,7 +332,7 @@ public interface StackV4Endpoint {
     @Operation(summary = START_BY_NAME_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "startStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStart(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("internal/{name}/start")
@@ -341,7 +341,7 @@ public interface StackV4Endpoint {
             operationId = "startStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStartInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     /**
      * @deprecated use rotate_secret endpoint with secret type SALT_PASSWORD instead
@@ -354,7 +354,7 @@ public interface StackV4Endpoint {
             operationId = "rotateSaltPasswordForStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSaltPasswordInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @Valid RotateSaltPasswordRequest request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @Valid RotateSaltPasswordRequest request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("internal/{crn}/rotate_salt_password/status")
@@ -379,7 +379,7 @@ public interface StackV4Endpoint {
             operationId = "modifyProxyConfigInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier modifyProxyConfigInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("{name}/scaling")
@@ -388,7 +388,7 @@ public interface StackV4Endpoint {
             operationId = "putScalingStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putScaling(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid StackScaleV4Request updateRequest,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("{name}/manual_repair")
@@ -397,7 +397,7 @@ public interface StackV4Endpoint {
             operationId = "repairStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier repairCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid ClusterRepairV4Request clusterRepairRequest, @QueryParam("accountId") String accountId);
+            @Valid ClusterRepairV4Request clusterRepairRequest, @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("internal/{name}/manual_repair")
@@ -406,7 +406,7 @@ public interface StackV4Endpoint {
             operationId = "repairStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier repairClusterInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid ClusterRepairV4Request clusterRepairRequest, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @Valid ClusterRepairV4Request clusterRepairRequest, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("{name}/upgrade")
@@ -415,7 +415,7 @@ public interface StackV4Endpoint {
             operationId = "upgradeOsInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier upgradeOs(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId, @QueryParam("keepVariant") Boolean keepVariant);
+            @QueryParam("accountId") @NotEmpty String accountId, @QueryParam("keepVariant") Boolean keepVariant);
 
     @POST
     @Path("internal/{crn}/os_upgrade_by_upgrade_sets")
@@ -431,7 +431,7 @@ public interface StackV4Endpoint {
             operationId = "upgradeOsInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier upgradeOsInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("keepVariant") Boolean keepVariant);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @QueryParam("keepVariant") Boolean keepVariant);
 
     @Deprecated
     @GET
@@ -441,7 +441,7 @@ public interface StackV4Endpoint {
             operationId = "checkForOsUpgradeInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeOptionV4Response checkForOsUpgrade(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("{name}/blueprint")
@@ -450,7 +450,7 @@ public interface StackV4Endpoint {
             description = Notes.STACK_NOTES, operationId = "postStackForBlueprintV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     GeneratedBlueprintV4Response postStackForBlueprint(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid StackV4Request stackRequest, @QueryParam("accountId") String accountId);
+            @Valid StackV4Request stackRequest, @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("{name}/change_image")
@@ -459,7 +459,7 @@ public interface StackV4Endpoint {
             description = Notes.STACK_NOTES, operationId = "changeImageStackInWorkspaceV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier changeImage(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid StackImageChangeV4Request stackImageChangeRequest, @QueryParam("accountId") String accountId);
+            @Valid StackImageChangeV4Request stackImageChangeRequest, @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("internal/{name}/change_image")
@@ -468,14 +468,14 @@ public interface StackV4Endpoint {
             description = Notes.STACK_NOTES, operationId = "changeImageStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier changeImageInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid StackImageChangeV4Request stackImageChangeRequest, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @Valid StackImageChangeV4Request stackImageChangeRequest, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @DELETE
     @Path("{name}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = DELETE_WITH_KERBEROS_IN_WORKSPACE, description = Notes.CLUSTER_NOTES)
     void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("forced") @DefaultValue("false") boolean forced, @QueryParam("accountId") String accountId);
+            @QueryParam("forced") @DefaultValue("false") boolean forced, @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("{name}/request")
@@ -484,7 +484,7 @@ public interface StackV4Endpoint {
             operationId = "getStackRequestFromNameV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Request getRequestfromName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("{name}/status")
@@ -493,7 +493,7 @@ public interface StackV4Endpoint {
             operationId = "statusStackV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Response getStatusByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @DELETE
     @Path("{name}/instance")
@@ -503,7 +503,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") boolean forced, @QueryParam("instanceId") String instanceId,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @DELETE
     @Path("{name}/instances")
@@ -513,7 +513,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteMultipleInstances(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("id") @NotEmpty List<String> instances, @QueryParam("forced") @DefaultValue("false") boolean forced,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("{name}/ambari_password")
@@ -522,7 +522,7 @@ public interface StackV4Endpoint {
             operationId = "putpasswordStackV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putPassword(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid UserNamePasswordV4Request userNamePasswordJson, @QueryParam("accountId") String accountId);
+            @Valid UserNamePasswordV4Request userNamePasswordJson, @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("{name}/maintenance")
@@ -531,7 +531,7 @@ public interface StackV4Endpoint {
             operationId = "setClusterMaintenanceMode",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier setClusterMaintenanceMode(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @NotNull MaintenanceModeV4Request maintenanceMode, @QueryParam("accountId") String accountId);
+            @NotNull MaintenanceModeV4Request maintenanceMode, @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("{name}/cluster")
@@ -539,7 +539,7 @@ public interface StackV4Endpoint {
     @Operation(summary = PUT_BY_STACK_ID, description = Notes.CLUSTER_NOTES, operationId = "putClusterV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UpdateClusterV4Request updateJson,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("{name}/inventory")
@@ -547,7 +547,7 @@ public interface StackV4Endpoint {
     @Operation(summary = GENERATE_HOSTS_INVENTORY, operationId = "getClusterHostsInventory",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     String getClusterHostsInventory(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("{name}/check_cluster_upgrade")
@@ -555,7 +555,7 @@ public interface StackV4Endpoint {
     @Operation(summary = CHECK_STACK_UPGRADE, operationId = "checkForClusterUpgradeByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeV4Response checkForClusterUpgradeByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @NotNull UpgradeV4Request request, @QueryParam("accountId") String accountId);
+            @NotNull UpgradeV4Request request, @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("{name}/cluster_upgrade")
@@ -563,7 +563,7 @@ public interface StackV4Endpoint {
     @Operation(summary = STACK_UPGRADE, operationId = "upgradeClusterByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier upgradeClusterByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("internal/{name}/cluster_upgrade")
@@ -571,7 +571,7 @@ public interface StackV4Endpoint {
     @Operation(summary = STACK_UPGRADE_INTERNAL, operationId = "upgradeClusterByNameInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier upgradeClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
             @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled);
 
     @GET
@@ -580,7 +580,7 @@ public interface StackV4Endpoint {
     @Operation(summary = STACK_UPGRADE_REINITIABLE, operationId = "getClusterUpgradeReinitiableByNameInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeReinitiableV4Response getClusterUpgradeReinitiableByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("internal/{crn}/prepare_cluster_upgrade")
@@ -588,7 +588,7 @@ public interface StackV4Endpoint {
     @Operation(summary = STACK_UPGRADE_INTERNAL, operationId = "prepareClusterUpgradeByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier prepareClusterUpgradeByCrnInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("internal/{name}/check_rds_upgrade")
@@ -659,7 +659,7 @@ public interface StackV4Endpoint {
     @Operation(summary = UPDATE_SALT, operationId = "updateSaltByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateSaltByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId, @QueryParam("skipHighstate") @DefaultValue("false") boolean skipHighstate);
+            @QueryParam("accountId") @NotEmpty String accountId, @QueryParam("skipHighstate") @DefaultValue("false") boolean skipHighstate);
 
     /**
      * @deprecated Use updatePillarConfigurationByCrn instead
@@ -689,7 +689,7 @@ public interface StackV4Endpoint {
             @QueryParam("backupLocation") String backupLocation,
             @QueryParam("backupId") String backupId,
             @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,
-            @QueryParam("accountId") String accountId,
+            @QueryParam("accountId") @NotEmpty String accountId,
             @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
@@ -703,7 +703,7 @@ public interface StackV4Endpoint {
             @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation,
             @QueryParam("closeConnections") boolean closeConnections,
             @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
             @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
@@ -716,7 +716,7 @@ public interface StackV4Endpoint {
     RestoreV4Response restoreDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation,
             @QueryParam("backupId") String backupId,
-            @QueryParam("accountId") String accountId,
+            @QueryParam("accountId") @NotEmpty String accountId,
             @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
@@ -729,7 +729,7 @@ public interface StackV4Endpoint {
     RestoreV4Response restoreDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation,
             @QueryParam("backupId") String backupId,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
             @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
@@ -739,7 +739,7 @@ public interface StackV4Endpoint {
     @Operation(summary = RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL, operationId = "recoverClusterInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RecoveryV4Response recoverClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("internal/{name}/cluster_recoverable")
@@ -747,7 +747,7 @@ public interface StackV4Endpoint {
     @Operation(summary = "validates if the cluster is recoverable or not", operationId = "getClusterRecoverableByNameInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RecoveryValidationV4Response getClusterRecoverableByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("{name}/refresh_recipes")
@@ -755,7 +755,7 @@ public interface StackV4Endpoint {
     @Operation(summary = REFRESH_RECIPES_IN_WORKSPACE, operationId = "refreshStackRecipes",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpdateRecipesV4Response refreshRecipes(@PathParam("workspaceId") Long workspaceId, @Valid UpdateRecipesV4Request request,
-            @PathParam("name") String name, @QueryParam("accountId") String accountId);
+            @PathParam("name") String name, @QueryParam("accountId") @NotEmpty String accountId);
 
     @PUT
     @Path("internal/{name}/refresh_recipes")
@@ -763,7 +763,7 @@ public interface StackV4Endpoint {
     @Operation(summary = REFRESH_RECIPES_IN_WORKSPACE_INTERNAL, operationId = "refreshRecipesInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpdateRecipesV4Response refreshRecipesInternal(@PathParam("workspaceId") Long workspaceId, @Valid UpdateRecipesV4Request request,
-            @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @PathParam("name") String name, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("{name}/attach_recipe")
@@ -771,7 +771,7 @@ public interface StackV4Endpoint {
     @Operation(summary = ATTACH_RECIPE_IN_WORKSPACE, operationId = "attachStackRecipe",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AttachRecipeV4Response attachRecipe(@PathParam("workspaceId") Long workspaceId, @Valid AttachRecipeV4Request request,
-            @PathParam("name") String name, @QueryParam("accountId") String accountId);
+            @PathParam("name") String name, @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("internal/{name}/attach_recipe")
@@ -779,7 +779,7 @@ public interface StackV4Endpoint {
     @Operation(summary = ATTACH_RECIPE_IN_WORKSPACE_INTERNAL, operationId = "attachRecipeInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AttachRecipeV4Response attachRecipeInternal(@PathParam("workspaceId") Long workspaceId, @Valid AttachRecipeV4Request request,
-            @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @PathParam("name") String name, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("{name}/detach_recipe")
@@ -787,7 +787,7 @@ public interface StackV4Endpoint {
     @Operation(summary = DETACH_RECIPE_IN_WORKSPACE, operationId = "detachStackRecipe",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetachRecipeV4Response detachRecipe(@PathParam("workspaceId") Long workspaceId, @Valid DetachRecipeV4Request request,
-            @PathParam("name") String name, @QueryParam("accountId") String accountId);
+            @PathParam("name") String name, @QueryParam("accountId") @NotEmpty String accountId);
 
     @POST
     @Path("internal/{name}/detach_recipe")
@@ -795,7 +795,7 @@ public interface StackV4Endpoint {
     @Operation(summary = DETACH_RECIPE_IN_WORKSPACE_INTERNAL, operationId = "detachRecipeInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetachRecipeV4Response detachRecipeInternal(@PathParam("workspaceId") Long workspaceId, @Valid DetachRecipeV4Request request,
-            @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @PathParam("name") String name, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("internal/{name}/rotate_autotls_certificates")
@@ -803,7 +803,7 @@ public interface StackV4Endpoint {
     @Operation(summary = ROTATE_CERTIFICATES, operationId = "rotateAutoTlsCertificates",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CertificatesRotationV4Response rotateAutoTlsCertificates(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
 
     @POST
     @Path("internal/{name}/renew_certificate")
@@ -812,7 +812,7 @@ public interface StackV4Endpoint {
             description = Notes.RENEW_CERTIFICATE_NOTES, operationId = "renewStackCertificate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier renewCertificate(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("internal/crn/{crn}/renew_certificate")
@@ -828,7 +828,7 @@ public interface StackV4Endpoint {
     @Operation(summary = UPDATE_LOAD_BALANCERS, operationId = "updateLoadBalancersInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateLoadBalancersInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("internal/{name}/change_image_catalog")
@@ -836,7 +836,7 @@ public interface StackV4Endpoint {
     @Operation(summary = CHANGE_IMAGE_CATALOG, operationId = "changeImageCatalogInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void changeImageCatalogInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
 
     @GET
     @Path("internal/{name}/generate_image_catalog")
@@ -844,7 +844,7 @@ public interface StackV4Endpoint {
     @Operation(summary = GENERATE_IMAGE_CATALOG, operationId = "generateImageCatalogInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     GenerateImageCatalogV4Response generateImageCatalogInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("internal/{crn}/ranger_raz_enabled")
@@ -852,7 +852,7 @@ public interface StackV4Endpoint {
     @Operation(summary = RANGER_RAZ_ENABLED, operationId = "rangerRazEnabled",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RangerRazEnabledV4Response rangerRazEnabledInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("internal/{crn}/re_register_cluster_proxy_config")
@@ -861,7 +861,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier reRegisterClusterProxyConfig(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("skipFullReRegistration") @DefaultValue("false") boolean skipFullReRegistration, @QueryParam("originalCrn") String originalCrn,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("internal/{name}/vertical_scaling")
@@ -872,7 +872,7 @@ public interface StackV4Endpoint {
     FlowIdentifier verticalScalingByName(
             @PathParam("workspaceId") Long workspaceId,
             @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
             @Valid StackVerticalScaleV4Request updateRequest);
 
     @GET
@@ -883,7 +883,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
             @PathParam("workspaceId") Long workspaceId,
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @POST
     @Path("{name}/determine_datalake_data_sizes")
@@ -899,7 +899,7 @@ public interface StackV4Endpoint {
     @Operation(summary = ROTATE_STACK_SECRETS, operationId = "rotateStackSecrets",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true), hidden = true)
     FlowIdentifier rotateSecrets(@PathParam("workspaceId") Long workspaceId, @Valid @NotNull StackV4SecretRotationRequest request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("internal/{crn}/refresh_entitlement_params")
@@ -907,7 +907,7 @@ public interface StackV4Endpoint {
     @Operation(summary = REFRESH_ENTITLEMENTS_PARAMS, operationId = "refreshEntitlementParams",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true), hidden = true)
     FlowIdentifier refreshEntitlementParams(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Deprecated
@@ -927,7 +927,7 @@ public interface StackV4Endpoint {
     FlowIdentifier restartClusterServices(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("rollingRestart") @DefaultValue("false") boolean rollingRestart,
             @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("{name}/trigger_sku_migration")
@@ -935,7 +935,7 @@ public interface StackV4Endpoint {
     @Operation(summary = "Triggering SKU migration", operationId = "triggerSkuMigration",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier triggerSkuMigration(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("force") @DefaultValue("false") boolean force, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("force") @DefaultValue("false") boolean force, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("imd_update")
@@ -943,7 +943,7 @@ public interface StackV4Endpoint {
     @Operation(summary = IMD_UPDATE, operationId = "imdUpdate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier instanceMetadataUpdate(@PathParam("workspaceId") Long workspaceId,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
             @NotNull @Valid StackInstanceMetadataUpdateV4Request request);
 
     @PUT
@@ -1002,7 +1002,7 @@ public interface StackV4Endpoint {
     FlowIdentifier setDefaultJavaVersionByCrnInternal(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("internal/crn/{crn}/set_default_java_version/validate")
@@ -1066,7 +1066,7 @@ public interface StackV4Endpoint {
     FlowIdentifier updatePublicDnsEntriesByCrn(
             @PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("internal/get_clusters_names_by_encryption_profile/{crn}")
@@ -1098,7 +1098,7 @@ public interface StackV4Endpoint {
     void modifyNotificationStateByCrn(
             @PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
             @PathParam("notificationState") NotificationState notificationState);
 
     @PUT
@@ -1109,7 +1109,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressCleanupResponse cleanupSecretRotationProgress(@PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-            @NotEmpty @QueryParam("secretType") @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
+            @QueryParam("secretType") @NotEmpty @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
 
     @GET
     @Path("internal/crn/{crn}/get_secret_rotation_progress")
@@ -1119,7 +1119,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressResponse getSecretRotationProgress(@PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-            @NotEmpty @QueryParam("secretType") @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
+            @QueryParam("secretType") @NotEmpty @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
 
     @PUT
     @Path("internal/crn/{crn}/modify_user_defined_tags")
@@ -1142,7 +1142,7 @@ public interface StackV4Endpoint {
     ResetJvmParamsV4Response resetJvmParams(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotNull @Valid ResetJvmParamsRequest request,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("internal/crn/{crn}/update_trusted_realm")

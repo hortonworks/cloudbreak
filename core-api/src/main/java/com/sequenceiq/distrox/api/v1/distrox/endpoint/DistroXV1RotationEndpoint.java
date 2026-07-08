@@ -63,5 +63,5 @@ public interface DistroXV1RotationEndpoint {
     @Operation(summary = "Get rotation progress information", operationId = "getProgress",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressResponse getProgress(@QueryParam("secretType") @ValidSecretType(allowedTypes = CloudbreakSecretType.class) @NotEmpty String secretType,
-            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @QueryParam("datahubCrn") String datahubCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @QueryParam("datahubCrn") @NotEmpty String datahubCrn);
 }

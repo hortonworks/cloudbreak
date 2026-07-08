@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DistroXSecretRotationCleanupProgressRequest {
 
+    @NotEmpty
     @ResourceCrn
     @ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
     private String crn;

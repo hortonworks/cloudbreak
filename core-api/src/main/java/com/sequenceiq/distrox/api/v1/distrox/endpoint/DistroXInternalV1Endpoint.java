@@ -67,14 +67,14 @@ public interface DistroXInternalV1Endpoint {
             operationId = "getDistroXStatusInternalV1ByEnvCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Responses getStatusByEnvironmentCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
     @Path("list")
     @Operation(summary = LIST, description = Notes.STACK_NOTES,
             operationId = "listDistroXInternalV1ByEnvCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    StackViewV4Responses list(@QueryParam("environmentCrn") String environmentCrn);
+    StackViewV4Responses list(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @POST
     @Path("crn/{crn}/renew_certificate")

@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.crossrealm;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -39,7 +40,7 @@ public interface TrustV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.SETUP_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "prepareCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
-    PrepareCrossRealmTrustResponse setup(@Valid PrepareCrossRealmTrustRequest request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    PrepareCrossRealmTrustResponse setup(@Valid PrepareCrossRealmTrustRequest request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @POST
     @Path("/finish_setup")
@@ -47,7 +48,8 @@ public interface TrustV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.SETUP_FINISH_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "finishCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
-    FinishSetupCrossRealmTrustResponse finishSetup(@Valid FinishSetupCrossRealmTrustRequest request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    FinishSetupCrossRealmTrustResponse finishSetup(@Valid FinishSetupCrossRealmTrustRequest request,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("/trust_setup_commands")
@@ -83,7 +85,7 @@ public interface TrustV1Endpoint {
             operationId = "cancelCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
     CancelCrossRealmTrustResponse cancelByCrn(
-            @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
 
     @POST
     @Path("/repair")
@@ -92,5 +94,5 @@ public interface TrustV1Endpoint {
             operationId = "repairCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
     RepairCrossRealmTrustResponse repairByCrn(
-            @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
 }

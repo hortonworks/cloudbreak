@@ -30,6 +30,8 @@ import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 public class EnforceAuthorizationTestUtil {
 
+    private static final String MOCK_PACKAGE_PREFIX = "com.sequenceiq.mock";
+
     private static final Reflections REFLECTIONS = new Reflections("com.sequenceiq",
         new FieldAnnotationsScanner(),
         new TypeAnnotationsScanner(),
@@ -60,6 +62,7 @@ public class EnforceAuthorizationTestUtil {
         List<String> validationErrors = Sets.difference(authorizationResourceClasses,
                         Sets.union(Set.of("ExampleAuthorizationResourceClass"), disabledAuthzOrInternalOnlyClasses))
                 .stream()
+                .filter(clazz -> !clazz.getPackageName().startsWith(MOCK_PACKAGE_PREFIX))
                 .map(Class::getDeclaredMethods)
                 .flatMap(Arrays::stream)
                 .filter(method -> Modifier.isPublic(method.getModifiers()))

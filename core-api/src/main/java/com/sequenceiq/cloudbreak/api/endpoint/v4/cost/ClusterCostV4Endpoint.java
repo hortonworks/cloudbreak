@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.cost;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -32,7 +33,7 @@ public interface ClusterCostV4Endpoint {
     @Operation(summary = OperationDescriptions.CostOpDescription.LIST,
             description = Notes.CLUSTER_COST_NOTES, operationId = "listClusterCostV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCostResponse list(List<String> clusterCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    RealTimeCostResponse list(List<String> clusterCrns, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
     @Path("environment")
@@ -40,5 +41,5 @@ public interface ClusterCostV4Endpoint {
     @Operation(summary = OperationDescriptions.CostOpDescription.LIST_BY_ENV,
             description = Notes.CLUSTER_COST_NOTES, operationId = "listClusterCostByEnvV4",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCostResponse listByEnv(ClusterCostV4Request clusterCostV4Request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+    RealTimeCostResponse listByEnv(ClusterCostV4Request clusterCostV4Request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }
