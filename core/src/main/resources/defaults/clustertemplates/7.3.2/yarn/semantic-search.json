@@ -1,0 +1,104 @@
+{
+  "name": "7.3.2 - Semantic Search for YCloud",
+  "description": "",
+  "type": "SEMANTIC_SEARCH",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Semantic Search"
+    },
+    "instanceGroups": [
+      {
+        "name": "gateway",
+        "type": "GATEWAY",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 8,
+            "memory": 32768
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        }
+      },
+      {
+        "name": "manager",
+        "type": "CORE",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 8,
+            "memory": 32768
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        }
+      },
+      {
+        "name": "data",
+        "type": "CORE",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 8,
+            "memory": 32768
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        }
+      },
+      {
+        "name": "ingest",
+        "type": "CORE",
+        "nodeCount": 0,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 8,
+            "memory": 16384
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        }
+      },
+      {
+        "name": "coordinator",
+        "type": "CORE",
+        "nodeCount": 0,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 8,
+            "memory": 65536
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        }
+      },
+      {
+        "name": "machinelearning",
+        "type": "CORE",
+        "nodeCount": 0,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 8,
+            "memory": 65536
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        }
+      }
+    ]
+  }
+}

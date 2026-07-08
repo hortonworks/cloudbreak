@@ -32,4 +32,24 @@ class CdhVersionProviderTest {
         assertEquals(expectedBuildNumber, CdhVersionProvider.getCdhBuildNumberFromVersionString(versionString));
     }
 
+    static Stream<Arguments> testGetCdhFullVersionArguments() {
+        return Stream.of(
+                Arguments.of(null, ""),
+                Arguments.of("", ""),
+                Arguments.of("invalid-version", ""),
+                Arguments.of("7.2.18", "7.2.18"),
+                Arguments.of("7.2.18-1.cdh7.2.18.p1101", "7.2.18.1101"),
+                Arguments.of("7.2.18-1.cdh7.2.18.p1101.68994679", "7.2.18.1101"),
+                Arguments.of("7.2.18-1200", "7.2.18.1200"),
+                Arguments.of("7.3.2-1.cdh7.3.2.p10000.80393083", "7.3.2.10000"),
+                Arguments.of("7.13.2-1.cdh7.13.2.p20000.12345678", "7.13.2.20000")
+        );
+    }
+
+    @MethodSource("testGetCdhFullVersionArguments")
+    @ParameterizedTest
+    void testGetCdhFullVersion(String versionString, String expectedFullVersion) {
+        assertEquals(expectedFullVersion, CdhVersionProvider.getCdhFullVersionFromVersionString(versionString));
+    }
+
 }

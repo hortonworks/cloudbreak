@@ -310,6 +310,12 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
+            {% if ('OPENSEARCH_MASTER' in exposed or 'OPENSEARCH_COORDINATOR' in exposed) and ('OPENSEARCH_MASTER' in salt['pillar.get']('gateway:location') or 'OPENSEARCH_COORDINATOR' in salt['pillar.get']('gateway:location')) -%}
+            <param>
+                <name>OPENSEARCH</name>
+                <value>enableStickySession=false;noFallback=false;enableLoadBalancing=true</value>
+            </param>
+            {%- endif %}
         </provider>
     </gateway>
 
@@ -753,4 +759,23 @@
     </service>
     {%- endif %}
     {%- endif %}
+
+    {% if 'OPENSEARCH_MASTER' in salt['pillar.get']('gateway:location') or 'OPENSEARCH_COORDINATOR' in salt['pillar.get']('gateway:location') -%}
+    {% if 'OPENSEARCH_MASTER' in exposed or 'OPENSEARCH_COORDINATOR' in exposed-%}
+    <service>
+        <role>OPENSEARCH</role>
+        {% if 'OPENSEARCH_MASTER' in salt['pillar.get']('gateway:location') -%}
+        {% for hostloc in salt['pillar.get']('gateway:location')['OPENSEARCH_MASTER'] -%}
+        <url>{{ protocols['OPENSEARCH_MASTER'] }}://{{ hostloc }}:{{ ports['OPENSEARCH_MASTER'] }}</url>
+        {%- endfor %}
+        {%- endif %}
+        {% if 'OPENSEARCH_COORDINATOR' in salt['pillar.get']('gateway:location') -%}
+        {% for hostloc in salt['pillar.get']('gateway:location')['OPENSEARCH_COORDINATOR'] -%}
+        <url>{{ protocols['OPENSEARCH_COORDINATOR'] }}://{{ hostloc }}:{{ ports['OPENSEARCH_COORDINATOR'] }}</url>
+        {%- endfor %}
+        {%- endif %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
 </topology>

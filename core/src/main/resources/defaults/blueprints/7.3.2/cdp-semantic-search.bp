@@ -1,0 +1,102 @@
+{
+  "description": "7.3.2 - Semantic Search",
+  "blueprint": {
+    "cdhVersion" : "7.3.2",
+    "displayName" : "semantic-search",
+    "blueprintUpgradeOption": "ENABLED",
+    "services": [
+      {
+        "refName" : "opensearch",
+        "serviceType" : "OPENSEARCH",
+        "roleConfigGroups" : [
+          {
+            "refName" : "opensearch-OPENSEARCH_MASTER-BASE",
+            "roleType" : "OPENSEARCH_MASTER",
+            "base" : true
+          },
+          {
+            "refName" : "opensearch-OPENSEARCH_DATA-BASE",
+            "roleType" : "OPENSEARCH_DATA",
+            "base" : true
+          },
+          {
+            "refName" : "opensearch-OPENSEARCH_COORDINATOR-BASE",
+            "roleType" : "OPENSEARCH_COORDINATOR",
+            "base" : true
+          },
+          {
+            "refName" : "opensearch-OPENSEARCH_INGEST-BASE",
+            "roleType" : "OPENSEARCH_INGEST",
+            "base" : true
+          },
+          {
+            "refName" : "opensearch-OPENSEARCH_ML-BASE",
+            "roleType" : "OPENSEARCH_ML",
+            "base" : true
+          },
+          {
+            "refName" : "opensearch-OPENSEARCH_DASHBOARD-BASE",
+            "roleType" : "OPENSEARCH_DASHBOARD",
+            "base" : true
+          }
+        ]
+      },
+      {
+        "refName": "knox",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          }
+        ],
+        "serviceType": "KNOX"
+      }
+    ],
+    "hostTemplates" : [
+      {
+        "refName" : "gateway",
+        "cardinality" : 1,
+        "roleConfigGroupsRefNames" : [
+          "knox-KNOX_GATEWAY-BASE",
+          "opensearch-OPENSEARCH_DASHBOARD-BASE"
+        ]
+      },
+      {
+        "refName" : "manager",
+        "cardinality" : 3,
+        "roleConfigGroupsRefNames" : [
+          "opensearch-OPENSEARCH_MASTER-BASE"
+        ]
+      },
+      {
+        "refName" : "data",
+        "cardinality" : 3,
+        "roleConfigGroupsRefNames" : [
+          "opensearch-OPENSEARCH_DATA-BASE"
+        ]
+      },
+      {
+        "refName" : "ingest",
+        "cardinality" : 0,
+        "roleConfigGroupsRefNames" : [
+          "opensearch-OPENSEARCH_INGEST-BASE"
+        ]
+      },
+      {
+        "refName" : "coordinator",
+        "cardinality" : 0,
+        "roleConfigGroupsRefNames" : [
+          "opensearch-OPENSEARCH_COORDINATOR-BASE"
+        ]
+      },
+      {
+        "refName" : "machinelearning",
+        "cardinality" : 0,
+        "roleConfigGroupsRefNames" : [
+          "opensearch-OPENSEARCH_ML-BASE"
+        ]
+      }
+    ]
+  }
+}

@@ -23,7 +23,8 @@ public enum ClusterTemplateV4Type {
     DATAVIZ,
     HYBRID_DATAENGINEERING_HA,
     HYBRID_STREAMING,
-    HYBRID_DATAMART;
+    HYBRID_DATAMART,
+    SEMANTIC_SEARCH;
 
     public boolean isHybrid() {
         return name().startsWith("HYBRID_");

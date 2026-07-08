@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
@@ -58,7 +59,7 @@ class StackBlueprintValidatorTest {
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         ServiceComponent serviceComponent = mock(ServiceComponent.class);
 
-        Image image = createImage("7.13.2.10000");
+        Image image = createImage("7.3.2-1.cdh7.3.2.p100.79687996");
 
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprintService.get(1L)).thenReturn(blueprint);
@@ -88,7 +89,7 @@ class StackBlueprintValidatorTest {
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateComponentsByRuntime(stackV4Request, stack, image));
-        assertEquals("DATAVIZ clusters only supperted if Cloudera Manager is >= 7.13.2.100", exception.getMessage());
+        assertEquals("DATAVIZ clusters only supported if Cloudera Manager is >= 7.3.2.100", exception.getMessage());
     }
 
     @Test
@@ -110,34 +111,38 @@ class StackBlueprintValidatorTest {
     }
 
     @Test
-    void testValidateComponentsByRuntimeWhenNoRuntimeVersion() {
+    void testValidateComponentsByRuntimeWhenNoImageStackDetailsUsesProductVersion() {
         StackDto stack = mock(StackDto.class);
         StackV4Request stackV4Request = mock(StackV4Request.class);
         ClouderaManagerV4Request clouderaManagerV4Request = mock(ClouderaManagerV4Request.class);
         ClusterV4Request clusterV4Request = mock(ClusterV4Request.class);
-        ClouderaManagerRepositoryV4Request clouderaManagerRepositoryV4Request = mock(ClouderaManagerRepositoryV4Request.class);
         Image image = mock(Image.class);
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         ServiceComponent serviceComponent = mock(ServiceComponent.class);
 
+        ClouderaManagerProductV4Request cdhProduct = new ClouderaManagerProductV4Request();
+        cdhProduct.setName("CDH");
+        cdhProduct.setVersion("7.3.2-1.cdh7.3.2.p100.12345678");
+
         when(image.getStackDetails()).thenReturn(null);
         when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
         when(clusterV4Request.getCm()).thenReturn(clouderaManagerV4Request);
-        when(clouderaManagerV4Request.getRepository()).thenReturn(clouderaManagerRepositoryV4Request);
-        when(clouderaManagerRepositoryV4Request.getVersion()).thenReturn("7.13.2.1000");
+        when(clouderaManagerV4Request.getProducts()).thenReturn(List.of(cdhProduct));
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprintService.get(1L)).thenReturn(blueprint);
         when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
         when(serviceComponent.getService()).thenReturn(DatavizRoles.DATAVIZ);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(Set.of(serviceComponent));
+
         assertDoesNotThrow(() -> underTest.validateComponentsByRuntime(stackV4Request, stack, image));
     }
 
     private Image createImage(String version) {
-        StackRepoDetails stackRepoDetails = new StackRepoDetails(Map.of("repository-version", version), null);
-        ImageStackDetails imageStackDetails = new ImageStackDetails(null, stackRepoDetails, null);
+        StackRepoDetails stackRepoDetails = new StackRepoDetails(
+                Map.of(com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION, version), null);
+        ImageStackDetails imageStackDetails = new ImageStackDetails(version, stackRepoDetails, null);
         Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(imageStackDetails);
         return image;

@@ -950,6 +950,36 @@
       "visibleForDatalake": false,
       "visibleForDatahub": true,
       "minVersion": "7.3.2"
+    },
+    {
+      "name": "OPENSEARCH_MASTER",
+      "displayName": "Cloudera OpenSearch",
+      "serviceName": "OPENSEARCH_MASTER",
+      "knoxService": "OPENSEARCH_MASTER",
+      "knoxUrl": "/opensearch/",
+      "ssoSupported": false,
+      "port": 9200,
+      "tlsPort": 9200,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true,
+      "minVersion": "7.3.2"
+    },
+    {
+      "name": "OPENSEARCH_COORDINATOR",
+      "displayName": "Cloudera OpenSearch",
+      "serviceName": "OPENSEARCH_COORDINATOR",
+      "knoxService": "OPENSEARCH_COORDINATOR",
+      "knoxUrl": "/opensearch/",
+      "ssoSupported": false,
+      "port": 9200,
+      "tlsPort": 9200,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true,
+      "minVersion": "7.3.2"
     }
   ]
 }

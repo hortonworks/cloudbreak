@@ -152,7 +152,9 @@ class ExposedServiceCollectorTest {
                 "KAFKA_BROKER",
                 "DLM_SERVER",
                 "CLO_SERVER",
-                "DATAVIZ_WEBSERVER");
+                "DATAVIZ_WEBSERVER",
+                "OPENSEARCH_MASTER",
+                "OPENSEARCH_COORDINATOR");
     }
 
     @Test
@@ -221,7 +223,9 @@ class ExposedServiceCollectorTest {
                 "KAFKA_BROKER",
                 "DLM",
                 "LAKEHOUSE_OPTIMIZER",
-                "DATAVIZ");
+                "DATAVIZ",
+                "OPENSEARCH_MASTER",
+                "OPENSEARCH_COORDINATOR");
     }
 
     @Test
@@ -582,7 +586,9 @@ class ExposedServiceCollectorTest {
                 Map.entry("SSB-SSE-UI", "https"),
                 Map.entry("SSB-SSE-WS", "https"),
                 Map.entry("LAKEHOUSE_OPTIMIZER", "https"),
-                Map.entry("DATAVIZ", "https")
+                Map.entry("DATAVIZ", "https"),
+                Map.entry("OPENSEARCH_MASTER", "https"),
+                Map.entry("OPENSEARCH_COORDINATOR", "https")
         );
     }
 
@@ -773,7 +779,9 @@ class ExposedServiceCollectorTest {
                 Map.entry("SSB-SSE-UI", "http"),
                 Map.entry("SSB-SSE-WS", "http"),
                 Map.entry("LAKEHOUSE_OPTIMIZER", "http"),
-                Map.entry("DATAVIZ", "http")
+                Map.entry("DATAVIZ", "http"),
+                Map.entry("OPENSEARCH_MASTER", "http"),
+                Map.entry("OPENSEARCH_COORDINATOR", "http")
         );
     }
 
@@ -1560,7 +1568,9 @@ class ExposedServiceCollectorTest {
                 Map.entry("SSB-SSE-UI", 18121),
                 Map.entry("SSB-SSE-WS", 18121),
                 Map.entry("LAKEHOUSE_OPTIMIZER", 8087),
-                Map.entry("DATAVIZ", 8100)
+                Map.entry("DATAVIZ", 8100),
+                Map.entry("OPENSEARCH_MASTER", 9200),
+                Map.entry("OPENSEARCH_COORDINATOR", 9200)
         );
     }
 

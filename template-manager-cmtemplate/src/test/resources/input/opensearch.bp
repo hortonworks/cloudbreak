@@ -1,0 +1,68 @@
+{
+  "cdhVersion": "7.3.1",
+  "displayName": "opensearch",
+  "services": [
+    {
+      "refName": "opensearch",
+      "serviceType": "OPENSEARCH",
+      "roleConfigGroups": [
+        {
+          "refName": "opensearch-OPENSEARCH_MASTER-BASE",
+          "roleType": "OPENSEARCH_MASTER",
+          "base": true
+        },
+        {
+          "refName": "opensearch-OPENSEARCH_DATA-BASE",
+          "roleType": "OPENSEARCH_DATA",
+          "base": true
+        },
+        {
+          "refName": "opensearch-OPENSEARCH_COORDINATOR-BASE",
+          "roleType": "OPENSEARCH_COORDINATOR",
+          "base": true
+        },
+        {
+          "refName": "opensearch-OPENSEARCH_INGEST-BASE",
+          "roleType": "OPENSEARCH_INGEST",
+          "base": true
+        },
+        {
+          "refName": "opensearch-OPENSEARCH_ML-BASE",
+          "roleType": "OPENSEARCH_ML",
+          "base": true
+        },
+        {
+          "refName": "opensearch-OPENSEARCH_DASHBOARD-BASE",
+          "roleType": "OPENSEARCH_DASHBOARD",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "gateway",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "opensearch-OPENSEARCH_DASHBOARD-BASE"
+      ]
+    },
+    {
+      "refName": "master",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "opensearch-OPENSEARCH_MASTER-BASE"
+      ]
+    },
+    {
+      "refName": "worker",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "opensearch-OPENSEARCH_DATA-BASE",
+        "opensearch-OPENSEARCH_COORDINATOR-BASE",
+        "opensearch-OPENSEARCH_INGEST-BASE",
+        "opensearch-OPENSEARCH_ML-BASE"
+      ]
+    }
+  ]
+}

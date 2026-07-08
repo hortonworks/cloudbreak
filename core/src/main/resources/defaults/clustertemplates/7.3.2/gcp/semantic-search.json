@@ -1,0 +1,116 @@
+{
+  "name": "7.3.2 - Semantic Search for GCP",
+  "description": "",
+  "type": "SEMANTIC_SEARCH",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Semantic Search"
+    },
+    "instanceGroups": [
+      {
+        "name": "gateway",
+        "type": "GATEWAY",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "instanceType": "n2-standard-8",
+          "cloudPlatform": "GCP"
+        }
+      },
+      {
+        "name": "manager",
+        "type": "CORE",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "n2-standard-8",
+          "cloudPlatform": "GCP"
+        }
+      },
+      {
+        "name": "data",
+        "type": "CORE",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 500,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "n2-standard-8",
+          "cloudPlatform": "GCP"
+        }
+      },
+      {
+        "name": "ingest",
+        "type": "CORE",
+        "nodeCount": 0,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "c3-highcpu-8",
+          "cloudPlatform": "GCP"
+        }
+      },
+      {
+        "name": "coordinator",
+        "type": "CORE",
+        "nodeCount": 0,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "n2-highmem-8",
+          "cloudPlatform": "GCP"
+        }
+      },
+      {
+        "name": "machinelearning",
+        "type": "CORE",
+        "nodeCount": 0,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "n2-highmem-8",
+          "cloudPlatform": "GCP"
+        }
+      }
+    ]
+  }
+}

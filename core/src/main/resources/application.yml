@@ -571,6 +571,7 @@ cb:
           7.3.2 - Data Visualization=cdp-dataviz;
           7.3.2 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE=cdp-sdx-without-hdfs-hbase;
           7.3.2 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph=cdp-sdx-enterprise-without-hdfs-hbase;
+          7.3.2 - Semantic Search=cdp-semantic-search;
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
 
