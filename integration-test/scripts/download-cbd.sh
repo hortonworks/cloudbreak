@@ -6,7 +6,7 @@
 
 cd $INTEGCB_LOCATION
 
-os=$(uname)
+os=$(uname)_$(uname -m)
 echo -e "\n\033[1;96m--- build latest cbd: $CB_TARGET_BRANCH for $os\033[0m\n"
 rm_flag="--rm"
 
