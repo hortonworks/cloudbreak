@@ -68,9 +68,9 @@ public class MinionAcceptor {
             List<String> unacceptedMinions = new ArrayList<>(minionKeysOnMaster.getUnacceptedMinions());
             List<String> deniedMinions = minionKeysOnMaster.getDeniedMinions();
             List<String> conflictingMinions = removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions);
-            removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
+            List<String> deniedOnlyMinions = removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
             List<String> unexpectedMinions = removeMinionIdsThatAreNotExpected(sc, unacceptedMinions);
-            removedConflictingMinion = removedConflictingMinion || !conflictingMinions.isEmpty();
+            removedConflictingMinion = removedConflictingMinion || !conflictingMinions.isEmpty() || !deniedOnlyMinions.isEmpty();
             unacceptedMinions = unacceptedMinions.stream()
                     .filter(not(conflictingMinions::contains))
                     .filter(not(unexpectedMinions::contains))
@@ -127,14 +127,16 @@ public class MinionAcceptor {
         return MINION_DELETION_POLLING_TIMEOUT_IN_MINUTES;
     }
 
-    private void removeMinionIdsOnlyInDeniedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
+    private List<String> removeMinionIdsOnlyInDeniedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
             throws CloudbreakOrchestratorFailedException {
-        ArrayList<String> minionIdsOnlyDenied = new ArrayList<String>(deniedMinions);
-        minionIdsOnlyDenied.removeAll(unacceptedMinions);
+        List<String> minionIdsOnlyDenied = deniedMinions.stream().distinct()
+                .filter(not(unacceptedMinions::contains))
+                .collect(Collectors.toList());
         if (!minionIdsOnlyDenied.isEmpty()) {
             LOGGER.info("There are minions in denied state, removing: {}", minionIdsOnlyDenied);
             deleteSaltKey(sc, minionIdsOnlyDenied);
         }
+        return minionIdsOnlyDenied;
     }
 
     private List<String> removeMinionIdsThatAreNotExpected(SaltConnector sc, List<String> unacceptedMinions)

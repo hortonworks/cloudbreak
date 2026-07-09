@@ -279,7 +279,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    void handleIfMinionDenied() throws Exception {
+    void deniedOnlyMinionIsRemovedAndTriggersRestart() {
         MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
 
         Minion m1 = new Minion();
@@ -299,7 +299,10 @@ class MinionAcceptorTest {
 
         MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2, m3), List.of(m1, m2, m3),
                 new EqualMinionFpMatcher(), new FingerprintFromSbCollector(), saltStateService);
-        underTest.acceptMinions();
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        assertEquals("Minion(s) were removed, restart bootstrap to ensure all minion present", exception.getMessage());
+        verify(sc).wheel(eq("key.delete"), argThat(arg -> arg.containsAll(List.of("m2.d", "m3.d"))), eq(Object.class));
     }
 
     @Test
