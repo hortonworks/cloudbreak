@@ -194,7 +194,7 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request)).thenReturn(customImage);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(customImageCatalogService.createCustomImage(eq(WORKSPACE_ID), anyString(), eq(IMAGE_CATALOG_NAME), eq(customImage)))
+        when(customImageCatalogService.createOrUpdateCustomImage(eq(WORKSPACE_ID), anyString(), eq(IMAGE_CATALOG_NAME), eq(customImage)))
                 .thenReturn(savedCustomImage);
         when(customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage)).thenReturn(expected);
 

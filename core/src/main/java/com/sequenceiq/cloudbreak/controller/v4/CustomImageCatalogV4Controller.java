@@ -148,7 +148,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
             CustomImageCatalogV4CreateImageRequest request, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request);
         CustomImage savedCustomImage = customImageCatalogService
-                .createCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, name, customImage);
+                .createOrUpdateCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, name, customImage);
 
         return customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage);
     }

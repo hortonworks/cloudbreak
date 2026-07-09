@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -93,29 +94,57 @@ public class CustomImageCatalogService {
         }
     }
 
-    public CustomImage createCustomImage(Long workspaceId, String accountId, String imageCatalogName, CustomImage customImage) {
-        String imageName = UUID.randomUUID().toString();
-        LOGGER.debug(String.format("Create custom image '%s' in catalog '%s' in workspace '%d'", imageName, imageCatalogName, workspaceId));
-
+    public CustomImage createOrUpdateCustomImage(Long workspaceId, String accountId, String imageCatalogName, CustomImage customImage) {
         try {
             return transactionService.required(() -> {
                 ImageCatalog imageCatalog = getImageCatalog(workspaceId, imageCatalogName);
-                customImage.setName(imageName);
-                customImage.setResourceCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.IMAGE_CATALOG, imageName, accountId));
                 customImage.setImageCatalog(imageCatalog);
-                customImage.getVmImage().stream().forEach(vmImage -> vmImage.setCustomImage(customImage));
-
                 validateSourceImage(customImage);
 
-                imageCatalog.getCustomImages().add(customImage);
-                ImageCatalog result = imageCatalogService.pureSave(imageCatalog);
+                List<CustomImage> matches = findMatchingCustomImages(imageCatalog, customImage);
+                CustomImage upserted = matches.isEmpty()
+                        ? addNewCustomImage(imageCatalog, customImage, accountId, imageCatalogName, workspaceId)
+                        : replaceMatchingCustomImages(imageCatalog, matches, customImage, imageCatalogName);
 
-                return getCustomImageFromCatalog(result, imageName);
+                ImageCatalog savedCatalog = imageCatalogService.pureSave(imageCatalog);
+                return getCustomImageFromCatalog(savedCatalog, upserted.getName());
             });
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error(String.format("Custom image creation failed: %s", e.getMessage()));
             throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
+    }
+
+    private List<CustomImage> findMatchingCustomImages(ImageCatalog imageCatalog, CustomImage customImage) {
+        return imageCatalog.getCustomImages().stream()
+                .filter(existing -> existing.getCustomizedImageId().equalsIgnoreCase(customImage.getCustomizedImageId())
+                        && existing.getImageType() == customImage.getImageType())
+                .sorted(Comparator.comparing(CustomImage::getCreated).reversed())
+                .toList();
+    }
+
+    private CustomImage addNewCustomImage(ImageCatalog imageCatalog, CustomImage customImage, String accountId, String imageCatalogName,
+            Long workspaceId) {
+        String imageName = UUID.randomUUID().toString();
+        LOGGER.debug(String.format("Creating custom image '%s' in catalog '%s' in workspace '%d'", imageName, imageCatalogName, workspaceId));
+        customImage.setName(imageName);
+        customImage.setResourceCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.IMAGE_CATALOG, imageName, accountId));
+        customImage.getVmImage().forEach(vmImage -> vmImage.setCustomImage(customImage));
+        imageCatalog.getCustomImages().add(customImage);
+        return customImage;
+    }
+
+    private CustomImage replaceMatchingCustomImages(ImageCatalog imageCatalog, List<CustomImage> matches, CustomImage customImage,
+            String imageCatalogName) {
+        CustomImage mostRecent = matches.get(0);
+        LOGGER.info(String.format("Found %d custom image(s) for source '%s' (type %s) in catalog '%s'; removing duplicates and updating '%s'.",
+                matches.size(), customImage.getCustomizedImageId(), customImage.getImageType(), imageCatalogName, mostRecent.getName()));
+        matches.stream().skip(1).forEach(imageCatalog.getCustomImages()::remove);
+        if (customImage.getBaseParcelUrl() != null) {
+            mostRecent.setBaseParcelUrl(customImage.getBaseParcelUrl());
+        }
+        mergeVmImagesByRegion(mostRecent, customImage.getVmImage());
+        return mostRecent;
     }
 
     public CustomImage deleteCustomImage(Long workspaceId, String imageCatalogName, String imageId) {
@@ -158,21 +187,7 @@ public class CustomImageCatalogService {
                     savedCustomImage.setBaseParcelUrl(customImage.getBaseParcelUrl());
                 }
                 if (customImage.getVmImage() != null) {
-                    Set<VmImage> vmImagesToSave = new HashSet<>(customImage.getVmImage());
-                    for (VmImage savedVmImage : savedCustomImage.getVmImage()) {
-                        Optional<VmImage> vmImage = vmImagesToSave.stream().filter(vm -> vm.getRegion().equals(savedVmImage.getRegion())).findFirst();
-                        if (vmImage.isPresent()) {
-                            savedVmImage.setRegion(vmImage.get().getRegion());
-                            savedVmImage.setImageReference(vmImage.get().getImageReference());
-                            vmImagesToSave.remove(vmImage.get());
-                        } else {
-                            savedCustomImage.getVmImage().remove(savedVmImage);
-                        }
-                    }
-                    for (VmImage vmImage : vmImagesToSave) {
-                        vmImage.setCustomImage(savedCustomImage);
-                        savedCustomImage.getVmImage().add(vmImage);
-                    }
+                    mergeVmImagesByRegion(savedCustomImage, customImage.getVmImage());
                 }
 
                 validateSourceImage(savedCustomImage);
@@ -191,6 +206,36 @@ public class CustomImageCatalogService {
     private CustomImage getCustomImageFromCatalog(ImageCatalog imageCatalog, String imageId) {
         return imageCatalog.getCustomImages().stream().filter(ci -> ci.getName().equalsIgnoreCase(imageId)).findFirst().orElseThrow(
                 () -> new NotFoundException(String.format("Could not find any image with id: '%s' in catalog: '%s'", imageId, imageCatalog.getName())));
+    }
+
+    private void mergeVmImagesByRegion(CustomImage target, Set<VmImage> incomingVmImages) {
+        updateMatchingRegionsInPlace(target, incomingVmImages);
+        removeRegionsMissingFrom(target, incomingVmImages);
+        addNewRegions(target, incomingVmImages);
+    }
+
+    private void updateMatchingRegionsInPlace(CustomImage target, Set<VmImage> incomingVmImages) {
+        for (VmImage existing : target.getVmImage()) {
+            findByRegion(incomingVmImages, existing.getRegion())
+                    .ifPresent(incoming -> existing.setImageReference(incoming.getImageReference()));
+        }
+    }
+
+    private void removeRegionsMissingFrom(CustomImage target, Set<VmImage> incomingVmImages) {
+        target.getVmImage().removeIf(existing -> findByRegion(incomingVmImages, existing.getRegion()).isEmpty());
+    }
+
+    private void addNewRegions(CustomImage target, Set<VmImage> incomingVmImages) {
+        for (VmImage incoming : incomingVmImages) {
+            if (findByRegion(target.getVmImage(), incoming.getRegion()).isEmpty()) {
+                incoming.setCustomImage(target);
+                target.getVmImage().add(incoming);
+            }
+        }
+    }
+
+    private Optional<VmImage> findByRegion(Set<VmImage> vmImages, String region) {
+        return vmImages.stream().filter(vmImage -> region.equals(vmImage.getRegion())).findFirst();
     }
 
     private void validateSourceImage(CustomImage customImage) {
