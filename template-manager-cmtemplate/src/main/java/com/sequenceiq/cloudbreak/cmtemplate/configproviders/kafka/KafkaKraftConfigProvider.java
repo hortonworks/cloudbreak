@@ -34,9 +34,7 @@ public class KafkaKraftConfigProvider extends AbstractRoleConfigProvider {
             if (zookeeperHostGroup.isEmpty() && kraftHostGroup.isEmpty()) {
                 throw new CloudbreakRuntimeException("KRaft or Zookeeper hostgroup must be present to determine the metadata store type.");
             }
-            if (kraftHostGroup.isPresent() && kraftHostGroup.get().getNodeCount() > 0
-                // support KRaft only in Workload clusters for now
-                && StackType.WORKLOAD.equals(source.getStackType())) {
+            if (kraftHostGroup.isPresent() && kraftHostGroup.get().getNodeCount() > 0) {
                 configs.add(
                     config(KafkaConfigs.METADATA_STORE, "KRaft")
                 );

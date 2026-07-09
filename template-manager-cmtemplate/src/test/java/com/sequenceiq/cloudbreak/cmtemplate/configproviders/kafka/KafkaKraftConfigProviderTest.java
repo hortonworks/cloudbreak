@@ -91,9 +91,6 @@ public class KafkaKraftConfigProviderTest {
     @Test
     public void testOverridesConfigToZookeeperOnWorkloadWhenKraftIsNotPresent() {
         cdpMainVersionIs("7.3.2");
-        HostgroupView kraft = new HostgroupView("kraft", 1, InstanceGroupType.CORE, 3);
-        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
-
         List<ApiClusterTemplateConfig> expectedConfig = List.of(config(KafkaConfigs.METADATA_STORE, "Zookeeper"));
         List<ApiClusterTemplateConfig> actualConfig =
             kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithZookeeper(StackType.WORKLOAD));
@@ -107,6 +104,16 @@ public class KafkaKraftConfigProviderTest {
         List<ApiClusterTemplateConfig> expectedConfig = List.of(config(KafkaConfigs.METADATA_STORE, "Zookeeper"));
         List<ApiClusterTemplateConfig> actualConfig =
             kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithZookeeper(StackType.DATALAKE));
+
+        assertEquals(expectedConfig, actualConfig);
+    }
+
+    @Test
+    public void testOverridesConfigToZookeeperOnDatalakeWhenKraftIsPresent() {
+        cdpMainVersionIs("7.3.2");
+        List<ApiClusterTemplateConfig> expectedConfig = List.of(config(KafkaConfigs.METADATA_STORE, "KRaft"));
+        List<ApiClusterTemplateConfig> actualConfig =
+                kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithKraft(StackType.DATALAKE));
 
         assertEquals(expectedConfig, actualConfig);
     }

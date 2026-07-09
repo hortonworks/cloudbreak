@@ -20,7 +20,8 @@
           "ranger-RANGER_USERSYNC-BASE",
           "solr-SOLR_SERVER-BASE",
           "solr-GATEWAY-BASE",
-          "zookeeper-SERVER-BASE"
+          "zookeeper-SERVER-BASE",
+          "kafka-KAFKA_KRAFT-BASE"
         ]
       },
       {
@@ -309,6 +310,11 @@
       {
         "refName": "kafka",
         "roleConfigGroups": [
+          {
+            "refName": "kafka-KAFKA_KRAFT-BASE",
+            "roleType": "KRAFT",
+            "base": true
+          },
           {
             "base": true,
             "refName": "kafka-GATEWAY-BASE",
