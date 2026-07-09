@@ -162,17 +162,6 @@ public class UpgradeRdsActions {
         };
     }
 
-    // TODO This is for backward compatibility reason, can be removed in CB-24447
-    @Bean(name = "UPGRADE_RDS_START_SERVICES_STATE")
-    public Action<?, ?> restartServicesAndCm() {
-        return new AbstractUpgradeRdsAction<>(UpgradeRdsDataRestoreResult.class) {
-            @Override
-            protected void doExecute(UpgradeRdsContext context, UpgradeRdsDataRestoreResult payload, Map<Object, Object> variables) {
-                sendEvent(context, new UpgradeRdsDataRestoreResult(context.getStackId(), context.getVersion()));
-            }
-        };
-    }
-
     @Bean(name = "UPGRADE_RDS_START_CM_STATE")
     public Action<?, ?> restartClusterManager() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsDataRestoreResult.class) {

@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
@@ -25,8 +24,6 @@ public enum UpgradeRdsEvent implements FlowEvent {
     UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_FINISHED_EVENT(EventSelectorUtil.selector(WaitForDatabaseServerUpgradeResult.class)),
     UPGRADE_RDS_MIGRATE_DATABASE_SETTINGS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsMigrateDatabaseSettingsResponse.class)),
     UPGRADE_RDS_DATA_RESTORE_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsDataRestoreResult.class)),
-    // TODO This is for backward compatibility reason, can be removed in CB-24447
-    UPGRADE_RDS_START_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartServicesResult.class)),
     UPGRADE_RDS_START_CM_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartCMResult.class)),
     UPGRADE_RDS_MIGRATE_SERVICES_DB_SETTINGS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsMigrateServicesDBSettingsResponse.class)),
     UPGRADE_RDS_START_CMSERVICES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartCMServicesResult.class)),
