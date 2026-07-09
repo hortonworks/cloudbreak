@@ -8,3 +8,27 @@ runs:
       shell: bash
       run: |-
         make component-test-steps_component_test
+    - name: component_test_add_test_report
+      if: ${{ always() }}
+      id: component-test-report
+      uses: Kitchen/RE-thirdparty-actions/actions/test-reporter@main
+      with:
+        name: Component Test Report
+        path: 'flow/build/test-results/test/TEST-*.xml'
+        reporter: java-junit
+        list-suites: 'failed'
+        list-tests: 'failed'
+        fail-on-error: 'true'
+        only-summary: 'true'
+    - name: component_test_collect_test_result_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: component-test-test-output-artifact
+        retention-days: 5
+        path: |
+          flow/build/test-results/test/**/*
+          flow/build/reports/tests/test/**/*
+          flow/build/flowlog.html
+          flow/build/flowchainlog.html
+          flow/build/flowoperationstats.html
