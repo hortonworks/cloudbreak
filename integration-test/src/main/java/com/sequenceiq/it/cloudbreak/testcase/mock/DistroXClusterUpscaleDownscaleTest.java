@@ -33,7 +33,7 @@ import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractCloude
 
 public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerTest {
 
-    private static final int CLUSTER_NODE_COUNT_MAX = 1000;
+    private static final int CLUSTER_NODE_COUNT_MAX = 1100;
 
     private static final int CLUSTER_NODE_COUNT_MIN = 2;
 
@@ -65,6 +65,19 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    private static Assertion<DistroXTestDto, CloudbreakClient> assertInstanceCount(String hostGroup, int instanceCount) {
+        return (tc, testDto, client) -> {
+            assertEquals(client.getDefaultClient(tc).distroXV1Endpoint().getByName(testDto.getName(), new HashSet<>())
+                    .getInstanceGroups()
+                    .stream()
+                    .filter(instanceGroup -> hostGroup.equals(instanceGroup.getName()))
+                    .findFirst()
+                    .get()
+                    .getMetadata().size(), instanceCount);
+            return testDto;
+        };
+    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -274,19 +287,6 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
     @Override
     protected BlueprintTestClient blueprintTestClient() {
         return blueprintTestClient;
-    }
-
-    private static Assertion<DistroXTestDto, CloudbreakClient> assertInstanceCount(String hostGroup, int instanceCount) {
-        return (tc, testDto, client) -> {
-            assertEquals(client.getDefaultClient(tc).distroXV1Endpoint().getByName(testDto.getName(), new HashSet<>())
-                    .getInstanceGroups()
-                    .stream()
-                    .filter(instanceGroup -> hostGroup.equals(instanceGroup.getName()))
-                    .findFirst()
-                    .get()
-                    .getMetadata().size(), instanceCount);
-            return testDto;
-        };
     }
 }
 

@@ -221,13 +221,13 @@ cb:
           AZURE: Standard_D32s_v5
     nodeCountLimits:
       safe:
-        cm: 800
-        infrastructure: 800
-        upgrade: 800
+        cm: 900
+        infrastructure: 900
+        upgrade: 900
       experimental:
-        cm: 1000
-        infrastructure: 1000
-        upgrade: 1000
+        cm: 1100
+        infrastructure: 1100
+        upgrade: 1100
 
   imd.update.types:
     IMDS_HTTP_TOKEN_REQUIRED:
