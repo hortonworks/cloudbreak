@@ -13,7 +13,17 @@ set -e
 
 echo "Importing certificates to the default Java certificate trust store."
 
-java /ImportCerts.java "$JAVA_HOME/lib/security/cacerts" changeit "$TRUSTED_CERT_DIR" "$SERVICE_SPECIFIC_CERT_DIR"
+CACERTS_SRC="$JAVA_HOME/lib/security/cacerts"
+CACERTS_WRITABLE="/tmp/cacerts"
+cp "$CACERTS_SRC" "$CACERTS_WRITABLE"
+chmod 644 "$CACERTS_WRITABLE"
+
+java /ImportCerts.java "$CACERTS_WRITABLE" changeit "$TRUSTED_CERT_DIR" "$SERVICE_SPECIFIC_CERT_DIR" "$MOCK_INFRASTRUCTURE_CERT_DIR"
+
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=$CACERTS_WRITABLE"
+
+# Create writable log directory (filesystem is read-only)
+mkdir -p /tmp/datalake-log
 
 JACOCO_AGENT_OPTIONS=""
 if [ "${JACOCO_AGENT_ENABLED:-false}" = true ]; then

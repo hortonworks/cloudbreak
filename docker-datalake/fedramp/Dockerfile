@@ -18,6 +18,7 @@ RUN apk add --no-cache unzip
 
 # install the datalake app
 ADD ${REPO_URL}/com/sequenceiq/datalake/$VERSION/datalake-$VERSION.jar /datalake.jar
+RUN chmod 644 /datalake.jar
 
 # extract schema files
 RUN ( unzip datalake.jar schema/* -d / ) || \
@@ -25,7 +26,11 @@ RUN ( unzip datalake.jar schema/* -d / ) || \
 
 # Install starter script for the Datalake application
 COPY bootstrap/start_datalake_app.sh /
-COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_datalake_api.sh /
+COPY bootstrap/ImportCerts.java /
+
+RUN chmod +x /start_datalake_app.sh /wait_for_datalake_api.sh
+
+WORKDIR /tmp
 
 ENTRYPOINT ["/start_datalake_app.sh"]

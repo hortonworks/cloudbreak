@@ -1,6 +1,6 @@
 FROM docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-fips
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
-MAINTAINER info@cloudera.com
+LABEL maintainer="info@cloudera.com"
 
 # REPO URL to download jar
 ARG REPO_URL=https://nexus-private.eng.cloudera.com/nexus/content/groups/public
@@ -19,6 +19,7 @@ RUN apk add --no-cache unzip
 
 # install the externalized compute app
 ADD ${REPO_URL}/com/sequenceiq/externalized-compute/$VERSION/externalized-compute-$VERSION.jar /externalized-compute.jar
+RUN chmod 644 /externalized-compute.jar
 
 # extract schema files
 RUN ( unzip externalized-compute.jar schema/* -d / ) || \
@@ -26,7 +27,11 @@ RUN ( unzip externalized-compute.jar schema/* -d / ) || \
 
 # Install starter script for the Externalized Compute application
 COPY bootstrap/start_externalizedcompute_app.sh /
-COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_externalizedcompute_api.sh /
+COPY bootstrap/ImportCerts.java /
+
+RUN chmod +x /start_externalizedcompute_app.sh /wait_for_externalizedcompute_api.sh
+
+WORKDIR /tmp
 
 ENTRYPOINT ["/start_externalizedcompute_app.sh"]

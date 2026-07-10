@@ -1,6 +1,6 @@
 FROM docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-fips
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
-MAINTAINER info@cloudera.com
+LABEL maintainer="info@cloudera.com"
 
 # REPO URL to download jar
 ARG REPO_URL=https://nexus-private.eng.cloudera.com/nexus/content/groups/public
@@ -18,6 +18,7 @@ RUN apk add --no-cache unzip
 
 # install the Redbeams app
 ADD ${REPO_URL}/com/sequenceiq/redbeams/$VERSION/redbeams-$VERSION.jar /redbeams.jar
+RUN chmod 644 /redbeams.jar
 
 # extract schema files
 RUN ( unzip redbeams.jar schema/* -d / ) || \
@@ -25,7 +26,11 @@ RUN ( unzip redbeams.jar schema/* -d / ) || \
 
 # Install starter script for the Redbeams application
 COPY bootstrap/start_redbeams_app.sh /
-COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_redbeams_api.sh /
+COPY bootstrap/ImportCerts.java /
+
+RUN chmod +x /start_redbeams_app.sh /wait_for_redbeams_api.sh
+
+WORKDIR /tmp
 
 ENTRYPOINT ["/start_redbeams_app.sh"]

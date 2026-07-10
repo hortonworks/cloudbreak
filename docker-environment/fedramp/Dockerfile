@@ -18,6 +18,7 @@ RUN apk add --no-cache unzip
 
 # install the environment app
 ADD ${REPO_URL}/com/sequenceiq/environment/$VERSION/environment-$VERSION.jar /environment.jar
+RUN chmod 644 /environment.jar
 
 # extract schema files
 RUN ( unzip environment.jar schema/* -d / ) || \
@@ -25,7 +26,11 @@ RUN ( unzip environment.jar schema/* -d / ) || \
 
 # Install starter script for the Environment application
 COPY bootstrap/start_environment_app.sh /
-COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_environment_api.sh /
+COPY bootstrap/ImportCerts.java /
+
+RUN chmod +x /start_environment_app.sh /wait_for_environment_api.sh
+
+WORKDIR /tmp
 
 ENTRYPOINT ["/start_environment_app.sh"]

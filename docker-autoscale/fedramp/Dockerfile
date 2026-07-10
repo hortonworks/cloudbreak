@@ -18,6 +18,7 @@ RUN apk add --no-cache unzip
 
 # install the periscope app
 ADD ${REPO_URL}/com/sequenceiq/periscope/$VERSION/periscope-$VERSION.jar /periscope.jar
+RUN chmod 644 /periscope.jar
 
 # extract schema files
 RUN ( unzip periscope.jar schema/* -d / ) || \
@@ -26,5 +27,10 @@ RUN ( unzip periscope.jar schema/* -d / ) || \
 # Install starter script for the Autoscale application
 COPY bootstrap/start_autoscale_app.sh /
 COPY bootstrap/wait_for_autoscale_api.sh /
+COPY bootstrap/ImportCerts.java /
+
+RUN chmod +x /start_autoscale_app.sh /wait_for_autoscale_api.sh
+
+WORKDIR /tmp
 
 ENTRYPOINT ["/start_autoscale_app.sh"]

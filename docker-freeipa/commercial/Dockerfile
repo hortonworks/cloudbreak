@@ -1,6 +1,6 @@
 FROM docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-fips
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
-MAINTAINER info@cloudera.com
+LABEL maintainer="info@cloudera.com"
 
 # REPO URL to download jar
 ARG REPO_URL=https://nexus-private.eng.cloudera.com/nexus/content/groups/public
@@ -18,6 +18,7 @@ RUN apk add --no-cache unzip
 
 # install the freeipa app
 ADD ${REPO_URL}/com/sequenceiq/freeipa/$VERSION/freeipa-$VERSION.jar /freeipa.jar
+RUN chmod 644 /freeipa.jar
 
 # extract schema files
 RUN ( unzip freeipa.jar schema/* -d / ) || \
@@ -25,7 +26,11 @@ RUN ( unzip freeipa.jar schema/* -d / ) || \
 
 # Install starter script for the FreeIpa application
 COPY bootstrap/start_freeipa_app.sh /
-COPY bootstrap/ImportCerts.java /
 COPY bootstrap/wait_for_freeipa_api.sh /
+COPY bootstrap/ImportCerts.java /
+
+RUN chmod +x /start_freeipa_app.sh /wait_for_freeipa_api.sh
+
+WORKDIR /tmp
 
 ENTRYPOINT ["/start_freeipa_app.sh"]

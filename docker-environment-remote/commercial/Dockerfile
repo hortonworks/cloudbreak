@@ -1,6 +1,6 @@
 FROM docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-fips
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
-MAINTAINER info@cloudera.com
+LABEL maintainer="info@cloudera.com"
 
 # REPO URL to download jar
 ARG REPO_URL=https://nexus-private.eng.cloudera.com/nexus/content/groups/public
@@ -19,6 +19,7 @@ RUN apk add --no-cache unzip
 
 # install the remote environment app
 ADD ${REPO_URL}/com/sequenceiq/environment-remote/$VERSION/environment-remote-$VERSION.jar /remote-environment.jar
+RUN chmod 644 /remote-environment.jar
 
 # extract schema files
 RUN ( unzip remote-environment.jar schema/* -d / ) || \
@@ -27,5 +28,9 @@ RUN ( unzip remote-environment.jar schema/* -d / ) || \
 # Install starter script for the Remote Environment application
 COPY bootstrap/start_remoteenvironment_app.sh /
 COPY bootstrap/ImportCerts.java /
+
+RUN chmod +x /start_remoteenvironment_app.sh
+
+WORKDIR /tmp
 
 ENTRYPOINT ["/start_remoteenvironment_app.sh"]
