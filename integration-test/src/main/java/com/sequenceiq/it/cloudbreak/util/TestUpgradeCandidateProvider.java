@@ -54,8 +54,38 @@ public class TestUpgradeCandidateProvider {
     }
 
     public Pair<String, String> getOsUpgradeSourceAndCandidate(TestContext testContext) {
-        String runtimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
-        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasSameBuildNumber, runtimeVersion, Architecture.X86_64, false);
+        String sourceRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
+        String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
+        if (sourceRuntimeVersion.equals(targetRuntimeVersion)) {
+            return getUpgradeSourceAndCandidateByCondition(testContext, this::hasSameBuildNumber, sourceRuntimeVersion, Architecture.X86_64, false);
+        }
+        return getCrossVersionOsUpgradePair(testContext, sourceRuntimeVersion, targetRuntimeVersion, Architecture.X86_64);
+    }
+
+    private Pair<String, String> getCrossVersionOsUpgradePair(TestContext testContext, String sourceRuntimeVersion,
+            String targetRuntimeVersion, Architecture architecture) {
+        List<ImageV4Response> sourceImages = getCdhImagesByRuntime(testContext, sourceRuntimeVersion, imageCatalogTestClient.getV4WithAllImages())
+                .stream()
+                .filter(hasArchitecture(architecture))
+                .sorted(Comparator.comparing(ImageV4Response::getCreated))
+                .toList();
+        List<ImageV4Response> targetImages = getDefaultCdhImagesByRuntime(testContext, targetRuntimeVersion,
+                imageCatalogTestClient.getImagesByNameV4(testContext.getCloudPlatform(), false))
+                .stream()
+                .filter(hasArchitecture(architecture))
+                .sorted(Comparator.comparing(ImageV4Response::getCreated).reversed())
+                .toList();
+        if (sourceImages.isEmpty()) {
+            throw new TestFailException("No source images found for runtime " + sourceRuntimeVersion);
+        }
+        if (targetImages.isEmpty()) {
+            throw new TestFailException("No target images found for runtime " + targetRuntimeVersion);
+        }
+        ImageV4Response source = sourceImages.get(0);
+        ImageV4Response target = targetImages.get(0);
+        LOGGER.info("Cross-version OS upgrade candidates found. Source: {} (runtime {}), Target: {} (runtime {})",
+                source.getUuid(), sourceRuntimeVersion, target.getUuid(), targetRuntimeVersion);
+        return Pair.of(source.getUuid(), target.getUuid());
     }
 
     private Pair<String, String> getUpgradeSourceAndCandidateByCondition(TestContext testContext, BiPredicate<ImageV4Response, ImageV4Response> matchCondition,
