@@ -1,10 +1,11 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
-import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPLETED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -16,7 +17,6 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -26,6 +26,8 @@ import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
 
     protected static final Status FREEIPA_AVAILABLE = Status.AVAILABLE;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUpgradeNativeTests.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -73,26 +75,38 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
                 .then(freeIpaCloudFormationStackDoesExist())
                 .when(freeIpaTestClient.checkVariant("AWS"))
                 .when(freeIpaTestClient.upgrade())
-                .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
-                .given(FreeIpaOperationStatusTestDto.class)
-                .withOperationId(((FreeIpaTestDto) testContext.get(FreeIpaTestDto.class)).getOperationId())
-                .await(COMPLETED)
-                .given(FreeIpaTestDto.class)
+                .awaitForFlow()
                 .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
-                .then(freeIpaCloudFromationStackDoesNotExist())
+                .then(freeIpaCloudFormationStackDoesNotExist())
                 .when(freeIpaTestClient.checkVariant("AWS_NATIVE"))
                 .validate();
     }
 
     private Assertion<FreeIpaTestDto, FreeIpaClient> freeIpaCloudFormationStackDoesExist() {
-        return isFreeIpaCloudFromationStackDoesExist(true);
+        return isFreeIpaCloudFormationStackDoesExist(true);
     }
 
-    private Assertion<FreeIpaTestDto, FreeIpaClient> freeIpaCloudFromationStackDoesNotExist() {
-        return isFreeIpaCloudFromationStackDoesExist(false);
+    private Assertion<FreeIpaTestDto, FreeIpaClient> freeIpaCloudFormationStackDoesNotExist() {
+        return (tc, freeipaTestDto, client) -> {
+            int maxAttempts = tc.getMaxRetry();
+            long pollingInterval = tc.getPollingInterval();
+            for (int attempt = 0; attempt < maxAttempts; attempt++) {
+                if (!cloudFunctionality.isFreeipaCfStackExistForEnvironment(freeipaTestDto.getEnvironmentCrn())) {
+                    return freeipaTestDto;
+                }
+                LOGGER.info("Waiting for CF stacks to be deleted, attempt {}/{}", attempt + 1, maxAttempts);
+                try {
+                    Thread.sleep(pollingInterval);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted while waiting for CF stacks to be empty", e);
+                }
+            }
+            throw new AssertionError("CF stacks for environment did not become empty within timeout");
+        };
     }
 
-    private Assertion<FreeIpaTestDto, FreeIpaClient> isFreeIpaCloudFromationStackDoesExist(boolean exist) {
+    private Assertion<FreeIpaTestDto, FreeIpaClient> isFreeIpaCloudFormationStackDoesExist(boolean exist) {
         return (tc, freeipaTestDto, client) -> {
             Boolean res = cloudFunctionality.isFreeipaCfStackExistForEnvironment(freeipaTestDto.getEnvironmentCrn());
             org.assertj.core.api.Assertions.assertThat(res).as("freeipa cloudformation template for environment should "
