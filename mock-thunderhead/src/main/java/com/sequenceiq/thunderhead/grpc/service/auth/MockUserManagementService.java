@@ -1269,15 +1269,20 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void createWorkloadMachineUser(CreateWorkloadMachineUserRequest request,
             StreamObserver<CreateWorkloadMachineUserResponse> responseObserver) {
-        String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
-        String name = request.getMachineUserName();
-        LOGGER.info("Create workload machine user for account {} with name {}", accountId, name);
+        String accountId = request.getAccountId();
+        String region = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getRegion().toString();
+        String name = accountUsers.isEmpty()
+                ? "fakeMockUser1"
+                : accountUsers.get(accountId).stream().findFirst().orElse("fakeMockUser1");
+        String machineUserId = UUID.nameUUIDFromBytes((accountId + '#' + request.getMachineUserName()).getBytes()).toString();
+        String machineUserCrn = "crn:cdp:iam:" + region + ":" + accountId + ":machineUser:" + name;
+        LOGGER.info("Create workload machine user for account {} with name {} and machineUserCrn {}", accountId, name, machineUserCrn);
         responseObserver.onNext(CreateWorkloadMachineUserResponse.newBuilder()
                 .setPrivateKey(Base64Util.encode(UUID.randomUUID().toString()))
                 .setAccessKeyId(UUID.randomUUID().toString())
                 .setMachineUser(MachineUser.newBuilder()
-                        .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + name).getBytes()).toString())
-                        .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                        .setMachineUserId(machineUserId)
+                        .setCrn(machineUserCrn)
                         .build())
                 .build());
         responseObserver.onCompleted();
