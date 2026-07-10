@@ -92,12 +92,7 @@ public class CcmUserDataService {
         } else if (stack.getTunnel().useCcmV2()) {
             ccmConnectivityParameters = getCcmV2ConnectivityParameters(stack, keyId);
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            if (usesRemoteJumpgate(stack)) {
-                LOGGER.info("Stack uses remote environment jumpgate, skipping CCM agent registration");
-                ccmConnectivityParameters = new CcmConnectivityParameters(new DefaultCcmV2JumpgateParameters());
-            } else {
-                ccmConnectivityParameters = getCcmV2JumpgateConnectivityParameters(stack, keyId, getHmacKeyOpt(stack));
-            }
+            ccmConnectivityParameters = getCcmV2JumpgateConnectivityParameters(stack, keyId, getHmacKeyOpt(stack));
         } else {
             LOGGER.debug("CCM not enabled for stack.");
         }
@@ -199,11 +194,6 @@ public class CcmUserDataService {
                 stack.getEnvironmentCrn(), updatedInvertingProxyAgent.getAccessKeyId(), updatedInvertingProxyAgent.getEncipheredAccessKey(),
                 hmacKey.orElse(EMPTY), updatedInvertingProxyAgent.getInitialisationVector(), updatedInvertingProxyAgent.getHmacForPrivateKey());
         return new CcmConnectivityParameters(modifiedCcmV2JumpgateParameters);
-    }
-
-    private boolean usesRemoteJumpgate(Stack stack) {
-        DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
-        return environment != null && StringUtils.isNotBlank(environment.getRemoteEnvironmentCrn());
     }
 
     private CcmConnectivityParameters createCcmConnectivityParametersFromUserData(Stack stack, String modifiedUserData) {

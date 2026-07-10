@@ -54,14 +54,11 @@ class CredentialDeleteServiceTest {
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
 
-    @Mock
-    private ServiceProviderCredentialAdapter credentialAdapter;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         underTest = new CredentialDeleteService(credentialRetrievalService, credentialNotificationService,
-                environmentViewService, ownerAssignmentService, credentialRepository, credentialAdapter, Set.of("AWS", "AZURE", "YARN"));
+                environmentViewService, ownerAssignmentService, credentialRepository, Set.of("AWS", "AZURE", "YARN"));
     }
 
     @Test

@@ -27,7 +27,6 @@ public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConve
         response.setFacing(source.getFacing());
         response.setPassword(source.getPassword());
         response.setUserName(source.getUserName());
-        response.setRemoteEnvironmentCrn(source.getRemoteEnvironmentCrn());
         return response;
     }
 
@@ -38,7 +37,6 @@ public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConve
         response.setFacing(source.getFacing());
         response.setPassword(source.getPassword());
         response.setUserName(source.getUserName());
-        response.setRemoteEnvironmentCrn(source.getRemoteEnvironmentCrn());
         return response;
     }
 

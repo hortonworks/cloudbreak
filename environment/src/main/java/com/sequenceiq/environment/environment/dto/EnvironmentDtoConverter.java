@@ -215,7 +215,6 @@ public class EnvironmentDtoConverter {
         setDefaultComputeCluster(creationDto, environment);
         setRegions(creationDto, environment);
         environment.setEnvironmentType(creationDto.getEnvironmentType());
-        environment.setRemoteEnvironmentCrn(creationDto.getRemoteEnvironmentCrn());
         return environment;
     }
 

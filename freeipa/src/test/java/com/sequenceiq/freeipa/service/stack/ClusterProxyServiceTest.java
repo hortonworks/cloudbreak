@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,13 +33,11 @@ import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 
@@ -67,8 +64,6 @@ public class ClusterProxyServiceTest {
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
-    private static final String REMOTE_ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:acc:environment:remote-env-id";
-
     @InjectMocks
     private ClusterProxyService underTest;
 
@@ -86,9 +81,6 @@ public class ClusterProxyServiceTest {
 
     @Mock
     private ClusterProxyRegistrationClient clusterProxyRegistrationClient;
-
-    @Mock
-    private CachedEnvironmentClientService environmentClientService;
 
     @Mock
     private ClusterProxyServiceAvailabilityChecker clusterProxyServiceAvailabilityChecker;
@@ -315,51 +307,6 @@ public class ClusterProxyServiceTest {
         assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be initialized");
 
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://publicAddress:9443"), List.of(), null));
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
-    public void testClusterProxyRegistrationWhenRemoteJumpgate(Tunnel ccmv2Mode) {
-        Stack aStack = getAStack();
-        aStack.setTunnel(ccmv2Mode);
-        aStack.setCcmV2AgentCrn("testAgentCrn");
-
-        GatewayConfig gatewayConfig = GatewayConfig.builder()
-                .withConnectionAddress("connectionAddress")
-                .withPublicAddress("publicIpAddress")
-                .withPrivateAddress(PRIVATE_IP_ADDRESS)
-                .withGatewayPort(22)
-                .withPrimary(true)
-                .withHostname("host")
-                .withInstanceId("testInstanceId")
-                .withKnoxGatewayEnabled(false)
-                .build();
-        ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
-        DetailedEnvironmentResponse envResponse = mock(DetailedEnvironmentResponse.class);
-        when(envResponse.getRemoteEnvironmentCrn()).thenReturn(REMOTE_ENVIRONMENT_CRN);
-        when(environmentClientService.getByCrn(eq(ENVIRONMENT_CRN))).thenReturn(envResponse);
-
-        when(stackService.getStackById(STACK_ID)).thenReturn(aStack);
-        when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(true);
-        when(gatewayConfigService.getPrimaryGatewayConfig(aStack)).thenReturn(gatewayConfig);
-        when(securityConfigService.findOneByStack(aStack)).thenReturn(null);
-        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
-        when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
-
-        underTest.registerFreeIpaForBootstrap(STACK_ID);
-
-        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
-        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
-
-        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
-
-        assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_RESOURCE_CRN);
-        assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
-        assertTrue(proxyRegistrationReq.isUseCcmV2(), "useCcmV2 should be true for remote jumpgate");
-        assertNull(proxyRegistrationReq.getCcmV2Configs(), "No local agent configs for remote jumpgate");
-        assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(REMOTE_ENVIRONMENT_CRN);
-        assertThat(proxyRegistrationReq.getServices()).contains(
-                new ClusterServiceConfig("freeipa", List.of("https://privateIpAddress:9443"), List.of(), null));
     }
 
     @Test

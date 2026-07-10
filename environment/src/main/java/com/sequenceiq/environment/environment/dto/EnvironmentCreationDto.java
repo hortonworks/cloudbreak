@@ -83,8 +83,6 @@ public class EnvironmentCreationDto {
 
     private final boolean secretEncryptionEnabled;
 
-    private final String remoteEnvironmentCrn;
-
     private EnvironmentCreationDto(Builder builder) {
         name = builder.name;
         description = builder.description;
@@ -119,7 +117,6 @@ public class EnvironmentCreationDto {
         environmentType = builder.environmentType;
         encryptionProfileCrn = builder.encryptionProfileCrn;
         secretEncryptionEnabled = builder.secretEncryptionEnabled;
-        remoteEnvironmentCrn = builder.remoteEnvironmentCrn;
     }
 
     public static Builder builder() {
@@ -247,10 +244,6 @@ public class EnvironmentCreationDto {
         return secretEncryptionEnabled;
     }
 
-    public String getRemoteEnvironmentCrn() {
-        return remoteEnvironmentCrn;
-    }
-
     @Override
     public String toString() {
         return "EnvironmentCreationDto{" +
@@ -327,8 +320,6 @@ public class EnvironmentCreationDto {
         private String encryptionProfileCrn;
 
         private boolean secretEncryptionEnabled;
-
-        private String remoteEnvironmentCrn;
 
         private Builder() {
         }
@@ -480,11 +471,6 @@ public class EnvironmentCreationDto {
 
         public Builder withSecretEncryptionEnabled(boolean secretEncryptionEnabled) {
             this.secretEncryptionEnabled = secretEncryptionEnabled;
-            return this;
-        }
-
-        public Builder withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
-            this.remoteEnvironmentCrn = remoteEnvironmentCrn;
             return this;
         }
 

@@ -1,13 +1,11 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +13,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -129,7 +126,7 @@ public class FreeIpaConfigService {
                 .withHosts(hosts)
                 .withBackupConfig(determineAndSetBackup(stack))
                 .withCcmv2Enabled(stack.getTunnel().useCcmV2OrJumpgate())
-                .withCidrBlocks(getCidrBlocks(stack, environmentResponse))
+                .withCidrBlocks(stack.getNetwork().getNetworkCidrs())
                 .withCcmv2JumpgateEnabled(stack.getTunnel().useCcmV2Jumpgate())
                 .withSecretEncryptionEnabled(environmentService.isSecretEncryptionEnabled(stack.getEnvironmentCrn()))
                 .withKerberosSecretLocation(kerberosSecretLocation)
@@ -156,23 +153,6 @@ public class FreeIpaConfigService {
         boolean dnsSecValidationEnabled = Boolean.parseBoolean(environment.getProperty(dnssecValidationPropertyKey, "true"));
         LOGGER.info("DNSSEC validation is {}", dnsSecValidationEnabled ? "enabled" : "disabled");
         return dnsSecValidationEnabled;
-    }
-
-    private List<String> getCidrBlocks(Stack stack, DetailedEnvironmentResponse environmentResponse) {
-        String remoteEnvCrn = environmentResponse.getRemoteEnvironmentCrn();
-        if (StringUtils.isNotBlank(remoteEnvCrn)) {
-            DetailedEnvironmentResponse remoteEnv = cachedEnvironmentClientService.getByCrn(remoteEnvCrn);
-            if (remoteEnv != null && remoteEnv.getNetwork() != null
-                    && remoteEnv.getNetwork().getNetworkCidrs() != null && !remoteEnv.getNetwork().getNetworkCidrs().isEmpty()) {
-                List<String> cidrs = List.copyOf(remoteEnv.getNetwork().getNetworkCidrs());
-                LOGGER.info("Remote environment jumpgate detected, using remote env network CIDRs for nginx access: {}", cidrs);
-                return cidrs;
-            }
-            throw new CloudbreakServiceException(String.format(
-                    "Remote environment %s has no network CIDRs configured; cannot restrict FreeIPA nginx access for the jumpgate agent",
-                    remoteEnvCrn));
-        }
-        return stack.getNetwork().getNetworkCidrs();
     }
 
     private FreeIpaBackupConfigView determineAndSetBackup(Stack stack) {

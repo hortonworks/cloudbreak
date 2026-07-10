@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
@@ -57,7 +56,6 @@ import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterProxyServiceTest {
@@ -84,12 +82,6 @@ class ClusterProxyServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:c681a099-bff3-4f3f-8884-1de9604a3a09";
 
-    private static final String ENVIRONMENT_CRN =
-            "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:b3a1e202-ddfd-4a6c-a103-04c95f1e8a09";
-
-    private static final String REMOTE_ENVIRONMENT_CRN =
-            "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:f5e2a918-cc1e-4b97-94d3-7890abcd1234";
-
     private static final String MINA_ID = "mina-id";
 
     private static final String CLOUDERA_MANAGER_SERVICE = "cloudera-manager";
@@ -110,9 +102,6 @@ class ClusterProxyServiceTest {
 
     @Mock
     private ClusterProxySecretProvider clusterProxySecretProvider;
-
-    @Mock
-    private EnvironmentService environmentService;
 
     @InjectMocks
     private ClusterProxyService underTest;
@@ -171,11 +160,8 @@ class ClusterProxyServiceTest {
     void testRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStack();
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
-        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         stack.setCcmV2AgentCrn("testAgentCrn");
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
-        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-        when(environmentService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(envResponse);
 
         ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         underTest.registerCluster(stack);
@@ -184,38 +170,11 @@ class ClusterProxyServiceTest {
         ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
         assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_CRN);
         assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
-        assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertTrue(proxyRegistrationReq.isUseCcmV2(), "CCMV2 should be enabled");
         assertNull(proxyRegistrationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
         assertTrue(proxyRegistrationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PRIVATE_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegistrationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PRIVATE_IP, OTHER_INSTANCE_ID)));
         assertTrue(proxyRegistrationReq.getServices().contains(cmInternalServiceConfig(true)));
-
-        assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
-        assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
-    }
-
-    @Test
-    void testRegisterClusterWhenCCMV2JumpgateWithRemoteEnvironment() throws ClusterProxyException, JsonProcessingException {
-        Stack stack = testStack();
-        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
-        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
-        stack.setCcmV2AgentCrn("testAgentCrn");
-        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
-        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-        envResponse.setRemoteEnvironmentCrn(REMOTE_ENVIRONMENT_CRN);
-        when(environmentService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(envResponse);
-
-        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
-        underTest.registerCluster(stack);
-
-        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
-        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
-        assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_CRN);
-        assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
-        assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(REMOTE_ENVIRONMENT_CRN);
-        assertTrue(proxyRegistrationReq.isUseCcmV2(), "CCMV2 should be enabled");
-        assertNull(proxyRegistrationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
 
         assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
         assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
@@ -281,7 +240,6 @@ class ClusterProxyServiceTest {
     void testReRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStack();
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
-        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         stack.setCcmV2AgentCrn("testAgentCrn");
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");
@@ -289,8 +247,6 @@ class ClusterProxyServiceTest {
         stack.getCluster().setGateway(gateway);
 
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
-        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-        when(environmentService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(envResponse);
         ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         underTest.reRegisterCluster(stack);
 
@@ -298,7 +254,6 @@ class ClusterProxyServiceTest {
         ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
         assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_CRN);
         assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
-        assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertTrue(proxyRegistrationReq.isUseCcmV2(), "CCMV2 should be enabled");
         assertNull(proxyRegistrationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
         assertTrue(proxyRegistrationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PRIVATE_IP, PRIMARY_INSTANCE_ID)));
@@ -306,38 +261,9 @@ class ClusterProxyServiceTest {
         assertTrue(proxyRegistrationReq.getServices().contains(cmInternalServiceConfig(true)));
 
         assertEquals("https://10.10.10.10:9443/knox/test-cluster", proxyRegistrationReq.getUriOfKnox(), "CCMV2 Knox URI should match");
-
-        assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
-        assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
-    }
-
-    @Test
-    void testReRegisterClusterWhenCCMV2JumpgateWithRemoteEnvironment() throws ClusterProxyException, JsonProcessingException {
-        Stack stack = testStack();
-        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
-        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
-        stack.setCcmV2AgentCrn("testAgentCrn");
-        Gateway gateway = new Gateway();
-        gateway.setPath("test-cluster");
-        stack.getCluster().setId(1L);
-        stack.getCluster().setGateway(gateway);
-
-        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
-        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-        envResponse.setRemoteEnvironmentCrn(REMOTE_ENVIRONMENT_CRN);
-        when(environmentService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(envResponse);
-        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
-        underTest.reRegisterCluster(stack);
-
-        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
-        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
-        assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_CRN);
-        assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
-        assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(REMOTE_ENVIRONMENT_CRN);
-        assertTrue(proxyRegistrationReq.isUseCcmV2(), "CCMV2 should be enabled");
-        assertNull(proxyRegistrationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
-
-        assertEquals("https://10.10.10.10:9443/knox/test-cluster", proxyRegistrationReq.getUriOfKnox(), "CCMV2 Knox URI should match");
+        assertTrue(proxyRegistrationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PRIVATE_IP, PRIMARY_INSTANCE_ID)));
+        assertTrue(proxyRegistrationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PRIVATE_IP, OTHER_INSTANCE_ID)));
+        assertTrue(proxyRegistrationReq.getServices().contains(cmInternalServiceConfig(true)));
 
         assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
         assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be configured.");

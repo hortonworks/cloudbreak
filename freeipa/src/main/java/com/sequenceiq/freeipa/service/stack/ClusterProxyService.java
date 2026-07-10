@@ -35,12 +35,10 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 import com.sequenceiq.freeipa.vault.FreeIpaCertVaultComponent;
@@ -88,9 +86,6 @@ public class ClusterProxyService {
 
     @Inject
     private HealthCheckAvailabilityChecker healthCheckAvailabilityChecker;
-
-    @Inject
-    private CachedEnvironmentClientService environmentClientService;
 
     @Inject
     private ClusterProxyServiceAvailabilityChecker clusterProxyServiceAvailabilityChecker;
@@ -149,15 +144,8 @@ public class ClusterProxyService {
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(createTunnelEntries(stack, tunnelGatewayConfigs));
         } else if (stack.getTunnel().useCcmV2OrJumpgate()) {
-            String remoteEnvCrn = getRemoteEnvironmentCrn(stack);
-            if (StringUtils.isNotBlank(remoteEnvCrn)) {
-                LOGGER.info("Using remote environment jumpgate for cluster proxy registration: {}", remoteEnvCrn);
-                requestBuilder.withEnvironmentCrn(remoteEnvCrn);
-                requestBuilder.withUseCcmV2(true);
-            } else {
-                requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn());
-                requestBuilder.withCcmV2Entries(createCcmV2Configs(stack, tunnelGatewayConfigs));
-            }
+            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn());
+            requestBuilder.withCcmV2Entries(createCcmV2Configs(stack, tunnelGatewayConfigs));
         }
         ConfigRegistrationRequest request = requestBuilder.build();
         LOGGER.debug("Registering cluster proxy configuration [{}]", request);
@@ -222,11 +210,6 @@ public class ClusterProxyService {
             return intervalInSecV2;
         }
         return intervalInSecV1;
-    }
-
-    private String getRemoteEnvironmentCrn(Stack stack) {
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-        return environment != null ? environment.getRemoteEnvironmentCrn() : null;
     }
 
     private List<CcmV2Config> createCcmV2Configs(Stack stack, List<GatewayConfig> gatewayConfigs) {

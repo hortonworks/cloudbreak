@@ -30,8 +30,6 @@ public class OpenstackParameters implements Serializable {
 
     private KeystoneV3Parameters keystoneV3;
 
-    private String remoteEnvironmentCrn;
-
     public String getEndpoint() {
         return endpoint;
     }
@@ -82,14 +80,6 @@ public class OpenstackParameters implements Serializable {
         keystoneV3 = v3Parameter;
     }
 
-    public String getRemoteEnvironmentCrn() {
-        return remoteEnvironmentCrn;
-    }
-
-    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
-        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
-    }
-
     @Override
     public String toString() {
         return "OpenstackParameters{" +
@@ -98,7 +88,6 @@ public class OpenstackParameters implements Serializable {
                 ", userName='" + userName + '\'' +
                 ", keystoneV2=" + keystoneV2 +
                 ", keystoneV3=" + keystoneV3 +
-                ", remoteEnvironmentCrn='" + remoteEnvironmentCrn + '\'' +
                 '}';
     }
 }
