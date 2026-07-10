@@ -236,10 +236,18 @@ public class AzureClientActions {
                 allTags.putAll(tags);
                 allTags.putAll(commonCloudProperties.getTags());
                 ResourceGroup resourceGroup;
-                resourceGroup = azure.resourceGroups().define(resourceGroupName)
-                        .withRegion(azureProperties.getRegion())
-                        .withTags(allTags)
-                        .create();
+                try {
+                    resourceGroup = azure.resourceGroups().define(resourceGroupName)
+                            .withRegion(azureProperties.getRegion())
+                            .withTags(allTags)
+                            .create();
+                } catch (ManagementException e) {
+                    if (e.getResponse() != null && e.getResponse().getStatusCode() == 409) {
+                        LOGGER.info("Concurrent resource group creation detected for '{}', fetching existing one.", resourceGroupName);
+                        return azure.resourceGroups().getByName(resourceGroupName);
+                    }
+                    throw e;
+                }
                 if (resourceGroup.provisioningState().equalsIgnoreCase("Succeeded")) {
                     LOGGER.info(format("New resource group '%s' has been created.", resourceGroupName));
                     Log.then(LOGGER, format(" New resource group '%s' has been created. ", resourceGroupName));
