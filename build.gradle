@@ -357,6 +357,7 @@ subprojects {
             'datalake',
             'externalized-compute',
             'environment-remote',
+            'maintenance',
             'integration-test',
             'mock-infrastructure',
             'mock-thunderhead'] && project.plugins.hasPlugin('org.springframework.boot')) {

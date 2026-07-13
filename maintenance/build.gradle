@@ -1,0 +1,161 @@
+import org.ajoberstar.grgit.Grgit
+
+buildscript {
+  repositories {
+    maven { url = "$repoUrl" }
+    maven { url = "$springRepoUrl" }
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarVersion}"
+  }
+}
+
+plugins {
+  id "java"
+  id "checkstyle"
+  id "jacoco"
+  id "maven-publish"
+  id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
+  id "org.springframework.boot" version "${springBootVersion}"
+  id "org.sonarqube" version "${sonarVersion}"
+}
+
+apply plugin: "org.sonarqube"
+
+sonar {
+  properties {
+    property("sonar.projectName", "Maintenance_Service_UT_master")
+    property("sonar.projectKey", "Maintenance_Service_UT_master")
+    property("sonar.java.coveragePlugin", "plugin")
+    property("sonar.sourceEncoding", "UTF-8")
+    property("sonar.sources", "src/main")
+    property("sonar.tests", "src/test")
+    property("sonar.java.binaries", "build/classes")
+    property("sonar.project.reporting.outputEncoding", "UTF-8")
+    property("sonar.host.url", "$System.env.SONAR_URL")
+    property("sonar.token", "$System.env.SONAR_TOKEN")
+    property("org.gradle.internal.http.socketTimeout", "600000")
+    property("org.gradle.internal.http.connectionTimeout", "600000")
+    property("sonar.coverage.exclusions", "**/proto/**,**/generated/**")
+    property("sonar.exclusions", "**/proto/**,**/generated/**")
+  }
+}
+
+configurations.all {
+  resolutionStrategy {
+    force "org.springframework.data:spring-data-jpa:${springDataJpaFrameworkVersion}"
+    force "org.springframework.data:spring-data-commons:${springDataJpaFrameworkVersion}"
+  }
+}
+
+dependencyManagement {
+  dependencies {
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
+    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: reactorNettyHttp
+    dependency group: 'org.postgresql',           name: 'postgresql',         version: postgreSQLVersion
+    dependency group: 'org.springframework.data', name: 'spring-data-jpa',    version: springDataJpaFrameworkVersion
+    dependency group: 'org.springframework.data', name: 'spring-data-commons', version: springDataJpaFrameworkVersion
+  }
+}
+
+dependencies {
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',     version: swaggerCoreVersion
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: javaxXmlBindJaxbApiVersion
+  implementation     group: 'com.google.code.gson',      name: 'gson',                       version: gsonVersion
+  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',            version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',          version: jerseyMicrometerVersion
+  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',         version: mybatisMigrationVersion
+  implementation     group: 'org.postgresql',            name: 'postgresql',                 version: postgreSQLVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',        version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',    version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator', version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa', version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz', version: springBootVersion
+  implementation     group: 'org.springframework.data',  name: 'spring-data-jpa',              version: springDataJpaFrameworkVersion
+  implementation     group: 'org.springframework.data',  name: 'spring-data-commons',        version: springDataJpaFrameworkVersion
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',              version: apacheCommonsLangVersion
+
+  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: byteBuddyVersion
+
+  implementation(group: 'net.minidev', name: 'json-smart') {
+    version {
+      strictly jsonSmartVersion
+    }
+    because 'CVE-2021-31684'
+  }
+  implementation(group: 'net.minidev', name: 'accessors-smart') {
+    version {
+      strictly accessorSmartVersion
+    }
+    because 'because there is no jar for 2.4.3 in maven central repo...'
+  }
+
+  constraints {
+    implementation     group: 'com.google.code.gson',      name: 'gson',                       version: gsonVersion
+    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',              version: jerseyCoreVersion
+    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',          version: jerseyMicrometerVersion
+    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',         version: mybatisMigrationVersion
+    implementation     group: 'org.postgresql',            name: 'postgresql',                 version: postgreSQLVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',        version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',    version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator', version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa', version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',   version: springBootVersion
+  }
+
+  implementation project(':authorization-common')
+  implementation project(':auth-connector')
+  implementation project(':common')
+  implementation project(':service-common')
+  implementation project(':status-checker')
+  implementation project(':structuredevent-service-cdp')
+  implementation project(':usage-collection')
+
+  testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+    exclude group: 'junit'
+  }
+  testImplementation project(path: ':authorization-common', configuration: 'tests')
+  testImplementation project(path: ':common', configuration: 'tests')
+}
+
+bootRun {
+  mainClass = 'com.sequenceiq.maintenance.MaintenanceApplication'
+  systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
+  systemProperty "spring.config.location", System.properties["spring.config.location"]
+  systemProperty 'spring.config.additional-location', System.properties['spring.config.additional-location']
+
+  if (project.hasProperty("jvmArgs")) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
+bootJar {
+  archiveBaseName = 'maintenance'
+  archiveFileName = 'maintenance.jar'
+  manifest {
+    def grgit = Grgit.open(currentDir: project.projectDir)
+    attributes "Implementation-Version": grgit.describe()
+  }
+}
+
+publishing {
+  publications {
+    bootJava(MavenPublication) {
+      artifact bootJar
+    }
+  }
+  repositories {
+    maven {
+      url = "$System.env.NEXUS_URL"
+      allowInsecureProtocol = true
+      credentials {
+        username = "$System.env.NEXUS_USER"
+        setPassword("$System.env.NEXUS_PASSWORD")
+      }
+    }
+  }
+}
