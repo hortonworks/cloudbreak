@@ -43,15 +43,6 @@ public class SupportedOsServiceTest {
     }
 
     @Test
-    public void shouldSupportRhel8Os() {
-        boolean actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isSupported(REDHAT8));
-        assertTrue(actual);
-
-        actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isRhel8Supported());
-        assertTrue(actual);
-    }
-
-    @Test
     public void shouldNotSupportRandomOs() {
         boolean actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isSupported("ubuntu"));
 

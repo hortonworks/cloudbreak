@@ -113,9 +113,10 @@ class ImageChangeActionsTest {
     void prepareImageSendsStartedNotification() throws Exception {
         Map<Object, Object> variables = new HashMap<>();
         ImageEntity imageEntity = new ImageEntity();
+        imageEntity.setImageName("imageName");
         Image image = org.mockito.Mockito.mock(Image.class);
         doReturn(imageEntity).when(imageService).getByStack(stack);
-        doReturn(false).when(imageFallbackService).imageFallbackPermitted(imageEntity, stack);
+        doReturn(false).when(imageFallbackService).imageFallbackPermitted(imageEntity.getImageName(), stack);
         doReturn(cloudStack).when(cloudStackConverter).convert(stack);
         doReturn(image).when(imageConverter).convert(imageEntity);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), payload)).when(reactorEventFactory).createEvent(any(), any());

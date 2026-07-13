@@ -36,10 +36,6 @@ public class UpgradeValidationService {
     private EntitlementService entitlementService;
 
     public void validateUpgradeRequest(FreeIpaUpgradeRequest request) {
-        if (Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()) && !supportedOsService.isRhel8Supported()) {
-            LOGGER.warn("Major OS upgrade is not supported");
-            throw new BadRequestException("Major OS upgrade is not supported");
-        }
         if (request.getImage() != null && !supportedOsService.isSupported(request.getImage().getOs())) {
             LOGGER.warn("Selected os '{}' is not supported", request.getImage().getOs());
             throw new BadRequestException(String.format("Selected os '%s' is not supported", request.getImage().getOs()));

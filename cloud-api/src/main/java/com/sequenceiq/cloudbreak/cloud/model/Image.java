@@ -216,6 +216,23 @@ public class Image {
         private ImageBuilder() {
         }
 
+        public ImageBuilder withImage(Image image) {
+            Objects.requireNonNull(image, "image must not be null");
+            imageName = image.imageName;
+            userdata = image.userdata;
+            os = image.os;
+            osType = image.osType;
+            architecture = image.architecture;
+            imageCatalogUrl = image.imageCatalogUrl;
+            imageId = image.imageId;
+            imageCatalogName = image.imageCatalogName;
+            packageVersions = image.packageVersions;
+            date = image.date;
+            created = image.created;
+            tags = image.tags;
+            return this;
+        }
+
         public ImageBuilder withArchitecture(String architecture) {
             this.architecture = architecture;
             return this;

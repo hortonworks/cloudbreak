@@ -137,7 +137,7 @@ class ImageFallbackServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.getImageWrapper(currentImage, stack));
 
-        assertEquals("Failed to start instances with image: vhdImageName. The current image is a Redhat 8 VHD image, " +
+        assertEquals("Failed to start instances with image: vhdImageName. The current image is a Redhat VHD image, " +
                 "please check if the source image is signed: redhat8:source:image.", exception.getMessage());
     }
 

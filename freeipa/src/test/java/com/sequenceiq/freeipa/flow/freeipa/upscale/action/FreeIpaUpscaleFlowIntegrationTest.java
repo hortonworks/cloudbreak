@@ -100,6 +100,7 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConvert
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
+import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -479,6 +480,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
             CloudPlatformInitializer.class,
             ProvisionValidationHandler.class,
             ImageConverter.class,
+            ImageToImageEntityConverter.class,
             ProvisionSetupHandler.class,
             PrepareImageHandler.class,
             CheckImageHandler.class,

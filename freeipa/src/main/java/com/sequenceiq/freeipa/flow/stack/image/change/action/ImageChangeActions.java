@@ -96,7 +96,7 @@ public class ImageChangeActions {
                 String regionName = cloudContext.getLocation().getRegion().value();
                 String platform = cloudContext.getPlatform().getValue();
                 String fallbackImageName = null;
-                if (imageFallbackService.imageFallbackPermitted(imageEntity, stack)) {
+                if (imageFallbackService.imageFallbackPermitted(imageEntity.getImageName(), stack)) {
                     try {
                         com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image imageForStack = imageService.getImageForStack(stack);
                         fallbackImageName = imageService.determineImageNameByRegion(platform, regionName, imageForStack);
@@ -160,7 +160,7 @@ public class ImageChangeActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 ImageEntity image = stack.getImage();
-                if (imageFallbackService.imageFallbackPermitted(image, stack)) {
+                if (imageFallbackService.imageFallbackPermitted(image.getImageName(), stack)) {
                     getStackUpdater().updateStackStatus(stack, DetailedStackStatus.IMAGE_CHANGE_IN_PROGRESS, "Setting up fallback image");
                     imageFallbackService.performImageFallback(image, stack);
                 }

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,10 +22,13 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaPrepareUpgradeResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
@@ -32,7 +36,6 @@ import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class PrepareUpgradeServiceTest {
@@ -45,8 +48,14 @@ class PrepareUpgradeServiceTest {
 
     private static final Long STACK_ID = 1L;
 
+    private static final String SELECTED_IMAGE_ID = "selected-image-uuid";
+
+    private static final String SELECTED_IMAGE_CATALOG = "catalog-name";
+
+    private static final String SELECTED_IMAGE_OS = "redhat8";
+
     @Mock
-    private StackService stackService;
+    private UpgradeService upgradeService;
 
     @Mock
     private OperationService operationService;
@@ -64,7 +73,7 @@ class PrepareUpgradeServiceTest {
         Operation operation = createRunningOperation();
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "flow-id");
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(upgradeService.validateFreeIpaForUpgrade(ACCOUNT_ID, request)).thenReturn(createValidationResult(stack));
         when(operationService.startOperation(eq(ACCOUNT_ID), eq(OperationType.PREPARE_UPGRADE), eq(List.of(ENVIRONMENT_CRN)), eq(List.of())))
                 .thenReturn(operation);
         when(flowManager.notify(eq(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event()), any(PrepareUpgradeTriggerEvent.class)))
@@ -80,14 +89,18 @@ class PrepareUpgradeServiceTest {
         PrepareUpgradeTriggerEvent triggerEvent = triggerCaptor.getValue();
         assertEquals(STACK_ID, triggerEvent.getResourceId());
         assertEquals(OPERATION_ID, triggerEvent.getOperationId());
+        ImageSettingsRequest targetImage = triggerEvent.getImageSettingsRequest();
+        assertEquals(SELECTED_IMAGE_ID, targetImage.getId());
+        assertEquals(SELECTED_IMAGE_CATALOG, targetImage.getCatalog());
+        assertEquals(SELECTED_IMAGE_OS, targetImage.getOs());
     }
 
     @Test
-    void testPrepareUpgradeStackNotAvailable() {
-        Stack stack = createStack(Status.STOPPED);
+    void testPrepareUpgradeValidationFails() {
         FreeIpaUpgradeRequest request = createRequest();
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(upgradeService.validateFreeIpaForUpgrade(ACCOUNT_ID, request))
+                .thenThrow(new BadRequestException("FreeIPA is not in available state"));
 
         assertThrows(BadRequestException.class, () -> underTest.prepareUpgrade(ACCOUNT_ID, request));
         verifyNoInteractions(operationService, flowManager);
@@ -99,7 +112,7 @@ class PrepareUpgradeServiceTest {
         FreeIpaUpgradeRequest request = createRequest();
         Operation operation = createFailedOperation();
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(upgradeService.validateFreeIpaForUpgrade(ACCOUNT_ID, request)).thenReturn(createValidationResult(stack));
         when(operationService.startOperation(eq(ACCOUNT_ID), eq(OperationType.PREPARE_UPGRADE), eq(List.of(ENVIRONMENT_CRN)), eq(List.of())))
                 .thenReturn(operation);
 
@@ -113,7 +126,7 @@ class PrepareUpgradeServiceTest {
         FreeIpaUpgradeRequest request = createRequest();
         Operation operation = createRunningOperation();
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(upgradeService.validateFreeIpaForUpgrade(ACCOUNT_ID, request)).thenReturn(createValidationResult(stack));
         when(operationService.startOperation(eq(ACCOUNT_ID), eq(OperationType.PREPARE_UPGRADE), eq(List.of(ENVIRONMENT_CRN)), eq(List.of())))
                 .thenReturn(operation);
         when(flowManager.notify(any(), any(PrepareUpgradeTriggerEvent.class)))
@@ -127,6 +140,18 @@ class PrepareUpgradeServiceTest {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
         return request;
+    }
+
+    private FreeIpaUpgradeValidationResult createValidationResult(Stack stack) {
+        return new FreeIpaUpgradeValidationResult(stack, Set.of(new InstanceMetaData()), new ImageInfoResponse(), createSelectedImage());
+    }
+
+    private ImageInfoResponse createSelectedImage() {
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setId(SELECTED_IMAGE_ID);
+        selectedImage.setCatalogName(SELECTED_IMAGE_CATALOG);
+        selectedImage.setOs(SELECTED_IMAGE_OS);
+        return selectedImage;
     }
 
     private Stack createAvailableStack() {

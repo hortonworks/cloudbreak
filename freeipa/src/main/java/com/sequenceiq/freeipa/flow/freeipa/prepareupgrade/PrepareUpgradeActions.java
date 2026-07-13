@@ -5,30 +5,57 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PREPARE_UPGR
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PREPARE_UPGRADE_STARTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CLUSTER_OPERATION;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_IMAGE_COPY_CHECK_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_IMAGE_COPY_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_LB_CONFIGURATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_LB_DB_CLEANUP_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.PrepareUpgradeEvent.PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeFailureCleanupComplete;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeFailureCleanupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeFailureEvent;
@@ -41,6 +68,12 @@ import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeMe
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.flow.stack.provision.PrepareImageResultToStackEventConverter;
+import com.sequenceiq.freeipa.flow.stack.provision.action.CheckImageAction;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
+import com.sequenceiq.freeipa.service.image.ImageFallbackService;
+import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerConfigurationService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
@@ -56,9 +89,179 @@ public class PrepareUpgradeActions {
 
     private static final String FAILURE_EXCEPTION = "FAILURE_EXCEPTION";
 
+    private static final String IMAGE = "IMAGE";
+
+    private static final String FALLBACK_IMAGE_NAME = "FALLBACK_IMAGE_NAME";
+
+    private static final String IMAGE_IDENTIFIER_PARAMETER = "IMAGE_IDENTIFIER_PARAMETER";
+
+    @Bean(name = "PREPARE_UPGRADE_PREPARE_IMAGE_STATE")
+    public AbstractPrepareUpgradeAction<?> prepareImage() {
+        return new AbstractPrepareUpgradeAction<>(PrepareUpgradeTriggerEvent.class) {
+            @Inject
+            private ImageService imageService;
+
+            @Inject
+            private ImageFallbackService imageFallbackService;
+
+            @Inject
+            private ImageConverter imageConverter;
+
+            @Override
+            protected void prepareExecution(PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+                setOperationId(variables, payload.getOperationId());
+            }
+
+            @Override
+            protected void doExecute(StackContext context, PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                getStackUpdater().updateStackStatus(stack, CLUSTER_OPERATION, "Preparing image on cloud provider side");
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_PREPARE_UPGRADE_STARTED);
+                CloudContext cloudContext = context.getCloudContext();
+
+                Pair<ImageWrapper, String> imageWrapperAndName = imageService.fetchImageWrapperAndName(stack, payload.getImageSettingsRequest());
+                String regionName = cloudContext.getLocation().getRegion().value();
+                String platform = cloudContext.getPlatform().getValue();
+                String fallbackImageName = null;
+                if (imageFallbackService.imageFallbackPermitted(imageWrapperAndName.getRight(), stack)) {
+                    try {
+                        fallbackImageName = imageService.determineImageNameByRegion(platform, regionName, imageWrapperAndName.getLeft().getImage());
+                        variables.put(FALLBACK_IMAGE_NAME, fallbackImageName);
+                    } catch (ImageNotFoundException e) {
+                        LOGGER.warn("Fallback image could not be determined due to exception {}," +
+                                " we should continue execution", e.getMessage());
+                    }
+                }
+
+                Image image = imageConverter.convert(imageWrapperAndName);
+                variables.put(IMAGE, image);
+                CloudStack cloudStack = context.getCloudStack().toBuilder().image(image).build();
+                PrepareImageRequest<Object> request = new PrepareImageRequest<>(cloudContext, context.getCloudCredential(), cloudStack, image,
+                        PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImageName);
+                LOGGER.info("Prepare image: {}, fallback image:{}", image, fallbackImageName);
+                sendEvent(context, request);
+            }
+
+            @Override
+            protected Object getFailurePayload(PrepareUpgradeTriggerEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new PrepareImageResult(ex, payload.getResourceId());
+            }
+        };
+    }
+
+    @Bean(name = "PREPARE_UPGRADE_SET_FALLBACK_IMAGE_STATE")
+    public AbstractPrepareUpgradeAction<?> imageFallbackAction() {
+        return new AbstractPrepareUpgradeAction<>(StackEvent.class) {
+
+            @Inject
+            private ImageFallbackService imageFallbackService;
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                Image image = (Image) variables.get(IMAGE);
+                String fallbackImageName = (String) variables.get(FALLBACK_IMAGE_NAME);
+                if (fallbackImageName != null && imageFallbackService.imageFallbackPermitted(image.getImageName(), stack)) {
+                    LOGGER.info("Falling back from image '{}' to VHD image '{}' during prepare upgrade", image.getImageName(), fallbackImageName);
+                    getStackUpdater().updateStackStatus(stack, DetailedStackStatus.CLUSTER_OPERATION, "Setting up fallback image");
+                    Image fallbackImage = Image.builder().withImage(image).withImageName(fallbackImageName).build();
+                    variables.put(IMAGE, fallbackImage);
+                } else {
+                    LOGGER.info("Image fallback not required for image '{}' during prepare upgrade, continuing with the original image",
+                            image == null ? null : image.getImageName());
+                }
+                ImageFallbackSuccess imageFallbackSuccess = new ImageFallbackSuccess(stack.getId());
+                sendEvent(context, PREPARE_UPGRADE_IMAGE_FALLBACK_FINISHED_EVENT.event(), imageFallbackSuccess);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new PrepareImageResultToStackEventConverter());
+            }
+        };
+    }
+
+    @Bean(name = "PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_STATE")
+    public Action<?, ?> updateImageParameterAction() {
+        return new AbstractPrepareUpgradeAction<>(PrepareImageResult.class) {
+
+            @Override
+            protected void doExecute(StackContext context, PrepareImageResult payload, Map<Object, Object> variables) {
+                if (StringUtils.isNotBlank(payload.getImageIdentifier())) {
+                    LOGGER.info("Storing prepared image identifier '{}' for the image copy check step", payload.getImageIdentifier());
+                    variables.put(IMAGE_IDENTIFIER_PARAMETER, payload.getImageIdentifier());
+                } else {
+                    LOGGER.debug("No image identifier was returned by the prepare image step, continuing without it");
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new StackEvent(PREPARE_UPGRADE_UPDATE_IMAGE_PARAMETER_FINISHED_EVENT.event(), context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "PREPARE_UPGRADE_CHECK_IMAGE_STATE")
+    public Action<?, ?> checkImageAction() {
+        return new CheckImageAction() {
+
+            @Inject
+            private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+            @Inject
+            private EventBus eventBus;
+
+            @Override
+            protected CheckImageResult checkImage(StackContext context, Map<Object, Object> variables) {
+                CloudStack cloudStack = context.getCloudStack();
+                CloudStack.Builder builder = cloudStack.toBuilder();
+                Image image = (Image) variables.get(IMAGE);
+                builder.image(image);
+                Optional.ofNullable(variables.get(IMAGE_IDENTIFIER_PARAMETER)).ifPresent(identifier -> {
+                    Map<String, String> parameters = new HashMap<>(cloudStack.getParameters());
+                    parameters.put(PlatformParametersConsts.IMAGE_IDENTIFIER, (String) identifier);
+                    builder.parameters(parameters);
+                });
+                CloudStack updatedStack = builder.build();
+
+                try {
+                    CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
+                            updatedStack, image);
+                    LOGGER.debug("Triggering event: {}", checkImageRequest);
+                    eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
+                    CheckImageResult result = checkImageRequest.await();
+                    LOGGER.debug("Result: {}", result);
+                    return result;
+                } catch (InterruptedException e) {
+                    LOGGER.error("Error while executing check image", e);
+                    throw new OperationException(e);
+                } catch (Exception e) {
+                    throw new CloudbreakServiceException(e);
+                }
+            }
+
+            @Override
+            protected FlowEvent getFinishedEvent() {
+                return PREPARE_UPGRADE_IMAGE_COPY_FINISHED_EVENT;
+            }
+
+            @Override
+            protected FlowEvent getRepeatEvent() {
+                return PREPARE_UPGRADE_IMAGE_COPY_CHECK_EVENT;
+            }
+
+            @Override
+            protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new PrepareUpgradeFailureEvent(payload.getResourceId(), VALIDATION, ex);
+            }
+        };
+    }
+
     @Bean(name = "PREPARE_UPGRADE_LB_CONFIGURATION_STATE")
     public Action<?, ?> prepareUpgradeLbConfiguration() {
-        return new AbstractPrepareUpgradeAction<>(PrepareUpgradeTriggerEvent.class) {
+        return new AbstractPrepareUpgradeAction<>(StackEvent.class) {
 
             @Inject
             private FreeIpaLoadBalancerConfigurationService freeIpaLoadBalancerConfigurationService;
@@ -70,14 +273,7 @@ public class PrepareUpgradeActions {
             private FreeIpaLoadBalancerProvisionCondition freeIpaLoadBalancerProvisionCondition;
 
             @Override
-            protected void prepareExecution(PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
-                setOperationId(variables, payload.getOperationId());
-            }
-
-            @Override
-            protected void doExecute(StackContext context, PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
-                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(),
-                        FREEIPA_PREPARE_UPGRADE_STARTED);
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
                 if (!CloudPlatform.AWS.name().equals(context.getStack().getCloudPlatform())) {
                     LOGGER.debug("Stack is not on AWS, skipping prepare upgrade LB validation");
@@ -223,6 +419,11 @@ public class PrepareUpgradeActions {
             @Override
             protected Object getFailurePayload(PrepareUpgradeFailureEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new PrepareUpgradeFailureCleanupComplete(payload.getResourceId());
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<PrepareUpgradeFailureEvent>> payloadConverters) {
+                payloadConverters.add(new PrepareImageResultToPrepareUpgradeFailureConverter());
             }
         };
     }

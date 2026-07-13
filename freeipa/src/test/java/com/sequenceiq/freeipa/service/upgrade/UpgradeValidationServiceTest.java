@@ -42,23 +42,12 @@ class UpgradeValidationServiceTest {
     private EntitlementService entitlementService;
 
     @Test
-    void testMajorOsUpgradeNotSupported() {
-        FreeIpaUpgradeRequest upgradeRequest = new FreeIpaUpgradeRequest();
-        upgradeRequest.setAllowMajorOsUpgrade(true);
-        when(supportedOsService.isRhel8Supported()).thenReturn(false);
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateUpgradeRequest(upgradeRequest));
-        assertEquals("Major OS upgrade is not supported", exception.getMessage());
-    }
-
-    @Test
     void testOsNotSupported() {
         FreeIpaUpgradeRequest upgradeRequest = new FreeIpaUpgradeRequest();
         upgradeRequest.setAllowMajorOsUpgrade(true);
         ImageSettingsRequest image = new ImageSettingsRequest();
         image.setOs("redhat8");
         upgradeRequest.setImage(image);
-        when(supportedOsService.isRhel8Supported()).thenReturn(true);
         when(supportedOsService.isSupported(image.getOs())).thenReturn(false);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateUpgradeRequest(upgradeRequest));

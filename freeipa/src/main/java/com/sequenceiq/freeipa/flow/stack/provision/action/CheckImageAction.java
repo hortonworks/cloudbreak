@@ -44,7 +44,7 @@ public class CheckImageAction extends AbstractStackProvisionAction<StackEvent> {
 
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-        CheckImageResult checkImageResult = stackCreationService.checkImage(context);
+        CheckImageResult checkImageResult = checkImage(context, variables);
         switch (checkImageResult.getImageStatus()) {
             case IN_PROGRESS:
                 repeat(context);
@@ -67,6 +67,10 @@ public class CheckImageAction extends AbstractStackProvisionAction<StackEvent> {
                 LOGGER.error("Unknown image status: {}", checkImageResult.getImageStatus());
                 break;
         }
+    }
+
+    protected CheckImageResult checkImage(StackContext context, Map<Object, Object> variables) {
+        return stackCreationService.checkImage(context);
     }
 
     @Override

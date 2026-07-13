@@ -33,12 +33,12 @@ public class ImageFallbackService {
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
 
-    public boolean imageFallbackPermitted(ImageEntity currentImage, Stack stack) {
+    public boolean imageFallbackPermitted(String imageName, Stack stack) {
         if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform()) &&
-                azureImageFormatValidator.isMarketplaceImageFormat(currentImage.getImageName())) {
+                azureImageFormatValidator.isMarketplaceImageFormat(imageName)) {
             return true;
         } else {
-            String msg = String.format("Image fallback is only supported on the Azure cloud platform and Marketplace image %s", currentImage.getImageName());
+            String msg = String.format("Image fallback is only supported on the Azure cloud platform and Marketplace image %s", imageName);
             LOGGER.info(msg);
             return false;
         }
@@ -50,7 +50,7 @@ public class ImageFallbackService {
         ImageEntity imageEntity = imageService.getByStack(stack);
         String regionName = cloudContext.getLocation().getRegion().value();
         String platform = cloudContext.getPlatform().getValue();
-        if (imageFallbackPermitted(imageEntity, stack)) {
+        if (imageFallbackPermitted(imageEntity.getImageName(), stack)) {
             try {
                 com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image imageForStack = imageService.getImageForStack(stack);
                 String fallbackImageName = imageService.determineImageNameByRegion(platform, regionName, imageForStack);
@@ -65,7 +65,7 @@ public class ImageFallbackService {
     }
 
     public void performImageFallback(ImageEntity currentImage, Stack stack) {
-        if (imageFallbackPermitted(currentImage, stack)) {
+        if (imageFallbackPermitted(currentImage.getImageName(), stack)) {
             ImageWrapper imageWrapper = getImageWrapper(currentImage, stack);
             String newImageName = imageService.determineImageNameByRegion(stack.getCloudPlatform(), stack.getRegion(), imageWrapper.getImage());
             currentImage.setImageName(newImageName);
@@ -77,7 +77,7 @@ public class ImageFallbackService {
 
     public ImageWrapper getImageWrapper(ImageEntity currentImage, Stack stack) {
         if (!OsType.vhdIsSupported(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
-            String message = String.format("Failed to start instances with image: %s. The current image is a Redhat 8 VHD image, " +
+            String message = String.format("Failed to start instances with image: %s. The current image is a Redhat VHD image, " +
                             "please check if the source image is signed: %s.",
                     currentImage.getImageName(), currentImage.getSourceImage());
             throw new CloudbreakServiceException(message);

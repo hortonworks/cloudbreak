@@ -16,8 +16,4 @@ public class SupportedOsService {
                 || RHEL8.getOs().equalsIgnoreCase(os)
                 || RHEL9.getOs().equalsIgnoreCase(os);
     }
-
-    public boolean isRhel8Supported() {
-        return isSupported(RHEL8.getOs());
-    }
 }

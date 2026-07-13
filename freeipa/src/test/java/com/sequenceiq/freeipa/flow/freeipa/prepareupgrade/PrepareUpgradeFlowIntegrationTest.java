@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,13 +38,21 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageFallbackException;
+import com.sequenceiq.cloudbreak.cloud.handler.CheckImageHandler;
+import com.sequenceiq.cloudbreak.cloud.handler.PrepareImageHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
+import com.sequenceiq.common.api.type.ImageStatus;
+import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -51,9 +60,12 @@ import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
@@ -69,8 +81,11 @@ import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.handler.PrepareUpgrade
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.handler.PrepareUpgradeLbDeletionHandler;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.handler.PrepareUpgradeLbProvisionHandler;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.handler.PrepareUpgradeMetadataCollectionHandler;
+import com.sequenceiq.freeipa.flow.stack.provision.action.StackProvisionService;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.image.ImageFallbackService;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerConfigurationService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerCreationService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerMetadataCollectionService;
@@ -173,11 +188,25 @@ class PrepareUpgradeFlowIntegrationTest {
     @MockitoBean
     private EventSenderService eventSenderService;
 
+    @MockitoBean
+    private ImageService imageService;
+
+    @MockitoBean
+    private ImageFallbackService imageFallbackService;
+
+    @MockitoBean
+    private ImageConverter imageConverter;
+
+    @MockitoBean
+    private StackProvisionService stackProvisionService;
+
     @Mock
     private AuthenticatedContext ac;
 
     @Mock
     private CloudStack cloudStack;
+
+    private Setup setup;
 
     private Stack stack;
 
@@ -193,13 +222,27 @@ class PrepareUpgradeFlowIntegrationTest {
         stack.setInstanceGroups(Set.of(ig));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackToCloudStackConverter.convert(stack)).thenReturn(cloudStack);
+        when(cloudStack.toBuilder()).thenAnswer(invocation -> CloudStack.builder());
 
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(cloudConnector);
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         Authenticator authenticator = mock(Authenticator.class);
         when(authenticator.authenticate(any(), any())).thenReturn(ac);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
+
+        setup = mock(Setup.class);
+        when(cloudConnector.setup()).thenReturn(setup);
+        when(setup.prepareImage(any(), any(), any(), any(), any())).thenReturn(Optional.empty());
+        when(setup.checkImageStatus(any(), any(), any())).thenReturn(new ImageStatusResult(ImageStatus.CREATE_FINISHED, 100));
+
+        ImageWrapper imageWrapper = mock(ImageWrapper.class);
+        when(imageService.fetchImageWrapperAndName(eq(stack), any())).thenReturn(Pair.of(imageWrapper, "targetImageName"));
+        Image image = mock(Image.class);
+        when(image.getImageName()).thenReturn("targetImageName");
+        when(imageConverter.convert(any(Pair.class))).thenReturn(image);
+        when(imageFallbackService.imageFallbackPermitted(any(String.class), eq(stack))).thenReturn(false);
 
         doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
@@ -217,6 +260,8 @@ class PrepareUpgradeFlowIntegrationTest {
         testFlow();
 
         InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "Preparing image on cloud provider side");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
                 "Preparing FreeIPA upgrade: creating temporary load balancer");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
@@ -244,6 +289,8 @@ class PrepareUpgradeFlowIntegrationTest {
         testFlow();
 
         InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "Preparing image on cloud provider side");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, AVAILABLE,
                 "FreeIPA upgrade preparation completed");
         stackStatusVerify.verifyNoMoreInteractions();
@@ -252,6 +299,28 @@ class PrepareUpgradeFlowIntegrationTest {
         verify(freeIpaLoadBalancerService, never()).save(any());
         verifyNoInteractions(freeIpaLoadBalancerCreationService);
         verifyNoInteractions(freeIpaLoadBalancerMetadataCollectionService);
+        verify(operationService).completeOperation(eq(ACCOUNT_ID), eq(OPERATION_ID), eq(List.of()), eq(List.of()));
+    }
+
+    @Test
+    public void testAzureImageFallbackSetsFallbackImage() throws Exception {
+        stack.setCloudPlatform("AZURE");
+        when(imageFallbackService.imageFallbackPermitted(any(String.class), eq(stack))).thenReturn(true);
+        when(imageService.determineImageNameByRegion(any(), any(), any())).thenReturn("fallbackImageName");
+        when(setup.prepareImage(any(), any(), any(), any(), any())).thenThrow(new CloudImageFallbackException("Marketplace image terms not accepted"));
+
+        testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "Preparing image on cloud provider side");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "Setting up fallback image");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, AVAILABLE,
+                "FreeIPA upgrade preparation completed");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verifyNoInteractions(freeIpaLoadBalancerConfigurationService);
         verify(operationService).completeOperation(eq(ACCOUNT_ID), eq(OPERATION_ID), eq(List.of()), eq(List.of()));
     }
 
@@ -273,6 +342,8 @@ class PrepareUpgradeFlowIntegrationTest {
         testFlow();
 
         InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "Preparing image on cloud provider side");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
                 "Preparing FreeIPA upgrade: creating temporary load balancer");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
@@ -299,6 +370,8 @@ class PrepareUpgradeFlowIntegrationTest {
         testFlow();
 
         InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "Preparing image on cloud provider side");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, AVAILABLE,
                 "FreeIPA upgrade preparation completed");
         stackStatusVerify.verifyNoMoreInteractions();
@@ -362,7 +435,7 @@ class PrepareUpgradeFlowIntegrationTest {
 
     private FlowIdentifier triggerFlow() {
         PrepareUpgradeTriggerEvent triggerEvent = new PrepareUpgradeTriggerEvent(
-                PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), STACK_ID, OPERATION_ID);
+                PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), STACK_ID, OPERATION_ID, new ImageSettingsRequest());
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(triggerEvent.selector(), triggerEvent));
@@ -398,6 +471,9 @@ class PrepareUpgradeFlowIntegrationTest {
             PrepareUpgradeFailureCleanupHandler.class,
             PrepareUpgradeFlowConfig.class,
             FlowIntegrationTestConfig.class,
+            CloudPlatformInitializer.class,
+            PrepareImageHandler.class,
+            CheckImageHandler.class,
             ResourceToCloudResourceConverter.class,
             ResourceAttributeUtil.class,
             FreeIpaFailedFlowAnalyzer.class,

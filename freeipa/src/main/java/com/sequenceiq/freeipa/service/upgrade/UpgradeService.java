@@ -80,8 +80,13 @@ public class UpgradeService {
     @Inject
     private FreeipaPlatformStringTransformer platformStringTransformer;
 
-    @SuppressWarnings("IllegalType")
     public FreeIpaUpgradeResponse upgradeFreeIpa(String accountId, FreeIpaUpgradeRequest request) {
+        FreeIpaUpgradeValidationResult result = validateFreeIpaForUpgrade(accountId, request);
+        return triggerUpgrade(request, result.stack(), result.allInstances(), result.selectedImage(), result.currentImage(), accountId);
+    }
+
+    @SuppressWarnings("IllegalType")
+    public FreeIpaUpgradeValidationResult validateFreeIpaForUpgrade(String accountId, FreeIpaUpgradeRequest request) {
         validationService.validateUpgradeRequest(request);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
@@ -94,7 +99,7 @@ public class UpgradeService {
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
         validationService.validateSelectedImageEntitledFor(accountId, selectedImage);
         validationService.validateSelectedImageForArchitecture(currentImage, selectedImage);
-        return triggerUpgrade(request, stack, allInstances, selectedImage, currentImage, accountId);
+        return new FreeIpaUpgradeValidationResult(stack, allInstances, currentImage, selectedImage);
     }
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest,
