@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractKeyBasedServiceClient<T extends AbstractKeyBasedServiceEndpoint> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUserCrnServiceClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractKeyBasedServiceClient.class);
 
     private final Client client;
 

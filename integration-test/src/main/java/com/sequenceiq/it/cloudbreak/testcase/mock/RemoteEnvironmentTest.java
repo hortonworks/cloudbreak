@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.client.RemoteEnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.RemoteEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.ListRemoteEnvironmentsTestDto;
 
 public class RemoteEnvironmentTest extends AbstractMockTest {
 
@@ -27,7 +27,7 @@ public class RemoteEnvironmentTest extends AbstractMockTest {
             then = "there should be http200 code call")
     public void testRemoteEnvironmentService(MockedTestContext testContext) {
         testContext
-                .given(RemoteEnvironmentTestDto.class)
+                .given(ListRemoteEnvironmentsTestDto.class)
                 .when(remoteEnvironmentTestClient.list())
                 .validate();
     }

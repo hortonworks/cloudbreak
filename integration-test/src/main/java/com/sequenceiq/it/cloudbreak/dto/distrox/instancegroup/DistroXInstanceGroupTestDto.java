@@ -12,6 +12,8 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.KRAFT;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MANAGER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MANAGER_STREAMING;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTERX;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER_HA;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER_STREAMING;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER_STREAMS;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.SRM;
@@ -52,6 +54,10 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
         return withHostGroup(testContext, cloudPlatform, MASTER, COMPUTE, WORKER, GATEWAY);
     }
 
+    public static List<DistroXInstanceGroupTestDto> dataEngHaHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
+        return withHostGroup(testContext, cloudPlatform, MASTER_HA, MASTERX, COMPUTE, WORKER, GATEWAY);
+    }
+
     public static List<DistroXInstanceGroupTestDto> dataMartHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
         return withHostGroup(testContext, cloudPlatform, MASTER, COORDINATOR, EXECUTOR);
     }
@@ -69,7 +75,15 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
     }
 
     public static List<DistroXInstanceGroupTestDto> dataEngHostGroups(TestContext testContext) {
-        return withHostGroup(testContext, testContext.getCloudPlatform(), MASTER, COMPUTE, WORKER, GATEWAY);
+        return dataEngHostGroups(testContext, testContext.getCloudPlatform());
+    }
+
+    public static List<DistroXInstanceGroupTestDto> dataEngHaHostGroups(TestContext testContext) {
+        return dataEngHaHostGroups(testContext, testContext.getCloudPlatform());
+    }
+
+    public static List<DistroXInstanceGroupTestDto> dataMartHostGroups(TestContext testContext) {
+        return dataMartHostGroups(testContext, testContext.getCloudPlatform());
     }
 
     public static List<DistroXInstanceGroupTestDto> withHostGroup(TestContext testContext, HostGroupType... groupTypes) {

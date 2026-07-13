@@ -115,6 +115,7 @@ integrationtest:
   internalClusterShape: CUSTOM
   internalSdxBlueprintName: "%s - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
   dataEngDistroXBlueprintName: "%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie"
+  hybridDataMartDistroXBlueprintName: "%s - Hybrid Data Mart: Apache Impala, Hue"
   dataMartDistroXBlueprintName: "%s - Data Mart: Apache Impala, Hue"
   streamsHADistroXBlueprintName: "%s - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
   streamsLDDistroXBlueprintName: "%s - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
@@ -169,6 +170,7 @@ integrationtest:
 
   trust:
     remoteEnvironmentCrn: crn:cdp:classicclusters:us-west-1:ACCOUNT_ID:cluster:classiccluster-transactions
+    hdfsPath: transactions-master0.hybrid.cloudera.org/
     activeDirectory:
       fqdn: ec2amaz-uvredmu.hybrid.cloudera.org
       ip: 10.84.202.113

@@ -1,73 +1,40 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.trust;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.assertion.hybrid.HybridTrustAssertions;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.RemoteEnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTrustCommandsDto;
+import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.DescribeRemoteEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.ActiveDirectorySshJClientActions;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
-import com.sequenceiq.it.util.SimpleRetryWrapper;
-
-import net.schmizz.sshj.SSHClient;
 
 public class HybridTrustTests extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(HybridTrustTests.class);
-
-    private static final String SET_CONTENT_COMMAND = "Set-Content -Path $env:TEMP\\%s -Value %s";
-
-    private static final String EXECUTE_BATCH_COMMAND = "%%TEMP%%\\%s";
-
-    private static final String DELETE_BATCH_COMMAND = "del /f /q %%TEMP%%\\%s";
-
-    private static final String BATCH_FILENAME = "trustsetup-%s.bat";
-
-    /**
-     * Make sure that the scripts validated for return code write this token in a new line in case of a failure
-     */
-    private static final String FAILURE_TOKEN = "[FAILURE]";
-
-    private static final String AD_TRUST_VALIDATE_COMMAND = "nltest /dsgetdc:%s /force || echo: && echo " + FAILURE_TOKEN;
-
-    private static final String FREEIPA_TRUST_VALIDATE_COMMAND = "export PW=$(sudo grep -v \"^#\" /srv/pillar/freeipa/init.sls | jq -r '.freeipa.password'); " +
-            "kinit admin <<<$PW > /dev/null 2>&1; " +
-            "kvno ldap/%s@%s";
-
-    @Value("${integrationtest.trust.activedirectory.ip}")
-    private String activeDirectoryIp;
-
-    @Value("${integrationtest.trust.activedirectory.user}")
-    private String activeDirectoryUser;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -79,10 +46,22 @@ public class HybridTrustTests extends AbstractE2ETest {
     private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
+    private RemoteEnvironmentTestClient remoteEnvironmentTestClient;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
+
+    @Inject
     private SshJClient sshJClient;
 
     @Inject
+    private ActiveDirectorySshJClientActions activeDirectorySshJClientActions;
+
+    @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private HybridTrustAssertions hybridTrustAssertions;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -97,6 +76,12 @@ public class HybridTrustTests extends AbstractE2ETest {
             when = "create a hybrid environment, setup trust with the given active directory",
             then = "trust setup successfully finished")
     public void testTrustSetup(TestContext testContext) {
+        DescribeEnvironmentResponse remoteEnvironment = testContext
+                .given(DescribeRemoteEnvironmentTestDto.class)
+                .when(remoteEnvironmentTestClient.describe())
+                .getResponse();
+        String runtimeVersion = remoteEnvironment.getEnvironment().getCdpRuntimeVersion().split("-")[0];
+
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -127,8 +112,15 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .refresh()
-                .then(validateTrustOnFreeIpa())
-                .then(validateTrustOnActiveDirectory())
+                .then(hybridTrustAssertions.validateTrustOnFreeIpa())
+                .then(hybridTrustAssertions.validateTrustOnActiveDirectory())
+                .given(DistroXTestDto.class)
+                    .withTemplate(commonClusterManagerProperties().getHybridDataMartDistroXBlueprintName(runtimeVersion))
+                    .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataMartHostGroups(testContext))
+                .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .then(hybridTrustAssertions.validateTrustOnDistroX())
                 .given(FreeIpaTrustCommandsDto.class)
                 .when(freeIpaTestClient.trustCleanupCommands())
                 .given(EnvironmentTestDto.class)
@@ -142,7 +134,7 @@ public class HybridTrustTests extends AbstractE2ETest {
     private Assertion<FreeIpaTrustCommandsDto, FreeIpaClient> setupActiveDirectory() {
         return (testContext, testDto, client) -> {
             String commands = testDto.getResponse().getActiveDirectoryCommands().getCommands();
-            executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-setup", commands, true);
+            activeDirectorySshJClientActions.executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-setup", commands, true);
             return testDto;
         };
     }
@@ -150,79 +142,8 @@ public class HybridTrustTests extends AbstractE2ETest {
     private Assertion<FreeIpaTrustCommandsDto, FreeIpaClient> cleanUpActiveDirectory(boolean validateError) {
         return (testContext, testDto, client) -> {
             String commands = testDto.getResponse().getActiveDirectoryCommands().getCommands();
-            executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-cleanup", commands, validateError);
+            activeDirectorySshJClientActions.executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-cleanup", commands, validateError);
             return testDto;
         };
-    }
-
-    private Assertion<FreeIpaTestDto, FreeIpaClient> validateTrustOnFreeIpa() {
-        return (testContext, testDto, client) -> {
-            List<String> freeIpaIps = testDto.getAllInstanceIps();
-            TrustResponse trust = testDto.getResponse().getTrust();
-            String command = String.format(FREEIPA_TRUST_VALIDATE_COMMAND, trust.getFqdn(), trust.getRealm().toUpperCase(Locale.ROOT));
-            executeFreeIpaCommand(freeIpaIps, command, true);
-            return testDto;
-        };
-    }
-
-    private Assertion<FreeIpaTestDto, FreeIpaClient> validateTrustOnActiveDirectory() {
-        return (testContext, testDto, client) ->  {
-            String realm = testDto.getResponse().getFreeIpa().getDomain().toLowerCase(Locale.ROOT);
-            String command = String.format(AD_TRUST_VALIDATE_COMMAND, realm);
-            executeActiveDirectoryCommands(testDto.getName() + "-validate", command, true);
-            return testDto;
-        };
-    }
-
-    private void executeActiveDirectoryCommands(String name, String commands, boolean validateError) {
-        try (SSHClient sshClient = sshJClient.createSshClient(activeDirectoryIp, activeDirectoryUser, null, commonCloudProperties.getDefaultPrivateKeyFile())) {
-            String batchCommands = Arrays.stream(commands.split("\n"))
-                    .map(command -> '\'' + command + '\'')
-                    .collect(Collectors.joining(","));
-            String batchFileName = String.format(BATCH_FILENAME, name);
-            String uploadBatchCommand = "powershell -EncodedCommand " + Base64.getEncoder().encodeToString(
-                    String.format(SET_CONTENT_COMMAND, batchFileName, batchCommands).getBytes(StandardCharsets.UTF_16LE));
-            Pair<Integer, String> createScriptResult = sshJClient.execute(sshClient, uploadBatchCommand, 120L);
-            validateCommandResult(uploadBatchCommand, createScriptResult, validateError);
-
-            SimpleRetryWrapper.create(() -> {
-                try {
-                    String executeBatchCommand = String.format(EXECUTE_BATCH_COMMAND, batchFileName);
-                    Pair<Integer, String> executeScriptResult = sshJClient.execute(sshClient, executeBatchCommand, 120L);
-                    validateCommandResult(executeBatchCommand, executeScriptResult, validateError);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).withName(String.format("execute %s batch commands", name)).withRetryWaitSeconds(30).run();
-
-            String deleteBatchCommand = String.format(DELETE_BATCH_COMMAND, batchFileName);
-            Pair<Integer, String> deleteScriptResult = sshJClient.execute(sshClient, deleteBatchCommand, 120L);
-            validateCommandResult(deleteBatchCommand, deleteScriptResult, false);
-        } catch (IOException ex) {
-            String errorMessage = String.format("Exception during ssh to active directory %s", activeDirectoryIp);
-            LOGGER.error(errorMessage, ex);
-            throw new TestFailException(errorMessage, ex);
-        }
-    }
-
-    private void executeFreeIpaCommand(List<String> freeIpaIps, String command, boolean validateError) {
-        freeIpaIps.forEach(freeIpaIp -> {
-            Pair<Integer, String> result = sshJClient.executeCommand(freeIpaIp, command);
-            validateCommandResult(command, result, validateError);
-        });
-    }
-
-    private void validateCommandResult(String command, Pair<Integer, String> sshResult, boolean validateError) {
-        Integer returnCode = sshResult.getLeft();
-        String output = sshResult.getRight();
-        LOGGER.info("Result of the {} command:\nReturn code: {}\nOutput: {}", command, returnCode, output);
-        if (validateError && (returnCode != 0 || containsFailureToken(output))) {
-            throw new TestFailException("The command execution of '" + command + "' failed.");
-        }
-    }
-
-    private boolean containsFailureToken(String output) {
-        return Arrays.stream(Objects.requireNonNullElse(output, "").split("\r?\n"))
-                .anyMatch(line -> line.startsWith(FAILURE_TOKEN));
     }
 }

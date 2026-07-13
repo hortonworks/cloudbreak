@@ -12,7 +12,8 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.RemoteEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.DescribeRemoteEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.ListRemoteEnvironmentsTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentCrnEndpoint;
 import com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentInternalCrnClient;
@@ -70,6 +71,7 @@ public class RemoteEnvironmentClient<E extends Enum<E>, W extends WaitObject>
     @Override
     public Set<String> supportedTestDtos() {
         return Set.of(
-                RemoteEnvironmentTestDto.class.getSimpleName());
+                ListRemoteEnvironmentsTestDto.class.getSimpleName(),
+                DescribeRemoteEnvironmentTestDto.class.getSimpleName());
     }
 }

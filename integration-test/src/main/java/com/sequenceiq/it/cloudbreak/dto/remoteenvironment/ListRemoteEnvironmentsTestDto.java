@@ -6,16 +6,16 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractRemoteEnvironmentTestDto;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 
 @Prototype
-public class RemoteEnvironmentTestDto extends AbstractRemoteEnvironmentTestDto<Object, SimpleRemoteEnvironmentResponse, RemoteEnvironmentTestDto> {
+public class ListRemoteEnvironmentsTestDto extends AbstractRemoteEnvironmentTestDto<Object, SimpleRemoteEnvironmentResponse, ListRemoteEnvironmentsTestDto> {
 
     private static final int ORDER = 100;
 
-    public RemoteEnvironmentTestDto(TestContext testContext) {
+    public ListRemoteEnvironmentsTestDto(TestContext testContext) {
         super(null, testContext);
     }
 
     @Override
-    public RemoteEnvironmentTestDto valid() {
+    public ListRemoteEnvironmentsTestDto valid() {
         return this;
     }
 

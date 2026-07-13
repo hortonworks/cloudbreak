@@ -4,9 +4,11 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public enum HostGroupType {
     MASTER("master", InstanceGroupType.GATEWAY, 1),
+    MASTER_HA("master", InstanceGroupType.GATEWAY, 2),
     MASTER_ENT("master", InstanceGroupType.CORE, 2),
     MASTER_STREAMS("master", InstanceGroupType.CORE, 1),
     MASTER_STREAMING("master", InstanceGroupType.CORE, 2),
+    MASTERX("masterx", InstanceGroupType.CORE, 1),
     WORKER("worker", InstanceGroupType.CORE, 3),
     IDBROKER("idbroker", InstanceGroupType.CORE, 1),
     IDBROKER_ENT("idbroker", InstanceGroupType.CORE, 2),

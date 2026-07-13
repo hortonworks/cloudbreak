@@ -4,27 +4,20 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.config.TrustProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractEnvironmentTestDto;
 
 @Prototype
 public class EnvironmentTrustSetupDto extends AbstractEnvironmentTestDto<SetupCrossRealmTrustRequest, SetupCrossRealmTrustRequest, EnvironmentTrustSetupDto> {
-    @Value("${integrationtest.trust.remoteEnvironmentCrn}")
-    private String remoteEnvironmentCrn;
 
-    @Value("${integrationtest.trust.activedirectory.fqdn}")
-    private String activeDirectoryFqdn;
-
-    @Value("${integrationtest.trust.activedirectory.ip}")
-    private String activeDirectoryIp;
-
-    @Value("${integrationtest.trust.activedirectory.realm}")
-    private String activeDirectoryRealm;
+    @Inject
+    private TrustProperties trustProperties;
 
     public EnvironmentTrustSetupDto(TestContext testContext) {
         super(new SetupCrossRealmTrustRequest(), testContext);
@@ -32,11 +25,11 @@ public class EnvironmentTrustSetupDto extends AbstractEnvironmentTestDto<SetupCr
 
     @Override
     public EnvironmentTrustSetupDto valid() {
-        String remoteEnvironmentCrn = this.remoteEnvironmentCrn.replaceAll("ACCOUNT_ID", getTestContext().getActingUserCrn().getAccountId());
+        String remoteEnvironmentCrn = trustProperties.getRemoteEnvironmentCrn(getTestContext().getActingUserCrn().getAccountId());
         getRequest().setRemoteEnvironmentCrn(remoteEnvironmentCrn);
-        getRequest().setFqdn(activeDirectoryFqdn);
-        getRequest().setIp(activeDirectoryIp);
-        getRequest().setRealm(activeDirectoryRealm);
+        getRequest().setFqdn(trustProperties.getActiveDirectoryFqdn());
+        getRequest().setIp(trustProperties.getActiveDirectoryIp());
+        getRequest().setRealm(trustProperties.getActiveDirectoryRealm());
         return this;
     }
 

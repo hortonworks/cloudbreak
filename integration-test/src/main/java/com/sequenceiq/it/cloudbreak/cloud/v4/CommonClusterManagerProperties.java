@@ -34,6 +34,8 @@ public class CommonClusterManagerProperties {
 
     private String dataEngDistroXBlueprintName;
 
+    private String hybridDataMartDistroXBlueprintName;
+
     private String dataMartDistroXBlueprintName;
 
     private String streamsHADistroXBlueprintName;
@@ -108,6 +110,18 @@ public class CommonClusterManagerProperties {
 
     public void setDataEngDistroXBlueprintName(String dataEngDistroXBlueprintName) {
         this.dataEngDistroXBlueprintName = dataEngDistroXBlueprintName;
+    }
+
+    public String getHybridDataMartDistroXBlueprintNameForCurrentRuntime() {
+        return getHybridDataMartDistroXBlueprintName(runtimeVersion);
+    }
+
+    public String getHybridDataMartDistroXBlueprintName(String distroXUpgradeCurrentVersion) {
+        return String.format(hybridDataMartDistroXBlueprintName, distroXUpgradeCurrentVersion);
+    }
+
+    public void setHybridDataMartDistroXBlueprintName(String hybridDataMartDistroXBlueprintName) {
+        this.hybridDataMartDistroXBlueprintName = hybridDataMartDistroXBlueprintName;
     }
 
     public String getDataMartDistroXBlueprintNameForCurrentRuntime() {
