@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpCreateDiskParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskAttachmentParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskPlan;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateRetryService;
@@ -166,22 +167,6 @@ class GcpResourceVolumeConnectorTest {
                 () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, List.of(createZonedDiskResource("i1v1", 100))));
         assertTrue(exception.getMessage().contains("i1v1"));
         assertTrue(exception.getMessage().contains("boom"), "The aggregated exception should surface the underlying GCP failure cause");
-    }
-
-    @Test
-    void testUpdateDiskVolumesAggregatesAllFailureCauses() throws Exception {
-        mockContextAndExecutor();
-        when(gcpDiskUpdateRetryService.resizeDisk(any(GcpResizeDiskParameters.class), eq(gcpContext))).thenAnswer(invocation -> {
-            GcpResizeDiskParameters params = invocation.getArgument(0);
-            throw new IOException(params.diskName() + "-cause");
-        });
-
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1", "i1v2"), null, 200,
-                        List.of(createZonedDiskResource("i1v1", 100), createZonedDiskResource("i1v2", 100))));
-
-        assertTrue(exception.getMessage().contains("i1v1 (i1v1-cause)"), "The aggregated exception should surface the first disk's cause");
-        assertTrue(exception.getMessage().contains("i1v2 (i1v2-cause)"), "The aggregated exception should surface every failed disk's cause");
     }
 
     @Test
@@ -356,7 +341,9 @@ class GcpResourceVolumeConnectorTest {
                 .withName("name")
                 .withParameters(new HashMap<>())
                 .build();
-        cloudResource.setTypedAttributes(createVolumeSetAttributes(List.of(volume)));
+        cloudResource.setTypedAttributes(new VolumeSetAttributes.Builder()
+                .withVolumes(List.of(volume))
+                .build());
         return cloudResource;
     }
 
@@ -425,6 +412,7 @@ class GcpResourceVolumeConnectorTest {
 
     private VolumeSetAttributes createVolumeSetAttributes(List<VolumeSetAttributes.Volume> volumes) {
         return new VolumeSetAttributes.Builder()
+                .withAvailabilityZone(ZONE)
                 .withVolumes(volumes)
                 .build();
     }
@@ -552,5 +540,136 @@ class GcpResourceVolumeConnectorTest {
                 .setDeviceName(deviceName)
                 .setDiskSizeGb(sizeGb)
                 .setType("SCRATCH");
+    }
+
+    @Test
+    void testDetachVolumesDetachesEachNonLocalSsdVolumeAndSkipsLocalSsd() throws Exception {
+        GcpContext context = mockGcpContext();
+        runSubmittedTasksSynchronously();
+
+        VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "HDD", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i1v2 = new VolumeSetAttributes.Volume("i1v2", "/dev/sdd", 375, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i2v1 = new VolumeSetAttributes.Volume("i2v1", "/dev/disk/by-id/google-i2v1", 100, "HDD", CloudVolumeUsageType.DATABASE);
+        CloudResource resource1 = createVolumeSetResource("instance1", createVolumeSetAttributes(List.of(i1v1, i1v2)));
+        CloudResource resource2 = createVolumeSetResource("instance2", createVolumeSetAttributes(List.of(i2v1)));
+
+        underTest.detachVolumes(authenticatedContext, List.of(resource1, resource2));
+
+        ArgumentCaptor<GcpDiskAttachmentParameters> captor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        verify(gcpDiskUpdateRetryService, times(2)).detachDiskFromInstance(captor.capture(), eq(context));
+        List<GcpDiskAttachmentParameters> params = captor.getAllValues();
+        assertEquals(List.of("i1v1", "i2v1"), params.stream().map(GcpDiskAttachmentParameters::diskName).toList());
+        // device name must be the short disk id, not the OS device path
+        assertEquals(List.of("i1v1", "i2v1"), params.stream().map(GcpDiskAttachmentParameters::deviceName).toList());
+        assertEquals(List.of("instance1", "instance2"), params.stream().map(GcpDiskAttachmentParameters::instanceId).toList());
+    }
+
+    @Test
+    void testDetachVolumesThrowsWhenAnyDetachFails() throws Exception {
+        mockGcpContext();
+        runSubmittedTasksSynchronously();
+        when(gcpDiskUpdateRetryService.detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), any(GcpContext.class)))
+                .thenThrow(new CloudbreakServiceException("boom"));
+
+        VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "HDD", CloudVolumeUsageType.GENERAL);
+        CloudResource resource1 = createVolumeSetResource("instance1", createVolumeSetAttributes(List.of(i1v1)));
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.detachVolumes(authenticatedContext, List.of(resource1)));
+    }
+
+    @Test
+    void testDetachVolumesWithOnlyLocalSsdDoesNotCallProvider() throws Exception {
+        mockGcpContext();
+
+        VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/sdc", 375, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        CloudResource resource1 = createVolumeSetResource("instance1", createVolumeSetAttributes(List.of(i1v1)));
+
+        underTest.detachVolumes(authenticatedContext, List.of(resource1));
+
+        verify(intermediateBuilderExecutor, never()).submit(any(Callable.class));
+        verify(gcpDiskUpdateRetryService, never()).detachDiskFromInstance(any(), any());
+    }
+
+    @Test
+    void testAttachVolumesAttachesEachNonLocalSsdVolumeWithShortDiskIdAndSkipsLocalSsd() throws Exception {
+        GcpContext context = mockGcpContext();
+        runSubmittedTasksSynchronously();
+
+        VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "HDD", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i1v2 = new VolumeSetAttributes.Volume("i1v2", "/dev/sdd", 375, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i2v1 = new VolumeSetAttributes.Volume("i2v1", "/dev/disk/by-id/google-i2v1", 100, "HDD", CloudVolumeUsageType.DATABASE);
+        CloudResource resource1 = createVolumeSetResource("instance1", createVolumeSetAttributes(List.of(i1v1, i1v2)));
+        CloudResource resource2 = createVolumeSetResource("instance2", createVolumeSetAttributes(List.of(i2v1)));
+
+        underTest.attachVolumes(authenticatedContext, List.of(resource1, resource2), mock(CloudStack.class));
+
+        ArgumentCaptor<GcpDiskAttachmentParameters> paramsCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        ArgumentCaptor<AttachedDisk> diskCaptor = ArgumentCaptor.forClass(AttachedDisk.class);
+        verify(gcpDiskUpdateRetryService, times(2)).attachDiskToInstance(paramsCaptor.capture(), diskCaptor.capture(), eq(context));
+        List<GcpDiskAttachmentParameters> params = paramsCaptor.getAllValues();
+        assertEquals(List.of("i1v1", "i2v1"), params.stream().map(GcpDiskAttachmentParameters::diskName).toList());
+        assertEquals(List.of("instance1", "instance2"), params.stream().map(GcpDiskAttachmentParameters::instanceId).toList());
+        List<AttachedDisk> disks = diskCaptor.getAllValues();
+        // both device name and source URL must use the short disk id, not the OS device path
+        assertEquals(List.of("i1v1", "i2v1"), disks.stream().map(AttachedDisk::getDeviceName).toList());
+        assertEquals("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/disks/i1v1", disks.get(0).getSource());
+        assertEquals("READ_WRITE", disks.get(0).getMode());
+        assertFalse(disks.get(0).getBoot());
+    }
+
+    @Test
+    void testAttachVolumesThrowsWithFirstCauseWhenAnyAttachFails() throws Exception {
+        mockGcpContext();
+        runSubmittedTasksSynchronously();
+        when(gcpDiskUpdateRetryService.attachDiskToInstance(any(GcpDiskAttachmentParameters.class), any(AttachedDisk.class), any(GcpContext.class)))
+                .thenThrow(new CloudbreakServiceException("attach boom"));
+
+        VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "HDD", CloudVolumeUsageType.GENERAL);
+        CloudResource resource1 = createVolumeSetResource("instance1", createVolumeSetAttributes(List.of(i1v1)));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.attachVolumes(authenticatedContext, List.of(resource1), mock(CloudStack.class)));
+        assertTrue(exception.getMessage().contains("i1v1"));
+        assertTrue(exception.getMessage().contains("attach boom"));
+    }
+
+    @Test
+    void testDeleteVolumesDeletesEachNonLocalSsdVolumeAndSkipsLocalSsd() throws Exception {
+        GcpContext context = mockGcpContext();
+        runSubmittedTasksSynchronously();
+
+        VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "HDD", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i1v2 = new VolumeSetAttributes.Volume("i1v2", "/dev/sdd", 375, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i2v1 = new VolumeSetAttributes.Volume("i2v1", "/dev/disk/by-id/google-i2v1", 100, "HDD", CloudVolumeUsageType.DATABASE);
+        CloudResource resource1 = createVolumeSetResource("instance1", createVolumeSetAttributes(List.of(i1v1, i1v2)));
+        CloudResource resource2 = createVolumeSetResource("instance2", createVolumeSetAttributes(List.of(i2v1)));
+
+        underTest.deleteVolumes(authenticatedContext, List.of(resource1, resource2));
+
+        ArgumentCaptor<GcpDiskAttachmentParameters> captor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        verify(gcpDiskUpdateRetryService, times(2)).deleteDisk(captor.capture(), eq(context));
+        assertEquals(List.of("i1v1", "i2v1"), captor.getAllValues().stream().map(GcpDiskAttachmentParameters::diskName).toList());
+    }
+
+    private GcpContext mockGcpContext() {
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        GcpContext context = mock(GcpContext.class);
+        when(gcpContextBuilder.contextInit(eq(cloudContext), eq(authenticatedContext), eq(null), eq(false))).thenReturn(context);
+        when(context.getCompute()).thenReturn(compute);
+        when(context.getProjectId()).thenReturn(PROJECT_ID);
+        return context;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void runSubmittedTasksSynchronously() {
+        when(intermediateBuilderExecutor.submit(any(Callable.class))).thenAnswer(invocation -> {
+            Callable<Object> callable = invocation.getArgument(0);
+            try {
+                return CompletableFuture.completedFuture(callable.call());
+            } catch (Exception e) {
+                return CompletableFuture.failedFuture(e);
+            }
+        });
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.DisksResizeRequest;
 import com.google.api.services.compute.model.Operation;
@@ -32,6 +33,11 @@ import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.ResourceType;
 
+/**
+ * Self-contained retry + poll service backing the add-volumes attach/detach/delete operations on GCP. Each disk
+ * operation is submitted to the Compute API and its zonal {@link Operation} is polled to completion via
+ * {@link SyncPollingScheduler}. Transient provider errors (429/5xx) are retried; other client errors fail fast.
+ */
 @Service
 public class GcpDiskUpdateRetryService extends AbstractGcpComputeBaseResourceChecker implements ResourceChecker<GcpContext> {
 
@@ -91,6 +97,36 @@ public class GcpDiskUpdateRetryService extends AbstractGcpComputeBaseResourceChe
     }
 
     /**
+     * Attaches a single disk to its target instance. Idempotent so {@code @Retryable} re-attempts and reruns of the
+     * add-volumes flow are safe: if the disk is already attached to the target instance the attach is skipped, and if
+     * it is attached to a different instance the attach fails fast. Retries on transient GCP errors.
+     *
+     * @return the polled resource statuses, or an empty list when the disk was already attached to the target.
+     */
+    @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
+    public List<CloudResourceStatus> attachDiskToInstance(GcpDiskAttachmentParameters parameters, AttachedDisk attachedDisk, GcpContext context) {
+        String diskName = parameters.diskName();
+        try {
+            if (alreadyAttachedToTargetInstance(parameters)) {
+                LOGGER.info("Disk '{}' is already attached to instance '{}', skipping attach.", diskName, parameters.instanceId());
+                return List.of();
+            }
+            Operation operation = parameters.compute().instances()
+                    .attachDisk(parameters.projectId(), parameters.zone(), parameters.instanceId(), attachedDisk)
+                    .execute();
+            CloudResource operationAwareResource = createOperationAwareCloudResource(parameters.cloudResource(), operation);
+            return waitForOperation(parameters.authenticatedContext(), context, List.of(operationAwareResource));
+        } catch (GoogleJsonResponseException e) {
+            throw classifyGoogleException(e, "attach", diskName);
+        } catch (CloudConnectorException | CloudbreakServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CloudbreakServiceException(String.format("Failed to attach disk '%s' to instance '%s'.", diskName,
+                    parameters.instanceId()), e);
+        }
+    }
+
+    /**
      * Submits the delete of a single GCP disk and returns the operation-aware {@link CloudResource} to be polled later,
      * or {@link Optional#empty()} when the disk is already gone (404) so the rollback path is safely re-runnable. Does
      * not poll; the caller batches the poll via {@link #pollDiskOperations}.
@@ -113,6 +149,106 @@ public class GcpDiskUpdateRetryService extends AbstractGcpComputeBaseResourceChe
                 return Optional.empty();
             }
             throw classifyGoogleException(e, "delete", diskName);
+        }
+    }
+
+    /**
+     * Detaches a single disk from its instance. Tolerates an already-detached or missing disk so the rollback path is
+     * safely re-runnable. Retries on transient GCP errors.
+     *
+     * @return the polled resource statuses, or an empty list when there was nothing to detach.
+     */
+    @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
+    public List<CloudResourceStatus> detachDiskFromInstance(GcpDiskAttachmentParameters parameters, GcpContext context) {
+        String diskName = parameters.diskName();
+        try {
+            if (!attachedToTargetInstance(parameters)) {
+                LOGGER.info("Disk '{}' is not attached to instance '{}', skipping detach.", diskName, parameters.instanceId());
+                return List.of();
+            }
+            Operation operation = parameters.compute().instances()
+                    .detachDisk(parameters.projectId(), parameters.zone(), parameters.instanceId(), parameters.deviceName())
+                    .execute();
+            CloudResource operationAwareResource = createOperationAwareCloudResource(parameters.cloudResource(), operation);
+            return waitForOperation(parameters.authenticatedContext(), context, List.of(operationAwareResource));
+        } catch (GoogleJsonResponseException e) {
+            throw classifyGoogleException(e, "detach", diskName);
+        } catch (CloudConnectorException | CloudbreakServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CloudbreakServiceException(String.format("Failed to detach disk '%s' from instance '%s'.", diskName,
+                    parameters.instanceId()), e);
+        }
+    }
+
+    /**
+     * Deletes a single disk. Tolerates a missing disk (404) so the rollback path is safely re-runnable. Retries on
+     * transient GCP errors.
+     *
+     * @return the polled resource statuses, or an empty list when the disk was already gone.
+     */
+    @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
+    public List<CloudResourceStatus> deleteDisk(GcpDiskAttachmentParameters parameters, GcpContext context) {
+        String diskName = parameters.diskName();
+        try {
+            Operation operation = parameters.compute().disks()
+                    .delete(parameters.projectId(), parameters.zone(), diskName)
+                    .execute();
+            CloudResource operationAwareResource = createOperationAwareCloudResource(parameters.cloudResource(), operation);
+            return waitForOperation(parameters.authenticatedContext(), context, List.of(operationAwareResource));
+        } catch (GoogleJsonResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                LOGGER.info("Disk '{}' not found on provider, treating as already deleted.", diskName);
+                return List.of();
+            }
+            throw classifyGoogleException(e, "delete", diskName);
+        } catch (CloudConnectorException | CloudbreakServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CloudbreakServiceException(String.format("Failed to delete disk '%s'.", diskName), e);
+        }
+    }
+
+    private boolean alreadyAttachedToTargetInstance(GcpDiskAttachmentParameters parameters) throws Exception {
+        try {
+            Disk disk = parameters.compute().disks().get(parameters.projectId(), parameters.zone(), parameters.diskName()).execute();
+            List<String> users = disk.getUsers();
+            if (users == null || users.isEmpty()) {
+                return false;
+            }
+            if (users.stream().anyMatch(user -> parameters.instanceId().equals(lastPathSegment(user)))) {
+                return true;
+            }
+            throw new CloudbreakServiceException(String.format("Disk '%s' is already attached to a different instance %s, cannot attach it to '%s'.",
+                    parameters.diskName(), users, parameters.instanceId()));
+        } catch (GoogleJsonResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                LOGGER.info("Disk '{}' not found on provider before attach, proceeding with attach.", parameters.diskName());
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    private boolean attachedToTargetInstance(GcpDiskAttachmentParameters parameters) throws Exception {
+        try {
+            Disk disk = parameters.compute().disks().get(parameters.projectId(), parameters.zone(), parameters.diskName()).execute();
+            List<String> users = disk.getUsers();
+            if (users == null || users.isEmpty()) {
+                return false;
+            }
+            boolean attachedToTarget = users.stream().anyMatch(user -> parameters.instanceId().equals(lastPathSegment(user)));
+            if (!attachedToTarget) {
+                LOGGER.warn("Disk '{}' is attached to a different instance {} than the detach target '{}', skipping detach.",
+                        parameters.diskName(), users, parameters.instanceId());
+            }
+            return attachedToTarget;
+        } catch (GoogleJsonResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                LOGGER.info("Disk '{}' not found on provider, treating as already detached.", parameters.diskName());
+                return false;
+            }
+            throw e;
         }
     }
 

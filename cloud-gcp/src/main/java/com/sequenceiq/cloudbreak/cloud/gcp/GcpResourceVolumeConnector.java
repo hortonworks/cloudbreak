@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpCreateDiskParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskAttachmentParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskPlan;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateRetryService;
@@ -43,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -58,6 +61,10 @@ import com.sequenceiq.common.model.VolumeInfo;
 public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpResourceVolumeConnector.class);
+
+    private static final String DISK_URL = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s";
+
+    private static final String READ_WRITE_MODE = "READ_WRITE";
 
     @Inject
     private GcpComputeFactory gcpComputeFactory;
@@ -103,7 +110,7 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
         LOGGER.info("Resizing {} GCP disk(s) to {} GB in project {}: {}", volumeIds.size(), size, projectId, volumeIds);
         Map<String, DiskResizeTarget> volumeIdToTarget = buildVolumeIdToTargetMap(cloudResources);
         Map<String, String> failedVolumes = new LinkedHashMap<>();
-        Map<String, Future<?>> futures = new LinkedHashMap<>();
+        List<DiskOperationFuture<List<CloudResourceStatus>>> resizeOperations = new ArrayList<>();
         for (String volumeId : volumeIds) {
             DiskResizeTarget target = volumeIdToTarget.get(volumeId);
             if (target == null || target.availabilityZone() == null) {
@@ -115,51 +122,17 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
             LOGGER.info("Submitting resize of GCP disk {} in zone {} to {} GB.", volumeId, zone, size);
             GcpResizeDiskParameters params =
                     new GcpResizeDiskParameters(compute, projectId, zone, volumeId, size, target.cloudResource(), authenticatedContext);
-            Callable<?> resizeTask = () -> gcpDiskUpdateRetryService.resizeDisk(params, gcpContext);
-            futures.put(volumeId, intermediateBuilderExecutor.submit(resizeTask));
+            Callable<List<CloudResourceStatus>> resizeTask = () -> gcpDiskUpdateRetryService.resizeDisk(params, gcpContext);
+            resizeOperations.add(new DiskOperationFuture<>(volumeId, intermediateBuilderExecutor.submit(resizeTask)));
         }
 
-        awaitVolumeResize(futures, failedVolumes, size);
+        awaitDiskOperations("resize", resizeOperations, failedVolumes, result -> { });
 
-        if (!failedVolumes.isEmpty()) {
-            String failures = failedVolumes.entrySet().stream()
-                    .map(entry -> StringUtils.isNotBlank(entry.getValue())
-                            ? String.format("%s (%s)", entry.getKey(), entry.getValue())
-                            : entry.getKey())
-                    .collect(Collectors.joining(", "));
-            throw new CloudbreakServiceException(String.format(
-                    "Failed to resize the following GCP disks: %s. The disk update can be rerun to retry the failed disks.", failures));
+        String failureMessage = buildFailureMessage("resize", failedVolumes, "The disk update can be rerun to retry the failed disks.");
+        if (failureMessage != null) {
+            throw new CloudbreakServiceException(failureMessage);
         }
-        LOGGER.info("Successfully resized all {} GCP disk(s) to {} GB.", futures.size(), size);
-    }
-
-    /**
-     * Waits for every submitted resize request and records the failed disks and their cause. Runs on the calling
-     * thread, so the {@code failedVolumes} map is mutated single-threaded; the worker tasks never touch it. The
-     * original exception (wrapped in an {@link java.util.concurrent.ExecutionException}) is logged with its full
-     * cause chain, and every cause message is captured so the aggregated failure surfaces the actual GCP error for
-     * each failed disk. On interruption the remaining futures are cancelled and the wait stops early instead of
-     * blocking on outstanding resizes during shutdown.
-     */
-    private void awaitVolumeResize(Map<String, Future<?>> futures, Map<String, String> failedVolumes, int size) {
-        LOGGER.debug("Waiting for volumes resize requests ({} futures)", futures.size());
-        for (Map.Entry<String, Future<?>> entry : futures.entrySet()) {
-            String volumeId = entry.getKey();
-            try {
-                entry.getValue().get();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                LOGGER.warn("Interrupted while waiting for GCP disk {} resize to size {} GB. Cancelling remaining futures.",
-                        volumeId, size, ex);
-                failedVolumes.put(volumeId, ex.getMessage());
-                futures.values().forEach(future -> future.cancel(true));
-                break;
-            } catch (Exception ex) {
-                LOGGER.warn("Failed to resize GCP disk {} to size {} GB.", volumeId, size, ex);
-                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-                failedVolumes.put(volumeId, cause.getMessage());
-            }
-        }
+        LOGGER.info("Successfully resized all {} GCP disk(s) to {} GB.", resizeOperations.size(), size);
     }
 
     /**
@@ -189,18 +162,19 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
         LOGGER.info("Provisioning GCP disks for group {} in project {}: creating {}, reusing {} orphaned disk(s).",
                 group.getName(), projectId, specs.size(), reused.size());
 
-        Map<Future<Optional<CloudResource>>, GcpDiskCreationSpec> futures = new LinkedHashMap<>();
+        List<DiskOperationFuture<Optional<CloudResource>>> insertOperations = new ArrayList<>();
         for (GcpDiskCreationSpec spec : specs) {
             GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, projectId, spec.zone(), spec.disk().getName(), spec.disk(),
                     spec.resource(), authenticatedContext);
-            futures.put(intermediateBuilderExecutor.submit(() -> gcpDiskUpdateRetryService.insertDisk(params)), spec);
+            insertOperations.add(new DiskOperationFuture<>(spec.disk().getName(),
+                    intermediateBuilderExecutor.submit(() -> gcpDiskUpdateRetryService.insertDisk(params))));
         }
 
         List<CloudResource> operationsToPoll = new ArrayList<>();
         Map<String, String> failedDisks = new LinkedHashMap<>();
-        awaitDiskInserts(futures, operationsToPoll, failedDisks);
+        awaitDiskOperations("create", insertOperations, failedDisks, optional -> optional.ifPresent(operationsToPoll::add));
 
-        String failureMessage = buildInsertFailureMessage(failedDisks);
+        String failureMessage = buildFailureMessage("create", failedDisks, null);
         if (failureMessage == null) {
             try {
                 gcpDiskUpdateRetryService.pollDiskOperations(authenticatedContext, gcpContext, operationsToPoll);
@@ -234,38 +208,57 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
         resource.setStatus(CommonStatus.CREATED);
     }
 
-    private String buildInsertFailureMessage(Map<String, String> failedDisks) {
-        if (failedDisks.isEmpty()) {
+    /**
+     * Builds the aggregated failure message for a set of failed disks: the list of disk ids/names and the first
+     * non-blank failure cause, with an optional trailing {@code suffix} (e.g. a rerun hint) appended. Returns
+     * {@code null} when there were no failures, so a caller can use it both to decide whether to fail and to build the
+     * message. The per-disk causes are already logged individually while awaiting the futures; the aggregated message
+     * surfaces only the first one.
+     */
+    private String buildFailureMessage(String operationName, Map<String, String> failedVolumes, String suffix) {
+        if (failedVolumes.isEmpty()) {
             return null;
         }
-        String firstCause = failedDisks.values().stream().filter(StringUtils::isNotBlank).findFirst().orElse(null);
-        String message = String.format("Failed to create the following GCP disks: %s.", String.join(", ", failedDisks.keySet()));
+        String firstCause = failedVolumes.values().stream().filter(StringUtils::isNotBlank).findFirst().orElse(null);
+        String message = String.format("Failed to %s the following GCP disks: %s.", operationName, String.join(", ", failedVolumes.keySet()));
         if (firstCause != null) {
             message += String.format(" First failure cause: %s", firstCause);
+        }
+        if (StringUtils.isNotBlank(suffix)) {
+            message += " " + suffix;
         }
         return message;
     }
 
     /**
-     * Waits for every submitted insert and collects the operation-aware resources to poll and the failures with their
-     * cause. Runs on the calling thread, so {@code operationsToPoll} and {@code failedDisks} are mutated single-threaded;
-     * the worker tasks never touch them. A reused existing disk yields an empty result (nothing to poll).
+     * Waits single-threaded for every submitted per-disk future, recording each failed disk and its unwrapped cause in
+     * {@code failedVolumes} (keyed by disk id/name) and passing every successful result to {@code resultConsumer}. Runs
+     * on the calling thread, so {@code failedVolumes} and anything the consumer mutates are touched single-threaded; the
+     * worker tasks never touch them. On interruption the interrupt flag is restored, the failure is recorded, the
+     * remaining futures are cancelled, and the wait stops early instead of blocking on in-flight operations during
+     * shutdown.
+     *
+     * @param operationName the action verb used in the log messages (e.g. {@code "resize"}, {@code "create"})
+     * @param resultConsumer receives each future's successful result (e.g. to collect the operations to poll); use a
+     *                       no-op when the result is not needed
      */
-    private void awaitDiskInserts(Map<Future<Optional<CloudResource>>, GcpDiskCreationSpec> futures, List<CloudResource> operationsToPoll,
-            Map<String, String> failedDisks) {
-        LOGGER.debug("Waiting for volume insert requests ({} futures)", futures.size());
-        for (Map.Entry<Future<Optional<CloudResource>>, GcpDiskCreationSpec> entry : futures.entrySet()) {
-            String diskName = entry.getValue().disk().getName();
+    private <T> void awaitDiskOperations(String operationName, List<DiskOperationFuture<T>> operations,
+            Map<String, String> failedVolumes, Consumer<? super T> resultConsumer) {
+        LOGGER.debug("Waiting for GCP disk {} requests ({} futures)", operationName, operations.size());
+        for (DiskOperationFuture<T> operation : operations) {
+            String volumeId = operation.volumeId();
             try {
-                entry.getKey().get().ifPresent(operationsToPoll::add);
+                resultConsumer.accept(operation.future().get());
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                LOGGER.warn("Interrupted while waiting for GCP disk {} insert.", diskName, ex);
-                failedDisks.put(diskName, ex.getMessage());
+                LOGGER.warn("Interrupted while waiting for GCP disk {} to {}. Cancelling remaining futures.", volumeId, operationName, ex);
+                failedVolumes.put(volumeId, ex.getMessage());
+                operations.forEach(op -> op.future().cancel(true));
+                break;
             } catch (Exception ex) {
-                LOGGER.warn("Failed to create GCP disk {}.", diskName, ex);
+                LOGGER.warn("Failed to {} GCP disk {}.", operationName, volumeId, ex);
                 Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-                failedDisks.put(diskName, cause.getMessage());
+                failedVolumes.put(volumeId, cause.getMessage());
             }
         }
     }
@@ -429,10 +422,110 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
         return attachedVolumes;
     }
 
+    @Override
+    public void attachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, CloudStack cloudStack)
+            throws CloudbreakServiceException {
+        GcpContext context = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, false);
+        Compute compute = context.getCompute();
+        String projectId = context.getProjectId();
+        LOGGER.debug("Attaching volumes on GCP for resources: {}", cloudResources);
+        runPerVolume("attach", cloudResources, (resource, volumeSetAttributes, volume) -> {
+            String zone = volumeSetAttributes.getAvailabilityZone();
+            AttachedDisk attachedDisk = buildAttachedDisk(projectId, zone, volume.getId(), volumeSetAttributes.getDeleteOnTermination());
+            GcpDiskAttachmentParameters parameters = new GcpDiskAttachmentParameters(compute, projectId, zone,
+                    resource.getInstanceId(), volume.getId(), volume.getId(), resource, authenticatedContext);
+            return gcpDiskUpdateRetryService.attachDiskToInstance(parameters, attachedDisk, context);
+        });
+    }
+
+    @Override
+    public void detachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception {
+        GcpContext context = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, false);
+        Compute compute = context.getCompute();
+        String projectId = context.getProjectId();
+        LOGGER.debug("Detaching volumes on GCP for resources: {}", cloudResources);
+        runPerVolume("detach", cloudResources, (resource, volumeSetAttributes, volume) -> {
+            GcpDiskAttachmentParameters parameters = new GcpDiskAttachmentParameters(compute, projectId,
+                    volumeSetAttributes.getAvailabilityZone(), resource.getInstanceId(), volume.getId(), volume.getId(),
+                    resource, authenticatedContext);
+            return gcpDiskUpdateRetryService.detachDiskFromInstance(parameters, context);
+        });
+    }
+
+    @Override
+    public void deleteVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception {
+        GcpContext context = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, false);
+        Compute compute = context.getCompute();
+        String projectId = context.getProjectId();
+        LOGGER.debug("Deleting volumes on GCP for resources: {}", cloudResources);
+        runPerVolume("delete", cloudResources, (resource, volumeSetAttributes, volume) -> {
+            GcpDiskAttachmentParameters parameters = new GcpDiskAttachmentParameters(compute, projectId,
+                    volumeSetAttributes.getAvailabilityZone(), resource.getInstanceId(), volume.getId(), volume.getId(),
+                    resource, authenticatedContext);
+            return gcpDiskUpdateRetryService.deleteDisk(parameters, context);
+        });
+    }
+
+    /**
+     * Builds the {@link AttachedDisk} for an attach request. Both the device name and the source URL use the short disk
+     * name ({@code volume.getId()}), matching {@code GcpInstanceResourceBuilder#createDisk}; {@code volume.getDevice()}
+     * must NOT be used as it holds the OS {@code /dev/disk/by-id/google-<id>} path, not the provider device name.
+     */
+    private AttachedDisk buildAttachedDisk(String projectId, String zone, String diskName, Boolean deleteOnTermination) {
+        return new AttachedDisk()
+                .setBoot(false)
+                .setAutoDelete(Boolean.TRUE.equals(deleteOnTermination))
+                .setMode(READ_WRITE_MODE)
+                .setDeviceName(diskName)
+                .setSource(String.format(DISK_URL, projectId, zone, diskName));
+    }
+
+    /**
+     * Fans out a per-volume disk operation on the intermediate builder executor and awaits all of them single-threaded,
+     * collecting failures. Local SSD volumes are skipped (they are created inline at instance build and cannot be
+     * attached/detached on a running instance). If any operation failed, throws a {@link CloudbreakServiceException}
+     * listing the failed disks and surfacing the first failure cause.
+     */
+    private void runPerVolume(String operationName, List<CloudResource> cloudResources, VolumeOperation operation) {
+        List<DiskOperationFuture<List<CloudResourceStatus>>> operations = new ArrayList<>();
+        for (CloudResource resource : cloudResources) {
+            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            if (volumeSetAttributes == null) {
+                continue;
+            }
+            for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
+                if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
+                    LOGGER.debug("Volume {} is a local SSD, skipping.", volume.getId());
+                    continue;
+                }
+                operations.add(new DiskOperationFuture<>(volume.getId(),
+                        intermediateBuilderExecutor.submit(() -> operation.apply(resource, volumeSetAttributes, volume))));
+            }
+        }
+        Map<String, String> failedVolumes = new LinkedHashMap<>();
+        awaitDiskOperations(operationName, operations, failedVolumes, result -> { });
+        String failureMessage = buildFailureMessage(operationName, failedVolumes, null);
+        if (failureMessage != null) {
+            throw new CloudbreakServiceException(failureMessage);
+        }
+    }
+
     /**
      * Resolved resize target for a single disk: the availability zone (source of truth for the GCP resize call,
      * {@code null} when it could not be resolved) and the owning disk-set {@link CloudResource}.
      */
     private record DiskResizeTarget(String availabilityZone, CloudResource cloudResource) {
+    }
+
+    /**
+     * A submitted per-disk operation future together with the disk id/name it acts on, so failures can be reported
+     * against the right disk when the futures are awaited in {@link #awaitDiskOperations}.
+     */
+    private record DiskOperationFuture<T>(String volumeId, Future<T> future) {
+    }
+
+    @FunctionalInterface
+    private interface VolumeOperation {
+        List<CloudResourceStatus> apply(CloudResource resource, VolumeSetAttributes volumeSetAttributes, VolumeSetAttributes.Volume volume) throws Exception;
     }
 }
