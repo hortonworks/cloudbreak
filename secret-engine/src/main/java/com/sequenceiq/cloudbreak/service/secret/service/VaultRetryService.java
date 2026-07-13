@@ -8,27 +8,38 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.vault.authentication.LifecycleAwareSessionManager;
+import org.springframework.vault.authentication.SessionManager;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
+import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 
 @Service
+@ConditionalOnBean({VaultKvV2Engine.class, VaultConfig.class})
 public class VaultRetryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultRetryService.class);
 
     private static final String FORBIDDEN_ERROR_MESSAGE = "Status 403 Forbidden";
 
+    private static final String INVALID_TOKEN_ERROR_MESSAGE = "invalid token";
+
     private static final String CONNECTION_POOL_SHUT_DOWN = "Connection pool shut down";
 
     @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
+
+    @Inject
+    private SessionManager sessionManager;
 
     @Retryable(
             retryFor = Retry.ActionFailedException.class,
@@ -59,13 +70,32 @@ public class VaultRetryService {
             LOGGER.warn("Exception during vault " + operation + ", possible shutdown.");
             throw e;
         } catch (RuntimeException e) {
+            String message = e.getMessage();
+            if (message != null && message.contains(FORBIDDEN_ERROR_MESSAGE) && message.contains(INVALID_TOKEN_ERROR_MESSAGE)) {
+                LOGGER.info("Vault session token is expired or invalid during {}, revoking it and forcing a re-login before retrying", operation);
+                forceVaultReLogin();
+                throw new VaultRetryException(message, e, operation, metricType);
+            }
             LOGGER.warn("Exception during vault " + operation, e);
-            if (e.getMessage() != null
-                    && (e.getMessage().contains(FORBIDDEN_ERROR_MESSAGE) || e.getMessage().equals(CONNECTION_POOL_SHUT_DOWN))) {
+            if (message != null && (message.contains(FORBIDDEN_ERROR_MESSAGE) || message.equals(CONNECTION_POOL_SHUT_DOWN))) {
                 throw e;
             } else {
-                throw new VaultRetryException(e.getMessage(), e, operation, metricType);
+                throw new VaultRetryException(message, e, operation, metricType);
             }
+        }
+    }
+
+    private void forceVaultReLogin() {
+        try {
+            if (sessionManager instanceof LifecycleAwareSessionManager lifecycleAwareSessionManager) {
+                lifecycleAwareSessionManager.revoke();
+                LOGGER.info("Revoked the invalid Vault session token, the next attempt will re-login and obtain a fresh token");
+            } else {
+                LOGGER.warn("Cannot force Vault re-authentication, session manager is not a LifecycleAwareSessionManager: {}",
+                        sessionManager.getClass().getName());
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("Failed to revoke the stale Vault session token, proceeding with retry anyway", ex);
         }
     }
 

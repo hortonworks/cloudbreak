@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
@@ -24,11 +26,16 @@ import com.sequenceiq.cloudbreak.service.secret.service.VaultRetryService.VaultR
 @ExtendWith(MockitoExtension.class)
 class VaultRetryServiceTest {
 
+    private static final String INVALID_TOKEN_403 = "Status 403 Forbidden [secret/data/foo]: 2 errors occurred:\n\t* permission denied\n\t* invalid token\n";
+
     @InjectMocks
     private VaultRetryService underTest;
 
     @Mock
     private MetricService metricService;
+
+    @Mock
+    private LifecycleAwareSessionManager sessionManager;
 
     @Test
     void testRetryWhenNoException() {
@@ -53,6 +60,34 @@ class VaultRetryServiceTest {
         }));
         assertEquals("Status 403 Forbidden", exception.getMessage());
         verify(metricService, never()).incrementMetricCounter(any(MetricType.class));
+    }
+
+    @Test
+    void testInvalidTokenForcesReLoginAndBecomesRetryable() {
+        VaultRetryException exception = assertThrows(VaultRetryException.class, () -> underTest.tryReadingVault(() -> {
+            throw new VaultException(INVALID_TOKEN_403);
+        }));
+        assertEquals(INVALID_TOKEN_403, exception.getMessage());
+        verify(sessionManager, times(1)).revoke();
+    }
+
+    @Test
+    void testInvalidTokenStillRetriesWhenRevokeFails() {
+        doThrow(new VaultException("connection refused")).when(sessionManager).revoke();
+        VaultRetryException exception = assertThrows(VaultRetryException.class, () -> underTest.tryReadingVault(() -> {
+            throw new VaultException(INVALID_TOKEN_403);
+        }));
+        assertEquals(INVALID_TOKEN_403, exception.getMessage());
+        verify(sessionManager, times(1)).revoke();
+    }
+
+    @Test
+    void testPlainForbiddenDoesNotForceReLoginAndIsNotRetried() {
+        VaultException exception = assertThrows(VaultException.class, () -> underTest.tryReadingVault(() -> {
+            throw new VaultException("Status 403 Forbidden: permission denied");
+        }));
+        assertEquals("Status 403 Forbidden: permission denied", exception.getMessage());
+        verify(sessionManager, never()).revoke();
     }
 
     @Test
