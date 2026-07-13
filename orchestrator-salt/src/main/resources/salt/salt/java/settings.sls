@@ -2,7 +2,10 @@
 {% if not java_home %}
   {% set java_home = '/usr/lib/jvm/java' %}
 {% endif %}
-{% set java_version = salt.cmd.shell("java -version 2>&1 | grep -oP \"version [^0-9]?(1\\.)?\\K\\d+\" || true") %}
+{% set java_version = salt['pillar.get']('java:version', '') | string %}
+{% if not java_version %}
+  {% set java_version = salt.cmd.shell("java -version 2>&1 | grep -oP \"version [^0-9]?(1\\.)?\\K\\d+\" || true") %}
+{% endif %}
 {% set jre_ext_path = java_home + '/jre/lib/ext' %}
 
 {% if java_version == "8" %}
