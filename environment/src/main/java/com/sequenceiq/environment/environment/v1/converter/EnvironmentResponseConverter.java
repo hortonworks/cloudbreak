@@ -153,6 +153,7 @@ public class EnvironmentResponseConverter {
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() :  null)
                 .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn())
+                .withJumpgateEnvironmentCrn(environmentDto.getJumpgateEnvironmentCrn())
                 .withEncryptionProfileCrn(environmentDto.getEncryptionProfileCrn())
                 .withNotificationParameters(getIfNotNull(environmentDto.getParameters(), this::distributionListToNotificationParameters));
 
@@ -231,6 +232,7 @@ public class EnvironmentResponseConverter {
                 .withEnableComputeCluster(environmentViewDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentViewDto.getEnvironmentType() != null ? environmentViewDto.getEnvironmentType().toString() : null)
                 .withRemoteEnvironmentCrn(environmentViewDto.getRemoteEnvironmentCrn())
+                .withJumpgateEnvironmentCrn(environmentViewDto.getJumpgateEnvironmentCrn())
                 .withEncryptionProfileCrn(environmentViewDto.getEncryptionProfileCrn());
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),

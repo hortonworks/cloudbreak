@@ -105,6 +105,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String remoteEnvironmentCrn;
 
+    private String jumpgateEnvironmentCrn;
+
     private String encryptionProfileCrn;
 
     private NotificationParameters notificationParameters;
@@ -463,6 +465,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
+    public String getJumpgateEnvironmentCrn() {
+        return jumpgateEnvironmentCrn;
+    }
+
+    public void setJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+        this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+    }
+
     public String getEncryptionProfileCrn() {
         return encryptionProfileCrn;
     }
@@ -499,6 +509,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
+                ", jumpgateEnvironmentCrn=" + jumpgateEnvironmentCrn +
                 ", encryptionProfileCrn=" + encryptionProfileCrn +
                 ", notificationParameters=" + notificationParameters +
                 '}';
@@ -583,6 +594,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private EnvironmentType environmentType;
 
         private String remoteEnvironmentCrn;
+
+        private String jumpgateEnvironmentCrn;
 
         private String encryptionProfileCrn;
 
@@ -779,6 +792,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+            this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+            return (B) this;
+        }
+
         public B withEncryptionProfileCrn(String encryptionProfileCrn) {
             this.encryptionProfileCrn = encryptionProfileCrn;
             return (B) this;
@@ -822,6 +840,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setEnableComputeCluster(enableComputeCluster);
             environmentDto.setEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType);
             environmentDto.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
+            environmentDto.setJumpgateEnvironmentCrn(jumpgateEnvironmentCrn);
             environmentDto.setEncryptionProfileCrn(encryptionProfileCrn);
         }
 

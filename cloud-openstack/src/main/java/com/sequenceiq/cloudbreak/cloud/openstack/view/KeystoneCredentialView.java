@@ -38,6 +38,14 @@ public class KeystoneCredentialView {
         return cloudCredential.getName();
     }
 
+    public String getCredentialCrn() {
+        return cloudCredential.getId();
+    }
+
+    public String getFacing() {
+        return keystoneConfig.facing;
+    }
+
     public String getStackName() {
         return stackName;
     }
@@ -98,6 +106,10 @@ public class KeystoneCredentialView {
         }
     }
 
+    public String getJumpgateEnvironmentCrn() {
+        return keystoneConfig.jumpgateEnvironmentCrn;
+    }
+
     public String getVersion() {
         return cloudCredential.getParameter("keystoneVersion", String.class);
     }
@@ -107,7 +119,8 @@ public class KeystoneCredentialView {
             String facing,
             String userName,
             String password,
-            KeystoneV3 keystoneV3
+            KeystoneV3 keystoneV3,
+            String jumpgateEnvironmentCrn
     ) {
         record KeystoneV3(
                 Project project,

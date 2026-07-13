@@ -67,6 +67,7 @@ public class EnvironmentModelDescription {
     public static final String POLICY_VALIDATION_ERROR_MESSAGE = "The policy validation message of service";
     public static final String POLICY_VALIDATION_ERROR_CODE = "The policy validation code";
     public static final String REMOTE_ENVIRONMENT_CRN = "The Remote environment crn";
+    public static final String JUMPGATE_ENVIRONMENT_CRN = "The Jumpgate environment crn";
 
     public static final String CREDENTIAL_NAME_REQUEST = "Name of the credential of the environment. If the name is given, "
             + "the detailed credential is ignored in the request.";
@@ -206,6 +207,8 @@ public class EnvironmentModelDescription {
 
     public static final String FREEIPA_LOADBALANCER = "FreeIpa load balancer type to be created. " +
             "Possible values: NONE, INTERNAL_NLB. Default is INTERNAL_NLB.";
+
+    public static final String JUMPGATE_ENV_CRN = "CRN of jumpgate Environment ";
 
     public static final String REMOTE_ENV_CRN = "CRN of remote Environment for hybrid environment";
 

@@ -149,6 +149,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.SECRET_ENCRYPTION_ENABLED)
     private boolean secretEncryptionEnabled;
 
+    @Schema(description = EnvironmentModelDescription.JUMPGATE_ENVIRONMENT_CRN)
+    private String jumpgateEnvironmentCrn;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -396,6 +399,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.secretEncryptionEnabled = secretEncryptionEnabled;
     }
 
+    public String getJumpgateEnvironmentCrn() {
+        return jumpgateEnvironmentCrn;
+    }
+
+    public void setJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+        this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentRequest{" +
@@ -426,6 +437,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", ccmV2TlsType=" + ccmV2TlsType +
                 ", dataServices=" + dataServices +
                 ", environmentType=" + environmentType +
+                ", jumpgateEnvironmentCrn=" + jumpgateEnvironmentCrn +
                 ", encryptionProfileNameOrCrn=" + encryptionProfileNameOrCrn +
                 ", secretEncryptionEnabled=" + secretEncryptionEnabled +
                 "} " + super.toString();

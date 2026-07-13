@@ -173,6 +173,9 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @Column(name = "remoteenvironmentcrn")
     private String remoteEnvironmentCrn;
 
+    @Column(name = "jumpgateenvironmentcrn")
+    private String jumpgateEnvironmentCrn;
+
     @Column(name = "encryption_profile_crn")
     private String encryptionProfileCrn;
 
@@ -568,6 +571,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
+    public String getJumpgateEnvironmentCrn() {
+        return jumpgateEnvironmentCrn;
+    }
+
+    public void setJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+        this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+    }
+
     public String getEncryptionProfileCrn() {
         return encryptionProfileCrn;
     }
@@ -614,6 +625,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
+                ", jumpgateEnvironmentCrn=" + jumpgateEnvironmentCrn +
                 ", encryptionProfileCrn=" + encryptionProfileCrn +
                 '}';
     }

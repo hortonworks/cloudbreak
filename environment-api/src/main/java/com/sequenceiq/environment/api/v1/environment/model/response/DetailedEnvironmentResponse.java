@@ -161,6 +161,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String environmentType;
 
+        private String jumpgateEnvironmentCrn;
+
         private String remoteEnvironmentCrn;
 
         private String encryptionProfileCrn;
@@ -385,6 +387,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return (B) this;
         }
 
+        public B withJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+            this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+            return (B) this;
+        }
+
         public B withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
             this.remoteEnvironmentCrn = remoteEnvironmentCrn;
             return (B) this;
@@ -448,6 +455,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
             detailedEnvironmentResponse.setEnvironmentType(environmentType);
             detailedEnvironmentResponse.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
+            detailedEnvironmentResponse.setJumpgateEnvironmentCrn(jumpgateEnvironmentCrn);
             detailedEnvironmentResponse.setEncryptionProfileCrn(encryptionProfileCrn);
             detailedEnvironmentResponse.setNotificationParameters(notificationParameters);
             return detailedEnvironmentResponse;

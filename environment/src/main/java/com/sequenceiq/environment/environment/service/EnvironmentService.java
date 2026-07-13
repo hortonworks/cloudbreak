@@ -418,6 +418,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         environmentRepository.updateRemoteEnvironmentCrn(accountId, environmentCrn, remoteEnvironmentCrn);
     }
 
+    public void updateJumpgateEnvironmentCrn(String accountId, String environmentCrn, String jumpgateEnvironmentCrn) {
+        environmentRepository.updateJumpgateEnvironmentCrn(accountId, environmentCrn, jumpgateEnvironmentCrn);
+    }
+
     public void validateCancelCrossRealmSetup() {
     }
 
@@ -426,6 +430,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     public void removeRemoteEnvironmentCrn(String environmentCrn) {
         environmentRepository.removeRemoteEnvironmentCrn(environmentCrn);
+    }
+
+    public void removeJumpgateEnvironmentCrn(String environmentCrn) {
+        environmentRepository.removeJumpgateEnvironmentCrn(environmentCrn);
     }
 
     public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {

@@ -150,6 +150,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentType;
 
+    @Schema(description = EnvironmentModelDescription.JUMPGATE_ENV_CRN, subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
+    private String jumpgateEnvironmentCrn;
+
     @Schema(description = EnvironmentModelDescription.REMOTE_ENV_CRN, subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
     private String remoteEnvironmentCrn;
 
@@ -499,6 +502,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.environmentType = environmentType;
     }
 
+    public String getJumpgateEnvironmentCrn() {
+        return jumpgateEnvironmentCrn;
+    }
+
+    public void setJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+        this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+    }
+
     public String getRemoteEnvironmentCrn() {
         return remoteEnvironmentCrn;
     }
@@ -564,6 +575,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", enableComputeCluster=" + enableComputeCluster +
                 ", environmentType=" + environmentType +
+                ", jumpgateEnvironmentCrn=" + jumpgateEnvironmentCrn +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
                 ", encryptionProfileCrn=" + encryptionProfileCrn +
                 ", notificationParameters=" + notificationParameters +

@@ -102,6 +102,7 @@ public class EnvironmentDtoConverter {
                 .withEnableComputeCluster(isComputeClusterEnabled(environmentView.getDefaultComputeCluster()))
                 .withEnvironmentType(environmentView.getEnvironmentType())
                 .withRemoteEnvironmentCrn(environmentView.getRemoteEnvironmentCrn())
+                .withJumpgateEnvironmentCrn(environmentView.getJumpgateEnvironmentCrn())
                 .withEncryptionProfileCrn(environmentView.getEncryptionProfileCrn());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
@@ -153,6 +154,7 @@ public class EnvironmentDtoConverter {
                 .withEnableComputeCluster(isComputeClusterEnabled(environment.getDefaultComputeCluster()))
                 .withEnvironmentType(environment.getEnvironmentType())
                 .withRemoteEnvironmentCrn(environment.getRemoteEnvironmentCrn())
+                .withJumpgateEnvironmentCrn(environment.getJumpgateEnvironmentCrn())
                 .withEncryptionProfileCrn(environment.getEncryptionProfileCrn());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
@@ -215,6 +217,8 @@ public class EnvironmentDtoConverter {
         setDefaultComputeCluster(creationDto, environment);
         setRegions(creationDto, environment);
         environment.setEnvironmentType(creationDto.getEnvironmentType());
+        environment.setRemoteEnvironmentCrn(creationDto.getRemoteEnvironmentCrn());
+        environment.setJumpgateEnvironmentCrn(creationDto.getJumpgateEnvironmentCrn());
         return environment;
     }
 

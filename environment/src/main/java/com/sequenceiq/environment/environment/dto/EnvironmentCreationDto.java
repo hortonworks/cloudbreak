@@ -83,6 +83,10 @@ public class EnvironmentCreationDto {
 
     private final boolean secretEncryptionEnabled;
 
+    private final String remoteEnvironmentCrn;
+
+    private final String jumpgateEnvironmentCrn;
+
     private EnvironmentCreationDto(Builder builder) {
         name = builder.name;
         description = builder.description;
@@ -117,6 +121,8 @@ public class EnvironmentCreationDto {
         environmentType = builder.environmentType;
         encryptionProfileCrn = builder.encryptionProfileCrn;
         secretEncryptionEnabled = builder.secretEncryptionEnabled;
+        remoteEnvironmentCrn = builder.remoteEnvironmentCrn;
+        jumpgateEnvironmentCrn = builder.jumpgateEnvironmentCrn;
     }
 
     public static Builder builder() {
@@ -244,6 +250,14 @@ public class EnvironmentCreationDto {
         return secretEncryptionEnabled;
     }
 
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public String getJumpgateEnvironmentCrn() {
+        return jumpgateEnvironmentCrn;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentCreationDto{" +
@@ -254,6 +268,7 @@ public class EnvironmentCreationDto {
                 ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
                 (isNotEmpty(creatorClient) ? ", creatorClient='" + creatorClient + '\'' : "") +
                 ", environmentType='" + environmentType + '\'' +
+                ", jumpgateEnvironmentCrn='" + jumpgateEnvironmentCrn + '\'' +
                 '}';
     }
 
@@ -320,6 +335,10 @@ public class EnvironmentCreationDto {
         private String encryptionProfileCrn;
 
         private boolean secretEncryptionEnabled;
+
+        private String remoteEnvironmentCrn;
+
+        private String jumpgateEnvironmentCrn;
 
         private Builder() {
         }
@@ -471,6 +490,16 @@ public class EnvironmentCreationDto {
 
         public Builder withSecretEncryptionEnabled(boolean secretEncryptionEnabled) {
             this.secretEncryptionEnabled = secretEncryptionEnabled;
+            return this;
+        }
+
+        public Builder withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+            this.remoteEnvironmentCrn = remoteEnvironmentCrn;
+            return this;
+        }
+
+        public Builder withJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+            this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
             return this;
         }
 

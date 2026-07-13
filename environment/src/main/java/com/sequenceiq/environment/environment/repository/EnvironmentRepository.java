@@ -212,9 +212,22 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             @Param("remoteEnvironmentCrn") String remoteEnvironmentCrn);
 
     @Modifying
+    @Query("UPDATE Environment e SET e.jumpgateEnvironmentCrn = :jumpgateEnvironmentCrn " +
+            "WHERE e.resourceCrn = :environmentCrn AND e.accountId = :accountId AND e.archived = false")
+    int updateJumpgateEnvironmentCrn(
+            @Param("accountId") String accountId,
+            @Param("environmentCrn") String environmentCrn,
+            @Param("jumpgateEnvironmentCrn") String jumpgateEnvironmentCrn);
+
+    @Modifying
     @Query("UPDATE Environment e SET e.remoteEnvironmentCrn = null " +
             "WHERE e.resourceCrn = :environmentCrn AND e.archived = false")
     void removeRemoteEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
+
+    @Modifying
+    @Query("UPDATE Environment e SET e.jumpgateEnvironmentCrn = null " +
+            "WHERE e.resourceCrn = :environmentCrn AND e.archived = false")
+    void removeJumpgateEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
 
     @Modifying
     @Query("UPDATE Environment e SET e.encryptionProfileCrn = null " +

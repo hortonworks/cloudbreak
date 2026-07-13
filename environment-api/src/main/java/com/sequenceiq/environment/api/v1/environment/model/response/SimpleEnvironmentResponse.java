@@ -126,6 +126,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String remoteEnvironmentCrn;
 
+        private String jumpgateEnvironmentCrn;
+
         private String encryptionProfileCrn;
 
         private Builder() {
@@ -306,6 +308,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
+            this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+            return this;
+        }
+
         public Builder withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
             this.remoteEnvironmentCrn = remoteEnvironmentCrn;
             return this;
@@ -353,6 +360,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
             simpleEnvironmentResponse.setEnvironmentType(environmentType);
             simpleEnvironmentResponse.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
+            simpleEnvironmentResponse.setJumpgateEnvironmentCrn(jumpgateEnvironmentCrn);
             simpleEnvironmentResponse.setEncryptionProfileCrn(encryptionProfileCrn);
             return simpleEnvironmentResponse;
         }
