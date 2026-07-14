@@ -1,19 +1,32 @@
 package com.sequenceiq.mock.config;
 
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
 @Configuration
 public class CcmV2Config {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CcmV2Config.class);
+
+    private static final String TEST_HOST = "ci-cloudbreak.eng.hortonworks.com";
+
+    private static final int HTTP_PORT = 80;
 
     @Value("${grpc.ccmv2.jumpgate.relay.host:}")
     private String jumpgateRelayHost;
@@ -35,7 +48,7 @@ public class CcmV2Config {
     }
 
     public String getJumpgateRelayHost() {
-        return jumpgateRelayHost;
+        return Strings.isNullOrEmpty(jumpgateRelayHost) ? tryToDetermineHostAddress() : jumpgateRelayHost;
     }
 
     @Nullable
@@ -49,5 +62,18 @@ public class CcmV2Config {
 
     public String getPrivateKey() {
         return privateKey;
+    }
+
+    private String tryToDetermineHostAddress() {
+        LOGGER.info("Trying to find out address of host running the mock-infrastructure by connecting to {}:80", TEST_HOST);
+        try (DatagramSocket socket = new DatagramSocket()) {
+            socket.connect(InetAddress.getByName(TEST_HOST), HTTP_PORT);
+            String hostAddress = socket.getLocalAddress().getHostAddress();
+            LOGGER.info("Using host address: {}", hostAddress);
+            return hostAddress;
+        } catch (SocketException | UnknownHostException e) {
+            LOGGER.debug("Failed to determine host address of host running the mock-infrastructure", e);
+            throw new RuntimeException("Failed to determine host address of host running the mock-infrastructure", e);
+        }
     }
 }
