@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -23,6 +25,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsGetLatestCertsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsGetLatestCertsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsRequest;
@@ -38,6 +42,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateLatestCertsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateLatestCertsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
@@ -48,6 +54,8 @@ import com.sequenceiq.cloudbreak.view.StackView;
 
 @Configuration
 public class UpgradeRdsActions {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeRdsActions.class);
 
     private static final Object CLOUD_STORAGE_BACKUP_LOCATION = "cloud_storage_backup_location";
 
@@ -121,11 +129,47 @@ public class UpgradeRdsActions {
         };
     }
 
-    @Bean(name = "UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE")
-    public Action<?, ?> migrateDatabaseSettings() {
+    @Bean(name = "UPGRADE_RDS_GET_LATEST_CERTS_STATE")
+    public Action<?, ?> getLatestCerts() {
         return new AbstractUpgradeRdsAction<>(WaitForDatabaseServerUpgradeResult.class) {
             @Override
-            protected void doExecute(UpgradeRdsContext context, WaitForDatabaseServerUpgradeResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(UpgradeRdsContext context, WaitForDatabaseServerUpgradeResult payload, Map<Object, Object> variables) {
+                Selectable event;
+                if (Boolean.TRUE.equals(context.getCluster().getDbSslEnabled())) {
+                    upgradeRdsService.getLatestCertsState(payload.getResourceId());
+                    event = new UpgradeRdsGetLatestCertsRequest(context.getStackId(), context.getVersion());
+                } else {
+                    LOGGER.info("Database SSL is disabled for stack {}, skipping SSL certificate fetch", context.getStackId());
+                    event = new UpgradeRdsGetLatestCertsResult(context.getStackId(), context.getVersion());
+                }
+                sendEvent(context, event);
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_UPDATE_LATEST_CERTS_STATE")
+    public Action<?, ?> updateLatestCerts() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsGetLatestCertsResult.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsGetLatestCertsResult payload, Map<Object, Object> variables) {
+                Selectable event;
+                if (Boolean.TRUE.equals(context.getCluster().getDbSslEnabled())) {
+                    upgradeRdsService.updateLatestCertsState(payload.getResourceId());
+                    event = new UpgradeRdsUpdateLatestCertsRequest(context.getStackId(), context.getVersion());
+                } else {
+                    LOGGER.info("Database SSL is disabled for stack {}, skipping SSL certificate bundle push", context.getStackId());
+                    event = new UpgradeRdsUpdateLatestCertsResult(context.getStackId(), context.getVersion());
+                }
+                sendEvent(context, event);
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE")
+    public Action<?, ?> migrateDatabaseSettings() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsUpdateLatestCertsResult.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpdateLatestCertsResult payload, Map<Object, Object> variables) throws Exception {
                 if (externalDatabaseService.isMigrationNeededDuringUpgrade(context)) {
                     upgradeRdsService.migrateDatabaseSettingsState(payload.getResourceId());
                 }

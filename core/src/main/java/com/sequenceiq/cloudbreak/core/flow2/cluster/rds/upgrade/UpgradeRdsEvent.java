@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsGetLatestCertsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
@@ -10,6 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateLatestCertsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.WaitForDatabaseServerUpgradeResult;
@@ -22,6 +24,8 @@ public enum UpgradeRdsEvent implements FlowEvent {
     UPGRADE_RDS_DATA_BACKUP_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsDataBackupResult.class)),
     UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsUpgradeDatabaseServerResult.class)),
     UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_FINISHED_EVENT(EventSelectorUtil.selector(WaitForDatabaseServerUpgradeResult.class)),
+    UPGRADE_RDS_GET_LATEST_CERTS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsGetLatestCertsResult.class)),
+    UPGRADE_RDS_UPDATE_LATEST_CERTS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsUpdateLatestCertsResult.class)),
     UPGRADE_RDS_MIGRATE_DATABASE_SETTINGS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsMigrateDatabaseSettingsResponse.class)),
     UPGRADE_RDS_DATA_RESTORE_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsDataRestoreResult.class)),
     UPGRADE_RDS_START_CM_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartCMResult.class)),

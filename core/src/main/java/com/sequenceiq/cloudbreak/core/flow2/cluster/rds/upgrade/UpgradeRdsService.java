@@ -72,6 +72,14 @@ public class UpgradeRdsService {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE), ResourceEvent.CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE);
     }
 
+    void getLatestCertsState(Long stackId) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_GET_LATEST_CERTS), ResourceEvent.CLUSTER_RDS_UPGRADE_GET_LATEST_CERTS);
+    }
+
+    void updateLatestCertsState(Long stackId) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_UPDATE_LATEST_CERTS), ResourceEvent.CLUSTER_RDS_UPGRADE_UPDATE_LATEST_CERTS);
+    }
+
     void migrateDatabaseSettingsState(Long stackId) {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS), ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS);
     }

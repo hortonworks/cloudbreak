@@ -59,6 +59,10 @@ class UpgradeRdsServiceTest {
 
     private static final String UPGRADE_STATE = "Upgrading database server.";
 
+    private static final String GET_LATEST_CERTS_STATE = "Fetching latest database SSL certificate.";
+
+    private static final String UPDATE_LATEST_CERTS_STATE = "Refreshing database SSL certificate bundle.";
+
     private static final String INSTALL_PG_STATE = "Installing Postgres packages if necessary.";
 
     private static final String BACKUP_INSTANCE_PROFILE = "BACKUP_INSTANCE_PROFILE";
@@ -197,6 +201,24 @@ class UpgradeRdsServiceTest {
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(UPGRADE_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE));
+    }
+
+    @Test
+    public void testGetLatestCertsState() {
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_GET_LATEST_CERTS.getMessage())).thenReturn(GET_LATEST_CERTS_STATE);
+        underTest.getLatestCertsState(STACK_ID);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(GET_LATEST_CERTS_STATE));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_GET_LATEST_CERTS));
+    }
+
+    @Test
+    public void testUpdateLatestCertsState() {
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_UPDATE_LATEST_CERTS.getMessage())).thenReturn(UPDATE_LATEST_CERTS_STATE);
+        underTest.updateLatestCertsState(STACK_ID);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(UPDATE_LATEST_CERTS_STATE));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_UPDATE_LATEST_CERTS));
     }
 
     @Test

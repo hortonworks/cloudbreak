@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsGetLatestCertsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsGetLatestCertsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsResponse;
@@ -45,6 +47,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateLatestCertsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateLatestCertsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.WaitForDatabaseServerUpgradeRequest;
@@ -174,9 +178,49 @@ class UpgradeRdsActionsTest {
     }
 
     @Test
+    public void testShouldGetLatestCertsWhenSslEnabled() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.getLatestCerts();
+        WaitForDatabaseServerUpgradeResult triggerEvent = new WaitForDatabaseServerUpgradeResult(STACK_ID, TargetMajorVersion.VERSION_11, null);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true, true);
+
+        verify(upgradeRdsService).getLatestCertsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsGetLatestCertsRequest.class);
+    }
+
+    @Test
+    public void testShouldNotGetLatestCertsWhenSslDisabled() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.getLatestCerts();
+        WaitForDatabaseServerUpgradeResult triggerEvent = new WaitForDatabaseServerUpgradeResult(STACK_ID, TargetMajorVersion.VERSION_11, null);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true, false);
+
+        verify(upgradeRdsService, never()).getLatestCertsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsGetLatestCertsResult.class);
+    }
+
+    @Test
+    public void testShouldUpdateLatestCertsWhenSslEnabled() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.updateLatestCerts();
+        UpgradeRdsGetLatestCertsResult triggerEvent = new UpgradeRdsGetLatestCertsResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true, true);
+
+        verify(upgradeRdsService).updateLatestCertsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsUpdateLatestCertsRequest.class);
+    }
+
+    @Test
+    public void testShouldNotUpdateLatestCertsWhenSslDisabled() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.updateLatestCerts();
+        UpgradeRdsGetLatestCertsResult triggerEvent = new UpgradeRdsGetLatestCertsResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true, false);
+
+        verify(upgradeRdsService, never()).updateLatestCertsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsUpdateLatestCertsResult.class);
+    }
+
+    @Test
     public void testShouldMigrateDatabaseSettings() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.migrateDatabaseSettings();
-        WaitForDatabaseServerUpgradeResult triggerEvent = new WaitForDatabaseServerUpgradeResult(STACK_ID, TargetMajorVersion.VERSION_11, null);
+        UpgradeRdsUpdateLatestCertsResult triggerEvent = new UpgradeRdsUpdateLatestCertsResult(STACK_ID, TargetMajorVersion.VERSION_11);
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
 
         verify(upgradeRdsService).migrateDatabaseSettingsState(STACK_ID);
@@ -186,7 +230,7 @@ class UpgradeRdsActionsTest {
     @Test
     public void testShouldNotMigrateDatabaseSettings() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.migrateDatabaseSettings();
-        WaitForDatabaseServerUpgradeResult triggerEvent = new WaitForDatabaseServerUpgradeResult(STACK_ID, TargetMajorVersion.VERSION_11, null);
+        UpgradeRdsUpdateLatestCertsResult triggerEvent = new UpgradeRdsUpdateLatestCertsResult(STACK_ID, TargetMajorVersion.VERSION_11);
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, false);
 
         verify(upgradeRdsService, never()).migrateDatabaseSettingsState(STACK_ID);
@@ -275,6 +319,11 @@ class UpgradeRdsActionsTest {
 
     private Map<Object, Object> mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractUpgradeRdsEvent triggerEvent,
             boolean shouldRunDataBackupRestore, boolean shouldStopServices, boolean shouldMigrateDBSettings) throws Exception {
+        return mockAndTriggerRdsUpgradeAction(action, triggerEvent, shouldRunDataBackupRestore, shouldStopServices, shouldMigrateDBSettings, false);
+    }
+
+    private Map<Object, Object> mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractUpgradeRdsEvent triggerEvent,
+            boolean shouldRunDataBackupRestore, boolean shouldStopServices, boolean shouldMigrateDBSettings, boolean sslEnabled) throws Exception {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
@@ -283,6 +332,7 @@ class UpgradeRdsActionsTest {
         StackView stack = mock(StackView.class);
         when(stack.getId()).thenReturn(STACK_ID);
         ClusterView cluster = mock(ClusterView.class);
+        lenient().when(cluster.getDbSslEnabled()).thenReturn(sslEnabled);
         Database database = new Database();
         UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, database, TargetMajorVersion.VERSION_11);
         lenient().when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster, context.getDatabase())).thenReturn(shouldRunDataBackupRestore);
