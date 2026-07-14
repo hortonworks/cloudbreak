@@ -131,12 +131,28 @@ class ExistingStackPatcherJobTest {
         underTest.executeJob(context);
 
         verifyUnschedule();
+        verify(existingStackPatchService, never()).isEntitled(stack);
         verify(existingStackPatchService, never()).apply(stack);
+        verify(stackPatchService).updateStatus(stackPatch, StackPatchStatus.NOT_AFFECTED);
+    }
+
+    @Test
+    void shouldSkipAndRemainScheduledWhenStackIsAffectedButNotEntitled() throws JobExecutionException, ExistingStackPatchApplyException {
+        when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+        when(existingStackPatchService.isEntitled(stack)).thenReturn(false);
+
+        underTest.executeJob(context);
+
+        verify(jobService, never()).unschedule(any());
+        verify(existingStackPatchService, never()).apply(stack);
+        verify(stackPatchService).updateStatus(stackPatch, StackPatchStatus.SKIPPED);
+        verify(stackPatchService, never()).updateStatusAndReportUsage(stackPatch, StackPatchStatus.AFFECTED);
     }
 
     @Test
     void shouldApplyWhenStackIsAffected() throws JobExecutionException, ExistingStackPatchApplyException {
         when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+        when(existingStackPatchService.isEntitled(stack)).thenReturn(true);
 
         underTest.executeJob(context);
 
@@ -149,6 +165,7 @@ class ExistingStackPatcherJobTest {
     void shouldApplyButNotReportWhenStackPatchWasAlreadyTried(StackPatchStatus stackPatchStatus) throws Exception {
         stackPatch.setStatus(stackPatchStatus);
         when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+        when(existingStackPatchService.isEntitled(stack)).thenReturn(true);
 
         underTest.executeJob(context);
 
@@ -159,6 +176,7 @@ class ExistingStackPatcherJobTest {
     @Test
     void shouldUnscheduleWhenSuccessfullyApplied() throws JobExecutionException, ExistingStackPatchApplyException {
         when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+        when(existingStackPatchService.isEntitled(stack)).thenReturn(true);
         when(existingStackPatchService.apply(stack)).thenReturn(true);
 
         underTest.executeJob(context);
@@ -172,6 +190,7 @@ class ExistingStackPatcherJobTest {
     @Test
     void shouldNotUnscheduleWhenApplyFails() throws ExistingStackPatchApplyException {
         when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+        when(existingStackPatchService.isEntitled(stack)).thenReturn(true);
         String errorMessage = "error message";
         doThrow(new ExistingStackPatchApplyException(errorMessage)).when(existingStackPatchService).apply(stack);
 

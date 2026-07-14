@@ -106,6 +106,11 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
             try {
                 if (existingStackPatchService.isAffected(stack)) {
                     LOGGER.debug("Stack {} needs patch for {}", stack.getResourceCrn(), stackPatchType);
+                    if (!existingStackPatchService.isEntitled(stack)) {
+                        LOGGER.debug("Stack {} is not entitled for patch {}", stack.getResourceCrn(), stackPatchType);
+                        stackPatchService.updateStatus(stackPatch, StackPatchStatus.SKIPPED);
+                        return false;
+                    }
                     if (StackPatchStatus.SCHEDULED.equals(stackPatch.getStatus())) {
                         // only report AFFECTED status once
                         stackPatchService.updateStatusAndReportUsage(stackPatch, StackPatchStatus.AFFECTED);

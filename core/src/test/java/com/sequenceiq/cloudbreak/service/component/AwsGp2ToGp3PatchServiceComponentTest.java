@@ -32,7 +32,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
@@ -58,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretAspectService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.AwsGp2ToGp3PatchService;
+import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchEntitlementService;
 import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchUsageReporterService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
@@ -190,7 +190,7 @@ class AwsGp2ToGp3PatchServiceComponentTest {
     private ExistingStackPatcherConfig existingStackPatcherConfig;
 
     @MockBean
-    private EntitlementService entitlementService;
+    private StackPatchEntitlementService stackPatchEntitlementService;
 
     @MockBean
     private StackPatchUsageReporterService stackPatchUsageReporterService;
@@ -284,8 +284,6 @@ class AwsGp2ToGp3PatchServiceComponentTest {
                 List.of(ResourceType.AWS_ROOT_DISK, ResourceType.AWS_VOLUMESET)).size(), "one resource row should exist for the stack");
 
         doReturn(mockAmazonEc2Client).when(underTestLocal).getAwsClient(any());
-
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
 
         Volume awsVolume0 = Volume.builder()
                 .volumeId("vol-0")

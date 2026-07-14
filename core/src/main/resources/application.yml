@@ -897,6 +897,7 @@ existing-stack-patcher:
       enabled: true
     aws-gp2-to-gp3-migration:
       enabled: false
+      entitlement: GP2_TO_GP3_MIGRATION
 
 dynamic-entitlement:
   entitlements:

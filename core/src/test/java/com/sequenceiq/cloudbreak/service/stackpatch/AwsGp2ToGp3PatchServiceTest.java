@@ -26,7 +26,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
@@ -108,9 +107,6 @@ class AwsGp2ToGp3PatchServiceTest {
 
     @Mock
     private StackService stackService;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private StackPatchUsageReporterService stackPatchUsageReporterService;
@@ -214,14 +210,6 @@ class AwsGp2ToGp3PatchServiceTest {
     }
 
     @Test
-    void testIsAffectedAwsStackWithNoEntitlement() throws Exception {
-        when(entitlementService.isGp2toGp3MigrationEnabled(any())).thenReturn(false);
-
-        boolean result = underTest.doApply(stack);
-        assertFalse(result, "Stack with GP2 volumes but no entitlement should not be affected");
-    }
-
-    @Test
     void testIsAffectedAwsStackWithGp3Volumes() {
         // Create VolumeSetAttributes with GP3 volumes
         VolumeSetAttributes.Volume rootDiskVolume = new VolumeSetAttributes.Volume(
@@ -260,8 +248,6 @@ class AwsGp2ToGp3PatchServiceTest {
 
         // Setup: configure mock EC2 client
         doReturn(mockAmazonEc2Client).when(underTestLocal).getAwsClient(any());
-
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
 
         // AWS describeVolumes: return GP2 volume in-use (for both getGp2Volumes and getVolumeInfo)
         Volume awsVolume = Volume.builder()
@@ -412,8 +398,6 @@ class AwsGp2ToGp3PatchServiceTest {
 
         // Setup: configure mock EC2 client
         doReturn(mockAmazonEc2Client).when(underTestLocal).getAwsClient(any());
-
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
 
         // AWS describeVolumes: return GP2 volume in-use (for both getGp2Volumes and getVolumeInfo)
         List<Volume> awsVolumes = createAwsVolumeResponse(100, VolumeType.GP2);
@@ -578,8 +562,6 @@ class AwsGp2ToGp3PatchServiceTest {
         // Setup: configure mock EC2 client
         doReturn(mockAmazonEc2Client).when(underTestLocal).getAwsClient(any());
 
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
-
         // AWS describeVolumes: return GP2 volume in-use (for both getGp2Volumes and getVolumeInfo)
         Volume awsVolume = Volume.builder()
                 .volumeId("vol-0")
@@ -638,8 +620,6 @@ class AwsGp2ToGp3PatchServiceTest {
         // Setup: configure mock EC2 client
         doReturn(mockAmazonEc2Client).when(underTestLocal).getAwsClient(any());
 
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
-
         // AWS describeVolumes: return GP3 volume in-use so that AWS does not match CB.
         Volume awsVolume = Volume.builder()
                 .volumeId("vol-0")
@@ -686,8 +666,6 @@ class AwsGp2ToGp3PatchServiceTest {
 
         // Setup: configure mock EC2 client
         doReturn(mockAmazonEc2Client).when(underTestLocal).getAwsClient(any());
-
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
 
         // AWS describeVolumes: return GP2 volume in-use (for both getGp2Volumes and getVolumeInfo)
         List<Volume> awsVolumes = createAwsVolumeResponse(3, VolumeType.GP2);
@@ -835,8 +813,6 @@ class AwsGp2ToGp3PatchServiceTest {
 
         List<StackStatus> stacksStatuses = setupTwoVolumeInitialPass(underTestLocal);
 
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
-
         // Execute pass 1
         boolean pass1Result = underTestLocal.doApply(stack);
 
@@ -888,8 +864,6 @@ class AwsGp2ToGp3PatchServiceTest {
         AwsGp2ToGp3PatchService underTestLocal = spy(underTest);
 
         List<StackStatus> stacksStatuses = setupTwoVolumeInitialPass(underTestLocal);
-
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
 
         // Execute pass 1
         boolean pass1Result = underTestLocal.doApply(stack);
@@ -962,8 +936,6 @@ class AwsGp2ToGp3PatchServiceTest {
         AwsGp2ToGp3PatchService underTestLocal = spy(underTest);
 
         List<StackStatus> stacksStatuses = setupTwoVolumeInitialPass(underTestLocal);
-
-        doReturn(true).when(entitlementService).isGp2toGp3MigrationEnabled(any());
 
         // Store the resource save call.
         Resource[] updatedResource = new Resource[1];

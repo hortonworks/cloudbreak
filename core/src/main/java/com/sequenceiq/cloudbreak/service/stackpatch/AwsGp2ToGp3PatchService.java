@@ -26,8 +26,6 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
@@ -64,7 +62,7 @@ import software.amazon.awssdk.services.ec2.model.VolumeType;
 /**
  * Migrates AWS EBS volumes from gp2 to gp3.
  * <ol>
- *   <li>{@link #isAffected} — AWS stack, entitlement on, DB still lists migratable gp2 volumes.</li>
+ *   <li>{@link #isAffected} — AWS stack with migratable gp2 volumes still listed in DB.</li>
  *   <li>{@link #doApply} — Starts AWS modification and/or polls EC2 until each batch completes.</li>
  * </ol>
  * <p/>
@@ -122,9 +120,6 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
     private AwsVolumeIopsCalculator volumeIopsCalculator;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private StackPatchUsageReporterService stackPatchUsageReporterService;
 
     /**
@@ -169,13 +164,6 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
     @Override
     protected boolean doApply(Stack inputStack) throws ExistingStackPatchApplyException {
         LOGGER.info("Running GP2 to GP3 volume migration for stack {}", inputStack.getResourceCrn());
-
-        // Make sure the entitlement is enabled for the stack's account
-        String accountId = Crn.safeFromString(inputStack.getResourceCrn()).getAccountId();
-        if (!entitlementService.isGp2toGp3MigrationEnabled(accountId)) {
-            LOGGER.info("Entitlement for GP2 to GP3 volume migration is not enabled for account {}", accountId);
-            return false;
-        }
 
         List<StackStatus> statusList = stackStatusService.findAllStackStatusesById(inputStack.getId());
         AmazonEc2Client awsClient = getAwsClient(inputStack);

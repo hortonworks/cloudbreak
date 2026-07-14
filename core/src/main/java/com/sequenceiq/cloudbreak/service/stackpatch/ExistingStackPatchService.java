@@ -30,6 +30,9 @@ public abstract class ExistingStackPatchService {
     @Inject
     private ExistingStackPatcherConfig properties;
 
+    @Inject
+    private StackPatchEntitlementService stackPatchEntitlementService;
+
     public int getIntervalInMinutes() {
         return (int) TimeUnit.HOURS.toMinutes(properties.getIntervalInHours());
     }
@@ -100,6 +103,13 @@ public abstract class ExistingStackPatchService {
      * @return Is the stack affected by the {@link StackPatchType}
      */
     public abstract boolean isAffected(Stack stack);
+
+    /**
+     * @return Whether the stack is entitled for the {@link StackPatchType}
+     */
+    public boolean isEntitled(Stack stack) {
+        return stackPatchEntitlementService.isEntitled(stack, getStackPatchType());
+    }
 
     /**
      * Apply the fix of {@link StackPatchType} for the affected stack
