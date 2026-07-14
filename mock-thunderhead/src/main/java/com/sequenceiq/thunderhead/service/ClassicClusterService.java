@@ -89,14 +89,10 @@ public class ClassicClusterService implements LoadResourcesForAccountIdService {
                 .withKnoxUrl(null)
                 .withKnoxSecretRef(null)
                 .withAccountId(classicCluster.getAccountId())
-                .withUseCcmV2(false)
-                .withCcmV2Entries(null)
                 .withTunnelEntries(null)
                 .withAliases(null)
                 .withServices(getClusterServiceConfigs(classicCluster))
                 .withCertificates(null)
-                .withUseCcmV2(false)
-                .withCcmV2Entries(null)
                 .withTlsStrictCheck(false)
                 .build();
         intermediateBuilderExecutor.submit(() -> clusterProxyRegistrationClient.registerConfig(configRegistrationRequest));

@@ -94,14 +94,10 @@ public class PrivateControlPlaneService implements LoadResourcesForAccountIdServ
                 .withKnoxUrl(null)
                 .withKnoxSecretRef(null)
                 .withAccountId(privateControlPlane.getAccountId())
-                .withUseCcmV2(false)
-                .withCcmV2Entries(null)
                 .withTunnelEntries(null)
                 .withAliases(null)
                 .withServices(getClusterServiceConfigs(privateControlPlane))
                 .withCertificates(null)
-                .withUseCcmV2(false)
-                .withCcmV2Entries(null)
                 .withTlsStrictCheck(false)
                 .build();
         intermediateBuilderExecutor.submit(() -> clusterProxyRegistrationClient.registerConfig(configRegistrationRequest));
