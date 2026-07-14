@@ -62,14 +62,22 @@ setup_autotls_token:
 
 {% if internal_loadbalancer_san|length > 0 %}
 
+replace_autotls_san:
+  file.replace:
+    - name: /etc/cloudera-scm-agent/config.ini
+    - pattern: "^subject_alt_names=.*"
+    - repl: "subject_alt_names={{ internal_loadbalancer_san }}"
+    - backup: False
+
 setup_autotls_san:
   file.line:
     - name: /etc/cloudera-scm-agent/config.ini
     - mode: ensure
     - content: "subject_alt_names={{ internal_loadbalancer_san }}"
-    - after: "# client_cert_file.*"
+    - after: "cert_request_token_file=.*"
     - backup: False
     - quiet: True
+    - unless: grep -q "^subject_alt_names=" /etc/cloudera-scm-agent/config.ini
 
 {% endif %}
 
