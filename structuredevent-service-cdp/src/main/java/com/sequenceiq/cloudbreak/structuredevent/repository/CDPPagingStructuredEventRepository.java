@@ -27,14 +27,14 @@ public interface CDPPagingStructuredEventRepository extends PagingAndSortingRepo
 
     Page<CDPStructuredEventEntity> findByEventTypeAndResourceCrn(StructuredEventType eventType, String resourceCrn, Pageable pageable);
 
-    @QueryHints(@QueryHint(name = "jakarta.persistence.query.timeout", value = "25000"))
+    @QueryHints(@QueryHint(name = "jakarta.persistence.query.timeout", value = "65000"))
     @Query("SELECT e FROM CDPStructuredEventEntity e WHERE e.eventType IN :eventType AND e.resourceCrn = :resourceCrn")
     Slice<CDPStructuredEventEntity> findByEventTypeInAndResourceCrn(
             @Param("eventType") List<StructuredEventType> eventType,
             @Param("resourceCrn") String resourceCrn,
             Pageable pageable);
 
-    @QueryHints(@QueryHint(name = "jakarta.persistence.query.timeout", value = "25000"))
+    @QueryHints(@QueryHint(name = "jakarta.persistence.query.timeout", value = "65000"))
     @Query("SELECT e FROM CDPStructuredEventEntity e WHERE e.eventType IN :eventType AND e.resourceCrn IN :resourceCrn")
     Slice<CDPStructuredEventEntity> findByEventTypeInAndResourceCrnIn(
             @Param("eventType") List<StructuredEventType> eventType,
