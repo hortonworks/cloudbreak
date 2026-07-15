@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.securitygroup;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.openstack4j.api.Builders;
@@ -11,6 +12,8 @@ import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.compute.IPProtocol;
 import org.openstack4j.model.compute.SecGroupExtension;
 import org.openstack4j.model.compute.SecGroupExtension.Rule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -22,10 +25,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.context.OpenStackContext;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGroupResourceBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackSecurityGroupResourceBuilder.class);
 
     private static final int MAX_PORT = 65535;
 
@@ -34,6 +40,11 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
     @Override
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Group group, Network network, Security security,
             CloudResource resource) {
+        if (isExistingSecurityGroupForBuild(resource)) {
+            LOGGER.info("Using existing security group [{}] for group [{}], skipping creation.", resource.getReference(), group.getName());
+            return createPersistedResource(null, resource, group.getName(), resource.getReference(),
+                    Map.of(CloudResource.ATTRIBUTES, Map.of(EXISTING_SECURITY_GROUP, true)));
+        }
         try {
             OSClient<?> osClient = createOSClient(auth);
             ComputeSecurityGroupService securityGroupService = osClient.compute().securityGroups();
@@ -69,6 +80,10 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
 
     @Override
     public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) {
+        if (isExistingSecurityGroup(resource)) {
+            LOGGER.info("Security group [{}] is pre-existing, skipping deletion.", resource.getReference());
+            return null;
+        }
         try {
             OSClient<?> osClient = createOSClient(auth);
             ActionResponse response = osClient.compute().securityGroups().delete(resource.getReference());
@@ -76,6 +91,14 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("SecurityGroup deletion failed", resourceType(), resource.getName(), ex);
         }
+    }
+
+    private boolean isExistingSecurityGroupForBuild(CloudResource resource) {
+        return resource.getStatus() == CommonStatus.CREATED && resource.getReference() != null;
+    }
+
+    private boolean isExistingSecurityGroup(CloudResource resource) {
+        return Boolean.TRUE.equals(resource.getParameter(EXISTING_SECURITY_GROUP, Boolean.class));
     }
 
     @Override
