@@ -25,7 +25,7 @@
         }
       },
       {
-        "name": "manager",
+        "name": "master",
         "type": "CORE",
         "nodeCount": 3,
         "recoveryMode": "MANUAL",
@@ -40,7 +40,7 @@
         }
       },
       {
-        "name": "data",
+        "name": "worker",
         "type": "CORE",
         "nodeCount": 3,
         "recoveryMode": "MANUAL",
@@ -85,7 +85,7 @@
         }
       },
       {
-        "name": "machinelearning",
+        "name": "compute",
         "type": "CORE",
         "nodeCount": 0,
         "recoveryMode": "MANUAL",

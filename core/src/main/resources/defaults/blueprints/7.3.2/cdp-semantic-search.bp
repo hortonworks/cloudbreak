@@ -63,14 +63,14 @@
         ]
       },
       {
-        "refName" : "manager",
+        "refName" : "master",
         "cardinality" : 3,
         "roleConfigGroupsRefNames" : [
           "opensearch-OPENSEARCH_MASTER-BASE"
         ]
       },
       {
-        "refName" : "data",
+        "refName" : "worker",
         "cardinality" : 3,
         "roleConfigGroupsRefNames" : [
           "opensearch-OPENSEARCH_DATA-BASE"
@@ -91,7 +91,7 @@
         ]
       },
       {
-        "refName" : "machinelearning",
+        "refName" : "compute",
         "cardinality" : 0,
         "roleConfigGroupsRefNames" : [
           "opensearch-OPENSEARCH_ML-BASE"
