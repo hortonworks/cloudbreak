@@ -150,11 +150,16 @@ public class DefaultClusterTemplateCache {
                                         "%s global default cluster template crn was already generated from another template name.", resourceCrn));
                             }
                             clusterTemplate.setResourceCrn(resourceCrn);
-                            BlueprintFile blueprint = defaultBlueprintCache.getDefaultByName(
-                                    defaultClusterTemplateV4Request.getDistroXTemplate().getCluster().getBlueprintName());
-                            clusterTemplate.setClouderaRuntimeVersion(blueprint.getStackVersion());
-                            defaultClusterTemplates.put(resourceCrn, clusterTemplate);
-                            LOGGER.debug("Default clustertemplate is loaded into cache by resource file: {}", clusterTemplateName);
+                            String blueprintName = defaultClusterTemplateV4Request.getDistroXTemplate().getCluster().getBlueprintName();
+                            Optional<BlueprintFile> blueprint = defaultBlueprintCache.getDefaultByName(blueprintName);
+                            if (blueprint.isPresent()) {
+                                clusterTemplate.setClouderaRuntimeVersion(blueprint.get().getStackVersion());
+                                defaultClusterTemplates.put(resourceCrn, clusterTemplate);
+                                LOGGER.debug("Default clustertemplate is loaded into cache by resource file: {}", clusterTemplateName);
+                            } else {
+                                LOGGER.warn("Couldn't find blueprint [{}] by name in blueprint cache, " +
+                                                "skip to add cluster template [{}] to cluster template cache.", blueprintName, clusterTemplateName);
+                            }
                         }
                     } catch (IOException e) {
                         String msg = "Could not load cluster template: " + clusterTemplateName;

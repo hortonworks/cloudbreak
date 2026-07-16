@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,10 +15,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +69,7 @@ class DefaultClusterTemplateCacheTest {
         lenient().doAnswer(invocation -> {
             BlueprintFile blueprintFile = mock(BlueprintFile.class);
             when(blueprintFile.getStackVersion()).thenReturn("x.y.z");
-            return blueprintFile;
+            return Optional.of(blueprintFile);
         }).when(defaultBlueprintCache).getDefaultByName(anyString());
     }
 
@@ -81,7 +83,7 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(1));
+        assertEquals(1, actual.size());
     }
 
     @Test
@@ -91,7 +93,7 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(0));
+        assertEquals(0, actual.size());
     }
 
     @Test
@@ -100,7 +102,7 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(0));
+        assertEquals(0, actual.size());
     }
 
     @Test
@@ -126,12 +128,12 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(7));
-        MatcherAssert.assertThat(actual.get("cluster-template"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template2"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws-ranger"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-azure"), is(notNullValue()));
+        assertEquals(7, actual.size());
+        assertNotNull(actual.get("cluster-template"));
+        assertNotNull(actual.get("cluster-template2"));
+        assertNotNull(actual.get("cluster-template-aws"));
+        assertNotNull(actual.get("cluster-template-aws-ranger"));
+        assertNotNull(actual.get("cluster-template-azure"));
     }
 
     @Test
@@ -169,12 +171,12 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(5));
-        MatcherAssert.assertThat(actual.get("cluster-template"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template2"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws-ranger"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-azure"), is(notNullValue()));
+        assertEquals(5, actual.size());
+        assertNotNull(actual.get("cluster-template"));
+        assertNotNull(actual.get("cluster-template2"));
+        assertNotNull(actual.get("cluster-template-aws"));
+        assertNotNull(actual.get("cluster-template-aws-ranger"));
+        assertNotNull(actual.get("cluster-template-azure"));
     }
 
     @Test
@@ -209,9 +211,9 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(2));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws-gov"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws-gov-ranger"), is(notNullValue()));
+        assertEquals(2, actual.size());
+        assertNotNull(actual.get("cluster-template-aws-gov"));
+        assertNotNull(actual.get("cluster-template-aws-gov-ranger"));
     }
 
     @Test
@@ -249,12 +251,23 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(5));
-        MatcherAssert.assertThat(actual.get("cluster-template"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template2"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-aws-ranger"), is(notNullValue()));
-        MatcherAssert.assertThat(actual.get("cluster-template-azure"), is(notNullValue()));
+        assertEquals(5, actual.size());
+        assertNotNull(actual.get("cluster-template"));
+        assertNotNull(actual.get("cluster-template2"));
+        assertNotNull(actual.get("cluster-template-aws"));
+        assertNotNull(actual.get("cluster-template-aws-ranger"));
+        assertNotNull(actual.get("cluster-template-azure"));
+    }
+
+    @Test
+    void testLoadClusterTemplatesFromFileWhenBlueprintNotFoundInCache() {
+        when(defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(any())).thenReturn(new ClusterTemplate());
+        when(defaultBlueprintCache.getDefaultByName(eq("Blueprint name"))).thenReturn(Optional.empty());
+
+        underTest.setClusterTemplates(Collections.singletonList("default-template.json"));
+        underTest.loadClusterTemplatesFromFile();
+
+        assertFalse(underTest.getTemplateByName("cluster-template").isPresent());
     }
 
     @Test
@@ -264,7 +277,7 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(0));
+        assertEquals(0, actual.size());
     }
 
     @Test
@@ -274,7 +287,7 @@ class DefaultClusterTemplateCacheTest {
                 .filter(e -> !e.contains("7.2.18"))
                 .collect(Collectors.toSet());
 
-        MatcherAssert.assertThat(actual.size(), is(0));
+        assertEquals(0, actual.size());
     }
 
     @Test
@@ -284,7 +297,7 @@ class DefaultClusterTemplateCacheTest {
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
-        MatcherAssert.assertThat(actual.size(), is(0));
+        assertEquals(0, actual.size());
     }
 
     private List<String> getFiles() throws IOException {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -132,8 +133,8 @@ public class DefaultBlueprintCache {
                 .anyMatch(b -> b.getResourceCrn().equals(crn));
     }
 
-    public BlueprintFile getDefaultByName(String blueprintName) {
-        return defaultBlueprints.get(blueprintName);
+    public Optional<BlueprintFile> getDefaultByName(String blueprintName) {
+        return Optional.ofNullable(defaultBlueprints.get(blueprintName));
     }
 
     public BlueprintFile getDefaultByCrn(String crn) {
