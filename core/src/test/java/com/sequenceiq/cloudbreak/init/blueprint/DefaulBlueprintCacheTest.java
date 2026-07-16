@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.init.blueprint;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -232,9 +231,9 @@ class DefaulBlueprintCacheTest {
         underTest.defaultBlueprints().put("bp2", bp2);
 
         // WHEN & THEN
-        assertEquals(bp1, underTest.getDefaultByName("bp1"));
-        assertEquals(bp2, underTest.getDefaultByName("bp2"));
-        assertNull(underTest.getDefaultByName("unknown"));
+        assertEquals(bp1, underTest.getDefaultByName("bp1").get());
+        assertEquals(bp2, underTest.getDefaultByName("bp2").get());
+        assertFalse(underTest.getDefaultByName("unknown").isPresent());
     }
 
     @Test

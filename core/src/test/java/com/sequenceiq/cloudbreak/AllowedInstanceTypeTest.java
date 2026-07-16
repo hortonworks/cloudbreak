@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -168,7 +169,7 @@ class AllowedInstanceTypeTest {
             doAnswer(invocation -> {
                 BlueprintFile blueprintFile = mock(BlueprintFile.class);
                 when(blueprintFile.getStackVersion()).thenReturn("x.y.z");
-                return blueprintFile;
+                return Optional.of(blueprintFile);
             }).when(defaultBlueprintCache).getDefaultByName(anyString());
         }
     }
