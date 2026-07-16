@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.VmImageDescription
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.VmImageDescription.REGION;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,11 +18,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class CustomImageCatalogV4VmImageRequest implements JsonEntity {
 
     @Size(max = 255, min = 1, message = "The length of the region must be between 1 and 255")
+    @Pattern(regexp = "[a-zA-Z0-9 -]*", message = "The region can only contain alphanumeric characters, spaces and hyphens")
     @NotNull
     @Schema(description = REGION, required = true)
     private String region;
 
     @Size(max = 255, min = 1, message = "The length of the imageReference must be between 1 and 255")
+    @Pattern(regexp = "[a-zA-Z0-9 /_.:-]*",
+            message = "The imageReference can only contain alphanumeric characters, spaces and the '-', '/', '_', '.' and ':' characters")
     @NotNull
     @Schema(description = IMAGE_REFERENCE, required = true)
     private String imageReference;

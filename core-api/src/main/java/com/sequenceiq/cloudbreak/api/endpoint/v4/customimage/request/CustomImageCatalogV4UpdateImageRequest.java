@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CustomImageDescrip
 
 import java.util.Set;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -36,6 +37,7 @@ public class CustomImageCatalogV4UpdateImageRequest {
 
     @Schema(description = VM_IMAGES)
     @UniqueRegion
+    @Valid
     private Set<CustomImageCatalogV4VmImageRequest> vmImages;
 
     public String getImageType() {

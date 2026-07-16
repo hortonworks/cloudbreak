@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CustomImageDescrip
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -40,6 +41,7 @@ public class CustomImageCatalogV4CreateImageRequest {
     @NotNull
     @Schema(description = VM_IMAGES, required = true)
     @UniqueRegion
+    @Valid
     private Set<CustomImageCatalogV4VmImageRequest> vmImages = new HashSet<>();
 
     public CustomImageCatalogV4CreateImageRequest() {
