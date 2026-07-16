@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.Objects;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,10 +19,17 @@ public class CustomConfigurationPropertyParameters {
 
     @Schema(description = CustomConfigurationsJsonProperties.NAME)
     @NotNull
+    @Size(max = 256, message = "Configuration property name must be at most 256 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9][a-zA-Z0-9._/-]*$",
+            message = "Configuration property name must start with a letter or digit and contain only alphanumeric, dot, underscore, "
+                    + "hyphen, or forward slash characters")
     private String name;
 
     @Schema(description = CustomConfigurationsJsonProperties.VALUE)
     @NotNull
+    @Size(max = 4194304, message = "Configuration property value must be at most 4194304 characters")
+    @Pattern(regexp = "^[^\\p{Cntrl}]*$",
+            message = "Configuration property value must not contain control characters")
     private String value;
 
     @Schema
