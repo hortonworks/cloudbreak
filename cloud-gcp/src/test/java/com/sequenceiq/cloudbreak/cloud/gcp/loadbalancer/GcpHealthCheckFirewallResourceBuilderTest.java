@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -35,6 +36,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.OperationInfo;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -279,9 +282,13 @@ class GcpHealthCheckFirewallResourceBuilderTest {
         Assertions.assertThat(firewall2.getTargetTags()).contains("group3-tag", "group4-tag");
         assertEquals(2, result.size());
         assertEquals("testfirewall1", result.get(0).getName());
-        assertEquals("operation1", result.get(0).getParameter(AbstractGcpLoadBalancerBuilder.OPERATION_ID, String.class));
+        OperationInfo opInfo1 = result.get(0).getParameter(GcpOperationUtil.OPERATION_INFO, OperationInfo.class);
+        assertNotNull(opInfo1);
+        assertEquals("operation1", opInfo1.operationId());
         assertEquals("testfirewall2", result.get(1).getName());
-        assertEquals("operation2", result.get(1).getParameter(AbstractGcpLoadBalancerBuilder.OPERATION_ID, String.class));
+        OperationInfo opInfo2 = result.get(1).getParameter(GcpOperationUtil.OPERATION_INFO, OperationInfo.class);
+        assertNotNull(opInfo2);
+        assertEquals("operation2", opInfo2.operationId());
     }
 
     @Test

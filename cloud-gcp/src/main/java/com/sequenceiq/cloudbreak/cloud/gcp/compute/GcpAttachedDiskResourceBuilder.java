@@ -35,7 +35,9 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.OperationInfo;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -147,7 +149,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
         List<CloudResource> result = new ArrayList<>();
         for (CloudResource volumeSetResource : buildableResource) {
-            List<String> syncedOperations = Collections.synchronizedList(new ArrayList<>());
+            List<OperationInfo> syncedOperations = Collections.synchronizedList(new ArrayList<>());
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
             String zoneName = context.getLocation().getAvailabilityZone().getValue();
@@ -169,7 +171,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                         Insert insDisk = compute.disks().insert(projectId, volumeSetAttributes.getAvailabilityZone(), disk);
                         try {
                             Operation operation = insDisk.execute();
-                            syncedOperations.add(operation.getName());
+                            syncedOperations.add(new OperationInfo(GcpOperationUtil.getOperationType(operation), operation.getName()));
                             if (operation.getHttpErrorStatusCode() != null) {
                                 throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), disk.getName());
                             }
@@ -185,7 +187,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                     LOGGER.info("Disk '{}' already exists, using it.", disk.getName());
                 }
             }
-            volumeSetResource.putParameter(OPERATION_ID, syncedOperations);
+            volumeSetResource.putParameter(GcpOperationUtil.OPERATION_INFOS, syncedOperations);
         }
 
         for (Future<Void> future : futures) {
@@ -216,7 +218,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             throw new PreserveResourceException("Resource will be preserved for later reattachment.");
         }
 
-        List<String> syncedOperations = Collections.synchronizedList(new ArrayList<>());
+        List<OperationInfo> syncedOperations = Collections.synchronizedList(new ArrayList<>());
         Collection<Future<Void>> futures = new ArrayList<>();
         for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
             Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
@@ -225,7 +227,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                             context.getProjectId(), volumeSetAttributes.getAvailabilityZone());
                     Operation operation = context.getCompute().disks()
                             .delete(context.getProjectId(), volumeSetAttributes.getAvailabilityZone(), volume.getId()).execute();
-                    syncedOperations.add(operation.getName());
+                    syncedOperations.add(new OperationInfo(GcpOperationUtil.getOperationType(operation), operation.getName()));
                     if (operation.getHttpErrorStatusCode() != null) {
                         String message = String.format("%s [code: %d, message: %s, error: %s]", VOLUME_DELETION_FAILED_BASE_MSG,
                                 operation.getHttpErrorStatusCode(), operation.getHttpErrorMessage(), operation.getError());
@@ -251,7 +253,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             future.get();
         }
 
-        resource.putParameter(OPERATION_ID, syncedOperations);
+        resource.putParameter(GcpOperationUtil.OPERATION_INFOS, syncedOperations);
         return resource;
     }
 
@@ -280,12 +282,12 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         List<CloudResourceStatus> result = new ArrayList<>();
         for (CloudResource resource : resources) {
             LOGGER.debug("Check {} resource: {}", resourceType(), resource);
-            List<String> operationIds = Optional.ofNullable(resource.getParameter(OPERATION_ID, List.class)).orElse(List.of());
+            List<OperationInfo> operationInfos = GcpOperationUtil.getOperationInfos(resource);
 
-            boolean finished = operationIds.isEmpty() || operationIds.stream()
-                    .allMatch(operationId -> {
+            boolean finished = operationInfos.isEmpty() || operationInfos.stream()
+                    .allMatch(operationInfo -> {
                         try {
-                            Operation operation = getResourceChecker().check(context, operationId, resources);
+                            Operation operation = getResourceChecker().check(context, operationInfo, resources);
                             return operation == null || gcpStackUtil.isOperationFinished(operation);
                         } catch (Exception e) {
                             CloudContext cloudContext = auth.getCloudContext();

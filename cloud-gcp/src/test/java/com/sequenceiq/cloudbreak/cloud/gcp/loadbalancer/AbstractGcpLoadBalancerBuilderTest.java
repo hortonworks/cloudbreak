@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -49,6 +50,9 @@ class AbstractGcpLoadBalancerBuilderTest {
     private static final String RESOURCE_NAME = "test-resource";
 
     private static final ResourceType RESOURCE_TYPE = ResourceType.GCP_FORWARDING_RULE;
+
+    @Mock
+    private GcpStackUtil gcpStackUtil;
 
     @Mock
     private ResourceRetriever resourceRetriever;

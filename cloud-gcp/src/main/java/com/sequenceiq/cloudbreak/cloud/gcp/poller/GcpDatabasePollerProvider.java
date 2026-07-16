@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.poller;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.service.checker.AbstractGcpDatabaseBaseResourceChecker.OPERATION_ID;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.GcpDatabaseResourceChecker;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -117,7 +116,7 @@ public class GcpDatabasePollerProvider {
         for (CloudResource resource : resources) {
             LOGGER.debug("Check {} resource: {}", type, resource);
             try {
-                String operationId = resource.getStringParameter(OPERATION_ID);
+                String operationId = resource.getStringParameter(GcpOperationUtil.OPERATION_ID);
                 com.google.api.services.sqladmin.model.Operation operation = gcpResourceChecker.check(sqlAdmin, auth, operationId);
                 boolean finished = operation == null || gcpStackUtil.isOperationFinished(operation);
                 if (finished) {

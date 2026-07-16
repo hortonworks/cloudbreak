@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpInstanceCreationContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpInstanceTypeRetryExceptionMatcher;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -160,7 +161,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             updateDiskSetWithInstanceName(auth, context.getComputeResources(privateId), instance);
             assignToExistingInstanceGroup(context, group, instance, buildableResource, cloudInstance.getAvailabilityZone());
         }
-        return singletonList(createOperationAwareCloudResource(buildableResource.get(0), (Operation) cloudInstance.getParameter(OPERATION_ID, Operation.class)));
+        return singletonList(createOperationAwareCloudResource(buildableResource.getFirst(),
+                cloudInstance.getParameter(GcpOperationUtil.OPERATION_ID, Operation.class)));
     }
 
     private Instance createNewInstanceWithInstanceTypeRetry(GcpInstanceCreationContext instanceCreationContext, CloudInstance cloudInstance, long privateId,
@@ -272,7 +274,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             insert.setPrettyPrint(Boolean.TRUE);
             Operation operation = insert.execute();
             verifyOperation(operation, buildableResource);
-            cloudInstance.putParameter(OPERATION_ID, operation);
+            cloudInstance.putParameter(GcpOperationUtil.OPERATION_ID, operation);
             return instance;
         } catch (GoogleJsonResponseException e) {
             LOGGER.info("Instance creation failed with error: {}", e.getDetails().getMessage());

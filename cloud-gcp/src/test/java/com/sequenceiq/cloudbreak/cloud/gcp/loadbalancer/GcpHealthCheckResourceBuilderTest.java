@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -59,6 +60,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 class GcpHealthCheckResourceBuilderTest {
 
     private static final long STACK_ID = 5L;
+
+    @Mock
+    private GcpStackUtil gcpStackUtil;
 
     @Mock
     private GcpContext gcpContext;

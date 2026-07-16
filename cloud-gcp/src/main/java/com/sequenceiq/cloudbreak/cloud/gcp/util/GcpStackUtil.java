@@ -350,5 +350,4 @@ public class GcpStackUtil {
     private String[] createParts(String splittable) {
         return splittable.split("/");
     }
-
 }

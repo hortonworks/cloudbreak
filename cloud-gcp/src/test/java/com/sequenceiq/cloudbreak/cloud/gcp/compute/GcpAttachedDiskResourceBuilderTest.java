@@ -53,8 +53,10 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.AbstractGcpBaseResourceChecker;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.OperationInfo;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.OperationType;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -331,6 +333,7 @@ public class GcpAttachedDiskResourceBuilderTest {
     void deleteRemovesDiskWhenDeleteOnTerminationIsTrue() throws Exception {
         Operation operation = new Operation();
         operation.setName("delete-operation");
+        operation.setZone("zone");
         operation.setHttpErrorStatusCode(null);
         when(disks.delete(anyString(), anyString(), anyString())).thenReturn(delete);
         when(delete.execute()).thenReturn(operation);
@@ -341,7 +344,11 @@ public class GcpAttachedDiskResourceBuilderTest {
 
         assertNotNull(result);
         verify(disks, atLeastOnce()).delete("projectId", "az1", "vol-1");
-        assertFalse(((List<?>) result.getParameter(AbstractGcpBaseResourceChecker.OPERATION_ID, List.class)).isEmpty());
+        List<OperationInfo> ops = (List<OperationInfo>) result.getParameter(GcpOperationUtil.OPERATION_INFOS, List.class);
+        assertNotNull(ops);
+        assertFalse(ops.isEmpty());
+        assertEquals("delete-operation", ops.getFirst().operationId());
+        assertEquals(OperationType.ZONAL, ops.getFirst().operationType());
         verify(resourceNotifier, never()).notifyUpdate(any(), any());
     }
 

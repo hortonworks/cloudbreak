@@ -14,9 +14,6 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class AbstractGcpBaseResourceChecker {
-
-    public static final String OPERATION_ID = "opid";
-
     private static final String HTTP_CODE_KEY = "code";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGcpBaseResourceChecker.class);

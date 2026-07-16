@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.gcp.service.checker;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.Iterator;
+import java.util.List;
 
 import jakarta.inject.Inject;
 
@@ -30,27 +32,45 @@ public class GcpComputeResourceChecker {
     private GcpStackUtil gcpStackUtil;
 
     @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
-    public Operation check(GcpContext context, String operationId, Iterable<CloudResource> resources) throws IOException {
-        if (operationId == null) {
+    public Operation check(GcpContext context, OperationInfo operationInfo, Iterable<CloudResource> resources) throws IOException {
+        if (operationInfo != null && operationInfo.operationId() != null) {
+            String operationId = operationInfo.operationId();
+            return switch (operationInfo.operationType()) {
+                case GLOBAL -> getAndCheckOperation(context, operationId, this::getGlobalOperation);
+                case REGIONAL -> getAndCheckOperation(context, operationId, this::getRegionOperation);
+                case ZONAL -> getAndCheckOperation(context, operationId, (ctx, opId) -> getZoneOperation(ctx, opId, resources));
+                case UNKNOWN -> getOperationWithFallback(context, operationId, resources);
+                case null -> getOperationWithFallback(context, operationId, resources);
+            };
+        } else {
             return null;
-        }
-        try {
-            Operation execute = gcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operationId).execute();
-            checkComputeOperationError(execute);
-            return execute;
-        } catch (InterruptedIOException interruptedIOException) {
-            String message = String.format("Failed to check the '%s' operation on the database for '%s' due to network issues.", operationId,
-                    context.getName());
-            LOGGER.warn(message, interruptedIOException);
-            throw new CloudConnectorException(message, interruptedIOException);
-        } catch (GoogleJsonResponseException globalException) {
-            LOGGER.warn("Failed to check the '{}' global operation on the resource for '{}'. Reason: {}",
-                    operationId, context.getName(), globalException.getMessage());
-            return handleException(context, operationId, resources, globalException);
         }
     }
 
-    protected void checkComputeOperationError(Operation execute) {
+    private Operation getOperationWithFallback(GcpContext context, String operationId, Iterable<CloudResource> resources) throws IOException {
+        List<OperationGetter> operationGetters = List.of(
+                new OperationGetter(OperationType.GLOBAL, this::getGlobalOperation),
+                new OperationGetter(OperationType.REGIONAL, this::getRegionOperation),
+                new OperationGetter(OperationType.ZONAL, (ctx, opId) -> getZoneOperation(ctx, opId, resources)));
+        Iterator<OperationGetter> iterator = operationGetters.iterator();
+        while (iterator.hasNext()) {
+            OperationGetter operationGetter = iterator.next();
+            try {
+                LOGGER.info("Getting {} operation with id: {}", operationGetter.operationType(), operationId);
+                return getAndCheckOperation(context, operationId, operationGetter.operationGetterFunction());
+            } catch (GoogleJsonResponseException googleException) {
+                if (!iterator.hasNext() || !isFallbackNeeded(googleException)) {
+                    LOGGER.error("Exception during {} operation checking, stopping fallback chain.", operationGetter.operationType(), googleException);
+                    throw googleException;
+                } else {
+                    LOGGER.warn("Operation with {} id not found with {} type, try to fallback", operationId, operationGetter.operationType());
+                }
+            }
+        }
+        throw new CloudConnectorException("All operation fallback strategies failed unexpectedly.");
+    }
+
+    private void checkComputeOperationError(Operation execute) {
         if (execute.getError() != null) {
             String msg = null;
             StringBuilder error = new StringBuilder();
@@ -60,38 +80,59 @@ public class GcpComputeResourceChecker {
                 }
                 msg = error.toString();
             }
+            LOGGER.warn("Error during operation(id: {}) checking: {}", execute.getName(), msg);
             throw new CloudConnectorException(msg);
         }
     }
 
-    protected Operation handleException(GcpContext context, String operationId, Iterable<CloudResource> resources,
-            GoogleJsonResponseException globalException) throws IOException {
-        if (globalException.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) ||
-                globalException.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
-            Location location = context.getLocation();
-            Region region = location.getRegion();
-            CloudResource cloudResource = resources.iterator().next();
-            try {
-                Operation execute = gcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, region).execute();
-                checkComputeOperationError(execute);
-                return execute;
-            } catch (GoogleJsonResponseException regionException) {
-                if (regionException.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) ||
-                        regionException.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
-                    String availabilityZone = Strings.isNullOrEmpty(cloudResource.getAvailabilityZone())
-                            ? location.getAvailabilityZone().value() : cloudResource.getAvailabilityZone();
-                    Operation execute = gcpStackUtil.zoneOperation(context.getCompute(), context.getProjectId(), operationId,
-                            availabilityZone).execute();
-                    checkComputeOperationError(execute);
-                    return execute;
-                } else {
-                    LOGGER.warn("Exception during region operation checking", regionException);
-                    throw regionException;
-                }
-            }
+    private boolean isFallbackNeeded(GoogleJsonResponseException googleException) {
+        if (googleException.getDetails() != null) {
+            Object code = googleException.getDetails().get("code");
+            return code != null && (code.equals(HttpStatus.SC_NOT_FOUND) || code.equals(HttpStatus.SC_FORBIDDEN));
         } else {
-            LOGGER.warn("Exception during global operation checking", globalException);
-            throw globalException;
+            return false;
         }
+    }
+
+    private Operation getAndCheckOperation(GcpContext context, String operationId, OperationGetterFunction operationGetterFunction) throws IOException {
+        try {
+            Operation operation = operationGetterFunction.get(context, operationId);
+            checkComputeOperationError(operation);
+            return operation;
+        } catch (InterruptedIOException interruptedIOException) {
+            String message = String.format("Failed to check the '%s' operation on the compute for '%s' due to network issues.", operationId,
+                    context.getName());
+            LOGGER.warn(message, interruptedIOException);
+            throw new CloudConnectorException(message, interruptedIOException);
+        }
+    }
+
+    private Operation getGlobalOperation(GcpContext context, String operationId) throws IOException {
+        LOGGER.info("Getting global operation with id: {}", operationId);
+        return gcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operationId).execute();
+    }
+
+    private Operation getRegionOperation(GcpContext context, String operationId) throws IOException {
+        Location location = context.getLocation();
+        Region region = location.getRegion();
+        LOGGER.info("Getting region operation with id: {}, region: {}", operationId, region);
+        return gcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, region).execute();
+    }
+
+    private Operation getZoneOperation(GcpContext context, String operationId, Iterable<CloudResource> resources) throws IOException {
+        Location location = context.getLocation();
+        CloudResource cloudResource = resources.iterator().next();
+        String availabilityZone = Strings.isNullOrEmpty(cloudResource.getAvailabilityZone())
+                ? location.getAvailabilityZone().value() : cloudResource.getAvailabilityZone();
+        LOGGER.info("Getting zone operation with id: {}, zone: {}", operationId, availabilityZone);
+        return gcpStackUtil.zoneOperation(context.getCompute(), context.getProjectId(), operationId, availabilityZone).execute();
+    }
+
+    @FunctionalInterface
+    private interface OperationGetterFunction {
+        Operation get(GcpContext context, String operationId) throws IOException;
+    }
+
+    private record OperationGetter(OperationType operationType, OperationGetterFunction operationGetterFunction) {
     }
 }

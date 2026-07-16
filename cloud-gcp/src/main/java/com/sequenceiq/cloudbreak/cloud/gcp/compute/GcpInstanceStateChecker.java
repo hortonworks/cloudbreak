@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.service.checker.AbstractGcpComputeBaseResourceChecker.OPERATION_ID;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +16,7 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpInstanceStatusMapper;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -41,7 +40,7 @@ public class GcpInstanceStateChecker {
                 instances.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")));
         List<CloudVmInstanceStatus> result = new ArrayList<>();
         for (CloudInstance instance : instances) {
-            String operationName = instance.getStringParameter(OPERATION_ID);
+            String operationName = instance.getStringParameter(GcpOperationUtil.OPERATION_ID);
             String availabilityZone = instance.getAvailabilityZone();
             String instanceId = instance.getInstanceId();
             try {

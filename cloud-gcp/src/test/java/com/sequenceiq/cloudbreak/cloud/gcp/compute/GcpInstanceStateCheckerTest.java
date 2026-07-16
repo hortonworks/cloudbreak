@@ -29,7 +29,7 @@ import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.AbstractGcpComputeBaseResourceChecker;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -267,7 +267,7 @@ class GcpInstanceStateCheckerTest {
 
     private CloudInstance getCloudInstanceWithOperation(String availabilityZone, String operationId, String instanceId) {
         CloudInstance cloudInstance = new CloudInstance(instanceId, null, null, "subnetId", availabilityZone);
-        cloudInstance.putParameter(AbstractGcpComputeBaseResourceChecker.OPERATION_ID, operationId);
+        cloudInstance.putParameter(GcpOperationUtil.OPERATION_ID, operationId);
         return cloudInstance;
     }
 

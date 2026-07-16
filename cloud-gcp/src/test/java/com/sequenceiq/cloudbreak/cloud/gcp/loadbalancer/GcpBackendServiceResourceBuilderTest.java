@@ -47,6 +47,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -77,6 +78,9 @@ class GcpBackendServiceResourceBuilderTest {
     private static final String REGION = "us-west2";
 
     private static final String PROJECT_ID = "projectId";
+
+    @Mock
+    private GcpStackUtil gcpStackUtil;
 
     @Mock
     private GcpContext gcpContext;
