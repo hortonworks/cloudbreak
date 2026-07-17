@@ -56,7 +56,8 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandler extends Exce
             LOGGER.error("Migrate Zookeeper to KRaft (restart Kafka connect nodes) failed.", e);
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);
         }
-        return new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId);
+        return new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId,
+                event.getData().isBrokerRollingRestartNeeded());
     }
 
     @Override

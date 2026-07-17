@@ -6,17 +6,26 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class MigrateZookeeperToKraftEvent extends StackEvent {
 
+    private final boolean brokerRollingRestartNeeded;
+
     @JsonCreator
     public MigrateZookeeperToKraftEvent(
             @JsonProperty("selector") String selector,
-            @JsonProperty("resourceId") Long resourceId) {
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("brokerRollingRestartNeeded") boolean brokerRollingRestartNeeded) {
         super(selector, resourceId);
+        this.brokerRollingRestartNeeded = brokerRollingRestartNeeded;
     }
 
     @Override
     public String toString() {
         return "MigrateZookeeperToKraftEvent{" +
                 "selector='" + selector() + '\'' +
+                ", brokerRollingRestartNeeded=" + brokerRollingRestartNeeded +
                 '}' + super.toString();
+    }
+
+    public boolean isBrokerRollingRestartNeeded() {
+        return brokerRollingRestartNeeded;
     }
 }

@@ -54,7 +54,7 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftTriggerEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isBrokerRollingRestartNeeded());
             }
 
             @Override
@@ -62,7 +62,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 LOGGER.debug("Migrate Zookeeper to KRaft validation state started {}", payload);
                 Long stackId = payload.getResourceId();
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId));
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isBrokerRollingRestartNeeded()));
             }
 
             @Override
@@ -80,7 +80,7 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isBrokerRollingRestartNeeded());
             }
 
             @Override
@@ -90,7 +90,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
                 String nextEvent = RESTART_KAFKA_BROKER_NODES_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId));
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isBrokerRollingRestartNeeded()));
             }
 
             @Override
@@ -108,7 +108,7 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isBrokerRollingRestartNeeded());
             }
 
             @Override
@@ -116,7 +116,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka connect nodes state started {}", payload);
                 Long stackId = payload.getResourceId();
                 String nextEvent = RESTART_KAFKA_CONNECT_NODES_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId));
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isBrokerRollingRestartNeeded()));
             }
 
             @Override
@@ -134,15 +134,19 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isBrokerRollingRestartNeeded());
             }
 
             @Override
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Migrate Zookeeper to KRaft state started {}", payload);
                 Long stackId = payload.getResourceId();
+                if (!context.isBrokerRollingRestartNeeded()) {
+                    stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
+                    flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
+                }
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId));
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isBrokerRollingRestartNeeded()));
             }
 
             @Override
@@ -160,7 +164,7 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isBrokerRollingRestartNeeded());
             }
 
             @Override
@@ -170,7 +174,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE);
                 flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_FINISHED_EVENT);
                 String nextEventSelector = FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event();
-                sendEvent(context, nextEventSelector, new MigrateZookeeperToKraftEvent(nextEventSelector, stackId));
+                sendEvent(context, nextEventSelector, new MigrateZookeeperToKraftEvent(nextEventSelector, stackId, context.isBrokerRollingRestartNeeded()));
             }
 
             @Override

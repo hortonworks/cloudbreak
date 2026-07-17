@@ -44,15 +44,18 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         boolean kraftHostGroupPresent = isKraftHostGroupPresent(event.getResourceId());
         boolean kraftInstallNeeded = !kraftHostGroupPresent;
+        boolean kraftUpscaleNeeded = false;
         flowEventChain.add(getKraftMigrationConfigurationTriggerEvent(event, kraftInstallNeeded));
         if (kraftHostGroupPresent) {
             int kraftNodeCount = getKraftNodeCountByStackId(event.getResourceId());
+            kraftUpscaleNeeded = isKraftUpscaleNeeded(kraftNodeCount);
             int nodeAdjustment = getKraftNodeAdjustment(kraftNodeCount);
-            if (isKraftUpscaleNeeded(kraftNodeCount)) {
+            if (kraftUpscaleNeeded) {
                 flowEventChain.add(getStackUpscaleTriggerEvent(event, nodeAdjustment));
             }
         }
-        flowEventChain.add(getKraftMigrationTriggerEvent(event));
+        boolean brokerRollingRestartNeeded = kraftUpscaleNeeded || kraftInstallNeeded;
+        flowEventChain.add(getKraftMigrationTriggerEvent(event, brokerRollingRestartNeeded));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
@@ -91,8 +94,8 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
                 variant.getVariant().value(), false);
     }
 
-    private Selectable getKraftMigrationTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event) {
+    private Selectable getKraftMigrationTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event, boolean brokerRollingRestartNeeded) {
         Long stackId = event.getResourceId();
-        return new MigrateZookeeperToKraftTriggerEvent(stackId, event.accepted());
+        return new MigrateZookeeperToKraftTriggerEvent(stackId, brokerRollingRestartNeeded, event.accepted());
     }
 }

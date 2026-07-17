@@ -8,11 +8,14 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
 
     private final boolean kraftInstallNeeded;
 
+    private final boolean brokerRollingRestartNeeded;
+
     private Long stackId;
 
     public MigrateZookeeperToKraftContext(FlowParameters flowParameters, StackEvent event) {
         super(flowParameters);
         kraftInstallNeeded = false;
+        brokerRollingRestartNeeded = true;
         stackId = event.getResourceId();
     }
 
@@ -20,6 +23,15 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
         super(flowParameters);
         stackId = event.getResourceId();
         this.kraftInstallNeeded = kraftInstallNeeded;
+        this.brokerRollingRestartNeeded = true;
+    }
+
+    public MigrateZookeeperToKraftContext(FlowParameters flowParameters, StackEvent event, boolean kraftInstallNeeded,
+            boolean brokerRollingRestartNeeded) {
+        super(flowParameters);
+        stackId = event.getResourceId();
+        this.kraftInstallNeeded = kraftInstallNeeded;
+        this.brokerRollingRestartNeeded = brokerRollingRestartNeeded;
     }
 
     public static MigrateZookeeperToKraftContext from(FlowParameters flowParameters, StackEvent event) {
@@ -28,6 +40,11 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
 
     public static MigrateZookeeperToKraftContext from(FlowParameters flowParameters, StackEvent event, boolean kraftInstallNeeded) {
         return new MigrateZookeeperToKraftContext(flowParameters, event, kraftInstallNeeded);
+    }
+
+    public static MigrateZookeeperToKraftContext from(FlowParameters flowParameters, StackEvent event, boolean kraftInstallNeeded,
+            boolean brokerRollingRestartNeeded) {
+        return new MigrateZookeeperToKraftContext(flowParameters, event, kraftInstallNeeded, brokerRollingRestartNeeded);
     }
 
     public Long getStackId() {
@@ -40,6 +57,10 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
 
     public boolean isKraftInstallNeeded() {
         return kraftInstallNeeded;
+    }
+
+    public boolean isBrokerRollingRestartNeeded() {
+        return brokerRollingRestartNeeded;
     }
 
 }

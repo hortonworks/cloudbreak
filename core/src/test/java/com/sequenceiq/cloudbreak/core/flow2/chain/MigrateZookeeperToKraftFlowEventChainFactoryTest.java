@@ -64,7 +64,7 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
         assertEquals(3, queue.size());
         checkEventIsKraftConfiguration(queue.poll());
         checkEventIsStackAndClusterUpscale(queue.poll());
-        checkEventIsKraftMigration(queue.poll());
+        checkEventIsKraftMigration(queue.poll(), true);
         flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
 
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "ZOOKEEPER_TO_KRAFT_MIGRATION");
@@ -88,10 +88,28 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(2, queue.size());
         checkEventIsKraftConfiguration(queue.poll());
-        checkEventIsKraftMigration(queue.poll());
+        checkEventIsKraftMigration(queue.poll(), false);
         flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
 
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "ZOOKEEPER_TO_KRAFT_MIGRATION");
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueWhenKraftHostGroupNotPresent() {
+        Stack stack = new Stack();
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("zookeeper");
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        when(stackService.getByIdWithLists(0L)).thenReturn(stack);
+        MigrateZookeeperToKraftFlowChainTriggerEvent triggerEvent = new MigrateZookeeperToKraftFlowChainTriggerEvent(
+                FlowChainTriggers.MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT, 0L);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
+
+        Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+        assertEquals(2, queue.size());
+        checkEventIsKraftConfiguration(queue.poll());
+        checkEventIsKraftMigration(queue.poll(), true);
     }
 
     private void checkEventIsKraftConfiguration(Selectable event) {
@@ -108,9 +126,10 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
         assertEquals(Map.of("kraft", 3), (upscaleEvent.getHostGroupsWithAdjustment()));
     }
 
-    private void checkEventIsKraftMigration(Selectable event) {
+    private void checkEventIsKraftMigration(Selectable event, boolean brokerRollingRestartNeeded) {
         assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), event.selector());
         assertInstanceOf(MigrateZookeeperToKraftTriggerEvent.class, event);
         assertEquals(0L, event.getResourceId());
+        assertEquals(brokerRollingRestartNeeded, ((MigrateZookeeperToKraftTriggerEvent) event).isBrokerRollingRestartNeeded());
     }
 }

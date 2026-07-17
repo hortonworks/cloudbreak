@@ -41,6 +41,10 @@ public class MigrateZookeeperToKraftMigrationFlowConfig extends StackStatusFinal
                     .event(START_RESTART_KAFKA_BROKER_NODES_EVENT)
                     .defaultFailureEvent()
 
+                    .from(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_STATE)
+                    .event(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT)
+                    .defaultFailureEvent()
+
                     .from(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_FINISHED_STATE)
                     .event(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT)
                     .defaultFailureEvent()

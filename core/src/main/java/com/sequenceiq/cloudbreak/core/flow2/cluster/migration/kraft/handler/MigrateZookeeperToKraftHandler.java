@@ -47,7 +47,8 @@ public class MigrateZookeeperToKraftHandler extends ExceptionCatcherEventHandler
             LOGGER.error("Migrate Zookeeper to KRaft failed.", e);
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);
         }
-        return new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId);
+        return new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId,
+                event.getData().isBrokerRollingRestartNeeded());
     }
 
     @Override

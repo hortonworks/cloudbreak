@@ -62,7 +62,7 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
     @Test
     void testDoAcceptSuccess() {
         String clusterName = "testCluster";
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID, true);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getName()).thenReturn(clusterName);
@@ -81,7 +81,7 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
     @Test
     void testDoAcceptSuccessWhenBrokerRoleNotFound() {
         String clusterName = "testCluster";
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_CONNECT_NODES_EVENT.selector(), STACK_ID);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_CONNECT_NODES_EVENT.selector(), STACK_ID, true);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getName()).thenReturn(clusterName);
@@ -101,7 +101,7 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
     @Test
     void testDoAcceptFailure() {
         String clusterName = "testCluster";
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID, true);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getName()).thenReturn(clusterName);
