@@ -4,14 +4,12 @@ import java.util.Collections;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageFilterUpgradeService;
 
 @Component
@@ -29,20 +27,14 @@ public class ClusterUpgradeImageFilter {
     private ImageCatalogService imageCatalogService;
 
     public ImageFilterResult getAvailableImagesForUpgrade(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
-        if (isBaseImage(imageFilterParams.getCurrentImage())) {
-            LOGGER.info(String.format("Base image found, upgrade not supported: %s", imageFilterParams.getCurrentImage()));
+        if (BaseImageUtils.isBaseImage(imageFilterParams.getCurrentImage())) {
+            LOGGER.info("Base image found, upgrade not supported: {}", imageFilterParams.getCurrentImage());
             return createEmptyResult("Cannot upgrade a base image cluster.");
         } else {
             BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams);
             return blueprintValidationResult.isValid() ? getImageFilterResult(workspaceId, imageCatalogName, imageFilterParams)
                     : createEmptyResult(blueprintValidationResult.getReason());
         }
-    }
-
-    private boolean isBaseImage(Image image) {
-        String cdhBuildNumber = image.getPackageVersion(ImagePackageVersion.CDH_BUILD_NUMBER);
-        String cmVersion = image.getPackageVersion(ImagePackageVersion.CM);
-        return StringUtils.isEmpty(cdhBuildNumber) || StringUtils.isEmpty(cmVersion);
     }
 
     private ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {

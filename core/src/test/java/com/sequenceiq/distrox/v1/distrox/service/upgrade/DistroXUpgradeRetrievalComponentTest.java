@@ -121,6 +121,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImagePackageVersionsEnricher;
 import com.sequenceiq.cloudbreak.service.upgrade.BlockedUpgradePath;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
@@ -741,6 +742,7 @@ public class DistroXUpgradeRetrievalComponentTest {
             StackUpgradeOperations.class,
             DistroXUpgradeResponseFilterService.class,
             ClusterUpgradeAvailabilityService.class,
+            BaseImagePackageVersionsEnricher.class,
             CurrentImageRetrieverService.class,
             ClusterUpgradeCandidateFilterService.class,
             ClusterUpgradeImageFilter.class,

@@ -94,7 +94,7 @@ public class ClusterUpgradeAvailabilityService {
                     imageFilterParamsFactory.create(targetImageId, currentImage, lockComponents, replaceVms, stack, internalUpgradeSettings, getAllImages);
             ImageFilterResult imageFilterResult = getAvailableImagesForUpgrade(stack, currentImage.getImageCatalogName(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", imageFilterResult.getImages().size()));
-            upgradeOptions = createResponse(imageFilterResult, imageFilterParams);
+            upgradeOptions = createResponse(imageFilterResult, imageFilterParams, stack);
         } catch (CloudbreakImageNotFoundException | NotFoundException e) {
             LOGGER.warn("Failed to get images", e);
             upgradeOptions.setReason(String.format("Failed to retrieve image due to %s", e.getMessage()));
@@ -168,8 +168,8 @@ public class ClusterUpgradeAvailabilityService {
         return clusterUpgradeImageFilter.getAvailableImagesForUpgrade(stack.getWorkspace().getId(), imageCatalogName, imageFilterParams);
     }
 
-    private UpgradeV4Response createResponse(ImageFilterResult filteredImages, ImageFilterParams imageFilterParams) {
-        return upgradeOptionsResponseFactory.createV4Response(imageFilterParams.getCurrentImage(), filteredImages, imageFilterParams.getCloudPlatform(),
-                imageFilterParams.getRegion(), imageFilterParams.getImageCatalogName());
+    private UpgradeV4Response createResponse(ImageFilterResult filteredImages, ImageFilterParams imageFilterParams, Stack stack) {
+        return upgradeOptionsResponseFactory.createV4Response(imageFilterParams.getCurrentImage(), filteredImages, stack,
+                imageFilterParams.getImageCatalogName());
     }
 }

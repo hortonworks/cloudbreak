@@ -155,7 +155,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(true);
 
@@ -180,7 +180,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
                 currentImage.getImageCatalogName())).thenReturn(response);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
@@ -204,7 +204,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
                 currentImage.getImageCatalogName())).thenReturn(response);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
@@ -225,7 +225,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImage);
         when(imageFilterParamsFactory.create(null, currentImage, lockComponents, false, stack, INTERNAL_UPGRADE_SETTINGS, false)).thenReturn(imageFilterParams);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
                 currentImage.getImageCatalogName())).thenReturn(response);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, false, INTERNAL_UPGRADE_SETTINGS, false, null);
@@ -263,7 +263,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         when(imageFilterParamsFactory.create(null, currentImage, lockComponents, true, stack, INTERNAL_UPGRADE_SETTINGS, false)).thenReturn(imageFilterParams);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
                 currentImage.getImageCatalogName())).thenReturn(response);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
@@ -297,7 +297,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(imageFilterParamsFactory.create(null, currentImage, lockComponents, true, stack, INTERNAL_UPGRADE_SETTINGS, false)).thenReturn(imageFilterParams);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
                 currentImage.getImageCatalogName())).thenReturn(response);
         String validationError = "External RDS is not attached.";
         when(result.getError()).thenReturn(repairValidation);
@@ -323,7 +323,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         when(imageFilterParamsFactory.create(null, currentImage, lockComponents, true, stack, INTERNAL_UPGRADE_SETTINGS, false)).thenReturn(imageFilterParams);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, currentImage.getImageCatalogName(), imageFilterParams))
                 .thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, CLOUD_PLATFORM, REGION, CATALOG_NAME)).thenReturn(upgradeResponse);
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack, CATALOG_NAME)).thenReturn(upgradeResponse);
         when(upgradeResponse.getReason()).thenReturn("done");
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
@@ -491,7 +491,7 @@ class ClusterUpgradeAvailabilityServiceTest {
         when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
         ImageFilterResult filteredImages = new ImageFilterResult(List.of(), BASE_IMAGE_ERROR);
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
                 currentImage.getImageCatalogName())).thenReturn(response);
 
 

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -31,17 +32,23 @@ public class UpgradeOptionsResponseFactory {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
-    public UpgradeV4Response createV4Response(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, ImageFilterResult filteredImages, String cloudPlatform,
-            String region, String imageCatalogName) {
+    @Inject
+    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
+
+    public UpgradeV4Response createV4Response(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, ImageFilterResult filteredImages, Stack stack,
+            String imageCatalogName) {
         return new UpgradeV4Response(
-                createImageInfoFromCurrentImage(currentImage, imageCatalogName),
-                createImageInfoFromFilteredImages(filteredImages.getImages(), imageCatalogName, cloudPlatform, region),
+                createImageInfoFromCurrentImage(currentImage, stack, imageCatalogName),
+                createImageInfoFromFilteredImages(filteredImages.getImages(), imageCatalogName, stack.cloudPlatform(), stack.getRegion()),
                 filteredImages.getReason());
     }
 
-    private ImageInfoV4Response createImageInfoFromCurrentImage(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, String imageCatalogName) {
-        return new ImageInfoV4Response(currentImage.getImageName(), currentImage.getImageId(), imageCatalogName, currentImage.getCreated(),
-                currentImage.getDate(), getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
+    private ImageInfoV4Response createImageInfoFromCurrentImage(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Stack stack,
+            String imageCatalogName) {
+        com.sequenceiq.cloudbreak.cloud.model.Image enrichedCurrentImage = baseImagePackageVersionsEnricher.enrich(currentImage, stack);
+        return new ImageInfoV4Response(enrichedCurrentImage.getImageName(), enrichedCurrentImage.getImageId(), imageCatalogName,
+                enrichedCurrentImage.getCreated(), enrichedCurrentImage.getDate(),
+                getComponentVersions(enrichedCurrentImage.getPackageVersions(), enrichedCurrentImage.getOs(), enrichedCurrentImage.getDate()));
     }
 
     private List<ImageInfoV4Response> createImageInfoFromFilteredImages(List<Image> filteredImages, String imageCatalogName, String cloudPlatform,
