@@ -81,7 +81,7 @@ class SharedServiceValidatorTest {
     }
 
     private SdxBasicView getSdxBasicView(TargetPlatform targetPlatform) {
-        return new SdxBasicView(DATALAKE_NAME, "crn", "", false, 0L, "", targetPlatform);
+        return new SdxBasicView(DATALAKE_NAME, "crn", "", false, null, null, 0L, "", targetPlatform);
     }
 
     private RDSConfig getDatabase(String type) {

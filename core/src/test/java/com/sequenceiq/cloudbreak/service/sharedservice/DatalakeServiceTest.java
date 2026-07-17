@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -130,8 +131,7 @@ public class DatalakeServiceTest {
         StackV4Response stackV4Response = new StackV4Response();
         String envCrn = "envCrn";
         stackV4Response.setEnvironmentCrn(envCrn);
-        SdxBasicView sdxBasicView = new SdxBasicView("dlaname", "dlcrn", "7.3.1", false,
-                0L, null, TargetPlatform.PAAS);
+        SdxBasicView sdxBasicView = new SdxBasicView("dlaname", "dlcrn", "7.3.1", false, null, Map.of(), 0L, null, TargetPlatform.PAAS);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(envCrn)).thenReturn(Optional.of(sdxBasicView));
 
         underTest.decorateWithDataLakeResponseAnyPlatform(StackType.WORKLOAD, stackV4Response);

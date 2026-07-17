@@ -454,7 +454,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfile(sdxClusterRequest);
         String encryptionProfileCrn = encryptionProfileResponse != null ? encryptionProfileResponse.getCrn() : null;
-        stackRequestHandler.setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(),
+        stackRequestHandler.setStackRequestParams(stackRequest, null, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(),
                 sdxClusterRequest.isEnableRangerRms(), encryptionProfileCrn);
         sdxInstanceService.overrideDefaultInstanceType(environment, stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
                 Collections.emptyList(), sdxClusterRequest.getClusterShape());

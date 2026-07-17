@@ -45,14 +45,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
@@ -71,7 +70,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
-import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.MockAccountMappingHelper;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -186,12 +185,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private Credential credential;
 
     @Mock
-    private CloudCredential cloudCredential;
-
-    @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Mock
     private PlacementSettingsV4Request placementSettings;
 
     @Mock
@@ -222,7 +215,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private CredentialResponse credentialResponse;
 
     @Mock
-    private AwsMockAccountMappingService awsMockAccountMappingService;
+    private MockAccountMappingHelper mockAccountMappingHelper;
 
     @Mock
     private CloudStorageConverter cloudStorageConverter;
@@ -279,9 +272,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(placementSettings.getRegion()).thenReturn(REGION);
         when(placementSettings.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
-        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
-        when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
-        when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
+        when(mockAccountMappingHelper.getMockAccountMapping(CloudConstants.AWS, REGION, credential, ADMIN_GROUP_NAME))
+                .thenReturn(new AccountMappingView(MOCK_GROUP_MAPPINGS, MOCK_USER_MAPPINGS));
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn())).thenReturn(
                 Optional.of(SdxBasicView.builder().withRazEnabled().withCrn(SAAS_DATALAKE_CRN).withDbServerCrn(DB_SERVER_CRN).build()));

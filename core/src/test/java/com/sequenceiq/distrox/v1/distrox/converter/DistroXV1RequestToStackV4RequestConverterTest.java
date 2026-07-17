@@ -171,7 +171,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
     }
 
     private Optional<SdxBasicView> sdxBasicView(String runtime) {
-        return Optional.of(new SdxBasicView("name", "crn", runtime, false, null, null, null));
+        return Optional.of(new SdxBasicView("name", "crn", runtime, false, null, null, null, null, null));
     }
 
     @Test

@@ -863,7 +863,7 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
-        doCallRealMethod().when(stackRequestHandler).setStackRequestParams(any(), any(), anyBoolean(), anyBoolean(), eq(null));
+        doCallRealMethod().when(stackRequestHandler).setStackRequestParams(any(), any(), any(), anyBoolean(), anyBoolean(), any());
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));

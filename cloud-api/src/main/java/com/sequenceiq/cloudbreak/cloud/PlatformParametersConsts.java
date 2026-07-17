@@ -62,6 +62,8 @@ public class PlatformParametersConsts {
 
     public static final String IMAGE_IDENTIFIER = "imageIdentifier";
 
+    public static final String RAZ_AUTHENTICATION_TYPE = "razAuthenticationType";
+
     private PlatformParametersConsts() {
 
     }

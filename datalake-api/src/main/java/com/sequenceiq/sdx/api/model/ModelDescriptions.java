@@ -188,6 +188,8 @@ public class ModelDescriptions {
 
     public static final String AZURE_OPTIONS = "Azure options.";
 
+    public static final String GCP_OPTIONS = "GCP options.";
+
     public static final String CUSTOM_INSTANCE_GROUP_OPTIONS = "Custom instance group options.";
 
     public static final String RECIPES = "Recipes.";

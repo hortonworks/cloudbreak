@@ -12,5 +12,4 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class GcpDistroXV1Parameters implements Serializable {
-
 }

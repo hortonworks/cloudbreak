@@ -4,12 +4,15 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.common.notification.NotificationState.fromStateWithDisableIfNull;
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB;
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_HMAC;
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,7 +55,11 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -62,6 +69,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
@@ -94,6 +102,7 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -203,6 +212,12 @@ public class StackCreatorService {
 
     @Inject
     private StackBlueprintValidator stackBlueprintValidator;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private StackParametersService stackParametersService;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -325,6 +340,7 @@ public class StackCreatorService {
                 } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
+                updateRazAuthenticationTypeIfNeeded(newStack);
                 return newStack;
             });
         } catch (TransactionExecutionException e) {
@@ -355,6 +371,23 @@ public class StackCreatorService {
         metricService.recordTimer(System.currentTimeMillis() - start, STACK_PREPARATION);
 
         return response;
+    }
+
+    private void updateRazAuthenticationTypeIfNeeded(Stack stack) {
+        if (stack.getType() == StackType.DATALAKE && CloudConstants.GCP.equals(stack.getCloudPlatform()) &&
+                stack.getCluster() != null && stack.getCluster().isRangerRazEnabled() &&
+                (stack.getParameters() == null || StringUtils.isBlank(stack.getParameters().get(PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE)))) {
+            ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getClusterId());
+            if (clouderaManagerRepo != null) {
+                String razAuthType = CMRepositoryVersionUtil.isGcpRazCabAuthTypeSupported(clouderaManagerRepo.getVersion()) ?
+                        RAZ_AUTHENTICATION_TYPE_CAB : RAZ_AUTHENTICATION_TYPE_HMAC;
+                stackParametersService.setStackParameter(stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, razAuthType);
+                LOGGER.info("Raz authentication type set to {} (CM version: {}).", razAuthType, clouderaManagerRepo.getVersion());
+                Map<String, String> parameters = stack.getParameters() != null ? new HashMap<>(stack.getParameters()) : new HashMap<>();
+                parameters.put(PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, razAuthType);
+                stack.setParameters(parameters);
+            }
+        }
     }
 
     private void updateImageOsIfRequired(StackV4Request stackRequest, Optional<String> runtimeVersion, String accountId) {

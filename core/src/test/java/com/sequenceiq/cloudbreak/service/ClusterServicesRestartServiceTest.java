@@ -153,7 +153,7 @@ class ClusterServicesRestartServiceTest {
         long dlCreated = datalakeCreatedAfterDataHub
                 ? Instant.now().toEpochMilli()
                 : Instant.now().minus(7, ChronoUnit.DAYS).toEpochMilli();
-        SdxBasicView sdxBasicView = new SdxBasicView("name", "crn", "7.3.2", true, dlCreated, "dbcrn", dlPlatform);
+        SdxBasicView sdxBasicView = new SdxBasicView("name", "crn", "7.3.2", true, null, null, dlCreated, "dbcrn", dlPlatform);
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(any())).thenReturn(resizeEntitlementEnabled);
 
         boolean result = underTest.isRemoteDataContextRefreshNeeded(stack, sdxBasicView);

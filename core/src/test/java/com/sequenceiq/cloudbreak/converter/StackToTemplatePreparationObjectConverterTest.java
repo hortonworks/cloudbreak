@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2;
+package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -55,9 +55,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
-import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
@@ -91,9 +88,7 @@ import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
-import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.MockAccountMappingHelper;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -224,15 +219,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     private CredentialConverter credentialConverter;
 
     @Mock
-    private AwsMockAccountMappingService awsMockAccountMappingService;
-
-    @Mock
-    private AzureMockAccountMappingService azureMockAccountMappingService;
-
-    @Mock
-    private GcpMockAccountMappingService gcpMockAccountMappingService;
-
-    @Mock
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Mock
@@ -285,16 +271,13 @@ public class StackToTemplatePreparationObjectConverterTest {
     private GrpcUmsClient grpcUmsClient;
 
     @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Mock
-    private CloudCredential cloudCredential;
-
-    @Mock
     private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
 
     @Mock
     private FreeipaClientService freeipaClientService;
+
+    @Mock
+    private MockAccountMappingHelper mockAccountMappingHelper;
 
     @BeforeEach
     public void setUp() throws IOException, TransactionService.TransactionExecutionException {
@@ -345,15 +328,10 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .withAdminGroupName(ADMIN_GROUP_NAME)
                 .withCrn(TestConstants.CRN)
                 .build();
-        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(credential);
-        lenient().when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
-        lenient().when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
-        lenient().when(azureMockAccountMappingService.getGroupMappings("msi", cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
-        lenient().when(azureMockAccountMappingService.getUserMappings("msi", cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
-        lenient().when(gcpMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
-        lenient().when(gcpMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
+        lenient().when(mockAccountMappingHelper.getMockAccountMapping(anyString(), eq(REGION), eq(credential), eq(ADMIN_GROUP_NAME)))
+                .thenReturn(new AccountMappingView(MOCK_GROUP_MAPPINGS, MOCK_USER_MAPPINGS));
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
         when(stackMock.getResources()).thenReturn(Collections.EMPTY_SET);
@@ -720,7 +698,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getCluster().getFileSystem()).thenReturn(new FileSystem());
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(stackMock.getStack()).thenReturn(stackMock);
-
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         AccountMappingView accountMappingView = result.getAccountMappingView();
@@ -742,6 +719,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         AccountMappingView accountMappingView = result.getAccountMappingView();
         assertThat(accountMappingView).isNull();
         assertFalse(result.isEnableSecretEncryption());
+        verify(mockAccountMappingHelper, never()).getMockAccountMapping(anyString(), anyString(), any(Credential.class), anyString());
     }
 
     @Test

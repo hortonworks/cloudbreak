@@ -191,7 +191,7 @@ public class SdxResizeService {
         StackV4Request stackRequest = stackRequestHandler.getStackRequest(shape, null, cloudPlatform,
                 sdxCluster.getRuntime(), null, Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64));
         shapeValidator.validateVolumeCount(shape, stackRequest);
-        stackRequestHandler.setStackRequestParams(stackRequest, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(),
+        stackRequestHandler.setStackRequestParams(stackRequest, stackV4Response, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(),
                 sdxCluster.isRangerRmsEnabled(), stackV4Response.getCluster().getEncryptionProfileCrn());
         setSecurityRequest(sdxCluster, stackRequest);
         setRecipesFromStackV4ResponseToStackV4Request(stackV4Response, stackRequest);

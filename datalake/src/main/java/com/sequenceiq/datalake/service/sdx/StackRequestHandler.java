@@ -4,14 +4,17 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.Architecture;
@@ -53,15 +56,33 @@ public class StackRequestHandler {
         return stackV4Request;
     }
 
-    public void setStackRequestParams(StackV4Request stackV4Request, Integer javaVersion, boolean razEnabled, boolean rmsEnabled, String encryptionProfileCrn) {
+    public void setStackRequestParams(StackV4Request stackV4Request, StackV4Response stackV4Response,
+            Integer javaVersion, boolean razEnabled, boolean rmsEnabled, String encryptionProfileCrn) {
         if (javaVersion != null) {
             stackV4Request.setJavaVersion(javaVersion);
         }
+
+        setGcpRazIfProviderGcp(stackV4Request, stackV4Response);
         // We have provided a --ranger-raz-enabled flag in the CLI, but it will
         // get overwritten if you use a custom json (using --cli-json). To avoid
         // this, we will set the raz enablement here. See CB-7474 for more details
         stackV4Request.getCluster().setRangerRazEnabled(razEnabled);
         stackV4Request.getCluster().setRangerRmsEnabled(rmsEnabled);
         stackV4Request.getCluster().setEncryptionProfileCrn(encryptionProfileCrn);
+    }
+
+    private void setGcpRazIfProviderGcp(StackV4Request stackV4Request, StackV4Response stackV4Response) {
+        if (stackV4Response != null
+                && CloudPlatform.GCP.equals(stackV4Response.getCloudPlatform())
+                && stackV4Response.getGcp() != null
+                && StringUtils.isNotBlank(stackV4Response.getGcp().getRazAuthenticationType())) {
+            setGcpParameters(stackV4Request, stackV4Response.getGcp().getRazAuthenticationType());
+            LOGGER.info("Gcp Raz auth type set to {} based on the original stack.", stackV4Response.getGcp().getRazAuthenticationType());
+        }
+    }
+
+    private void setGcpParameters(StackV4Request stackV4Request, String razAuthenticationType) {
+        GcpStackV4Parameters gcpStackV4Parameters = stackV4Request.createGcp();
+        gcpStackV4Parameters.setRazAuthenticationType(razAuthenticationType);
     }
 }

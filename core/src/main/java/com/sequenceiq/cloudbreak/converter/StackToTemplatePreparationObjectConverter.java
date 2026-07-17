@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.getEphemeralVolumeWhichMustBeProvisioned;
 
 import java.io.IOException;
@@ -17,6 +15,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,6 @@ import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
@@ -46,7 +44,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -74,9 +71,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
-import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.MockAccountMappingHelper;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
@@ -153,15 +148,6 @@ public class StackToTemplatePreparationObjectConverter {
     private FreeipaClientService freeipaClientService;
 
     @Inject
-    private AwsMockAccountMappingService awsMockAccountMappingService;
-
-    @Inject
-    private AzureMockAccountMappingService azureMockAccountMappingService;
-
-    @Inject
-    private GcpMockAccountMappingService gcpMockAccountMappingService;
-
-    @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Inject
@@ -198,9 +184,6 @@ public class StackToTemplatePreparationObjectConverter {
     private TransactionService transactionService;
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Inject
     private DatalakeService datalakeService;
 
     @Inject
@@ -208,6 +191,9 @@ public class StackToTemplatePreparationObjectConverter {
 
     @Inject
     private RdsViewProvider rdsViewProvider;
+
+    @Inject
+    private MockAccountMappingHelper mockAccountMappingHelper;
 
     public TemplatePreparationObject convert(StackDtoDelegate source) {
         try {
@@ -283,7 +269,7 @@ public class StackToTemplatePreparationObjectConverter {
             decorateBuilderWithPlacement(source.getStack(), builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
             decorateBuilderWithServicePrincipals(source, builder, servicePrincipalCloudIdentities);
-            decorateDatalakeView(source, builder);
+            decorateDatalakeView(source, environment, credential, builder, virtualGroupRequest);
 
             return builder.build();
         } catch (AccountTagValidationFailed aTVF) {
@@ -372,34 +358,27 @@ public class StackToTemplatePreparationObjectConverter {
             if (accountMapping != null) {
                 builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK && source.getCluster().getFileSystem() != null) {
-                Map<String, String> groupMappings;
-                Map<String, String> userMappings;
-                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-                String virtualGroup = getMockVirtualGroup(virtualGroupRequest);
-                switch (source.getCloudPlatform()) {
-                    case AWS:
-                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), cloudCredential, virtualGroup);
-                        userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), cloudCredential);
-                        break;
-                    case AZURE:
-                        groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential, virtualGroup);
-                        userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential);
-                        break;
-                    case GCP:
-                        groupMappings = gcpMockAccountMappingService.getGroupMappings(source.getRegion(), cloudCredential, virtualGroup);
-                        userMappings = gcpMockAccountMappingService.getUserMappings(source.getRegion(), cloudCredential);
-                        break;
-                    default:
-                        return;
-                }
-                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
+                builder.withAccountMappingView(mockAccountMappingHelper.getMockAccountMapping(source.getCloudPlatform(), source.getRegion(), credential,
+                        getMockVirtualGroup(virtualGroupRequest)));
             }
         }
     }
 
-    private void decorateDatalakeView(StackDtoDelegate source, Builder builder) {
+    private Map<String, String> getUserMappings(StackDtoDelegate source, DetailedEnvironmentResponse environment, Credential credential,
+            VirtualGroupRequest virtualGroupRequest, Map<String, String> userMappings) {
+        if (MapUtils.isNotEmpty(userMappings)) {
+            return userMappings;
+        } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK && source.getCluster().getFileSystem() != null) {
+            AccountMappingView accountMappingView = mockAccountMappingHelper.getMockAccountMapping(source.getCloudPlatform(), source.getRegion(), credential,
+                    getMockVirtualGroup(virtualGroupRequest));
+            return accountMappingView != null ? accountMappingView.getUserMappings() : Map.of();
+        } else {
+            return Map.of();
+        }
+    }
+
+    private void decorateDatalakeView(StackDtoDelegate source, DetailedEnvironmentResponse environment, Credential credential, Builder builder,
+            VirtualGroupRequest virtualGroupRequest) {
         DatalakeView datalakeView = null;
         if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
             Optional<SdxBasicView> datalakeOpt = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
@@ -407,7 +386,9 @@ public class StackToTemplatePreparationObjectConverter {
                 SdxBasicView datalake = datalakeOpt.get();
                 boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.dbServerCrn());
                 RdcView rdcView = platformAwareSdxConnector.getRdcView(datalake.crn());
-                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.crn(), externalDatabaseForDL, rdcView);
+                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.razAuthenticationType(),
+                        getUserMappings(source, environment, credential, virtualGroupRequest, datalake.userMappings()), datalake.crn(),
+                        externalDatabaseForDL, rdcView);
             }
         }
         builder.withDataLakeView(datalakeView);

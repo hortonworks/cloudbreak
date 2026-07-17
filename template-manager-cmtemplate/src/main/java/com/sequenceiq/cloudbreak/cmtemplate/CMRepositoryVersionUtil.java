@@ -291,6 +291,10 @@ public class CMRepositoryVersionUtil {
         return cloudPlatform == GCP && isRazConfigurationSupported(cmVersion, cloudPlatform, stackType);
     }
 
+    public static boolean isGcpRazCabAuthTypeSupported(String cmVersion) {
+        return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_20000);
+    }
+
     public static boolean isSudoAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {
         LOGGER.info("ClouderaManagerRepo is compared for Host certs rotation Sudo access");
         return isVersionOlderThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_6);

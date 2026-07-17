@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB;
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_HMAC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -7,9 +9,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -25,15 +30,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
@@ -60,6 +70,7 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -172,6 +183,12 @@ class StackCreatorServiceJavaVersionTest {
 
     @Mock
     private StackBlueprintValidator stackBlueprintValidator;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private StackParametersService stackParametersService;
 
     @InjectMocks
     private StackCreatorService underTest;
@@ -348,8 +365,73 @@ class StackCreatorServiceJavaVersionTest {
         assertEquals(17, stack.getJavaVersion());
     }
 
-    private void callCreateStack(StackV4Request stackRequest) {
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true));
+    @Test
+    void testCreateStackWithGcpRazAuthTypeWhenItsGivenInStack() throws Exception {
+        Image image = mock(Image.class);
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
+        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
+        lenient().when(image.getArchitecture()).thenReturn("x86_64");
+        StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
+        setupImageFuture(statedImage);
+        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
+        StackV4Request stackRequest = createStackRequest("7.3.2");
+        stack.setCloudPlatform("GCP");
+        stack.setType(StackType.DATALAKE);
+        stack.getCluster().setRangerRazEnabled(true);
+        stack.setParameters(new HashMap<>());
+        stack.getParameters().put(PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, "RazAuthType");
+
+        callCreateStack(stackRequest);
+        verify(stackParametersService, never()).setStackParameter(any(), any(), any());
+    }
+
+    @Test
+    void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoBefore713220000() throws Exception {
+        Image image = mock(Image.class);
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
+        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
+        lenient().when(image.getArchitecture()).thenReturn("x86_64");
+        StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
+        setupImageFuture(statedImage);
+        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.3.2"));
+        when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
+        StackV4Request stackRequest = createStackRequest("7.3.2");
+        stack.setCloudPlatform("GCP");
+        stack.setType(StackType.DATALAKE);
+        stack.getCluster().setRangerRazEnabled(true);
+        stack.setParameters(new HashMap<>());
+
+        callCreateStack(stackRequest);
+        verify(stackParametersService, times(1)).setStackParameter(
+                stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, RAZ_AUTHENTICATION_TYPE_HMAC);
+    }
+
+    @Test
+    void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoAfter713220000() throws Exception {
+        Image image = mock(Image.class);
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
+        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
+        lenient().when(image.getArchitecture()).thenReturn("x86_64");
+        StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
+        setupImageFuture(statedImage);
+        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.13.2.20000"));
+        when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
+        StackV4Request stackRequest = createStackRequest("7.3.2");
+        stack.setCloudPlatform("GCP");
+        stack.setType(StackType.DATALAKE);
+        stack.getCluster().setRangerRazEnabled(true);
+        stack.setParameters(new HashMap<>());
+
+        callCreateStack(stackRequest);
+        verify(stackParametersService, times(1)).setStackParameter(
+                stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, RAZ_AUTHENTICATION_TYPE_CAB);
+    }
+
+    private StackV4Response callCreateStack(StackV4Request stackRequest) {
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true));
     }
 
     private void setupImageFuture(StatedImage statedImage) {

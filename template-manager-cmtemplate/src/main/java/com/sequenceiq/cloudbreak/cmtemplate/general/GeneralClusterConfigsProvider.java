@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -57,11 +58,19 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setExternalFQDN(cluster.getFqdn());
         generalClusterConfigs.setEnableRangerRaz(cluster.isRangerRazEnabled());
         generalClusterConfigs.setEnableRangerRms(cluster.isRangerRmsEnabled());
+        generalClusterConfigs.setRazAuthenticationType(getRazAuthenticationType(stack));
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
         generalClusterConfigs.setCreatorWorkloadUserCrn(stack.getCreator().getUserCrn());
         generalClusterConfigs.setResourceCrn(stack.getResourceCrn());
         generalClusterConfigs.setEnvironmentCrn(stack.getEnvironmentCrn());
         return generalClusterConfigs;
+    }
+
+    private String getRazAuthenticationType(StackDtoDelegate stack) {
+        if (stack.getParameters() != null) {
+            return stack.getParameters().get(PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE);
+        }
+        return null;
     }
 
     public GeneralClusterConfigs generalClusterConfigs(StackV4Request stack, Credential credential, String email, String clusterVariant) {

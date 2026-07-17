@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.common.model;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 
 public record SdxBasicView(
@@ -7,6 +9,8 @@ public record SdxBasicView(
         String crn,
         String runtime,
         boolean razEnabled,
+        String razAuthenticationType,
+        Map<String, String> userMappings,
         Long created,
         String dbServerCrn,
         TargetPlatform platform) {
@@ -23,6 +27,10 @@ public record SdxBasicView(
         private String runtime;
 
         private boolean razEnabled;
+
+        private String razAuthenticationType;
+
+        private Map<String, String> userMappings;
 
         private Long created;
 
@@ -58,6 +66,16 @@ public record SdxBasicView(
             return this;
         }
 
+        public Builder withRazAuthenticationType(String razAuthenticationType) {
+            this.razAuthenticationType = razAuthenticationType;
+            return this;
+        }
+
+        public Builder withUserMappings(Map<String, String> userMappings) {
+            this.userMappings = userMappings;
+            return this;
+        }
+
         public Builder withCreated(Long created) {
             this.created = created;
             return this;
@@ -74,7 +92,7 @@ public record SdxBasicView(
         }
 
         public SdxBasicView build() {
-            return new SdxBasicView(this.name, this.crn, this.runtime, this.razEnabled, this.created,
+            return new SdxBasicView(this.name, this.crn, this.runtime, this.razEnabled, this.razAuthenticationType, this.userMappings, this.created,
                     this.dbServerCrn, this.platform);
         }
     }

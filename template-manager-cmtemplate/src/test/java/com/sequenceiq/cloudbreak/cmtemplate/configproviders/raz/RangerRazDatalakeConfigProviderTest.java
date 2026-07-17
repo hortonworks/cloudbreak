@@ -64,7 +64,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(false, null, false))
+                .withDataLakeView(new DatalakeView(false, null, null, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -87,7 +87,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -110,7 +110,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -132,7 +132,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -164,7 +164,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         when(cmTemplateProcessor.getHostGroupsWithComponent(RangerRoles.RANGER_ADMIN)).thenReturn(Set.of("master"));
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
@@ -197,7 +197,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker, razHG))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         when(cmTemplateProcessor.getHostGroupsWithComponent(RangerRoles.RANGER_ADMIN)).thenReturn(Set.of("master"));
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
@@ -237,7 +237,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -257,7 +257,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -281,7 +281,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -303,7 +303,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(gateway, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         when(cmTemplateProcessor.getHostGroupsWithComponent(RangerRoles.RANGER_ADMIN)).thenReturn(Set.of("gateway"));
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);

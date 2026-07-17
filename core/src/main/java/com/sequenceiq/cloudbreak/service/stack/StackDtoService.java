@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -34,6 +35,8 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
@@ -42,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackParameters;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
@@ -433,6 +437,8 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
                         .withCrn(stackDto.getResourceCrn())
                         .withRuntime(runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null))
                         .withRazEnabled(stackDto.getCluster().isRangerRazEnabled())
+                        .withRazAuthenticationType(getRazAuthenticationType(stackDto))
+                        .withUserMappings(getUserMappings(stackDto))
                         .withCreated(stackDto.getCreated())
                         .withDbServerCrn(stackDto.getCluster().getDatabaseServerCrn())
                         .withPlatform(TargetPlatform.PAAS)
@@ -445,6 +451,22 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
                 .sorted(Comparator.comparing(dto -> dto.getStack().getOriginalName(),
                         Comparator.nullsLast(Comparator.naturalOrder())))
                 .findFirst();
+    }
+
+    private String getRazAuthenticationType(StackDtoDelegate stack) {
+        if (stack.getParameters() != null) {
+            return stack.getParameters().get(PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE);
+        }
+        return null;
+    }
+
+    private Map<String, String> getUserMappings(StackDtoDelegate stack) {
+        return Optional.ofNullable(stack.getCluster())
+                .map(ClusterView::getFileSystem)
+                .map(FileSystem::getCloudStorage)
+                .map(CloudStorage::getAccountMapping)
+                .map(AccountMapping::getUserMappings)
+                .orElse(Map.of());
     }
 
     @Override

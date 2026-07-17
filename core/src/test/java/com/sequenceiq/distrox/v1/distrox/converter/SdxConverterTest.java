@@ -3,6 +3,8 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +28,7 @@ public class SdxConverterTest {
 
     @Test
     public void testGetSharedService() {
-        SdxBasicView sdx = new SdxBasicView("name", null, "runtime", false, null, null, null);
+        SdxBasicView sdx = new SdxBasicView("name", null, "runtime", false, null, Map.of(), null, null, null);
 
         SharedServiceV4Request sdxRequest = underTest.getSharedService(sdx);
 

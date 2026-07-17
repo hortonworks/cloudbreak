@@ -179,7 +179,7 @@ public class RangerRmsDatalakeConfigProviderTest {
                 .withBlueprintView(new BlueprintView("", RMS_MINIMUM_VERSION, "CDP", null, cmTemplateProcessor))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null, false))
+                .withDataLakeView(new DatalakeView(true, null, null, null, false))
                 .build();
         ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
         when(cmTemplateProcessor.getServiceByType(eq(RANGER_RMS_SERVICE_TYPE))).thenReturn(Optional.of(apiClusterTemplateService));
@@ -333,7 +333,7 @@ public class RangerRmsDatalakeConfigProviderTest {
                 .withBlueprintView(new BlueprintView("", version, "CDP", null, cmTemplateProcessor))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(razEnabled, null, false))
+                .withDataLakeView(new DatalakeView(razEnabled, null, null, null, false))
                 .build();
     }
 }

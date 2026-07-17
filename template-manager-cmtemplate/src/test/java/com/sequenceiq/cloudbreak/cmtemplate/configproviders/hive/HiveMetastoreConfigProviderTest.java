@@ -199,7 +199,7 @@ class HiveMetastoreConfigProviderTest {
                 .withStackType(StackType.DATALAKE)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
-                .withDataLakeView(new DatalakeView(false, "crn", externalDb))
+                .withDataLakeView(new DatalakeView(false, null, null, "crn", externalDb))
                 .withCloudPlatform(CloudPlatform.valueOf(cloudPlatform))
                 .build();
 
@@ -235,7 +235,7 @@ class HiveMetastoreConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
-                .withDataLakeView(new DatalakeView(false, "crn", externalDbDatalake))
+                .withDataLakeView(new DatalakeView(false, null, null, "crn", externalDbDatalake))
                 .withCloudPlatform(CloudPlatform.valueOf(cloudPlatform))
                 .build();
 

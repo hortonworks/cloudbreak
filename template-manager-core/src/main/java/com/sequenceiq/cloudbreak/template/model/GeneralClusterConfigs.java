@@ -47,6 +47,8 @@ public class GeneralClusterConfigs {
 
     private boolean enableRangerRms;
 
+    private String razAuthenticationType;
+
     private boolean multiAzEnabled;
 
     private Optional<String> loadBalancerGatewayFqdn = Optional.empty();
@@ -213,6 +215,14 @@ public class GeneralClusterConfigs {
 
     public void setEnableRangerRaz(boolean enableRangerRaz) {
         this.enableRangerRaz = enableRangerRaz;
+    }
+
+    public String getRazAuthenticationType() {
+        return razAuthenticationType;
+    }
+
+    public void setRazAuthenticationType(String razAuthenticationType) {
+        this.razAuthenticationType = razAuthenticationType;
     }
 
     public Optional<String> getLoadBalancerGatewayFqdn() {

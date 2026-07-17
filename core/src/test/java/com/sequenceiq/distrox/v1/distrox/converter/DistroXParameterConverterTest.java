@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Aws
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
+import com.sequenceiq.cloudbreak.constant.GcpConstants;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
@@ -81,11 +83,13 @@ class DistroXParameterConverterTest {
         GcpStackV4Parameters result = underTest.convert(input);
 
         assertNotNull(result);
+        assertNull(result.getRazAuthenticationType());
     }
 
     @Test
     void testGcpStackV4ParametersToGcpDistroXV1Parameters() {
         GcpStackV4Parameters input = new GcpStackV4Parameters();
+        input.setRazAuthenticationType(GcpConstants.RAZ_AUTHENTICATION_TYPE_HMAC);
 
         GcpDistroXV1Parameters result = underTest.convert(input);
 

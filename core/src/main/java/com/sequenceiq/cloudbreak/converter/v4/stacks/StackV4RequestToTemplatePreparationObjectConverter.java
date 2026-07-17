@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
@@ -59,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.MockAccountMappingHelper;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -155,6 +154,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
 
     @Inject
     private RdsViewProvider rdsViewProvider;
+
+    @Inject
+    private MockAccountMappingHelper mockAccountMappingHelper;
 
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
@@ -338,33 +340,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             if (accountMapping != null) {
                 builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK) {
-                Map<String, String> groupMappings;
-                Map<String, String> userMappings;
-                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-                switch (source.getCloudPlatform()) {
-                    case AWS:
-                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(), cloudCredential,
-                                environment.getAdminGroupName());
-                        userMappings = awsMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(), cloudCredential);
-                        break;
-                    case AZURE:
-                        groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential,
-                                environment.getAdminGroupName());
-                        userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential);
-                        break;
-                    case GCP:
-                        groupMappings = gcpMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(),
-                                cloudCredential,
-                                environment.getAdminGroupName());
-                        userMappings = gcpMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(),
-                                cloudCredential);
-                        break;
-                    default:
-                        return;
-                }
-                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
+                builder.withAccountMappingView(mockAccountMappingHelper.getMockAccountMapping(source.getCloudPlatform().name(),
+                        source.getPlacement().getRegion(), credential, environment.getAdminGroupName()));
             }
         }
     }
@@ -395,7 +372,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
                 SdxBasicView datalake = datalakeOpt.get();
                 boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.dbServerCrn());
                 RdcView rdcView = platformAwareSdxConnector.getRdcView(datalake.crn());
-                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.crn(), externalDatabaseForDL, rdcView);
+                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.razAuthenticationType(), datalake.userMappings(),
+                        datalake.crn(), externalDatabaseForDL, rdcView);
             }
         }
         builder.withDataLakeView(datalakeView);
