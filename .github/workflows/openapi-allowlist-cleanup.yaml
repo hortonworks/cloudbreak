@@ -1,0 +1,108 @@
+name: openapi-allowlist-cleanup
+
+# Daily check: are any entries in <module>/openapi-breaking-allowlist.txt now stale?
+# An entry is stale once the branch's baseline build already contains the broken shape,
+# so removing it no longer trips the compatibility gate. Stale entries are removed and a
+# PR is opened. Runs against master only (see prune script header for why removability is
+# per-branch); add a matrix if you also want to prune active release lines.
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 03:00 UTC daily
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  prune-allowlist:
+    # Least privilege: the job's own GITHUB_TOKEN only needs to read the repo for checkout;
+    # the branch push and PR creation use the Vault PAT (steps.base.outputs.GITHUB_TOKEN).
+    permissions:
+      contents: read
+    name: Prune OpenAPI breaking-change allowlist
+    runs-on: [cb-ubuntu22]
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+        with:
+          ref: master
+          fetch-depth: 0        # need tags to derive the version
+
+      - name: prepare
+        id: base
+        uses: ./.github/actions/pull-request/base
+
+      - name: resolve version
+        id: version
+        run: |
+          CB_VERSION=$(git tag --list '2.*' | sort -V | tail -1)
+          if [ -z "${CB_VERSION}" ]; then
+            echo "ERROR: could not resolve CB_VERSION from git tags (are tags fetched? fetch-depth: 0)" >&2
+            exit 1
+          fi
+          echo "CB_VERSION=${CB_VERSION}" >> "$GITHUB_ENV"
+          echo "resolved CB_VERSION=${CB_VERSION}"
+
+      - name: build OpenAPI definitions
+        working-directory: integration-test
+        run: ./scripts/build-swagger.sh
+
+      - name: prune stale allowlist entries
+        id: prune
+        working-directory: integration-test
+        env:
+          INTEGCB_LOCATION: ${{ github.workspace }}/integration-test/scripts
+          CB_TARGET_BRANCH: master
+        run: |
+          removed=$(./scripts/openapi-allowlist-prune.sh)
+          echo "removed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "${removed}"    >> "$GITHUB_OUTPUT"
+          echo "EOF"           >> "$GITHUB_OUTPUT"
+          if [ -n "${removed}" ]; then echo "has_changes=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: create pull request
+        if: steps.prune.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ steps.base.outputs.GITHUB_TOKEN }}
+          GH_HOST: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
+          BRANCH_NAME: chore/openapi-allowlist-cleanup
+          REMOVED: ${{ steps.prune.outputs.removed }}
+        run: |
+          set -e
+          # Host of the GitHub instance (github.infra.cloudera.com on our GHES), taken from the
+          # Actions context so we never hardcode github.com.
+          server_host="${GH_HOST#https://}"
+          export GH_HOST="${server_host}"
+          # Attribute the commit to the token's own account so it links correctly on GHES.
+          actor=$(gh api user --jq '.login')
+          actor_id=$(gh api user --jq '.id')
+          git config user.name "${actor}"
+          git config user.email "${actor_id}+${actor}@users.noreply.${server_host}"
+          git checkout -B "$BRANCH_NAME"
+          git add */openapi-breaking-allowlist.txt
+          git commit -m "CB-33765 Remove stale OpenAPI breaking-change allowlist entries"
+          git push --force "https://x-access-token:${GH_TOKEN}@${server_host}/${REPO}.git" "$BRANCH_NAME"
+          body=$(cat <<EOF
+          Automated cleanup by \`openapi-allowlist-cleanup\`.
+
+          The following allowlist entries are no longer needed on **master**
+          (the baseline build already contains the changed shape, so oasdiff
+          reports no break even without the entry):
+
+          \`\`\`
+          ${REMOVED}
+          \`\`\`
+
+          EOF
+          )
+          # Reuse the existing PR if the branch already has one open, otherwise create it.
+          if [ -z "$(gh pr list --repo "$REPO" --head "$BRANCH_NAME" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --repo "$REPO" --base master --head "$BRANCH_NAME" \
+              --title "Remove stale OpenAPI breaking-change allowlist entries" \
+              --body "$body"
+          else
+            echo "PR for $BRANCH_NAME already open — pushed updated commit."
+          fi

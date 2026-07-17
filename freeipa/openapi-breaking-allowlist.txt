@@ -1,0 +1,1 @@
+# Deliberate, reviewed breaking changes for the freeipa API — one full oasdiff message per line.

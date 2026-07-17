@@ -31,3 +31,4 @@ dumps/
 yarn_cluster_logs/
 testuser_home/
 passed-tests.txt
+apidefinitions/
