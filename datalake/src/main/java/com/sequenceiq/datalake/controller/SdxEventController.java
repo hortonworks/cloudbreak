@@ -1,8 +1,6 @@
 package com.sequenceiq.datalake.controller;
 
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -13,10 +11,10 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.datalake.service.SdxEventsService;
+import com.sequenceiq.datalake.service.SdxEventsZipService;
 import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
 
 @Controller
@@ -24,6 +22,9 @@ public class SdxEventController implements SdxEventEndpoint {
 
     @Inject
     private SdxEventsService sdxEventsService;
+
+    @Inject
+    private SdxEventsZipService sdxEventsZipService;
 
     /**
      * Retrieves audit events for the provided Environment CRN.
@@ -40,6 +41,8 @@ public class SdxEventController implements SdxEventEndpoint {
 
     /**
      * Retrieves zipped datalake events for the provided Environment CRN.
+     * Events are streamed page-by-page from the database directly into the zip output
+     * to avoid holding all events in memory at once.
      *
      * @param environmentCrn a Environment CRN
      * @param types          types of structured events to retrieve
@@ -48,18 +51,9 @@ public class SdxEventController implements SdxEventEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public Response getDatalakeEventsZip(@ResourceCrn String environmentCrn, List<StructuredEventType> types) {
-        List<CDPStructuredEvent> events = sdxEventsService.getDatalakeAuditEvents(environmentCrn, List.of(StructuredEventType.NOTIFICATION));
-        return getDatalakeEventsZipResponse(events);
-    }
-
-    private Response getDatalakeEventsZipResponse(List<CDPStructuredEvent> events) {
-        StreamingOutput streamingOutput = output -> {
-            try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
-                zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
-                JsonUtil.writeValueToOutputStream(zipOutputStream, events);
-            }
-        };
-        String fileName = "datalake-audit.zip";
-        return Response.ok(streamingOutput).header("content-disposition", String.format("attachment; filename = %s", fileName)).build();
+        StreamingOutput streamingOutput = output -> sdxEventsZipService.streamDatalakeAuditEventsAsZip(environmentCrn, output);
+        return Response.ok(streamingOutput)
+                .header("content-disposition", "attachment; filename = datalake-audit.zip")
+                .build();
     }
 }

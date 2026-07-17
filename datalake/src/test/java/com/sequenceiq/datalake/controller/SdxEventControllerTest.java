@@ -10,22 +10,20 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.db.CDPStructuredEventDBService;
-import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.SdxEventsService;
+import com.sequenceiq.datalake.service.SdxEventsZipService;
 
+@ExtendWith(MockitoExtension.class)
 class SdxEventControllerTest {
 
     private static final Integer TEST_PAGE = 1;
@@ -38,29 +36,16 @@ class SdxEventControllerTest {
     private static final List<StructuredEventType> TEST_EVENT_TYPES = List.of(StructuredEventType.FLOW, StructuredEventType.NOTIFICATION);
 
     @Mock
-    private CDPStructuredEventDBService mockCdpStructuredEventDBService;
-
-    @Mock
-    private SdxClusterRepository mockSdxClusterRepository;
-
-    @Mock
     private SdxEventsService sdxEventsService;
+
+    @Mock
+    private SdxEventsZipService sdxEventsZipService;
 
     @InjectMocks
     private SdxEventController datalakeEventController;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setCrn(RESOURCE_CRN);
-        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(sdxCluster));
-    }
-
     @Test
     void testNoAuthorizationWhenEventsReturnedIsEmpty() {
-        when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(TEST_EVENT_TYPES), any(), any()))
-                .thenReturn(Page.empty());
         when(sdxEventsService.getPagedDatalakeAuditEvents(any(), eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(Collections.emptyList());
         List<CDPStructuredEvent> result = datalakeEventController.getAuditEvents(RESOURCE_CRN, TEST_EVENT_TYPES, TEST_PAGE, TEST_SIZE);
@@ -71,8 +56,6 @@ class SdxEventControllerTest {
 
     @Test
     void testNoAuthorizationWhenEventsReturnedIsNotEmpty() {
-        when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(TEST_EVENT_TYPES), any(), any()))
-                .thenReturn(Page.empty());
         when(sdxEventsService.getPagedDatalakeAuditEvents(any(), eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(Collections.singletonList(createCDPStructuredFlowEvent(1L)));
         List<CDPStructuredEvent> result = datalakeEventController.getAuditEvents(RESOURCE_CRN, TEST_EVENT_TYPES, TEST_PAGE, TEST_SIZE);

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.repository;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import jakarta.persistence.QueryHint;
 import jakarta.transaction.Transactional;
@@ -40,4 +41,14 @@ public interface CDPPagingStructuredEventRepository extends PagingAndSortingRepo
             @Param("eventType") List<StructuredEventType> eventType,
             @Param("resourceCrn") List<String> resourceCrn,
             Pageable pageable);
+
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.query.timeout", value = "65000"),
+            @QueryHint(name = org.hibernate.jpa.HibernateHints.HINT_READ_ONLY, value = "true"),
+            @QueryHint(name = org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE, value = "500")
+    })
+    @Query("SELECT e FROM CDPStructuredEventEntity e WHERE e.eventType IN :eventType AND e.resourceCrn IN :resourceCrn ORDER BY e.timestamp DESC")
+    Stream<CDPStructuredEventEntity> streamByEventTypeInAndResourceCrnIn(
+            @Param("eventType") List<StructuredEventType> eventType,
+            @Param("resourceCrn") List<String> resourceCrn);
 }

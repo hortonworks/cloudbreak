@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -197,6 +198,10 @@ public class JsonUtil {
         } catch (IOException ignore) {
             return false;
         }
+    }
+
+    public static JsonFactory getFactory() {
+        return MAPPER.getFactory();
     }
 
     private static void logObject(Object object) {

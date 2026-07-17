@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,7 +25,6 @@ import org.springframework.data.domain.Page;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
@@ -31,10 +32,11 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEven
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.db.CDPStructuredEventDBService;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.SdxEventsHelper;
 import com.sequenceiq.datalake.service.SdxEventsService;
 
 @ExtendWith(MockitoExtension.class)
+@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 public class SdxEventsServiceTests {
 
     private static final Integer TEST_PAGE = 1;
@@ -50,8 +52,6 @@ public class SdxEventsServiceTests {
     private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:cluster:" +
             "6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
 
-    private static final String INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
-
     private static final List<StructuredEventType> TEST_EVENT_TYPES = List.of(StructuredEventType.FLOW, StructuredEventType.NOTIFICATION);
 
     @Mock
@@ -61,10 +61,7 @@ public class SdxEventsServiceTests {
     private EventV4Endpoint eventV4Endpoint;
 
     @Mock
-    private SdxClusterRepository mockSdxClusterRepository;
-
-    @Mock
-    private SdxService sdxService;
+    private SdxEventsHelper sdxEventsHelper;
 
     @InjectMocks
     private SdxEventsService sdxEventsService;
@@ -72,8 +69,13 @@ public class SdxEventsServiceTests {
     @BeforeEach
     void setUp() {
         SdxCluster sdxCluster = getSdxCluster(DATALAKE_CRN, DATALAKE_CRN, ENVIRONMENT_CRN);
-        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(sdxCluster));
-        when(sdxService.listSdxByEnvCrn(any())).thenReturn(List.of(sdxCluster));
+        when(sdxEventsHelper.getAvailableAndDetachedDatalakes(any())).thenReturn(List.of(sdxCluster));
+        when(sdxEventsHelper.getCloudbreakCrn(any())).thenReturn(DATALAKE_CRN);
+        lenient().when(sdxEventsHelper.convert(any(CloudbreakEventV4Response.class), anyString()))
+                .thenAnswer(invocation -> {
+                    CloudbreakEventV4Response resp = invocation.getArgument(0);
+                    return createCDPStructuredNotificationEvent(resp.getEventTimestamp());
+                });
     }
 
     @Test
@@ -88,7 +90,6 @@ public class SdxEventsServiceTests {
 
         assertNotNull(result);
         assertEquals(2, result.size());
-
     }
 
     @Test
@@ -145,32 +146,36 @@ public class SdxEventsServiceTests {
 
     @Test
     public void testGetAuditEventsWhenCbAndDlCrnIsDifferent() {
-        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(getSdxCluster(DATALAKE_CRN, DATAHUB_CRN, ENVIRONMENT_CRN)));
-        when(eventV4Endpoint.structuredByCrn(any(), anyBoolean())).thenReturn(new StructuredEventContainer());
+        when(sdxEventsHelper.getAvailableAndDetachedDatalakes(any()))
+                .thenReturn(List.of(getSdxCluster(DATALAKE_CRN, DATAHUB_CRN, ENVIRONMENT_CRN)));
+        when(sdxEventsHelper.getCloudbreakCrn(any())).thenReturn(DATAHUB_CRN);
+        when(eventV4Endpoint.getPagedCloudbreakEventListByCrn(any(), any(), any(), anyBoolean()))
+                .thenReturn(List.of());
 
-        sdxEventsService.getDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION));
+        Page<CDPStructuredEvent> mockPage = mock(Page.class);
+        when(mockPage.getContent()).thenReturn(List.of());
+        when(mockCdpStructuredEventDBService.getPagedEventsOfResources(any(), any(), any())).thenReturn(mockPage);
 
-        verify(eventV4Endpoint).structuredByCrn(eq(DATAHUB_CRN), anyBoolean());
+        sdxEventsService.getPagedDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
+
+        verify(eventV4Endpoint).getPagedCloudbreakEventListByCrn(eq(DATAHUB_CRN), any(), any(), anyBoolean());
     }
 
     @Test
     public void testGetAuditEventsWhenCbAndDlCrnIsEquals() {
-        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(getSdxCluster(DATALAKE_CRN, DATALAKE_CRN, ENVIRONMENT_CRN)));
-        when(eventV4Endpoint.structuredByCrn(any(), anyBoolean())).thenReturn(new StructuredEventContainer());
+        when(sdxEventsHelper.getAvailableAndDetachedDatalakes(any()))
+                .thenReturn(List.of(getSdxCluster(DATALAKE_CRN, DATALAKE_CRN, ENVIRONMENT_CRN)));
+        when(sdxEventsHelper.getCloudbreakCrn(any())).thenReturn(DATALAKE_CRN);
+        when(eventV4Endpoint.getPagedCloudbreakEventListByCrn(any(), any(), any(), anyBoolean()))
+                .thenReturn(List.of());
 
-        sdxEventsService.getDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION));
+        Page<CDPStructuredEvent> mockPage = mock(Page.class);
+        when(mockPage.getContent()).thenReturn(List.of());
+        when(mockCdpStructuredEventDBService.getPagedEventsOfResources(any(), any(), any())).thenReturn(mockPage);
 
-        verify(eventV4Endpoint).structuredByCrn(eq(DATALAKE_CRN), anyBoolean());
-    }
+        sdxEventsService.getPagedDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
 
-    @Test
-    public void testGetAuditEventsWhenCbCrnIsNull() {
-        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(getSdxCluster(DATALAKE_CRN, null, ENVIRONMENT_CRN)));
-        when(eventV4Endpoint.structuredByCrn(any(), anyBoolean())).thenReturn(new StructuredEventContainer());
-
-        sdxEventsService.getDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION));
-
-        verify(eventV4Endpoint).structuredByCrn(eq(DATALAKE_CRN), anyBoolean());
+        verify(eventV4Endpoint).getPagedCloudbreakEventListByCrn(eq(DATALAKE_CRN), any(), any(), anyBoolean());
     }
 
     private SdxCluster getSdxCluster(String crn, String stackCrn, String envCrn) {
@@ -199,7 +204,6 @@ public class SdxEventsServiceTests {
         } else {
             return createCDPStructuredFlowEvent(0L);
         }
-
     }
 
     private CDPStructuredEvent createTestCDPStructuredEvent(StructuredEventType type, Long timestamp) {
@@ -208,7 +212,6 @@ public class SdxEventsServiceTests {
         } else {
             return createCDPStructuredFlowEvent(timestamp);
         }
-
     }
 
     private CDPStructuredEvent createCDPStructuredNotificationEvent(Long timestamp) {

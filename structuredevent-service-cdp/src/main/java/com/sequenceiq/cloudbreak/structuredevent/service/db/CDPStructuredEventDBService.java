@@ -150,6 +150,18 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         }
     }
 
+    /**
+     * Returns a lazy stream of events backed by a JDBC cursor. The caller MUST invoke this method
+     * within an active transaction (e.g. via {@code TransactionTemplate}) and close the returned
+     * stream when done, otherwise the underlying database cursor/connection will leak.
+     */
+    public Stream<CDPStructuredEvent> streamEventsOfResources(List<StructuredEventType> eventTypes, List<String> resourceCrns) {
+        LOGGER.debug("Streaming events for types: '{}' and resource CRNs: '{}'", eventTypes, resourceCrns);
+        List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
+        return pagingStructuredEventRepository.streamByEventTypeInAndResourceCrnIn(types, resourceCrns)
+                .map(cdpStructuredEventEntityToCDPStructuredEventConverter::convert);
+    }
+
     @Override
     public <T extends CDPStructuredEvent> List<T> getEventsOfResource(List<StructuredEventType> eventTypes, String resourceCrn) {
         LOGGER.debug("Gathering events for type: '{}' and resource CRN: '{}'", eventTypes, resourceCrn);
