@@ -32,16 +32,18 @@ public class AzureResourceGroupMetadataProvider {
     }
 
     public String getResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {
-        return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME_PARAMETER, getDefaultResourceGroupName(cloudContext));
+        String explicitResourceGroupName = cloudStack.getParameters().get(RESOURCE_GROUP_NAME_PARAMETER);
+        return explicitResourceGroupName != null ? explicitResourceGroupName : getDefaultResourceGroupName(cloudContext);
     }
 
     public String getResourceGroupName(CloudContext cloudContext, DatabaseStack databaseStack) {
-        return databaseStack.getDatabaseServer().getParameters()
-                .getOrDefault(RESOURCE_GROUP_NAME_PARAMETER, getDefaultResourceGroupName(cloudContext)).toString();
+        Object explicitResourceGroupName = databaseStack.getDatabaseServer().getParameters().get(RESOURCE_GROUP_NAME_PARAMETER);
+        return explicitResourceGroupName != null ? explicitResourceGroupName.toString() : getDefaultResourceGroupName(cloudContext);
     }
 
     public String getResourceGroupName(CloudContext cloudContext, DynamicModel dynamicModel) {
-        return dynamicModel.getParameters().getOrDefault(RESOURCE_GROUP_NAME_PARAMETER, getDefaultResourceGroupName(cloudContext)).toString();
+        Object explicitResourceGroupName = dynamicModel.getParameters().get(RESOURCE_GROUP_NAME_PARAMETER);
+        return explicitResourceGroupName != null ? explicitResourceGroupName.toString() : getDefaultResourceGroupName(cloudContext);
     }
 
     public Boolean useSingleResourceGroup(CloudStack cloudStack) {
@@ -70,6 +72,6 @@ public class AzureResourceGroupMetadataProvider {
     }
 
     private String getDefaultResourceGroupName(CloudContext cloudContext) {
-        return getStackName(cloudContext);
+        return cloudContext == null ? null : getStackName(cloudContext);
     }
 }
