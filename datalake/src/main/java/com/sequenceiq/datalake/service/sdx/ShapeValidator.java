@@ -7,6 +7,8 @@ import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MICRO_D
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.SHAPES_WITHOUT_HBASE_REQUIRED_VERSION;
 
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -16,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -33,6 +38,12 @@ public class ShapeValidator {
 
     private static final Set<SdxClusterShape> SHAPES_WITHOUT_HBASE_AND_HDFS = Set.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE,
             SdxClusterShape.ENTERPRISE_WITHOUT_HBASE);
+
+    // Host group that carries the volume-pinned services (ZooKeeper+KRaft, Kafka, Solr) and the minimum
+    // number of attached volumes it must have so the blueprint's fs1/fs2/fs3 data-dir mounts exist.
+    private static final Map<SdxClusterShape, Map.Entry<String, Integer>> MIN_VOLUMES_PER_SHAPE = Map.of(
+            SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, Map.entry("core", 3),
+            SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, Map.entry("master", 3));
 
     @Inject
     private EntitlementService entitlementService;
@@ -52,6 +63,35 @@ public class ShapeValidator {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    public void validateVolumeCount(SdxClusterShape shape, StackV4Request stackRequest) {
+        if (MIN_VOLUMES_PER_SHAPE.containsKey(shape) && stackRequest != null && stackRequest.getInstanceGroups() != null) {
+            Map.Entry<String, Integer> requirement = MIN_VOLUMES_PER_SHAPE.get(shape);
+            String groupName = requirement.getKey();
+            int minVolumes = requirement.getValue();
+            stackRequest.getInstanceGroups().stream()
+                    .filter(instanceGroup -> groupName.equals(instanceGroup.getName()))
+                    .findFirst()
+                    .ifPresent(instanceGroup -> {
+                        int volumeCount = countAttachedVolumes(instanceGroup);
+                        if (volumeCount < minVolumes) {
+                            throw new BadRequestException(String.format(
+                                    "SDX shape %s requires the '%s' host group to have at least %d attached volumes " +
+                                            "(ZooKeeper+KRaft, Kafka and Solr data-dir isolation); the cluster template provides %d.",
+                                    shape.name(), groupName, minVolumes, volumeCount));
+                        }
+                    });
+        }
+    }
+
+    private int countAttachedVolumes(InstanceGroupV4Request instanceGroup) {
+        return Optional.ofNullable(instanceGroup.getTemplate())
+                .map(InstanceTemplateV4Request::getAttachedVolumes)
+                .orElseGet(Set::of)
+                .stream()
+                .mapToInt(volume -> Optional.ofNullable(volume.getCount()).orElse(0))
+                .sum();
     }
 
     private void validateMicroDutyShape(String runtime, DetailedEnvironmentResponse environment, ValidationResultBuilder validationBuilder) {

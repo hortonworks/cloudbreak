@@ -447,6 +447,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 imageSettingsV4Request,
                 architecture
         );
+        shapeValidator.validateVolumeCount(sdxClusterRequest.getClusterShape(), stackRequest);
         if (sdxClusterRequest.getVariant() != null) {
             stackRequest.setVariant(sdxClusterRequest.getVariant());
         }

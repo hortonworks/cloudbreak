@@ -6,22 +6,30 @@
     "displayName": "enterprise-datalake-without-hdfs-and-hbase",
     "hostTemplates": [
       {
-        "cardinality": 3,
-        "refName": "core",
+        "cardinality": 2,
+        "refName": "gateway",
         "roleConfigGroupsRefNames": [
           "atlas-ATLAS_SERVER-BASE",
           "hive-GATEWAY-BASE",
           "hive-HIVEMETASTORE-BASE",
           "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE",
           "knox-KNOX_GATEWAY-BASE",
-          "ranger-RANGER_ADMIN-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "ranger-RANGER_USERSYNC-BASE",
+          "solr-GATEWAY-BASE"
+        ]
+      },
+      {
+        "cardinality": 3,
+        "refName": "core",
+        "roleConfigGroupsRefNames": [
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "kafka-KAFKA_KRAFT-BASE",
+          "ranger-RANGER_ADMIN-BASE",
           "solr-SOLR_SERVER-BASE",
           "solr-GATEWAY-BASE",
-          "zookeeper-SERVER-BASE",
-          "kafka-KAFKA_KRAFT-BASE"
+          "zookeeper-SERVER-BASE"
         ]
       },
       {
@@ -81,6 +89,16 @@
         "roleConfigGroups": [
           {
             "base": true,
+            "configs": [
+              {
+                "name": "dataDir",
+                "value": "/hadoopfs/fs1/zookeeper"
+              },
+              {
+                "name": "dataLogDir",
+                "value": "/hadoopfs/fs1/zookeeper"
+              }
+            ],
             "refName": "zookeeper-SERVER-BASE",
             "roleType": "SERVER"
           }
@@ -245,6 +263,18 @@
               {
                 "name": "solr_java_opts",
                 "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
+              },
+              {
+                "name": "solr_java_heapsize",
+                "value": 8589934592
+              },
+              {
+                "name": "solr_java_direct_memory_size",
+                "value": 1073741824
+              },
+              {
+                "name": "solr_data_dir",
+                "value": "/hadoopfs/fs3/solr"
               }
             ],
             "refName": "solr-SOLR_SERVER-BASE",
@@ -289,7 +319,13 @@
           {
             "refName": "kafka-KAFKA_KRAFT-BASE",
             "roleType": "KRAFT",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "metadata.log.dir",
+                "value": "/hadoopfs/fs1/kraft"
+              }
+            ]
           },
           {
             "base": true,
@@ -298,6 +334,12 @@
           },
           {
             "base": true,
+            "configs": [
+              {
+                "name": "log.dirs",
+                "value": "/hadoopfs/fs2/kafka"
+              }
+            ],
             "refName": "kafka-KAFKA_BROKER-BASE",
             "roleType": "KAFKA_BROKER"
           },

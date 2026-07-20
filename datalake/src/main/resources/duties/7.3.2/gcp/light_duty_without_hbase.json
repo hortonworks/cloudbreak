@@ -30,8 +30,8 @@
         "instanceType": "e2-highmem-8",
         "attachedVolumes": [
           {
-            "count": 1,
-            "size": 512,
+            "count": 3,
+            "size": 128,
             "type": "pd-ssd"
           }
         ]

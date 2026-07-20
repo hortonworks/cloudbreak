@@ -30,8 +30,8 @@
         "instanceType": "r2.xlarge",
         "attachedVolumes": [
           {
-            "count": 1,
-            "size": 512,
+            "count": 3,
+            "size": 128,
             "type": "PURE-ISCSI"
           }
         ]

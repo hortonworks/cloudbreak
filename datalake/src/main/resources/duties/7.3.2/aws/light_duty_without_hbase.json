@@ -32,8 +32,8 @@
         "fallbackInstanceTypes": [ "r5a.2xlarge", "r6i.2xlarge" ],
         "attachedVolumes": [
           {
-            "count": 1,
-            "size": 512,
+            "count": 3,
+            "size": 128,
             "type": "gp3"
           }
         ]

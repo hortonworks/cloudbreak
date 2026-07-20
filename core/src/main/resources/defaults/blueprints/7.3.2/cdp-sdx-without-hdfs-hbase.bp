@@ -38,6 +38,16 @@
         "roleConfigGroups": [
           {
             "base": true,
+            "configs": [
+              {
+                "name": "dataDir",
+                "value": "/hadoopfs/fs1/zookeeper"
+              },
+              {
+                "name": "dataLogDir",
+                "value": "/hadoopfs/fs1/zookeeper"
+              }
+            ],
             "refName": "zookeeper-SERVER-BASE",
             "roleType": "SERVER"
           }
@@ -163,6 +173,10 @@
               {
                 "name": "solr_java_opts",
                 "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
+              },
+              {
+                "name": "solr_data_dir",
+                "value": "/hadoopfs/fs3/solr"
               }
             ],
             "refName": "solr-SOLR_SERVER-BASE",
@@ -191,13 +205,25 @@
           },
           {
             "base": true,
+            "configs": [
+              {
+                "name": "log.dirs",
+                "value": "/hadoopfs/fs2/kafka"
+              }
+            ],
             "refName": "kafka-KAFKA_BROKER-BASE",
             "roleType": "KAFKA_BROKER"
           },
           {
             "refName": "kafka-KAFKA_KRAFT-BASE",
             "roleType": "KRAFT",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "metadata.log.dir",
+                "value": "/hadoopfs/fs1/kraft"
+              }
+            ]
           }
         ],
         "serviceConfigs": [

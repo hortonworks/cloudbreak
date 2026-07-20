@@ -2,16 +2,23 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE_WITHOUT_HBASE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +29,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -142,5 +153,56 @@ class ShapeValidatorTest {
         assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.3.0", detailedEnvironmentResponse));
         assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.2", detailedEnvironmentResponse));
         assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.3", detailedEnvironmentResponse));
+    }
+
+    @Test
+    void validateVolumeCountPassesWhenEnterpriseWithoutHbaseCoreHasThreeVolumes() {
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, stackWithGroup("core", 3)));
+    }
+
+    @Test
+    void validateVolumeCountFailsWhenEnterpriseWithoutHbaseCoreHasTwoVolumes() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, stackWithGroup("core", 2)));
+        assertTrue(exception.getMessage().contains("core"));
+        assertTrue(exception.getMessage().contains("at least 3"));
+    }
+
+    @Test
+    void validateVolumeCountChecksMasterGroupForLightDutyWithoutHbase() {
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(LIGHT_DUTY_WITHOUT_HBASE, stackWithGroup("master", 3)));
+        assertThrows(BadRequestException.class,
+                () -> underTest.validateVolumeCount(LIGHT_DUTY_WITHOUT_HBASE, stackWithGroup("master", 2)));
+    }
+
+    @Test
+    void validateVolumeCountIgnoresShapesWithoutVolumeInvariant() {
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(CUSTOM, stackWithGroup("core", 1)));
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE, stackWithGroup("core", 1)));
+    }
+
+    @Test
+    void validateVolumeCountIgnoresNullStackRequest() {
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, null));
+    }
+
+    @Test
+    void validateVolumeCountIgnoresWhenTargetGroupIsAbsent() {
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, stackWithGroup("gateway", 1)));
+    }
+
+    private StackV4Request stackWithGroup(String groupName, int volumeCount) {
+        VolumeV4Request volume = new VolumeV4Request();
+        volume.setCount(volumeCount);
+        volume.setSize(256);
+        volume.setType("gp3");
+        InstanceTemplateV4Request template = new InstanceTemplateV4Request();
+        template.setAttachedVolumes(Set.of(volume));
+        InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
+        instanceGroup.setName(groupName);
+        instanceGroup.setTemplate(template);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setInstanceGroups(List.of(instanceGroup));
+        return stackRequest;
     }
 }
