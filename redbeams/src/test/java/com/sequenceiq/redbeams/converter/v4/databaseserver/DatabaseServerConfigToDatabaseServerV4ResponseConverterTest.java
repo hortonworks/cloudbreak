@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -162,6 +163,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getDatabaseVendorDisplayName()).isEqualTo(server.getDatabaseVendor().displayName());
         assertThat(response.getStorageSize()).isEqualTo(server.getDbStack().get().getDatabaseServer().getStorageSize());
         assertThat(response.getInstanceType()).isEqualTo(server.getDbStack().get().getDatabaseServer().getInstanceType());
+        assertThat(response.getFallbackInstanceTypes()).isEqualTo(server.getDbStack().get().getDatabaseServer().getFallbackInstanceTypes());
         assertThat(response.getConnectionUserName()).isNotNull();
         assertThat(response.getConnectionPassword()).isNotNull();
         assertThat(response.getCreationDate()).isEqualTo(server.getCreationDate());
@@ -184,6 +186,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         }
         databaseServer.setStorageSize(DB_STORAGE_SIZE);
         databaseServer.setInstanceType(DB_INSTANCE_TYPE);
+        databaseServer.setFallbackInstanceTypes(List.of(DB_INSTANCE_TYPE));
         dbStack.setDatabaseServer(databaseServer);
     }
 

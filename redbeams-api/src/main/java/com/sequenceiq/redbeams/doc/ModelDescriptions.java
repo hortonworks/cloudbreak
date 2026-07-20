@@ -123,6 +123,7 @@ public final class ModelDescriptions {
         public static final String DATABASE_PROPERTIES = "Database server properties";
         public static final String CANARY_DATABASE_PROPERTIES = "Canary database server properties";
         public static final String INSTANCE_TYPE = "Instance type of the database server";
+        public static final String FALLBACK_INSTANCE_TYPES = "Fallback instance types of the database server";
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";
     }
 
@@ -153,6 +154,7 @@ public final class ModelDescriptions {
 
     public static class DatabaseServerModelDescriptions {
         public static final String INSTANCE_TYPE = "Instance type of the database server";
+        public static final String FALLBACK_INSTANCE_TYPES = "Fallback instance types of the database server";
         public static final String DATABASE_VENDOR = DatabaseServer.DATABASE_VENDOR;
         public static final String CONNECTION_DRIVER = DatabaseServer.CONNECTION_DRIVER;
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";

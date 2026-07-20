@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -74,6 +75,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         CloudPlatform cloudPlatform = CloudPlatform.AZURE;
         DatabaseServerV4StackRequest source = new DatabaseServerV4StackRequest();
         source.setInstanceType("Standard_E4ds_v4");
+        source.setFallbackInstanceTypes(List.of("Standard_E4ds_v5", "Standard_E4ads_v5"));
         source.setDatabaseVendor("postgres");
         source.setConnectionDriver("org.postgresql.Driver");
         source.setStorageSize(100L);
@@ -88,7 +90,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         DatabaseServer result = underTest.buildDatabaseServer(source, cloudPlatform);
 
         // Then
-        assertCommonAttributes(result, cloudPlatform);
+        assertCommonAttributes(source, result, cloudPlatform);
         assertNull(result.getSecurityGroup());
     }
 
@@ -112,7 +114,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         DatabaseServer result = underTest.buildDatabaseServer(source, cloudPlatform);
 
         // Then
-        assertCommonAttributes(result, cloudPlatform);
+        assertCommonAttributes(source, result, cloudPlatform);
         assertNull(result.getSecurityGroup());
         assertCustomRootUserAndPassword(result);
     }
@@ -141,7 +143,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         DatabaseServer result = underTest.buildDatabaseServer(source, cloudPlatform);
 
         // Then
-        assertCommonAttributes(result, cloudPlatform);
+        assertCommonAttributes(source, result, cloudPlatform);
         assertCustomSecurityGroup(result);
     }
 
@@ -167,15 +169,16 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         DatabaseServer result = underTest.buildDatabaseServer(source, cloudPlatform, Crn.fromString(OWNER_CRN), securityAccessResponse);
 
         // Then
-        assertCommonAttributes(result, cloudPlatform);
+        assertCommonAttributes(source, result, cloudPlatform);
         assertCustomSecurityGroup(result);
         assertEquals("[defaultSecurityGroupId]", result.getSecurityGroup().getSecurityGroupIds().toString());
     }
 
-    private void assertCommonAttributes(DatabaseServer databaseServer, CloudPlatform cloudPlatform) {
+    private void assertCommonAttributes(DatabaseServerV4StackRequest source, DatabaseServer databaseServer, CloudPlatform cloudPlatform) {
         assertNotNull(databaseServer);
         assertNotNull(databaseServer.getName());
         assertNotNull(databaseServer.getInstanceType());
+        assertEquals(source.getFallbackInstanceTypes(), databaseServer.getFallbackInstanceTypes());
         assertEquals(DatabaseVendor.POSTGRES, databaseServer.getDatabaseVendor());
         assertNotNull(databaseServer.getConnectionDriver());
         assertNotNull(databaseServer.getStorageSize());

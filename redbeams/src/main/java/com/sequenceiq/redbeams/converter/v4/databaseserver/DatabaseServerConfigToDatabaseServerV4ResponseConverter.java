@@ -82,6 +82,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
             response.setCanaryDatabasePropertiesV4Response(createCanaryDatabaseProperties(dbStack.getCanaryDatabaseResources()));
             if (dbStack.getDatabaseServer() != null) {
                 response.setInstanceType(dbStack.getDatabaseServer().getInstanceType());
+                response.setFallbackInstanceTypes(dbStack.getDatabaseServer().getFallbackInstanceTypes());
                 response.setStorageSize(dbStack.getDatabaseServer().getStorageSize());
             }
             response.setSslConfig(convertSslConfig(source));

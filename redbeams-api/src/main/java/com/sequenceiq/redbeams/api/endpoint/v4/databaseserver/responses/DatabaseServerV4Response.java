@@ -1,5 +1,8 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
@@ -60,6 +63,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     @Schema(description = DatabaseServer.INSTANCE_TYPE)
     private String instanceType;
+
+    @Schema(description = DatabaseServer.FALLBACK_INSTANCE_TYPES, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<String> fallbackInstanceTypes = new ArrayList<>();
 
     @Schema(description = DatabaseServer.STORAGE_SIZE)
     private Long storageSize;
@@ -187,6 +193,14 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
         this.instanceType = instanceType;
     }
 
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public void setFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes == null ? new ArrayList<>() : fallbackInstanceTypes;
+    }
+
     public Long getStorageSize() {
         return storageSize;
     }
@@ -221,8 +235,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
                 ", majorVersion=" + majorVersion +
                 ", databasePropertiesV4Response=" + databasePropertiesV4Response +
                 ", instanceType='" + instanceType + '\'' +
+                ", fallbackInstanceTypes=" + fallbackInstanceTypes +
                 ", storageSize=" + storageSize +
                 ", canaryDatabasePropertiesV4Response=" + canaryDatabasePropertiesV4Response +
-                '}';
+                "} " + super.toString();
     }
 }

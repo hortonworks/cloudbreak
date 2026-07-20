@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.domain.stack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.CascadeType;
@@ -17,6 +19,7 @@ import jakarta.persistence.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.DatabaseVendorConverter;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.common.database.StringListToStringConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -41,6 +44,10 @@ public class DatabaseServer implements AccountIdAwareResource {
     private String description;
 
     private String instanceType;
+
+    @Convert(converter = StringListToStringConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private List<String> fallbackInstanceTypes = new ArrayList<>();
 
     @Column(nullable = false)
     @Convert(converter = DatabaseVendorConverter.class)
@@ -110,6 +117,14 @@ public class DatabaseServer implements AccountIdAwareResource {
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public void setFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes == null ? new ArrayList<>() : fallbackInstanceTypes;
     }
 
     public DatabaseVendor getDatabaseVendor() {

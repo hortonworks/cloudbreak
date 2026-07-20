@@ -1,5 +1,8 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -18,6 +21,9 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
     @Schema(description = DatabaseServerModelDescriptions.INSTANCE_TYPE)
     private String instanceType;
+
+    @Schema(description = DatabaseServerModelDescriptions.FALLBACK_INSTANCE_TYPES, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<String> fallbackInstanceTypes = new ArrayList<>();
 
     @ValidDatabaseVendor
     @Schema(description = DatabaseServerModelDescriptions.DATABASE_VENDOR)
@@ -57,6 +63,14 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public void setFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes == null ? new ArrayList<>() : fallbackInstanceTypes;
     }
 
     public String getDatabaseVendor() {
@@ -177,6 +191,7 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
     public String toString() {
         return "DatabaseServerV4StackBase{" +
                 "instanceType='" + instanceType + '\'' +
+                ", fallbackInstanceTypes=" + fallbackInstanceTypes +
                 ", databaseVendor='" + databaseVendor + '\'' +
                 ", connectionDriver='" + connectionDriver + '\'' +
                 ", storageSize=" + storageSize +

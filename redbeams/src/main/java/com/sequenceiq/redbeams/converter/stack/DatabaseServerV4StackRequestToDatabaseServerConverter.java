@@ -56,6 +56,7 @@ public class DatabaseServerV4StackRequestToDatabaseServerConverter {
         server.setAccountId(Optional.ofNullable(ownerCrn).map(Crn::getAccountId).orElse(null));
         server.setName(nameGenerator.generateName(APIResourceType.DATABASE_SERVER));
         server.setInstanceType(source.getInstanceType());
+        server.setFallbackInstanceTypes(source.getFallbackInstanceTypes());
         DatabaseVendor databaseVendor = DatabaseVendor.fromValue(source.getDatabaseVendor());
         server.setDatabaseVendor(databaseVendor);
         server.setConnectionDriver(source.getConnectionDriver());

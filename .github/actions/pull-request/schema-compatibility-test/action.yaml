@@ -47,11 +47,13 @@ runs:
           integration-test/integcb/Profile
           integration-test/integcb/docker-compose.yml
           integration-test/integcb/*revert.result
+          integration-test/integcb/db_migration.log
           integration-test/test.out
           integration-test/swagger-validation-result.out
           integration-test/suites_log/*.log
           integration-test/test-output/**/*
           integration-test/dumps/*.hprof
+          integration-test/db_migration.log
     - name: schema_compatibility_test_check
       if: steps.schema_compatibility_test.outcome == 'failure'
       shell: bash
