@@ -4,9 +4,18 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # freeipa_check_replication_cleanup.sh
 #
-# Polls a FreeIPA node's 389-ds over LDAP until replication cleanup for a
-# set of removed hosts has converged, then exits 0.  Fails fast with an
-# actionable message on timeout.
+# Cleans up 389-ds replication for a set of removed hosts and confirms
+# convergence.  On each poll it actively deletes any replication agreement that
+# still points at a removed host (over LDAP as Directory Manager), then checks
+# that no such agreements remain and no CleanAllRUV task is still in flight.
+# Exits 0 on convergence; fails fast with an actionable message on timeout.
+#
+# Deleting the agreement is safe: TARGET_HOSTS are hosts being removed (already
+# uninstalled), so their agreements are dangling by definition.  This is
+# necessary because 'ipa server-del' removes the topology-plugin-managed
+# "<a>-to-<b>" segment agreements but leaves legacy "meTo<host>" agreements
+# behind — and nothing else deletes them, so they otherwise block a re-join or
+# downscale until timeout.
 #
 # Required env vars:
 #   FPW              – 389-ds Directory Manager password
@@ -78,6 +87,28 @@ build_host_filter() {
 
 HOST_FILTER="$(build_host_filter)"
 
+# Delete any replication agreements still pointing at the removed hosts.  These
+# entries live in the local cn=config of the queried server (they are not
+# replicated), so the delete takes effect immediately and is what unblocks
+# convergence — nothing else removes legacy "meTo<host>" agreements.  Idempotent
+# and tolerant of already-absent entries.
+delete_lingering_agreements() {
+  local dns dn
+  dns="$(ldapq sub "cn=mapping tree,cn=config" "$HOST_FILTER" dn | sed -n 's/^dn: //p')"
+  if [[ -z "$dns" ]]; then
+    return 0
+  fi
+  while IFS= read -r dn; do
+    if [[ -z "$dn" ]]; then
+      continue
+    fi
+    echo "Removing lingering replication agreement for removed host: ${dn}"
+    if ! ldapdelete -x -H "$LDAP_URI" -D "cn=Directory Manager" -w "$FPW" "$dn" 2>&1; then
+      echo "  delete returned non-zero for '${dn}' (may already be gone or recreated); will re-check on next poll"
+    fi
+  done <<< "$dns"
+}
+
 elapsed=0
 while true; do
   pending_cleanallruv=""
@@ -96,6 +127,11 @@ while true; do
       pending_cleanallruv="${pending_cleanallruv} [CleanAllRUV task still active under '${task_base}']"
     fi
   done
+
+  # Actively remove any agreements still pointing at the removed hosts before
+  # re-checking convergence.  Legacy "meTo<host>" agreements survive
+  # 'ipa server-del', so without this the check below would never converge.
+  delete_lingering_agreements
 
   # Check 2: lingering replication agreements for the removed hosts.
   ldap_result="$(ldapq sub "cn=mapping tree,cn=config" "$HOST_FILTER" nsDS5ReplicaHost dn)"

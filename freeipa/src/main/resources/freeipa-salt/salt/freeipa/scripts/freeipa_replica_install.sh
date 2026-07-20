@@ -4,7 +4,6 @@ set -e
 
 function cleanup() {
   kdestroy
-  rm -f /tmp/krb5cc_ldap /tmp/krb5cc_http
 }
 
 trap cleanup EXIT
@@ -23,11 +22,37 @@ fi
 
 install -m644 /etc/resolv.conf.install /etc/resolv.conf
 
+# On a retry after a prior attempt already completed ipa-replica-install, skip the entire
+# destructive reinstall (uninstall -> pre-join cleanup gate -> client/replica install) and only
+# re-verify replication health in place. Reinstalling would tear down a working replica and leave a
+# topology-plugin-managed agreement on the peer that raw ldapdelete cannot remove (err=53),
+# dead-locking the cleanup gate. The marker is written only after ipa-replica-install below
+# succeeds, so a failed install still triggers a full destructive retry.
+if [ -f /var/log/freeipa_replica_install_completed ]; then
+  echo "Prior attempt already completed ipa-replica-install for $FQDN; skipping reinstall and re-verifying replication health in place"
+else
+
 ipa-server-install --unattended --uninstall --ignore-topology-disconnect --ignore-last-of-role
+
+# A failed prior attempt can leave dirsrv's GSSAPI credential cache (owned by the dirsrv user, uid
+# 389 -> /tmp/krb5cc_389) latched onto a stale/expired ticket. The freshly installed dirsrv would
+# reuse that cache and its outbound replication binds would fail silently. dirsrv is stopped by the
+# uninstall above, so remove the cache now to force the next dirsrv to rebuild credentials from its
+# keytab.
+rm -f /tmp/krb5cc_389
 
 if [ -x /opt/salt/scripts/freeipa_check_replication_cleanup.sh ]; then
   echo "Waiting for FreeIPA replication cleanup on peer $FREEIPA_TO_REPLICATE before re-joining as $FQDN"
-  LDAP_URI="ldap://$FREEIPA_TO_REPLICATE" TARGET_HOSTS="$FQDN" FPW="$FPW" /opt/salt/scripts/freeipa_check_replication_cleanup.sh
+  # Non-fatal on purpose. The cleanup script can only ldapdelete un-managed "meTo<host>" orphans;
+  # if a prior partial install left a topology-plugin-managed agreement, ldapdelete is refused
+  # (err=53) and the gate can never converge. That agreement is removed topology-correctly by the
+  # "ipa server-del $FQDN" below (after re-enrollment), so this gate must NOT abort the re-join.
+  # A short timeout keeps the common case (already-clean, or an un-managed orphan that deletes
+  # immediately) fast without burning the full window on an entry only server-del can fix.
+  if ! LDAP_URI="ldap://$FREEIPA_TO_REPLICATE" TARGET_HOSTS="$FQDN" FPW="$FPW" TIMEOUT_SECONDS=60 \
+       /opt/salt/scripts/freeipa_check_replication_cleanup.sh; then
+    echo "Pre-join replication cleanup did not fully converge (likely a topology-managed agreement); proceeding — 'ipa server-del $FQDN' below will remove it topology-correctly"
+  fi
 else
   echo "Replication cleanup check script not present (cluster predates the feature); skipping cleanup gate before re-joining as $FQDN"
 fi
@@ -139,26 +164,32 @@ ipa-replica-install \
 {%- endif %}
           --dirsrv-config-file /opt/salt/initial-ldap-conf.ldif
 
-{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 8 %}
-verify_kinit() {
-  local ok=true
-  if ! echo "$FPW" | kinit $ADMIN_USER; then ok=false; fi
-  if ! KRB5CCNAME=/tmp/krb5cc_ldap kinit -k -t /etc/dirsrv/ds.keytab "ldap/$FQDN"; then ok=false; fi
-  if ! KRB5CCNAME=/tmp/krb5cc_http kinit -k -t /var/lib/ipa/gssproxy/http.keytab "HTTP/$FQDN"; then ok=false; fi
-  $ok
-}
-
-echo "Verifying Kerberos credentials after replica install"
-if ! verify_kinit; then
-  echo "kinit failed after replica install, restarting IPA services"
-  ipactl restart
-  sleep 10
-  if ! verify_kinit; then
-    echo "kinit still failing after ipactl restart — replica install cannot proceed"
-    exit 1
-  fi
+# Mark the replica install as completed so a subsequent retry (e.g. if the health gate below does
+# not converge within its window) re-verifies in place instead of reinstalling.
+echo "$(date +%Y-%m-%d:%H:%M:%S)" > /var/log/freeipa_replica_install_completed
 fi
-echo "Kerberos credentials verified successfully"
+
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 8 %}
+echo "Verifying FreeIPA replication health after replica install"
+if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
+  if ! /opt/salt/scripts/freeipa_verify_replica_health.sh; then
+    echo "Replication health gate failed; breaking stale dirsrv ccache latch and restarting the IPA stack"
+    # A plain 'ipactl restart' re-reads the poisoned external ccache. Stop the
+    # whole stack, delete the stale ccache while dirsrv is down (forcing it to
+    # rebuild from its keytab), then start everything back in dependency order
+    # so the KDC/CA come up clean before dirsrv attempts GSSAPI replication.
+    ipactl stop || true
+    rm -f /tmp/krb5cc_389
+    ipactl start || true
+    if ! /opt/salt/scripts/freeipa_verify_replica_health.sh; then
+      echo "Replication still unhealthy after ccache latch break and ipactl restart — replica install cannot proceed"
+      exit 1
+    fi
+  fi
+  echo "FreeIPA replication health verified successfully"
+else
+  echo "Replication health check script not present (cluster predates the feature); skipping replication health gate"
+fi
 {%- endif %}
 
 set +e

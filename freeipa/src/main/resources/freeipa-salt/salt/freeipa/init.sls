@@ -45,6 +45,14 @@ net.ipv6.conf.lo.disable_ipv6:
     - mode: 700
     - source: salt://freeipa/scripts/freeipa_check_replication_cleanup.sh
 
+/opt/salt/scripts/freeipa_verify_replica_health.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/freeipa_verify_replica_health.sh
+
 /opt/salt/scripts/update_cnames.sh:
   file.managed:
     - makedirs: True
