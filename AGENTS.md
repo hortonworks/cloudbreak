@@ -15,6 +15,7 @@ Assistant-oriented playbooks live under **`.agent/skills/`**. The files are **pl
 - **cb-flow-engine**: Step-by-step procedure for adding a flow (state machine config, states/events, actions, handlers, flow chains) without deadlocking the engine — load when implementing a long-running async operation.
 - **cb-db-migration**: MyBatis Migrations procedure — file location, timestamp+ticket naming, mandatory `@UNDO`, idempotent/reversible DDL — load when changing a service database schema.
 - **cb-testing**: JUnit 5 + Mockito unit tests, Spring integration tests, the authorization-compliance test, flow-chain graph tests, Gradle/jacoco commands and coverage gates — load when writing tests or before opening a PR.
+- **cb-pr-ci-triage**: Triage PR GitHub Actions failures from a PR number (unit tests, Jacoco coverage, checkstyle, SpotBugs, integration checks) — load when a PR build is red or the user asks why CI failed.
 - **cdp-docs**: Official CDP Public Cloud documentation lookup and verification.
 - **cb-cloud-providers**: Read-first AWS/Azure/GCP CLI/MCP recipes for inspecting live cloud state.
 
