@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.livy.LivyRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -67,6 +69,9 @@ public class HueConfigProviderTest {
     @Mock
     private IniFile safetyValve;
 
+    @Mock
+    private CmTemplateProcessor templateProcessor;
+
     @Test
     public void getServiceConfigs() {
         BlueprintView blueprintView = getMockBlueprintView("7.1.0");
@@ -88,10 +93,14 @@ public class HueConfigProviderTest {
 
         when(iniFileFactory.create()).thenReturn(safetyValve);
         when(safetyValve.print()).thenReturn("");
+        when(templateProcessor.getHostsWithComponent(LivyRoles.LIVY_SERVER_FOR_SPARK3)).thenReturn(List.of(HOST));
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
-        verify(safetyValve, never()).addContent(anyString());
+        ArgumentCaptor<String> safetyValveCaptor = ArgumentCaptor.forClass(String.class);
+        verify(safetyValve).addContent(safetyValveCaptor.capture());
+        assertThat(safetyValveCaptor.getValue()).contains("livy_server_url=https://%s:28998".formatted(HOST));
+
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
         assertThat(configToValue).containsOnly(
                 entry("database_host", HOST),
@@ -128,7 +137,7 @@ public class HueConfigProviderTest {
         when(iniFileFactory.create()).thenReturn(safetyValve);
         when(safetyValve.print()).thenReturn("");
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve, never()).addContent(anyString());
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
@@ -172,7 +181,7 @@ public class HueConfigProviderTest {
         String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": " + expectedSslMode + ", \"sslrootcert\": \"/foo/bar.pem\"}'";
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve).addContent(expectedSafetyValveValue);
         verifyNoMoreInteractions(safetyValve);
@@ -224,7 +233,7 @@ public class HueConfigProviderTest {
         String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve).addContent(expectedSafetyValveValue);
         verifyNoMoreInteractions(safetyValve);
@@ -276,7 +285,7 @@ public class HueConfigProviderTest {
         when(iniFileFactory.create()).thenReturn(safetyValve);
         when(safetyValve.print()).thenReturn("");
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve, never()).addContent(anyString());
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
@@ -333,7 +342,7 @@ public class HueConfigProviderTest {
         String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": " + expectedSslMode + ", \"sslrootcert\": \"/foo/bar.pem\"}'";
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve).addContent(expectedSafetyValveValue);
         verifyNoMoreInteractions(safetyValve);
@@ -441,7 +450,7 @@ public class HueConfigProviderTest {
         String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve).addContent(expectedSafetyValveValue);
         verifyNoMoreInteractions(safetyValve);
@@ -494,7 +503,7 @@ public class HueConfigProviderTest {
         String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve).addContent(expectedSafetyValveValue);
         verifyNoMoreInteractions(safetyValve);
@@ -545,7 +554,7 @@ public class HueConfigProviderTest {
         when(iniFileFactory.create()).thenReturn(safetyValve);
         when(safetyValve.print()).thenReturn("");
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verify(safetyValve, never()).addContent(anyString());
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);

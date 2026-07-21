@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.livy.LivyRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -47,6 +48,8 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
     private static final String SAFETY_VALVE_DATABASE_KEY_PATTERN = "[desktop]\n[[database]]\noptions=";
 
     private static final String DATABASE_OPTIONS_FORMAT = "'{\"sslmode\": \"%s\", \"sslrootcert\": \"%s\"}'";
+
+    private static final String SPARK_OPTIONS_FORMAT = "[spark]\nlivy_server_url=https://%s:28998\nsecurity_enabled=true\nssl_cert_ca_verify=true";
 
     @Inject
     private IniFileFactory iniFileFactory;
@@ -81,6 +84,10 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
             String dbSslConfig = SAFETY_VALVE_DATABASE_KEY_PATTERN.concat(String.format(DATABASE_OPTIONS_FORMAT, sslMode,
                     hueRdsView.getSslCertificateFilePath()));
             safetyValve.addContent(dbSslConfig);
+        }
+        List<String> livyServerHosts = templateProcessor.getHostsWithComponent(LivyRoles.LIVY_SERVER_FOR_SPARK3);
+        if (!livyServerHosts.isEmpty()) {
+            safetyValve.addContent(String.format(SPARK_OPTIONS_FORMAT, livyServerHosts.getFirst()));
         }
         String valveValue = safetyValve.print();
         if (!valveValue.isEmpty()) {

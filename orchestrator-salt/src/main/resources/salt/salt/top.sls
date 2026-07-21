@@ -65,6 +65,7 @@ base:
   'G@roles:manager_agent':
     - cloudera.repo
     - cloudera.agent
+    - livy
 
   'roles:postgresql_server':
     - match: grain

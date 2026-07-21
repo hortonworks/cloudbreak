@@ -24,6 +24,7 @@ public enum ClusterTemplateV4Type {
     HYBRID_DATAENGINEERING_HA,
     HYBRID_STREAMING,
     HYBRID_DATAMART,
+    HYBRID_SPARK3,
     SEMANTIC_SEARCH;
 
     public boolean isHybrid() {

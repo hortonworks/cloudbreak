@@ -55,9 +55,13 @@ public class HdfsConfigHelper {
 
     public Optional<String> getHdfsUrl(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<String> nameNodeHostNames = templateProcessor.getHostsWithComponent(HdfsRoles.NAMENODE);
-        return nameNodeHostNames.size() == 1
-                ? nameNodeHostNames.stream().map(nameNode -> String.format("hdfs://%s:%s", nameNode, getNameNodePort(templateProcessor))).findFirst()
-                : Optional.of("hdfs://" + getNameService(templateProcessor, source));
+        if (nameNodeHostNames.isEmpty()) {
+            return Optional.empty();
+        } else if (nameNodeHostNames.size() == 1) {
+            return nameNodeHostNames.stream().map(nameNode -> String.format("hdfs://%s:%s", nameNode, getNameNodePort(templateProcessor))).findFirst();
+        } else {
+            return Optional.of("hdfs://" + getNameService(templateProcessor, source));
+        }
     }
 
     private String getNameNodePort(CmTemplateProcessor templateProcessor) {

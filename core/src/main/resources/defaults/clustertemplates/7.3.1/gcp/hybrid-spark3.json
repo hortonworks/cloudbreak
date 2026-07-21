@@ -1,0 +1,66 @@
+{
+  "name": "7.3.1 - Hybrid Spark3 for Google Cloud",
+  "description": "",
+  "type": "HYBRID_SPARK3",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Hybrid Spark3"
+    },
+    "externalDatabase": {
+      "availabilityType": "NONE"
+    },
+    "enableLoadBalancer": false,
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "compute",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

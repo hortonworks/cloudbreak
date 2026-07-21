@@ -1,0 +1,223 @@
+{
+  "description": "7.3.1 - Hybrid Spark3",
+  "blueprint": {
+    "cdhVersion": "7.3.1",
+    "displayName": "hybrid_spark3",
+    "blueprintUpgradeOption": "GA",
+    "hybridOption": "BURST_TO_CLOUD",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "serviceConfigs": [
+          {
+            "name": "hue_service_safety_valve",
+            "value": "[desktop]\napp_blacklist=filebrowser,hbase,hive,impala,indexer,jobsub,metastore,oozie,pig,rdbms,search,security,sqoop,zookeeper\n\n[notebook]\n[[interpreters]]\n[[[sparksql]]]\nname=SparkSql\ninterface=livy\n[[[pyspark]]]\nname=PySpark\ninterface=livy\n[[[scala]]]\nname=Scala\ninterface=livy\n\n[metadata]\n[[catalog]]\ninterface=\napi_url=\n\n[filebrowser]\nshow_upload_button=false\nshow_download_button=false"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "livy_for_spark3",
+        "serviceType": "LIVY_FOR_SPARK3",
+        "roleConfigGroups": [
+          {
+            "refName": "livy_for_spark3-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "livy_for_spark3-LIVY_SERVER-BASE",
+            "roleType": "LIVY_SERVER_FOR_SPARK3",
+            "base": true,
+            "configs": [
+              {
+                "name": "livy_admin_users",
+                "value": "knox,zeppelin,hue"
+              },
+              {
+                "name": "livy3-conf/livy.conf_role_safety_valve",
+                "value": "livy.rsc.jars=local:/var/lib/livy-local-jars/rsc/kryo-shaded.jar,local:/var/lib/livy-local-jars/rsc/livy-api.jar,local:/var/lib/livy-local-jars/rsc/livy-rsc.jar,local:/var/lib/livy-local-jars/rsc/livy-thriftserver-session.jar,local:/var/lib/livy-local-jars/rsc/minlog.jar,local:/var/lib/livy-local-jars/rsc/netty-all.jar,local:/var/lib/livy-local-jars/rsc/netty-buffer.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-dns.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-haproxy.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-http2.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-http.jar,local:/var/lib/livy-local-jars/rsc/netty-codec.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-memcache.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-mqtt.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-redis.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-smtp.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-socks.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-stomp.jar,local:/var/lib/livy-local-jars/rsc/netty-codec-xml.jar,local:/var/lib/livy-local-jars/rsc/netty-common.jar,local:/var/lib/livy-local-jars/rsc/netty-handler.jar,local:/var/lib/livy-local-jars/rsc/netty-handler-proxy.jar,local:/var/lib/livy-local-jars/rsc/netty-handler-ssl-ocsp.jar,local:/var/lib/livy-local-jars/rsc/netty-resolver-dns-classes-macos.jar,local:/var/lib/livy-local-jars/rsc/netty-resolver-dns.jar,local:/var/lib/livy-local-jars/rsc/netty-resolver-dns-native-macos.jar,local:/var/lib/livy-local-jars/rsc/netty-resolver.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-classes-epoll.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-classes-kqueue.jar,local:/var/lib/livy-local-jars/rsc/netty-transport.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-native-epoll.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-native-kqueue.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-native-unix-common.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-rxtx.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-sctp.jar,local:/var/lib/livy-local-jars/rsc/netty-transport-udt.jar,local:/var/lib/livy-local-jars/rsc/objenesis.jar\nlivy.repl.jars=local:/var/lib/livy-local-jars/repl/commons-codec.jar,local:/var/lib/livy-local-jars/repl/kryo-shaded.jar,local:/var/lib/livy-local-jars/repl/livy-core_2.12.jar,local:/var/lib/livy-local-jars/repl/livy-repl_2.12.jar,local:/var/lib/livy-local-jars/repl/minlog.jar,local:/var/lib/livy-local-jars/repl/objenesis.jar"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,mapred"
+          },
+          {
+            "name": "yarn_service_mapred_safety_valve",
+            "value": "<property><name>mapreduce.fileoutputcommitter.algorithm.version</name><value>1</value></property><property><name>mapreduce.input.fileinputformat.list-status.num-threads</name><value>100</value></property>"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true,
+            "configs": [
+              {
+                "name": "resourcemanager_config_safety_valve",
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+              },
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property></configuration>"
+              }
+            ]
+          },
+          {
+            "refName": "yarn-NODEMANAGER-WORKER",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-NODEMANAGER-COMPUTE",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark3_on_yarn",
+        "serviceType": "SPARK3_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK3_YARN_HISTORY_SERVER",
+            "base": true,
+            "configs": [
+              {
+                "name": "history_server_admin_users",
+                "value": "knox,hue"
+              }
+            ]
+          },
+          {
+            "refName": "spark3_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true,
+            "configs": [
+              {
+                "name": "spark3-conf/spark-defaults.conf_client_config_safety_valve",
+                "value": "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1\nspark.yarn.jars=local:/opt/cloudera/parcels/CDH/lib/spark3/jars/*"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "knox",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          }
+        ],
+        "serviceType": "KNOX"
+      },
+      {
+        "refName": "queuemanager",
+        "serviceType": "QUEUEMANAGER",
+        "serviceConfigs": [
+          {
+            "name": "kerberos.auth.enabled",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+            "roleType": "QUEUEMANAGER_WEBAPP",
+            "base": true
+          },
+          {
+            "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+            "roleType": "QUEUEMANAGER_STORE",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "livy_for_spark3-GATEWAY-BASE",
+          "spark3_on_yarn-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "livy_for_spark3-GATEWAY-BASE",
+          "livy_for_spark3-LIVY_SERVER-BASE",
+          "spark3_on_yarn-GATEWAY-BASE",
+          "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "yarn-QUEUEMANAGER_STORE-BASE",
+          "zookeeper-SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE",
+          "knox-KNOX_GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "compute",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "yarn-NODEMANAGER-COMPUTE"
+        ]
+      }
+    ]
+  }
+}

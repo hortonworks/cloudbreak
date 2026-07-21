@@ -39,27 +39,12 @@ class HdfsConfigHelperTest {
     }
 
     @Test
-    void getHdfsUrlForHybridDhWithNoNodesYet() {
-        when(templateProcessor.isHybridDatahub(source)).thenReturn(true);
+    void getHdfsUrlForDhWithNoNameNodes() {
         when(templateProcessor.getHostsWithComponent(HdfsRoles.NAMENODE)).thenReturn(List.of());
 
         Optional<String> result = underTest.getHdfsUrl(templateProcessor, source);
 
-        assertThat(result)
-                .isPresent()
-                .contains("hdfs://" + HdfsConfigHelper.HYBRID_DH_NAME_SERVICE);
-    }
-
-    @Test
-    void getHdfsUrlForNonHybridDhWithNoNodesYet() {
-        when(templateProcessor.isHybridDatahub(source)).thenReturn(false);
-        when(templateProcessor.getHostsWithComponent(HdfsRoles.NAMENODE)).thenReturn(List.of());
-
-        Optional<String> result = underTest.getHdfsUrl(templateProcessor, source);
-
-        assertThat(result)
-                .isPresent()
-                .contains("hdfs://" + HdfsConfigHelper.DEFAULT_NAME_SERVICE);
+        assertThat(result).isEmpty();
     }
 
     @Test
