@@ -156,7 +156,12 @@ Where:
 
 1. `T` should contain a valid field path defined by `CheckPermissionByRequestProperty.path`,
 2. the field can be `null` based on `CheckPermissionByRequestProperty.skipOnNull`,
-3. the field will be handled as crn, name, crn list or name list based on `CheckPermissionByRequestProperty.type`
+3. the field will be handled as crn, name, crn list or name list based on `CheckPermissionByRequestProperty.type`,
+4. optionally, `CheckPermissionByRequestProperty.crnFilter` can be set to a `CrnResourceDescriptor` value to restrict the permission check to CRNs of a specific resource type. When `crnFilter` is set (not `UNKNOWN`):
+   - for `CRN` type: the permission check is only performed if the CRN matches the specified resource type, otherwise it is skipped (returns empty),
+   - for `CRN_LIST` type: the list is filtered to only include CRNs matching the specified resource type before performing the permission check.
+
+This is useful when the same request field can contain CRNs of different resource types and you need to define different permission checks per CRN type using multiple `@CheckPermissionByRequestProperty` annotations on the same method.
 
 Additional interface implementation needed based on `CheckPermissionByRequestProperty.type`:
 - crn: `AuthorizationEnvironmentCrnProvider` if hierarchical authorization is needed for resource type
@@ -219,6 +224,10 @@ public class MyResourceController {
     @CheckPermissionByRequestProperty(path = "name", type = AuthorizationVariableType.NAME, action = AuthorizationResourceAction.GET_RESOURCE)
     @CheckPermissionByRequestProperty(path = "subReq.crn", type = AuthorizationVariableType.CRN, action = AuthorizationResourceAction.GET_OTHER_RESOURCE, skipOnNull = true)
     public void doSomethingThatRequiresComplicatedAuthorization(@ResourceCrn String crn, @RequestObject MyRequest request) {}
+
+    @CheckPermissionByRequestProperty(path = "resourceCrn", type = AuthorizationVariableType.CRN, action = AuthorizationResourceAction.EDIT_CREDENTIAL, crnFilter = CrnResourceDescriptor.CREDENTIAL)
+    @CheckPermissionByRequestProperty(path = "resourceCrn", type = AuthorizationVariableType.CRN, action = AuthorizationResourceAction.EDIT_ENVIRONMENT, crnFilter = CrnResourceDescriptor.ENVIRONMENT)
+    public void doSomethingWithDifferentPermissionsPerCrnType(@RequestObject MyRequest request) {}
 
     @InternalOnly
     public void doSomethingInternalStaffThatNormalUsersShouldNotBeAbleToDo(@ResourceCrn String crn) {}

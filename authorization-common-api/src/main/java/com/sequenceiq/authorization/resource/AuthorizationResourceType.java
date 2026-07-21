@@ -19,7 +19,8 @@ public enum AuthorizationResourceType {
     FREEIPA(false),
     LDAP(false),
     STRUCTURED_EVENT(false),
-    ENCRYPTION_PROFILE(false);
+    ENCRYPTION_PROFILE(false),
+    CLASSIC_CLUSTER(false);
 
     private final boolean hierarchicalAuthorizationNeeded;
 

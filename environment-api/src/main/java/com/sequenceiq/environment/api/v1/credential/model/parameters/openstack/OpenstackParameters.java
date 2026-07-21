@@ -5,6 +5,8 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -30,6 +32,7 @@ public class OpenstackParameters implements Serializable {
 
     private KeystoneV3Parameters keystoneV3;
 
+    @ValidCrn(resource = { CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.CLASSIC_CLUSTER })
     private String jumpgateEnvironmentCrn;
 
     public String getEndpoint() {

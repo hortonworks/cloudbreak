@@ -13,11 +13,13 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.ws.rs.ForbiddenException;
 
@@ -35,6 +37,7 @@ import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
@@ -43,7 +46,9 @@ public class RequestPropertyAuthorizationFactoryTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
-    private static final String RESOURCE_CRN = "crn:cdp:credential:us-west-1:1234:credential:5678";
+    private static final String RESOURCE_CRN = "crn:cdp:environments:us-west-1:1234:credential:5678";
+
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:1234:environment:5678";
 
     private static final String RESOURCE_NAME = "resource";
 
@@ -177,8 +182,67 @@ public class RequestPropertyAuthorizationFactoryTest {
         assertEquals("Referred property within request object is not string, thus access is denied!", exception.getMessage());
     }
 
+    @Test
+    public void testOnCrnWithMatchingCrnFilter() {
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject(RESOURCE_CRN));
+        Optional<AuthorizationRule> expected = Optional.of(new HasRight(EDIT_CREDENTIAL, RESOURCE_CRN));
+        when(resourceCrnAthorizationFactory.calcAuthorization(anyString(), any()))
+                .thenReturn(expected);
+
+        Optional<AuthorizationRule> authorization = underTest.getAuthorization(
+                getAnnotation(CRN, EDIT_CREDENTIAL, false, "field", CrnResourceDescriptor.CREDENTIAL), USER_CRN, null, null);
+
+        verify(resourceCrnAthorizationFactory).calcAuthorization(RESOURCE_CRN, EDIT_CREDENTIAL);
+        assertEquals(expected, authorization);
+    }
+
+    @Test
+    public void testOnCrnWithNonMatchingCrnFilter() {
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject(RESOURCE_CRN));
+
+        Optional<AuthorizationRule> authorization = underTest.getAuthorization(
+                getAnnotation(CRN, EDIT_CREDENTIAL, false, "field", CrnResourceDescriptor.ENVIRONMENT), USER_CRN, null, null);
+
+        verifyNoInteractions(resourceCrnAthorizationFactory);
+        assertEquals(Optional.empty(), authorization);
+    }
+
+    @Test
+    public void testOnCrnListWithMatchingCrnFilterFiltersOnlyMatchingCrns() {
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any()))
+                .thenReturn(new SampleRequestObject(List.of(RESOURCE_CRN, ENVIRONMENT_CRN)));
+        Optional<AuthorizationRule> expected = Optional.of(new HasRightOnAll(EDIT_CREDENTIAL, List.of(RESOURCE_CRN)));
+        when(resourceCrnListAuthorizationFactory.calcAuthorization(anyCollection(), any()))
+                .thenReturn(expected);
+
+        Optional<AuthorizationRule> authorization = underTest.getAuthorization(
+                getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field", CrnResourceDescriptor.CREDENTIAL), USER_CRN, null, null);
+
+        verify(resourceCrnListAuthorizationFactory).calcAuthorization(Set.of(RESOURCE_CRN), EDIT_CREDENTIAL);
+        assertEquals(expected, authorization);
+    }
+
+    @Test
+    public void testOnCrnListWithNonMatchingCrnFilterResultsInEmptyCollection() {
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any()))
+                .thenReturn(new SampleRequestObject(List.of(ENVIRONMENT_CRN)));
+        when(resourceCrnListAuthorizationFactory.calcAuthorization(anyCollection(), any()))
+                .thenReturn(Optional.empty());
+
+        Optional<AuthorizationRule> authorization = underTest.getAuthorization(
+                getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field", CrnResourceDescriptor.CREDENTIAL), USER_CRN, null, null);
+
+        verify(resourceCrnListAuthorizationFactory).calcAuthorization(Set.of(), EDIT_CREDENTIAL);
+        assertEquals(Optional.empty(), authorization);
+    }
+
     private CheckPermissionByRequestProperty getAnnotation(AuthorizationVariableType type, AuthorizationResourceAction action,
             Boolean skipOnNull, String path) {
+        return getAnnotation(type, action, skipOnNull, path, CrnResourceDescriptor.UNKNOWN);
+    }
+
+    private CheckPermissionByRequestProperty getAnnotation(AuthorizationVariableType type, AuthorizationResourceAction action,
+            Boolean skipOnNull, String path, CrnResourceDescriptor crnFilterValue) {
         return new CheckPermissionByRequestProperty() {
 
             @Override
@@ -199,6 +263,11 @@ public class RequestPropertyAuthorizationFactoryTest {
             @Override
             public String path() {
                 return path;
+            }
+
+            @Override
+            public CrnResourceDescriptor crnFilter() {
+                return crnFilterValue;
             }
 
             @Override

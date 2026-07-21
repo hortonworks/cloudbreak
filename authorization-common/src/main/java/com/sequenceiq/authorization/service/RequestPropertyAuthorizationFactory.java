@@ -2,6 +2,7 @@ package com.sequenceiq.authorization.service;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
@@ -19,6 +20,8 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -61,8 +64,9 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
             Object fieldObject = PropertyUtils.getProperty(resourceObject, methodAnnotation.path());
             AuthorizationVariableType authorizationVariableType = methodAnnotation.type();
             AuthorizationResourceAction action = methodAnnotation.action();
+            CrnResourceDescriptor crnFilter = methodAnnotation.crnFilter();
             if (fieldObject != null) {
-                return calcAuthorizationFromObject(action, authorizationVariableType, fieldObject, userCrn);
+                return calcAuthorizationFromObject(action, authorizationVariableType, fieldObject, userCrn, crnFilter);
             } else if (!methodAnnotation.skipOnNull()) {
                 throw new BadRequestException(String.format("Property [%s] of the request object must not be null.", methodAnnotation.path()));
             }
@@ -83,16 +87,16 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
     }
 
     private Optional<AuthorizationRule> calcAuthorizationFromObject(AuthorizationResourceAction action, AuthorizationVariableType authorizationVariableType,
-            Object requestObject, String userCrn) {
+            Object requestObject, String userCrn, CrnResourceDescriptor crnFilter) {
         switch (authorizationVariableType) {
             case NAME:
                 return getAuthorizationFromResourceName(requestObject, action);
             case CRN:
-                return getAuthorizationFromResourceCrn(requestObject, action, userCrn);
+                return getAuthorizationFromResourceCrn(requestObject, action, userCrn, crnFilter);
             case NAME_LIST:
                 return getAuthorizationFromResouurceNameList(requestObject, action);
             case CRN_LIST:
-                return getAuthorizationFromResourceCrnList(requestObject, action, userCrn);
+                return getAuthorizationFromResourceCrnList(requestObject, action, userCrn, crnFilter);
             default:
                 throw new ForbiddenException("We cannot determine the type of field from authorization point of view, " +
                         "thus access is denied!");
@@ -107,20 +111,28 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
         return resourceNameAuthorizationProvider.calcAuthorization(resourceName, action);
     }
 
-    private Optional<AuthorizationRule> getAuthorizationFromResourceCrn(Object resultObject, AuthorizationResourceAction action, String userCrn) {
+    private Optional<AuthorizationRule> getAuthorizationFromResourceCrn(Object resultObject, AuthorizationResourceAction action, String userCrn,
+            CrnResourceDescriptor crnFilter) {
         if (!(resultObject instanceof String)) {
             throw new ForbiddenException("Referred property within request object is not string, thus access is denied!");
         }
         String resourceCrn = (String) resultObject;
-        crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
-        return resourceCrnAuthorizationProvider.calcAuthorization(resourceCrn, action);
+        if (CrnResourceDescriptor.UNKNOWN.equals(crnFilter) || crnFilter.checkIfCrnMatches(Crn.safeFromString(resourceCrn))) {
+            crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
+            return resourceCrnAuthorizationProvider.calcAuthorization(resourceCrn, action);
+        }
+        return Optional.empty();
     }
 
-    private Optional<AuthorizationRule> getAuthorizationFromResourceCrnList(Object resultObject, AuthorizationResourceAction action, String userCrn) {
+    private Optional<AuthorizationRule> getAuthorizationFromResourceCrnList(Object resultObject, AuthorizationResourceAction action, String userCrn,
+            CrnResourceDescriptor crnFilter) {
         if (!(resultObject instanceof Collection)) {
             throw new ForbiddenException("Referred property within request object is not collection, thus access is denied!");
         }
         Collection<String> resourceCrns = (Collection<String>) resultObject;
+        if (!CrnResourceDescriptor.UNKNOWN.equals(crnFilter)) {
+            resourceCrns = resourceCrns.stream().filter(crn -> crnFilter.checkIfCrnMatches(Crn.safeFromString(crn))).collect(Collectors.toSet());
+        }
         crnAccountValidator.validateSameAccount(userCrn, resourceCrns);
         return resourceCrnListAuthorizationFactory.calcAuthorization(resourceCrns, action);
     }

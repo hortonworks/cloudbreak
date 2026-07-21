@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,10 +52,12 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 public class EnforceAuthorizationAnnotationTestUtil {
 
@@ -285,15 +288,10 @@ public class EnforceAuthorizationAnnotationTestUtil {
             try {
                 Object requestSample = EnforceAuthorizationTestUtil.getSampleObjectFactory().manufacturePojo(type);
                 Set<String> errorMessages = Sets.newHashSet();
-                Arrays.stream(method.getAnnotations())
-                        .forEach(annotation -> {
-                            if (annotation.annotationType().equals(CheckPermissionByRequestProperty.class)) {
-                                checkRequestPropertyAnnotation(method, requestSample, errorMessages, (CheckPermissionByRequestProperty) annotation);
-                            } else if (annotation.annotationType().equals(CheckPermissionByCompositeRequestProperty.class)) {
-                                Arrays.stream(((CheckPermissionByCompositeRequestProperty) annotation).value()).forEach(byRequestProperty ->
-                                        checkRequestPropertyAnnotation(method, requestSample, errorMessages, byRequestProperty));
-                            }
-                        });
+                List<CheckPermissionByRequestProperty> allRequestPropertyAnnotations = collectRequestPropertyAnnotations(method);
+                allRequestPropertyAnnotations.forEach(annotation ->
+                        checkRequestPropertyAnnotation(method, requestSample, errorMessages, annotation));
+                checkValidCrnAnnotations(method, type, allRequestPropertyAnnotations, errorMessages);
                 if (errorMessages.isEmpty()) {
                     return Optional.empty();
                 } else {
@@ -304,6 +302,48 @@ public class EnforceAuthorizationAnnotationTestUtil {
                         method.getDeclaringClass().getSimpleName(), method.getName(), e.getMessage()));
             }
         };
+    }
+
+    private static List<CheckPermissionByRequestProperty> collectRequestPropertyAnnotations(Method method) {
+        List<CheckPermissionByRequestProperty> result = new ArrayList<>();
+        Arrays.stream(method.getAnnotations()).forEach(annotation -> {
+            if (annotation.annotationType().equals(CheckPermissionByRequestProperty.class)) {
+                result.add((CheckPermissionByRequestProperty) annotation);
+            } else if (annotation.annotationType().equals(CheckPermissionByCompositeRequestProperty.class)) {
+                result.addAll(Arrays.asList(((CheckPermissionByCompositeRequestProperty) annotation).value()));
+            }
+        });
+        return result;
+    }
+
+    private static void checkValidCrnAnnotations(Method method, Class<?> requestObjectType,
+            List<CheckPermissionByRequestProperty> annotations, Set<String> errorMessages) {
+        annotations.stream()
+                .map(CheckPermissionByRequestProperty::path)
+                .distinct()
+                .forEach(path -> {
+                    boolean allHaveNonUnknownFilter = annotations.stream()
+                            .filter(a -> a.path().equals(path))
+                            .noneMatch(a -> CrnResourceDescriptor.UNKNOWN.equals(a.crnFilter()));
+                    if (allHaveNonUnknownFilter) {
+                        checkValidCrnAnnotationOnField(method, requestObjectType, path, errorMessages);
+                    }
+                });
+    }
+
+    private static void checkValidCrnAnnotationOnField(Method method, Class<?> requestObjectType, String path, Set<String> errorMessages) {
+        Field field = resolveFieldFromPath(requestObjectType, path);
+        if (field == null) {
+            errorMessages.add(String.format("Cannot resolve field for path '%s' in %s#%s to check @ValidCrn annotation",
+                    path, method.getDeclaringClass().getSimpleName(), method.getName()));
+            return;
+        }
+        ValidCrn validCrn = field.getAnnotation(ValidCrn.class);
+        if (validCrn == null) {
+            errorMessages.add(String.format("Field '%s' in %s must have @ValidCrn annotation because the authorization annotation on %s#%s " +
+                            "has a crnFilter other than UNKNOWN",
+                    path, requestObjectType.getSimpleName(), method.getDeclaringClass().getSimpleName(), method.getName()));
+        }
     }
 
     private static void checkRequestPropertyAnnotation(Method method, Object sample, Set<String> errorMessages, CheckPermissionByRequestProperty annotation) {
@@ -337,6 +377,20 @@ public class EnforceAuthorizationAnnotationTestUtil {
             errorMessages.add(String.format("Error regarding %s in %s#%s: %s %s", annotation.path(),
                     method.getDeclaringClass().getSimpleName(), method.getName(), e.getClass().getSimpleName(), e.getMessage()));
         }
+    }
+
+    private static Field resolveFieldFromPath(Class<?> type, String path) {
+        String[] segments = path.split("\\.");
+        Class<?> currentType = type;
+        Field field = null;
+        for (String segment : segments) {
+            field = FieldUtils.getField(currentType, segment, true);
+            if (field == null) {
+                return null;
+            }
+            currentType = field.getType();
+        }
+        return field;
     }
 
     private static Set<Class<? extends Annotation>> collectParameterAnnotationTypes(Method method, int paramIndex) {

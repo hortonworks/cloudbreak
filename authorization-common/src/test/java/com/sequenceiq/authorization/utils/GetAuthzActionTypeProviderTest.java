@@ -16,7 +16,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 class GetAuthzActionTypeProviderTest {
 
     @ParameterizedTest
-    @EnumSource(value = AuthorizationResourceType.class, names = "CONSUMPTION", mode = EXCLUDE)
+    @EnumSource(value = AuthorizationResourceType.class, names = { "CONSUMPTION", "CLASSIC_CLUSTER" }, mode = EXCLUDE)
     void testAllAuthorizationResourceTypeShouldHaveAnEntryInTheResultMap(AuthorizationResourceType types) {
         List<String> missingTypesFromPairs = new ArrayList<>();
         for (AuthorizationResourceType resourceType : List.of(types)) {

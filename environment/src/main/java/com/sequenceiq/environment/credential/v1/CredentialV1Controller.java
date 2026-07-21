@@ -2,6 +2,7 @@ package com.sequenceiq.environment.credential.v1;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.READ_CLASSIC_CLUSTER;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
@@ -25,6 +26,7 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
@@ -130,7 +132,10 @@ public class CredentialV1Controller extends WebSocketNotificationController impl
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
-    @CheckPermissionByRequestProperty(path = "openstack.jumpgateEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT, skipOnNull = true)
+    @CheckPermissionByRequestProperty(path = "openstack.jumpgateEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT, skipOnNull = true,
+            crnFilter = CrnResourceDescriptor.ENVIRONMENT)
+    @CheckPermissionByRequestProperty(path = "openstack.jumpgateEnvironmentCrn", type = CRN, action = READ_CLASSIC_CLUSTER, skipOnNull = true,
+            crnFilter = CrnResourceDescriptor.CLASSIC_CLUSTER)
     public CredentialResponse create(@RequestObject CredentialRequest createCredentialRequest) {
         LOGGER.debug("Create credential request has received: {}", createCredentialRequest);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();

@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 
 @Repeatable(value = CheckPermissionByCompositeRequestProperty.class)
 @Retention(RetentionPolicy.RUNTIME)
@@ -19,6 +20,8 @@ public @interface CheckPermissionByRequestProperty {
     AuthorizationResourceAction action();
 
     boolean skipOnNull() default false;
+
+    CrnResourceDescriptor crnFilter() default CrnResourceDescriptor.UNKNOWN;
 
     String path();
 }
