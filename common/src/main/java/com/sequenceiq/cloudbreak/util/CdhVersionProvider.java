@@ -20,6 +20,17 @@ public class CdhVersionProvider {
     private CdhVersionProvider() {
     }
 
+    public static String getCdhFullVersionFromVersionString(String version) {
+        String stackVersion = getCdhStackVersionFromVersionString(version).orElse("");
+        String patchVersion = getCdhPatchVersionFromVersionString(version).map(String::valueOf).orElse("");
+        StringBuilder sb = new StringBuilder();
+        sb.append(stackVersion);
+        if (StringUtils.hasText(patchVersion)) {
+            sb.append(".").append(patchVersion);
+        }
+        return sb.toString();
+    }
+
     public static Optional<String> getCdhStackVersionFromVersionString(String version) {
         if (StringUtils.hasText(version)) {
             Matcher matcher = PATTERN.matcher(version);
