@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +57,7 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         when(stackDto.getStack()).thenReturn(stack);
         StatedImage statedImage = mock(StatedImage.class);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        when(image.getPackageVersion(ImagePackageVersion.STACK)).thenReturn("7.3.2");
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
         when(statedImage.getImage()).thenReturn(image);
         when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID))
                 .thenReturn(statedImage);
@@ -85,11 +85,11 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         StatedImage statedImage = mock(StatedImage.class);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.getPackageVersion(ImagePackageVersion.STACK)).thenReturn("7.3.1");
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.1.499"));
         when(statedImage.getImage()).thenReturn(image);
         when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID))
                 .thenReturn(statedImage);
         when(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.1.499")).thenReturn(8);
-        when(image.getTags()).thenReturn(Map.of("release-version", "7.3.1.499"));
 
         List<SetDefaultJavaVersionTriggerEvent> events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
                 new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL));
@@ -100,8 +100,8 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         assertEquals("8", javaEvent.getDefaultJavaVersion());
         assertEquals(1, javaEvent.getResourceId());
 
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.1.500"));
         when(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.1.500")).thenReturn(17);
-        when(image.getTags()).thenReturn(Map.of("release-version", "7.3.1.500"));
 
         events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
                 new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL));
@@ -123,7 +123,7 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         when(stackDto.getStack()).thenReturn(stack);
         StatedImage statedImage = mock(StatedImage.class);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        when(image.getPackageVersion(ImagePackageVersion.STACK)).thenReturn("7.3.1");
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.1"));
         when(statedImage.getImage()).thenReturn(image);
         when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID))
                 .thenReturn(statedImage);

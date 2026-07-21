@@ -370,7 +370,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             disableKnoxAutorestart(rollingUpgradeEnabled);
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
             updateParcelSettings(products);
-            if (JavaUtil.JAVA_17.equals(stack.getStack().getJavaVersion())) {
+            Integer javaVersion = stack.getStack().getJavaVersion();
+            if (javaVersion != null && javaVersion >= JavaUtil.JAVA_17) {
                 reallocateMemory(false);
             }
             restartMgmtServices();

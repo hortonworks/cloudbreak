@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.BaseSecur
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -96,6 +97,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -286,9 +288,17 @@ public class StackCreatorService {
                         LOGGER,
                         "Select the correct image took {} ms");
                 validateImageAndInstanceTypeArchitectureForAws(stackRequest, imgFromCatalog);
-                int javaVersion = javaDefaultVersionCalculator.calculate(stackRequest.getJavaVersion(), blueprint.getStackVersion());
+                String imageRuntimeVersion = imgFromCatalog.getImage().getRuntimeVersion()
+                        .or(() -> getCdhFullVersionFromRequest(stackRequest))
+                        .orElseGet(blueprint::getStackVersion);
+                String stackVersion = imgFromCatalog.getImage().getStackVersion()
+                        .or(() -> getCdhStackVersionFromRequest(stackRequest))
+                        .orElseGet(blueprint::getStackVersion);
+                LOGGER.info("Resolved runtime version '{}' and stack version '{}' for java version calculation.", imageRuntimeVersion, stackVersion);
+                int javaVersion = javaDefaultVersionCalculator.calculate(stackRequest.getJavaVersion(), imageRuntimeVersion);
                 setJavaVersion(stackRequest, stack, javaVersion);
-                javaVersionValidator.validateImage(imgFromCatalog.getImage(), blueprint.getStackVersion(), stackRequest.getJavaVersion());
+                LOGGER.info("Selected java version: {}", javaVersion);
+                javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackVersion, stackRequest.getJavaVersion());
                 stackCreationRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
                 encryptionProfileService.getDefaultEncryptionProfileIfRequired(environment, stack.getCluster(), runtimeVersion)
@@ -557,6 +567,27 @@ public class StackCreatorService {
 
     private boolean hasCmParcelInfo(ClouderaManagerV4Request cmRequest) {
         return cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts()) || cmRequest != null && cmRequest.getRepository() != null;
+    }
+
+    private Optional<String> getCdhFullVersionFromRequest(StackV4Request stackRequest) {
+        return getCdhProductVersion(stackRequest)
+                .map(CdhVersionProvider::getCdhFullVersionFromVersionString)
+                .filter(version -> !version.isEmpty());
+    }
+
+    private Optional<String> getCdhStackVersionFromRequest(StackV4Request stackRequest) {
+        return getCdhProductVersion(stackRequest)
+                .flatMap(CdhVersionProvider::getCdhStackVersionFromVersionString);
+    }
+
+    private Optional<String> getCdhProductVersion(StackV4Request stackRequest) {
+        return Optional.ofNullable(stackRequest.getCluster())
+                .map(ClusterV4Request::getCm)
+                .map(ClouderaManagerV4Request::getProducts)
+                .flatMap(products -> products.stream()
+                        .filter(product -> "CDH".equalsIgnoreCase(product.getName()))
+                        .findFirst())
+                .map(ClouderaManagerProductV4Request::getVersion);
     }
 
     private StatedImage getImageFromCatalog(Future<StatedImage> imgFromCatalogFuture) {

@@ -177,6 +177,6 @@ hikari:
       down-if-pool-is-full: false
 
 vm:
-  supportedJavaVersions: 8,11,17
+  supportedJavaVersions: 8,11,17,21
   supportedJavaVersionsByRuntime:
-      7.3.2: 17
+      7.3.2: 17,21

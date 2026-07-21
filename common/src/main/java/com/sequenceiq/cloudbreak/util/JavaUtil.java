@@ -8,6 +8,8 @@ public class JavaUtil {
 
     public static final Integer JAVA_17 = 17;
 
+    public static final Integer JAVA_21 = 21;
+
     private JavaUtil() {
 
     }

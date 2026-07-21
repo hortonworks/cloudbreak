@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -202,6 +205,21 @@ public class Image {
 
     public String getPackageVersion(ImagePackageVersion packageVersion) {
         return getPackageVersions().get(packageVersion.getKey());
+    }
+
+    @JsonIgnore
+    public Optional<String> getRuntimeVersion() {
+        return Optional.ofNullable(getTags())
+                .map(imageTags -> imageTags.get(ImagePackageVersion.RELEASE_VERSION_TAG.getKey()))
+                .filter(StringUtils::isNotEmpty)
+                .or(() -> Optional.ofNullable(getPackageVersion(ImagePackageVersion.STACK)))
+                .filter(StringUtils::isNotEmpty);
+    }
+
+    @JsonIgnore
+    public Optional<String> getStackVersion() {
+        return Optional.ofNullable(getPackageVersion(ImagePackageVersion.STACK))
+                .filter(StringUtils::isNotEmpty);
     }
 
     @JsonIgnore

@@ -41,8 +41,16 @@ class JavaDefaultVersionCalculatorTest {
                 { "7.2.16",    null,         8  },
                 { "7.2.17",    null,         8  },
                 { "7.2.18",    null,         8  },
+                { "7.2.18.100", null,        8  },
                 { "7.3.1",     null,         17 },
+                { "7.3.1.500", null,         17 },
+                { "7.3.2.100", null,         17 },
+                { "7.3.2.19999", null,       17 },
+                { "7.3.2.20000", null,       21 },
+                { "7.3.2.20500", null,       21 },
+                { "7.4.0",     null,         21 },
                 { "7.2.7",     8,            8  },
+                { "7.3.2.20000", 21,         21 },
                 { "7.2.8",     8,            8  },
                 { "7.2.9",     8,            8  },
                 { "7.2.10",    11,           11 },
@@ -64,14 +72,19 @@ class JavaDefaultVersionCalculatorTest {
             JavaConfiguration java8 = new JavaConfiguration();
             java8.setVersion(8);
             java8.setMinRuntimeVersion("7.1.0");
-            java8.setMaxRuntimeVersion("7.2.18");
+            java8.setMaxRuntimeVersion("7.2.18.X");
 
             JavaConfiguration java17 = new JavaConfiguration();
             java17.setVersion(17);
             java17.setMinRuntimeVersion("7.3.1");
+            java17.setMaxRuntimeVersion("7.3.2.19999");
+
+            JavaConfiguration java21 = new JavaConfiguration();
+            java21.setVersion(21);
+            java21.setMinRuntimeVersion("7.3.2.20000");
 
             when(defaultJavaConfigurations.defaultJavaConfigurationsAsList())
-                    .thenReturn(List.of(java8, java17));
+                    .thenReturn(List.of(java8, java17, java21));
         }
 
         int result = underTest.calculate(javaVersion, runtime);

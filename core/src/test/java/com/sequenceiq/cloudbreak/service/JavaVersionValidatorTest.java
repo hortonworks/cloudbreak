@@ -29,6 +29,8 @@ class JavaVersionValidatorTest {
 
     private static final int JAVA_VERSION_8 = 8;
 
+    private static final int JAVA_VERSION_21 = 21;
+
     @Mock
     private CommonJavaVersionValidator commonJavaVersionValidator;
 
@@ -52,6 +54,32 @@ class JavaVersionValidatorTest {
                 "java", "11"));
 
         victim.validateImage(image, null, JAVA_VERSION_11);
+    }
+
+    @Test
+    public void shouldNotFailInCaseOfImageSupportsJava21() {
+        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        when(image.getPackageVersion(ImagePackageVersion.JAVA)).thenReturn("21");
+        when(image.getPackageVersions()).thenReturn(Map.of(
+                String.format("java%d", JAVA_VERSION_21), "anyvalue",
+                "java", "21"));
+
+        victim.validateImage(image, "7.3.2.20000", JAVA_VERSION_21);
+    }
+
+    @Test
+    public void shouldFailInCaseOfImageDoesNotContainJava21() {
+        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        when(image.getUuid()).thenReturn("imageuuid");
+        when(image.getPackageVersion(ImagePackageVersion.JAVA)).thenReturn("17");
+        when(image.getPackageVersions()).thenReturn(Map.of(
+                String.format("java%d", 17), "anyvalue",
+                "java", "17"));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> victim.validateImage(image, "7.3.2.100", JAVA_VERSION_21));
+
+        assertEquals("The 'imageuuid' image does not support java version 21 to be forced.", exception.getMessage());
     }
 
     @Test

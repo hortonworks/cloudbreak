@@ -935,10 +935,13 @@ vm:
   default:
     javaVersions:
       - version: 8
-        maxRuntimeVersion: 7.2.18
         minRuntimeVersion: 7.1.0
+        maxRuntimeVersion: 7.2.18.X
       - version: 17
         minRuntimeVersion: 7.3.1
+        maxRuntimeVersion: 7.3.2.19999
+      - version: 21
+        minRuntimeVersion: 7.3.2.20000
   update:
     allowable:
       javaVersions:
@@ -947,6 +950,8 @@ vm:
           maxRuntimeVersion: 7.3.1.X
         - version: 17
           minRuntimeVersion: 7.3.1.500
+        - version: 21
+          minRuntimeVersion: 7.3.1
 
 retry:
   errors:

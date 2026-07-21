@@ -24,7 +24,8 @@
           "java": "8",
           "java11": "11.0.19",
           "java17": "17.0.2",
-          "java8": "1.8.0_372"
+          "java8": "1.8.0_372",
+          "java21": "21.0.11"
         },
         "tags": {
           "release-version": "CDH_RELEASE"
@@ -101,7 +102,8 @@
           "java": "8",
           "java11": "11.0.19",
           "java17": "17.0.2",
-          "java8": "1.8.0_372"
+          "java8": "1.8.0_372",
+          "java21": "21.0.11"
         },
         "tags": {
           "release-version": "CDH_RELEASE_NEXT"

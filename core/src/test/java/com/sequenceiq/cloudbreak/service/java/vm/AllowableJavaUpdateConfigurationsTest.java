@@ -111,6 +111,27 @@ class AllowableJavaUpdateConfigurationsTest {
     }
 
     @Test
+    void testJava21AllowableFrom731() {
+        JavaConfiguration java17Config = new JavaConfiguration();
+        java17Config.setVersion(17);
+        java17Config.setMinRuntimeVersion("7.3.1.500");
+        JavaConfiguration java21Config = new JavaConfiguration();
+        java21Config.setVersion(21);
+        java21Config.setMinRuntimeVersion("7.3.1");
+        allowableJavaUpdateConfigurations.setJavaVersions(List.of(java17Config, java21Config));
+
+        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.1"));
+        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.1.600"));
+        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.2.20000"));
+        assertEquals(List.of("21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.1"));
+        assertEquals(List.of("17", "21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.2.20000"));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.2.18"));
+        assertEquals("The requested Java version 21 is not compatible with the runtime version 7.2.18", exception.getMessage());
+    }
+
+    @Test
     void testGetMinJavaVersionForRuntime() {
         JavaConfiguration java8Config = new JavaConfiguration();
         java8Config.setVersion(8);

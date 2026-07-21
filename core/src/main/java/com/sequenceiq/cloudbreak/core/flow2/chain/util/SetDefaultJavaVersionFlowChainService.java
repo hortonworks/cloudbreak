@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain.util;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
-import static com.sequenceiq.cloudbreak.service.ComponentConfigProviderService.RELEASE_VERSION;
 
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -12,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -43,7 +40,7 @@ public class SetDefaultJavaVersionFlowChainService {
         try {
             StatedImage image = imageCatalogService.getImage(stack.getWorkspaceId(), imageChangeDto.getImageCatalogUrl(),
                     imageChangeDto.getImageCatalogName(), imageChangeDto.getImageId());
-            String runtimeVersion = getRuntimeVersion(image.getImage());
+            String runtimeVersion = image.getImage().getRuntimeVersion().orElse("");
             Integer minJavaVersionForRuntime = allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime(runtimeVersion);
             Integer currentJavaVersion = stack.getStack().getJavaVersion();
             String selector = FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
@@ -76,12 +73,5 @@ public class SetDefaultJavaVersionFlowChainService {
             LOGGER.warn("Image catalog is not reachable, continue with the upgrade flow.", e);
             throw new NotFoundException("Image catalog is not reachable", e);
         }
-    }
-
-    private String getRuntimeVersion(Image image) {
-        return Optional.ofNullable(image.getTags())
-                .map(tags -> tags.get(RELEASE_VERSION))
-                .or(() -> Optional.ofNullable(image.getPackageVersion(ImagePackageVersion.STACK)))
-                .orElse("");
     }
 }
