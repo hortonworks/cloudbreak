@@ -83,6 +83,7 @@ allprojects {
   ext['logback.version'] = logbackVersion
   ext['mockito.version'] = mockitoVersion
   ext['quartz.version'] = quartzVersion
+  ext['opentelemetry.version'] = openTelemetryVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
@@ -122,6 +123,8 @@ allprojects {
         force "org.slf4j:slf4j-api:$slf4jApiVersion"
         force "org.quartz-scheduler:quartz:$quartzVersion"
         force "io.projectreactor.netty:reactor-netty-http:$reactorNettyHttp"
+        force "io.opentelemetry:opentelemetry-api:$openTelemetryVersion"
+        force "io.opentelemetry:opentelemetry-sdk:$openTelemetryVersion"
       }
     }
   }
