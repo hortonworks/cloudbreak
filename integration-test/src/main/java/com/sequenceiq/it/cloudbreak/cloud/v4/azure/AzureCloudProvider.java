@@ -627,6 +627,16 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaRebuildImageId() {
+        return azureProperties.getFreeipa().getRebuild().getImageId();
+    }
+
+    @Override
+    public String getFreeIpaRebuildCatalog() {
+        return azureProperties.getFreeipa().getRebuild().getCatalog();
+    }
+
+    @Override
     public String getFreeIpaInstanceType() {
         return azureProperties.getFreeipa().getInstanceType();
     }

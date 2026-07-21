@@ -105,6 +105,18 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaRebuildImageId() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
+    public String getFreeIpaRebuildCatalog() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
     public String getFreeIpaInstanceType() {
         throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
                 "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));

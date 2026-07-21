@@ -592,6 +592,16 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getFreeIpaRebuildImageId() {
+        return delegate.getFreeIpaRebuildImageId();
+    }
+
+    @Override
+    public String getFreeIpaRebuildCatalog() {
+        return delegate.getFreeIpaRebuildCatalog();
+    }
+
+    @Override
     public String getFreeIpaInstanceType() {
         return delegate.getFreeIpaInstanceType();
     }

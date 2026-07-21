@@ -266,6 +266,10 @@ public interface CloudProvider {
 
     String getFreeIpaRebuildDataBackup();
 
+    String getFreeIpaRebuildImageId();
+
+    String getFreeIpaRebuildCatalog();
+
     String getFreeIpaInstanceType();
 
     ResourceType getRootDiskResourceType();

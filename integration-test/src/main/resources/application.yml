@@ -249,6 +249,8 @@ integrationtest:
         imageId: a1e7dad5-9ae7-4758-a469-bb557f8ebaed
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       rebuild:
+        imageId: f6782285-4b6b-47d7-a3a4-9066fc7a092e
+        catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-freeipa-image-catalog.json
         fullbackup: s3://cloudbreak-test-persistent/freeipa_rebuild/full/
         databackup: s3://cloudbreak-test-persistent/freeipa_rebuild/hourly/
     diskEncryption:
@@ -346,6 +348,8 @@ integrationtest:
             imageId: 5cc93573-4bf2-49f3-927b-b12a52f72dba
             catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/v3-mp-freeipa-image-catalog.json
       rebuild:
+        imageId: 8ba83255-e31b-41b9-9d15-a819e9fb95d5
+        catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-freeipa-image-catalog.json
         fullbackup: abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/full/
         databackup: abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/hourly/
     databaseEncryption:
@@ -429,6 +433,8 @@ integrationtest:
         imageId: dbc14494-da5f-43ef-b3b4-efed85ea3210
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       rebuild:
+        imageId: 30264fd1-2df6-4624-bb9f-a2c8897492f0
+        catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-freeipa-image-catalog.json
         fullbackup: gs://cloudbreak-test-persistent/rebuild/full
         databackup: gs://cloudbreak-test-persistent/rebuild/hourly
     diskEncryption:

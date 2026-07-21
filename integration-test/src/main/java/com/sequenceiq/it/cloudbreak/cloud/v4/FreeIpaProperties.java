@@ -102,6 +102,10 @@ public class FreeIpaProperties {
 
         private String databackup;
 
+        private String imageId;
+
+        private String catalog;
+
         public String getFullbackup() {
             return fullbackup;
         }
@@ -116,6 +120,22 @@ public class FreeIpaProperties {
 
         public void setDatabackup(String databackup) {
             this.databackup = databackup;
+        }
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
+        }
+
+        public String getCatalog() {
+            return catalog;
+        }
+
+        public void setCatalog(String catalog) {
+            this.catalog = catalog;
         }
     }
 }

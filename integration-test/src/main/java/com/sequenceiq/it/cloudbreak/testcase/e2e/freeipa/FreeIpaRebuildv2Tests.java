@@ -64,7 +64,8 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
                 .given(freeIpa, FreeIpaTestDto.class)
                     .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
                     .withTelemetry("telemetry")
-                    .withOsType("redhat8")
+                    .withImage(testContext.getCloudProvider().getFreeIpaRebuildCatalog(),
+                            testContext.getCloudProvider().getFreeIpaRebuildImageId())
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .awaitForCreationFlow()
                 .then((tc, testDto, client) -> {

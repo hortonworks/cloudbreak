@@ -586,6 +586,16 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaRebuildImageId() {
+        return awsProperties.getFreeipa().getRebuild().getImageId();
+    }
+
+    @Override
+    public String getFreeIpaRebuildCatalog() {
+        return awsProperties.getFreeipa().getRebuild().getCatalog();
+    }
+
+    @Override
     public String getFreeIpaInstanceType() {
         return awsProperties.getFreeipa().getInstanceType();
     }
