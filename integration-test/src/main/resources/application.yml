@@ -135,14 +135,14 @@ integrationtest:
       7.3.1: 7.2.18
       7.3.2: 7.3.1
     currentHARuntimeVersion: 7.3.1
-    currentGovHARuntimeVersion: 7.3.1
+    currentGovHARuntimeVersion: 7.3.2
     currentRuntimeVersion: 7.3.1
-    currentGovRuntimeVersion: 7.3.1
+    currentGovRuntimeVersion: 7.3.2
     targetRuntimeVersion: 7.3.2
     distroXUpgradeCurrentVersion: 7.3.1
-    distroXUpgradeCurrentGovVersion: 7.3.1
+    distroXUpgradeCurrentGovVersion: 7.3.2
     distroXUpgrade3rdPartyCurrentVersion: 7.3.1
-    distroXUpgrade3rdPartyCurrentGovVersion: 7.3.1
+    distroXUpgrade3rdPartyCurrentGovVersion: 7.3.2
     distroXUpgradeTargetVersion: 7.3.2
     distroXUpgrade3rdPartyTargetVersion: 7.3.2
     runtimeImageRepositoryVersionExclusions:

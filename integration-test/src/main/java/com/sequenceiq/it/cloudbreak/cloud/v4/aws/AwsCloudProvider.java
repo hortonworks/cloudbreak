@@ -423,6 +423,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
+        if (getGovCloud()) {
+            environment.withEncryptionProfile("cdp_default_fips_140_3_gov");
+        }
         return super.environment(environment)
                 .withFreeIpa(getAttachedFreeIpaRequest());
     }
