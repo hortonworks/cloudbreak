@@ -1,12 +1,13 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.trust;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.hybrid.HybridTrustAssertions;
@@ -76,13 +77,15 @@ public class HybridTrustTests extends AbstractE2ETest {
             when = "create a hybrid environment, setup trust with the given active directory",
             then = "trust setup successfully finished")
     public void testTrustSetup(TestContext testContext) {
-        DescribeEnvironmentResponse remoteEnvironment = testContext
-                .given(DescribeRemoteEnvironmentTestDto.class)
-                .when(remoteEnvironmentTestClient.describe())
-                .getResponse();
-        String runtimeVersion = remoteEnvironment.getEnvironment().getCdpRuntimeVersion().split("-")[0];
+        AtomicReference<String> runtimeVersion = new AtomicReference<>();
 
         testContext
+                .given(DescribeRemoteEnvironmentTestDto.class)
+                .when(remoteEnvironmentTestClient.describe())
+                .then((tc, testDto, client) -> {
+                    runtimeVersion.set(testDto.getResponse().getEnvironment().getCdpRuntimeVersion().split("-")[0]);
+                    return testDto;
+                })
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
@@ -115,7 +118,7 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .then(hybridTrustAssertions.validateTrustOnFreeIpa())
                 .then(hybridTrustAssertions.validateTrustOnActiveDirectory())
                 .given(DistroXTestDto.class)
-                    .withTemplate(commonClusterManagerProperties().getHybridDataMartDistroXBlueprintName(runtimeVersion))
+                    .withTemplate(commonClusterManagerProperties().getHybridDataMartDistroXBlueprintName(runtimeVersion.get()))
                     .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataMartHostGroups(testContext))
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)

@@ -12,7 +12,7 @@ public class RemoteEnvironmentListAction implements Action<ListRemoteEnvironment
     @Override
     public ListRemoteEnvironmentsTestDto action(TestContext testContext, ListRemoteEnvironmentsTestDto testDto, RemoteEnvironmentClient client)
             throws Exception {
-        testDto.setResponses(new HashSet<>(client.getEndpoint(testContext).remoteEnvironmentEndpoint().list(null).getResponses()));
+        testDto.setResponses(new HashSet<>(client.getDefaultClient(testContext).remoteEnvironmentEndpoint().list(null).getResponses()));
         Log.whenJson("Remote Environment list response: ", testDto.getResponses());
 
         return testDto;

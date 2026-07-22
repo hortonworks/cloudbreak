@@ -7,7 +7,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -15,34 +14,32 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.DescribeRemoteEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.ListRemoteEnvironmentsTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
-import com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentCrnEndpoint;
-import com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentInternalCrnClient;
+import com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentServiceApiKeyClient;
 
 public class RemoteEnvironmentClient<E extends Enum<E>, W extends WaitObject>
-        extends MicroserviceClient<com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentInternalCrnClient, Void, E, W> {
+        extends MicroserviceClient<com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentClient, Void, E, W> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteEnvironmentClient.class);
 
     private final CloudbreakUser cloudbreakUser;
 
-    private com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentInternalCrnClient client;
+    private com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentClient client;
 
-    private com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentInternalCrnClient alternativeClient;
+    private com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentClient alternativeClient;
 
-    public RemoteEnvironmentClient(CloudbreakUser cloudbreakUser, String address,  RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator,
-            String alternativeAddress) {
+    public RemoteEnvironmentClient(CloudbreakUser cloudbreakUser, String address, String alternativeAddress) {
         setActing(cloudbreakUser);
         this.cloudbreakUser = cloudbreakUser;
-        client = createRemoteEnvironmentClient(address, regionAwareInternalCrnGenerator);
+        client = createRemoteEnvironmentClient(cloudbreakUser, address);
 
         if (isNotEmpty(alternativeAddress)) {
-            alternativeClient = createRemoteEnvironmentClient(alternativeAddress, regionAwareInternalCrnGenerator);
+            alternativeClient = createRemoteEnvironmentClient(cloudbreakUser, alternativeAddress);
         }
     }
 
-    private RemoteEnvironmentInternalCrnClient createRemoteEnvironmentClient(String address, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
-        return new RemoteEnvironmentInternalCrnClient(address, configKey(),
-                "/api", regionAwareInternalCrnGenerator);
+    private com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentClient createRemoteEnvironmentClient(CloudbreakUser cloudbreakUser, String address) {
+        return new RemoteEnvironmentServiceApiKeyClient(address, configKey())
+                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
     }
 
     private ConfigKey configKey() {
@@ -56,16 +53,12 @@ public class RemoteEnvironmentClient<E extends Enum<E>, W extends WaitObject>
     }
 
     @Override
-    public com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentInternalCrnClient getDefaultClient(TestContext testContext) {
+    public com.sequenceiq.remoteenvironment.api.client.RemoteEnvironmentClient getDefaultClient(TestContext testContext) {
         if (testContext.shouldUseAlternativeEndpoints()) {
             return alternativeClient;
         } else {
             return client;
         }
-    }
-
-    public RemoteEnvironmentCrnEndpoint getEndpoint(TestContext testContext) {
-        return getDefaultClient(testContext).withCrn(cloudbreakUser.getCrn());
     }
 
     @Override

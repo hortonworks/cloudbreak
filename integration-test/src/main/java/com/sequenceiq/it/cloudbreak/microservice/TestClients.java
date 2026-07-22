@@ -146,7 +146,7 @@ public class TestClients {
     }
 
     private RemoteEnvironmentClient createRemoteEnvironmentClient(CloudbreakUser cloudbreakUser) {
-        return new RemoteEnvironmentClient(cloudbreakUser, serverProperties.getRemoteEnvironmentAddress(), regionAwareInternalCrnGeneratorFactory.iam(),
+        return new RemoteEnvironmentClient(cloudbreakUser, serverProperties.getRemoteEnvironmentAddress(),
                 serverProperties.getAlternativeRemoteEnvironmentAddress());
     }
 

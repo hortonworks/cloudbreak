@@ -133,7 +133,7 @@ public class ServerProperties {
     @Value("${integrationtest.remoteenvironment.server}")
     private String remoteEnvironmentServer;
 
-    @Value("${integrationtest.remoteenvironment.port:8092}")
+    @Value("${integrationtest.remoteenvironment.port:0}")
     private int remoteEnvironmentPort;
 
     @Value("${integrationtest.remoteenvironment.contextPath:/remoteenvironmentservice}")

@@ -10,7 +10,7 @@ public class RemoteEnvironmentDescribeAction implements Action<DescribeRemoteEnv
     @Override
     public DescribeRemoteEnvironmentTestDto action(TestContext testContext, DescribeRemoteEnvironmentTestDto testDto, RemoteEnvironmentClient client)
             throws Exception {
-        testDto.setResponse(client.getEndpoint(testContext).remoteEnvironmentEndpoint().getByCrn(testDto.getRequest()));
+        testDto.setResponse(client.getDefaultClient(testContext).remoteEnvironmentEndpoint().getByCrn(testDto.getRequest()));
         Log.whenJson("Remote Environment describe response: ", testDto.getResponse());
 
         return testDto;
