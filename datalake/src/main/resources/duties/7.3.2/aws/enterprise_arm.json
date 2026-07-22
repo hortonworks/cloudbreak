@@ -182,7 +182,7 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "c7g.large",
+        "instanceType": "c7g.xlarge",
         "attachedVolumes": [
           {
             "count": 0,
