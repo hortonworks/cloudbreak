@@ -119,7 +119,7 @@ public class UpdateSslConfigsOnClusterActions {
                 flowMessageService.fireEventAndLog(payload.getResourceId(),
                         ENABLE_ENCRYPTION_PROFILE_FAILED.name(),
                         ENABLE_ENCRYPTION_PROFILE_FAILED,
-                        String.valueOf(payload.getResourceId()));
+                        payload.getException() != null ? payload.getException().getMessage() : "unknown");
                 UpdateSslConfigFailedEvent failedEvent = new UpdateSslConfigFailedEvent(
                         UpdateSslConfigsOnClusterStateSelectors.HANDLED_FAILED_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT.event(),
                         payload.getResourceId(), payload.getException());

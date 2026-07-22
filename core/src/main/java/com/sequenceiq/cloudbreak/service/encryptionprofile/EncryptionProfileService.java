@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -43,6 +44,9 @@ public class EncryptionProfileService {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private EnvironmentConfigProvider environmentConfigProvider;
 
     public String getEncryptionProfileByCrnOrDefault(DetailedEnvironmentResponse environmentResponse, StackDto stackDto) {
         ClusterView clusterView = stackDto.getCluster();
@@ -162,6 +166,15 @@ public class EncryptionProfileService {
         } else {
             return Optional.empty();
         }
+    }
+
+    public EncryptionProfileResponse getEncryptionProfile(StackDto stackDto, DetailedEnvironmentResponse environmentResponse) {
+        DetailedEnvironmentResponse environment = environmentResponse != null
+                ? environmentResponse
+                : environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
+        String crn = getEncryptionProfileByCrnOrDefault(environment, stackDto);
+
+        return getEncryptionProfileByCrnOrDefault(crn);
     }
 
     private boolean inheritEncryptionProfileFromEnvironment(DetailedEnvironmentResponse environment, Cluster cluster) {

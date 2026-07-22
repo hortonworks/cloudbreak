@@ -678,6 +678,11 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new UpdateSslConfigTriggerEvent(selector, stackId, new Promise<>(), encryptionProfileCrn));
     }
 
+    public FlowIdentifier triggerDisableEncryptionProfileChain(Long stackId) {
+        String selector = FlowChainTriggers.DISABLE_ENCRYPTION_PROFILE_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId, new Promise<>()));
+    }
+
     public FlowIdentifier triggerVolumeResourcesUpdateByCrn(ResourceUpdateRequest request) {
         String selector = DiskSyncEvent.DISK_SYNC_TRIGGER_EVENT.event();
         return reactorNotifier.notify(request.getResourceId(), selector, new DiskSyncRequest(request.getResourceId(), request.getDiskSyncMode()));

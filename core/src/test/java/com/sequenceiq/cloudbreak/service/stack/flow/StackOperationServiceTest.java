@@ -963,6 +963,6 @@ class StackOperationServiceTest {
 
         underTest.disableEncryptionProfile(nameOrCrn, "accountId");
 
-        verify(flowManager).triggerPillarConfigurationUpdate(STACK_ID);
+        verify(flowManager).triggerDisableEncryptionProfileChain(STACK_ID);
     }
 }

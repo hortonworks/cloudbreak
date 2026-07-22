@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.DEFAULT;
 import static java.util.Collections.singletonMap;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
@@ -40,11 +43,16 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeExternalRdsStateParamsProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class PostgresConfigService {
@@ -60,6 +68,8 @@ public class PostgresConfigService {
     private static final String POSTGRES_COMMON = "postgres-common";
 
     private static final String POSTGRES_VERSION = "postgres_version";
+
+    private static final String POSTGRES_VERSION_17 = "17";
 
     private static final String POSTGRESQL_POSTGRE_SLS = "/postgresql/postgre.sls";
 
@@ -93,7 +103,24 @@ public class PostgresConfigService {
     @Inject
     private HostOrchestrator hostOrchestrator;
 
+    @Inject
+    private EncryptionProfileService encryptionProfileService;
+
+    @Inject
+    private EncryptionProfileProvider encryptionProfileProvider;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private EnvironmentConfigProvider environmentConfigProvider;
+
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
+        decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto, null);
+    }
+
+    public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto,
+            DetailedEnvironmentResponse environmentResponse) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
         SSLSaltConfig sslSaltConfig;
         if (stackDto.getCluster().getDbSslRootCertBundle() == null) {
@@ -101,6 +128,7 @@ public class PostgresConfigService {
         } else {
             sslSaltConfig = getSslSaltConfigWhenRootCertAlreadyInitialized(stackDto);
         }
+        enrichSslSaltConfigWithEncryptionProfile(sslSaltConfig, stackDto, environmentResponse);
         if (StringUtils.isNotBlank(sslSaltConfig.getRootCertsBundle())) {
             boolean externalDatabaseRequested = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn());
             generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig, stackDto.getCloudPlatform(), externalDatabaseRequested);
@@ -206,6 +234,30 @@ public class PostgresConfigService {
         return available;
     }
 
+    private void enrichSslSaltConfigWithEncryptionProfile(SSLSaltConfig sslSaltConfig, StackDto stackDto, DetailedEnvironmentResponse environmentResponse) {
+        String dbEngineVersion = stackDto.getExternalDatabaseEngineVersion();
+        String accountId = stackDto.getAccountId();
+        if (POSTGRES_VERSION_17.equals(dbEngineVersion) && entitlementService.isConfigureEncryptionProfileEnabled(accountId)) {
+            EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfile(stackDto, environmentResponse);
+            if (!encryptionProfileResponse.isLegacy()) {
+                Map<String, List<String>> userCipherSuites = encryptionProfileResponse.getCipherSuites();
+                sslSaltConfig.setTls12Ciphers(
+                        encryptionProfileProvider.getOpenSslCipherSuites(userCipherSuites, DEFAULT, encryptionProfileResponse.isLegacy()));
+                sslSaltConfig.setTls13Ciphers(encryptionProfileProvider.getTls13CipherSuites(userCipherSuites));
+                Set<String> tlsVersions = encryptionProfileResponse.getTlsVersions();
+                if (tlsVersions != null && !tlsVersions.isEmpty()) {
+                    sslSaltConfig.setTlsMinVersion(tlsVersions.stream().min(Comparator.naturalOrder()).orElse(""));
+                    sslSaltConfig.setTlsMaxVersion(tlsVersions.stream().max(Comparator.naturalOrder()).orElse(""));
+                }
+                sslSaltConfig.setTlsAdvancedControl(true);
+            } else {
+                LOGGER.debug("Skipping encryption profile enrichment: environment [{}] has a legacy encryption profile.", stackDto.getEnvironmentCrn());
+            }
+        } else {
+            LOGGER.debug("Skipping encryption profile enrichment: Postgres version [{}] or entitlement did not match.", dbEngineVersion);
+        }
+    }
+
     private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig, String cloudPlatform,
             boolean externalDatabaseRequested) {
         Map<String, Object> rootSslCertsMap = new HashMap<>(sslSaltConfig.toMap());
@@ -260,6 +312,16 @@ public class PostgresConfigService {
 
         private boolean sslForCmDbNativelySupported;
 
+        private boolean tlsAdvancedControl;
+
+        private String tlsMinVersion = "";
+
+        private String tlsMaxVersion = "";
+
+        private String tls12Ciphers = "";
+
+        private String tls13Ciphers = "";
+
         public String getRootCertsBundle() {
             return rootCertsBundle;
         }
@@ -292,14 +354,59 @@ public class PostgresConfigService {
             this.sslForCmDbNativelySupported = sslForCmDbNativelySupported;
         }
 
+        public boolean isTlsAdvancedControl() {
+            return tlsAdvancedControl;
+        }
+
+        public void setTlsAdvancedControl(boolean tlsAdvancedControl) {
+            this.tlsAdvancedControl = tlsAdvancedControl;
+        }
+
+        public String getTlsMinVersion() {
+            return tlsMinVersion;
+        }
+
+        public void setTlsMinVersion(String tlsMinVersion) {
+            this.tlsMinVersion = requireNonNull(tlsMinVersion);
+        }
+
+        public String getTlsMaxVersion() {
+            return tlsMaxVersion;
+        }
+
+        public void setTlsMaxVersion(String tlsMaxVersion) {
+            this.tlsMaxVersion = requireNonNull(tlsMaxVersion);
+        }
+
+        public String getTls12Ciphers() {
+            return tls12Ciphers;
+        }
+
+        public void setTls12Ciphers(String tls12Ciphers) {
+            this.tls12Ciphers = requireNonNull(tls12Ciphers);
+        }
+
+        public String getTls13Ciphers() {
+            return tls13Ciphers;
+        }
+
+        public void setTls13Ciphers(String tls13Ciphers) {
+            this.tls13Ciphers = requireNonNull(tls13Ciphers);
+        }
+
         public Map<String, Object> toMap() {
             // Note: The Salt logic expects "ssl_enabled", "ssl_restart_required" and "ssl_for_cm_db_natively_supported" be all represented as strings,
             // not primitive booleans.
-            return Map.of(
-                    "ssl_certs", rootCertsBundle,
-                    "ssl_restart_required", String.valueOf(restartRequired),
-                    "ssl_enabled", String.valueOf(sslEnabled),
-                    "ssl_for_cm_db_natively_supported", String.valueOf(sslForCmDbNativelySupported)
+            return Map.ofEntries(
+                    Map.entry("ssl_certs", rootCertsBundle),
+                    Map.entry("ssl_restart_required", String.valueOf(restartRequired)),
+                    Map.entry("ssl_enabled", String.valueOf(sslEnabled)),
+                    Map.entry("ssl_for_cm_db_natively_supported", String.valueOf(sslForCmDbNativelySupported)),
+                    Map.entry("tls_advanced_control", String.valueOf(tlsAdvancedControl)),
+                    Map.entry("tls_min_version", tlsMinVersion),
+                    Map.entry("tls_max_version", tlsMaxVersion),
+                    Map.entry("tls12_ciphers", tls12Ciphers),
+                    Map.entry("tls13_ciphers", tls13Ciphers)
             );
         }
     }

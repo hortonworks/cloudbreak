@@ -16,11 +16,11 @@
   {%- set command = 'systemctl show -p FragmentPath postgresql-11' %}
   {%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
   {%- set serviceName = "postgresql-11" %}
-{%- elif postgres_version == 14  %}
+{%- elif postgres_version == 14 %}
   {%- set command = 'systemctl show -p FragmentPath postgresql-14' %}
   {%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
   {%- set serviceName = "postgresql-14" %}
-{%- elif postgres_version == 17  %}
+{%- elif postgres_version == 17 %}
   {%- set command = 'systemctl show -p FragmentPath postgresql-17' %}
   {%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
   {%- set serviceName = "postgresql-17" %}
@@ -110,10 +110,13 @@ create_embeddeddb_certificate:
 
 {%- endif %}
 
-  {%- if postgres_version in [11, 14, 17] %}
 include:
+  {%- if postgres_version in [11, 14, 17] %}
   - postgresql.pg{{ postgres_version }}
-{%- endif %}
+  {%- endif %}
+  {%- if postgres_version == 17 and postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
+  - postgresql.configure_tls
+  {%- endif %}
 
 ensure-postgres-stopped-before-initdb:
   service.dead:
@@ -215,6 +218,10 @@ configure-max-connections:
     - template: jinja
     - context:
         postgres_directory: {{ postgres_directory }}
+        tls_advanced_control: {{ postgresql.tls_advanced_control | default(false) }}
+        tls_min_version: {{ postgresql.tls_min_version | default('') }}
+        tls_max_version: {{ postgresql.tls_max_version | default('') }}
+        tls12_ciphers: {{ postgresql.tls12_ciphers | default('') }}
 
 {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured:
   file.rename:
@@ -222,12 +229,19 @@ configure-max-connections:
     - source: {{ postgres_log_directory }}/pgsql_ssl_configured
     - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
 
+rerun-pgsql-ssl-configuration-if-script-changed:
+  file.absent:
+    - name: {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
+    - onchanges:
+      - file: /opt/salt/scripts/conf_pgsql_ssl.sh
+
 configure-ssl:
   cmd.run:
     - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/conf_pgsql_ssl.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
     - require:
       - file: /opt/salt/scripts/conf_pgsql_ssl.sh
       - service: start-postgresql
+      - file: rerun-pgsql-ssl-configuration-if-script-changed
     - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
 
 {%- endif %}
@@ -274,9 +288,16 @@ restart-pgsql-if-reconfigured:
     - watch:
       - cmd: configure-listen-address
       - cmd: configure-max-connections
+      - cmd: init-services-db
 {%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
       - cmd: configure-ssl
+{%- if postgres_version == 17 %}
+      - file: /etc/pki/tls/postgres-openssl.cnf
+      - file: /etc/systemd/system/postgresql-{{ postgres_version }}.service.d/openssl.conf
+    - require:
+      - cmd: systemctl-daemon-reload-for-postgres-openssl
+
 {%- endif %}
-      - cmd: init-services-db
+{%- endif %}
 
 {% endif %}

@@ -244,6 +244,7 @@ class ReactorFlowManagerTest {
         underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true, false);
         underTest.triggerUserDefinedTagsUpdate(STACK_ID, Map.of("custom", "value"));
         underTest.triggerVolumeResourcesUpdateByCrn(mock(ResourceUpdateRequest.class));
+        underTest.triggerDisableEncryptionProfileChain(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

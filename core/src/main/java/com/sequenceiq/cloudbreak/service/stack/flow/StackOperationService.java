@@ -847,7 +847,7 @@ public class StackOperationService {
         }
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         clusterService.disableEncryptionProfile(stack.getCluster().getId());
-        return flowManager.triggerPillarConfigurationUpdate(stack.getId());
+        return flowManager.triggerDisableEncryptionProfileChain(stack.getId());
     }
 
     public ResourceUpdateResponse updateVolumeResourcesByCrn(ResourceUpdateRequest request, String accountId) {

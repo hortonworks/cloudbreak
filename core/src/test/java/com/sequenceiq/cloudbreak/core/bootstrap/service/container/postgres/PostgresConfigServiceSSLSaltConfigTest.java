@@ -35,7 +35,9 @@ public class PostgresConfigServiceSSLSaltConfigTest {
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", ""), entry("ssl_restart_required", "false"), entry("ssl_enabled", "false"),
-                entry("ssl_for_cm_db_natively_supported", "false")));
+                entry("ssl_for_cm_db_natively_supported", "false"),
+                entry("tls_advanced_control", "false"), entry("tls_min_version", ""), entry("tls_max_version", ""),
+                entry("tls12_ciphers", ""), entry("tls13_ciphers", "")));
     }
 
     @Test
@@ -50,7 +52,9 @@ public class PostgresConfigServiceSSLSaltConfigTest {
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "false"), entry("ssl_enabled", "true"),
-                entry("ssl_for_cm_db_natively_supported", "false")));
+                entry("ssl_for_cm_db_natively_supported", "false"),
+                entry("tls_advanced_control", "false"), entry("tls_min_version", ""), entry("tls_max_version", ""),
+                entry("tls12_ciphers", ""), entry("tls13_ciphers", "")));
     }
 
     @Test
@@ -65,7 +69,9 @@ public class PostgresConfigServiceSSLSaltConfigTest {
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "true"), entry("ssl_enabled", "true"),
-                entry("ssl_for_cm_db_natively_supported", "false")));
+                entry("ssl_for_cm_db_natively_supported", "false"),
+                entry("tls_advanced_control", "false"), entry("tls_min_version", ""), entry("tls_max_version", ""),
+                entry("tls12_ciphers", ""), entry("tls13_ciphers", "")));
     }
 
     @Test
@@ -80,7 +86,32 @@ public class PostgresConfigServiceSSLSaltConfigTest {
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "false"), entry("ssl_enabled", "true"),
-                entry("ssl_for_cm_db_natively_supported", "true")));
+                entry("ssl_for_cm_db_natively_supported", "true"),
+                entry("tls_advanced_control", "false"), entry("tls_min_version", ""), entry("tls_max_version", ""),
+                entry("tls12_ciphers", ""), entry("tls13_ciphers", "")));
+    }
+
+    @Test
+    void testWhenTlsAdvancedControlEnabled() {
+        PostgresConfigService.SSLSaltConfig underTest = new PostgresConfigService.SSLSaltConfig();
+        underTest.setSslEnabled(true);
+        underTest.setRootCertsBundle("myCert");
+        underTest.setTlsAdvancedControl(true);
+        underTest.setTlsMinVersion("TLSv1.2");
+        underTest.setTlsMaxVersion("TLSv1.3");
+        underTest.setTls12Ciphers("ECDHE-RSA-AES128-GCM-SHA256");
+        underTest.setTls13Ciphers("TLS_AES_256_GCM_SHA384");
+
+        Map<String, Object> result = underTest.toMap();
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "false"), entry("ssl_enabled", "true"),
+                entry("ssl_for_cm_db_natively_supported", "false"),
+                entry("tls_advanced_control", "true"),
+                entry("tls_min_version", "TLSv1.2"),
+                entry("tls_max_version", "TLSv1.3"),
+                entry("tls12_ciphers", "ECDHE-RSA-AES128-GCM-SHA256"),
+                entry("tls13_ciphers", "TLS_AES_256_GCM_SHA384")));
     }
 
 }

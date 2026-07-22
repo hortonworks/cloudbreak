@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteDisksAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDisableEncryptionProfileAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDiskAddAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDiskUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
@@ -64,6 +65,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> create() {
         return new DistroXCreateAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> disableEncryptionProfile() {
+        return new DistroXDisableEncryptionProfileAction();
     }
 
     public Action<DistroXTestDto, CloudbreakClient> createInternal() {

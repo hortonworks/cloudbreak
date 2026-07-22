@@ -17,6 +17,10 @@ public class EncryptionProfileAssertion {
 
     private static final String NGINX_SSL_USER_FACING_CONF = "/etc/nginx/sites-enabled/ssl-user-facing.conf";
 
+    private static final String POSTGRES_OPENSSL_CONF = "/etc/pki/tls/postgres-openssl.cnf";
+
+    private static final String POSTGRES_SYSTEMD_DROPIN = "/etc/systemd/system/postgresql-17.service.d/openssl.conf";
+
     private static final String TLS_1_3_CIPHER = "TLS_AES_256_GCM_SHA384";
 
     private static final String CM_SUPPORTED_TLS_1_3_REGEX = "SUPPORTED_TLS_VERSIONS\\s* TLSv1.3";
@@ -31,6 +35,12 @@ public class EncryptionProfileAssertion {
 
     private static final String NGINX_TLS_1_3_CIPHER_REGEX = "ssl_conf_command Ciphersuites\\s*" + TLS_1_3_CIPHER;
 
+    private static final String POSTGRES_TLS_1_3_CIPHER_REGEX = "Ciphersuites\\s*=\\s*" + TLS_1_3_CIPHER;
+
+    private static final String POSTGRES_TLS_1_3_MIN_PROTOCOL_REGEX = "MinProtocol\\s*=\\s*\\'TLSv1.3\\'";
+
+    private static final String POSTGRES_SYSTEMD_OPENSSL_CONF_REGEX = "Environment=OPENSSL_CONF=" + POSTGRES_OPENSSL_CONF;
+
     @Inject
     private StackAssertion stackAssertion;
 
@@ -41,6 +51,9 @@ public class EncryptionProfileAssertion {
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_TLS_1_3_CIPHER_REGEX);
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_3_REGEX);
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_3_CIPHER_REGEX);
+        stackAssertion.validateFileContentExists(testDto, POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_3_CIPHER_REGEX);
+        stackAssertion.validateFileContentExists(testDto, POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_3_MIN_PROTOCOL_REGEX);
+        stackAssertion.validateFileContentExists(testDto, POSTGRES_SYSTEMD_DROPIN, POSTGRES_SYSTEMD_OPENSSL_CONF_REGEX);
         return testDto;
     }
 
@@ -51,6 +64,9 @@ public class EncryptionProfileAssertion {
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_TLS_1_3_CIPHER_REGEX);
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_3_REGEX);
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_3_CIPHER_REGEX);
+        stackAssertion.validateFileContentExists(testDto, POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_3_CIPHER_REGEX);
+        stackAssertion.validateFileContentExists(testDto, POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_3_MIN_PROTOCOL_REGEX);
+        stackAssertion.validateFileContentExists(testDto, POSTGRES_SYSTEMD_DROPIN, POSTGRES_SYSTEMD_OPENSSL_CONF_REGEX);
         return testDto;
     }
 

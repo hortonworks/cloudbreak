@@ -566,7 +566,7 @@ public class ClusterHostServiceRunner {
         servicePillar.putAll(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                 clouderaManagerRepo));
         saveIdBrokerPillar(cluster, servicePillar);
-        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
+        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto, detailedEnvironmentResponse);
         servicePillar.putAll(javaPillarDecorator.createJavaPillars(stackDto, detailedEnvironmentResponse));
 
         addClouderaManagerConfig(stackDto, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
