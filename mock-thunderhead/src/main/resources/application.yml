@@ -104,6 +104,7 @@ auth:
     azure.database.flexibleserver.upgrade.enabled: true
     azure.database.flexibleserver.upgrade.longpolling.enabled: false
     azure.database.singleserver.reject.enabled: true
+    azure.multipleresourcegroup.reject.enabled: true
     secret.encryption:
         enabled: false
         for.commercial.aws.enabled: false

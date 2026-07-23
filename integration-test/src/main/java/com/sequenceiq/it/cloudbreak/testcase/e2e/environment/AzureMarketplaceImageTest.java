@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaImageResponse;
-import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -63,7 +62,6 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
                     .withLogging()
                     .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                    .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_MULTIPLE, "")
                     .withNetwork("network")
                     .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)

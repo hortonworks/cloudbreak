@@ -71,9 +71,11 @@ import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(MockitoExtension.class)
@@ -879,5 +881,103 @@ class EnvironmentCreationServiceTest {
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
         verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
+    }
+
+    @Test
+    void testCreateRejectedWhenMultipleResourceGroupAndEntitlementEnabled() {
+        EnvironmentCreationDto environmentCreationDto = azureCreationDto(ResourceGroupUsagePattern.USE_MULTIPLE);
+        Environment environment = azureEnvironment();
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(entitlementService.isMultipleResourceGroupRejectEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        assertThatThrownBy(() -> environmentCreationServiceUnderTest.create(environmentCreationDto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("separate resource groups is no longer supported");
+
+        verify(environmentService, never()).save(any());
+        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testCreateAllowedWhenMultipleResourceGroupButEntitlementDisabled() {
+        EnvironmentCreationDto environmentCreationDto = azureCreationDto(ResourceGroupUsagePattern.USE_MULTIPLE);
+        Environment environment = azureEnvironment();
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(entitlementService.isMultipleResourceGroupRejectEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(entitlementService).isMultipleResourceGroupRejectEnabled(ACCOUNT_ID);
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    @Test
+    void testCreateAllowedWhenSingleResourceGroupAndEntitlementEnabled() {
+        EnvironmentCreationDto environmentCreationDto = azureCreationDto(ResourceGroupUsagePattern.USE_SINGLE);
+        Environment environment = azureEnvironment();
+        lenientHappyCreatePath(environmentCreationDto, environment);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(entitlementService, never()).isMultipleResourceGroupRejectEnabled(any());
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    @Test
+    void testCreateAllowedForNonAzureEvenWhenEntitlementEnabled() {
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withCrn("crn")
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withLocation(LocationDto.builder().withName("test").withDisplayName("test").withLatitude(0.1).withLongitude(0.1).build())
+                .build();
+        Environment environment = azureEnvironment();
+        lenientHappyCreatePath(environmentCreationDto, environment);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(entitlementService, never()).isMultipleResourceGroupRejectEnabled(any());
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    private EnvironmentCreationDto azureCreationDto(ResourceGroupUsagePattern resourceGroupUsagePattern) {
+        AzureResourceGroupDto azureResourceGroupDto = AzureResourceGroupDto.builder()
+                .withResourceGroupUsagePattern(resourceGroupUsagePattern)
+                .build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAzureParametersDto(AzureParametersDto.builder().withAzureResourceGroupDto(azureResourceGroupDto).build())
+                .build();
+        return EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withCrn("crn")
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withLocation(LocationDto.builder().withName("test").withDisplayName("test").withLatitude(0.1).withLongitude(0.1).build())
+                .build();
+    }
+
+    private Environment azureEnvironment() {
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        return environment;
+    }
+
+    private void lenientHappyCreatePath(EnvironmentCreationDto dto, Environment environment) {
+        lenient().when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        lenient().when(environmentDtoConverter.creationDtoToEnvironment(eq(dto))).thenReturn(environment);
+        lenient().when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID))).thenReturn(new Credential());
+        lenient().when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        lenient().when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        lenient().when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
+        lenient().when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        lenient().when(environmentService.save(any(Environment.class))).thenReturn(environment);
     }
 }

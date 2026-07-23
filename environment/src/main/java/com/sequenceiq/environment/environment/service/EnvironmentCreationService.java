@@ -41,9 +41,11 @@ import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -224,6 +226,7 @@ public class EnvironmentCreationService {
         }
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
+        validationBuilder.merge(validateResourceGroupUsage(creationDto));
         EnvironmentTelemetry environmentTelemetry = creationDto.getTelemetry();
         if (environmentTelemetry != null && environmentTelemetry.getLogging() != null && environmentTelemetry.getLogging().getStorageLocation() != null) {
             validationBuilder.merge(validatorService.validateStorageLocation(environmentTelemetry.getLogging().getStorageLocation(), "logging"));
@@ -242,6 +245,24 @@ public class EnvironmentCreationService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private ValidationResult validateResourceGroupUsage(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        ResourceGroupUsagePattern resourceGroupUsagePattern = Optional.ofNullable(creationDto.getParameters())
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
+                .orElse(null);
+        if (ResourceGroupUsagePattern.USE_MULTIPLE == resourceGroupUsagePattern) {
+            LOGGER.info("Azure environment created with multiple resource groups (deprecated), accountId={}", creationDto.getAccountId());
+            if (entitlementService.isMultipleResourceGroupRejectEnabled(creationDto.getAccountId())) {
+                validationResultBuilder.error("Creating an Azure environment in separate resource groups is no longer supported. "
+                        + "Please provide the name of an already existing resource group and retry the operation. " +
+                        "Documentation: https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/mc-azure-resource-groups.html");
+            }
+        }
+        return validationResultBuilder.build();
     }
 
     private ValidationResult validateSecretEncryption(EnvironmentCreationDto creationDto) {

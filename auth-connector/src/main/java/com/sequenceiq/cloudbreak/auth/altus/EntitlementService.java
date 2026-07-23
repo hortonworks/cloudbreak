@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_C
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_MULTIPLE_RESOURCE_GROUP_REJECT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
@@ -604,6 +605,10 @@ public class EntitlementService {
 
     public boolean isSingleServerRejectEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT);
+    }
+
+    public boolean isMultipleResourceGroupRejectEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AZURE_MULTIPLE_RESOURCE_GROUP_REJECT);
     }
 
     public boolean isDevTelemetryRepoEnabled(String accountId) {

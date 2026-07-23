@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_MULTIPLE_RESOURCE_GROUP_REJECT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_UAE_CENTRAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
@@ -580,6 +581,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.database.singleserver.reject.enabled}")
     private boolean azureSingleServerRejectEnabled;
 
+    @Value("${auth.mock.azure.multipleresourcegroup.reject.enabled}")
+    private boolean azureMultipleResourceGroupRejectEnabled;
+
     @Value("${auth.mock.gcp.secureboot.enabled}")
     private boolean gcpSecureBootEnabled;
 
@@ -989,6 +993,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, rangerLdapUsersyncEnabled, CDP_RANGER_LDAP_USERSYNC);
         addEntitlement(builder, accountId, azureFlexibleUpgradeLongPollingEnabled, CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING);
         addEntitlement(builder, accountId, azureSingleServerRejectEnabled, CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT);
+        addEntitlement(builder, accountId, azureMultipleResourceGroupRejectEnabled, CDP_AZURE_MULTIPLE_RESOURCE_GROUP_REJECT);
         addEntitlement(builder, accountId, gcpSecureBootEnabled, CDP_CB_GCP_SECURE_BOOT);
         addEntitlement(builder, accountId, datahubForceOsUpgradeEnabled, CDP_DATAHUB_FORCE_OS_UPGRADE);
         addEntitlement(builder, accountId, tlsv13Enabled, CDP_CB_TLS_1_3);
