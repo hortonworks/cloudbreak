@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -39,7 +39,6 @@ public class SecretAspectService {
         this.secretService = secretService;
     }
 
-    @PostConstruct
     public void init() {
         LOGGER.info("Preinvoke all repository methods to avoid Aspectj bug. More details under CB-28003");
         for (CrudRepository crudRepository : crudRepositories) {
@@ -99,6 +98,9 @@ public class SecretAspectService {
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (IllegalArgumentException | UnsupportedOperationException | InvalidDataAccessApiUsageException ex) {
+            LOGGER.warn("Exception during repository save: {}: {}", ex.getClass(), ex.getMessage());
+            throw ex;
         } catch (RuntimeException re) {
             LOGGER.warn("Failed to invoke repository save", re);
             throw re;
@@ -144,6 +146,9 @@ public class SecretAspectService {
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (IllegalArgumentException | UnsupportedOperationException | InvalidDataAccessApiUsageException ex) {
+            LOGGER.warn("Exception during repository delete: {}: {}", ex.getClass(), ex.getMessage());
+            throw ex;
         } catch (RuntimeException re) {
             LOGGER.warn("Failed to invoke repository delete", re);
             throw re;

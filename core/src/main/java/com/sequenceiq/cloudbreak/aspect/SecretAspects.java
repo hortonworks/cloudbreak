@@ -15,6 +15,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
@@ -81,23 +82,27 @@ public class SecretAspects {
         for (Object entity : entities) {
             String tenant = null;
             try {
-                for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(SecretValue.class)) {
-                        LOGGER.trace("Found SecretValue annotation on {}", field);
-                        ReflectionUtils.makeAccessible(field);
-                        Secret value = (Secret) field.get(entity);
-                        if (value != null && value.getRaw() != null && value.getSecret() == null) {
-                            tenant = Optional.ofNullable(tenant).orElseGet(() -> findTenant(entity));
-                            String path = String.format("%s/%s/%s/%s-%s", tenant,
-                                    entity.getClass().getSimpleName().toLowerCase(Locale.ROOT),
-                                    field.getName().toLowerCase(Locale.ROOT),
-                                    UUID.randomUUID().toString(),
-                                    Long.toHexString(clock.getCurrentTimeMillis()));
-                            String secret = secretService.put(path, value.getRaw());
-                            LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
-                            field.set(entity, new SecretProxy(secret));
+                if (entity != null) {
+                    for (Field field : entity.getClass().getDeclaredFields()) {
+                        if (field.isAnnotationPresent(SecretValue.class)) {
+                            LOGGER.trace("Found SecretValue annotation on {}", field);
+                            ReflectionUtils.makeAccessible(field);
+                            Secret value = (Secret) field.get(entity);
+                            if (value != null && value.getRaw() != null && value.getSecret() == null) {
+                                tenant = Optional.ofNullable(tenant).orElseGet(() -> findTenant(entity));
+                                String path = String.format("%s/%s/%s/%s-%s", tenant,
+                                        entity.getClass().getSimpleName().toLowerCase(Locale.ROOT),
+                                        field.getName().toLowerCase(Locale.ROOT),
+                                        UUID.randomUUID().toString(),
+                                        Long.toHexString(clock.getCurrentTimeMillis()));
+                                String secret = secretService.put(path, value.getRaw());
+                                LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
+                                field.set(entity, new SecretProxy(secret));
+                            }
                         }
                     }
+                } else {
+                    LOGGER.warn("We have received null as entity, there is nothing to do from vault perspective.");
                 }
             } catch (IllegalArgumentException e) {
                 LOGGER.error("Given entity isn't instance of TenantAwareResource or AccountIdAwareResource. Secret is not saved!", e);
@@ -111,6 +116,9 @@ public class SecretAspects {
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (IllegalArgumentException | UnsupportedOperationException | InvalidDataAccessApiUsageException ex) {
+            LOGGER.warn("Exception during repository save: {}: {}", ex.getClass(), ex.getMessage());
+            throw ex;
         } catch (RuntimeException re) {
             LOGGER.warn("Failed to invoke repository save", re);
             throw re;
@@ -126,18 +134,22 @@ public class SecretAspects {
         Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
         for (Object entity : entities) {
             try {
-                for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(SecretValue.class)) {
-                        LOGGER.debug("Found SecretValue annotation on {}", field);
-                        ReflectionUtils.makeAccessible(field);
-                        Secret path = (Secret) field.get(entity);
-                        if (path != null && path.getSecret() != null) {
-                            secretService.deleteByVaultSecretJson(path.getSecret());
-                            LOGGER.debug("Secret deleted at path: {}", path);
-                        } else {
-                            LOGGER.debug("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());
+                if (entity != null) {
+                    for (Field field : entity.getClass().getDeclaredFields()) {
+                        if (field.isAnnotationPresent(SecretValue.class)) {
+                            LOGGER.debug("Found SecretValue annotation on {}", field);
+                            ReflectionUtils.makeAccessible(field);
+                            Secret path = (Secret) field.get(entity);
+                            if (path != null && path.getSecret() != null) {
+                                secretService.deleteByVaultSecretJson(path.getSecret());
+                                LOGGER.debug("Secret deleted at path: {}", path);
+                            } else {
+                                LOGGER.debug("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());
+                            }
                         }
                     }
+                } else {
+                    LOGGER.warn("We have received null as entity, there is nothing to do from vault perspective.");
                 }
             } catch (IllegalArgumentException e) {
                 LOGGER.error("Given entity isn't instance of TenantAwareResource or AccountIdAwareResource. Secret is not deleted!", e);
@@ -151,6 +163,9 @@ public class SecretAspects {
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (IllegalArgumentException | UnsupportedOperationException | InvalidDataAccessApiUsageException ex) {
+            LOGGER.warn("Exception during repository delete: {}: {}", ex.getClass(), ex.getMessage());
+            throw ex;
         } catch (RuntimeException re) {
             LOGGER.warn("Failed to invoke repository delete", re);
             throw re;

@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -34,41 +35,47 @@ public class RecursiveSecretAspectService {
 
     public Object proceedSave(ProceedingJoinPoint proceedingJoinPoint) {
         Queue<Object> entities = convertFirstArgToQueue(proceedingJoinPoint);
-        Object entity;
-        while ((entity = entities.poll()) != null) {
-            try {
-                for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(SecretValue.class)) {
-                        LOGGER.info("Found SecretValue annotation on {} in entity of type {}", field, entity.getClass());
-                        ReflectionUtils.makeAccessible(field);
-                        Object fieldValue = field.get(entity);
-                        if (fieldValue instanceof Secret) {
-                            Secret value = (Secret) field.get(entity);
-                            if (value != null && value.getRaw() != null && value.getSecret() == null) {
-                                String path = String.format("%s/%s/%s-%s",
-                                        entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
-                                        UUID.randomUUID().toString(), Long.toHexString(System.currentTimeMillis()));
-                                String secret = secretService.put(path, value.getRaw());
-                                LOGGER.info("Field: '{}' is saved at path: {}", field.getName(), path);
-                                field.set(entity, new SecretProxy(secret));
+        while (!entities.isEmpty()) {
+            Object entity = entities.poll();
+            if (entity != null) {
+                try {
+                    for (Field field : entity.getClass().getDeclaredFields()) {
+                        if (field.isAnnotationPresent(SecretValue.class)) {
+                            LOGGER.info("Found SecretValue annotation on {} in entity of type {}", field, entity.getClass());
+                            ReflectionUtils.makeAccessible(field);
+                            Object fieldValue = field.get(entity);
+                            if (fieldValue instanceof Secret value) {
+                                if (value.getRaw() != null && value.getSecret() == null) {
+                                    String path = String.format("%s/%s/%s-%s",
+                                            entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
+                                            UUID.randomUUID().toString(), Long.toHexString(System.currentTimeMillis()));
+                                    String secret = secretService.put(path, value.getRaw());
+                                    LOGGER.info("Field: '{}' is saved at path: {}", field.getName(), path);
+                                    field.set(entity, new SecretProxy(secret));
+                                }
+                            } else if (fieldValue != null) {
+                                entities.add(fieldValue);
                             }
-                        } else {
-                            entities.add(fieldValue);
                         }
                     }
+                } catch (IllegalArgumentException e) {
+                    LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not saved!", e);
+                    throw new SecretOperationException(e);
+                } catch (Exception e) {
+                    LOGGER.warn("Looks like something went wrong with Secret store. Secret is not saved!", e);
+                    throw new SecretOperationException(e);
                 }
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not saved!", e);
-                throw new SecretOperationException(e);
-            } catch (Exception e) {
-                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not saved!", e);
-                throw new SecretOperationException(e);
+            } else {
+                LOGGER.warn("We have received null as entity, there is nothing to do from vault perspective.");
             }
         }
 
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (IllegalArgumentException | UnsupportedOperationException | InvalidDataAccessApiUsageException ex) {
+            LOGGER.warn("Exception during repository save: {}: {}", ex.getClass(), ex.getMessage());
+            throw ex;
         } catch (RuntimeException re) {
             LOGGER.warn("Failed to invoke repository save", re);
             throw re;
@@ -82,39 +89,45 @@ public class RecursiveSecretAspectService {
 
     public Object proceedDelete(ProceedingJoinPoint proceedingJoinPoint) {
         Queue<Object> entities = convertFirstArgToQueue(proceedingJoinPoint);
-        Object entity;
-        while ((entity = entities.poll()) != null) {
-            try {
-                for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(SecretValue.class)) {
-                        LOGGER.info("Found SecretValue annotation on {} in entity of type {}", field, entity.getClass());
-                        ReflectionUtils.makeAccessible(field);
-                        Object fieldValue = field.get(entity);
-                        if (fieldValue instanceof Secret) {
-                            Secret path = (Secret) field.get(entity);
-                            if (path != null && path.getSecret() != null) {
-                                secretService.deleteByVaultSecretJson(path.getSecret());
-                                LOGGER.info("Secret deleted at path: {}", path);
-                            } else {
-                                LOGGER.info("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());
+        while (!entities.isEmpty()) {
+            Object entity = entities.poll();
+            if (entity != null) {
+                try {
+                    for (Field field : entity.getClass().getDeclaredFields()) {
+                        if (field.isAnnotationPresent(SecretValue.class)) {
+                            LOGGER.info("Found SecretValue annotation on {} in entity of type {}", field, entity.getClass());
+                            ReflectionUtils.makeAccessible(field);
+                            Object fieldValue = field.get(entity);
+                            if (fieldValue instanceof Secret path) {
+                                if (path.getSecret() != null) {
+                                    secretService.deleteByVaultSecretJson(path.getSecret());
+                                    LOGGER.info("Secret deleted at path: {}", path);
+                                } else {
+                                    LOGGER.info("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());
+                                }
+                            } else if (fieldValue != null) {
+                                entities.add(fieldValue);
                             }
-                        } else {
-                            entities.add(fieldValue);
                         }
                     }
+                } catch (IllegalArgumentException e) {
+                    LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
+                    throw new SecretOperationException(e);
+                } catch (Exception e) {
+                    LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
+                    throw new SecretOperationException(e);
                 }
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
-                throw new SecretOperationException(e);
-            } catch (Exception e) {
-                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
-                throw new SecretOperationException(e);
+            } else {
+                LOGGER.warn("We have received null as entity, there is nothing to do from vault perspective.");
             }
         }
 
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (IllegalArgumentException | UnsupportedOperationException | InvalidDataAccessApiUsageException ex) {
+            LOGGER.warn("Exception during repository delete: {}: {}", ex.getClass(), ex.getMessage());
+            throw ex;
         } catch (RuntimeException re) {
             LOGGER.warn("Failed to invoke repository delete", re);
             throw re;
