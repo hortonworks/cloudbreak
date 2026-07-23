@@ -86,7 +86,8 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
                 GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig, repair);
                 KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
-                hostOrchestrator.uploadKeytabs(List.of(primaryGatewayConfig), Set.of(keytabModel),
+                List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+                hostOrchestrator.uploadKeytabs(allGatewayConfigs, Set.of(keytabModel),
                         ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stack.getCluster().getId()));
             }
             response = new KeytabConfigurationSuccess(stackId);
