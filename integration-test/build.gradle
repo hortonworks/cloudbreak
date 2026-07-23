@@ -136,7 +136,6 @@ dependencies {
   implementation group: 'software.amazon.awssdk',                 name: 'lambda',            version: awsSdkVersion
   implementation group: 'software.amazon.awssdk',                 name: 's3',                version: awsSdkVersion
   implementation group: 'software.amazon.awssdk',                 name: 'cloudformation',    version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'resourcegroupstaggingapi',    version: awsSdkVersion
 
   implementation group: 'com.google.code.gson',          name: 'gson',                           version: gsonVersion
   implementation (group: 'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev20260709-2.0.0'){
@@ -148,7 +147,6 @@ dependencies {
   implementation (group: 'com.google.cloud',              name: 'google-cloud-storage',           version: '2.23.0') {
     exclude group: "io.grpc"
   }
-  implementation group: 'com.google.cloud',             name: 'google-cloud-asset',                         version: '3.34.0'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                      version: azureSdkResourceManagerVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage'
   implementation group: 'com.azure',                    name: 'azure-identity',                             version: azureSdkIdentityVersion

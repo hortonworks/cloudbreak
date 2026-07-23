@@ -189,9 +189,4 @@ public class GcpCloudFunctionality implements CloudFunctionality {
             String command) {
         return sshJUtil.executeSshCommandsOnInstances(instanceGroups, hostGroupNames, privateKeyFilePath, command);
     }
-
-    @Override
-    public Map<String, Map<String, String>> getAllResourcesAndTagsForEnvironment(String envCrn) {
-        return gcpUtil.getAllResourcesAndTagsForEnvironment(envCrn);
-    }
 }

@@ -34,4 +34,3 @@ tests:
         excludedMethods:
           - testKraftMigrationFailAtUpscale
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.tagupdate.UserDefinedTagUpdateTest

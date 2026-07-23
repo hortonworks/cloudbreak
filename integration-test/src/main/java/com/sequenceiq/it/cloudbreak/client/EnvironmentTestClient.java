@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentAddUserManagedIdentityAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCascadingDeleteAction;
@@ -18,7 +17,6 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteActio
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByCrnsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByNamesAction;
-import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEditByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentFinishTrustSetupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
@@ -146,9 +144,5 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> finishTrustSetup() {
         return new EnvironmentFinishTrustSetupAction();
-    }
-
-    public Action<EnvironmentTestDto, EnvironmentClient> triggerEnvironmentEdit(EnvironmentEditRequest environmentEditRequest) {
-        return new EnvironmentEditByNameAction(environmentEditRequest);
     }
 }

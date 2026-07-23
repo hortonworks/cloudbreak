@@ -24,7 +24,6 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.SecurityUtils;
-import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Builder;
 import com.google.api.services.compute.ComputeScopes;
@@ -32,8 +31,6 @@ import com.google.api.services.storage.StorageScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import com.google.cloud.asset.v1.AssetServiceClient;
-import com.google.cloud.asset.v1.AssetServiceSettings;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -61,7 +58,7 @@ public class GcpClient {
     public Compute buildCompute() {
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredentials credentials = buildCredentialWithScopes(List.of(ComputeScopes.COMPUTE));
+            GoogleCredentials credentials = buildCredential();
             HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
             return new Builder(httpTransport, JSON_FACTORY, requestInitializer)
                     .setApplicationName(APPLICATION_NAME)
@@ -78,24 +75,13 @@ public class GcpClient {
     public Storage buildStorage() {
         return StorageOptions
                 .newBuilder()
-                .setCredentials(buildCredentialWithScopes(List.of(StorageScopes.DEVSTORAGE_FULL_CONTROL)))
+                .setCredentials(buildCredential())
                 .setProjectId(getProjectId())
                 .build()
                 .getService();
     }
 
-    public AssetServiceClient buildAsset() {
-        try {
-            AssetServiceSettings settings = AssetServiceSettings.newBuilder()
-                    .setCredentialsProvider(FixedCredentialsProvider.create(buildCredentialWithScopes(List.of(ComputeScopes.CLOUD_PLATFORM))))
-                    .build();
-            return AssetServiceClient.create(settings);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to create AssetServiceClient with credentials!", e);
-        }
-    }
-
-    public GoogleCredentials buildCredentialWithScopes(List<String> scopes) {
+    public GoogleCredentials buildCredential() {
         Credential credential = gcpProperties.getCredential();
         String credentialJson = credential.getJson().getBase64();
         String credentialP12 = credential.getP12().getBase64();
@@ -104,7 +90,7 @@ public class GcpClient {
             if (isNotEmpty(credentialJson)) {
                 googleCredentials = GoogleCredentials
                         .fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)))
-                        .createScoped(scopes);
+                        .createScoped(SCOPES);
             } else if (isNotEmpty(credentialP12)) {
                 PrivateKey privateKey = SecurityUtils
                         .loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
@@ -114,7 +100,7 @@ public class GcpClient {
                 googleCredentials = ServiceAccountCredentials.newBuilder()
                         .setClientEmail(credential.getP12().getServiceAccountId())
                         .setPrivateKey(privateKey)
-                        .setScopes(scopes)
+                        .setScopes(SCOPES)
                         .build();
             }
         } catch (Exception e) {

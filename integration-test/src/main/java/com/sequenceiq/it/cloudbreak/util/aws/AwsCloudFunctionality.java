@@ -18,7 +18,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.AmazonEC2Util;
-import com.sequenceiq.it.cloudbreak.util.aws.amazonrgt.AmazonResourceGroupTaggingUtil;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshEnaDriverCheckActions;
@@ -30,9 +29,6 @@ public class AwsCloudFunctionality implements CloudFunctionality {
 
     @Inject
     private AmazonEC2Util amazonEC2Util;
-
-    @Inject
-    private AmazonResourceGroupTaggingUtil amazonResourceGroupTaggingUtil;
 
     @Inject
     private AmazonS3Util amazonS3Util;
@@ -181,10 +177,5 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Override
     public Map<String, String> listAvailabilityZonesForVms(String clusterName, Map<String, String> instanceZoneMap) {
         return amazonEC2Util.listAvailabilityZonesForVms(instanceZoneMap);
-    }
-
-    @Override
-    public Map<String, Map<String, String>> getAllResourcesAndTagsForEnvironment(String envCrn) {
-        return amazonResourceGroupTaggingUtil.getAllResourcesAndTagsForEnvironment(envCrn);
     }
 }

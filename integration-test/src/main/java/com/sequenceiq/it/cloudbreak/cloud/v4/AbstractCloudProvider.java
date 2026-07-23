@@ -333,11 +333,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         return null;
     }
 
-    @Override
-    public List<String> getDistroXVariants() {
-        return List.of();
-    }
-
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
 
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
