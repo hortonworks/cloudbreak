@@ -116,27 +116,6 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     }
 
     @Test
-    void describeV1WithPvcCpSuccess() {
-        when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
-        DescribeEnvironmentResponse describeEnvironmentResponse = mock();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV1(USER_CRN, PVC_CP_ENV_CRN)).thenReturn(describeEnvironmentResponse);
-
-        DescribeEnvironmentResponse result = underTest.describeV1(USER_CRN, CLUSTER_CRN);
-
-        assertThat(result).isEqualTo(describeEnvironmentResponse);
-    }
-
-    @Test
-    void describeV1WithPvcCpFailure() {
-        when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
-        RuntimeException ex = new RuntimeException();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV1(USER_CRN, PVC_CP_ENV_CRN)).thenThrow(ex);
-
-        assertThatThrownBy(() -> underTest.describeV1(USER_CRN, CLUSTER_CRN))
-                .isEqualTo(ex);
-    }
-
-    @Test
     void describeV2() {
         DescribeEnvironmentV2Response describeEnvironmentV2Response = mock();
         when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN, true)).thenReturn(cluster);
@@ -145,27 +124,6 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         DescribeEnvironmentResponse result = underTest.describeV2(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(describeEnvironmentV2Response);
-    }
-
-    @Test
-    void describeV2WithPvcCpSuccess() {
-        when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
-        DescribeEnvironmentV2Response describeEnvironmentV2Response = mock();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV2(USER_CRN, PVC_CP_ENV_CRN)).thenReturn(describeEnvironmentV2Response);
-
-        DescribeEnvironmentResponse result = underTest.describeV2(USER_CRN, CLUSTER_CRN);
-
-        assertThat(result).isEqualTo(describeEnvironmentV2Response);
-    }
-
-    @Test
-    void describeV2WithPvcCpFailure() {
-        when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
-        RuntimeException ex = new RuntimeException();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV2(USER_CRN, PVC_CP_ENV_CRN)).thenThrow(ex);
-
-        assertThatThrownBy(() -> underTest.describeV2(USER_CRN, CLUSTER_CRN))
-                .isEqualTo(ex);
     }
 
     @Test

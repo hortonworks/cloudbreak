@@ -75,31 +75,12 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
 
     @Override
     public DescribeEnvironmentResponse describeV1(String userCrn, String environmentCrn) {
-        OnPremisesApiProto.Cluster cluster = getCluster(userCrn, environmentCrn);
-        if (StringUtils.isNotEmpty(cluster.getEnvironmentCrn())) {
-            try {
-                LOGGER.info("Forwarding describeV1 to connected Private Control Plane");
-                return privateControlPlaneRemoteEnvironmentConnector.describeV1(userCrn, cluster.getEnvironmentCrn());
-            } catch (Exception e) {
-                LOGGER.warn("Failed to forward describeV1 to connected Private Control Plane", e);
-                throw e;
-            }
-        }
-        return describeService.describe(getCluster(userCrn, environmentCrn, true)).toV1Response();
+        return describeV2(userCrn, environmentCrn).toV1Response();
     }
 
     @Override
     public DescribeEnvironmentV2Response describeV2(String userCrn, String environmentCrn) {
         OnPremisesApiProto.Cluster cluster = getCluster(userCrn, environmentCrn);
-        if (StringUtils.isNotEmpty(cluster.getEnvironmentCrn())) {
-            try {
-                LOGGER.info("Forwarding describeV2 to connected Private Control Plane");
-                return privateControlPlaneRemoteEnvironmentConnector.describeV2(userCrn, cluster.getEnvironmentCrn());
-            } catch (Exception e) {
-                LOGGER.warn("Failed to forward describeV2 to connected Private Control Plane", e);
-                throw e;
-            }
-        }
         return describeService.describe(getCluster(userCrn, environmentCrn, true));
     }
 
