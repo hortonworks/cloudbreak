@@ -46,7 +46,7 @@ ExecStart=/opt/node_exporter/node_exporter {{ config_flag }}=/opt/node_exporter/
 {%- endif %}
      --collector.textfile --collector.textfile.directory=/var/lib/node_exporter/files \
      --web.disable-exporter-metrics \
-     --web.listen-address=:{{ monitoring.nodeExporterPort }}
+     --web.listen-address=127.0.0.1:{{ monitoring.nodeExporterPort }}
 
 Restart=always
 

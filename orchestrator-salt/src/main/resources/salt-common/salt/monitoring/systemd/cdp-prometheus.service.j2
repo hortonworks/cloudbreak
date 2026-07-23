@@ -25,7 +25,7 @@ ExecStart=/bin/sh -c "/opt/cdp-prometheus/prometheus \
      --storage.agent.no-lockfile \
      --config.file=/opt/cdp-prometheus/prometheus.yml \
      --web.config.file=/opt/cdp-prometheus/prometheus-web-config.yml \
-     --web.listen-address=:{{ monitoring.agentPort }} \
+     --web.listen-address=127.0.0.1:{{ monitoring.agentPort }} \
      >>/var/log/cdp-prometheus/cdp-prometheus.log 2>&1"
 Restart=always
 
