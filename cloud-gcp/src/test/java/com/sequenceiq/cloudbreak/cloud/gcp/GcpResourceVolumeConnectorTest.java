@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskPlan;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateRetryService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpInstanceRetrievalService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResizeDiskParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpReusedDisk;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -79,6 +80,18 @@ class GcpResourceVolumeConnectorTest {
     private GcpStackUtil gcpStackUtil;
 
     @Mock
+    private GcpInstanceRetrievalService gcpInstanceRetrievalService;
+
+    @Mock
+    private AuthenticatedContext authenticatedContext;
+
+    @Mock
+    private CloudCredential cloudCredential;
+
+    @Mock
+    private Compute compute;
+
+    @Mock
     private GcpContextBuilder gcpContextBuilder;
 
     @Mock
@@ -91,19 +104,10 @@ class GcpResourceVolumeConnectorTest {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Mock
-    private AuthenticatedContext authenticatedContext;
-
-    @Mock
     private CloudContext cloudContext;
 
     @Mock
     private GcpContext gcpContext;
-
-    @Mock
-    private CloudCredential cloudCredential;
-
-    @Mock
-    private Compute compute;
 
     private void mockContext() {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
@@ -459,8 +463,8 @@ class GcpResourceVolumeConnectorTest {
                 bootDisk(),
                 persistentDisk("i2v0", 300L),
                 localSsdDisk("local-ssd-0", 375L));
-        when(gcpStackUtil.getComputeInstanceWithId(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance1"))).thenReturn(instance1);
-        when(gcpStackUtil.getComputeInstanceWithId(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance2"))).thenReturn(instance2);
+        when(gcpInstanceRetrievalService.getInstance(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance1"))).thenReturn(instance1);
+        when(gcpInstanceRetrievalService.getInstance(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance2"))).thenReturn(instance2);
 
         Map<String, List<VolumeRecord>> result = underTest.describeAttachedVolumes(authenticatedContext, cloudStack,
                 List.of("instance1", "instance2"));
@@ -480,6 +484,31 @@ class GcpResourceVolumeConnectorTest {
         assertEquals("/dev/disk/by-id/google-local-ssd-0", result.get("instance2").get(1).device());
         assertEquals(375, result.get("instance2").get(1).size());
         assertEquals("SCRATCH", result.get("instance2").get(1).type());
+    }
+
+    @Test
+    void testGetAttachedVolumeCountPerInstance() throws IOException {
+        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
+        when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(PROJECT_ID);
+
+        CloudStack cloudStack = mockCloudStack();
+        Instance instance1 = createInstanceWithDisks("instance1",
+                bootDisk(),
+                persistentDisk("i1v0", 100L));
+        Instance instance2 = createInstanceWithDisks("instance2",
+                bootDisk(),
+                persistentDisk("i2v0", 300L),
+                localSsdDisk("local-ssd-0", 375L));
+        when(gcpInstanceRetrievalService.getInstance(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance1"))).thenReturn(instance1);
+        when(gcpInstanceRetrievalService.getInstance(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance2"))).thenReturn(instance2);
+
+        Map<String, Integer> result = underTest.getAttachedVolumeCountPerInstance(authenticatedContext, cloudStack,
+                List.of("instance1", "instance2"));
+
+        assertEquals(2, result.size());
+        assertEquals(1, result.get("instance1"));
+        assertEquals(2, result.get("instance2"));
     }
 
     private CloudStack mockCloudStack() {

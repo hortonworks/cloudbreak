@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskPlan;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateRetryService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpInstanceRetrievalService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResizeDiskParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpReusedDisk;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -76,6 +77,9 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
     @Inject
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
+
+    @Inject
+    private GcpInstanceRetrievalService gcpInstanceRetrievalService;
 
     /**
      * Resizes GCP additional/data disks to the requested size. GCP only supports zonal, per-disk resize
@@ -366,22 +370,35 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
     @Override
     public Map<String, List<VolumeRecord>> describeAttachedVolumes(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
             Collection<String> instanceIds) {
+        return fetchInstancesById(authenticatedContext, cloudStack, instanceIds).entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> getAttachedVolumeRecords(entry.getValue())));
+    }
+
+    @Override
+    public Map<String, Integer> getAttachedVolumeCountPerInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+            Collection<String> instanceIds) {
+        return fetchInstancesById(authenticatedContext, cloudStack, instanceIds).entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> (int) entry.getValue().getDisks().stream().filter(disk -> !disk.getBoot()).count()));
+    }
+
+    private Map<String, Instance> fetchInstancesById(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+            Collection<String> instanceIds) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         Compute compute = gcpComputeFactory.buildCompute(credential);
         String projectId = gcpStackUtil.getProjectId(credential);
         Map<String, String> instanceZoneMap = getInstanceZoneMap(cloudStack, instanceIds);
         String defaultZone = getDefaultZone(cloudStack);
-        Map<String, List<VolumeRecord>> result = new HashMap<>();
+        Map<String, Instance> instances = new HashMap<>();
         for (String instanceId : instanceIds) {
             String zone = instanceZoneMap.getOrDefault(instanceId, defaultZone);
             try {
-                Instance instance = gcpStackUtil.getComputeInstanceWithId(compute, projectId, zone, instanceId);
-                result.put(instanceId, getAttachedVolumeRecords(instance));
+                instances.put(instanceId, gcpInstanceRetrievalService.getInstance(compute, projectId, zone, instanceId));
             } catch (IOException e) {
-                throw new CloudbreakServiceException("Failed to describe attached volumes for instance " + instanceId, e);
+                throw new CloudbreakServiceException("Failed to fetch GCP instance " + instanceId, e);
             }
         }
-        return result;
+        return instances;
     }
 
     private Map<String, String> getInstanceZoneMap(CloudStack cloudStack, Collection<String> instanceIds) {
@@ -399,7 +416,7 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
                 .orElseThrow(() -> new CloudbreakServiceException("Cannot determine availability zone from cloud stack"));
     }
 
-    private List<VolumeRecord> getAttachedVolumeRecords(Instance instance) throws IOException {
+    private List<VolumeRecord> getAttachedVolumeRecords(Instance instance) {
         List<VolumeRecord> attachedVolumes = new ArrayList<>();
         List<AttachedDisk> disks = instance.getDisks().stream().filter(d -> !d.getBoot()).toList();
         for (AttachedDisk attachedDisk : disks) {
