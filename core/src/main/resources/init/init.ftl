@@ -91,6 +91,21 @@ export IS_CCM_V2_JUMPGATE_ENABLED=false
 export SECRET_ENCRYPTION_ENABLED=true
 export SECRET_ENCRYPTION_KEY_SOURCE="${secretEncryptionKeySource}"
 </#if>
+<#if saltbootHttpsOnly!false>
+export SALTBOOT_HTTPS_ONLY=true
+</#if>
+<#if saltbootMinTlsVersion?? && saltbootMinTlsVersion?has_content>
+export SALTBOOT_MIN_TLS_VERSION=${saltbootMinTlsVersion}
+</#if>
+<#if saltbootMaxTlsVersion?? && saltbootMaxTlsVersion?has_content>
+export SALTBOOT_MAX_TLS_VERSION=${saltbootMaxTlsVersion}
+</#if>
+<#if saltbootCipherSuites?? && saltbootCipherSuites?has_content>
+export SALTBOOT_CIPHER_SUITES="${saltbootCipherSuites}"
+</#if>
+<#if saltbootFipsOnly!false>
+export SALTBOOT_FIPS_ONLY=true
+</#if>
 
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
 

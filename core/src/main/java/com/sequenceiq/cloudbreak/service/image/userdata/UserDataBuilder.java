@@ -1,19 +1,29 @@
 package com.sequenceiq.cloudbreak.service.image.userdata;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+import static com.sequenceiq.common.api.encryptionprofile.TlsVersion.TLS_1_2;
+import static com.sequenceiq.common.api.encryptionprofile.TlsVersion.TLS_1_3;
 
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterConstants;
@@ -28,9 +38,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 import freemarker.template.Configuration;
@@ -39,6 +52,15 @@ import freemarker.template.TemplateException;
 @Component
 public class UserDataBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataBuilder.class);
+
+    private static final String SALTBOOT_TLS_VERSION_1_2 = "1.2";
+
+    private static final String SALTBOOT_TLS_VERSION_1_3 = "1.3";
+
+    private static final Set<String> FIPS_APPROVED_TLS13_CIPHERS = Set.of("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384");
+
+    @Value("${cb.saltboot.httpsOnly:true}")
+    private boolean saltbootHttpsOnly;
 
     @Inject
     private UserDataBuilderParams userDataBuilderParams;
@@ -51,6 +73,12 @@ public class UserDataBuilder {
 
     @Inject
     private StackEncryptionService stackEncryptionService;
+
+    @Inject
+    private EncryptionProfileService encryptionProfileService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, Variant variant, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmParameters, ProxyConfig proxyConfig,
@@ -84,6 +112,10 @@ public class UserDataBuilder {
         extendModelWithCcmConnectivity(type, ccmConnectivityParameters, model);
         extendModelWithProxyParams(type, proxyConfig, model);
         extendModelAndEncryptSecretsIfSecretEncryptionEnabled(environment, stackId, model);
+        extendModelWithSaltbootTlsVersion(environment, model);
+        if (saltbootHttpsOnly) {
+            model.put("saltbootHttpsOnly", Boolean.TRUE);
+        }
         return build(model);
     }
 
@@ -125,6 +157,66 @@ public class UserDataBuilder {
             model.put("secretEncryptionEnabled", Boolean.TRUE);
             model.put("secretEncryptionKeySource", stackEncryption.getEncryptionKeyLuks());
         }
+    }
+
+    private void extendModelWithSaltbootTlsVersion(DetailedEnvironmentResponse environment, Map<String, Object> model) {
+        String encryptionProfileCrn = environment.getEncryptionProfileCrn();
+        if (StringUtils.isNotBlank(encryptionProfileCrn)
+                && entitlementService.isConfigureEncryptionProfileEnabled(environment.getAccountId())) {
+            EncryptionProfileResponse profile = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
+            determineTlsVersionBound(profile, TLS_1_2, SALTBOOT_TLS_VERSION_1_3).ifPresent(v -> model.put("saltbootMinTlsVersion", v));
+            determineTlsVersionBound(profile, TLS_1_3, SALTBOOT_TLS_VERSION_1_2).ifPresent(v -> model.put("saltbootMaxTlsVersion", v));
+            determineSaltbootCipherSuites(profile).ifPresent(ciphers -> model.put("saltbootCipherSuites", ciphers));
+            if (shouldEnableSaltbootFipsMode(profile)) {
+                model.put("saltbootFipsOnly", Boolean.TRUE);
+            }
+        }
+    }
+
+    private Optional<String> determineTlsVersionBound(EncryptionProfileResponse profile, TlsVersion excluded, String boundValue) {
+        Set<String> tlsVersions = profile.getTlsVersions();
+        if (CollectionUtils.isEmpty(tlsVersions) || tlsVersions.contains(excluded.getVersion())) {
+            return Optional.empty();
+        }
+        TlsVersion other = excluded == TLS_1_2 ? TLS_1_3 : TLS_1_2;
+        if (!tlsVersions.contains(other.getVersion())) {
+            LOGGER.warn("Encryption profile '{}' contains no recognized TLS versions: {}", profile.getName(), tlsVersions);
+            return Optional.empty();
+        }
+        LOGGER.info("Encryption profile '{}' does not allow {}, setting saltboot TLS bound to {}", profile.getName(), excluded.getVersion(), boundValue);
+        return Optional.of(boundValue);
+    }
+
+    private Optional<String> determineSaltbootCipherSuites(EncryptionProfileResponse profile) {
+        Map<String, List<String>> cipherSuites = profile.getCipherSuites();
+        if (MapUtils.isEmpty(cipherSuites)) {
+            return Optional.empty();
+        }
+        List<String> tls12Ciphers = cipherSuites.get(TLS_1_2.getVersion());
+        if (CollectionUtils.isEmpty(tls12Ciphers)) {
+            return Optional.empty();
+        }
+        String joined = String.join(",", tls12Ciphers);
+        LOGGER.info("Encryption profile '{}' specifies TLS 1.2 cipher suites for saltboot: {}", profile.getName(), joined);
+        return Optional.of(joined);
+    }
+
+    // Go's crypto/tls does not allow restricting TLS 1.3 cipher suites via tls.Config.CipherSuites.
+    // GODEBUG=fips140=only is the only runtime mechanism to block TLS_CHACHA20_POLY1305_SHA256.
+    private boolean shouldEnableSaltbootFipsMode(EncryptionProfileResponse profile) {
+        Map<String, List<String>> cipherSuites = profile.getCipherSuites();
+        if (MapUtils.isEmpty(cipherSuites)) {
+            return false;
+        }
+        List<String> tls13Ciphers = cipherSuites.get(TLS_1_3.getVersion());
+        if (CollectionUtils.isEmpty(tls13Ciphers)) {
+            return false;
+        }
+        boolean fipsOnly = Set.copyOf(tls13Ciphers).equals(FIPS_APPROVED_TLS13_CIPHERS);
+        if (fipsOnly) {
+            LOGGER.info("Encryption profile '{}' specifies only FIPS-approved TLS 1.3 ciphers, enabling FIPS mode for saltboot", profile.getName());
+        }
+        return fipsOnly;
     }
 
     private String build(Map<String, Object> model) {
