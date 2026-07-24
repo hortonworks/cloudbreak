@@ -168,8 +168,8 @@ class CertificateExpirationServiceTest {
         when(apiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getExtendedHostStatuses(Optional.of("7.2.18"))).thenReturn(extendedHostStatuses);
-        when(extendedHostStatuses.isAnyUnhealthyOrMissingWithType(HealthCheckType.HOST)).thenReturn(false);
-        when(extendedHostStatuses.isAnyUnhealthyOrMissingWithType(HealthCheckType.CERTIFICATE)).thenReturn(false);
+        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(false);
+        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE)).thenReturn(false);
 
         assertFalse(underTest.validateCertificateFullyExpired(stackDto));
     }
@@ -185,7 +185,7 @@ class CertificateExpirationServiceTest {
         when(apiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getExtendedHostStatuses(Optional.of("7.2.18"))).thenReturn(extendedHostStatuses);
-        when(extendedHostStatuses.isAnyUnhealthyOrMissingWithType(HealthCheckType.HOST)).thenReturn(true);
+        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(true);
         Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
         nodesWithErrors.put("host1.example.com", "stderr=Certificate check error: Certificate is expired, comment=Command failed");
         doThrow(new CloudbreakOrchestratorFailedException("Salt state failed", nodesWithErrors))
@@ -205,7 +205,7 @@ class CertificateExpirationServiceTest {
         when(apiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getExtendedHostStatuses(Optional.of("7.2.18"))).thenReturn(extendedHostStatuses);
-        when(extendedHostStatuses.isAnyUnhealthyOrMissingWithType(HealthCheckType.HOST)).thenReturn(true);
+        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(true);
         doNothing().when(saltService).executeSaltState(eq(stackDto), eq(Set.of("host1.example.com")), any());
 
         assertThrows(SecretRotationException.class, () -> underTest.validateCertificateFullyExpired(stackDto));

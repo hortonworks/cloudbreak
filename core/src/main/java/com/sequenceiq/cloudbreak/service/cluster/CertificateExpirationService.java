@@ -101,7 +101,7 @@ public class CertificateExpirationService {
     public boolean hasUnhealthyHosts(StackDto stackDto) {
         Optional<String> runtimeVersion = runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId());
         ExtendedHostStatuses extendedHostStatuses = apiConnectors.getConnector(stackDto).clusterStatusService().getExtendedHostStatuses(runtimeVersion);
-        return extendedHostStatuses.isAnyUnhealthyOrMissingWithType(HealthCheckType.HOST) ||
-                extendedHostStatuses.isAnyUnhealthyOrMissingWithType(HealthCheckType.CERTIFICATE);
+        return extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST) ||
+                extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE);
     }
 }
