@@ -5,7 +5,6 @@ import static com.sequenceiq.common.model.PrivateEndpointType.USE_PRIVATE_ENDPOI
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -30,11 +29,9 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
 
     private static final String MEMORY_OPTIMIZED = "MemoryOptimized";
 
-    private static final Set<String> GENERAL_PURPOSE_INSTANCE_TYPES = Set.of("Standard_D2s_v3", "Standard_D4s_v3", "Standard_D2ds_v4", "Standard_D4ds_v4",
-            "Standard_D2ds_v5", "Standard_D4ds_v5");
+    private static final String GENERAL_PURPOSE_PREFIX = "Standard_D";
 
-    private static final Set<String> MEMORY_OPTIMIZED_INSTANCE_TYPES = Set.of("Standard_E2s_v3", "Standard_E4s_v3", "Standard_E2ds_v4", "Standard_E4ds_v4",
-            "Standard_E2ds_v5", "Standard_E4ds_v5");
+    private static final String MEMORY_OPTIMIZED_PREFIX = "Standard_E";
 
     @Inject
     private AzureUtils azureUtils;
@@ -107,10 +104,10 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
     }
 
     private String getSkuTierFromSkuName(String skuName) {
-        if (GENERAL_PURPOSE_INSTANCE_TYPES.contains(skuName)) {
-            return GENERAL_PURPOSE;
-        } else if (MEMORY_OPTIMIZED_INSTANCE_TYPES.contains(skuName)) {
+        if (skuName.startsWith(MEMORY_OPTIMIZED_PREFIX)) {
             return MEMORY_OPTIMIZED;
+        } else if (skuName.startsWith(GENERAL_PURPOSE_PREFIX)) {
+            return GENERAL_PURPOSE;
         } else {
             return null;
         }

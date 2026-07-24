@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
@@ -8,10 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.azure.core.management.exception.AdditionalInfo;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDeploymentCapacityError;
 
 @Component
 public class AzureExceptionHandler {
@@ -158,5 +162,33 @@ public class AzureExceptionHandler {
         return exception.getResponse() != null && exception.getResponse().getStatusCode() == expectedHttpStatusCode && error != null &&
                 error.getCode().contains(expectedAzureErrorCode) &&
                 expectedAzureErrorMessage.stream().allMatch(errorMessage -> error.getMessage() != null && error.getMessage().contains(errorMessage));
+    }
+
+    public boolean isCapacityError(ManagementException e) {
+        ManagementError rootError = e.getValue();
+        if (rootError == null) {
+            return false;
+        }
+        Deque<ManagementError> stack = new ArrayDeque<>();
+        stack.push(rootError);
+        while (!stack.isEmpty()) {
+            ManagementError current = stack.pop();
+            if (AzureDeploymentCapacityError.isCapacityErrorCode(current.getCode())) {
+                return true;
+            }
+            if (current.getAdditionalInfo() != null) {
+                for (AdditionalInfo info : current.getAdditionalInfo()) {
+                    if (AzureDeploymentCapacityError.isCapacityErrorCode(info.getType())) {
+                        return true;
+                    }
+                }
+            }
+            if (current.getDetails() != null) {
+                for (ManagementError detail : current.getDetails()) {
+                    stack.push(detail);
+                }
+            }
+        }
+        return false;
     }
 }

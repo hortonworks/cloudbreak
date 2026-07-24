@@ -73,7 +73,7 @@ public class DatabaseServer extends DynamicModel {
         super(params);
         this.serverId = serverId;
         this.flavor = flavor;
-        this.fallbackInstanceTypes = fallbackInstanceTypes == null ? new ArrayList<>() : fallbackInstanceTypes;
+        this.fallbackInstanceTypes = fallbackInstanceTypes != null ? List.copyOf(fallbackInstanceTypes) : List.of();
         this.engine = engine;
         this.connectionDriver = connectionDriver;
         this.connectorJarUrl = connectorJarUrl;
@@ -92,7 +92,7 @@ public class DatabaseServer extends DynamicModel {
         super(builder.params);
         this.serverId = builder.serverId;
         this.flavor = builder.flavor;
-        this.fallbackInstanceTypes = builder.fallbackInstanceTypes == null ? new ArrayList<>() : builder.fallbackInstanceTypes;
+        this.fallbackInstanceTypes = builder.fallbackInstanceTypes != null ? List.copyOf(builder.fallbackInstanceTypes) : List.of();
         this.engine = builder.engine;
         this.connectionDriver = builder.connectionDriver;
         this.connectorJarUrl = builder.connectorJarUrl;

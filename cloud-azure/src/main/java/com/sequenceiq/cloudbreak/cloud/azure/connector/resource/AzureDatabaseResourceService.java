@@ -150,6 +150,9 @@ public class AzureDatabaseResourceService {
     @Inject
     private AzureTemplateDeploymentFailureReasonProvider azureTemplateDeploymentFailureReasonProvider;
 
+    @Inject
+    private AzureDatabaseFallbackDeploymentService azureDatabaseFallbackDeploymentService;
+
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
@@ -159,12 +162,11 @@ public class AzureDatabaseResourceService {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
-        String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
 
         createResourceGroupIfNotExists(ac, stack, client, resourceGroupName, resourceGroupUsage, persistenceNotifier);
 
         createTemplateResource(persistenceNotifier, cloudContext, stackName);
-        List<CloudResource> cloudResources = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, template, client, ac);
+        List<CloudResource> cloudResources = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, stack, cloudContext, client, ac);
 
         AzureDatabaseType databaseType = getAzureDatabaseType(stack);
         if (AzureDatabaseType.FLEXIBLE_SERVER.equals(databaseType)) {
@@ -235,6 +237,43 @@ public class AzureDatabaseResourceService {
                 .collect(Collectors.toList());
     }
 
+    private List<CloudResource> createOrFetchDeployment(PersistenceNotifier persistenceNotifier, String stackName, String resourceGroupName,
+            DatabaseStack stack, CloudContext cloudContext, AzureClient client, AuthenticatedContext ac) {
+        Optional<RuntimeException> exception = Optional.empty();
+        try {
+            if (client.getTemplateDeploymentStatus(resourceGroupName, stackName).isPermanent()) {
+                String effectiveSku = azureDatabaseFallbackDeploymentService.deployWithFallback(
+                        stackName, resourceGroupName, client, cloudContext, stack);
+                if (effectiveSku != null) {
+                    LOGGER.info("DB fallback deployed with effective SKU {} for stack {}", effectiveSku, stackName);
+                    stack.getDatabaseServer().putParameter("effectivelyUsedFlavor", effectiveSku);
+                }
+            } else {
+                try {
+                    waitForDeployment(stackName, resourceGroupName, ac);
+                } catch (CloudConnectorException cce) {
+                    LOGGER.info("Waited deployment {}/{} failed, attempting fallback deployment.", resourceGroupName, stackName);
+                    String effectiveSku = azureDatabaseFallbackDeploymentService.deployWithFallback(
+                            stackName, resourceGroupName, client, cloudContext, stack);
+                    if (effectiveSku != null) {
+                        LOGGER.info("DB fallback deployed with effective SKU {} for stack {}", effectiveSku, stackName);
+                        stack.getDatabaseServer().putParameter("effectivelyUsedFlavor", effectiveSku);
+                    }
+                }
+            }
+        } catch (ManagementException e) {
+            exception = Optional.ofNullable(azureUtils.convertToCloudConnectorException(e, "Database stack provisioning"));
+        } catch (CloudConnectorException cce) {
+            exception = Optional.of(cce);
+        } catch (Exception e) {
+            exception = Optional.of(new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e));
+        }
+        List<CloudResource> resources = fetchAndSaveDeploymentResources(persistenceNotifier, stackName, resourceGroupName, client, ac, exception);
+        LOGGER.debug("Deployment resources: {}", resources);
+        return resources;
+    }
+
+    // Canary path: fail-fast without fallback — fallback would defeat quick-validation purpose
     private List<CloudResource> createOrFetchDeployment(PersistenceNotifier persistenceNotifier, String stackName, String resourceGroupName, String template,
             AzureClient client, AuthenticatedContext ac) {
         Optional<RuntimeException> exception = Optional.empty();

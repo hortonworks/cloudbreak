@@ -182,6 +182,9 @@ class AzureDatabaseResourceServiceTest {
     private AzureTemplateDeploymentFailureReasonProvider azureTemplateDeploymentFailureReasonProvider;
 
     @Mock
+    private AzureDatabaseFallbackDeploymentService azureDatabaseFallbackDeploymentService;
+
+    @Mock
     private Network network;
 
     @InjectMocks
@@ -851,7 +854,6 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
@@ -872,10 +874,9 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
-        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(azureDatabaseFallbackDeploymentService).deployWithFallback(STACK_NAME, RESOURCE_GROUP_NAME, client, cloudContext, databaseStack);
         verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
-        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
         verify(client).createPublicAccessFirewallRuleForFlexibleDb(SERVER_ID, RESOURCE_GROUP_NAME);
         verify(client).addAzureExtensionsToFlexibleServer(RESOURCE_GROUP_NAME, SERVER_ID);
@@ -886,7 +887,6 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
 
         Exception exception = assertThrows(CloudConnectorException.class,
@@ -896,7 +896,6 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
-        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
     }
 
     @Test
@@ -904,7 +903,6 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.MULTIPLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region")));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
@@ -926,11 +924,10 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
-        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(azureDatabaseFallbackDeploymentService).deployWithFallback(STACK_NAME, RESOURCE_GROUP_NAME, client, cloudContext, databaseStack);
         verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
         verify(client).createResourceGroup(eq(RESOURCE_GROUP_NAME), any(), any());
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
-        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
         verify(client).createPublicAccessFirewallRuleForFlexibleDb(SERVER_ID, RESOURCE_GROUP_NAME);
         verify(client).addAzureExtensionsToFlexibleServer(RESOURCE_GROUP_NAME, SERVER_ID);
@@ -941,7 +938,6 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
@@ -958,7 +954,6 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
-        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
         verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
@@ -969,7 +964,6 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
         ResourcesStatePollerResult resourcesStatePollerResult = new ResourcesStatePollerResult(
@@ -977,6 +971,10 @@ class AzureDatabaseResourceServiceTest {
         when(syncPollingScheduler.schedule(null)).thenReturn(resourcesStatePollerResult);
         CloudConnectorException cloudConnectorException = new CloudConnectorException("msg");
         doThrow(cloudConnectorException).when(cloudResourceValidationService).validateResourcesState(cloudContext, resourcesStatePollerResult);
+        ManagementException fallbackException = new ManagementException("fallback failed", mock(HttpResponse.class));
+        when(azureDatabaseFallbackDeploymentService.deployWithFallback(STACK_NAME, RESOURCE_GROUP_NAME, client, cloudContext, databaseStack))
+                .thenThrow(fallbackException);
+        when(azureUtils.convertToCloudConnectorException(fallbackException, "Database stack provisioning")).thenReturn(cloudConnectorException);
 
         CloudConnectorException actualException = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
@@ -989,7 +987,6 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
@@ -997,6 +994,11 @@ class AzureDatabaseResourceServiceTest {
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         doThrow(new Exception("msg")).when(syncPollingScheduler).schedule(null);
         when(databaseStack.getDatabaseServer()).thenReturn(buildDatabaseServer(FLEXIBLE_SERVER));
+        ManagementException fallbackException = new ManagementException("fallback failed", mock(HttpResponse.class));
+        when(azureDatabaseFallbackDeploymentService.deployWithFallback(eq(STACK_NAME), eq(RESOURCE_GROUP_NAME), eq(client), eq(cloudContext),
+                any(DatabaseStack.class))).thenThrow(fallbackException);
+        CloudConnectorException cloudConnectorException = new CloudConnectorException("msg");
+        when(azureUtils.convertToCloudConnectorException(fallbackException, "Database stack provisioning")).thenReturn(cloudConnectorException);
 
         Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
@@ -1008,18 +1010,14 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         ManagementException managementException = new ManagementException("Error", mock(HttpResponse.class));
-        doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        when(azureDatabaseFallbackDeploymentService.deployWithFallback(STACK_NAME, RESOURCE_GROUP_NAME, client, cloudContext, databaseStack))
+                .thenThrow(managementException);
         String exceptionMessage = "Database stack provisioning";
         when(azureUtils.convertToCloudConnectorException(managementException, exceptionMessage))
                 .thenReturn(new CloudConnectorException(exceptionMessage, managementException));
@@ -1035,10 +1033,9 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
-        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(azureDatabaseFallbackDeploymentService).deployWithFallback(STACK_NAME, RESOURCE_GROUP_NAME, client, cloudContext, databaseStack);
         verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
         verify(persistenceNotifier, times(5)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
-        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
         verify(azureUtils).convertToCloudConnectorException(managementException, exceptionMessage);
         verify(azureCloudResourceService).getDeploymentCloudResources(Optional.of(deployment));
@@ -1049,18 +1046,14 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
-        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(Optional.of(deployment));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         AzureException azureException = new AzureException("Error");
-        doThrow(azureException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        when(azureDatabaseFallbackDeploymentService.deployWithFallback(STACK_NAME, RESOURCE_GROUP_NAME, client, cloudContext, databaseStack))
+                .thenThrow(azureException);
         ArrayList<CloudResource> resources = new ArrayList<>();
         resources.add(mock(CloudResource.class));
         when(azureCloudResourceService.getDeploymentCloudResources(Optional.of(deployment))).thenReturn(resources);
@@ -1073,10 +1066,9 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
-        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(azureDatabaseFallbackDeploymentService).deployWithFallback(STACK_NAME, RESOURCE_GROUP_NAME, client, cloudContext, databaseStack);
         verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
         verify(persistenceNotifier, times(5)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
-        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
         verify(azureCloudResourceService).getDeploymentCloudResources(Optional.of(deployment));
     }
