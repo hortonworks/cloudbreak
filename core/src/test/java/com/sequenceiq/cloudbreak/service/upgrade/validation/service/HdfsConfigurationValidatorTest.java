@@ -93,7 +93,8 @@ class HdfsConfigurationValidatorTest {
     @Test
     void testValidateShouldNotThrowExceptionWhenTheHdfsServiceIsNotPresentInTheCluster() {
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "RANGER")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithOnlySso(BLUEPRINT_TEXT))
+                .thenReturn(createSupportedServices(Set.of("HIVE", "RANGER")));
 
         doAs(ACTOR, () -> underTest.validate(createRequest(true)));
 
@@ -106,7 +107,8 @@ class HdfsConfigurationValidatorTest {
         String expectedConfig = HDFS_REPLACE_DATANODE_ON_FAILURE_POLICY_PROPERTY + HDFS_DATANODE_ON_FAILURE_ENABLED_PROPERTY;
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithOnlySso(BLUEPRINT_TEXT))
+                .thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.of(expectedConfig));
 
@@ -120,7 +122,8 @@ class HdfsConfigurationValidatorTest {
     void testValidateShouldThrowExceptionWhenTheRequiredConfigsAreNotPresent() {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithOnlySso(BLUEPRINT_TEXT))
+                .thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.empty());
 
@@ -138,7 +141,8 @@ class HdfsConfigurationValidatorTest {
     void testValidateShouldThrowExceptionWhenOnlyThePolicyTypeIsPresent() {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithOnlySso(BLUEPRINT_TEXT))
+                .thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.of(HDFS_REPLACE_DATANODE_ON_FAILURE_POLICY_PROPERTY));
 
@@ -154,7 +158,8 @@ class HdfsConfigurationValidatorTest {
     void testValidateShouldThrowExceptionWhenOnlyThePolicyIsPresent() {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithOnlySso(BLUEPRINT_TEXT))
+                .thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.of(HDFS_DATANODE_ON_FAILURE_ENABLED_PROPERTY));
 

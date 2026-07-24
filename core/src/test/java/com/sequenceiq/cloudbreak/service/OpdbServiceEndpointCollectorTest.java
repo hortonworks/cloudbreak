@@ -178,7 +178,7 @@ public class OpdbServiceEndpointCollectorTest {
                     .collect(Collectors.toList());
         });
         when(clouderaManagerProductsProvider.findCdhProduct(anySet())).thenReturn(Optional.of(new ClouderaManagerProduct().withVersion("7.3.1-1.cdh7.3.1.p0")));
-        when(templateGeneratorService.getServicesByBlueprint(any())).thenReturn(new SupportedServices());
+        when(templateGeneratorService.getServicesByBlueprintWithOnlySso(any())).thenReturn(new SupportedServices());
     }
 
     Collection<ExposedService> filterSupportedKnoxServices() {

@@ -106,6 +106,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.parcel.ManifestMapper;
 import com.sequenceiq.cloudbreak.service.parcel.ManifestRetrieverService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityRetrievalService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
@@ -773,6 +774,7 @@ public class DistroXUpgradeRetrievalComponentTest {
             ImageComponentVersionsComparator.class,
             OsChangeService.class,
             LockedComponentChecker.class,
+            ManifestMapper.class,
             StackVersionMatcher.class,
             CmVersionMatcher.class,
             ParcelMatcher.class,

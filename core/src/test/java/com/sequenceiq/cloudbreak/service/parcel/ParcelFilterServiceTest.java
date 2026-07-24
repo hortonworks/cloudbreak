@@ -93,7 +93,8 @@ public class ParcelFilterServiceTest {
     @MethodSource("data")
     void test(String description, String parcelUrl, ManifestStatus status, String serviceNameInTheBlueprint, String manifest, int parcelCount,
             Set<String> parcelNamesFromImage) {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(serviceNameInTheBlueprint)));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(getSupportedServices(Set.of(serviceNameInTheBlueprint)));
         when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(parcelNamesFromImage);
         if (!parcelNamesFromImage.isEmpty()) {
             when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(status, getManifest(manifest)));
@@ -108,7 +109,8 @@ public class ParcelFilterServiceTest {
         String parcelUrl = "http://parcel1.com/";
         String parcelName = "NIFI";
         ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(parcelName)));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(getSupportedServices(Set.of(parcelName)));
         when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of(parcelName));
         when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("otherService1")));
 
@@ -120,7 +122,8 @@ public class ParcelFilterServiceTest {
         String parcelUrl = "http://parcel1.com/";
         String parcelName = "CUSTOM";
         ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("NIFI")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(getSupportedServices(Set.of("NIFI")));
         when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("NIFI"));
         when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest(parcelName)));
 
@@ -136,14 +139,16 @@ public class ParcelFilterServiceTest {
         supportedService.setName(null);
         SupportedServices supportedServices = new SupportedServices();
         supportedServices.setServices(Set.of(supportedService));
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(supportedServices);
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(supportedServices);
 
         assertEquals(1, underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, Set.of(parcel), getBlueprint()).size());
     }
 
     @Test
     void testShouldAddOnlyCdhParcelWhenTheRequiredServicesAreAvailableInTheCdhParcelAndOtherParcelsAreNotAccessible() {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(getSupportedServices(Set.of("HDFS", "HIVE")));
         when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("HDFS", "HIVE", "SPARK", "CDH", "NIFI"));
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
@@ -157,7 +162,8 @@ public class ParcelFilterServiceTest {
 
     @Test
     void testShouldAddAllParcelsInTheRequestWhenTheImageIsABaseImage() {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(getSupportedServices(Set.of("HDFS", "HIVE")));
         when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Collections.emptySet());
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
@@ -170,7 +176,8 @@ public class ParcelFilterServiceTest {
 
     @Test
     void testShouldAddCdhAndNifiParcelWhenTheRequiredServicesAreNotAvailableInTheCdhParcelAndOtherParcelsAreNotAccessible() {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE", "SPARK")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(getSupportedServices(Set.of("HDFS", "HIVE", "SPARK")));
         when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("HDFS", "HIVE", "SPARK", "CDH", "NIFI"));
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
@@ -186,7 +193,8 @@ public class ParcelFilterServiceTest {
 
     @Test
     void testShouldAddNotAccessibleParcelsToRequiredParcelsWhenReadRepoManifestRetriesAreExhausted() {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE", "SPARK")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(BLUEPRINT_TEXT))
+                .thenReturn(getSupportedServices(Set.of("HDFS", "HIVE", "SPARK")));
         when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("HDFS", "HIVE", "SPARK", "CDH", "NIFI"));
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");

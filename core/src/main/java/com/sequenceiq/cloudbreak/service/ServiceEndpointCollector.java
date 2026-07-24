@@ -157,7 +157,7 @@ public class ServiceEndpointCollector {
     }
 
     private void overrideDisplayProperties(Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap, String blueprintText) {
-        SupportedServices servicesByBlueprint = clusterTemplateGeneratorService.getServicesByBlueprint(blueprintText);
+        SupportedServices servicesByBlueprint = clusterTemplateGeneratorService.getServicesByBlueprintWithOnlySso(blueprintText);
         // override UI related informations
         clusterExposedServiceMap.values().stream().flatMap(Collection::stream).forEach(exposedServiceResponse ->
                 servicesByBlueprint.getServices().stream()

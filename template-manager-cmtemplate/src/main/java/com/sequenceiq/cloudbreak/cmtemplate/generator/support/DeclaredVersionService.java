@@ -28,14 +28,14 @@ public class DeclaredVersionService {
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
-    public SupportedServices collectDeclaredVersions(String blueprintText) {
+    public SupportedServices collectDeclaredVersions(String blueprintText, boolean includeServicesWithNonSsoSupport) {
         SupportedServices supportedServices = new SupportedServices();
         supportedServices.setServices(new HashSet<>());
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
         Collection<ExposedService> exposedServices = exposedServiceCollector.getExposedServices()
                 .stream()
-                .filter(e -> e.isSsoSupported())
-                .filter(e -> !e.isApiOnly())
+                .filter(e -> includeServicesWithNonSsoSupport || e.isSsoSupported())
+                .filter(e -> includeServicesWithNonSsoSupport || !e.isApiOnly())
                 .collect(Collectors.toSet());
 
         for (ApiClusterTemplateService service : cmTemplateProcessor.getTemplate().getServices()) {

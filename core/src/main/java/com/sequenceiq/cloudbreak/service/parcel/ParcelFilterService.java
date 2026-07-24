@@ -73,7 +73,9 @@ public class ParcelFilterService {
 
     private Set<String> getServiceNamesInBlueprint(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintJsonText();
-        Set<SupportedService> supportedServices = clusterTemplateGeneratorService.getServicesByBlueprint(blueprintText).getServices();
+        Set<SupportedService> supportedServices = clusterTemplateGeneratorService
+                .getServicesByBlueprintWithSsoAndNonSso(blueprintText)
+                .getServices();
         return supportedServices.stream()
                 .map(SupportedService::getName)
                 .collect(Collectors.toSet());

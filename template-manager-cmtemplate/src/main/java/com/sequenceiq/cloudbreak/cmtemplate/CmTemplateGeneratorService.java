@@ -71,7 +71,15 @@ public class CmTemplateGeneratorService {
         return supportedVersionService.collectSupportedVersions(versions);
     }
 
-    public SupportedServices getServicesByBlueprint(String blueprintText) {
-        return declaredVersionService.collectDeclaredVersions(blueprintText);
+    public SupportedServices getServicesByBlueprintWithOnlySso(String blueprintText) {
+        return getServicesByBlueprint(blueprintText, false);
+    }
+
+    public SupportedServices getServicesByBlueprintWithSsoAndNonSso(String blueprintText) {
+        return getServicesByBlueprint(blueprintText, true);
+    }
+
+    private SupportedServices getServicesByBlueprint(String blueprintText, boolean includeServicesWithNonSsoSupport) {
+        return declaredVersionService.collectDeclaredVersions(blueprintText, includeServicesWithNonSsoSupport);
     }
 }

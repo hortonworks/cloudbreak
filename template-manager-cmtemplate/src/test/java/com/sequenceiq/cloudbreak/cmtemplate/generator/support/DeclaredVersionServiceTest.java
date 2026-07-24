@@ -75,7 +75,7 @@ class DeclaredVersionServiceTest {
         when(cmTemplateProcessor.getTemplate()).thenReturn(apiClusterTemplate);
         when(exposedServiceCollector.getExposedServices()).thenReturn(List.of(exposedService));
 
-        SupportedServices supportedServices = underTest.collectDeclaredVersions(blueprintText);
+        SupportedServices supportedServices = underTest.collectDeclaredVersions(blueprintText, false);
 
         assertEquals(1, supportedServices.getServices().size());
         SupportedService supportedService = supportedServices.getServices().iterator().next();
@@ -122,7 +122,7 @@ class DeclaredVersionServiceTest {
         when(cmTemplateProcessor.getTemplate()).thenReturn(apiClusterTemplate);
         when(exposedServiceCollector.getExposedServices()).thenReturn(List.of(exposedService));
 
-        SupportedServices supportedServices = underTest.collectDeclaredVersions(blueprintText);
+        SupportedServices supportedServices = underTest.collectDeclaredVersions(blueprintText, false);
 
         assertEquals(1, supportedServices.getServices().size());
         SupportedService supportedService = supportedServices.getServices().iterator().next();

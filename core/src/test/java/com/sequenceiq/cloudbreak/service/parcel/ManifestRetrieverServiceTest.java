@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.parcel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +19,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,8 +44,16 @@ public class ManifestRetrieverServiceTest {
     @Mock
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
+    @Mock
+    private ManifestMapper manifestMapper;
+
     @InjectMocks
     private ManifestRetrieverService underTest;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(manifestMapper.map(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
 
     @Test
     void testReadRepoManifestShouldReturnManifest() {

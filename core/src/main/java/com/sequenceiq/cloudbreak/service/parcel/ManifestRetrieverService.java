@@ -40,6 +40,9 @@ public class ManifestRetrieverService {
     @Inject
     private RestClientFactory restClientFactory;
 
+    @Inject
+    private ManifestMapper manifestMapper;
+
     @Cacheable(cacheNames = "parcelMetadataCache", key = "#baseUrl")
     @Retryable(value = ProcessingException.class, maxAttempts = MAX_RETRIES,
             backoff = @Backoff(delay = MANIFEST_READ_TIMEOUT_IN_MS))
@@ -54,6 +57,13 @@ public class ManifestRetrieverService {
             addPaywallCredentialsIfNecessary(baseUrl, target);
             Response response = target.request().get();
             Manifest manifest = readResponse(target, response);
+            manifest.getParcels().forEach(parcel -> {
+                parcel.getComponents().forEach(component -> {
+                    // Remap component names before caching so all consumers see normalized names
+                    // Asked opensearch team to fix but the already created images has the wrong manifest
+                    component.setName(manifestMapper.map(component.getName()));
+                });
+            });
             return ImmutablePair.of(ManifestStatus.SUCCESS, manifest);
         } catch (ProcessingException e) {
             if (PaywallCredentialPopulator.ARCHIVE_URL_PATTERN.matcher(baseUrl).find()) {

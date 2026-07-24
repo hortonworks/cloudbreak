@@ -123,7 +123,7 @@ public class ServiceEndpointCollectorTest {
         lenient().when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
         lenient().when(exposedServiceCollector.getNameNodeService()).thenReturn(exposedService("NAMENODE"));
         lenient().when(exposedServiceCollector.getHBaseJarsService()).thenReturn(exposedService("HBASEJARS"));
-        lenient().when(templateGeneratorService.getServicesByBlueprint(any())).thenReturn(new SupportedServices());
+        lenient().when(templateGeneratorService.getServicesByBlueprintWithOnlySso(any())).thenReturn(new SupportedServices());
     }
 
     @Test
@@ -199,7 +199,7 @@ public class ServiceEndpointCollectorTest {
         supportedService.setDisplayName("display");
         supportedService.setName("HUE");
         supportedServices.setServices(Set.of(supportedService));
-        when(templateGeneratorService.getServicesByBlueprint(any())).thenReturn(supportedServices);
+        when(templateGeneratorService.getServicesByBlueprintWithOnlySso(any())).thenReturn(supportedServices);
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(stack, "10.0.0.1");
