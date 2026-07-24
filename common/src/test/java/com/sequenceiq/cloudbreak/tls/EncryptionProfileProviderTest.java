@@ -423,6 +423,44 @@ public class EncryptionProfileProviderTest {
         assertThat(assertValue).isEqualTo("ECDHE-RSA-AES256-GCM-SHA384");
     }
 
+    @Test
+    public void testGetDirectoryServerCipherSuitesTls13Only() {
+        Map<String, List<String>> userEncryptionProfileMap = Map.of(
+                TlsVersion.TLS_1_3.getVersion(), List.of("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"));
+
+        String assertValue = underTest.getDirectoryServerCipherSuites(userEncryptionProfileMap);
+
+        assertThat(assertValue).isEqualTo("TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384");
+    }
+
+    @Test
+    public void testGetDirectoryServerCipherSuitesTls13AndTls12PutsTls13First() {
+        Map<String, List<String>> userEncryptionProfileMap = Map.of(
+                TlsVersion.TLS_1_2.getVersion(), List.of("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
+                TlsVersion.TLS_1_3.getVersion(), List.of("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"));
+
+        String assertValue = underTest.getDirectoryServerCipherSuites(userEncryptionProfileMap);
+
+        assertThat(assertValue).isEqualTo("TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+    }
+
+    @Test
+    public void testGetDirectoryServerCipherSuitesUsesIanaNamesForTls12() {
+        Map<String, List<String>> userEncryptionProfileMap = Map.of(
+                TlsVersion.TLS_1_2.getVersion(), List.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"));
+
+        String assertValue = underTest.getDirectoryServerCipherSuites(userEncryptionProfileMap);
+
+        assertThat(assertValue).isEqualTo("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256");
+    }
+
+    @Test
+    public void testGetDirectoryServerCipherSuitesWithEmptyMap() {
+        String assertValue = underTest.getDirectoryServerCipherSuites(Map.of());
+
+        assertThat(assertValue).isEmpty();
+    }
+
     private Map<String, List<String>> createLegacyCipherSuitesMap(CipherSuitesLimitType cipherSuitesLimitType) {
         return Map.of(TlsVersion.TLS_1_2.getVersion(),
                 EncryptionProfileConverter.toListString(cipherSuiteProvider.getLegacyCipherSuitesByLimitType(cipherSuitesLimitType)));

@@ -23,6 +23,8 @@ public class EncryptionProfileProvider {
 
     private static final String COLON_SEPARATOR = ":";
 
+    private static final String COMMA_SEPARATOR = ",";
+
     private final CipherSuiteProvider cipherSuiteProvider;
 
     public EncryptionProfileProvider(CipherSuiteProvider cipherSuiteProvider) {
@@ -96,12 +98,28 @@ public class EncryptionProfileProvider {
     }
 
     private String getCipherSuiteByTlsVersion(String tlsVersion, Map<String, List<String>> userEncryptionProfileMap, boolean ianaName) {
+        return getCipherSuiteByTlsVersion(tlsVersion, userEncryptionProfileMap, ianaName, COLON_SEPARATOR);
+    }
+
+    private String getCipherSuiteByTlsVersion(String tlsVersion, Map<String, List<String>> userEncryptionProfileMap, boolean ianaName, String separator) {
         String cipherSuites = StringUtils.EMPTY;
         if (userEncryptionProfileMap.containsKey(tlsVersion)) {
             List<String> ciphersList = userEncryptionProfileMap.get(tlsVersion);
-            cipherSuites = EncryptionProfileConverter.fromListToString(ciphersList, ianaName, COLON_SEPARATOR);
+            cipherSuites = EncryptionProfileConverter.fromListToString(ciphersList, ianaName, separator);
         }
         return cipherSuites;
+    }
+
+    /**
+     * Returns the encryption profile's full cipher-suite set (TLS 1.3 followed by TLS 1.2) as a comma-separated list of
+     * IANA cipher names. This is the naming scheme and separator that the 389-ds directory server / NSS expects for
+     * {@code nsSSL3Ciphers} and {@code dsconf security ciphers} (for TLS 1.3 the NSS names are identical to the IANA
+     * names). Used to feed the ns-slapd TLS hardening state from the same profile that drives the nginx front end.
+     */
+    public String getDirectoryServerCipherSuites(Map<String, List<String>> userEncryptionProfileMap) {
+        String tls13Ciphers = getCipherSuiteByTlsVersion(TLS_1_3.getVersion(), userEncryptionProfileMap, true, COMMA_SEPARATOR);
+        String tls12Ciphers = getCipherSuiteByTlsVersion(TLS_1_2.getVersion(), userEncryptionProfileMap, true, COMMA_SEPARATOR);
+        return EncryptionProfileConverter.mergeCipherSuites(tls13Ciphers, tls12Ciphers, COMMA_SEPARATOR);
     }
 
     public String getDefaultTls12CipherSuites(boolean useIanaName) {

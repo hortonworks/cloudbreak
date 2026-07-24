@@ -10,9 +10,11 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileConverter;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 
 public class FreeIpaEncryptionConfigView {
+
     private final String tlsVersionsSpaceSeparated;
 
     private final String tlsCipherSuites;
@@ -23,6 +25,12 @@ public class FreeIpaEncryptionConfigView {
 
     private final String tls13CipherSuites;
 
+    private final String dirsrvTlsMinVersion;
+
+    private final String dirsrvTlsMaxVersion;
+
+    private final String dirsrvCipherSuites;
+
     public FreeIpaEncryptionConfigView(EncryptionProfileProvider encryptionProfileProvider, EncryptionProfileResponse encryptionProfileResponse) {
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
@@ -32,6 +40,23 @@ public class FreeIpaEncryptionConfigView {
         tlsCipherSuitesRedHat8 = encryptionProfileProvider.getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, legacyEncryptionProfile);
         tls12CipherSuites = encryptionProfileProvider.getDefaultTls12CipherSuites(false);
         tls13CipherSuites = encryptionProfileProvider.getTls13CipherSuites(userEncryptionProfileMap);
+        dirsrvTlsMinVersion = resolveDirsrvMinTlsVersion(userTlsVersions);
+        dirsrvTlsMaxVersion = resolveDirsrvMaxTlsVersion(userTlsVersions);
+        dirsrvCipherSuites = encryptionProfileProvider.getDirectoryServerCipherSuites(userEncryptionProfileMap);
+    }
+
+    private String resolveDirsrvMinTlsVersion(Set<String> userTlsVersions) {
+        if (userTlsVersions.contains(TlsVersion.TLS_1_2.getVersion())) {
+            return DirectoryServerTlsVersion.TLS_1_2.getVersion();
+        }
+        return userTlsVersions.contains(TlsVersion.TLS_1_3.getVersion()) ? DirectoryServerTlsVersion.TLS_1_3.getVersion() : "";
+    }
+
+    private String resolveDirsrvMaxTlsVersion(Set<String> userTlsVersions) {
+        if (userTlsVersions.contains(TlsVersion.TLS_1_3.getVersion())) {
+            return DirectoryServerTlsVersion.TLS_1_3.getVersion();
+        }
+        return userTlsVersions.contains(TlsVersion.TLS_1_2.getVersion()) ? DirectoryServerTlsVersion.TLS_1_2.getVersion() : "";
     }
 
     public Map<String, Object> toMap() {
@@ -41,6 +66,9 @@ public class FreeIpaEncryptionConfigView {
         result.put("tlsCipherSuitesRedHat8", tlsCipherSuitesRedHat8);
         result.put("tls12CipherSuites", tls12CipherSuites);
         result.put("tls13CipherSuites", tls13CipherSuites);
+        result.put("dirsrvTlsMinVersion", dirsrvTlsMinVersion);
+        result.put("dirsrvTlsMaxVersion", dirsrvTlsMaxVersion);
+        result.put("dirsrvCipherSuites", dirsrvCipherSuites);
         return result;
     }
 }

@@ -82,11 +82,6 @@ net.ipv6.conf.lo.disable_ipv6:
     - template: jinja
 {%- endif %}
 
-disable_old_tls_for_ldap_server:
-  file.append:
-    - name: /usr/share/ipa/updates/20-sslciphers.update
-    - text: 'only:sslVersionMin: TLS1.2'
-
 /opt/salt/scripts/initdnarange.py:
   file.managed:
     - makedirs: True
