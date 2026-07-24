@@ -7,7 +7,9 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerSetupService.POLICY_NA
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerSetupService.POLICY_VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -74,6 +76,9 @@ import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapp
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -167,6 +172,9 @@ class ClouderaManagerSetupServiceTest {
     @Mock
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
     @InjectMocks
     private ClouderaManagerSetupService underTest;
 
@@ -193,6 +201,7 @@ class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "blueprintUtils", blueprintUtils);
         ReflectionTestUtils.setField(underTest, "entitlementService", entitlementService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerCommandsService", clouderaManagerCommandsService);
+        ReflectionTestUtils.setField(underTest, "cmTemplateProcessorFactory", cmTemplateProcessorFactory);
     }
 
     @Test
@@ -651,6 +660,62 @@ class ClouderaManagerSetupServiceTest {
                 anyString()
         );
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
+    }
+
+    @Test
+    void testUpdateConfigDisablesFasterFirstRunWhenRazEnabledDatalakeWithoutHdfs() throws Exception {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
+        Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
+        cluster.setRangerRazEnabled(true);
+        cluster.setExtendedBlueprintText("{\"services\":[]}");
+        CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(processor);
+        when(processor.isRoleTypePresentInService(HdfsRoles.HDFS, List.of(HdfsRoles.NAMENODE))).thenReturn(false);
+
+        underTest.updateConfig();
+
+        ArgumentCaptor<ApiConfigList> captor = ArgumentCaptor.forClass(ApiConfigList.class);
+        verify(clouderaManagerResourceApi).updateConfig(captor.capture(), anyString());
+        assertTrue(captor.getValue().getItems().stream()
+                .anyMatch(c -> "enable_faster_bootstrap".equals(c.getName()) && "false".equals(c.getValue())));
+    }
+
+    @Test
+    void testUpdateConfigDoesNotDisableFasterFirstRunWhenRazDisabled() throws Exception {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
+        Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
+        cluster.setRangerRazEnabled(false);
+
+        underTest.updateConfig();
+
+        ArgumentCaptor<ApiConfigList> captor = ArgumentCaptor.forClass(ApiConfigList.class);
+        verify(clouderaManagerResourceApi).updateConfig(captor.capture(), anyString());
+        assertFalse(captor.getValue().getItems().stream()
+                .anyMatch(c -> "enable_faster_bootstrap".equals(c.getName())));
+    }
+
+    @Test
+    void testUpdateConfigDoesNotDisableFasterFirstRunWhenHdfsPresent() throws Exception {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
+        Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
+        cluster.setRangerRazEnabled(true);
+        cluster.setExtendedBlueprintText("{\"services\":[]}");
+        CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(processor);
+        when(processor.isRoleTypePresentInService(HdfsRoles.HDFS, List.of(HdfsRoles.NAMENODE))).thenReturn(true);
+
+        underTest.updateConfig();
+
+        ArgumentCaptor<ApiConfigList> captor = ArgumentCaptor.forClass(ApiConfigList.class);
+        verify(clouderaManagerResourceApi).updateConfig(captor.capture(), anyString());
+        assertFalse(captor.getValue().getItems().stream()
+                .anyMatch(c -> "enable_faster_bootstrap".equals(c.getName())));
     }
 
     @Test

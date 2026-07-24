@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupName;
@@ -19,7 +21,6 @@ import com.sequenceiq.common.api.type.InstanceGroupName;
  */
 @Component
 public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider {
-    private static final Set<String> ADDITIONAL_SERVICE_HOSTGROUPS = Set.of(InstanceGroupName.MASTER.getName(), InstanceGroupName.RAZ_SCALE_OUT.getName());
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
@@ -33,13 +34,27 @@ public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         if (isConfigurationNeeded(cmTemplateProcessor, source)) {
             ApiClusterTemplateService coreSettings = createTemplate();
-            Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
+            Set<String> targetGroups = resolveTargetGroups(cmTemplateProcessor, source);
 
-            return hostgroupViews.stream()
-                    .filter(hg -> ADDITIONAL_SERVICE_HOSTGROUPS.contains(hg.getName().toLowerCase()))
+            return source.getHostgroupViews().stream()
+                    .filter(hg -> targetGroups.contains(hg.getName()))
                     .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
         }
         return Map.of();
+    }
+
+    /**
+     * RAZ is co-located with the host group that runs Ranger Admin (the {@code master} group in legacy shapes,
+     * the {@code gateway} group in the no-HDFS/HBase Enterprise shape), plus the {@code raz_scale_out} group when
+     * the template defines it. Resolving by role placement avoids hardcoding group names.
+     */
+    private Set<String> resolveTargetGroups(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        Set<String> groups = new HashSet<>(cmTemplateProcessor.getHostGroupsWithComponent(RangerRoles.RANGER_ADMIN));
+        source.getHostgroupViews().stream()
+                .map(HostgroupView::getName)
+                .filter(InstanceGroupName.RAZ_SCALE_OUT.getName()::equals)
+                .forEach(groups::add);
+        return groups;
     }
 
     public Set<String> getHostGroups(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {

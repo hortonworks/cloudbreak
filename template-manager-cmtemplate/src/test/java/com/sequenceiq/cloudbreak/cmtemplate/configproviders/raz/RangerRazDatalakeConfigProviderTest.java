@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -9,15 +10,18 @@ import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoles;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -26,6 +30,7 @@ import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
+@ExtendWith(MockitoExtension.class)
 public class RangerRazDatalakeConfigProviderTest {
 
     private final RangerRazDatalakeConfigProvider configProvider = new RangerRazDatalakeConfigProvider();
@@ -161,6 +166,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withHostgroupViews(Set.of(master, idbroker))
                 .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
+        when(cmTemplateProcessor.getHostGroupsWithComponent(RangerRoles.RANGER_ADMIN)).thenReturn(Set.of("master"));
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
         ApiClusterTemplateService service = additionalServices.get("master");
@@ -193,6 +199,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withHostgroupViews(Set.of(master, idbroker, razHG))
                 .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
+        when(cmTemplateProcessor.getHostGroupsWithComponent(RangerRoles.RANGER_ADMIN)).thenReturn(Set.of("master"));
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
         ApiClusterTemplateService razHGService = additionalServices.get("raz_scale_out");
@@ -279,5 +286,36 @@ public class RangerRazDatalakeConfigProviderTest {
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
         assertEquals(0, additionalServices.size());
+    }
+
+    @Test
+    @DisplayName("New Enterprise SDX shape (no master group, Ranger Admin on gateway) attaches RAZ to the gateway group")
+    void getAdditionalServicesWhenRazIsEnabledAndRangerAdminOnGateway() {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.2.2");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setEnableRangerRaz(true);
+        HostgroupView gateway = new HostgroupView("gateway", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView idbroker = new HostgroupView("idbroker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(CloudPlatform.AWS)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(gateway, idbroker))
+                .withDataLakeView(new DatalakeView(true, null, false))
+                .build();
+        when(cmTemplateProcessor.getHostGroupsWithComponent(RangerRoles.RANGER_ADMIN)).thenReturn(Set.of("gateway"));
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        ApiClusterTemplateService gatewayService = additionalServices.get("gateway");
+        List<ApiClusterTemplateRoleConfigGroup> gatewayRoleConfigGroups = gatewayService.getRoleConfigGroups();
+        assertAll(
+                () -> assertEquals(1, additionalServices.size()),
+                () -> assertEquals("RANGER_RAZ", gatewayService.getServiceType()),
+                () -> assertEquals("ranger-RANGER_RAZ", gatewayService.getRefName()),
+                () -> assertEquals("RANGER_RAZ_SERVER", gatewayRoleConfigGroups.get(0).getRoleType()),
+                () -> assertEquals("ranger-RANGER_RAZ_SERVER", gatewayRoleConfigGroups.get(0).getRefName())
+        );
     }
 }

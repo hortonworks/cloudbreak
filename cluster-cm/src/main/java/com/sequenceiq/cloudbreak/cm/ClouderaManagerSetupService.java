@@ -68,6 +68,8 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -107,6 +109,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private static final String SDX_ENTERPRISE_DATALAKE_TEXT = "enterprise-datalake";
 
     private static final int BAD_REQUEST_ERROR_CODE = 400;
+
+    private static final String ENABLE_FASTER_BOOTSTRAP = "enable_faster_bootstrap";
 
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
@@ -161,6 +165,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private BlueprintUtils blueprintUtils;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
@@ -390,6 +397,11 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     .addItemsItem(removeRemoteParcelRepos())
                     .addItemsItem(setHeader(stackType))
                     .addItemsItem(disableGoogleAnalytics());
+            if (shouldDisableFasterFirstRun()) {
+                LOGGER.info("RAZ-enabled Datalake without HDFS/HBase: disabling Faster First Run "
+                        + "(enable_faster_bootstrap=false) so ZooKeeper starts before RANGER_RAZ. See CB-33827, OPSAPS-79103.");
+                apiConfigList.addItemsItem(new ApiConfig().name(ENABLE_FASTER_BOOTSTRAP).value("false"));
+            }
             clouderaManagerResourceApi.updateConfig(apiConfigList, "Updated configurations.");
             updateClouderaManagerMonitoringConfig();
         } catch (ApiException e) {
@@ -397,6 +409,25 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (Exception e) {
             throw mapException(e);
         }
+    }
+
+    /**
+     * The lean Enterprise SDX shape (Datalake with RAZ, no HDFS/HBASE) uses STUB_DFS as the DFS provider. Because
+     * STUB_DFS is daemonless, Faster First Run drops the create-dir -> DFS-start ordering edge and starts RANGER_RAZ
+     * before ZooKeeper; RAZ never gets its ZooKeeper session, so the create-dir first-run commands fail. Disabling
+     * Faster First Run restores dependency-tier ordering (ZooKeeper starts before RANGER_RAZ). See CB-33827, OPSAPS-79103.
+     */
+    private boolean shouldDisableFasterFirstRun() {
+        if (StackType.DATALAKE != stack.getType() || !stack.getCluster().isRangerRazEnabled()) {
+            return false;
+        }
+        String blueprintText = stack.getBlueprintJsonText();
+        if (blueprintText == null || blueprintText.isBlank()) {
+            return false;
+        }
+        boolean hdfsPresent = cmTemplateProcessorFactory.get(blueprintText)
+                .isRoleTypePresentInService(HdfsRoles.HDFS, List.of(HdfsRoles.NAMENODE));
+        return !hdfsPresent;
     }
 
     private void updateClouderaManagerMonitoringConfig() throws ApiException {
