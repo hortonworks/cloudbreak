@@ -5,8 +5,13 @@
 
 set -euo pipefail
 
-PARCEL_LIB=/opt/cloudera/parcels/CDH/lib/livy3
+PARCEL_LIB_DIR=/opt/cloudera/parcels/CDH/lib/livy3
 TARGET_ROOT=/var/lib/livy-local-jars
+
+if [[ ! -d $PARCEL_LIB_DIR ]]; then
+    echo "PARCEL_LIB_DIR $PARCEL_LIB_DIR does not exist; skipping Livy local-jar generation" >&2
+    exit 0
+fi
 
 # ---- host arch detection ----------------------------------------------------
 # Netty classifier convention: aarch_64 (underscore), not aarch64.
@@ -81,8 +86,8 @@ echo "removing previous Livy local-jar symlinks"
 rm -rf ${TARGET_ROOT}/*
 
 echo "generating Livy local-jar symlinks against $(readlink -f /opt/cloudera/parcels/CDH)" >&2
-populate "$PARCEL_LIB/rsc-jars"       "$TARGET_ROOT/rsc"
-populate "$PARCEL_LIB/repl_2.12-jars" "$TARGET_ROOT/repl"
+populate "$PARCEL_LIB_DIR/rsc-jars"       "$TARGET_ROOT/rsc"
+populate "$PARCEL_LIB_DIR/repl_2.12-jars" "$TARGET_ROOT/repl"
 
 echo >&2
 echo "# ---------- Livy Server for Spark 3 Advanced Configuration Snippet (Safety Valve) for livy3-conf/livy.conf ----------"
