@@ -24,7 +24,7 @@ permissions:
   "compute.addresses.use": "Cloudera platform attaches reserved external IPs to environment compute instances."
   "compute.disks.create": "Cloudera platform creates persistent disks for GCP environment host storage."
   "compute.disks.delete": "Cloudera platform deletes disks when removing GCP environment nodes."
-  "compute.disks.setLabels": "Cloudera platform labels disks for Cloudera resource tracking via GCP labeling."
+  "compute.disks.setLabels": "Cloudera platform labels disks for Cloudera resource tracking with GCP labeling."
   "compute.disks.use": "Cloudera platform attaches persistent disks to environment VM instances."
   "compute.firewalls.create": "Cloudera platform creates firewall rules for environment cluster connectivity."
   "compute.firewalls.delete": "Cloudera platform deletes firewall rules during environment teardown."
