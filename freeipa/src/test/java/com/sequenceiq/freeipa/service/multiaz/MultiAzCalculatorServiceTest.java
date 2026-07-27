@@ -132,6 +132,21 @@ class MultiAzCalculatorServiceTest {
     }
 
     @Test
+    void testFilterSubnetByLeastUsedAzWithInstanceWithoutInstanceId() {
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of(SUB_1, SUB_2))));
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+        // Upscale adds a fresh InstanceMetaData with instanceId=null before EC2 provisions the VM.
+        // The two-arg call defaults excludeInstanceIds to Set.of(); its contains(null) throws NPE, so this asserts the guard.
+        instanceGroup.setInstanceMetaData(Set.of(createInstanceMetadata(SUB_1, "i-existing"), createInstanceMetadata(SUB_1, null)));
+
+        Map<String, String> result = underTest.filterSubnetByLeastUsedAz(instanceGroup, SUBNET_AZ_PAIRS);
+
+        assertEquals(Map.of(SUB_2, "AZ2"), result);
+    }
+
+    @Test
     void testUpdateSubnetIdForSingleInstanceIfEligible() {
         InstanceGroup instanceGroup = new InstanceGroup();
         when(multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)).thenReturn(Boolean.TRUE);

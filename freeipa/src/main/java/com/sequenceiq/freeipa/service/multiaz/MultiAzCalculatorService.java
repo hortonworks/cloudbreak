@@ -133,7 +133,7 @@ public class MultiAzCalculatorService {
     private void collectCurrentAzUsage(InstanceGroup instanceGroup, Map<String, Integer> azUsage, Map<String, String> subnetAzPairs,
             Set<String> excludeInstanceIds) {
         for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-            if (excludeInstanceIds.contains(instanceMetaData.getInstanceId())) {
+            if (!shouldNotBeExcluded(instanceMetaData, excludeInstanceIds)) {
                 LOGGER.debug("Excluding instance '{}' from AZ occupancy: it is scheduled for replacement.", instanceMetaData.getInstanceId());
                 continue;
             }
