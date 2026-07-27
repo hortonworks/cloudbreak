@@ -87,6 +87,11 @@ public interface ClusterApi {
         clusterModificationService().updateServiceConfig(serviceType, config);
     }
 
+    default void updateServiceConfig(String serviceType, Map<String, String> config, List<String> roleGroupNames)
+            throws CloudbreakException {
+        clusterModificationService().updateServiceConfig(serviceType, config, roleGroupNames);
+    }
+
     default void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
         clusterModificationService().stopCluster(disableKnoxAutorestart);
     }

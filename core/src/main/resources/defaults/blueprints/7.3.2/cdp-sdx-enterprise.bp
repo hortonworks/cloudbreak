@@ -387,10 +387,6 @@
                 "value": "{{CM_AUTO_TLS}}"
               },
               {
-                "name": "regionserver_tls_plaintext_enabled",
-                "value": "true"
-              },
-              {
                 "name": "regionserver_tls_truststore_file",
                 "value": "{{CM_AUTO_TLS}}"
               },

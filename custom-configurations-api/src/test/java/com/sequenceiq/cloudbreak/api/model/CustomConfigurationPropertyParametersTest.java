@@ -42,7 +42,10 @@ class CustomConfigurationPropertyParametersTest {
             "fs.defaultFS",
             "hive.metastore.warehouse.dir",
             "a",
-            "A1"
+            "A1",
+            "1startsWithDigit",
+            "has/slash",
+            "spark3-conf/spark-defaults.conf_client_config_safety_valve"
     })
     void testPropertyNameValid(String name) {
         CustomConfigurationPropertyParameters params = createValid();
@@ -54,13 +57,11 @@ class CustomConfigurationPropertyParametersTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "1startsWithDigit",
             ".starts.with.dot",
             "-starts-with-hyphen",
             "has spaces",
             "has<angle>brackets",
             "has;semicolon",
-            "has/slash",
             "name with special!chars",
             "<script>alert(1)</script>"
     })
@@ -126,9 +127,19 @@ class CustomConfigurationPropertyParametersTest {
     }
 
     @Test
+    void testLargeSafetyValveValueIsValid() {
+        CustomConfigurationPropertyParameters params = createValid();
+        // A single Hive Advanced safety-valve XML block can far exceed the old 4096 limit (CB-33663).
+        params.setValue("<property><name>hive.custom</name><value>x</value></property>".repeat(1000));
+        Set<ConstraintViolation<CustomConfigurationPropertyParameters>> violations = localValidatorFactory.validate(params);
+        long valueViolations = violations.stream().filter(v -> v.getPropertyPath().toString().equals("value")).count();
+        assertEquals(0, valueViolations, "Large safety-valve values below the 4194304 limit should be accepted");
+    }
+
+    @Test
     void testPropertyValueTooLong() {
         CustomConfigurationPropertyParameters params = createValid();
-        params.setValue("x".repeat(4097));
+        params.setValue("x".repeat(4194305));
         Set<ConstraintViolation<CustomConfigurationPropertyParameters>> violations = localValidatorFactory.validate(params);
         long valueViolations = violations.stream().filter(v -> v.getPropertyPath().toString().equals("value")).count();
         assertTrue(valueViolations > 0);
