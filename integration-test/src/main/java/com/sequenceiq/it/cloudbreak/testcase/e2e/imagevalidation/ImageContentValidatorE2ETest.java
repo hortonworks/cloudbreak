@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,7 +152,7 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
                         LOGGER.info("Host {} has {}", key, value.getRight());
                         String javaVersion = extractJavaVersion(value.getRight());
                         assertNotNull(javaVersion);
-                        assertTrue(javaVersion.startsWith(getDefaultJavaForOS()));
+                        assertTrue(javaVersion.startsWith(getDefaultJavaForImage()));
                     });
 
                     return testDto;
@@ -179,13 +180,22 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
         return m.find() ? m.group(1) : null;
     }
 
-    private String getDefaultJavaForOS() {
-        return switch (OsType.getByOs(imageUnderValidation.getOs())) {
+    private String getDefaultJavaForImage() {
+        String javaVersion = switch (OsType.getByOs(imageUnderValidation.getOs())) {
             case OsType.RHEL8 -> "8.";
             case OsType.RHEL9 -> "17.";
             default -> throw new TestFailException(String.format("OS of image %s is not supported by image validation.",
                     imageUnderValidation.getUuid()));
         };
+        // Base or FreeIPA image
+        if (StringUtils.isEmpty(imageUnderValidation.getVersion())) {
+            return javaVersion;
+        }
+        // Runtime image
+        if ("7.3.1".equals(imageUnderValidation.getVersion())) {
+            javaVersion = "17.";
+        }
+        return javaVersion;
     }
 
     // Note: right now this is not working on FreeIPA instances, but fixing it is low priority, so for now this is left
