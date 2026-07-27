@@ -38,7 +38,7 @@ dependencies {
   implementation project(':template-manager-core')
   implementation project(':workspace')
 
-  implementation            group: "joda-time",                 name: "joda-time",                               version: "2.14.2"
+  implementation            group: "joda-time",                 name: "joda-time",                               version: "2.14.3"
   implementation            group: 'org.hibernate',             name: 'hibernate-envers',                        version: hibernateCoreVersion
   implementation            group: 'com.dyngr',                 name: 'polling',                                 version: dyngrPollingVersion
 
