@@ -80,12 +80,6 @@ public class HybridTrustTests extends AbstractE2ETest {
         AtomicReference<String> runtimeVersion = new AtomicReference<>();
 
         testContext
-                .given(DescribeRemoteEnvironmentTestDto.class)
-                .when(remoteEnvironmentTestClient.describe())
-                .then((tc, testDto, client) -> {
-                    runtimeVersion.set(testDto.getResponse().getEnvironment().getCdpRuntimeVersion().split("-")[0]);
-                    return testDto;
-                })
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
@@ -117,6 +111,12 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .refresh()
                 .then(hybridTrustAssertions.validateTrustOnFreeIpa())
                 .then(hybridTrustAssertions.validateTrustOnActiveDirectory())
+                .given(DescribeRemoteEnvironmentTestDto.class)
+                .when(remoteEnvironmentTestClient.describe())
+                .then((tc, testDto, client) -> {
+                    runtimeVersion.set(testDto.getResponse().getEnvironment().getCdpRuntimeVersion().split("-")[0]);
+                    return testDto;
+                })
                 .given(DistroXTestDto.class)
                     .withTemplate(commonClusterManagerProperties().getHybridDataMartDistroXBlueprintName(runtimeVersion.get()))
                     .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataMartHostGroups(testContext))
