@@ -52,6 +52,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
+import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -240,6 +241,7 @@ class MultiAzMigrationInitFlowIntegrationTest {
             MultiAzMigrationInitHandler.class,
             FlowEventListenerAdapter.class,
             ImageConverter.class,
+            ImageToImageEntityConverter.class,
             WebApplicationExceptionMessageExtractor.class,
             FreeIpaFailedFlowAnalyzer.class,
             FreeIpaValidationProperties.class,
