@@ -133,26 +133,25 @@ public class MultiAzCalculatorService {
     private void collectCurrentAzUsage(InstanceGroup instanceGroup, Map<String, Integer> azUsage, Map<String, String> subnetAzPairs,
             Set<String> excludeInstanceIds) {
         for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-            if (!shouldNotBeExcluded(instanceMetaData, excludeInstanceIds)) {
-                LOGGER.debug("Excluding instance '{}' from AZ occupancy: it is scheduled for replacement.", instanceMetaData.getInstanceId());
-                continue;
-            }
-            String subnetId = instanceMetaData.getSubnetId();
-            if (!isNullOrEmpty(subnetId)) {
-                String az = subnetAzPairs.get(subnetId);
-                if (StringUtils.isNotEmpty(az)) {
-                    Integer countOfInstances = azUsage.get(az);
-                    if (countOfInstances != null) {
-                        azUsage.put(az, countOfInstances + 1);
+            if (shouldNotBeExcluded(instanceMetaData, excludeInstanceIds)) {
+                String subnetId = instanceMetaData.getSubnetId();
+                if (!isNullOrEmpty(subnetId)) {
+                    String az = subnetAzPairs.get(subnetId);
+                    if (StringUtils.isNotEmpty(az)) {
+                        Integer countOfInstances = azUsage.get(az);
+                        if (countOfInstances != null) {
+                            azUsage.put(az, countOfInstances + 1);
+                        } else {
+                            LOGGER.warn("AZ with subnet ID {} is not present in the environment networks. Current usage: {}", subnetId, azUsage.keySet());
+                        }
                     } else {
-                        LOGGER.warn("AZ with subnet ID {} is not present in the environment networks. Current usage: {}",
-                                subnetId, azUsage.keySet());
+                        LOGGER.debug("There is no availability zone data for subnet id: '{}', It is normal on Azure for now", subnetId);
                     }
                 } else {
-                    LOGGER.debug("There is no availability zone data for subnet id: '{}', It is normal on Azure for now", subnetId);
+                    LOGGER.debug("Subnet id is null or empty for instance metadata: {}", instanceMetaData);
                 }
             } else {
-                LOGGER.debug("Subnet id is null or empty for instance metadata: {}", instanceMetaData);
+                LOGGER.debug("Excluding instance '{}' from AZ occupancy: it is scheduled for replacement.", instanceMetaData.getInstanceId());
             }
         }
         LOGGER.debug("Current availability zone usage of instance group '{}': '{}'", instanceGroup.getGroupName(), azUsage);

@@ -96,7 +96,6 @@ public class MultiAzMigrationInitHandler extends ExceptionCatcherEventHandler<Mu
                 }
 
                 stackUpdater.updateMultiAzEnabled(stack.getId(), true);
-
             });
         } catch (TransactionExecutionException e) {
             LOGGER.warn("Failed to update availability zones for stack {} during multi-AZ migration", stackId, e);

@@ -44,7 +44,6 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
-import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @ExtendWith(MockitoExtension.class)
 class MultiAzMigrationFlowEventChainFactoryTest {
@@ -81,9 +80,6 @@ class MultiAzMigrationFlowEventChainFactoryTest {
 
     @Mock
     private OperationService operationService;
-
-    @Mock
-    private FreeipaJobService freeipaJobService;
 
     @InjectMocks
     private MultiAzMigrationFlowEventChainFactory underTest;
@@ -166,7 +162,6 @@ class MultiAzMigrationFlowEventChainFactoryTest {
         verify(eventSenderService).sendEventAndNotification(stack, USER_CRN, ResourceEvent.FREEIPA_MULTI_AZ_MIGRATION_FAILED,
                 List.of("FreeIPA multi-AZ migration failed in one of the intermediate flows."));
         verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID, "FreeIPA multi-AZ migration failed in one of the intermediate flows.");
-        verify(freeipaJobService).schedule(STACK_ID);
     }
 
     static Stream<Arguments> testGetUseCaseForFlowStateArguments() {

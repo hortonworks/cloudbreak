@@ -132,7 +132,9 @@ public enum DetailedStackStatus {
     CANCEL_TRUST_SETUP_IN_PROGRESS(Status.CANCEL_TRUST_SETUP_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     @Deprecated
     CANCEL_TRUST_SETUP_SUCCESSFUL(Status.CANCEL_TRUST_SETUP_SUCCESSFUL, AvailabilityStatus.AVAILABLE),
-    MULTI_AZ_MIGRATION_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    AWS_VARIANT_MIGRATION_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    AWS_VARIANT_MIGRATION_FAILED(Status.UPDATE_FAILED, AvailabilityStatus.AVAILABLE),
+    MULTI_AZ_MIGRATION_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
     MULTI_AZ_MIGRATION_FAILED(Status.UPDATE_FAILED, AvailabilityStatus.AVAILABLE),;
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES = Stream.of(DetailedStackStatus.values())

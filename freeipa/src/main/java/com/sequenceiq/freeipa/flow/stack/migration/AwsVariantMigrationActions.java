@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.migration.aws.DeleteCloudF
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -59,8 +60,9 @@ public class AwsVariantMigrationActions {
             @Override
             protected void doExecute(AwsVariantMigrationFlowContext context, AwsVariantMigrationTriggerEvent payload, Map<Object, Object> variables)
                     throws Exception {
-                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(),
-                        FREEIPA_AWS_VARIANT_MIGRATION_STARTED);
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.AWS_VARIANT_MIGRATION_IN_PROGRESS,
+                        "Creating resources for AWS variant migration");
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_STARTED);
                 CreateResourcesRequest request = new CreateResourcesRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         payload.getHostGroupName());
                 sendEvent(context, request.selector(), request);
@@ -74,6 +76,8 @@ public class AwsVariantMigrationActions {
         return new AbstractAwsVariantMigrationAction<>(CreateResourcesResult.class) {
             @Override
             protected void doExecute(AwsVariantMigrationFlowContext context, CreateResourcesResult payload, Map<Object, Object> variables) throws Exception {
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.AWS_VARIANT_MIGRATION_IN_PROGRESS,
+                        "Checking if CloudFormation stack is ready to be deleted");
                 sendEvent(context);
             }
 
@@ -90,6 +94,8 @@ public class AwsVariantMigrationActions {
             @Override
             protected void doExecute(AwsVariantMigrationFlowContext context, DeleteCloudFormationResult payload, Map<Object, Object> variables)
                     throws Exception {
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.AWS_VARIANT_MIGRATION_IN_PROGRESS,
+                        "Checking if variant is ready to be changed");
                 if (payload.isCloudFormationTemplateDeleted()) {
                     LOGGER.debug("Variant will be changed");
                     stackUpdater.updateVariant(payload.getResourceId(), CloudConstants.AWS_NATIVE);

@@ -59,6 +59,7 @@ public class MultiAzMigrationInitActions {
             @Override
             protected void doExecute(StackContext context, MultiAzMigrationInitResult payload, Map<Object, Object> variables) {
                 LOGGER.debug("Multi-AZ migration DB update completed for stack: {}", context.getStack().getName());
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.MULTI_AZ_MIGRATION_IN_PROGRESS, "Starting FreeIPA multi-AZ migration.");
                 sendEvent(context, MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_INIT_FINISHED_EVENT.event(), payload);
             }
         };

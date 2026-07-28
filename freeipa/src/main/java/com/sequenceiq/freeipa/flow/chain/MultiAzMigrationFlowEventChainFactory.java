@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowEventContext;
 import com.sequenceiq.flow.core.FlowState;
@@ -53,7 +54,6 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
-import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @Component
 public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFactory<MultiAzMigrationEvent>, FreeIpaUseCaseAware {
@@ -78,9 +78,6 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
 
     @Inject
     private OperationService operationService;
-
-    @Inject
-    private FreeipaJobService freeipaJobService;
 
     @Override
     public String initEvent() {
@@ -202,13 +199,13 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
     }
 
     private int instanceCountForDownscale(MultiAzMigrationEvent event) {
-        int target = Math.min(getDesiredNodeCount(event), MAX_NODE_COUNT_FOR_DOWNSCALE);
+        int target = Math.min(getInstanceCountOfCurrentShape(event), MAX_NODE_COUNT_FOR_DOWNSCALE);
         LOGGER.info("Multi-AZ migration: planned downscale target node count is [{}].", target);
         return target;
     }
 
     private int instanceCountForUpscale(MultiAzMigrationEvent event) {
-        int target = Math.min(getDesiredNodeCount(event) + 1, MAX_NODE_COUNT_FOR_UPSCALE);
+        int target = Math.min(getInstanceCountOfCurrentShape(event) + 1, MAX_NODE_COUNT_FOR_UPSCALE);
         LOGGER.info("Multi-AZ migration: planned upscale target node count is [{}].", target);
         return target;
     }
@@ -217,8 +214,10 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
      * Returns the canonical node count for the stack's FreeIPA shape, derived by snapping the current
      * instance set size to {@link AvailabilityType} (NON_HA=1, TWO_NODE_BASED=2, HA=3).
      */
-    private int getDesiredNodeCount(MultiAzMigrationEvent event) {
-        int currentCount = Optional.ofNullable(event.getInstanceIds()).map(Set::size).orElse(0);
+    private int getInstanceCountOfCurrentShape(MultiAzMigrationEvent event) {
+        int currentCount = Optional.ofNullable(event.getInstanceIds())
+                .map(Set::size)
+                .orElseThrow(() -> new CloudbreakRuntimeException("The instanceIds set is empty, cannot determine current"));
         return AvailabilityType.getByInstanceCount(currentCount).getInstanceCount();
     }
 
@@ -249,7 +248,6 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
             LOGGER.error("Failed to fail operation for multi-AZ migration chain failure on stack {}.", flowEventContext.getResourceId(), e);
         }
         LOGGER.info("Re-enabling status checker for stack {} after multi-AZ migration chain failure.", flowEventContext.getResourceId());
-        freeipaJobService.schedule(stack.getId());
     }
 
     @Override
