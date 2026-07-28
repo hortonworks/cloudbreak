@@ -9,7 +9,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VerticalScaleResponse extends BaseFlowIdentifierResponse {
 
+    private String operationId;
+
     private VerticalScaleRequest request;
+
+    public String getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
+    }
 
     public VerticalScaleRequest getRequest() {
         return request;
@@ -23,6 +33,7 @@ public class VerticalScaleResponse extends BaseFlowIdentifierResponse {
     public String toString() {
         return "VerticalScaleResponse{" +
                 super.toString() +
+                ", operationId=" + operationId +
                 ", request=" + request +
                 '}';
     }

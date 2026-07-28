@@ -6,6 +6,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Availabil
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,7 +27,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityInfo;
@@ -38,12 +41,15 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rollingvscale.event.FreeIpaRollingVerticalScaleChainTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -74,6 +80,9 @@ class FreeIpaScalingServiceTest {
 
     @Mock
     private FreeipaDownscaleNodeCalculatorService freeipaDownscaleNodeCalculatorService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private FreeIpaScalingService underTest;
@@ -279,6 +288,69 @@ class FreeIpaScalingServiceTest {
             operation.setError(OPERATION_ERROR);
         }
         return operation;
+    }
+
+    @Test
+    public void testRollingVerticalScaleEntitlementDisabledThrowsBadRequest() {
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        VerticalScaleRequest request = createVerticalScaleRequest();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.rollingVerticalScale(ACCOUNT_ID, ENV_CRN, request));
+
+        assertTrue(exception.getMessage().contains("not enabled"));
+        verify(stackService, org.mockito.Mockito.never())
+                .getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString());
+    }
+
+    @Test
+    public void testVerticalScaleWithOneByOneRoutesToRollingPath() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getResourceCrn()).thenReturn("crn");
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        doNothing().when(validationService).validateStackForRollingVerticalScale(any(), any());
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.VERTICAL_SCALE, List.of(ENV_CRN), List.of()))
+                .thenReturn(createOperation(true));
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ONE_BY_ONE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        assertEquals(OPERATION_ID, result.getOperationId());
+        verify(flowManager).notify(eq(FlowChainTriggers.FREEIPA_ROLLING_VERTICAL_SCALE_CHAIN_TRIGGER_EVENT),
+                any(FreeIpaRollingVerticalScaleChainTriggerEvent.class));
+    }
+
+    @Test
+    public void testRollingVerticalScaleEntitlementEnabledFiresChainTrigger() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getResourceCrn()).thenReturn("crn");
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        doNothing().when(validationService).validateStackForRollingVerticalScale(any(), any());
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.VERTICAL_SCALE, List.of(ENV_CRN), List.of()))
+                .thenReturn(createOperation(true));
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+
+        VerticalScaleRequest request = createVerticalScaleRequest();
+
+        VerticalScaleResponse result = underTest.rollingVerticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        assertEquals(OPERATION_ID, result.getOperationId());
+        verify(flowManager).notify(eq(FlowChainTriggers.FREEIPA_ROLLING_VERTICAL_SCALE_CHAIN_TRIGGER_EVENT),
+                any(FreeIpaRollingVerticalScaleChainTriggerEvent.class));
     }
 
     private Set<InstanceMetaData> createValidImSet() {

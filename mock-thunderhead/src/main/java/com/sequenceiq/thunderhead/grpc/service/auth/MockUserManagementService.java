@@ -68,6 +68,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBAC
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_ROLLING_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
@@ -609,6 +610,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.verticalscale.ha.enabled}")
     private boolean verticalScaleHaEnabled;
 
+    @Value("${auth.mock.freeipa.rolling.verticalscale.enabled}")
+    private boolean freeipaRollingVerticalScaleEnabled;
+
     @Value("${auth.mock.distrox.operations.by.sdx.health.enabled}")
     private boolean distroxOperationsBySdxHealthEnabled;
 
@@ -1012,6 +1016,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, changeEncryptionProfileEnabled, CDP_CHANGE_ENCRYPTION_PROFILE);
         addEntitlement(builder, accountId, freeipaMultiazMigrationEnable, CDP_CB_FREEIPA_MULTI_AZ_MIGRATION);
         addEntitlement(builder, accountId, globalDefaultTemplateEnabled, CDP_GLOBAL_DEFAULT_TEMPLATE);
+        addEntitlement(builder, accountId, freeipaRollingVerticalScaleEnabled, CDP_FREEIPA_ROLLING_VERTICAL_SCALE);
 
         addEntitlement(builder, accountId, true, CLOUDERA_INTERNAL_ACCOUNT);
         addEntitlement(builder, accountId, true, CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED);

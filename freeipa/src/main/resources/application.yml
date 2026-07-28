@@ -112,6 +112,11 @@ freeipa:
     threadpool:
       core:
         size: 25
+  rolling-vertical-scale:
+    health-check:
+      max-attempts: 60
+      interval-seconds: 10
+      consecutive-success-required: 3
   passwordpolicy:
     min-password-lenght: 4
     max-password-lenght: 64

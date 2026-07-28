@@ -2,7 +2,10 @@ package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -49,6 +52,7 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentia
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceGroupAvailabilityZone;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.CredentialService;
@@ -97,6 +101,7 @@ public class VerticalScalingValidatorServiceTest {
     public void testRequestWhenPlatformIsNotSupportShouldThrowBadRequest() {
         ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
         when(stack.getCloudPlatform()).thenReturn(OPENSTACK);
+        when(stack.isStopped()).thenReturn(true);
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
 
@@ -122,7 +127,7 @@ public class VerticalScalingValidatorServiceTest {
             underTest.validateRequest(stack, verticalScaleRequest);
         });
 
-        assertEquals("Define an exiting instancetype to vertically scale the AWS FreeIpa.",
+        assertEquals("Define an existing instance type to vertically scale the AWS FreeIPA 'null'.",
                 badRequestException.getMessage());
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
         verify(verticalScaleInstanceProvider, never()).validateInstanceTypeForVerticalScaling(any(), any(), any(), any(), any());
@@ -498,7 +503,6 @@ public class VerticalScalingValidatorServiceTest {
         String instanceGroupNameInRequest = "master1";
         String instanceTypeNameInRequest = "m3.xlarge";
 
-        when(stack.getCloudPlatform()).thenReturn(AWS);
         when(stack.isStopped()).thenReturn(false);
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
@@ -511,7 +515,7 @@ public class VerticalScalingValidatorServiceTest {
             underTest.validateRequest(stack, verticalScaleRequest);
         });
 
-        assertEquals("You must stop FreeIPA to be able to vertically scale it.",
+        assertEquals("Stack 'null' must be stopped to be able to vertically scale it.",
                 badRequestException.getMessage());
     }
 
@@ -557,6 +561,52 @@ public class VerticalScalingValidatorServiceTest {
         }).collect(Collectors.toSet());
         instanceGroup.setAvailabilityZones(instanceGroupAvailabilityZones);
         return instanceGroup;
+    }
+
+    @Test
+    public void testRollingScaleWhenStackIsNotAvailableShouldThrowBadRequest() {
+        when(stack.isAvailable()).thenReturn(false);
+
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateRequestForRollingScale(stack, verticalScaleRequest);
+        });
+
+        assertTrue(badRequestException.getMessage().contains("must be running"));
+    }
+
+    @Test
+    public void testRollingScaleWhenTemplateNotSpecifiedShouldThrowBadRequest() {
+        when(stack.getCloudPlatform()).thenReturn(AWS);
+        when(stack.isAvailable()).thenReturn(true);
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(new InstanceMetaData(), new InstanceMetaData()));
+
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateRequestForRollingScale(stack, verticalScaleRequest);
+        });
+
+        assertNotNull(badRequestException.getMessage());
+        assertTrue(badRequestException.getMessage().contains("instance type"));
+    }
+
+    @Test
+    public void testRollingScaleWhenStackIsAvailableShouldNotThrowForBasicPlatformCheck() {
+        when(stack.getCloudPlatform()).thenReturn(AWS);
+        when(stack.isAvailable()).thenReturn(true);
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(new InstanceMetaData(), new InstanceMetaData()));
+
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+
+        // Even though the template is null (which triggers a later check), the platform check passes.
+        // We verify this by ensuring the thrown exception is about the template, not the platform.
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateRequestForRollingScale(stack, verticalScaleRequest);
+        });
+
+        assertFalse(badRequestException.getMessage().contains("not supported on AWS cloud platform"));
     }
 
     private Credential credential() {

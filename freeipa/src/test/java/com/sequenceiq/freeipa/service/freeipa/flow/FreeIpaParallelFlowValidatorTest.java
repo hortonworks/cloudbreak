@@ -47,6 +47,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rollingvscale.FreeIpaRollingVerticalScaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
@@ -147,7 +148,7 @@ class FreeIpaParallelFlowValidatorTest {
     @Test
     public void testNewParallelFlows() {
         List<String> allowedParallelFlows = new FreeIpaFlowInformation().getAllowedParallelFlows();
-        assertEquals(23, allowedParallelFlows.size(),
+        assertEquals(24, allowedParallelFlows.size(),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
         assertTrue(Set.of(
                         RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_PARAMS_TRIGGER_EVENT.event(),
@@ -170,6 +171,7 @@ class FreeIpaParallelFlowValidatorTest {
                         FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT.event(),
                         FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event(),
                         FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT.event(),
+                        FreeIpaRollingVerticalScaleEvent.ROLLING_VERTICAL_SCALE_TRIGGER_EVENT.event(),
                         MODIFY_SELINUX_START_EVENT.event(),
                         MODIFY_USER_DEFINED_TAGS_FREEIPA_START_EVENT.event(),
                         PREPARE_UPGRADE_EVENT.event()).containsAll(allowedParallelFlows),

@@ -24,6 +24,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rollingvscale.FreeIpaRollingVerticalScaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
@@ -56,6 +57,7 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             FullBackupEvent.FULL_BACKUP_EVENT.event(),
             DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_VALIDATION_EVENT.event(),
             FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT.event(),
+            FreeIpaRollingVerticalScaleEvent.ROLLING_VERTICAL_SCALE_TRIGGER_EVENT.event(),
             AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(),
             UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(),
             UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(),

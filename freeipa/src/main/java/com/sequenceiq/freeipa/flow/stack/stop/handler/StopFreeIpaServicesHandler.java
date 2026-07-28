@@ -38,11 +38,20 @@ public class StopFreeIpaServicesHandler extends ExceptionCatcherEventHandler<Sto
 
     @Override
     protected Selectable doAccept(HandlerEvent<StopFreeIpaServicesEvent> event) {
-        try {
-            freeIpaServicesStopService.stopServices(event.getData().getResourceId());
-        } catch (Exception e) {
-            LOGGER.error("FreeIPA service stop failed. Continue with stopping instances", e);
+        StopFreeIpaServicesEvent data = event.getData();
+        if (!data.getInstanceIds().isEmpty()) {
+            try {
+                freeIpaServicesStopService.stopServicesOnInstances(data.getResourceId(), data.getInstanceIds());
+            } catch (Exception e) {
+                LOGGER.error("FreeIPA service stop failed for instances {}. Continuing with VM stop.", data.getInstanceIds(), e);
+            }
+        } else {
+            try {
+                freeIpaServicesStopService.stopServices(data.getResourceId());
+            } catch (Exception e) {
+                LOGGER.error("FreeIPA service stop failed. Continue with stopping instances", e);
+            }
         }
-        return new StackEvent(StackStopEvent.STACK_STOP_INSTANCES_EVENT.event(), event.getData().getResourceId());
+        return new StackEvent(StackStopEvent.STACK_STOP_INSTANCES_EVENT.event(), data.getResourceId());
     }
 }

@@ -36,6 +36,7 @@ import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlo
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rollingvscale.FreeIpaRollingVerticalScaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent;
@@ -67,7 +68,8 @@ class FreeIpaFlowInformationTest {
             FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_EVENT.event(),
             FreeIpaTrustCancelFlowEvent.TRUST_CANCEL_EVENT.event(),
             MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_INIT_EVENT.event(),
-            MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_EVENT.event()
+            MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_EVENT.event(),
+            FreeIpaRollingVerticalScaleEvent.ROLLING_VERTICAL_SCALE_TRIGGER_EVENT.event()
     );
 
     @Mock

@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequ
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.model.FreeIpaVerticalScaleParameters;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.TemplateService;
 
@@ -59,6 +60,23 @@ public class FreeIpaVerticalScaleService {
             }
             if (instanceTemplateRequest.getRootVolume() != null && instanceTemplateRequest.getRootVolume().getSize() != null) {
                 template.setRootVolumeSize(instanceTemplateRequest.getRootVolume().getSize());
+            }
+            templateService.save(template);
+        }
+    }
+
+    public void updateTemplateWithVerticalScaleInformation(Long stackId, FreeIpaVerticalScaleParameters config) {
+        Optional<InstanceGroup> optionalGroup = instanceGroupService
+                .getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, config.getGroup());
+        if (optionalGroup.isPresent()) {
+            InstanceGroup group = optionalGroup.get();
+            Template template = templateService.findById(group.getTemplate().getId()).get();
+            if (!Strings.isNullOrEmpty(config.getTargetInstanceType())) {
+                LOGGER.info("Set instancetype to {} in group {} on stackid {}", config.getTargetInstanceType(), template.getName(), stackId);
+                template.setInstanceType(config.getTargetInstanceType());
+            }
+            if (config.getRootVolumeSize() != null) {
+                template.setRootVolumeSize(config.getRootVolumeSize());
             }
             templateService.save(template);
         }

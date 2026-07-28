@@ -61,23 +61,44 @@ public class VerticalScalingValidatorService {
     @Inject
     private InstanceGroupAvailabilityZoneService availabilityZoneService;
 
+    public void validateRequestForRollingScale(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
+        if (!stack.isAvailable()) {
+            throw new BadRequestException(String.format(
+                    "FreeIPA '%s' must be running to perform rolling vertical scale. Current state does not allow this operation.",
+                    stack.getName()));
+        }
+        if (stack.getNotDeletedInstanceMetaDataSet().size() < 2) {
+            throw new BadRequestException(String.format(
+                    "Rolling vertical scale requires HA (2+ nodes). Use the standard vertical scale path for single-node FreeIPA '%s'.",
+                    stack.getName()));
+        }
+        validateCommonVerticalScaleRules(stack, verticalScaleV4Request);
+    }
+
     public void validateRequest(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
+        if (!stack.isStopped()) {
+            throw new BadRequestException(String.format("Stack '%s' must be stopped to be able to vertically scale it.", stack.getName()));
+        }
+        validateCommonVerticalScaleRules(stack, verticalScaleV4Request);
+    }
+
+    private void validateCommonVerticalScaleRules(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
         if (!verticalScalingSupported.contains(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloud platform", stack.getCloudPlatform()));
         }
-        if (!stack.isStopped()) {
-            throw new BadRequestException("You must stop FreeIPA to be able to vertically scale it.");
-        }
         if (verticalScaleV4Request.getTemplate() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIpa.", stack.getCloudPlatform()));
+            throw new BadRequestException(String.format("Define an existing instance type to vertically scale the %s FreeIPA '%s'.",
+                    stack.getCloudPlatform(), stack.getName()));
         }
         if (verticalScaleV4Request.getTemplate().getInstanceType() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIpa.", stack.getCloudPlatform()));
+            throw new BadRequestException(String.format("Define an existing instance type to vertically scale the %s FreeIPA '%s'.",
+                    stack.getCloudPlatform(), stack.getName()));
         } else {
             validateInstanceType(stack, verticalScaleV4Request);
         }
         if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
-            throw new BadRequestException(String.format("Only instance type modification is supported on %s FreeIpa.", stack.getCloudPlatform()));
+            throw new BadRequestException(String.format("Only instance type modification is supported on %s FreeIPA '%s'.",
+                    stack.getCloudPlatform(), stack.getName()));
         }
     }
 

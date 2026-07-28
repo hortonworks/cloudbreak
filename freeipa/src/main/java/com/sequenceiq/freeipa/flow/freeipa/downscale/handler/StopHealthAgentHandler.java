@@ -51,7 +51,11 @@ public class StopHealthAgentHandler extends ExceptionCatcherEventHandler<StopHea
         StopHealthAgentRequest request = event.getData();
         LOGGER.info("Stop health agents gracefully on {}", request.getFqdns());
         if (request.getFqdns() != null && !request.getFqdns().isEmpty()) {
-            healthAgentService.stopHealthAgentOnHosts(request.getResourceId(), Set.copyOf(request.getFqdns()));
+            try {
+                healthAgentService.stopHealthAgentOnHosts(request.getResourceId(), Set.copyOf(request.getFqdns()));
+            } catch (Exception e) {
+                LOGGER.warn("Failed to stop health agent on {}. Continuing.", request.getFqdns(), e);
+            }
             try {
                 delayedExecutorService.runWithDelay(() -> LOGGER.debug("Waiting for LoadBalancer to realize instance down state is done"),
                         WAIT_FOR_LB_DELAY, TimeUnit.SECONDS);

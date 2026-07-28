@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildv2Action;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRollingVerticalScaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRotateSecretInternalAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSetPasswordAction;
@@ -45,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaInstanceMetadataUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaUsedImagesAction;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
@@ -56,6 +58,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaUsedImagesTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 @Service
@@ -198,6 +201,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> updateDisks(int size, String volumeType) {
         return new FreeIpaDiskUpdateAction(size, volumeType);
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> rollingVerticalScale(String verticalScaleKey) {
+        return new FreeIpaRollingVerticalScaleAction(verticalScaleKey);
     }
 
     public Action<FreeIpaTrustCommandsDto, FreeIpaClient> trustSetupCommands() {

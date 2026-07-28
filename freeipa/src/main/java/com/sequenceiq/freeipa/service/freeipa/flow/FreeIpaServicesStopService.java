@@ -48,6 +48,18 @@ public class FreeIpaServicesStopService {
         List<InstanceMetaData> instancesToStopOrdered = stack.getNotDeletedInstanceMetaDataSet().stream()
                 .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator().reversed())
                 .toList();
+        stopServicesOnOrderedInstances(stack, instancesToStopOrdered);
+    }
+
+    public void stopServicesOnInstances(Long stackId, List<String> instanceIds) throws ExecutionException, InterruptedException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        List<InstanceMetaData> matchingInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
+                .filter(instance -> instanceIds.contains(instance.getInstanceId()))
+                .toList();
+        stopServicesOnOrderedInstances(stack, matchingInstances);
+    }
+
+    private void stopServicesOnOrderedInstances(Stack stack, List<InstanceMetaData> instancesToStopOrdered) throws ExecutionException, InterruptedException {
         if (!instancesToStopOrdered.isEmpty()) {
             stopServicesOnInstance(stack, instancesToStopOrdered.getFirst());
             if (instancesToStopOrdered.size() > 1) {
@@ -60,7 +72,7 @@ public class FreeIpaServicesStopService {
         }
     }
 
-    private void stopServicesOnInstance(Stack stack, InstanceMetaData instanceMetaData) {
+    public void stopServicesOnInstance(Stack stack, InstanceMetaData instanceMetaData) {
         try {
             LOGGER.info("Stopping instance: {}", instanceMetaData);
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
@@ -70,4 +82,5 @@ public class FreeIpaServicesStopService {
             LOGGER.error("Failed to stop services on {}", instanceMetaData, e);
         }
     }
+
 }

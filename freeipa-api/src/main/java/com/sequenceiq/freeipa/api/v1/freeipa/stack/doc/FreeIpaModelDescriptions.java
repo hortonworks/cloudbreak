@@ -131,6 +131,14 @@ public class FreeIpaModelDescriptions {
         public static final String RESOURCE_ID = "resource id of the LoadBalancer";
     }
 
+    public static class FreeIpaVerticalScalingModelDescriptions {
+        public static final String ORCHESTRATOR = "Orchestrator strategy for vertical scaling operations. "
+                + "ONE_BY_ONE performs rolling scale on each instance sequentially. "
+                + "ALL_AT_ONCE scales all instances simultaneously (non-rolling).";
+        private FreeIpaVerticalScalingModelDescriptions() {
+        }
+    }
+
     public static class CrossRealmTrustModelDescriptions {
         public static final String FQDN = "Fully qualified domain name of the Active Directory server.";
         public static final String IP = "IP address of the Active Directory server.";

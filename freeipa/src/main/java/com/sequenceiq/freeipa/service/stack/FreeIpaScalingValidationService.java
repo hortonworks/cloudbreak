@@ -45,6 +45,10 @@ public class FreeIpaScalingValidationService {
         verticalScalingValidatorService.validateRequest(stack, request);
     }
 
+    public void validateStackForRollingVerticalScale(Stack stack, VerticalScaleRequest request) {
+        verticalScalingValidatorService.validateRequestForRollingScale(stack, request);
+    }
+
     public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath, Set<String> instanceIdsToDelete,
             boolean force) {
         validateScalingIsDownscale(scalingPath);

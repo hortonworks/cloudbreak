@@ -21,6 +21,8 @@ public class FlowChainTriggers {
 
     public static final String TRUST_REPAIR_TRIGGER_EVENT = "TRUST_REPAIR_TRIGGER_EVENT";
 
+    public static final String FREEIPA_ROLLING_VERTICAL_SCALE_CHAIN_TRIGGER_EVENT = "FREEIPA_ROLLING_VERTICAL_SCALE_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

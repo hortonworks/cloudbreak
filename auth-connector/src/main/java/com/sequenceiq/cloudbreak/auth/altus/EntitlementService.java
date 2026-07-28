@@ -70,6 +70,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBAC
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_ROLLING_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
@@ -653,6 +654,10 @@ public class EntitlementService {
 
     public boolean isFreeIpaMultiAzMigrationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_FREEIPA_MULTI_AZ_MIGRATION);
+    }
+
+    public boolean isFreeIpaRollingVerticalScaleEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FREEIPA_ROLLING_VERTICAL_SCALE);
     }
 
     public boolean isStrictImageCatalogUrlValidationDisabled(String accountId) {
