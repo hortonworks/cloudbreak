@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -169,7 +170,6 @@ class EnvironmentTagsDtoConverterTest {
     void getTagsWithEditDtoShouldPreserveExistingTags() throws Exception {
         EnvironmentTags existingTags = new EnvironmentTags(Map.of("existingKey", "existingValue"), Map.of());
         EnvironmentEditDto editDto = createMockEnvironmentEditDto(Map.of("newKey", "newValue"));
-        when(crnUserDetailsService.getUmsUser(any())).thenReturn(createMockUserDetails());
 
         Json result = underTest.getTags(editDto, existingTags);
 
@@ -184,7 +184,6 @@ class EnvironmentTagsDtoConverterTest {
     void getTagsWithEditDtoRequestTagShouldOverwriteExistingTag() throws Exception {
         EnvironmentTags existingTags = new EnvironmentTags(Map.of("existingKey", "existingValue"), Map.of());
         EnvironmentEditDto editDto = createMockEnvironmentEditDto(Map.of("existingKey", "existingValue2"));
-        when(crnUserDetailsService.getUmsUser(any())).thenReturn(createMockUserDetails());
 
         Json result = underTest.getTags(editDto, existingTags);
 
@@ -199,7 +198,6 @@ class EnvironmentTagsDtoConverterTest {
     void getTagsWithEditDtoShouldHandleNullOrEmptyEnvironmentAndRequestTags(EnvironmentTags environmentTags, Map<String, String> requestTags,
             Map<String, String> expetedTags) throws Exception {
         EnvironmentEditDto editDto = createMockEnvironmentEditDto(requestTags);
-        when(crnUserDetailsService.getUmsUser(any())).thenReturn(createMockUserDetails());
 
         Json result = underTest.getTags(editDto, environmentTags);
 
@@ -256,6 +254,35 @@ class EnvironmentTagsDtoConverterTest {
 
     private CrnUser createMockUserDetails() {
         return new CrnUser("userId", "userCrn", "username", "email", "tenant", "role");
+    }
+
+    @Test
+    void getTagsWithEditDtoShouldPreserveExistingDefaultTagsAndNotCallUms() throws Exception {
+        Map<String, String> existingDefaultTags = Map.of(
+                "owner", "originalowner",
+                "Cloudera-Creator-Resource-Name",
+                "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3");
+        EnvironmentTags existingTags = new EnvironmentTags(Map.of("existingKey", "existingValue"), existingDefaultTags);
+        EnvironmentEditDto editDto = createMockEnvironmentEditDto(Map.of("newKey", "newValue"));
+
+        Json result = underTest.getTags(editDto, existingTags);
+
+        EnvironmentTags resultTags = JsonUtil.readValue(result.getValue(), EnvironmentTags.class);
+        assertEquals(existingDefaultTags, resultTags.getDefaultTags(), "defaultTags must be preserved unchanged to stay in sync with cloud resources.");
+        verifyNoInteractions(crnUserDetailsService, costTagging, entitlementService, accountTagService);
+    }
+
+    @Test
+    void getTagsWithEditDtoShouldNotOverwriteDefaultTagWhenRequestUserDefinedTagCollidesWithReservedKey() throws Exception {
+        Map<String, String> existingDefaultTags = Map.of("owner", "originalowner", "Cloudera-Resource-Name", "envName");
+        EnvironmentTags existingTags = new EnvironmentTags(Map.of(), existingDefaultTags);
+        EnvironmentEditDto editDto = createMockEnvironmentEditDto(Map.of("owner", "attackerowner", "newKey", "newValue"));
+
+        Json result = underTest.getTags(editDto, existingTags);
+
+        EnvironmentTags resultTags = JsonUtil.readValue(result.getValue(), EnvironmentTags.class);
+        assertEquals(existingDefaultTags, resultTags.getDefaultTags(), "Default 'owner' must remain the original value.");
+        assertEquals("newValue", resultTags.getUserDefinedTags().get("newKey"));
     }
 
 }
