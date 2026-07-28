@@ -295,6 +295,8 @@ class EnvironmentApiConverterTest {
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
         assertEquals(proxyConfig, actual.getProxyConfig());
         assertEquals(dataServices, actual.getDataServices());
+        assertEquals("creator", actual.getCreator(),
+                "Creator must be the original creator from DB so billing tags (owner, Cloudera-Creator-Resource-Name) are preserved on edit.");
 
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convertForEdit(any(), eq(request.getTelemetry()), any(), anyString());

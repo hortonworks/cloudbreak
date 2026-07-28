@@ -65,11 +65,11 @@ public class EnvironmentTagsDtoConverter {
         Map<String, String> existingUserDefinedTags = Optional.ofNullable(environmentTags)
                 .map(EnvironmentTags::getUserDefinedTags)
                 .orElse(Map.of());
-        return getTags(editDto.getAccountId(),
-                editDto.getCreator(),
-                editDto.getCrn(),
-                editDto.getCloudPlatform(),
-                mergeTags(existingUserDefinedTags, editDto.getUserDefinedTags()));
+        Map<String, String> mergedUserDefinedTags = mergeTags(existingUserDefinedTags, editDto.getUserDefinedTags());
+        Map<String, String> existingDefaultTags = Optional.ofNullable(environmentTags)
+                .map(EnvironmentTags::getDefaultTags)
+                .orElse(Map.of());
+        return new Json(new EnvironmentTags(mergedUserDefinedTags, new HashMap<>(existingDefaultTags)));
     }
 
     private Map<String, String> mergeTags(Map<String, String> existingTags, Map<String, String> newTags) {
