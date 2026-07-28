@@ -625,30 +625,33 @@ public class SshJClientActions {
         return testDto;
     }
 
-    public FreeIpaTestDto checkFluentdStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+    public FreeIpaTestDto checkLoggingAgentStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
         List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
                 testDto.getTestContext());
-        return checkFluentdStatus(testDto, instanceIps);
+        return checkLoggingAgentStatus(testDto, instanceIps);
     }
 
-    public <T extends CloudbreakTestDto> T checkFluentdStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+    public <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
-        return checkFluentdStatus(testDto, instanceIps);
+        return checkLoggingAgentStatus(testDto, instanceIps);
     }
 
-    private <T extends CloudbreakTestDto> T checkFluentdStatus(T testDto, List<String> instanceIps) {
-        String fluentdNokStatusCommand = "sudo cdp-doctor fluentd status --format json | tail -1 | " +
+    private <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<String> instanceIps) {
+        String loggingAgentNokStatusCommand = "if sudo cdp-doctor service status --format json | " +
+                "jq -e '.infraServices[] | select(.name == \"minifi\")' > /dev/null 2>&1; " +
+                "then AGENT=minifi; else AGENT=fluentd; fi; " +
+                "sudo cdp-doctor $AGENT status --format json | tail -1 | " +
                 "jq -r '.. | objects | to_entries | map(select(.value == \"NOK\"))[] | \"\\(.key) \\(.value)\"'";
-        Map<String, Pair<Integer, String>> fluentdNokStatusReportByIp = instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, fluentdNokStatusCommand)));
+        Map<String, Pair<Integer, String>> loggingAgentNokStatusReportByIp = instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, loggingAgentNokStatusCommand)));
 
-        for (Entry<String, Pair<Integer, String>> statusReport : fluentdNokStatusReportByIp.entrySet()) {
-            String fluentdNotOkStatuses = StringUtils.trimToNull(statusReport.getValue().getValue());
-            if (StringUtils.isNotBlank(fluentdNotOkStatuses)) {
-                Log.error(LOGGER, format(" There is 'Not OK' CDP Fluentd status %s is present on '%s' instance! ", fluentdNotOkStatuses,
+        for (Entry<String, Pair<Integer, String>> statusReport : loggingAgentNokStatusReportByIp.entrySet()) {
+            String loggingAgentNotOkStatuses = StringUtils.trimToNull(statusReport.getValue().getValue());
+            if (StringUtils.isNotBlank(loggingAgentNotOkStatuses)) {
+                Log.error(LOGGER, format(" There is 'Not OK' logging agent status %s is present on '%s' instance! ", loggingAgentNotOkStatuses,
                         statusReport.getKey()));
-                throw new TestFailException(format("There is 'Not OK' CDP Fluentd status %s is present on '%s' instance!", fluentdNotOkStatuses,
-                        statusReport.getKey()));
+                throw new TestFailException(format("There is 'Not OK' logging agent status %s is present on '%s' instance!",
+                        loggingAgentNotOkStatuses, statusReport.getKey()));
             }
         }
         return testDto;

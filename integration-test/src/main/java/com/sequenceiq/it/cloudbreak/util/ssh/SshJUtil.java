@@ -78,12 +78,12 @@ public class SshJUtil {
         return sshJClientActions.checkNetworkStatus(testDto, environmentCrn, freeipaClient);
     }
 
-    public <T extends CloudbreakTestDto> T checkFluentdStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        return sshJClientActions.checkFluentdStatus(testDto, instanceGroups, hostGroupNames);
+    public <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        return sshJClientActions.checkLoggingAgentStatus(testDto, instanceGroups, hostGroupNames);
     }
 
-    public FreeIpaTestDto checkFluentdStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        return sshJClientActions.checkFluentdStatus(testDto, environmentCrn, freeipaClient);
+    public FreeIpaTestDto checkLoggingAgentStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        return sshJClientActions.checkLoggingAgentStatus(testDto, environmentCrn, freeipaClient);
     }
 
     public <T extends CloudbreakTestDto> T checkCdpServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {

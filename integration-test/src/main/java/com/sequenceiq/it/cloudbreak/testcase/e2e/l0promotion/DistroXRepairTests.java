@@ -82,7 +82,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .when(distroXTestClient.get())
                 .then(this::verifyMountedDisks)
                 .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();

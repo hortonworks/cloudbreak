@@ -144,7 +144,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getEnvironmentCrn(), client))
-                .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getEnvironmentCrn(), client))
+                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getEnvironmentCrn(), client))
                 .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getEnvironmentCrn(), client))
                 .then((tc, testDto, client) -> {
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
@@ -167,7 +167,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .when(sdxTestClient.describeInternal())
                 .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
                         List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
                         List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
                         List.of(MASTER.getName())))
@@ -188,7 +188,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get())
                 .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getInstanceGroups(),
