@@ -138,9 +138,8 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
-        String auditExternalId, String deploymentAddress, CredentialType type) {
+        String auditExternalId, String deploymentAddress, CredentialType type, boolean govCloud) {
         String policyJson;
-        boolean govCloud = cloudContext.isGovCloud();
         String actualExternalId = switch (type) {
             case ENVIRONMENT -> {
                 policyJson = awsPlatformParameters.getCredentialPoliciesJson().get(getPolicyType(govCloud));

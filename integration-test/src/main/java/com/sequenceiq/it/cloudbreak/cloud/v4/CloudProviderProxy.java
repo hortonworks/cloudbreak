@@ -563,6 +563,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public int getFreeIpaDefaultNodeCount() {
+        return delegate.getFreeIpaDefaultNodeCount();
+    }
+
+    @Override
     public boolean isMultiAZ() {
         return delegate.isMultiAZ();
     }
@@ -629,5 +634,10 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public EncryptionProfileTestDto encryptionProfile(EncryptionProfileTestDto encryptionProfile) {
         return delegate.encryptionProfile(encryptionProfile);
+    }
+
+    @Override
+    public String defaultEncryptionProfile() {
+        return delegate.defaultEncryptionProfile();
     }
 }

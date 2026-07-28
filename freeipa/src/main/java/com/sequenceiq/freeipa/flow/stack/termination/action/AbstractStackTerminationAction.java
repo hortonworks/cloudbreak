@@ -21,7 +21,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
-import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -61,8 +60,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
             StackTerminationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         CloudContext cloudContext = buildContext(stack);
-        Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
-        CloudCredential cloudCredential = credentialConverter.convert(credential);
+        CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = resourceService.findAllByStackId(stack.getId()).stream()
                 .map(r -> resourceConverter.convert(r))

@@ -79,7 +79,7 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
-        String auditExternalId, String deploymentAddress, CredentialType type) {
+        String auditExternalId, String deploymentAddress, CredentialType type, boolean govCloud) {
         Map<String, String> minimalRequiredPermissions = new HashMap<>();
         Set<GranularPolicyResponse> granularPolicies = new HashSet<>();
 

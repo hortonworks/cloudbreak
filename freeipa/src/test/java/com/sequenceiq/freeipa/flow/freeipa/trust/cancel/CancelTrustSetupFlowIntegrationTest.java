@@ -168,6 +168,8 @@ class CancelTrustSetupFlowIntegrationTest {
         ig.setInstanceMetaData(Set.of(instanceMetaData));
         stack.setInstanceGroups(Set.of(ig));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN))
+                .thenReturn(new com.sequenceiq.freeipa.dto.Credential("AWS", "cred", "{}", "crn", ACCOUNT_ID));
     }
 
     @Test

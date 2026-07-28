@@ -61,7 +61,7 @@ public interface CredentialConnector {
      * @return the necessary prerequisites for credential creation
      */
     default CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String auditExternalId, String deploymentAddress,
-        CredentialType type) {
+        CredentialType type, boolean govCloud) {
         String message = String.format("There is no prerequisites for '%s' cloud platform!", cloudContext.getPlatform().value());
         throw new UnsupportedOperationException(message);
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.GOV_CLOUD;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ public class CredentialToCloudCredentialConverter implements Converter<Credentia
             return null;
         }
         Map<String, Object> fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
+        fields.put(GOV_CLOUD, credential.isGovCloud());
         return new CloudCredential(credential.getCrn(), credential.getName(), fields, credential.getAccountId());
     }
 

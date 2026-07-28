@@ -170,7 +170,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
      */
     @Override
     protected void createDefaultEnvironment(TestContext testContext) {
-        createEnvironment(testContext, Boolean.TRUE, 1);
+        createEnvironment(testContext, Boolean.TRUE, testContext.getCloudProvider().getFreeIpaDefaultNodeCount());
     }
 
     protected void createEnvironment(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount) {

@@ -60,6 +60,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     private static final String DEFAULT_ACCESS_CIDR = "0.0.0.0/0";
 
+    private static final String DEFAULT_COMMERCIAL_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_140_3";
+
     private static final String DUMMY_SSH_KEY = "ssh-rsa "
             + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
@@ -503,5 +505,15 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public String verticalScaleVolumeType() {
         return null;
+    }
+
+    @Override
+    public int getFreeIpaDefaultNodeCount() {
+        return 1;
+    }
+
+    @Override
+    public String defaultEncryptionProfile() {
+        return DEFAULT_COMMERCIAL_ENCRYPTION_PROFILE_NAME;
     }
 }

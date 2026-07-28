@@ -315,8 +315,9 @@ public class StackProvisionActions {
             @Override
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
                 Stack stack = stackProvisionService.provisioningFinished(context, payload, variables);
-                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudStack());
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
+                        context.getCloudStack()
+                );
                 sendEvent(newContext);
             }
 
@@ -339,8 +340,8 @@ public class StackProvisionActions {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Stack stack = stackProvisionService.setupMetadata(context, payload);
-                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudStack());
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
+                        context.getCloudStack());
                 sendEvent(newContext);
             }
 

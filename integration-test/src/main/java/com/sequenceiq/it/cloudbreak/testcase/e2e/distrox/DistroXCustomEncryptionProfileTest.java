@@ -87,7 +87,6 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
                 .withCreateFreeIpa(Boolean.TRUE)
-                .withOneFreeIpaNode()
                 .withEncryptionProfile(encryptionProfileName)
                 .when(environmentTestClient.create())
                 .awaitForCreationFlow()
@@ -149,7 +148,6 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
             when = "a default encryption profile is used to create the environment",
             then = "datalake and datahub uses the same TLS version from the default encryption profile with TLSv1.2 and TLSv1.3")
     public void testCreateDistroXWithDefaultEncryptionProfile(TestContext testContext) {
-        String defaultEncryptionProfile = "cdp_default_fips_140_3";
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -162,8 +160,7 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
                 .withCreateFreeIpa(Boolean.TRUE)
-                .withOneFreeIpaNode()
-                .withEncryptionProfile(defaultEncryptionProfile)
+                .withEncryptionProfile(testContext.getTestContext().getCloudProvider().defaultEncryptionProfile())
                 .when(environmentTestClient.create())
                 .awaitForCreationFlow()
                 .given(FreeIpaUserSyncTestDto.class)

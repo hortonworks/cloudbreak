@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -213,7 +214,8 @@ public class CredentialExperienceTest {
         when(credentialPrerequisitesRequest.selector()).thenReturn("selector");
         when(credentialPrerequisitesRequest.await()).thenReturn(credentialPrerequisitesResult);
         when(credentialPrerequisitesResult.getStatus()).thenReturn(EventStatus.OK);
-        when(cloudPlatformRequestProvider.getCredentialPrerequisitesRequest(any(), any(), any(), any(), any())).thenReturn(credentialPrerequisitesRequest);
+        when(cloudPlatformRequestProvider.getCredentialPrerequisitesRequest(any(), any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(credentialPrerequisitesRequest);
 
 
         Map<String, String> experiencePolicies = new HashMap<>();
@@ -266,7 +268,8 @@ public class CredentialExperienceTest {
     private CredentialPrerequisitesResponse testSkeleton(String cloudProvider, Boolean entitlementEnabled) {
 
         when(credentialPrerequisitesResult.getCredentialPrerequisitesResponse()).thenReturn(getCredentialPrerequisitesResponse(cloudProvider, ASTERISK));
-        when(credentialConnector.getPrerequisites(any(), any(), any(), any(), any())).thenReturn(getCredentialPrerequisitesResponse(cloudProvider, ASTERISK));
+        when(credentialConnector.getPrerequisites(any(), any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(getCredentialPrerequisitesResponse(cloudProvider, ASTERISK));
 
         when(entitlementService.awsRestrictedPolicy(anyString())).thenReturn(entitlementEnabled);
 

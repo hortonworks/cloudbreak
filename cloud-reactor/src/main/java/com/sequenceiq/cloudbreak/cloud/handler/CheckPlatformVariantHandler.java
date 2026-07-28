@@ -41,7 +41,7 @@ public class CheckPlatformVariantHandler implements CloudPlatformEventHandler<Ch
     }
 
     private CloudConnector getConnector(CheckPlatformVariantRequest request) {
-        if (request.getCloudContext().isGovCloud()) {
+        if (request.getCloudCredential().isGovCloud()) {
             return cloudPlatformConnectors.getGov(request.getCloudContext().getPlatform(), request.getCloudContext().getVariant());
         } else {
             return cloudPlatformConnectors.get(request.getCloudContext().getPlatform(), request.getCloudContext().getVariant());

@@ -45,8 +45,8 @@ public abstract class AbstractFreeIpaInstanceMetadataUpdateAction<P extends Payl
     protected StackContext createFlowContext(FlowParameters flowParameters,
             StateContext<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        CloudContext cloudContext = buildContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
+        CloudContext cloudContext = buildContext(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }

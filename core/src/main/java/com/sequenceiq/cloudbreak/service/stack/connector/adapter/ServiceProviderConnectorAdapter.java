@@ -240,7 +240,6 @@ public class ServiceProviderConnectorAdapter {
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(credential.getCrn()).getAccountId())
-                .withGovCloud(credential.isGovCloud())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);

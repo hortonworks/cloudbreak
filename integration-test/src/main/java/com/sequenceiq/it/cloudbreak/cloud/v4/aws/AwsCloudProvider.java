@@ -82,6 +82,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     private static final String KEY_BASED_CREDENTIAL = "key";
 
+    private static final String DEFAULT_GOV_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_140_3_gov";
+
     @Inject
     private AwsProperties awsProperties;
 
@@ -424,7 +426,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         if (getGovCloud()) {
-            environment.withEncryptionProfile("cdp_default_fips_140_3_gov");
+            environment
+                    .withEncryptionProfile(defaultEncryptionProfile())
+                    .withResourceEncryption(true);
         }
         return super.environment(environment)
                 .withFreeIpa(getAttachedFreeIpaRequest());
@@ -487,6 +491,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public boolean getGovCloud() {
         return awsProperties.getGovCloud();
+    }
+
+    @Override
+    public int getFreeIpaDefaultNodeCount() {
+        return getGovCloud() ? 2 : 1;
     }
 
     @Override
@@ -624,5 +633,15 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public EncryptionProfileTestDto encryptionProfile(EncryptionProfileTestDto encryptionProfile) {
         return encryptionProfile;
+    }
+
+    @Override
+    public String getFreeIpaImageCatalogUrl() {
+        return getGovCloud() ? null : super.getFreeIpaImageCatalogUrl();
+    }
+
+    @Override
+    public String defaultEncryptionProfile() {
+        return getGovCloud() ? DEFAULT_GOV_ENCRYPTION_PROFILE_NAME : super.defaultEncryptionProfile();
     }
 }

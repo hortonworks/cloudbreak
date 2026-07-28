@@ -191,9 +191,13 @@ public class EnvironmentCreationService {
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         environment.setEnvironmentServiceVersion(environmentServiceVersion);
         environment.setEncryptionProfileCrn(creationDto.getEncryptionProfileCrn());
-        environment.setEnableSecretEncryption(creationDto.isSecretEncryptionEnabled());
+        environment.setEnableSecretEncryption(isSecretEncryptionEnabled(creationDto));
         LOGGER.info("Environment is initialized for creation.");
         return environment;
+    }
+
+    private boolean isSecretEncryptionEnabled(EnvironmentCreationDto creationDto) {
+        return creationDto.isSecretEncryptionEnabled() || creationDto.isGovCloud();
     }
 
     private void initializeEnvironmentTunnel(Environment environment) {
@@ -267,14 +271,11 @@ public class EnvironmentCreationService {
 
     private ValidationResult validateSecretEncryption(EnvironmentCreationDto creationDto) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
-        if (creationDto.isSecretEncryptionEnabled()) {
+        if (isSecretEncryptionEnabled(creationDto)) {
             String cloudPlatform = creationDto.getCloudPlatform().toLowerCase(Locale.ROOT);
             switch (cloudPlatform) {
                 case "aws" -> {
                     String accountId = creationDto.getAccountId();
-                    if (!entitlementService.isSecretEncryptionEnabled(accountId)) {
-                        validationResultBuilder.error(String.format("Account '%s' is not entitled to use secret encryption.", accountId));
-                    }
                     if (!creationDto.isGovCloud() && !entitlementService.isSecretEncryptionForCommercialAwsEnabled(accountId)) {
                         validationResultBuilder.error(String.format("Account '%s' is not entitled to use secret encryption on commercial AWS.", accountId));
                     }
@@ -310,7 +311,7 @@ public class EnvironmentCreationService {
                         .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
                         .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn)
                         .orElse(null);
-                yield validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.isGovCloud(), creationDto.isSecretEncryptionEnabled());
+                yield validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.isGovCloud(), isSecretEncryptionEnabled(creationDto));
             }
             default -> ValidationResult.empty();
         };

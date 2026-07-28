@@ -376,14 +376,11 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
-        if (secretEncryptionEnabled) {
-            when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
-        }
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
         verify(validatorService).validatePublicKey(any());
-        verify(validatorService).validateEncryptionKeyArn(eq("dummy-key-arn"), eq(true), eq(secretEncryptionEnabled));
+        verify(validatorService).validateEncryptionKeyArn(eq("dummy-key-arn"), eq(true), eq(true));
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
@@ -392,7 +389,7 @@ class EnvironmentCreationServiceTest {
         List<Environment> allValues = environmentCaptor.getAllValues();
         assertThat(allValues).hasSize(2);
         Environment environmentCaptured = allValues.get(0);
-        assertThat(environmentCaptured.isEnableSecretEncryption()).isEqualTo(secretEncryptionEnabled);
+        assertThat(environmentCaptured.isEnableSecretEncryption()).isTrue();
     }
 
     @Test
@@ -616,23 +613,12 @@ class EnvironmentCreationServiceTest {
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
     }
 
-    static Stream<Arguments> testSecretEncyptionValidationFailureWithAwsArguments() {
-        return Stream.of(
-                Arguments.of(false, false, false),
-                Arguments.of(false, false, true),
-                Arguments.of(false, true, false),
-                Arguments.of(true, false, false),
-                Arguments.of(true, false, true)
-        );
-    }
-
-    @MethodSource("testSecretEncyptionValidationFailureWithAwsArguments")
-    @ParameterizedTest
-    void testSecretEncyptionValidationFailureWithAws(boolean govCloud, boolean secretEncryptionEntitlement, boolean commercialSecretEncryptionEntitlement) {
+    @Test
+    void testSecretEncyptionValidationFailureWithAws() {
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withCloudPlatform("AWS")
-                .withGovCloud(govCloud)
+                .withGovCloud(false)
                 .withSecretEncryptionEnabled(true)
                 .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
@@ -646,8 +632,7 @@ class EnvironmentCreationServiceTest {
         Credential credential = new Credential();
         credential.setCloudPlatform("AWS");
 
-        when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(secretEncryptionEntitlement);
-        lenient().when(entitlementService.isSecretEncryptionForCommercialAwsEnabled(ACCOUNT_ID)).thenReturn(commercialSecretEncryptionEntitlement);
+        when(entitlementService.isSecretEncryptionForCommercialAwsEnabled(ACCOUNT_ID)).thenReturn(false);
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
         when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
@@ -655,22 +640,22 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.empty());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        verify(validatorService, never()).validateFreeIpaCreation(any(), any());
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
     }
 
     static Stream<Arguments> testSecretEncyptionValidationSuccessArguments() {
+        // govCloud, commercialSecretEncryptionEntitlement
         return Stream.of(
-                Arguments.of(false, true, true),
-                Arguments.of(true, true, false),
-                Arguments.of(true, true, true)
+                Arguments.of(false, true),
+                Arguments.of(true, false),
+                Arguments.of(true, true)
         );
     }
 
     @MethodSource("testSecretEncyptionValidationSuccessArguments")
     @ParameterizedTest
-    void testSecretEncyptionValidationSuccess(boolean govCloud, boolean secretEncryptionEntitlement, boolean commercialSecretEncryptionEntitlement) {
+    void testSecretEncyptionValidationSuccess(boolean govCloud, boolean commercialSecretEncryptionEntitlement) {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         String environmentCrn = "crn";
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
@@ -697,7 +682,7 @@ class EnvironmentCreationServiceTest {
         environment.setAccountId(ACCOUNT_ID);
         Credential credential = new Credential();
         credential.setCloudPlatform("AWS");
-        when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(secretEncryptionEntitlement);
+        credential.setGovCloud(govCloud);
         lenient().when(entitlementService.isSecretEncryptionForCommercialAwsEnabled(ACCOUNT_ID)).thenReturn(commercialSecretEncryptionEntitlement);
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);

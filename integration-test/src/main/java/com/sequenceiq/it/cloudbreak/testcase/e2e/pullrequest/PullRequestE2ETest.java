@@ -22,7 +22,7 @@ public class PullRequestE2ETest extends AbstractE2ETest {
             then    = "all freeipa and environment must came up"
     )
     public void testSimpleEnvironmentWithFreeipa(TestContext testContext) {
-        createEnvironment(testContext, Boolean.TRUE, 1);
+        createEnvironment(testContext, Boolean.TRUE, testContext.getCloudProvider().getFreeIpaDefaultNodeCount());
     }
 
     @Test(dataProvider = TEST_CONTEXT)

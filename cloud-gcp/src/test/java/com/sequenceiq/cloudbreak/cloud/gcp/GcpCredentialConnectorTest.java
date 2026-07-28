@@ -216,7 +216,7 @@ class GcpCredentialConnectorTest {
                 "externalId",
                 "auditExternalId",
                 "deploymentAddress",
-                CredentialType.ENVIRONMENT);
+                CredentialType.ENVIRONMENT, false);
         Map<String, String> minimalRequiredPermissions = new HashMap<>();
         Set<GranularPolicyResponse> granularPolicies = new HashSet<>();
         minimalRequiredPermissions.put("MinimalPrerequisitesCreationCommand", Base64.encodeBase64String(expectedMinimalCommands.getBytes()));

@@ -254,6 +254,8 @@ public interface CloudProvider {
 
     boolean getGovCloud();
 
+    int getFreeIpaDefaultNodeCount();
+
     boolean isMultiAZ();
 
     boolean verticalScalingSupported();
@@ -281,4 +283,6 @@ public interface CloudProvider {
     String getModifyDiskVolumeType();
 
     EncryptionProfileTestDto encryptionProfile(EncryptionProfileTestDto encryptionProfile);
+
+    String defaultEncryptionProfile();
 }

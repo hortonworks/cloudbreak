@@ -44,7 +44,7 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         initializeTest(testContext);
-        createEnvironment(testContext, Boolean.FALSE, 1);
+        createEnvironment(testContext, Boolean.FALSE, testContext.getCloudProvider().getFreeIpaDefaultNodeCount());
     }
 
     @Test(dataProvider = TEST_CONTEXT)

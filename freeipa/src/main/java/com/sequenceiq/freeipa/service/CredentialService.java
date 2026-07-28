@@ -67,6 +67,8 @@ public class CredentialService {
                 credentialResponse.getName(),
                 attributes,
                 credentialResponse.getCrn(),
-                credentialResponse.getAccountId());
+                credentialResponse.getAccountId(),
+                Boolean.TRUE.equals(credentialResponse.getGovCloud())
+        );
     }
 }

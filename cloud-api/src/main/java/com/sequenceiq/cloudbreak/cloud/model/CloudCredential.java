@@ -40,6 +40,17 @@ public class CloudCredential extends DynamicModel {
         this.accountId = acountId;
     }
 
+    public boolean isGovCloud() {
+        Object govCloudEnabled = getParameter(GOV_CLOUD, Object.class);
+        if (govCloudEnabled instanceof Boolean) {
+            return (Boolean) govCloudEnabled;
+        } else if (govCloudEnabled instanceof String) {
+            return Boolean.parseBoolean((String) govCloudEnabled);
+        } else {
+            return false;
+        }
+    }
+
     public String getName() {
         return name;
     }

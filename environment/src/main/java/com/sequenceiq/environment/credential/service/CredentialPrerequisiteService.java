@@ -126,7 +126,6 @@ public class CredentialPrerequisiteService {
             String deploymentAddress, CredentialType type, boolean internal) {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(cloudPlatform)
-                .withGovCloud(govCloud)
                 .withWorkspaceId(TEMP_WORKSPACE_ID)
                 .build();
         CredentialPrerequisitesRequest request = cloudPlatformRequestProvider.getCredentialPrerequisitesRequest(
@@ -134,7 +133,8 @@ public class CredentialPrerequisiteService {
                 internal ? null : userPreferencesService.getExternalIdForCurrentUser(),
                 internal ? null : userPreferencesService.getAuditExternalIdForCurrentUser(),
                 deploymentAddress,
-                type);
+                type,
+                govCloud);
         LOGGER.debug("Triggering event to get Cloudbreak prerequistites using payload: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         String message = String.format("Failed to get prerequisites for platform '%s': ", cloudPlatform);

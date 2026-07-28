@@ -199,22 +199,18 @@ class EncryptionProfileServiceTest {
     }
 
     @Test
-    void testGetDefaultEncryptionProfileIfRequiredWhenGovCloudAndVersion732ReturnsDefaultProfile() {
+    void testGetDefaultEncryptionProfileIfRequiredWhenGovCloudAndVersion732ReturnsEnvProfile() {
         Cluster cluster = new Cluster();
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setEncryptionProfileCrn("envProfileCrn");
         CredentialResponse credential = new CredentialResponse();
         credential.setGovCloud(true);
         environment.setCredential(credential);
-        EncryptionProfileResponse defaultProfile = new EncryptionProfileResponse();
-        defaultProfile.setCrn("defaultProfileCrn");
-        when(encryptionProfileEndpoint.getDefaultEncryptionProfile()).thenReturn(defaultProfile);
 
-        Optional<String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.of("7.3.2")));
+        Optional<String> result = underTest.getDefaultEncryptionProfileIfRequired(environment, cluster, Optional.of("7.3.2"));
 
-        assertThat(result).contains("defaultProfileCrn");
-        verify(encryptionProfileEndpoint, times(1)).getDefaultEncryptionProfile();
+        assertThat(result).contains("envProfileCrn");
+        verify(encryptionProfileEndpoint, never()).getDefaultEncryptionProfile();
     }
 
     @Test

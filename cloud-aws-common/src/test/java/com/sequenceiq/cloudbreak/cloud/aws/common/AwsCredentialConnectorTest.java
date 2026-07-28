@@ -399,7 +399,7 @@ public class AwsCredentialConnectorTest {
         when(awsPlatformParameters.getCdpIdbrokerPolicyJson()).thenReturn(idbrokerPolicyJson);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(CloudContext.Builder.builder().build(), "externalId",
-                "auditExtenralId", "deploymentaddress", CredentialType.ENVIRONMENT);
+                "auditExtenralId", "deploymentaddress", CredentialType.ENVIRONMENT, false);
 
         assertNotNull(result);
         assertNotNull(result.getAws());

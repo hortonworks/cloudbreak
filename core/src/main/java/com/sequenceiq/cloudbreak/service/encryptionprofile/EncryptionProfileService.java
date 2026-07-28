@@ -150,20 +150,30 @@ public class EncryptionProfileService {
     public Optional<String> getDefaultEncryptionProfileIfRequired(
             DetailedEnvironmentResponse environment,
             Cluster cluster,
-            Optional<String> runtimeVersion
-    ) {
-        if (StringUtils.isNoneBlank(cluster.getEncryptionProfileCrn())) {
+            Optional<String> runtimeVersion) {
+        if (StringUtils.isNotBlank(cluster.getEncryptionProfileCrn())) {
             return Optional.ofNullable(cluster.getEncryptionProfileCrn());
         } else if (govCloudAnd732AndProfileShouldApplied(environment, cluster, runtimeVersion)) {
-            return Optional.ofNullable(getDefaultEncryptionProfile().getCrn());
+            if (inheritEncryptionProfileFromEnvironment(environment, cluster)) {
+                return Optional.ofNullable(environment.getEncryptionProfileCrn());
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            return Optional.empty();
         }
-        return Optional.empty();
+    }
+
+    private boolean inheritEncryptionProfileFromEnvironment(DetailedEnvironmentResponse environment, Cluster cluster) {
+        return StringUtils.isBlank(cluster.getEncryptionProfileCrn())
+                && StringUtils.isNotBlank(environment.getEncryptionProfileCrn());
     }
 
     private boolean govCloudAnd732AndProfileShouldApplied(DetailedEnvironmentResponse environment, Cluster cluster, Optional<String> runtimeVersion) {
         return StringUtils.isBlank(cluster.getEncryptionProfileCrn())
-                && StringUtils.isNoneBlank(environment.getEncryptionProfileCrn())
+                && StringUtils.isNotBlank(environment.getEncryptionProfileCrn())
                 && environment.getCredential().getGovCloud()
+                && runtimeVersion.isPresent()
                 && isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_2);
     }
 }

@@ -46,8 +46,8 @@ public class CloudPlatformRequestProvider {
     }
 
     public CredentialPrerequisitesRequest getCredentialPrerequisitesRequest(CloudContext cloudContext, String externalId, String auditExternalId,
-            String deploymentAddress, CredentialType type) {
-        return new CredentialPrerequisitesRequest(cloudContext, externalId, auditExternalId, deploymentAddress, type);
+            String deploymentAddress, CredentialType type, boolean govCloud) {
+        return new CredentialPrerequisitesRequest(cloudContext, externalId, auditExternalId, deploymentAddress, type, govCloud);
     }
 
 }

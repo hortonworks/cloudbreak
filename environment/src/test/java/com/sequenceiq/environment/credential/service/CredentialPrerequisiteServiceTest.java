@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.credential.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -151,8 +153,16 @@ class CredentialPrerequisiteServiceTest {
         validateMocksWhenAwsRestrictedPolicyIsNotEntitled();
     }
 
+    @Test
+    @DisplayName("Test for that the govCloud flag is propagated to the Cloudbreak prerequisites request.")
+    void testGovCloudFlagIsPropagatedToRequest() throws InterruptedException {
+        underTest.getPrerequisites(AWS_CLOUD_PLATFORM, true, TEST_DEPLOYMENT_ADDRESS, CredentialType.ENVIRONMENT, INTERNAL_CALL);
+
+        verify(mockCloudPlatformRequestProvider, times(1)).getCredentialPrerequisitesRequest(any(), any(), any(), any(), any(), eq(true));
+    }
+
     private void mockCredentialPrerequisitesRequestToOk() throws InterruptedException {
-        lenient().when(mockCloudPlatformRequestProvider.getCredentialPrerequisitesRequest(any(), any(), any(), any(), any()))
+        lenient().when(mockCloudPlatformRequestProvider.getCredentialPrerequisitesRequest(any(), any(), any(), any(), any(), anyBoolean()))
                 .thenReturn(mockCredentialPrerequisitesRequest);
         lenient().when(mockCredentialPrerequisitesRequest.await()).thenReturn(mockCredentialPrerequisitesResult);
         lenient().when(mockCredentialPrerequisitesResult.getStatus()).thenReturn(EventStatus.OK);
@@ -169,7 +179,7 @@ class CredentialPrerequisiteServiceTest {
     }
 
     private void validateMocksWhenAwsRestrictedPolicyIsNotEntitled() throws InterruptedException {
-        verify(mockCloudPlatformRequestProvider, times(1)).getCredentialPrerequisitesRequest(any(), any(), any(), any(), any());
+        verify(mockCloudPlatformRequestProvider, times(1)).getCredentialPrerequisitesRequest(any(), any(), any(), any(), any(), anyBoolean());
         verify(mockCredentialPrerequisitesRequest, times(1)).selector();
         verify(mockCredentialPrerequisitesRequest, times(1)).await();
         verify(mockCloudPlatformRequestProvider, never()).getCredentialExperiencePolicyRequest(any());
@@ -177,7 +187,7 @@ class CredentialPrerequisiteServiceTest {
     }
 
     private void validateMocksWhenAwsRestrictedPolicyIsEntitled() throws InterruptedException {
-        verify(mockCloudPlatformRequestProvider, times(1)).getCredentialPrerequisitesRequest(any(), any(), any(), any(), any());
+        verify(mockCloudPlatformRequestProvider, times(1)).getCredentialPrerequisitesRequest(any(), any(), any(), any(), any(), anyBoolean());
         verify(mockCredentialPrerequisitesRequest, times(1)).selector();
         verify(mockCredentialPrerequisitesRequest, times(1)).await();
         verify(mockCloudPlatformRequestProvider, times(1)).getCredentialExperiencePolicyRequest(any());

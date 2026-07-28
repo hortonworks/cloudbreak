@@ -391,6 +391,8 @@ class RebuildFlowIntegrationTest {
         ig.setInstanceMetaData(Set.of(instanceMetaData));
         stack.setInstanceGroups(Set.of(ig));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN))
+                .thenReturn(new com.sequenceiq.freeipa.dto.Credential("AWS", "cred", "{}", "crn", ACCOUNT_ID));
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         Authenticator authenticator = mock(Authenticator.class);
