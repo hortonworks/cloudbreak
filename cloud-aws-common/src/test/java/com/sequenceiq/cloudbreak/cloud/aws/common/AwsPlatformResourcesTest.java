@@ -56,9 +56,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
@@ -660,5 +662,27 @@ public class AwsPlatformResourcesTest {
 
         assertTrue(result.isPresent());
         assertEquals("https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Instances:search=i-1234567890abcdef0", result.get());
+    }
+
+    @Test
+    void databaseCapabilitiesShouldReturnDefaultsWhenFillUpInstanceTypesThrows() {
+        AmazonRdsClient amazonRdsClient = mock(AmazonRdsClient.class);
+        when(awsClient.createRdsClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonRdsClient);
+        when(amazonRdsClient.describeDBEngineVersions(any())).thenThrow(new RuntimeException("RDS API unavailable"));
+
+        ReflectionTestUtils.setField(underTest, "awsDatabaseVmDefault", "db.m5.large");
+        ReflectionTestUtils.setField(underTest, "awsArmDatabaseVmDefault", "db.m6g.large");
+        Coordinate coordinate = mock(Coordinate.class);
+        when(coordinate.getDefaultDbVmTypes()).thenReturn(List.of("db.m5.large"));
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate> coordinates = Map.of(region, coordinate);
+        ReflectionTestUtils.setField(underTest, "regionCoordinates", coordinates);
+
+        PlatformDatabaseCapabilities result = underTest.databaseCapabilities(
+                cloudCredential, region, Map.of("architecture", "x86_64"));
+
+        assertThat(result).isNotNull();
+        assertThat(result.getRegionDefaultInstanceTypeMap()).isNotEmpty();
+        assertThat(result.getRegionDefaultInstanceTypeMap().get(region)).isEqualTo("db.m5.large");
+        assertThat(result.getRegionAvailableInstanceTypes()).isEmpty();
     }
 }

@@ -4,18 +4,26 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 
 public class DatabaseVmType extends StringType {
 
-    private DatabaseVmType(String vmType) {
+    private DatabaseVmTypeMeta metaData;
+
+    private DatabaseVmType(String vmType, DatabaseVmTypeMeta meta) {
         super(vmType);
+        this.metaData = meta;
     }
 
-    public static DatabaseVmType databaseVmType(String vmType) {
-        return new DatabaseVmType(vmType);
+    public DatabaseVmTypeMeta getMetaData() {
+        return metaData;
+    }
+
+    public static DatabaseVmType databaseVmType(String vmType, DatabaseVmTypeMeta meta) {
+        return new DatabaseVmType(vmType, meta);
     }
 
     @Override
     public String toString() {
         return "DatabaseVmType{"
                 + "name=" + getValue()
+                + ", metaData=" + metaData
                 + '}';
     }
 }

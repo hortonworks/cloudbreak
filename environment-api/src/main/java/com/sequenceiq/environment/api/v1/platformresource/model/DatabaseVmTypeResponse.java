@@ -15,12 +15,20 @@ public class DatabaseVmTypeResponse implements Serializable {
     @Schema
     private String value;
 
-    public DatabaseVmTypeResponse() {
+    @Schema
+    private DatabaseVmTypeMetaJson databaseVmTypeMetaJson;
 
+    public DatabaseVmTypeResponse() {
+        this(null, null);
     }
 
     public DatabaseVmTypeResponse(String value) {
+        this(value, null);
+    }
+
+    public DatabaseVmTypeResponse(String value, DatabaseVmTypeMetaJson databaseVmTypeMetaJson) {
         this.value = value;
+        this.databaseVmTypeMetaJson = databaseVmTypeMetaJson;
     }
 
     public String getValue() {
@@ -31,10 +39,19 @@ public class DatabaseVmTypeResponse implements Serializable {
         this.value = value;
     }
 
+    public DatabaseVmTypeMetaJson getDatabaseVmTypeMetaJson() {
+        return databaseVmTypeMetaJson;
+    }
+
+    public void setDatabaseVmTypeMetaJson(DatabaseVmTypeMetaJson databaseVmTypeMetaJson) {
+        this.databaseVmTypeMetaJson = databaseVmTypeMetaJson;
+    }
+
     @Override
     public String toString() {
-        return "VmTypeResponse{" +
+        return "DatabaseVmTypeResponse{" +
                 "value='" + value + '\'' +
+                ", databaseVmTypeMetaJson=" + databaseVmTypeMetaJson +
                 '}';
     }
 }

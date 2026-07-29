@@ -20,6 +20,7 @@ import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelD
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseVmtypesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
@@ -49,6 +50,20 @@ public interface EnvironmentPlatformResourceEndpoint {
             operationId = "getVmTypesByCredentialByEnv",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformVmtypesResponse getVmTypesByCredential(
+            @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("architecture") @DefaultValue("X86_64") String architecture,
+            @QueryParam("resourceType") CdpResourceType resourceType);
+
+    @GET
+    @Path("database_machine_types")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = OpEnvDescription.GET_DATABASE_VMTYPES_BY_CREDENTIAL, description = CONNECTOR_NOTES,
+            operationId = "getDatabaseVmTypesByCredentialByEnv",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    PlatformDatabaseVmtypesResponse getDatabaseVmTypesByCredential(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,

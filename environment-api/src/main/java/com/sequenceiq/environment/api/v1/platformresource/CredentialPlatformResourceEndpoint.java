@@ -16,6 +16,7 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription.OpDescription;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseVmtypesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
@@ -48,6 +49,21 @@ public interface CredentialPlatformResourceEndpoint {
             operationId = "getVmTypesByCredential",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformVmtypesResponse getVmTypesByCredential(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("resourceType") CdpResourceType resourceType,
+            @QueryParam("architecture") String architecture);
+
+    @GET
+    @Path("database_machine_types")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = OpDescription.GET_DATABASE_VMTYPES_BY_CREDENTIAL, description = CONNECTOR_NOTES,
+            operationId = "getDatabaseVmTypesByCredential",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    PlatformDatabaseVmtypesResponse getDatabaseVmTypesByCredential(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -47,6 +48,7 @@ import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformRes
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseVmtypesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
@@ -65,6 +67,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudGatewayssToPlatformGatewaysV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudIpPoolsToPlatformIpPoolsV1ResponseConverter;
@@ -119,6 +122,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
     private DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter databaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter;
 
     @Inject
+    private CloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter cloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter;
+
+    @Inject
     private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
 
     @Inject
@@ -157,6 +163,40 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
         LOGGER.info("Resp /platform_resources/machine_types, request: {}, cloudVmTypes: {}, response: {}", request, cloudVmTypes, response);
+        return response;
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public PlatformDatabaseVmtypesResponse getDatabaseVmTypesByCredential(
+            @ResourceCrn String environmentCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone,
+            String architecture,
+            CdpResourceType resourceType) {
+        String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
+                accountId,
+                environmentCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                null,
+                null,
+                null,
+                CdpResourceType.DATABASE);
+        List<String> availabilityZones = new ArrayList<>();
+        if (!Strings.isNullOrEmpty(availabilityZone)) {
+            availabilityZones.add(availabilityZone);
+        }
+        setFilterForVmTypes(availabilityZones, architecture, request, accountId);
+        LOGGER.info("Get /platform_resources/database_machine_types, request: {}", request);
+        CloudDatabaseVmTypes cloudVmTypes = platformParameterService.getDatabaseVmTypesByCredential(request);
+        PlatformDatabaseVmtypesResponse response = cloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter.convert(cloudVmTypes);
+        LOGGER.info("Resp /platform_resources/database_machine_types, request: {}, cloudDatabaseVmTypes: {}, response: {}",
+                request, cloudVmTypes, response);
         return response;
     }
 

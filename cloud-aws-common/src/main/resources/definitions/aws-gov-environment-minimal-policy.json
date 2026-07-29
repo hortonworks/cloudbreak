@@ -162,6 +162,7 @@
         "rds:DescribeDBEngineVersions",
         "rds:ModifyDBParameterGroup",
         "rds:DescribeDBParameters",
+        "rds:DescribeOrderableDBInstanceOptions",
         "rds:DescribeDBParameterGroups",
         "rds:DescribeDBSubnetGroups",
         "rds:DescribeDBInstances",

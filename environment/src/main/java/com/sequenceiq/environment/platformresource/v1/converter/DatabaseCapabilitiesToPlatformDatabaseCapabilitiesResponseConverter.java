@@ -5,16 +5,25 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.environment.api.v1.platformresource.model.DatabaseVmTypeResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 
 @Component
 public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter {
+
+    @Inject
+    private DatabaseVmTypeToDatabaseVmTypeResponseConverter databaseVmTypeToDatabaseVmTypeResponseConverter;
 
     public PlatformDatabaseCapabilitiesResponse convert(PlatformDatabaseCapabilities source) {
         Map<String, List<String>> includedRegions = new HashMap<>();
@@ -40,13 +49,21 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
             String region = upgradeEntry.getKey().getRegionName();
             regionUpgradeVersions.put(region, upgradeEntry.getValue());
         }
-
+        Map<String, Set<DatabaseVmTypeResponse>> databaseVmTypes = new HashMap<>();
+        for (Map.Entry<Region, Set<DatabaseVmType>> instanceTypeEntry : source.getRegionAvailableInstanceTypes().entrySet()) {
+            Set<DatabaseVmTypeResponse> vmTypeResponses = instanceTypeEntry.getValue()
+                    .stream()
+                    .map(e -> databaseVmTypeToDatabaseVmTypeResponseConverter.convert(e))
+                    .collect(Collectors.toSet());
+            databaseVmTypes.put(instanceTypeEntry.getKey().getRegionName(), vmTypeResponses);
+        }
 
         return new PlatformDatabaseCapabilitiesResponse(
                 includedRegions,
                 defaultTypes,
                 regionUpgradeVersions,
-                source.getLatestDatabaseEngineVersion()
+                source.getLatestDatabaseEngineVersion(),
+                databaseVmTypes
         );
     }
 }
