@@ -43,6 +43,12 @@ class CommonExperienceWebTargetProvider {
         return client.target(path);
     }
 
+    WebTarget getPathToEnvironmentTagsEndpoint(String experienceBasePath, String environmentCrn) {
+        checkExperienceBasePath(experienceBasePath);
+        LOGGER.debug("Creating WebTarget to connect experience for environment tags fetch");
+        return client.target(experienceBasePath.replace(componentsToReplace.get(ExperiencePathPlaceholders.ENVIRONMENT_CRN.getPlaceholder()), environmentCrn));
+    }
+
     private void checkExperienceBasePath(String experienceBasePath) {
         throwIfNull(experienceBasePath, () -> new IllegalArgumentException(INVALID_XP_BASE_PATH_GIVEN_MSG));
     }

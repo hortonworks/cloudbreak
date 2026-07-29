@@ -15,6 +15,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -69,6 +70,32 @@ class CommonExperienceWebTargetProviderTest {
 
         assertNotNull(expectedException);
         assertEquals(INVALID_XP_BASE_PATH_GIVEN_MSG, expectedException.getMessage());
+    }
+
+    @Test
+    @DisplayName("When the environment tags endpoint has no base path, then an illegal argument exception is thrown")
+    void testWhenEnvironmentTagsEndpointBasePathIsNullThenIllegalArgumentExceptionIsThrown() {
+        IllegalArgumentException expectedException = assertThrows(
+                IllegalArgumentException.class, () -> underTest.getPathToEnvironmentTagsEndpoint(null, TEST_ENV_CRN));
+
+        assertNotNull(expectedException);
+        assertEquals(INVALID_XP_BASE_PATH_GIVEN_MSG, expectedException.getMessage());
+    }
+
+    @Test
+    @DisplayName("When the environment tags endpoint is created, then the CRN placeholder is replaced in the web target path")
+    void testWhenEnvironmentTagsEndpointIsCreatedThenCrnPlaceholderIsReplacedInWebTarget() {
+        String xpBasePathBase = "someBasePath/";
+        String xpBasePathExtended = xpBasePathBase + TEST_COMPONENT_TO_REPLACE_IN_PATH;
+        String expectedTargetCreationContent = xpBasePathBase + TEST_ENV_CRN;
+
+        WebTarget expectedWebTarget = mock(WebTarget.class);
+        when(mockClient.target(expectedTargetCreationContent)).thenReturn(expectedWebTarget);
+
+        WebTarget resultWebTarget = underTest.getPathToEnvironmentTagsEndpoint(xpBasePathExtended, TEST_ENV_CRN);
+
+        assertEquals(expectedWebTarget, resultWebTarget);
+        verify(mockClient, times(ONCE)).target(expectedTargetCreationContent);
     }
 
     @Test

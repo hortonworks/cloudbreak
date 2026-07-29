@@ -15,6 +15,7 @@ gradle
 *.iws
 .shelf/
 .run/
+*.run.xml
 
 .jpb/
 .nb-gradle-properties

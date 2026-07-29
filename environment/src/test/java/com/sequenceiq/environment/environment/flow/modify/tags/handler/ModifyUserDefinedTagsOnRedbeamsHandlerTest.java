@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.tags.handler;
 
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
-import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.verify;
@@ -59,7 +59,7 @@ class ModifyUserDefinedTagsOnRedbeamsHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
-        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        assertEquals(START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.name(), result.getSelector());
         verify(redbeamsPollerService).updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
     }
 

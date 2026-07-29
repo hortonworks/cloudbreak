@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsMod
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_DATAHUBS_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_DATALAKE_STATE;
+import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_EXPERIENCES_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE;
@@ -16,6 +17,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_ENVIRONMENT_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 import static java.util.Objects.requireNonNull;
@@ -58,6 +60,9 @@ class EnvTagsModificationFlowConfigTest {
                         USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE,
                         START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT),
                 new FlowTransition(USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE,
+                        USER_DEFINED_TAGS_MODIFICATION_EXPERIENCES_STATE,
+                        START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT),
+                new FlowTransition(USER_DEFINED_TAGS_MODIFICATION_EXPERIENCES_STATE,
                         USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE,
                         FINISH_MODIFY_USER_DEFINED_TAGS_EVENT),
                 new FlowTransition(USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE,

@@ -26,6 +26,8 @@ public final class CommonExperience {
 
     private boolean forceDeleteCapable;
 
+    private String environmentTagsEndpoint;
+
     public CommonExperience(String name, String description, String internalEnvironmentEndpoint, String address, String businessName, String policyEndpoint,
             String environmentEndpointPort, String baseAddress, String policyPort, boolean forceDeleteCapable) {
         this.name = name;
@@ -132,6 +134,18 @@ public final class CommonExperience {
         this.forceDeleteCapable = forceDeleteCapable;
     }
 
+    public String getEnvironmentTagsEndpoint() {
+        return environmentTagsEndpoint;
+    }
+
+    public void setEnvironmentTagsEndpoint(String environmentTagsEndpoint) {
+        this.environmentTagsEndpoint = environmentTagsEndpoint;
+    }
+
+    public boolean hasEnvironmentTagsDistribution() {
+        return StringUtils.isNotEmpty(environmentTagsEndpoint);
+    }
+
     @Override
     public String toString() {
         return "CommonExperience{" +
@@ -145,6 +159,7 @@ public final class CommonExperience {
                 ", address='" + address + '\'' +
                 ", environmentEndpointPort='" + environmentEndpointPort + '\'' +
                 ", forceDeleteCapable='" + forceDeleteCapable + '\'' +
+                ", environmentTagsEndpoint='" + environmentTagsEndpoint + '\'' +
                 '}';
     }
 

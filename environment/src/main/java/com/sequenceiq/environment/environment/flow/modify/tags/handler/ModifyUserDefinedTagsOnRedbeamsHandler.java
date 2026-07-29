@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.tags.handler;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT;
-import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT;
 
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public class ModifyUserDefinedTagsOnRedbeamsHandler extends ExceptionCatcherEven
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED, e);
         }
         return EnvTagsModificationEvent.builder()
-                .withSelector(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name())
+                .withSelector(START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.name())
                 .withResourceId(resourceId)
                 .withResourceName(resourceName)
                 .withResourceCrn(resourceCrn)

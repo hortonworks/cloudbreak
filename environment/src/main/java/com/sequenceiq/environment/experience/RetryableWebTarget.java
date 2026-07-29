@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience;
 
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.Response;
 
@@ -30,6 +31,13 @@ public class RetryableWebTarget {
         LOGGER.info("Retryable DELETE called [{}] with the maximum amount of retry of {} and with the backoff delay of {}", call.toString(), MAX_ATTEMPTS,
                 BACKOFF_DELAY);
         return call.delete();
+    }
+
+    @Retryable(maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = BACKOFF_DELAY))
+    public Response put(Invocation.Builder call, Object entity) {
+        LOGGER.info("Retryable PUT called [{}] with the maximum amount of retry of {} and with the backoff delay of {}", call.toString(), MAX_ATTEMPTS,
+                BACKOFF_DELAY);
+        return call.put(Entity.json(entity));
     }
 
 }

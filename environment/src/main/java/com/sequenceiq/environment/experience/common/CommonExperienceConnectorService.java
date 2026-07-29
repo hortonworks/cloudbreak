@@ -103,6 +103,15 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         throw new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
     }
 
+    @Override
+    public void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags) {
+        LOGGER.debug("About to distribute environment tags to experience for environment [crn: {}]", environmentCrn);
+        WebTarget webTarget = commonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(experienceBasePath, environmentCrn);
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        executeCall(webTarget.getUri(), () -> retryableWebTarget.put(call, tags))
+                .ifPresentOrElse(this::throwExceptionIfResultIsUnsuccessful, this::throwExperienceOperationFailedException);
+    }
+
     private void throwExceptionIfResultIsUnsuccessful(Response response) {
         if (!response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
             LOGGER.info("Experience deletion result was not {} but {} with the reason of: {}",

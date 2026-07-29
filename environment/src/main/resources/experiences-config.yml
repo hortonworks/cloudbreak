@@ -7,6 +7,7 @@ environment:
       pathInfix: /liftie/api/v1
       address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
       policyPath: /prerequisites?cloudPlatform={cloudProvider}
+    environmentTagsPath: ""
     path:
       componentToReplace: "{environmentCrn}"
       toReplace:

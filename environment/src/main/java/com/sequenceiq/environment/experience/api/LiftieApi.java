@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.experience.api;
 
+import java.util.Map;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
@@ -14,5 +16,7 @@ public interface LiftieApi {
     @NotNull DeleteClusterResponse deleteCluster(@NotNull String clusterId);
 
     @Nullable ExperiencePolicyResponse getPolicy(String cloudPlatform);
+
+    void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags);
 
 }
