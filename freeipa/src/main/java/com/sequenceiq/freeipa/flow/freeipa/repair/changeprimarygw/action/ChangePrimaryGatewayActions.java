@@ -196,6 +196,7 @@ public class ChangePrimaryGatewayActions {
                     successDetails.getAdditionalDetails().put("DownscaleHosts", getDownscaleHosts(variables));
                     successDetails.getAdditionalDetails().put("UpscaleHosts", getUpscaleHosts(variables));
                     operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
+                    stackUpdater.updateStackStatus(stack, DetailedStackStatus.AVAILABLE, "Finished changing the primary gateway");
                 } else {
                     stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Finished changing the primary gateway");
                 }
