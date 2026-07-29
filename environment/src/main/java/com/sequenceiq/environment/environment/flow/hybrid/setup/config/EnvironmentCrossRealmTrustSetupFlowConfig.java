@@ -50,13 +50,13 @@ public class EnvironmentCrossRealmTrustSetupFlowConfig extends AbstractFlowConfi
             .defaultFailureEvent()
 
             .from(TRUST_SETUP_STATE)
-            .to(TRUST_SETUP_KDC_CONFIG_STATE)
-            .event(TRUST_SETUP_KDC_CONFIG_EVENT)
+            .to(TRUST_SETUP_UPDATE_STACKS_STATE)
+            .event(TRUST_SETUP_UPDATE_STACKS_EVENT)
             .defaultFailureEvent()
 
             .from(TRUST_SETUP_KDC_CONFIG_STATE)
             .to(TRUST_SETUP_UPDATE_STACKS_STATE)
-            .event(TRUST_SETUP_UPDATE_STACKS_EVENT)
+            .event(TRUST_SETUP_KDC_CONFIG_EVENT)
             .defaultFailureEvent()
 
             .from(TRUST_SETUP_UPDATE_STACKS_STATE)

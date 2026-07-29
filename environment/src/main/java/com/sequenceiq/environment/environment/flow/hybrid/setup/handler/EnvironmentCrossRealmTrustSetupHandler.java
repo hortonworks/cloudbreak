@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.hybrid.setup.handler;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FAILED;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupHandlerSelectors.TRUST_SETUP_HANDLER;
-import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_KDC_CONFIG_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_UPDATE_STACKS_EVENT;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,9 +86,9 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
                     }
                 }
             }
-            LOGGER.debug("TRUST_SETUP_KDC_CONFIG_EVENT event sent");
+            LOGGER.debug("TRUST_SETUP_UPDATE_STACKS_EVENT event sent");
             return data.toBuilder()
-                    .withSelector(TRUST_SETUP_KDC_CONFIG_EVENT.selector())
+                    .withSelector(TRUST_SETUP_UPDATE_STACKS_EVENT.selector())
                     .build();
         } catch (Exception e) {
             LOGGER.debug("TRUST_SETUP_FAILED event sent");

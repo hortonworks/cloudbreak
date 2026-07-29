@@ -6,7 +6,6 @@ public enum EnvironmentCrossRealmTrustSetupHandlerSelectors implements FlowEvent
 
     TRUST_SETUP_VALIDATION_HANDLER,
     TRUST_SETUP_HANDLER,
-    TRUST_SETUP_KDC_CONFIG_HANDLER,
     TRUST_SETUP_UPDATE_STACKS_HANDLER;
 
     @Override

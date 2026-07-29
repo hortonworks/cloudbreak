@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.flow.hybrid.setup;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_FINISHED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED;
@@ -14,7 +13,6 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SET
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FINISHED_STATE;
-import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_KDC_CONFIG_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_UPDATE_STACKS_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_VALIDATION_STATE;
@@ -92,7 +90,6 @@ import com.sequenceiq.environment.environment.flow.hybrid.setup.action.Environme
 import com.sequenceiq.environment.environment.flow.hybrid.setup.config.EnvironmentCrossRealmTrustSetupFlowConfig;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentCrossRealmTrustSetupHandler;
-import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentCrossRealmTrustSetupKdcConfigHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentCrossRealmTrustSetupUpdateStacksHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentValidateCrossRealmTrustSetupHandler;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
@@ -322,13 +319,6 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
                 any(CommonContext.class),
                 any(Payload.class),
                 eq(TRUST_SETUP_IN_PROGRESS),
-                eq(ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED),
-                eq(TRUST_SETUP_KDC_CONFIG_STATE)
-        );
-        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
-                any(CommonContext.class),
-                any(Payload.class),
-                eq(TRUST_SETUP_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED),
                 eq(TRUST_SETUP_UPDATE_STACKS_STATE)
         );
@@ -365,13 +355,6 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
                 any(CommonContext.class),
                 any(Payload.class),
                 eq(TRUST_SETUP_IN_PROGRESS),
-                eq(ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED),
-                eq(TRUST_SETUP_KDC_CONFIG_STATE)
-        );
-        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
-                any(CommonContext.class),
-                any(Payload.class),
-                eq(TRUST_SETUP_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_TRUST_UPDATE_STACKS_STARTED),
                 eq(TRUST_SETUP_UPDATE_STACKS_STATE)
         );
@@ -394,7 +377,6 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         describeFreeIpaResponse.setStatus(Status.AVAILABLE);
         describeFreeIpaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         when(freeIpaService.describe(ENVIRONMENT_CRN))
-                .thenReturn(Optional.empty())
                 .thenReturn(Optional.empty())
                 .thenReturn(Optional.of(describeFreeIpaResponse));
 
@@ -422,13 +404,6 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
                 eq(TRUST_SETUP_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_TRUST_STARTED),
                 eq(TRUST_SETUP_STATE)
-        );
-        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
-                any(CommonContext.class),
-                any(Payload.class),
-                eq(TRUST_SETUP_IN_PROGRESS),
-                eq(ENVIRONMENT_SETUP_TRUST_KDC_CONFIG_STARTED),
-                eq(TRUST_SETUP_KDC_CONFIG_STATE)
         );
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
@@ -583,7 +558,6 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
             CommonMetricService.class,
             EnvironmentCrossRealmTrustSetupActions.class,
             EnvironmentCrossRealmTrustSetupHandler.class,
-            EnvironmentCrossRealmTrustSetupKdcConfigHandler.class,
             EnvironmentCrossRealmTrustSetupUpdateStacksHandler.class,
             EnvironmentValidateCrossRealmTrustSetupHandler.class,
             WebApplicationExceptionMessageExtractor.class,

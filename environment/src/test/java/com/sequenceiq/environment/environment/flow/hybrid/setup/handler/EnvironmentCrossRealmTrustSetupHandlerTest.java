@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.hybrid.setup.handler;
 
-import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_KDC_CONFIG_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_UPDATE_STACKS_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -120,7 +120,7 @@ class EnvironmentCrossRealmTrustSetupHandlerTest {
                 requestCaptor.capture()
         );
 
-        assertThat(result.selector()).isEqualTo(TRUST_SETUP_KDC_CONFIG_EVENT.selector());
+        assertThat(result.selector()).isEqualTo(TRUST_SETUP_UPDATE_STACKS_EVENT.selector());
         assertThat(requestCaptor.getValue())
                 .returns(eventData.getResourceCrn(), PrepareCrossRealmTrustV2Request::getEnvironmentCrn)
                 .returns(List.of(eventData.getDnsIp()), PrepareCrossRealmTrustV2Request::getDnsServerIps)
