@@ -7,8 +7,13 @@ import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsLaunc
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsLaunchService.PORT;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,8 +40,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.RDSModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -55,6 +62,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksResponse;
+import software.amazon.awssdk.services.cloudformation.model.Stack;
+import software.amazon.awssdk.services.cloudformation.model.StackStatus;
 import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
 
 @ExtendWith(MockitoExtension.class)
@@ -126,6 +136,9 @@ class AwsRdsLaunchServiceTest {
     private AwsStackRequestHelper awsStackRequestHelper;
 
     @Mock
+    private AwsCloudFormationErrorMessageProvider awsCloudFormationErrorMessageProvider;
+
+    @Mock
     private PersistenceNotifier resourceNotifier;
 
     @Mock
@@ -163,7 +176,7 @@ class AwsRdsLaunchServiceTest {
 
         when(awsClient.createCloudFormationClient(isA(AwsCredentialView.class), eq(REGION))).thenReturn(cfRetryClient);
 
-        when(cfRetryClient.describeStacks(isA(DescribeStacksRequest.class)))
+        lenient().when(cfRetryClient.describeStacks(isA(DescribeStacksRequest.class)))
                 .thenThrow(AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder().errorMessage("Stack not found").build()).build());
 
         when(cfRetryClient.waiters()).thenReturn(cfWaiters);
@@ -184,6 +197,76 @@ class AwsRdsLaunchServiceTest {
     @Test
     void launchTestUseSslEnforcementWhenEnforcementEnabledAndCertificateIdentifierPresent() {
         launchTestUseSslEnforcementInternal(true, true);
+    }
+
+    @Test
+    void launchFallsBackToNextInstanceTypeOnCapacityFailure() {
+        when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient)).thenReturn(CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
+        when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any()))
+                .thenThrow(new RuntimeException("stack create failed"))
+                .thenReturn(null);
+        when(awsCloudFormationErrorMessageProvider.getErrorReason(eq(authenticatedContext), eq(STACK_NAME_CF), any()))
+                .thenReturn("The requested resource failed: InsufficientDBInstanceCapacity for db.m5.large");
+
+        List<CloudResourceStatus> statuses = underTest.launch(authenticatedContext,
+                createDatabaseStack("db.m5.large", List.of("db.m6i.large", "db.m7i.large")), resourceNotifier);
+
+        assertThat(statuses).isNotNull();
+        checkOutputResourceExists(statuses, ResourceType.RDS_INSTANCE, OUT_DB_INSTANCE);
+
+        ArgumentCaptor<DatabaseStack> stackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(awsStackRequestHelper, times(2)).createCreateStackRequest(eq(authenticatedContext), stackCaptor.capture(), eq(STACK_NAME_CF), eq(CF_TEMPLATE));
+        assertThat(stackCaptor.getAllValues().get(0).getDatabaseServer().getFlavor()).isEqualTo("db.m5.large");
+        assertThat(stackCaptor.getAllValues().get(1).getDatabaseServer().getFlavor()).isEqualTo("db.m6i.large");
+        verify(cfRetryClient, times(2)).createStack(any());
+        verify(cfRetryClient).deleteStack(any());
+    }
+
+    @Test
+    void launchFailsWhenAllInstanceTypesRunOutOfCapacity() {
+        when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any()))
+                .thenThrow(new RuntimeException("primary failed"))
+                .thenThrow(new RuntimeException("fallback failed"));
+        when(awsCloudFormationErrorMessageProvider.getErrorReason(eq(authenticatedContext), eq(STACK_NAME_CF), any()))
+                .thenReturn("InsufficientDBInstanceCapacity");
+
+        assertThatThrownBy(() -> underTest.launch(authenticatedContext,
+                createDatabaseStack("db.m5.large", List.of("db.m6i.large")), resourceNotifier))
+                .isInstanceOf(CloudConnectorException.class);
+
+        verify(cfRetryClient, times(2)).createStack(any());
+        verify(cfRetryClient).deleteStack(any());
+    }
+
+    @Test
+    void launchFailsImmediatelyOnNonCapacityFailureWithoutFallback() {
+        when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any())).thenThrow(new RuntimeException("stack create failed"));
+        when(awsCloudFormationErrorMessageProvider.getErrorReason(eq(authenticatedContext), eq(STACK_NAME_CF), any()))
+                .thenReturn("Subnet is invalid, not a capacity problem");
+
+        assertThatThrownBy(() -> underTest.launch(authenticatedContext,
+                createDatabaseStack("db.m5.large", List.of("db.m6i.large")), resourceNotifier))
+                .isInstanceOf(CloudConnectorException.class);
+
+        verify(cfRetryClient, times(1)).createStack(any());
+        verify(cfRetryClient, never()).deleteStack(any());
+    }
+
+    @Test
+    void launchDeletesFailedStackAndReprovisionsWhenPreviousAttemptLeftFailedStack() {
+        when(cfRetryClient.describeStacks(isA(DescribeStacksRequest.class))).thenReturn(DescribeStacksResponse.builder()
+                .stacks(Stack.builder().stackName(STACK_NAME_CF).stackStatus(StackStatus.CREATE_FAILED).build())
+                .build());
+        when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient)).thenReturn(CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
+        when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any())).thenReturn(null);
+
+        List<CloudResourceStatus> statuses = underTest.launch(authenticatedContext,
+                createDatabaseStack("db.m5.large", List.of("db.m6i.large")), resourceNotifier);
+
+        assertThat(statuses).isNotNull();
+        checkOutputResourceExists(statuses, ResourceType.RDS_INSTANCE, OUT_DB_INSTANCE);
+        verify(cfRetryClient).deleteStack(any());
+        verify(cfRetryClient).createStack(any());
     }
 
     private void launchTestUseSslEnforcementInternal(boolean useSslEnforcement, boolean sslCertificateIdentifierDefined) {
@@ -231,6 +314,23 @@ class AwsRdsLaunchServiceTest {
         DatabaseServer databaseServer = DatabaseServer.builder()
                 .withUseSslEnforcement(useSslEnforcement)
                 .withParams(sslCertificateIdentifierDefined ? Map.of(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER, SSL_CERTIFICATE_IDENTIFIER) : Map.of())
+                .withSecurity(security)
+                .build();
+
+        return new DatabaseStack(network, databaseServer, Collections.emptyMap(), null);
+    }
+
+    private DatabaseStack createDatabaseStack(String flavor, List<String> fallbackInstanceTypes) {
+        Subnet subnet = new Subnet(SUBNET_CIDR);
+        Network network = new Network(subnet, List.of(NETWORK_CIDR), OutboundInternetTraffic.ENABLED);
+        network.putParameter("subnetId", SUBNET_ID);
+        network.putParameter("vpcCidr", NETWORK_CIDR);
+
+        Security security = new Security(Collections.emptyList(), List.of(SECURITY_GROUP_ID));
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .withFlavor(flavor)
+                .withFallbackInstanceTypes(fallbackInstanceTypes)
+                .withUseSslEnforcement(false)
                 .withSecurity(security)
                 .build();
 

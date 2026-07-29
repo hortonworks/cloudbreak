@@ -103,6 +103,7 @@ public class DBStackToDatabaseStackConverterTest {
         DatabaseServer server = new DatabaseServer();
         server.setName("myserver");
         server.setInstanceType("db.m3.medium");
+        server.setFallbackInstanceTypes(List.of("db.m6i.large", "db.m7i.large"));
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         server.setConnectionDriver("org.postgresql.Driver");
         server.setRootUserName("root");
@@ -126,6 +127,7 @@ public class DBStackToDatabaseStackConverterTest {
 
         assertThat(convertedStack.getDatabaseServer().getServerId()).isEqualTo("myserver");
         assertThat(convertedStack.getDatabaseServer().getFlavor()).isEqualTo("db.m3.medium");
+        assertThat(convertedStack.getDatabaseServer().getFallbackInstanceTypes()).containsExactly("db.m6i.large", "db.m7i.large");
         assertThat(convertedStack.getDatabaseServer().getEngine()).isEqualTo(DatabaseEngine.POSTGRESQL);
         assertThat(convertedStack.getDatabaseServer().getConnectionDriver()).isEqualTo("org.postgresql.Driver");
         assertThat(convertedStack.getDatabaseServer().getRootUserName()).isEqualTo("root");

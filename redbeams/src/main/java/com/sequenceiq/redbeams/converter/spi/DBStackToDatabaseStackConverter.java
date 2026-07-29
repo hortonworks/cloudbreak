@@ -96,6 +96,7 @@ public class DBStackToDatabaseStackConverter {
         DatabaseServer.Builder builder = DatabaseServer.builder()
                 .withServerId(dbStackDatabaseServer.getName())
                 .withFlavor(dbStackDatabaseServer.getInstanceType())
+                .withFallbackInstanceTypes(dbStackDatabaseServer.getFallbackInstanceTypes())
                 .withEngine(getDatabaseEngine(dbStackDatabaseServer))
                 .withConnectionDriver(dbStackDatabaseServer.getConnectionDriver())
                 .withRootUserName(dbStackDatabaseServer.getRootUserName())

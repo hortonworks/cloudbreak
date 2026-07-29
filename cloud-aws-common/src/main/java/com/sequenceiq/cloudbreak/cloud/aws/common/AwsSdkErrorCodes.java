@@ -6,6 +6,8 @@ public class AwsSdkErrorCodes {
 
     public static final String INSUFFICIENT_INSTANCE_CAPACITY = "InsufficientInstanceCapacity";
 
+    public static final String INSUFFICIENT_DB_INSTANCE_CAPACITY = "InsufficientDBInstanceCapacity";
+
     public static final String ACCESS_DENIED = "AccessDenied";
 
     public static final String UNSUPPORTED = "Unsupported";

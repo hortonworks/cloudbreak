@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -26,6 +28,8 @@ public class DatabaseServer extends DynamicModel {
     private final String serverId;
 
     private final String flavor;
+
+    private final List<String> fallbackInstanceTypes;
 
     private final DatabaseEngine engine;
 
@@ -54,12 +58,13 @@ public class DatabaseServer extends DynamicModel {
     /*
      * We need this constructor because flow request objects use this class, and it can not be deserialized to object
      */
-    private DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String connectionDriver, String connectorJarUrl, String rootUserName,
-            String rootPassword, Integer port, boolean useSslEnforcement, Long storageSize, Security security, InstanceStatus status, String location,
-            boolean highAvailability, Map<String, Object> params) {
+    private DatabaseServer(String serverId, String flavor, List<String> fallbackInstanceTypes, DatabaseEngine engine, String connectionDriver,
+            String connectorJarUrl, String rootUserName, String rootPassword, Integer port, boolean useSslEnforcement, Long storageSize, Security security,
+            InstanceStatus status, String location, boolean highAvailability, Map<String, Object> params) {
         super(params);
         this.serverId = serverId;
         this.flavor = flavor;
+        this.fallbackInstanceTypes = fallbackInstanceTypes == null ? new ArrayList<>() : fallbackInstanceTypes;
         this.engine = engine;
         this.connectionDriver = connectionDriver;
         this.connectorJarUrl = connectorJarUrl;
@@ -78,6 +83,7 @@ public class DatabaseServer extends DynamicModel {
         super(builder.params);
         this.serverId = builder.serverId;
         this.flavor = builder.flavor;
+        this.fallbackInstanceTypes = builder.fallbackInstanceTypes == null ? new ArrayList<>() : builder.fallbackInstanceTypes;
         this.engine = builder.engine;
         this.connectionDriver = builder.connectionDriver;
         this.connectorJarUrl = builder.connectorJarUrl;
@@ -98,6 +104,10 @@ public class DatabaseServer extends DynamicModel {
 
     public String getFlavor() {
         return flavor;
+    }
+
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
     }
 
     public DatabaseEngine getEngine() {
@@ -153,6 +163,7 @@ public class DatabaseServer extends DynamicModel {
         return "DatabaseServer{"
                 + "serverId='" + serverId + '\''
                 + ", flavor='" + flavor + '\''
+                + ", fallbackInstanceTypes=" + fallbackInstanceTypes
                 + ", engine='" + engine + '\''
                 + ", connectionDriver='" + connectionDriver + '\''
                 + ", connectorJarUrl='" + connectorJarUrl + '\''
@@ -175,6 +186,7 @@ public class DatabaseServer extends DynamicModel {
         return new Builder()
                 .withServerId(databaseServer.serverId)
                 .withFlavor(databaseServer.flavor)
+                .withFallbackInstanceTypes(databaseServer.fallbackInstanceTypes)
                 .withEngine(databaseServer.engine)
                 .withConnectionDriver(databaseServer.connectionDriver)
                 .withConnectorJarUrl(databaseServer.connectorJarUrl)
@@ -196,6 +208,8 @@ public class DatabaseServer extends DynamicModel {
         private String serverId;
 
         private String flavor;
+
+        private List<String> fallbackInstanceTypes = new ArrayList<>();
 
         private DatabaseEngine engine;
 
@@ -230,6 +244,11 @@ public class DatabaseServer extends DynamicModel {
 
         public Builder withFlavor(String flavor) {
             this.flavor = flavor;
+            return this;
+        }
+
+        public Builder withFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+            this.fallbackInstanceTypes = fallbackInstanceTypes == null ? new ArrayList<>() : fallbackInstanceTypes;
             return this;
         }
 
