@@ -379,7 +379,7 @@ public class MockPlatformResources implements PlatformResources {
                 String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmTypes().getFirst();
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? mockDatabaseVmDefault : defaultDbVmType);
             }
-            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap, new HashMap<>(), null, new HashMap<>());
+            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap, new HashMap<>(), null);
         } catch (Exception e) {
             return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
         }

@@ -10,7 +10,6 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.SSD;
 import static com.sequenceiq.cloudbreak.cloud.gcp.GcpEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.SHARED_PROJECT_ID;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
-import static com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType.databaseVmType;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
@@ -92,8 +91,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmTypeMeta.DatabaseVmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -125,10 +122,6 @@ public class GcpPlatformResources implements PlatformResources {
     private static final Set<Integer> GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES = Set.of(1, 2, 3, 4, 5, 6, 7, 8, 16, 24);
 
     private static final Set<String> MACHINE_TYPES_WITH_LOCAL_SSD = Set.of("n1", "n2", "n2d");
-
-    private static final int DEFAULT_CPU = 2;
-
-    private static final float DEFAULT_MEMORY = 14;
 
     private final VersionComparator versionComparator = new VersionComparator();
 
@@ -520,44 +513,24 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Map<Region, Set<DatabaseVmType>> cloudVmResponses = new HashMap<>();
+        Map<Region, Set<String>> cloudVmResponses = new HashMap<>();
         Map<Region, String> defaultCloudVmResponses = new HashMap<>();
-        Set<DatabaseVmType> instanceTypes = getAvailableDatabaseInstanceTypes(cloudCredential);
-        if (!instanceTypes.isEmpty()) {
-            cloudVmResponses.put(region, instanceTypes);
-            defaultCloudVmResponses.put(region, gcpDatabaseVmDefault);
-        }
-        return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
-    }
-
-    private Set<DatabaseVmType> getAvailableDatabaseInstanceTypes(CloudCredential cloudCredential) {
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(cloudCredential, cloudCredential.getName());
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
+
         try {
-            Set<DatabaseVmType> instanceTypes = sqlAdmin.tiers().list(projectId)
+            cloudVmResponses.put(region, sqlAdmin.tiers().list(projectId)
                     .execute()
                     .getItems()
                     .stream()
-                    .map(tier -> databaseVmType(
-                            tier.getTier(),
-                            DatabaseVmTypeMetaBuilder.builder()
-                                    .withMemory(tier.getRAM().floatValue() / (THOUSAND * THOUSAND * THOUSAND))
-                                    .create())
-                    )
-                    .collect(Collectors.toSet());
-            instanceTypes.add(
-                    databaseVmType(
-                        gcpDatabaseVmDefault,
-                        DatabaseVmTypeMetaBuilder.builder()
-                                .withCpuAndMemory(DEFAULT_CPU, DEFAULT_MEMORY)
-                                .create()
-                    )
+                    .map(e -> e.getTier())
+                    .collect(Collectors.toSet())
             );
-            return instanceTypes;
+            defaultCloudVmResponses.put(region, gcpDatabaseVmDefault);
         } catch (IOException e) {
-            LOGGER.warn("Could not get available database instance types for GCP", e);
-            return Set.of();
+            return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
         }
+        return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
     }
 
     @Override
@@ -794,23 +767,11 @@ public class GcpPlatformResources implements PlatformResources {
                 String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmTypes().getFirst();
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? gcpDatabaseVmDefault : defaultDbVmType);
             }
-            Map<Region, Set<DatabaseVmType>> regionAvailableInstanceTypes = new HashMap<>();
-            Set<DatabaseVmType> instanceTypes = getAvailableDatabaseInstanceTypes(cloudCredential);
-            if (!instanceTypes.isEmpty()) {
-                if (region != null && !Strings.isNullOrEmpty(region.value())) {
-                    regionAvailableInstanceTypes.put(region, instanceTypes);
-                } else {
-                    for (Region actualRegion : regions.getCloudRegions().keySet()) {
-                        regionAvailableInstanceTypes.put(actualRegion, instanceTypes);
-                    }
-                }
-            }
             return new PlatformDatabaseCapabilities(
                     new HashMap<>(),
                     regionDefaultInstanceTypeMap,
                     new HashMap<>(),
-                    getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null),
-                    regionAvailableInstanceTypes
+                    getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null)
             );
         } catch (Exception e) {
             return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>(), null);

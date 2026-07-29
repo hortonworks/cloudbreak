@@ -6,23 +6,23 @@ import java.util.Set;
 
 public class CloudDatabaseVmTypes {
 
-    private Map<Region, Set<DatabaseVmType>> cloudDatabaseVmResponses = new HashMap<>();
+    private Map<Region, Set<String>> cloudDatabaseVmResponses = new HashMap<>();
 
     private Map<Region, String> defaultCloudDatabaseVmResponses = new HashMap<>();
 
     public CloudDatabaseVmTypes() {
     }
 
-    public CloudDatabaseVmTypes(Map<Region, Set<DatabaseVmType>> cloudDatabaseVmResponses, Map<Region, String> defaultCloudDatabaseVmResponses) {
+    public CloudDatabaseVmTypes(Map<Region, Set<String>> cloudDatabaseVmResponses, Map<Region, String> defaultCloudDatabaseVmResponses) {
         this.cloudDatabaseVmResponses = cloudDatabaseVmResponses;
         this.defaultCloudDatabaseVmResponses = defaultCloudDatabaseVmResponses;
     }
 
-    public Map<Region, Set<DatabaseVmType>> getCloudDatabaseVmResponses() {
+    public Map<Region, Set<String>> getCloudDatabaseVmResponses() {
         return cloudDatabaseVmResponses;
     }
 
-    public void setCloudDatabaseVmResponses(Map<Region, Set<DatabaseVmType>> cloudDatabaseVmResponses) {
+    public void setCloudDatabaseVmResponses(Map<Region, Set<String>> cloudDatabaseVmResponses) {
         this.cloudDatabaseVmResponses = cloudDatabaseVmResponses;
     }
 

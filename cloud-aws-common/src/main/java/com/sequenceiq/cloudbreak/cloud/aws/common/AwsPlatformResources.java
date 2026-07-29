@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceT
 import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
-import static com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType.databaseVmType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
@@ -16,7 +15,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 import static com.sequenceiq.common.model.Architecture.ARM64;
-import static com.sequenceiq.common.model.Architecture.X86_64;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
@@ -31,7 +29,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -44,7 +41,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,8 +85,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmTypeMeta.DatabaseVmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -182,7 +176,6 @@ import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsResponse;
 import software.amazon.awssdk.services.rds.model.DescribeOrderableDbInstanceOptionsRequest;
-import software.amazon.awssdk.services.rds.paginators.DescribeOrderableDBInstanceOptionsIterable;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
@@ -592,7 +585,7 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #region, #availabilityZonesNeeded }")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
-            boolean availabilityZonesNeeded) {
+                                boolean availabilityZonesNeeded) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential));
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -718,20 +711,47 @@ public class AwsPlatformResources implements PlatformResources {
         return getCloudVmTypes(cloudCredential, true, region, filters, enabledInstanceTypeFilter, false);
     }
 
+    @Override
+    public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        Map<Region, Set<String>> cloudVmResponses = new HashMap<>();
+        Map<Region, String> defaultCloudVmResponses = new HashMap<>();
+        String architecture = filters.getOrDefault("architecture", Architecture.X86_64.getName());
+        if (region != null && !Strings.isNullOrEmpty(region.value())) {
+            AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+            AmazonRdsClient rdsClient = awsClient.createRdsClient(awsCredentialView, region.getRegionName());
+            Set<String> instanceTypes = new HashSet<>();
+            boolean armRequired = ARM64.getName().equals(architecture);
+            DescribeDbEngineVersionsRequest engineVersionsRequest = DescribeDbEngineVersionsRequest.builder()
+                    .engine(POSTGRES)
+                    .build();
+
+            Optional<DBEngineVersion> postgres = rdsClient.describeDBEngineVersions(engineVersionsRequest)
+                    .dbEngineVersions()
+                    .stream()
+                    .filter(version -> version.engineVersion().startsWith(dbOverrideConfig.findMinEngineVersion()))
+                    .findFirst();
+            if (postgres.isPresent()) {
+                DescribeOrderableDbInstanceOptionsRequest request = DescribeOrderableDbInstanceOptionsRequest.builder()
+                        .engine(POSTGRES)
+                        .maxRecords(SEGMENT)
+                        .engineVersion(postgres.get().engineVersion())
+                        .build();
+                rdsClient.describeOrderableDbInstanceOptionsResponse(request)
+                        .stream()
+                        .flatMap(response -> response.orderableDBInstanceOptions().stream())
+                        .filter(e -> armRequired ? isArmInstance(e.dbInstanceClass()) : !isArmInstance(e.dbInstanceClass()))
+                        .forEach(option -> instanceTypes.add(option.dbInstanceClass()));
+                cloudVmResponses.put(region, instanceTypes);
+                defaultCloudVmResponses.put(region, awsDatabaseVmDefault);
+            }
+
+        }
+        return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
     private boolean isArmInstance(String instanceClass) {
         // Pattern matches db.m6g, db.t4g, db.r6g, etc.
         return instanceClass.matches("db\\.[a-z][0-9]g\\..*");
-    }
-
-    private boolean filterArmInstance(String instanceClass, Architecture architecture) {
-        switch (architecture) {
-            case ARM64 -> {
-                return isArmInstance(instanceClass);
-            }
-            default -> {
-                return !isArmInstance(instanceClass);
-            }
-        }
     }
 
     @Override
@@ -779,7 +799,6 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceDatabaseVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters + 'database'")
     public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         try {
             CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
@@ -796,21 +815,18 @@ public class AwsPlatformResources implements PlatformResources {
                     }
                 } else {
                     if (coordinate.getDefaultDbVmTypes() == null || coordinate.getDefaultDbVmTypes().isEmpty()) {
-                        defaultDbVmType = getAwsDatabaseVmDefault(architecture);
+                        defaultDbVmType = awsDatabaseVmDefault;
                     } else {
                         defaultDbVmType = coordinate.getDefaultDbVmTypes().getFirst();
                     }
                 }
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType);
             }
-            Map<Region, Set<DatabaseVmType>> regionAvailableInstanceTypes = new HashMap<>();
-            fillUpInstanceTypes(cloudCredential, region, architecture, regionAvailableInstanceTypes);
             return new PlatformDatabaseCapabilities(
                     new HashMap<>(),
                     regionDefaultInstanceTypeMap,
                     new HashMap<>(),
-                    getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null),
-                    regionAvailableInstanceTypes
+                    getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null)
             );
         } catch (Exception e) {
             LOGGER.error("Could not get database capabilities for provider: ", e);
@@ -818,25 +834,11 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private void fillUpInstanceTypes(CloudCredential cloudCredential, Region region, String architecture, Map<Region,
-            Set<DatabaseVmType>> regionAvailableInstanceTypes) {
-        if (region != null && !Strings.isNullOrEmpty(region.value())) {
-            Set<DatabaseVmType> instanceTypes = getAvailableDatabaseInstanceTypes(
-                    new AwsCredentialView(cloudCredential),
-                    region,
-                    architecture
-            );
-            if (!instanceTypes.isEmpty()) {
-                regionAvailableInstanceTypes.put(region, instanceTypes);
-            }
-        }
-    }
-
     @Override
     public DefaultPlatformDatabaseCapabilities defaultDatabaseCapabilities() {
         DefaultPlatformDatabaseCapabilities defaultPlatformDatabaseCapabilities = new DefaultPlatformDatabaseCapabilities();
-        defaultPlatformDatabaseCapabilities.setDefaultX86InstanceTypeRequirements(Set.of(getAwsDatabaseVmDefault(X86_64.getName())));
-        defaultPlatformDatabaseCapabilities.setDefaultArmInstanceTypeRequirements(Set.of(getAwsDatabaseVmDefault(ARM64.getName())));
+        defaultPlatformDatabaseCapabilities.setDefaultX86InstanceTypeRequirements(Set.of(awsDatabaseVmDefault));
+        defaultPlatformDatabaseCapabilities.setDefaultArmInstanceTypeRequirements(Set.of(awsArmDatabaseVmDefault));
         return defaultPlatformDatabaseCapabilities;
     }
 
@@ -858,14 +860,8 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private CloudVmTypes getCloudVmTypes(
-            ExtendedCloudCredential cloudCredential,
-            boolean dataHubArmEnabled,
-            Region region,
-            Map<String, String> filters,
-            Predicate<VmType> enabledInstanceTypeFilter,
-            boolean enableMinimalHardwareFilter
-    ) {
+    private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, boolean dataHubArmEnabled, Region region, Map<String, String> filters,
+            Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
         List<Architecture> architectures = getArchitectures(filters);
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -910,72 +906,6 @@ public class AwsPlatformResources implements PlatformResources {
             filterInstancesByFilters(enabledInstanceTypeFilter, cloudVmResponses);
         }
         return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
-    }
-
-    @Override
-    public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Map<Region, Set<DatabaseVmType>> cloudVmResponses = new HashMap<>();
-        Map<Region, String> defaultCloudVmResponses = new HashMap<>();
-        String architecture = filters.getOrDefault("architecture", Architecture.X86_64.getName());
-        if (region != null && !Strings.isNullOrEmpty(region.value())) {
-            AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
-            Set<DatabaseVmType> instanceTypes = getAvailableDatabaseInstanceTypes(awsCredentialView, region, architecture);
-            if (!instanceTypes.isEmpty()) {
-                cloudVmResponses.put(region, instanceTypes);
-                defaultCloudVmResponses.put(region, getAwsDatabaseVmDefault(architecture));
-            }
-        }
-        return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
-    }
-
-    private String getAwsDatabaseVmDefault(String architecture) {
-        if (getTargetArchitecture(architecture).equals(Architecture.X86_64)) {
-            return awsDatabaseVmDefault;
-        }
-        return awsArmDatabaseVmDefault;
-    }
-
-    private Set<DatabaseVmType> getAvailableDatabaseInstanceTypes(AwsCredentialView awsCredentialView, Region region, String architecture) {
-        Set<DatabaseVmType> instanceTypes = new HashSet<>();
-        AmazonRdsClient rdsClient = awsClient.createRdsClient(awsCredentialView, region.getRegionName());
-        DescribeDbEngineVersionsRequest engineVersionsRequest = DescribeDbEngineVersionsRequest.builder()
-                .engine(POSTGRES)
-                .build();
-        Optional<DBEngineVersion> postgres = rdsClient.describeDBEngineVersions(engineVersionsRequest)
-                .dbEngineVersions()
-                .stream()
-                .filter(version -> version.engineVersion().startsWith(dbOverrideConfig.findMinEngineVersion()))
-                .findFirst();
-        if (postgres.isPresent()) {
-            DescribeOrderableDbInstanceOptionsRequest request = DescribeOrderableDbInstanceOptionsRequest.builder()
-                    .engine(POSTGRES)
-                    .engineVersion(postgres.get().engineVersion())
-                    .build();
-            DescribeOrderableDBInstanceOptionsIterable paginator = rdsClient.describeOrderableDbInstanceOptionsResponse(request);
-            paginator.orderableDBInstanceOptions().stream()
-                    .filter(e -> filterArmInstance(e.dbInstanceClass(), getTargetArchitecture(architecture)))
-                    .forEach(option -> {
-                        DatabaseVmTypeMetaBuilder databaseVmTypeMetaBuilder = DatabaseVmTypeMetaBuilder.builder()
-                                .withArchitecture(isArmInstance(option.dbInstanceClass()) ? ARM64 : Architecture.X86_64)
-                                .withAvailabilityZones(
-                                        option.availabilityZones()
-                                        .stream()
-                                        .map(e -> e.name())
-                                        .collect(Collectors.toList()));
-                        instanceTypes.add(databaseVmType(option.dbInstanceClass(), databaseVmTypeMetaBuilder.create()));
-                    });
-        }
-        return instanceTypes;
-    }
-
-    private Architecture getTargetArchitecture(String architecture) {
-        Architecture targetArchitecture;
-        if (StringUtils.isNotBlank(architecture) && architecture.toUpperCase(Locale.ROOT).equals(ARM64.getName().toUpperCase(Locale.ROOT))) {
-            targetArchitecture = ARM64;
-        } else {
-            targetArchitecture = Architecture.X86_64;
-        }
-        return targetArchitecture;
     }
 
     private Map<String, List<String>> getAvailableInstanceTypesByAvailabilityZones(CloudRegions regions, Region region, AmazonEc2Client ec2Client) {

@@ -17,10 +17,6 @@ public enum Architecture {
         return fromString(architecture, true);
     }
 
-    public static Architecture fromStringWithFallback(Object architecture) {
-        return fromString(architecture == null ? null : architecture.toString(), true);
-    }
-
     public static Architecture fromStringWithValidation(String architecture) {
         Architecture result = fromString(architecture, false);
         if (result == UNKNOWN) {

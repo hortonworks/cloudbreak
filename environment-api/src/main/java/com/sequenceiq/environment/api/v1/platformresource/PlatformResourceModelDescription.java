@@ -58,7 +58,6 @@ public class PlatformResourceModelDescription {
 
         public static final String GET_DATABASE_CAPABILITIES = "retrieve database capabilities by environment";
         public static final String GET_PRIVATE_DNS_ZONES = "retrieve private DNS zones by environment";
-        public static final String GET_DATABASE_VMTYPES_BY_CREDENTIAL = "retrieve database vmtype properties by environment";
     }
 
 }
