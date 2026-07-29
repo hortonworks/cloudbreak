@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.chain;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +83,7 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     }
 
     protected void setInstanceIdsBeingReplaced(Map<Object, Object> variables, Set<String> instanceIdsBeingReplaced) {
-        variables.put(INSTANCE_IDS_BEING_REPLACED, instanceIdsBeingReplaced != null ? instanceIdsBeingReplaced : Set.of());
+        variables.put(INSTANCE_IDS_BEING_REPLACED, instanceIdsBeingReplaced != null ? new HashSet<String>(instanceIdsBeingReplaced) : new HashSet<>());
     }
 
     protected Set<String> getInstanceIdsBeingReplaced(Map<Object, Object> variables) {
