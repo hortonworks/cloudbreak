@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
@@ -45,10 +47,13 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
@@ -63,6 +68,8 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
     private static final String IMAGE_CATALOG_NAME = "dev";
 
     private static final String IMAGE_CATALOG_URL = "http://dev.catalog.url";
+
+    private static final String RUNTIME_VERSION = "7.2.18";
 
     @InjectMocks
     private UpgradeDatalakeFlowEventChainFactory underTest;
@@ -82,6 +89,9 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
     @Mock
     private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
 
+    @Mock
+    private ImageCatalogService imageCatalogService;
+
     @Test
     void testInitEvent() {
         assertEquals(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, underTest.initEvent());
@@ -89,18 +99,66 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
 
     @Test
     void testCreateFlowTriggerEventQueue() throws Exception {
-        Image targetImage = Image.builder()
+        Image currentImage = Image.builder()
                 .withImageId(IMAGE_ID)
                 .withImageCatalogName(IMAGE_CATALOG_NAME)
                 .withImageCatalogUrl(IMAGE_CATALOG_URL)
+                .withOsType(OsType.RHEL9.getOsType())
                 .build();
-        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(targetImage);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(currentImage);
+        String secretRotationSelector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
+        when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
+                .thenReturn(List.of(
+                        new SecretRotationFlowChainTriggerEvent(secretRotationSelector, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getWorkspaceId()).thenReturn(STACK_ID);
+        when(stackDtoService.getByIdWithoutResources(1L)).thenReturn(stackDto);
+        when(lockedComponentService.isComponentsLocked(stackDto, IMAGE_ID)).thenReturn(false);
+        StatedImage statedImage = mock(StatedImage.class);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(catalogImage.getVersion()).thenReturn(RUNTIME_VERSION);
+        when(statedImage.getImage()).thenReturn(catalogImage);
+        when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(statedImage);
+        SetDefaultJavaVersionTriggerEvent setDefaultJavaEvent =
+                new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), STACK_ID, "17",
+                        false, false, false);
+        when(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(eq(stackDto), any(ImageChangeDto.class)))
+                .thenReturn(List.of(setDefaultJavaEvent));
+
+        FlowTriggerEventQueue flowTriggerQueue = underTest.createFlowTriggerEventQueue(
+                new DataLakeUpgradeFlowChainTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true));
+
+        assertEquals(9, flowTriggerQueue.getQueue().size());
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(flowTriggerQueue.getQueue());
+        assertSyncTriggerEvent(flowTriggerQueue);
+        assertClusterSyncTriggerEvent(flowTriggerQueue);
+        assertClusterUpgradeValidationTriggerEvent(flowTriggerQueue);
+        assertClusterUpgradePreparationTriggerEvent(flowTriggerQueue);
+        assertSaltSecretRotationTriggerEvent(flowTriggerQueue);
+        assertSaltUpdateTriggerEvent(flowTriggerQueue);
+        assertImageUpdateTriggerEvent(flowTriggerQueue);
+        assertSetDefaultJavaEvent(flowTriggerQueue);
+        assertClusterUpgradeTriggerEvent(flowTriggerQueue);
+        flowTriggerQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerQueue);
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueSkipsPreparationWhenLockComponents() throws Exception {
+        Image currentImage = Image.builder()
+                .withImageId(IMAGE_ID)
+                .withImageCatalogName(IMAGE_CATALOG_NAME)
+                .withImageCatalogUrl(IMAGE_CATALOG_URL)
+                .withOsType(OsType.RHEL9.getOsType())
+                .build();
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(currentImage);
         String secretRotationSelector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
                 .thenReturn(List.of(
                         new SecretRotationFlowChainTriggerEvent(secretRotationSelector, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByIdWithoutResources(1L)).thenReturn(stackDto);
+        when(lockedComponentService.isComponentsLocked(stackDto, IMAGE_ID)).thenReturn(true);
         SetDefaultJavaVersionTriggerEvent setDefaultJavaEvent =
                 new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), STACK_ID, "17",
                         false, false, false);
@@ -111,7 +169,6 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
                 new DataLakeUpgradeFlowChainTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true));
 
         assertEquals(8, flowTriggerQueue.getQueue().size());
-        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(flowTriggerQueue.getQueue());
         assertSyncTriggerEvent(flowTriggerQueue);
         assertClusterSyncTriggerEvent(flowTriggerQueue);
         assertClusterUpgradeValidationTriggerEvent(flowTriggerQueue);
@@ -120,8 +177,6 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
         assertImageUpdateTriggerEvent(flowTriggerQueue);
         assertSetDefaultJavaEvent(flowTriggerQueue);
         assertClusterUpgradeTriggerEvent(flowTriggerQueue);
-        flowTriggerQueue.getQueue().addAll(restrainedQueueData);
-        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerQueue);
     }
 
     @Test
@@ -165,6 +220,16 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
         assertInstanceOf(ClusterUpgradeValidationTriggerEvent.class, event);
         ClusterUpgradeValidationTriggerEvent triggerEvent = (ClusterUpgradeValidationTriggerEvent) event;
         assertEquals(IMAGE_ID, triggerEvent.getImageId());
+    }
+
+    private void assertClusterUpgradePreparationTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
+        Selectable event = flowTriggerEventQueue.getQueue().remove();
+        assertEquals(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), event.selector());
+        assertEquals(STACK_ID, event.getResourceId());
+        assertInstanceOf(ClusterUpgradePreparationTriggerEvent.class, event);
+        ClusterUpgradePreparationTriggerEvent triggerEvent = (ClusterUpgradePreparationTriggerEvent) event;
+        assertEquals(IMAGE_ID, triggerEvent.getImageChangeDto().getImageId());
+        assertEquals(RUNTIME_VERSION, triggerEvent.getRuntimeVersion());
     }
 
     private void assertSaltSecretRotationTriggerEvent(FlowTriggerEventQueue flowChainQueue) {
