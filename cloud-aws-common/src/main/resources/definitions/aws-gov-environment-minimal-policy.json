@@ -34,6 +34,9 @@
       "Action": [
         "cloudformation:DeleteStack",
         "cloudwatch:DeleteAlarms",
+        "cloudwatch:TagResource",
+        "cloudwatch:ListTagsForResource",
+        "cloudwatch:UntagResource",
         "elasticloadbalancing:DeleteListener",
         "elasticloadbalancing:DeleteTargetGroup",
         "elasticloadbalancing:DeleteLoadBalancer",

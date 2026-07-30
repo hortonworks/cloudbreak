@@ -15,7 +15,10 @@
       "Action": [
         "cloudwatch:PutMetricAlarm",
         "cloudwatch:DeleteAlarms",
-        "cloudwatch:DescribeAlarms"
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:TagResource",
+        "cloudwatch:ListTagsForResource",
+        "cloudwatch:UntagResource"
       ],
       "Effect": "Allow",
       "Resource": [
