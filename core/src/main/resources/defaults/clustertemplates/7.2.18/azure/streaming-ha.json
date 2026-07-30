@@ -25,7 +25,7 @@
           "azure": {
             "manageDisk": true
           },
-          "instanceType": "Standard_D16s_v3"
+          "instanceType": "Standard_D16ds_v5"
         },
         "nodeCount": 2,
         "type": "GATEWAY",
@@ -35,7 +35,7 @@
         "name": "master",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "Standard_E16s_v3",
+          "instanceType": "Standard_E16ds_v5",
           "attachedVolumes": [
             {
               "count": 1,
@@ -52,7 +52,7 @@
         "name": "core_zookeeper",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "attachedVolumes": [
             {
               "count": 1,
@@ -70,7 +70,7 @@
         "name": "core_broker",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "attachedVolumes": [
             {
               "count": 1,
@@ -87,7 +87,7 @@
       {
         "name": "broker",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "attachedVolumes": [
             {
               "count": 1,
@@ -114,7 +114,7 @@
           "azure": {
             "manageDisk": true
           },
-          "instanceType": "Standard_D8s_v3"
+          "instanceType": "Standard_D8ds_v5"
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -133,7 +133,7 @@
           "azure": {
             "manageDisk": true
           },
-          "instanceType": "Standard_D8s_v3"
+          "instanceType": "Standard_D8ds_v5"
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -152,7 +152,7 @@
           "azure": {
             "manageDisk": true
           },
-          "instanceType": "Standard_D8s_v3"
+          "instanceType": "Standard_D8ds_v5"
         },
         "nodeCount": 0,
         "type": "CORE",
