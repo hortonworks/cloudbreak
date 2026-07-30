@@ -9,6 +9,7 @@ import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.migration.FreeIpaMigrationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaInternalV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -144,5 +145,10 @@ public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint im
     @Override
     public SupportV1Endpoint getSupportV1Endpoint() {
         return getEndpoint(SupportV1Endpoint.class);
+    }
+
+    @Override
+    public FreeIpaMigrationV1Endpoint getFreeIpaMigrationV1Endpoint() {
+        return getEndpoint(FreeIpaMigrationV1Endpoint.class);
     }
 }

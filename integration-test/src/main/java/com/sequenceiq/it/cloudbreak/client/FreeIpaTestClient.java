@@ -26,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersInGroupAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetHealthDetailsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationStatus;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaMigrationToMultiAzAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildv2Action;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
@@ -205,5 +206,9 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTrustCommandsDto, FreeIpaClient> trustCleanupCommands() {
         return new FreeIpaTrustCleanupCommandsAction();
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> migrateToMultiAz() {
+        return new FreeIpaMigrationToMultiAzAction();
     }
 }
