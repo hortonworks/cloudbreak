@@ -11,7 +11,7 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "Standard_D2s_v3",
+        "instanceType": "Standard_D2s_v5",
         "attachedVolumes": [
           {
             "count": 0,
@@ -27,7 +27,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "Standard_DS13_v2",
+        "instanceType": "Standard_E8s_v5",
         "attachedVolumes": [
           {
             "count": 1,
