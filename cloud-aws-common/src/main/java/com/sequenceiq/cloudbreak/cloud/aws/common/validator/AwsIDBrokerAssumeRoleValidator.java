@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.iam.model.IamException;
 import software.amazon.awssdk.services.iam.model.InstanceProfile;
 import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
 import software.amazon.awssdk.services.iam.model.PolicyEvaluationDecisionType;
+import software.amazon.awssdk.services.iam.model.ResourceSpecificResult;
 import software.amazon.awssdk.services.iam.model.Role;
 
 @Component
@@ -47,12 +48,7 @@ public class AwsIDBrokerAssumeRoleValidator {
                 List<EvaluationResult> evaluationResults = awsIamService.simulatePrincipalPolicy(iam,
                         instanceProfileRole.arn(), ASSUME_ROLE_ACTION, roleArns);
                 LOGGER.debug("EvaluationResult result for {}, {}", instanceProfileRole.arn(), evaluationResults);
-                for (EvaluationResult evaluationResult : evaluationResults) {
-                    handleOrgPolicyDecisions(skipOrgPolicyDecisions, resultBuilder, roleArns, evaluationResult);
-                    if (PolicyEvaluationDecisionType.ALLOWED.toString().equals(evaluationResult.evalDecision().toString())) {
-                        roleArns.remove(evaluationResult.evalResourceName());
-                    }
-                }
+                removeAllowedRoles(skipOrgPolicyDecisions, resultBuilder, evaluationResults, roleArns);
             } catch (IamException e) {
                 // Log the error and return true. We don't want to block if there is an IAM failure.
                 // This can happen due to throttling or other issues.
@@ -82,13 +78,35 @@ public class AwsIDBrokerAssumeRoleValidator {
         }
     }
 
+    private void removeAllowedRoles(boolean skipOrgPolicyDecisions, ValidationResultBuilder resultBuilder, List<EvaluationResult> evaluationResults,
+            Collection<String> roleArns) {
+        for (EvaluationResult evaluationResult : evaluationResults) {
+            List<ResourceSpecificResult> resourceSpecificResults = evaluationResult.resourceSpecificResults();
+            if (resourceSpecificResults != null && !resourceSpecificResults.isEmpty()) {
+                for (ResourceSpecificResult resourceSpecificResult : resourceSpecificResults) {
+                    String resourceArn = resourceSpecificResult.evalResourceName();
+                    handleOrgPolicyDecisions(skipOrgPolicyDecisions, resultBuilder, roleArns, evaluationResult, resourceArn);
+                    if (PolicyEvaluationDecisionType.ALLOWED.toString()
+                            .equals(resourceSpecificResult.evalResourceDecision().toString())) {
+                        roleArns.remove(resourceArn);
+                    }
+                }
+            } else {
+                handleOrgPolicyDecisions(skipOrgPolicyDecisions, resultBuilder, roleArns, evaluationResult, evaluationResult.evalResourceName());
+                if (PolicyEvaluationDecisionType.ALLOWED.toString().equals(evaluationResult.evalDecision().toString())) {
+                    roleArns.remove(evaluationResult.evalResourceName());
+                }
+            }
+        }
+    }
+
     private static void handleOrgPolicyDecisions(boolean skipOrgPolicyDecisions, ValidationResultBuilder resultBuilder,
-            Collection<String> roleArns, EvaluationResult evaluationResult) {
+            Collection<String> roleArns, EvaluationResult evaluationResult, String resourceArn) {
         OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.organizationsDecisionDetail();
         if (organizationsDecisionDetail != null && !organizationsDecisionDetail.allowedByOrganizations()) {
             if (skipOrgPolicyDecisions) {
                 LOGGER.warn("skipOrgPolicyDecisions is enabled, validation result will be ignored for {}", evaluationResult.evalActionName());
-                roleArns.remove(evaluationResult.evalResourceName());
+                roleArns.remove(resourceArn);
             } else {
                 resultBuilder.error(
                         String.format("Validation failed due to an Organizational Policy Deny rule when evaluating (%s). " +
