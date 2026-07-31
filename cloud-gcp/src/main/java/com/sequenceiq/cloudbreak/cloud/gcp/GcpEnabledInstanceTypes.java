@@ -176,7 +176,34 @@ public class GcpEnabledInstanceTypes {
             "n4-highmem-32",
             "n4-highmem-48",
             "n4-highmem-64",
-            "n4-highmem-80"
+            "n4-highmem-80",
+
+            "n4d-standard-4",
+            "n4d-standard-8",
+            "n4d-standard-16",
+            "n4d-standard-32",
+            "n4d-standard-48",
+            "n4d-standard-64",
+            "n4d-standard-80",
+            "n4d-standard-96",
+
+            "n4d-highcpu-4",
+            "n4d-highcpu-8",
+            "n4d-highcpu-16",
+            "n4d-highcpu-32",
+            "n4d-highcpu-48",
+            "n4d-highcpu-64",
+            "n4d-highcpu-80",
+            "n4d-highcpu-96",
+
+            "n4d-highmem-4",
+            "n4d-highmem-8",
+            "n4d-highmem-16",
+            "n4d-highmem-32",
+            "n4d-highmem-48",
+            "n4d-highmem-64",
+            "n4d-highmem-80",
+            "n4d-highmem-96"
     );
 
     private GcpEnabledInstanceTypes() {

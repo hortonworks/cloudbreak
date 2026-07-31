@@ -25,6 +25,7 @@ import software.amazon.awssdk.services.iam.model.EvaluationResult;
 import software.amazon.awssdk.services.iam.model.InstanceProfile;
 import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
 import software.amazon.awssdk.services.iam.model.PolicyEvaluationDecisionType;
+import software.amazon.awssdk.services.iam.model.ResourceSpecificResult;
 import software.amazon.awssdk.services.iam.model.Role;
 import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
 import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyResponse;
@@ -169,6 +170,99 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
                 String.format("Data Access Instance profile (%s) assume validation failed for the role(s): %s. " +
                                 "Please check if you've used the correct Instance profile when setting up Data Access.",
                         instanceProfile.arn(), Collections.singletonList(role.arn()))));
+    }
+
+    @Test
+    public void checkSkipOrgPolicyClearsAllArnsWhenResourceSpecificResultsPresent() {
+        Role assumedRole1 = Role.builder()
+                .arn("arn:aws:iam::12345:role/LogRole")
+                .roleName("LogRole").build();
+        Role assumedRole2 = Role.builder()
+                .arn("arn:aws:iam::12345:role/AdminRole")
+                .roleName("AdminRole").build();
+        Role assumedRole3 = Role.builder()
+                .arn("arn:aws:iam::12345:role/DataRole")
+                .roleName("DataRole").build();
+        Collection<Role> roles = List.of(assumedRole1, assumedRole2, assumedRole3);
+
+        InstanceProfile instanceProfile = InstanceProfile.builder()
+                .arn("arn:aws:iam::12345:instance-profile/idBrokerInstanceProfile")
+                .roles(roles)
+                .build();
+
+        ResourceSpecificResult resourceResult1 = ResourceSpecificResult.builder()
+                .evalResourceName(assumedRole1.arn())
+                .evalResourceDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .build();
+        ResourceSpecificResult resourceResult2 = ResourceSpecificResult.builder()
+                .evalResourceName(assumedRole2.arn())
+                .evalResourceDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .build();
+        ResourceSpecificResult resourceResult3 = ResourceSpecificResult.builder()
+                .evalResourceName(assumedRole3.arn())
+                .evalResourceDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .build();
+        EvaluationResult evalResult = EvaluationResult.builder()
+                .evalActionName("sts:AssumeRole")
+                .evalDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .evalResourceName("arn:aws:iam::${Account}:${RelativeId}")
+                .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build())
+                .resourceSpecificResults(resourceResult1, resourceResult2, resourceResult3)
+                .build();
+        when(iam.simulatePrincipalPolicy(any()))
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(evalResult).build());
+
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, roles, true, validationResultBuilder)).isTrue();
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertThat(validationResult.hasError()).isFalse();
+        assertThat(validationResult.getErrors()).isEmpty();
+    }
+
+    @Test
+    public void checkOrgPolicyErrorWhenSkipDisabledAndResourceSpecificResultsPresent() {
+        Role assumedRole1 = Role.builder()
+                .arn("arn:aws:iam::12345:role/LogRole")
+                .roleName("LogRole").build();
+        Role assumedRole2 = Role.builder()
+                .arn("arn:aws:iam::12345:role/AdminRole")
+                .roleName("AdminRole").build();
+        Collection<Role> roles = List.of(assumedRole1, assumedRole2);
+
+        InstanceProfile instanceProfile = InstanceProfile.builder()
+                .arn("arn:aws:iam::12345:instance-profile/idBrokerInstanceProfile")
+                .roles(roles)
+                .build();
+
+        ResourceSpecificResult resourceResult1 = ResourceSpecificResult.builder()
+                .evalResourceName(assumedRole1.arn())
+                .evalResourceDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .build();
+        ResourceSpecificResult resourceResult2 = ResourceSpecificResult.builder()
+                .evalResourceName(assumedRole2.arn())
+                .evalResourceDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .build();
+        EvaluationResult evalResult = EvaluationResult.builder()
+                .evalActionName("sts:AssumeRole")
+                .evalDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .evalResourceName("arn:aws:iam::${Account}:${RelativeId}")
+                .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build())
+                .resourceSpecificResults(resourceResult1, resourceResult2)
+                .build();
+        when(iam.simulatePrincipalPolicy(any()))
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(evalResult).build());
+
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, roles, false, validationResultBuilder)).isFalse();
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertThat(validationResult.hasError()).isTrue();
+        assertThat(validationResult.getErrors()).isEqualTo(List.of(
+                "Data Access Instance profile (arn:aws:iam::12345:instance-profile/idBrokerInstanceProfile) assume validation failed " +
+                        "for the role(s): [arn:aws:iam::12345:role/AdminRole, arn:aws:iam::12345:role/LogRole]. " +
+                        "Please check if you've used the correct Instance profile when setting up Data Access.",
+                "Validation failed due to an Organizational Policy Deny rule when evaluating (sts:AssumeRole). " +
+                        "It's possible bypass this validation by setting 'skipOrgPolicyDecisions' on the credentials settings page. " +
+                        "Please note that this could result in other failures during cluster creation."));
     }
 
     @Test
