@@ -83,6 +83,7 @@ public class DistroxEnabledInstanceTypes {
         "Standard_E64a_v4",
         "Standard_E64as_v4",
         "Standard_E4as_v5",
+        "Standard_E4ads_v5",
         "Standard_E8as_v5",
         "Standard_E16as_v5",
         "Standard_E20as_v5",
