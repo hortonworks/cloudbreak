@@ -122,9 +122,9 @@ class AllowableJavaUpdateConfigurationsTest {
 
         assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.1"));
         assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.1.600"));
-        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.2.20000"));
+        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.2.30000"));
         assertEquals(List.of("21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.1"));
-        assertEquals(List.of("17", "21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.2.20000"));
+        assertEquals(List.of("17", "21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.2.30000"));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.2.18"));

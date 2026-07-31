@@ -64,7 +64,7 @@ class JavaVersionValidatorTest {
                 String.format("java%d", JAVA_VERSION_21), "anyvalue",
                 "java", "21"));
 
-        victim.validateImage(image, "7.3.2.20000", JAVA_VERSION_21);
+        victim.validateImage(image, "7.3.2.30000", JAVA_VERSION_21);
     }
 
     @Test

@@ -236,18 +236,18 @@ class StackCreatorServiceJavaVersionTest {
     @Test
     void prewarmedImageWithRuntimeVersionUsesImageVersion() throws Exception {
         Image image = mock(Image.class);
-        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2.20000"));
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2.30000"));
         when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.20000"))).thenReturn(21);
+        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.30000"))).thenReturn(21);
 
-        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p20000.80393083");
+        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p30000.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.20000");
+        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.30000");
         verify(javaVersionValidator).validateImage(image, "7.3.2", 21);
         assertEquals(21, stack.getJavaVersion());
     }
@@ -260,13 +260,13 @@ class StackCreatorServiceJavaVersionTest {
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.20000"))).thenReturn(21);
+        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.30000"))).thenReturn(21);
 
-        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p20000.80393083");
+        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p30000.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.20000");
+        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.30000");
         verify(javaVersionValidator).validateImage(image, "7.3.2", 21);
         assertEquals(21, stack.getJavaVersion());
     }
@@ -279,13 +279,13 @@ class StackCreatorServiceJavaVersionTest {
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.19999"))).thenReturn(17);
+        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.29999"))).thenReturn(17);
 
-        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p19999.80393083");
+        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p29999.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.19999");
+        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.29999");
         verify(javaVersionValidator).validateImage(image, "7.3.2", 17);
         assertEquals(17, stack.getJavaVersion());
     }
@@ -312,18 +312,18 @@ class StackCreatorServiceJavaVersionTest {
     @Test
     void prewarmedImageVersionTakesPrecedenceOverCdhRequest() throws Exception {
         Image image = mock(Image.class);
-        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2.20000"));
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2.30000"));
         when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.20000"))).thenReturn(21);
+        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.30000"))).thenReturn(21);
 
-        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p19000.80393083");
+        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p29000.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.20000");
+        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.30000");
         verify(javaVersionValidator).validateImage(image, "7.3.2", 21);
         assertEquals(21, stack.getJavaVersion());
     }
@@ -331,19 +331,19 @@ class StackCreatorServiceJavaVersionTest {
     @Test
     void userSpecifiedJavaVersionIsPassedToCalculator() throws Exception {
         Image image = mock(Image.class);
-        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2.20000"));
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2.30000"));
         when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(17), eq("7.3.2.20000"))).thenReturn(17);
+        when(javaDefaultVersionCalculator.calculate(eq(17), eq("7.3.2.30000"))).thenReturn(17);
 
-        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p20000.80393083");
+        StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p30000.80393083");
         stackRequest.setJavaVersion(17);
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(17, "7.3.2.20000");
+        verify(javaDefaultVersionCalculator).calculate(17, "7.3.2.30000");
         verify(javaVersionValidator).validateImage(image, "7.3.2", 17);
         assertEquals(17, stack.getJavaVersion());
     }
