@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -103,7 +103,7 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
     @UseSpotInstances
     @Description(
             given = "There is a running Environment with FreeIPA and SDX",
-            then = "Check that all the expected Java versions are installed")
+            then = "Check that the default Java version is the expected one")
     public void testJavaVersionsAreCorrect(TestContext testContext) {
 
         if (imageValidatorE2ETestUtil.isFreeIpaImageValidation()) {
@@ -113,11 +113,29 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
         }
     }
 
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "There is a running Environment with FreeIPA and SDX",
+            then = "Check that the default OS version is the expected one")
+    public void testOsVersionsAreCorrect(TestContext testContext) {
+
+        if (imageValidatorE2ETestUtil.isFreeIpaImageValidation()) {
+            testOsVersionsAreCorrectOnFreeIPA(testContext);
+        } else {
+            testOsVersionsAreCorrectOnSdx(testContext);
+        }
+    }
+
     private void testPythonVersionsAreCorrectOnFreeIPA(TestContext testContext) {
         throw new TestFailException("This test is not yet implemented for FreeIPA images!");
     }
 
     private void testJavaVersionsAreCorrectOnFreeIPA(TestContext testContext) {
+        throw new TestFailException("This test is not yet implemented for FreeIPA images!");
+    }
+
+    private void testOsVersionsAreCorrectOnFreeIPA(TestContext testContext) {
         throw new TestFailException("This test is not yet implemented for FreeIPA images!");
     }
 
@@ -132,7 +150,7 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
                 results.forEach((key, value) -> {
                     assertEquals(0, value.getLeft());
                     LOGGER.info("Host {} has {}", key, value.getRight());
-                    assertEquals(getDefaultPythonForOS(), extractPythonVersion(value.getRight()));
+                    assertEquals(getDefaultPythonForOS(), extractSemanticVersion(value.getRight()));
                 });
 
                 return testDto;
@@ -144,22 +162,42 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
         testContext.given(SdxTestDto.class)
                 .then((tc, testDto, client) -> {
                     Map<String, Pair<Integer, String>> results = executeCommandOnInstanceGroup(
-                            testContext.get(SdxTestDto.class), "java --version");
+                            testContext.get(SdxTestDto.class), "java -version");
 
                     LOGGER.info("Java Versions reported by hosts:");
                     results.forEach((key, value) -> {
                         assertEquals(0, value.getLeft());
                         LOGGER.info("Host {} has {}", key, value.getRight());
-                        String javaVersion = extractJavaVersion(value.getRight());
+                        String javaVersion = extractSemanticVersion(value.getRight());
                         assertNotNull(javaVersion);
-                        assertTrue(javaVersion.startsWith(getDefaultJavaForImage()));
+                        assertThat(javaVersion).startsWith(getDefaultJavaForImage());
                     });
 
                     return testDto;
                 }).validate();
     }
 
-    private String extractPythonVersion(String versionString) {
+    private void testOsVersionsAreCorrectOnSdx(TestContext testContext) {
+
+        testContext.given(SdxTestDto.class)
+                .then((tc, testDto, client) -> {
+                    Map<String, Pair<Integer, String>> results = executeCommandOnInstanceGroup(
+                            testContext.get(SdxTestDto.class), "cat /etc/redhat-release");
+
+                    LOGGER.info("OS versions reported by hosts:");
+                    results.forEach((key, value) -> {
+                        assertEquals(0, value.getLeft());
+                        LOGGER.info("Host {} has {}", key, value.getRight());
+                        String osVersion = extractSemanticVersion(value.getRight());
+                        assertNotNull(osVersion);
+                        assertThat(osVersion).startsWith(getExpectedOsVersionForImage());
+                    });
+
+                    return testDto;
+                }).validate();
+    }
+
+    private String extractSemanticVersion(String versionString) {
         Pattern p = Pattern.compile("(\\d+(?:\\.\\d+)+)");
         Matcher m = p.matcher(versionString);
         return m.find() ? m.group(1) : null;
@@ -174,15 +212,9 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
         };
     }
 
-    private String extractJavaVersion(String versionString) {
-        Pattern p = Pattern.compile("(\\d+(?:\\.\\d+)+)");
-        Matcher m = p.matcher(versionString);
-        return m.find() ? m.group(1) : null;
-    }
-
     private String getDefaultJavaForImage() {
         String javaVersion = switch (OsType.getByOs(imageUnderValidation.getOs())) {
-            case OsType.RHEL8 -> "8.";
+            case OsType.RHEL8 -> "1.8.";
             case OsType.RHEL9 -> "17.";
             default -> throw new TestFailException(String.format("OS of image %s is not supported by image validation.",
                     imageUnderValidation.getUuid()));
@@ -196,6 +228,15 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
             javaVersion = "17.";
         }
         return javaVersion;
+    }
+
+    private String getExpectedOsVersionForImage() {
+        return switch (OsType.getByOs(imageUnderValidation.getOs())) {
+            case OsType.RHEL8 -> "8.10";
+            case OsType.RHEL9 -> "9.6";
+            default -> throw new TestFailException(String.format("OS of image %s is not supported by image validation.",
+                    imageUnderValidation.getUuid()));
+        };
     }
 
     // Note: right now this is not working on FreeIPA instances, but fixing it is low priority, so for now this is left

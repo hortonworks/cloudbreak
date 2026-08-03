@@ -65,7 +65,8 @@ public class ImageValidatorE2ETestUtil {
             "testSDXUpgrade", SdxUpgradeTests.class,
             "testMonitoringOnFreeIpaSdxDistrox", MonitoringTests.class,
             "testPythonVersionsAreCorrect", ImageContentValidatorE2ETest.class,
-            "testJavaVersionsAreCorrect", ImageContentValidatorE2ETest.class
+            "testJavaVersionsAreCorrect", ImageContentValidatorE2ETest.class,
+            "testOsVersionsAreCorrect", ImageContentValidatorE2ETest.class
     );
 
     @Inject
