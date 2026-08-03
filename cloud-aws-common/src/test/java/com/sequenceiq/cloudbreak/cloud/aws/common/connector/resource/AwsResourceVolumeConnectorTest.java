@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -84,8 +85,10 @@ class AwsResourceVolumeConnectorTest {
 
     @Test
     void testUpdateDiskVolumes() throws Exception {
-        underTest.updateDiskVolumes(authenticatedContext, List.of("TEST-VOLUME"), "TEST", 100, List.of());
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("TEST-VOLUME"), "TEST", 100, null, List.of());
         verify(awsCommonDiskUpdateService).modifyVolumes(authenticatedContext, List.of("TEST-VOLUME"), "TEST", 100);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -93,7 +96,7 @@ class AwsResourceVolumeConnectorTest {
         doThrow(AwsServiceException.builder().message("TEST").build()).when(awsCommonDiskUpdateService).modifyVolumes(authenticatedContext,
                 List.of("TEST-VOLUME"), "TEST", 100);
         AwsServiceException exception = assertThrows(AwsServiceException.class, () -> underTest.updateDiskVolumes(authenticatedContext,
-                List.of("TEST-VOLUME"), "TEST", 100, List.of()));
+                List.of("TEST-VOLUME"), "TEST", 100, null, List.of()));
         assertEquals("TEST", exception.getMessage());
     }
 

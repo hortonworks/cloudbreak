@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Service
@@ -50,11 +51,12 @@ public class AwsResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
-            List<CloudResource> cloudResources) throws Exception {
+    public Map<String, VolumeUpdateResult> updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            CloudStack cloudStack, List<CloudResource> cloudResources) throws Exception {
         LOGGER.debug("Calling update volumes in AwsCommonDiskUpdateService for volumes : {} : to disk type : {} and size : {}", volumeIds,
                 diskType, size);
         awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
+        return Map.of();
     }
 
     @Override

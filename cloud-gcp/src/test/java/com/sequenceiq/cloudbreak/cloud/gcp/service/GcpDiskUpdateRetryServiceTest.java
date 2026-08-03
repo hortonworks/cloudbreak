@@ -36,6 +36,7 @@ import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.DisksResizeRequest;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Snapshot;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -60,6 +61,12 @@ class GcpDiskUpdateRetryServiceTest {
     private static final String INSTANCE_ID = "instance1";
 
     private static final String DISK_NAME = "disk1";
+
+    private static final String SNAPSHOT_NAME = "disk1-typechange";
+
+    private static final String NEW_DISK_NAME = "disk1-pdssd";
+
+    private static final String SOURCE_SNAPSHOT_URL = "https://www.googleapis.com/compute/v1/projects/test-project/global/snapshots/disk1-typechange";
 
     private static final String INSTANCE_URL = "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/instances/instance1";
 
@@ -463,7 +470,229 @@ class GcpDiskUpdateRetryServiceTest {
         assertThrows(CloudConnectorException.class, () -> underTest.deleteDisk(parameters(), gcpContext));
     }
 
+    @Test
+    void createSnapshotSubmitsSnapshotAndPollsZonalOperation() throws Exception {
+        Snapshot snapshot = new Snapshot().setName(SNAPSHOT_NAME);
+        when(compute.disks().createSnapshot(PROJECT_ID, ZONE, DISK_NAME, snapshot).execute()).thenReturn(new Operation().setName("op-snap"));
+        PollTask<List<CloudResourceStatus>> pollTask = mock(PollTask.class);
+        when(statusCheckFactory.newPollResourceTask(eq(underTest), eq(authenticatedContext), any(), eq(gcpContext), anyBoolean()))
+                .thenReturn(pollTask);
+
+        underTest.createSnapshot(snapshotParameters(), snapshot, gcpContext);
+
+        verify(syncPollingScheduler).schedule(pollTask);
+    }
+
+    @Test
+    void createSnapshotFailsFastWhenOperationReturnsHttpError() throws Exception {
+        Snapshot snapshot = new Snapshot().setName(SNAPSHOT_NAME);
+        when(compute.disks().createSnapshot(PROJECT_ID, ZONE, DISK_NAME, snapshot).execute())
+                .thenReturn(new Operation().setName("op-snap").setHttpErrorStatusCode(400).setHttpErrorMessage("BAD REQUEST"));
+
+        CloudbreakServiceException exception =
+                assertThrows(CloudbreakServiceException.class, () -> underTest.createSnapshot(snapshotParameters(), snapshot, gcpContext));
+        assertTrue(exception.getMessage().contains("BAD REQUEST"));
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void createSnapshotThrowsRetryableOnTransientError() throws Exception {
+        Snapshot snapshot = new Snapshot().setName(SNAPSHOT_NAME);
+        when(compute.disks().createSnapshot(PROJECT_ID, ZONE, DISK_NAME, snapshot).execute()).thenThrow(googleException(503, "Service Unavailable"));
+
+        assertThrows(CloudConnectorException.class, () -> underTest.createSnapshot(snapshotParameters(), snapshot, gcpContext));
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void createSnapshotFailsFastOnClientError() throws Exception {
+        Snapshot snapshot = new Snapshot().setName(SNAPSHOT_NAME);
+        when(compute.disks().createSnapshot(PROJECT_ID, ZONE, DISK_NAME, snapshot).execute()).thenThrow(googleException(400, "Bad Request"));
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.createSnapshot(snapshotParameters(), snapshot, gcpContext));
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void createSnapshotToleratesConflictWhenExistingSnapshotIsReady() throws Exception {
+        Snapshot snapshot = new Snapshot().setName(SNAPSHOT_NAME);
+        when(compute.disks().createSnapshot(PROJECT_ID, ZONE, DISK_NAME, snapshot).execute()).thenThrow(googleException(409, "already exists"));
+        when(compute.snapshots().get(PROJECT_ID, SNAPSHOT_NAME).execute()).thenReturn(new Snapshot().setName(SNAPSHOT_NAME).setStatus("READY"));
+
+        List<CloudResourceStatus> result = underTest.createSnapshot(snapshotParameters(), snapshot, gcpContext);
+
+        assertTrue(result.isEmpty(), "A conflict on an already-READY snapshot is treated as success");
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void createSnapshotThrowsRetryableOnConflictWhenExistingSnapshotStillCreating() throws Exception {
+        Snapshot snapshot = new Snapshot().setName(SNAPSHOT_NAME);
+        when(compute.disks().createSnapshot(PROJECT_ID, ZONE, DISK_NAME, snapshot).execute()).thenThrow(googleException(409, "already exists"));
+        when(compute.snapshots().get(PROJECT_ID, SNAPSHOT_NAME).execute()).thenReturn(new Snapshot().setName(SNAPSHOT_NAME).setStatus("CREATING"));
+
+        assertThrows(CloudConnectorException.class, () -> underTest.createSnapshot(snapshotParameters(), snapshot, gcpContext));
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void createSnapshotSelfHealsConflictWhenExistingSnapshotFailed() throws Exception {
+        Snapshot snapshot = new Snapshot().setName(SNAPSHOT_NAME);
+        when(compute.disks().createSnapshot(PROJECT_ID, ZONE, DISK_NAME, snapshot).execute()).thenThrow(googleException(409, "already exists"));
+        when(compute.snapshots().get(PROJECT_ID, SNAPSHOT_NAME).execute()).thenReturn(new Snapshot().setName(SNAPSHOT_NAME).setStatus("FAILED"));
+
+        // a FAILED leftover is deleted (best-effort) and a retryable exception is thrown so the deterministically named
+        // snapshot is recreated on the next @Retryable attempt, instead of failing the whole type change
+        assertThrows(CloudConnectorException.class, () -> underTest.createSnapshot(snapshotParameters(), snapshot, gcpContext));
+        verify(compute.snapshots().delete(PROJECT_ID, SNAPSHOT_NAME)).execute();
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void deleteSnapshotDeletesAndPollsGlobalOperation() throws Exception {
+        when(compute.snapshots().delete(PROJECT_ID, SNAPSHOT_NAME).execute()).thenReturn(new Operation().setName("op-snap-del"));
+        PollTask<List<CloudResourceStatus>> pollTask = mock(PollTask.class);
+        when(statusCheckFactory.newPollResourceTask(eq(underTest), eq(authenticatedContext), any(), eq(gcpContext), anyBoolean()))
+                .thenReturn(pollTask);
+
+        underTest.deleteSnapshot(snapshotParameters(), gcpContext);
+
+        verify(syncPollingScheduler).schedule(pollTask);
+    }
+
+    @Test
+    void deleteSnapshotToleratesMissingSnapshot() throws Exception {
+        when(compute.snapshots().delete(PROJECT_ID, SNAPSHOT_NAME).execute()).thenThrow(googleException(404, "Not Found"));
+
+        List<CloudResourceStatus> result = underTest.deleteSnapshot(snapshotParameters(), gcpContext);
+
+        assertTrue(result.isEmpty());
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void deleteSnapshotThrowsRetryableOnTransientError() throws Exception {
+        when(compute.snapshots().delete(PROJECT_ID, SNAPSHOT_NAME).execute()).thenThrow(googleException(500, "Server Error"));
+
+        assertThrows(CloudConnectorException.class, () -> underTest.deleteSnapshot(snapshotParameters(), gcpContext));
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void deleteSnapshotFailsFastOnClientError() throws Exception {
+        when(compute.snapshots().delete(PROJECT_ID, SNAPSHOT_NAME).execute()).thenThrow(googleException(400, "Bad Request"));
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.deleteSnapshot(snapshotParameters(), gcpContext));
+        verify(syncPollingScheduler, never()).schedule(any());
+    }
+
+    @Test
+    void resolveReturnsFullMigrationWhenNewDiskDoesNotExist() throws Exception {
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenThrow(googleException(404, "Not Found"));
+
+        DiskTypeChangeResumePoint result = underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME);
+
+        assertEquals(ResumeAction.FULL_MIGRATION, result.action());
+        assertTrue(result.existingNewDisk().isEmpty(), "No new disk exists yet, so none can be carried into the result");
+    }
+
+    @Test
+    void resolveResumesAtDetachWhenNewDiskReadyUnattachedAndOldStillAttached() throws Exception {
+        Disk newDisk = new Disk().setName(NEW_DISK_NAME).setStatus("READY").setSourceSnapshot(SOURCE_SNAPSHOT_URL).setSizeGb(150L);
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenReturn(newDisk);
+        Disk oldDisk = new Disk().setName(DISK_NAME).setUsers(List.of(INSTANCE_URL));
+        when(compute.disks().get(PROJECT_ID, ZONE, DISK_NAME).execute()).thenReturn(oldDisk);
+
+        DiskTypeChangeResumePoint result = underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME);
+
+        assertEquals(ResumeAction.RESUME_AT_DETACH, result.action());
+        assertEquals(150L, result.existingNewDisk().orElseThrow().getSizeGb());
+    }
+
+    @Test
+    void resolveResumesAtAttachWhenNewDiskReadyUnattachedAndOldAlreadyDetached() throws Exception {
+        Disk newDisk = new Disk().setName(NEW_DISK_NAME).setStatus("READY").setSourceSnapshot(SOURCE_SNAPSHOT_URL).setSizeGb(150L);
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenReturn(newDisk);
+        when(compute.disks().get(PROJECT_ID, ZONE, DISK_NAME).execute()).thenReturn(new Disk().setName(DISK_NAME));
+
+        DiskTypeChangeResumePoint result = underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME);
+
+        assertEquals(ResumeAction.RESUME_AT_ATTACH, result.action());
+        assertEquals(150L, result.existingNewDisk().orElseThrow().getSizeGb());
+    }
+
+    @Test
+    void resolveCleansUpWhenNewDiskAlreadyAttachedToTargetInstance() throws Exception {
+        Disk newDisk = new Disk().setName(NEW_DISK_NAME).setStatus("READY").setSourceSnapshot(SOURCE_SNAPSHOT_URL).setSizeGb(150L)
+                .setUsers(List.of(INSTANCE_URL));
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenReturn(newDisk);
+
+        DiskTypeChangeResumePoint result = underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME);
+
+        assertEquals(ResumeAction.CLEANUP_ONLY, result.action());
+        assertEquals(150L, result.existingNewDisk().orElseThrow().getSizeGb());
+    }
+
+    @Test
+    void resolveRecreatesWhenUnattachedNewDiskSourceSnapshotDoesNotMatch() throws Exception {
+        Disk newDisk = new Disk().setName(NEW_DISK_NAME).setStatus("READY").setSizeGb(150L)
+                .setSourceSnapshot("https://www.googleapis.com/compute/v1/projects/test-project/global/snapshots/some-alien-snapshot");
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenReturn(newDisk);
+
+        DiskTypeChangeResumePoint result = underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME);
+
+        assertEquals(ResumeAction.RECREATE_NEW_DISK, result.action(),
+                "An unattached leftover not created from our snapshot is self-healed, not adopted");
+        assertTrue(result.existingNewDisk().isPresent(), "The untrustworthy leftover disk is carried so the connector can delete it");
+    }
+
+    @Test
+    void resolveFailsFastWhenNewDiskAttachedToDifferentInstance() throws Exception {
+        Disk newDisk = new Disk().setName(NEW_DISK_NAME).setStatus("READY").setSourceSnapshot(SOURCE_SNAPSHOT_URL)
+                .setUsers(List.of(INSTANCE_URL.replace(INSTANCE_ID, "otherInstance")));
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenReturn(newDisk);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME));
+
+        assertTrue(exception.getMessage().contains("different instance"));
+    }
+
+    @Test
+    void resolveRecreatesWhenNewDiskExistsButNotReady() throws Exception {
+        Disk newDisk = new Disk().setName(NEW_DISK_NAME).setStatus("CREATING").setSourceSnapshot(SOURCE_SNAPSHOT_URL).setSizeGb(150L);
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenReturn(newDisk);
+
+        DiskTypeChangeResumePoint result = underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME);
+
+        assertEquals(ResumeAction.RECREATE_NEW_DISK, result.action());
+        assertTrue(result.existingNewDisk().isPresent(), "The unusable leftover disk is carried so the connector can delete it");
+    }
+
+    @Test
+    void resolveResumesAtAttachWhenNewDiskReadyUnattachedAndOldDiskMissing() throws Exception {
+        Disk newDisk = new Disk().setName(NEW_DISK_NAME).setStatus("READY").setSourceSnapshot(SOURCE_SNAPSHOT_URL).setSizeGb(150L);
+        when(compute.disks().get(PROJECT_ID, ZONE, NEW_DISK_NAME).execute()).thenReturn(newDisk);
+        when(compute.disks().get(PROJECT_ID, ZONE, DISK_NAME).execute()).thenThrow(googleException(404, "Not Found"));
+
+        DiskTypeChangeResumePoint result = underTest.resolveDiskTypeChangeResumePoint(newDiskParameters(), oldDiskParameters(), SNAPSHOT_NAME);
+
+        assertEquals(ResumeAction.RESUME_AT_ATTACH, result.action());
+    }
+
+    private GcpSnapshotParameters snapshotParameters() {
+        return new GcpSnapshotParameters(compute, PROJECT_ID, ZONE, DISK_NAME, SNAPSHOT_NAME, cloudResource, authenticatedContext);
+    }
+
     private GcpDiskAttachmentParameters parameters() {
+        return new GcpDiskAttachmentParameters(compute, PROJECT_ID, ZONE, INSTANCE_ID, DISK_NAME, DISK_NAME, cloudResource, authenticatedContext);
+    }
+
+    private GcpDiskAttachmentParameters newDiskParameters() {
+        return new GcpDiskAttachmentParameters(compute, PROJECT_ID, ZONE, INSTANCE_ID, NEW_DISK_NAME, NEW_DISK_NAME, cloudResource, authenticatedContext);
+    }
+
+    private GcpDiskAttachmentParameters oldDiskParameters() {
         return new GcpDiskAttachmentParameters(compute, PROJECT_ID, ZONE, INSTANCE_ID, DISK_NAME, DISK_NAME, cloudResource, authenticatedContext);
     }
 }

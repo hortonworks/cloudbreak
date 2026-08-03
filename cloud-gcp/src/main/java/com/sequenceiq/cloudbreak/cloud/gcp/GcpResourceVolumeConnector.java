@@ -6,17 +6,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +32,16 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AttachedDisk;
+import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
+import com.google.api.services.compute.model.Snapshot;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.DiskTypeChangeResumePoint;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpCreateDiskParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskAttachmentParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
@@ -41,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpInstanceRetrievalService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResizeDiskParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpReusedDisk;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpSnapshotParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -49,8 +60,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.util.IndexingDeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -64,7 +77,13 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
 
     private static final String DISK_URL = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s";
 
+    private static final String SNAPSHOT_URL = "https://www.googleapis.com/compute/v1/projects/%s/global/snapshots/%s";
+
     private static final String READ_WRITE_MODE = "READ_WRITE";
+
+    private static final int MAX_DISK_NAME_LENGTH = 63;
+
+    private static final int HASH_LENGTH = 8;
 
     @Inject
     private GcpComputeFactory gcpComputeFactory;
@@ -88,22 +107,41 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
     @Inject
     private GcpInstanceRetrievalService gcpInstanceRetrievalService;
 
+    @Inject
+    private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
+
+    /**
+     * Updates GCP additional/data disks. GCP has no in-place disk-type change API, so the two update kinds take
+     * different paths: a {@code diskType} change migrates each disk by snapshotting it, creating a new disk of the
+     * target type from that snapshot and swapping it onto the instance (see
+     * {@link #changeDiskVolumesType}); a resize (no {@code diskType}) grows each disk in place via
+     * {@link #resizeDiskVolumes}. Both fan the per-disk work out concurrently and aggregate any failures.
+     *
+     * @param cloudStack     the cloud stack being modified; carries the instance templates used to resolve the disk
+     *                       encryption key for the disk-type change (customer-supplied CSEK cannot be read back from
+     *                       the provider)
+     * @param cloudResources the disk-set resources being modified; each carries the availability zone and the
+     *                       {@link VolumeSetAttributes} used to resolve the zone of every disk being updated
+     */
+    @Override
+    public Map<String, VolumeUpdateResult> updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            CloudStack cloudStack, List<CloudResource> cloudResources) throws Exception {
+        if (diskType != null) {
+            return changeDiskVolumesType(authenticatedContext, volumeIds, diskType, size, cloudStack, cloudResources);
+        } else {
+            return resizeDiskVolumes(authenticatedContext, volumeIds, size, cloudResources);
+        }
+    }
+
     /**
      * Resizes GCP additional/data disks to the requested size. GCP only supports zonal, per-disk resize
      * ({@code compute.disks().resize}), so each disk is resized via {@link GcpDiskUpdateRetryService} and the
      * per-disk requests are submitted concurrently on the {@code intermediateBuilderExecutor}. Any disks that
      * fail are aggregated into the thrown exception, so a rerun of the disk update flow re-attempts only the
-     * disks that have not yet been grown. Disk type changes are not supported on GCP.
-     *
-     * @param cloudResources the disk-set resources being modified; each carries the availability zone and the
-     *                       {@link VolumeSetAttributes} used to resolve the zone of every disk being resized
+     * disks that have not yet been grown.
      */
-    @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+    private Map<String, VolumeUpdateResult> resizeDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, int size,
             List<CloudResource> cloudResources) throws Exception {
-        if (diskType != null) {
-            throw new CloudbreakServiceException("Changing disk type is not supported on GCP.");
-        }
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
         Compute compute = gcpContext.getCompute();
         String projectId = gcpContext.getProjectId();
@@ -133,6 +171,378 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
             throw new CloudbreakServiceException(failureMessage);
         }
         LOGGER.info("Successfully resized all {} GCP disk(s) to {} GB.", resizeOperations.size(), size);
+        // A GCP resize grows the disk in place under the same id/device, so there are no renames to report back.
+        return Map.of();
+    }
+
+    /**
+     * Changes the type of GCP additional/data disks.
+     * Volumes are migrated <b>in parallel</b> (one {@link CompletableFuture} per volume on the
+     * {@code intermediateBuilderExecutor}), while each volume's internal 6-step sequence runs <b>synchronously</b> in
+     * {@link #migrateVolumeType} so a failure can roll back exactly the steps that succeeded. Per-volume failures are
+     * aggregated (first cause surfaced) and thrown as a single {@link CloudbreakServiceException}; each disk's migration
+     * is atomic, so the flow can be rerun to retry only the disks that failed. Local SSD volumes are skipped.
+     */
+    private Map<String, VolumeUpdateResult> changeDiskVolumesType(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            CloudStack cloudStack, List<CloudResource> cloudResources) {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        Compute compute = gcpContext.getCompute();
+        String projectId = gcpContext.getProjectId();
+        LOGGER.info("Changing the type of {} GCP disk(s) to {} in project {}: {}", volumeIds.size(), diskType, projectId, volumeIds);
+        Set<String> requestedVolumeIds = new HashSet<>(volumeIds);
+        Set<String> matchedVolumeIds = new HashSet<>();
+        Set<String> skippedLocalSsdIds = new LinkedHashSet<>();
+        Map<String, String> failedVolumes = new LinkedHashMap<>();
+        DiskTypeChangeContext typeChangeContext = new DiskTypeChangeContext(compute, projectId, diskType, size, authenticatedContext, gcpContext);
+        List<DiskOperationFuture<VolumeTypeChangeResult>> migrations = new ArrayList<>();
+        for (CloudResource resource : cloudResources) {
+            if (!ResourceType.GCP_ATTACHED_DISKSET.equals(resource.getType())) {
+                continue;
+            }
+            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            if (volumeSetAttributes == null || volumeSetAttributes.getVolumes() == null) {
+                continue;
+            }
+            InstanceTemplate instanceTemplate = resolveInstanceTemplate(cloudStack, resource);
+            String zone = volumeSetAttributes.getAvailabilityZone();
+            boolean deleteOnTermination = Boolean.TRUE.equals(volumeSetAttributes.getDeleteOnTermination());
+            for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
+                if (!requestedVolumeIds.contains(volume.getId())) {
+                    continue;
+                }
+                matchedVolumeIds.add(volume.getId());
+                if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
+                    LOGGER.debug("Volume {} is a local SSD, skipping type change.", volume.getId());
+                    skippedLocalSsdIds.add(volume.getId());
+                    continue;
+                }
+                migrations.add(new DiskOperationFuture<>(volume.getId(),
+                        CompletableFuture.supplyAsync(() -> migrateVolumeType(typeChangeContext, zone, resource, volume,
+                                instanceTemplate, deleteOnTermination), intermediateBuilderExecutor)));
+            }
+        }
+
+        List<VolumeTypeChangeResult> succeeded = new ArrayList<>();
+        awaitDiskOperations("change the type of", migrations, failedVolumes, succeeded::add);
+
+        String failureMessage = buildFailureMessage("change the type of", failedVolumes,
+                "Each disk's type change is atomic with rollback, so the disk update can be rerun to retry the failed disks.");
+        if (failureMessage != null) {
+            throw new CloudbreakServiceException(failureMessage);
+        }
+        // Report each rename back to the caller (keyed by the volume's original id) instead of mutating the shared
+        // in-memory volume attributes, so persistence is driven by an explicit result the caller owns.
+        Map<String, VolumeUpdateResult> updateResults = new LinkedHashMap<>();
+        for (VolumeTypeChangeResult result : succeeded) {
+            String oldVolumeId = result.volume().getId();
+            updateResults.put(oldVolumeId, new VolumeUpdateResult(oldVolumeId, result.newDiskName(),
+                    DEVICE_NAME_PREFIX + result.newDiskName(), result.newSize()));
+        }
+        warnOnSkippedVolumes(requestedVolumeIds, matchedVolumeIds, skippedLocalSsdIds, migrations.size(), diskType);
+        LOGGER.info("Successfully changed the type of all {} GCP disk(s) to {}.", migrations.size(), diskType);
+        return updateResults;
+    }
+
+    /**
+     * Warns (but does not fail) when some or all requested volume ids were not actually migrated: local SSDs cannot
+     * have their type changed, and ids that match no disk on any resource are dropped. If nothing was migrated at all
+     * this is likely a caller mistake, so it is surfaced loudly, but the disk update still reports success.
+     */
+    private void warnOnSkippedVolumes(Set<String> requestedVolumeIds, Set<String> matchedVolumeIds, Set<String> skippedLocalSsdIds,
+            int migratedCount, String diskType) {
+        Set<String> unmatchedIds = new LinkedHashSet<>(requestedVolumeIds);
+        unmatchedIds.removeAll(matchedVolumeIds);
+        if (!skippedLocalSsdIds.isEmpty()) {
+            LOGGER.warn("Skipped the type change of local SSD GCP disk(s) {} to {}: local SSD types cannot be changed.", skippedLocalSsdIds, diskType);
+        }
+        if (!unmatchedIds.isEmpty()) {
+            LOGGER.warn("Requested GCP disk type change to {} for volume id(s) {} that matched no attached disk; skipping them.", diskType, unmatchedIds);
+        }
+        if (migratedCount == 0 && !requestedVolumeIds.isEmpty()) {
+            LOGGER.warn("No GCP disks were migrated to type {} although {} volume id(s) were requested (local SSD: {}, unmatched: {}).",
+                    diskType, requestedVolumeIds.size(), skippedLocalSsdIds, unmatchedIds);
+        }
+    }
+
+    /**
+     * Runs the synchronous per-volume disk-type migration with strict rollback so a failure never leaves the instance
+     * half-migrated. The steps and their rollback:
+     * <ol>
+     *   <li>Create a snapshot of the current disk. Failure &rarr; nothing to clean up, fail.</li>
+     *   <li>Create the new disk (target type) from the snapshot. Failure &rarr; delete the snapshot, fail.</li>
+     *   <li>Detach the old disk. Failure &rarr; delete the new disk, delete the snapshot, fail.</li>
+     *   <li>Attach the new disk. Failure &rarr; re-attach the old disk, delete the new disk, delete the snapshot, fail.</li>
+     *   <li>Delete the old disk. Failure &rarr; WARN and continue (not fatal).</li>
+     *   <li>Delete the snapshot. Failure &rarr; WARN and continue (not fatal).</li>
+     * </ol>
+     * Runs on an executor thread, so all failures are surfaced as unchecked exceptions.
+     *
+     * <p><b>Resume-safety.</b> A JVM death mid-migration (pod eviction) can leave a disk in any intermediate state, and
+     * the disk-update flow reruns this method with the <b>old</b> volume id (the DB is written only after all disks
+     * succeed). Rather than assume a clean start, this method first asks
+     * {@link GcpDiskUpdateRetryService#resolveDiskTypeChangeResumePoint} which of five states the disks are actually in
+     * &mdash; branching on the instance's real attachment list, never on mere existence &mdash; and resumes accordingly:
+     * <ul>
+     *   <li>{@code FULL_MIGRATION}: no usable new disk yet &rarr; steps 1&ndash;6.</li>
+     *   <li>{@code RECREATE_NEW_DISK}: a non-READY leftover new disk of ours &rarr; delete it, then steps 1&ndash;6.</li>
+     *   <li>{@code RESUME_AT_DETACH}: new disk READY+unattached, old still attached &rarr; steps 3&ndash;6.</li>
+     *   <li>{@code RESUME_AT_ATTACH}: new disk READY+unattached, old already detached &rarr; steps 4&ndash;6.</li>
+     *   <li>{@code CLEANUP_ONLY}: new disk already attached to the target (swap completed) &rarr; delete old + snapshot.</li>
+     * </ul>
+     * The old disk is deleted only once the new disk is confirmed attached to the target, so a rerun never destroys the
+     * instance's only copy of the data.</p>
+     */
+    private VolumeTypeChangeResult migrateVolumeType(DiskTypeChangeContext context, String zone, CloudResource resource,
+            VolumeSetAttributes.Volume volume, InstanceTemplate instanceTemplate, boolean deleteOnTermination) {
+        Compute compute = context.compute();
+        String projectId = context.projectId();
+        String targetType = context.targetType();
+        AuthenticatedContext authenticatedContext = context.authenticatedContext();
+        GcpContext gcpContext = context.gcpContext();
+        String oldDiskName = volume.getId();
+        String instanceId = resource.getInstanceId();
+        if (StringUtils.isBlank(zone)) {
+            throw new CloudbreakServiceException(
+                    String.format("Could not resolve the availability zone for GCP disk %s, cannot change its type.", oldDiskName));
+        }
+        // GCP cannot restore a snapshot into a disk smaller than the source, so a combined type+size change floors the
+        // new disk at the current size; a resize below the current size is not expressible via a type change.
+        int newSize = context.size() > 0 ? Math.max(context.size(), volume.getSize()) : volume.getSize();
+        String newDiskName = buildTypeChangeDiskName(oldDiskName, targetType);
+        String snapshotName = buildSnapshotName(oldDiskName);
+        LOGGER.info("Changing the type of GCP disk {} (instance {}, zone {}) to {} via snapshot {} and new disk {}.",
+                oldDiskName, instanceId, zone, targetType, snapshotName, newDiskName);
+
+        GcpSnapshotParameters snapshotParams =
+                new GcpSnapshotParameters(compute, projectId, zone, oldDiskName, snapshotName, resource, authenticatedContext);
+        GcpDiskAttachmentParameters oldDiskParams =
+                new GcpDiskAttachmentParameters(compute, projectId, zone, instanceId, oldDiskName, oldDiskName, resource, authenticatedContext);
+        GcpDiskAttachmentParameters newDiskParams =
+                new GcpDiskAttachmentParameters(compute, projectId, zone, instanceId, newDiskName, newDiskName, resource, authenticatedContext);
+
+        // Resume-safe dispatch: a rerun after a mid-migration crash must branch on the disks' actual attachment state,
+        // never on mere existence, so the old disk is deleted only once the new disk is confirmed attached to the
+        // target (see the class-level five-state table). Persist-at-end is preserved: the size we report always comes
+        // from the provider-authoritative new disk when one already exists.
+        DiskTypeChangeResumePoint resumePoint =
+                gcpDiskUpdateRetryService.resolveDiskTypeChangeResumePoint(newDiskParams, oldDiskParams, snapshotName);
+        int existingNewDiskSize = resumePoint.existingNewDisk().map(disk -> disk.getSizeGb().intValue()).orElse(newSize);
+        LOGGER.info("Resume point for the type change of GCP disk {} to {} (new disk {}): {}.", oldDiskName, targetType, newDiskName, resumePoint.action());
+        switch (resumePoint.action()) {
+            case CLEANUP_ONLY:
+                // The new disk is already attached to the target: the swap completed earlier, only cleanup remains.
+                deleteDiskBestEffort(oldDiskParams, gcpContext);
+                deleteSnapshotBestEffort(snapshotParams, gcpContext);
+                return new VolumeTypeChangeResult(volume, newDiskName, existingNewDiskSize);
+            case RESUME_AT_ATTACH:
+                // The new disk is READY and the old disk already detached: attach the new disk, then delete old + snapshot.
+                attachNewDiskStep(deleteOnTermination, newDiskParams, oldDiskParams, snapshotParams, gcpContext);
+                deleteOldDiskStep(oldDiskParams, gcpContext, oldDiskName);
+                deleteSnapshotBestEffort(snapshotParams, gcpContext);
+                return new VolumeTypeChangeResult(volume, newDiskName, existingNewDiskSize);
+            case RESUME_AT_DETACH:
+                // The new disk is READY but the old disk is still attached: detach old, attach new, then delete old + snapshot.
+                detachOldDiskStep(oldDiskParams, newDiskParams, snapshotParams, gcpContext, oldDiskName, instanceId);
+                attachNewDiskStep(deleteOnTermination, newDiskParams, oldDiskParams, snapshotParams, gcpContext);
+                deleteOldDiskStep(oldDiskParams, gcpContext, oldDiskName);
+                deleteSnapshotBestEffort(snapshotParams, gcpContext);
+                return new VolumeTypeChangeResult(volume, newDiskName, existingNewDiskSize);
+            case RECREATE_NEW_DISK:
+                // A leftover new disk of ours is not usable (not READY): delete it, then fall through to a full migration.
+                LOGGER.info("Deleting the unusable leftover new GCP disk {} before re-running the full type change of disk {}.", newDiskName, oldDiskName);
+                deleteDiskBestEffort(newDiskParams, gcpContext);
+                break;
+            case FULL_MIGRATION:
+            default:
+                break;
+        }
+
+        // Step 1: snapshot the currently attached disk.
+        Snapshot snapshot = new Snapshot().setName(snapshotName);
+        customGcpDiskEncryptionService.addEncryptionKeyToSnapshot(instanceTemplate, snapshot);
+        createSnapshotStep(snapshotParams, snapshot, gcpContext, oldDiskName, snapshotName);
+
+        // Step 2: create the new disk of the target type from the snapshot.
+        Disk newDisk = buildDiskFromSnapshot(projectId, zone, newDiskName, targetType, newSize, snapshotName, instanceTemplate);
+        GcpCreateDiskParameters createParams =
+                new GcpCreateDiskParameters(compute, projectId, zone, newDiskName, newDisk, resource, authenticatedContext);
+        createNewDiskStep(createParams, gcpContext, snapshotParams, targetType);
+
+        // Step 3: detach the old disk.
+        detachOldDiskStep(oldDiskParams, newDiskParams, snapshotParams, gcpContext, oldDiskName, instanceId);
+
+        // Step 4: attach the new disk.
+        attachNewDiskStep(deleteOnTermination, newDiskParams, oldDiskParams, snapshotParams, gcpContext);
+
+        // Step 5: delete the old disk (non-fatal on failure).
+        deleteOldDiskStep(oldDiskParams, gcpContext, oldDiskName);
+
+        // Step 6: delete the snapshot (non-fatal on failure).
+        deleteSnapshotBestEffort(snapshotParams, gcpContext);
+
+        return new VolumeTypeChangeResult(volume, newDiskName, newSize);
+    }
+
+    private void createSnapshotStep(GcpSnapshotParameters snapshotParams, Snapshot snapshot, GcpContext gcpContext, String oldDiskName,
+            String snapshotName) {
+        try {
+            gcpDiskUpdateRetryService.createSnapshot(snapshotParams, snapshot, gcpContext);
+        } catch (Exception ex) {
+            throw new CloudbreakServiceException(
+                    String.format("Failed to create a snapshot of GCP disk %s while changing its type.", oldDiskName), ex);
+        }
+        LOGGER.info("Created snapshot {} of GCP disk {}.", snapshotName, oldDiskName);
+    }
+
+    private void createNewDiskStep(GcpCreateDiskParameters createParams, GcpContext gcpContext, GcpSnapshotParameters snapshotParams, String targetType) {
+        try {
+            Optional<CloudResource> insertOperation = gcpDiskUpdateRetryService.insertDisk(createParams);
+            gcpDiskUpdateRetryService.pollDiskOperations(createParams.authenticatedContext(), gcpContext,
+                    insertOperation.map(List::of).orElseGet(List::of));
+        } catch (Exception ex) {
+            deleteSnapshotBestEffort(snapshotParams, gcpContext);
+            throw new CloudbreakServiceException(
+                    String.format("Failed to create the new %s disk %s from snapshot %s while changing the type of disk %s.",
+                            targetType, createParams.diskName(), snapshotParams.snapshotName(), snapshotParams.sourceDiskName()), ex);
+        }
+        LOGGER.info("Created new GCP disk {} of type {} from snapshot {}.", createParams.diskName(), targetType, snapshotParams.snapshotName());
+    }
+
+    private void detachOldDiskStep(GcpDiskAttachmentParameters oldDiskParams, GcpDiskAttachmentParameters newDiskParams,
+            GcpSnapshotParameters snapshotParams, GcpContext gcpContext, String oldDiskName, String instanceId) {
+        try {
+            gcpDiskUpdateRetryService.detachDiskFromInstance(oldDiskParams, gcpContext);
+        } catch (Exception ex) {
+            deleteDiskBestEffort(newDiskParams, gcpContext);
+            deleteSnapshotBestEffort(snapshotParams, gcpContext);
+            throw new CloudbreakServiceException(
+                    String.format("Failed to detach the old GCP disk %s from instance %s while changing its type.", oldDiskName, instanceId), ex);
+        }
+        LOGGER.info("Detached old GCP disk {} from instance {}.", oldDiskName, instanceId);
+    }
+
+    private void attachNewDiskStep(boolean deleteOnTermination, GcpDiskAttachmentParameters newDiskParams,
+            GcpDiskAttachmentParameters oldDiskParams, GcpSnapshotParameters snapshotParams, GcpContext gcpContext) {
+        String projectId = newDiskParams.projectId();
+        String zone = newDiskParams.zone();
+        String newDiskName = newDiskParams.diskName();
+        String instanceId = newDiskParams.instanceId();
+        String oldDiskName = oldDiskParams.diskName();
+        try {
+            AttachedDisk attachedDisk = buildAttachedDisk(projectId, zone, newDiskName, deleteOnTermination);
+            gcpDiskUpdateRetryService.attachDiskToInstance(newDiskParams, attachedDisk, gcpContext);
+        } catch (Exception ex) {
+            reattachOldDiskBestEffort(projectId, zone, oldDiskName, deleteOnTermination, oldDiskParams, gcpContext);
+            deleteDiskBestEffort(newDiskParams, gcpContext);
+            deleteSnapshotBestEffort(snapshotParams, gcpContext);
+            throw new CloudbreakServiceException(
+                    String.format("Failed to attach the new GCP disk %s to instance %s while changing the type of disk %s.",
+                            newDiskName, instanceId, oldDiskName), ex);
+        }
+        LOGGER.info("Attached new GCP disk {} to instance {}.", newDiskName, instanceId);
+    }
+
+    private void deleteOldDiskStep(GcpDiskAttachmentParameters oldDiskParams, GcpContext gcpContext, String oldDiskName) {
+        try {
+            gcpDiskUpdateRetryService.deleteDisk(oldDiskParams, gcpContext);
+            LOGGER.info("Deleted old GCP disk {} after changing its type.", oldDiskName);
+        } catch (Exception ex) {
+            LOGGER.warn("Failed to delete the old GCP disk {} after changing its type; the type change succeeded, continuing.", oldDiskName, ex);
+        }
+    }
+
+    /**
+     * Builds the {@link Disk} for the new target-type disk restored from the snapshot. Sets the target type URL and the
+     * source snapshot, plus the encryption keys: the source-snapshot key so GCP can read a customer-encrypted snapshot,
+     * and the new disk's own encryption key. Both are no-ops for non-custom (or KMS/CMEK) encryption.
+     */
+    private Disk buildDiskFromSnapshot(String projectId, String zone, String newDiskName, String targetType, int size, String snapshotName,
+            InstanceTemplate instanceTemplate) {
+        Disk disk = new Disk();
+        disk.setName(newDiskName);
+        disk.setSizeGb((long) size);
+        disk.setType(GcpDiskType.getUrl(projectId, zone, targetType));
+        disk.setSourceSnapshot(String.format(SNAPSHOT_URL, projectId, snapshotName));
+        customGcpDiskEncryptionService.addSourceSnapshotEncryptionKeyToDisk(instanceTemplate, disk);
+        customGcpDiskEncryptionService.addEncryptionKeyToDisk(instanceTemplate, disk);
+        return disk;
+    }
+
+    private void reattachOldDiskBestEffort(String projectId, String zone, String oldDiskName, boolean deleteOnTermination,
+            GcpDiskAttachmentParameters oldDiskParams, GcpContext gcpContext) {
+        try {
+            AttachedDisk oldAttachedDisk = buildAttachedDisk(projectId, zone, oldDiskName, deleteOnTermination);
+            gcpDiskUpdateRetryService.attachDiskToInstance(oldDiskParams, oldAttachedDisk, gcpContext);
+            LOGGER.info("Re-attached old GCP disk {} to instance {} after a failed new-disk attach.", oldDiskName, oldDiskParams.instanceId());
+        } catch (Exception ex) {
+            LOGGER.warn("Failed to re-attach the old GCP disk {} to instance {} during rollback of a failed type change.",
+                    oldDiskName, oldDiskParams.instanceId(), ex);
+        }
+    }
+
+    private void deleteDiskBestEffort(GcpDiskAttachmentParameters diskParams, GcpContext gcpContext) {
+        try {
+            gcpDiskUpdateRetryService.deleteDisk(diskParams, gcpContext);
+        } catch (Exception ex) {
+            LOGGER.warn("Failed to delete GCP disk {} during rollback of a failed type change.", diskParams.diskName(), ex);
+        }
+    }
+
+    private void deleteSnapshotBestEffort(GcpSnapshotParameters snapshotParams, GcpContext gcpContext) {
+        try {
+            gcpDiskUpdateRetryService.deleteSnapshot(snapshotParams, gcpContext);
+        } catch (Exception ex) {
+            LOGGER.warn("Failed to delete GCP snapshot {} during a disk type change; continuing.", snapshotParams.snapshotName(), ex);
+        }
+    }
+
+    private InstanceTemplate resolveInstanceTemplate(CloudStack cloudStack, CloudResource resource) {
+        return cloudStack.getGroups().stream()
+                .filter(group -> group.getName().equals(resource.getGroup()))
+                .map(Group::getReferenceInstanceTemplate)
+                .findFirst()
+                .orElseThrow(() -> new CloudbreakServiceException(
+                        String.format("Could not resolve the instance template for group %s to change the GCP disk type.", resource.getGroup())));
+    }
+
+    /**
+     * Deterministic new-disk name derived from the old disk name plus a sanitized target-type suffix, so a rerun reuses
+     * a half-created disk from a previous attempt (GCP disks cannot be renamed and the new disk must coexist with the old
+     * during the swap). Capped at the GCP {@value #MAX_DISK_NAME_LENGTH}-character disk-name limit via
+     * {@link #buildNameWithinLimit}, which keeps distinct source names distinct when truncation is needed.
+     */
+    private String buildTypeChangeDiskName(String oldDiskName, String targetType) {
+        String suffix = "-" + targetType.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        return buildNameWithinLimit(oldDiskName, suffix);
+    }
+
+    /**
+     * Deterministic snapshot name derived from the old disk name plus a fixed {@code -typechange} suffix. The name is
+     * intentionally stable across attempts (no timestamp) so a rerun after a partially failed attempt targets the same
+     * snapshot: the existing 409-adopt / FAILED-self-heal path in {@link GcpDiskUpdateRetryService#createSnapshot} can
+     * reuse or recreate it, and the matching cleanup delete removes it, so no orphaned snapshots accumulate. Capped at
+     * the GCP {@value #MAX_DISK_NAME_LENGTH}-character snapshot-name limit via {@link #buildNameWithinLimit}.
+     */
+    private String buildSnapshotName(String oldDiskName) {
+        return buildNameWithinLimit(oldDiskName, "-typechange");
+    }
+
+    /**
+     * Appends {@code suffix} to {@code baseName} within the GCP {@value #MAX_DISK_NAME_LENGTH}-character limit. When the
+     * combined length fits it is returned as-is; otherwise the base is truncated and a short deterministic hash of the
+     * <b>full</b> original base is inserted before the suffix, so two long names that share a truncated prefix still map
+     * to distinct names (avoiding a silent collision where the wrong disk/snapshot would be addressed). Deterministic:
+     * the same input always yields the same name, which is what makes rerun reuse and the idempotency short-circuit work.
+     */
+    private String buildNameWithinLimit(String baseName, String suffix) {
+        if (baseName.length() + suffix.length() <= MAX_DISK_NAME_LENGTH) {
+            return baseName + suffix;
+        }
+        String hash = "-" + DigestUtils.sha256Hex(baseName).substring(0, HASH_LENGTH);
+        String base = baseName.substring(0, MAX_DISK_NAME_LENGTH - suffix.length() - hash.length());
+        // Avoid a trailing/double hyphen (GCP RFC1035 names) when the truncation lands on a hyphen boundary.
+        base = StringUtils.stripEnd(base, "-");
+        return base + hash + suffix;
     }
 
     /**
@@ -522,6 +932,26 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
      * against the right disk when the futures are awaited in {@link #awaitDiskOperations}.
      */
     private record DiskOperationFuture<T>(String volumeId, Future<T> future) {
+    }
+
+    /**
+     * Result of a successful per-volume disk-type migration: the migrated {@link VolumeSetAttributes.Volume} (still
+     * carrying its original id, so the rename can be keyed back to it), plus the new disk name and the size the new
+     * disk was actually created at. {@link #changeDiskVolumesType} turns these into the {@link VolumeUpdateResult} map
+     * it returns to the caller once all migrations finish; the volume attributes themselves are no longer mutated in
+     * place.
+     */
+    private record VolumeTypeChangeResult(VolumeSetAttributes.Volume volume, String newDiskName, int newSize) {
+    }
+
+    /**
+     * The invariant context shared by every per-volume {@link #migrateVolumeType} task in a single disk-type-change
+     * fan-out: the GCP client, project id, requested target type, requested total size (0 when only the type changes)
+     * and the authenticated/GCP contexts. Bundled into one argument so the per-volume signature stays within the
+     * parameter-count limit.
+     */
+    private record DiskTypeChangeContext(Compute compute, String projectId, String targetType, int size,
+            AuthenticatedContext authenticatedContext, GcpContext gcpContext) {
     }
 
     @FunctionalInterface

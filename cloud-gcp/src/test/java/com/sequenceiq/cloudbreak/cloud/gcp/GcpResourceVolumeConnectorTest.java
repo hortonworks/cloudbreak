@@ -7,8 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -27,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,11 +41,14 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
+import com.google.api.services.compute.model.Snapshot;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.DiskTypeChangeResumePoint;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpCreateDiskParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskAttachmentParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
@@ -50,6 +58,8 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpInstanceRetrievalService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResizeDiskParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpReusedDisk;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpSnapshotParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.ResumeAction;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -57,8 +67,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -70,6 +82,8 @@ class GcpResourceVolumeConnectorTest {
     private static final String PROJECT_ID = "test-project";
 
     private static final String ZONE = "us-central1-a";
+
+    private static final String DEVICE_NAME_PREFIX = "/dev/disk/by-id/google-";
 
     @InjectMocks
     private GcpResourceVolumeConnector underTest;
@@ -100,6 +114,9 @@ class GcpResourceVolumeConnectorTest {
 
     @Mock
     private GcpDiskUpdateRetryService gcpDiskUpdateRetryService;
+
+    @Mock
+    private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
 
     @Mock
     private AsyncTaskExecutor intermediateBuilderExecutor;
@@ -139,7 +156,7 @@ class GcpResourceVolumeConnectorTest {
     void testUpdateDiskVolumesResizesUndersizedDisk() throws Exception {
         mockContextAndExecutor();
 
-        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, List.of(createZonedDiskResource("i1v1", 100)));
+        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, null, List.of(createZonedDiskResource("i1v1", 100)));
 
         ArgumentCaptor<GcpResizeDiskParameters> captor = ArgumentCaptor.forClass(GcpResizeDiskParameters.class);
         verify(gcpDiskUpdateRetryService).resizeDisk(captor.capture(), eq(gcpContext));
@@ -152,19 +169,13 @@ class GcpResourceVolumeConnectorTest {
     }
 
     @Test
-    void testUpdateDiskVolumesThrowsForDiskTypeChange() {
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 200, List.of()));
-        assertEquals("Changing disk type is not supported on GCP.", exception.getMessage());
-    }
-
-    @Test
     void testUpdateDiskVolumesAggregatesFailures() throws Exception {
         mockContextAndExecutor();
         doThrow(new IOException("boom")).when(gcpDiskUpdateRetryService).resizeDisk(any(GcpResizeDiskParameters.class), eq(gcpContext));
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, List.of(createZonedDiskResource("i1v1", 100))));
+                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, null,
+                        List.of(createZonedDiskResource("i1v1", 100))));
         assertTrue(exception.getMessage().contains("i1v1"));
         assertTrue(exception.getMessage().contains("boom"), "The aggregated exception should surface the underlying GCP failure cause");
     }
@@ -173,7 +184,7 @@ class GcpResourceVolumeConnectorTest {
     void testUpdateDiskVolumesResolvesZoneFromVolumeSetAttributes() throws Exception {
         mockContextAndExecutor();
 
-        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200,
+        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, null,
                 List.of(createDiskResourceWithAttributeZone("i1v1", 100)));
 
         ArgumentCaptor<GcpResizeDiskParameters> captor = ArgumentCaptor.forClass(GcpResizeDiskParameters.class);
@@ -187,7 +198,7 @@ class GcpResourceVolumeConnectorTest {
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200,
+                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, null,
                         List.of(createDiskResourceWithoutZone("i1v1", 100))));
         assertTrue(exception.getMessage().contains("i1v1"));
         verify(gcpDiskUpdateRetryService, never()).resizeDisk(any(GcpResizeDiskParameters.class), any(GcpContext.class));
@@ -204,12 +215,441 @@ class GcpResourceVolumeConnectorTest {
                 .withParameters(new HashMap<>())
                 .build();
 
-        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200,
+        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200, null,
                 List.of(nonDiskSetResource, createZonedDiskResource("i1v1", 100)));
 
         ArgumentCaptor<GcpResizeDiskParameters> captor = ArgumentCaptor.forClass(GcpResizeDiskParameters.class);
         verify(gcpDiskUpdateRetryService).resizeDisk(captor.capture(), eq(gcpContext));
         assertEquals("i1v1", captor.getValue().diskName());
+    }
+
+    @Test
+    void changeDiskTypeMigratesDiskThroughSnapshotAndSwapInOrder() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        InOrder inOrder = inOrder(gcpDiskUpdateRetryService);
+        inOrder.verify(gcpDiskUpdateRetryService).createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).insertDisk(any(GcpCreateDiskParameters.class));
+        inOrder.verify(gcpDiskUpdateRetryService).pollDiskOperations(eq(authenticatedContext), eq(gcpContext), anyList());
+        inOrder.verify(gcpDiskUpdateRetryService).detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).attachDiskToInstance(any(GcpDiskAttachmentParameters.class), any(AttachedDisk.class), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).deleteDisk(any(GcpDiskAttachmentParameters.class), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+
+        // the new disk carries the deterministic new name, target type url and the deterministic (timestamp-free) source snapshot
+        ArgumentCaptor<GcpCreateDiskParameters> createCaptor = ArgumentCaptor.forClass(GcpCreateDiskParameters.class);
+        verify(gcpDiskUpdateRetryService).insertDisk(createCaptor.capture());
+        Disk newDisk = createCaptor.getValue().disk();
+        assertEquals("i1v1-pdssd", newDisk.getName());
+        assertEquals(100L, newDisk.getSizeGb());
+        assertTrue(newDisk.getType().endsWith("pd-ssd"), "The new disk must be created with the target type url");
+        assertEquals("https://www.googleapis.com/compute/v1/projects/test-project/global/snapshots/i1v1-typechange",
+                newDisk.getSourceSnapshot());
+
+        // the rename is reported back keyed by the original volume id, instead of mutating the shared volume attributes
+        VolumeUpdateResult updateResult = result.get("i1v1");
+        assertEquals("i1v1-pdssd", updateResult.newVolumeId());
+        assertEquals(DEVICE_NAME_PREFIX + "i1v1-pdssd", updateResult.newDevice());
+        assertEquals(100, updateResult.newSize());
+        // the source volume attributes are left untouched by the connector
+        assertEquals("i1v1", volume.getId());
+    }
+
+    @Test
+    void changeDiskTypeFailsImmediatelyWhenSnapshotCreationFailsWithNothingToClean() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        when(gcpDiskUpdateRetryService.createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), eq(gcpContext)))
+                .thenThrow(new CloudbreakServiceException("snapshot boom"));
+        CloudResource resource = createTypeChangeResource("instance1", "master",
+                new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard", CloudVolumeUsageType.GENERAL));
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource)));
+
+        assertTrue(exception.getMessage().contains("i1v1"));
+        verify(gcpDiskUpdateRetryService, never()).insertDisk(any(GcpCreateDiskParameters.class));
+        verify(gcpDiskUpdateRetryService, never()).deleteSnapshot(any(GcpSnapshotParameters.class), any(GcpContext.class));
+        verify(gcpDiskUpdateRetryService, never()).detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), any(GcpContext.class));
+    }
+
+    @Test
+    void changeDiskTypeDeletesSnapshotWhenNewDiskCreationFails() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        when(gcpDiskUpdateRetryService.insertDisk(any(GcpCreateDiskParameters.class))).thenThrow(new CloudbreakServiceException("insert boom"));
+        CloudResource resource = createTypeChangeResource("instance1", "master",
+                new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard", CloudVolumeUsageType.GENERAL));
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource)));
+
+        assertTrue(exception.getMessage().contains("i1v1"));
+        verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+        verify(gcpDiskUpdateRetryService, never()).detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), any(GcpContext.class));
+    }
+
+    @Test
+    void changeDiskTypeDeletesNewDiskAndSnapshotWhenDetachFails() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        when(gcpDiskUpdateRetryService.detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), eq(gcpContext)))
+                .thenThrow(new CloudbreakServiceException("detach boom"));
+        CloudResource resource = createTypeChangeResource("instance1", "master",
+                new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard", CloudVolumeUsageType.GENERAL));
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource)));
+
+        assertTrue(exception.getMessage().contains("i1v1"));
+        ArgumentCaptor<GcpDiskAttachmentParameters> deleteCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        verify(gcpDiskUpdateRetryService).deleteDisk(deleteCaptor.capture(), eq(gcpContext));
+        assertEquals("i1v1-pdssd", deleteCaptor.getValue().diskName());
+        verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+        verify(gcpDiskUpdateRetryService, never()).attachDiskToInstance(any(GcpDiskAttachmentParameters.class), any(AttachedDisk.class), any(GcpContext.class));
+    }
+
+    @Test
+    void changeDiskTypeReattachesOldDiskAndCleansUpWhenAttachFails() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        when(gcpDiskUpdateRetryService.attachDiskToInstance(any(GcpDiskAttachmentParameters.class), any(AttachedDisk.class), eq(gcpContext)))
+                .thenThrow(new CloudbreakServiceException("attach boom"));
+        CloudResource resource = createTypeChangeResource("instance1", "master",
+                new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard", CloudVolumeUsageType.GENERAL));
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource)));
+
+        assertTrue(exception.getMessage().contains("i1v1"));
+        // the failed new-disk attach is followed by a best-effort re-attach of the old disk (2 attach calls total)
+        ArgumentCaptor<GcpDiskAttachmentParameters> attachCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        verify(gcpDiskUpdateRetryService, times(2)).attachDiskToInstance(attachCaptor.capture(), any(AttachedDisk.class), eq(gcpContext));
+        assertEquals(List.of("i1v1-pdssd", "i1v1"), attachCaptor.getAllValues().stream().map(GcpDiskAttachmentParameters::diskName).toList());
+        // the new disk and the snapshot are cleaned up
+        verify(gcpDiskUpdateRetryService).deleteDisk(any(GcpDiskAttachmentParameters.class), eq(gcpContext));
+        verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+    }
+
+    @Test
+    void changeDiskTypeSucceedsWhenOldDiskDeletionFails() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        when(gcpDiskUpdateRetryService.deleteDisk(any(GcpDiskAttachmentParameters.class), eq(gcpContext)))
+                .thenThrow(new CloudbreakServiceException("delete old boom"));
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        // deleting the old disk is not fatal: the snapshot is still cleaned up and the rename is still reported back
+        verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+        assertEquals("i1v1-pdssd", result.get("i1v1").newVolumeId());
+    }
+
+    @Test
+    void changeDiskTypeSucceedsWhenSnapshotDeletionFails() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        when(gcpDiskUpdateRetryService.deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext)))
+                .thenThrow(new CloudbreakServiceException("delete snapshot boom"));
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        // deleting the snapshot is not fatal: the type change still succeeds and the rename is still reported back
+        assertEquals("i1v1-pdssd", result.get("i1v1").newVolumeId());
+    }
+
+    @Test
+    void changeDiskTypeSkipsLocalSsdVolumes() throws Exception {
+        mockContext();
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/sdc", 375, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        verify(gcpDiskUpdateRetryService, never()).createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), any(GcpContext.class));
+        // a local ssd is never migrated, so its attributes are untouched
+        assertEquals("i1v1", volume.getId());
+        assertEquals(LOCAL_SSD.value(), volume.getType());
+    }
+
+    @Test
+    void changeDiskTypeAggregatesFailuresAndMigratesTheHealthyDisk() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        when(gcpDiskUpdateRetryService.createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), eq(gcpContext)))
+                .thenAnswer(invocation -> {
+                    GcpSnapshotParameters params = invocation.getArgument(0);
+                    if ("i1v1".equals(params.sourceDiskName())) {
+                        throw new CloudbreakServiceException("snapshot boom");
+                    }
+                    return List.of();
+                });
+        VolumeSetAttributes.Volume failing = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume healthy = new VolumeSetAttributes.Volume("i1v2", "/dev/disk/by-id/google-i1v2", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", failing, healthy);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1", "i1v2"), "pd-ssd", 0, cloudStack, List.of(resource)));
+
+        assertTrue(exception.getMessage().contains("i1v1"), "The aggregated exception should name the failed disk");
+        // on partial failure the connector throws and reports nothing back, so the source volume attributes stay untouched;
+        // the healthy disk was still migrated at the provider (a new disk was created for it)
+        assertEquals("i1v1", failing.getId());
+        assertEquals("i1v2", healthy.getId());
+        ArgumentCaptor<GcpCreateDiskParameters> createCaptor = ArgumentCaptor.forClass(GcpCreateDiskParameters.class);
+        verify(gcpDiskUpdateRetryService).insertDisk(createCaptor.capture());
+        assertEquals("i1v2-pdssd", createCaptor.getValue().disk().getName());
+    }
+
+    @Test
+    void changeDiskTypeAndSizeCreatesNewDiskAtRequestedSize() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        // a combined type + size change: type pd-ssd and a size increase to 200 GB
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 200, cloudStack, List.of(resource));
+
+        ArgumentCaptor<GcpCreateDiskParameters> createCaptor = ArgumentCaptor.forClass(GcpCreateDiskParameters.class);
+        verify(gcpDiskUpdateRetryService).insertDisk(createCaptor.capture());
+        assertEquals(200L, createCaptor.getValue().disk().getSizeGb(), "The new disk must be created at the requested size, not the old size");
+        assertEquals(200, result.get("i1v1").newSize(), "The reported size must reflect the requested size after the swap");
+    }
+
+    @Test
+    void changeDiskTypeFloorsNewDiskSizeAtCurrentSizeWhenRequestedSmaller() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        // a smaller requested size cannot shrink a snapshot-restored disk, so it is floored at the current size
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 50, cloudStack, List.of(resource));
+
+        ArgumentCaptor<GcpCreateDiskParameters> createCaptor = ArgumentCaptor.forClass(GcpCreateDiskParameters.class);
+        verify(gcpDiskUpdateRetryService).insertDisk(createCaptor.capture());
+        assertEquals(100L, createCaptor.getValue().disk().getSizeGb(), "The new disk must not be created smaller than the source disk");
+        assertEquals(100, result.get("i1v1").newSize());
+    }
+
+    @Test
+    void changeDiskTypeWarnsAndDoesNotThrowWhenNoVolumeMatches() throws Exception {
+        mockContext();
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        // a requested id that matches no attached disk migrates nothing, but the update still succeeds (warn-only)
+        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v9"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        verify(gcpDiskUpdateRetryService, never()).createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), any(GcpContext.class));
+        assertEquals("i1v1", volume.getId());
+        assertEquals("pd-standard", volume.getType());
+    }
+
+    @Test
+    void changeDiskTypeGivesTruncatedNewDiskNamesDistinctHashesToAvoidCollision() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        // two disk ids longer than the 63-char GCP limit that share the same truncated prefix; without a hash the derived
+        // new-disk names would collide and the wrong disk could be attached (525908)
+        String sharedPrefix = "a".repeat(55);
+        String longId1 = sharedPrefix + "1111111";
+        String longId2 = sharedPrefix + "2222222";
+        VolumeSetAttributes.Volume volume1 = new VolumeSetAttributes.Volume(longId1, DEVICE_NAME_PREFIX + longId1, 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume volume2 = new VolumeSetAttributes.Volume(longId2, DEVICE_NAME_PREFIX + longId2, 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume1, volume2);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        underTest.updateDiskVolumes(authenticatedContext, List.of(longId1, longId2), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        ArgumentCaptor<GcpCreateDiskParameters> createCaptor = ArgumentCaptor.forClass(GcpCreateDiskParameters.class);
+        verify(gcpDiskUpdateRetryService, times(2)).insertDisk(createCaptor.capture());
+        List<String> newNames = createCaptor.getAllValues().stream().map(params -> params.disk().getName()).toList();
+        assertEquals(2, newNames.stream().distinct().count(), "Two long source names sharing a truncated prefix must map to distinct new disk names");
+        newNames.forEach(name -> assertTrue(name.length() <= 63, "The new disk name must fit the GCP 63-character limit, but was: " + name));
+    }
+
+    @Test
+    void changeDiskTypeUsesDeterministicTimestampFreeSnapshotName() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        // the snapshot name is stable (no epoch-millis suffix) so a rerun can adopt/clean up the same snapshot (525909)
+        ArgumentCaptor<Snapshot> snapshotCaptor = ArgumentCaptor.forClass(Snapshot.class);
+        verify(gcpDiskUpdateRetryService).createSnapshot(any(GcpSnapshotParameters.class), snapshotCaptor.capture(), eq(gcpContext));
+        assertEquals("i1v1-typechange", snapshotCaptor.getValue().getName());
+    }
+
+    @Test
+    void changeDiskTypeCleansUpOnlyWhenResumePointIsCleanupOnly() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        // a prior attempt already completed the swap: the deterministically-named new disk exists and is attached to the
+        // target instance, so this rerun must not re-snapshot the (already deleted) source disk (525907)
+        when(gcpDiskUpdateRetryService.resolveDiskTypeChangeResumePoint(any(GcpDiskAttachmentParameters.class),
+                any(GcpDiskAttachmentParameters.class), anyString()))
+                .thenReturn(new DiskTypeChangeResumePoint(ResumeAction.CLEANUP_ONLY, Optional.of(new Disk().setSizeGb(150L))));
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        // nothing is re-created or swapped; the leftover old disk and snapshot are cleaned up best-effort
+        verify(gcpDiskUpdateRetryService, never()).createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), any(GcpContext.class));
+        verify(gcpDiskUpdateRetryService, never()).insertDisk(any(GcpCreateDiskParameters.class));
+        verify(gcpDiskUpdateRetryService, never()).detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), any(GcpContext.class));
+        verify(gcpDiskUpdateRetryService, never()).attachDiskToInstance(any(GcpDiskAttachmentParameters.class), any(AttachedDisk.class), any(GcpContext.class));
+        ArgumentCaptor<GcpDiskAttachmentParameters> deleteCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        verify(gcpDiskUpdateRetryService).deleteDisk(deleteCaptor.capture(), eq(gcpContext));
+        assertEquals("i1v1", deleteCaptor.getValue().diskName(), "The leftover old disk must be the one cleaned up");
+        verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+        // the rename is reported using the existing new disk's provider-authoritative size
+        VolumeUpdateResult updateResult = result.get("i1v1");
+        assertEquals("i1v1-pdssd", updateResult.newVolumeId());
+        assertEquals(DEVICE_NAME_PREFIX + "i1v1-pdssd", updateResult.newDevice());
+        assertEquals(150, updateResult.newSize());
+    }
+
+    @Test
+    void changeDiskTypeResumesAtDetachWithoutReSnapshottingAndDeletesOldOnlyAfterAttach() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        // The new disk is already READY but the old disk is still attached: resume at detach, never re-create the disk,
+        // and never delete the old disk before the new one is attached (the data-loss guard).
+        when(gcpDiskUpdateRetryService.resolveDiskTypeChangeResumePoint(any(GcpDiskAttachmentParameters.class),
+                any(GcpDiskAttachmentParameters.class), anyString()))
+                .thenReturn(new DiskTypeChangeResumePoint(ResumeAction.RESUME_AT_DETACH, Optional.of(new Disk().setSizeGb(150L))));
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        // no snapshot / disk creation on resume
+        verify(gcpDiskUpdateRetryService, never()).createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), any(GcpContext.class));
+        verify(gcpDiskUpdateRetryService, never()).insertDisk(any(GcpCreateDiskParameters.class));
+        // detach old -> attach new -> delete old (in that order): the old disk is deleted only after the new disk is attached
+        InOrder inOrder = inOrder(gcpDiskUpdateRetryService);
+        inOrder.verify(gcpDiskUpdateRetryService).detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), eq(gcpContext));
+        ArgumentCaptor<GcpDiskAttachmentParameters> attachCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        inOrder.verify(gcpDiskUpdateRetryService).attachDiskToInstance(attachCaptor.capture(), any(AttachedDisk.class), eq(gcpContext));
+        ArgumentCaptor<GcpDiskAttachmentParameters> deleteCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        inOrder.verify(gcpDiskUpdateRetryService).deleteDisk(deleteCaptor.capture(), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+        assertEquals("i1v1-pdssd", attachCaptor.getValue().diskName(), "The new disk must be the one attached");
+        assertEquals("i1v1", deleteCaptor.getValue().diskName(), "The old disk is deleted, only after the new one is attached");
+        assertEquals(150, result.get("i1v1").newSize());
+    }
+
+    @Test
+    void changeDiskTypeResumesAtAttachAndDoesNotDeleteOldDiskBeforeAttaching() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        // The new disk is READY and the old disk already detached: resume at attach. Neither disk is attached right now,
+        // so the old disk must not be deleted before the new one is attached (the data-loss guard).
+        when(gcpDiskUpdateRetryService.resolveDiskTypeChangeResumePoint(any(GcpDiskAttachmentParameters.class),
+                any(GcpDiskAttachmentParameters.class), anyString()))
+                .thenReturn(new DiskTypeChangeResumePoint(ResumeAction.RESUME_AT_ATTACH, Optional.of(new Disk().setSizeGb(150L))));
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        // no snapshot / disk creation and no detach on resume
+        verify(gcpDiskUpdateRetryService, never()).createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), any(GcpContext.class));
+        verify(gcpDiskUpdateRetryService, never()).insertDisk(any(GcpCreateDiskParameters.class));
+        verify(gcpDiskUpdateRetryService, never()).detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), any(GcpContext.class));
+        // attach new -> delete old (in that order): the old disk is deleted only after the new disk is attached
+        InOrder inOrder = inOrder(gcpDiskUpdateRetryService);
+        ArgumentCaptor<GcpDiskAttachmentParameters> attachCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        inOrder.verify(gcpDiskUpdateRetryService).attachDiskToInstance(attachCaptor.capture(), any(AttachedDisk.class), eq(gcpContext));
+        ArgumentCaptor<GcpDiskAttachmentParameters> deleteCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        inOrder.verify(gcpDiskUpdateRetryService).deleteDisk(deleteCaptor.capture(), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).deleteSnapshot(any(GcpSnapshotParameters.class), eq(gcpContext));
+        assertEquals("i1v1-pdssd", attachCaptor.getValue().diskName(), "The new disk must be the one attached");
+        assertEquals("i1v1", deleteCaptor.getValue().diskName(), "The old disk is deleted, only after the new one is attached");
+        assertEquals(150, result.get("i1v1").newSize());
+    }
+
+    @Test
+    void changeDiskTypeRecreatesLeftoverNewDiskThenRunsFullMigration() throws Exception {
+        mockContext();
+        mockExecutorExecutesInline();
+        // A non-READY leftover new disk of ours exists: it must be deleted, then a full snapshot -> create -> swap runs.
+        when(gcpDiskUpdateRetryService.resolveDiskTypeChangeResumePoint(any(GcpDiskAttachmentParameters.class),
+                any(GcpDiskAttachmentParameters.class), anyString()))
+                .thenReturn(new DiskTypeChangeResumePoint(ResumeAction.RECREATE_NEW_DISK, Optional.of(new Disk().setSizeGb(150L))));
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("i1v1", "/dev/disk/by-id/google-i1v1", 100, "pd-standard",
+                CloudVolumeUsageType.GENERAL);
+        CloudResource resource = createTypeChangeResource("instance1", "master", volume);
+        CloudStack cloudStack = mockCloudStackWithTemplate("master");
+
+        Map<String, VolumeUpdateResult> result =
+                underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), "pd-ssd", 0, cloudStack, List.of(resource));
+
+        // the unusable leftover new disk is deleted first, then the full migration re-creates it
+        InOrder inOrder = inOrder(gcpDiskUpdateRetryService);
+        ArgumentCaptor<GcpDiskAttachmentParameters> deleteCaptor = ArgumentCaptor.forClass(GcpDiskAttachmentParameters.class);
+        inOrder.verify(gcpDiskUpdateRetryService).deleteDisk(deleteCaptor.capture(), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).createSnapshot(any(GcpSnapshotParameters.class), any(Snapshot.class), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).insertDisk(any(GcpCreateDiskParameters.class));
+        inOrder.verify(gcpDiskUpdateRetryService).detachDiskFromInstance(any(GcpDiskAttachmentParameters.class), eq(gcpContext));
+        inOrder.verify(gcpDiskUpdateRetryService).attachDiskToInstance(any(GcpDiskAttachmentParameters.class), any(AttachedDisk.class), eq(gcpContext));
+        assertEquals("i1v1-pdssd", deleteCaptor.getValue().diskName(), "The leftover new disk must be the one deleted before recreation");
+        // the full migration reports the freshly computed size, not the leftover disk's size
+        assertEquals("i1v1-pdssd", result.get("i1v1").newVolumeId());
+        assertEquals(100, result.get("i1v1").newSize());
     }
 
     @Test
@@ -359,6 +799,44 @@ class GcpResourceVolumeConnectorTest {
                 .build();
         cloudResource.setTypedAttributes(createVolumeSetAttributes(List.of(volume)));
         return cloudResource;
+    }
+
+    private CloudResource createTypeChangeResource(String instanceId, String groupName, VolumeSetAttributes.Volume... volumes) {
+        CloudResource cloudResource = CloudResource.builder()
+                .withInstanceId(instanceId)
+                .withGroup(groupName)
+                .withType(ResourceType.GCP_ATTACHED_DISKSET)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withParameters(new HashMap<>())
+                .build();
+        cloudResource.setTypedAttributes(new VolumeSetAttributes.Builder()
+                .withAvailabilityZone(ZONE)
+                .withDeleteOnTermination(Boolean.TRUE)
+                .withVolumes(new ArrayList<>(List.of(volumes)))
+                .build());
+        return cloudResource;
+    }
+
+    private CloudStack mockCloudStackWithTemplate(String groupName) {
+        CloudStack cloudStack = mock(CloudStack.class);
+        Group group = mock(Group.class);
+        when(group.getName()).thenReturn(groupName);
+        when(group.getReferenceInstanceTemplate()).thenReturn(mock(InstanceTemplate.class));
+        when(cloudStack.getGroups()).thenReturn(List.of(group));
+        return cloudStack;
+    }
+
+    private void mockExecutorExecutesInline() {
+        doAnswer(invocation -> {
+            Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(intermediateBuilderExecutor).execute(any(Runnable.class));
+        // Default: a clean start (no prior attempt). Resume-branch tests override this per case.
+        lenient().when(gcpDiskUpdateRetryService.resolveDiskTypeChangeResumePoint(any(GcpDiskAttachmentParameters.class),
+                        any(GcpDiskAttachmentParameters.class), anyString()))
+                .thenReturn(new DiskTypeChangeResumePoint(ResumeAction.FULL_MIGRATION, Optional.empty()));
     }
 
     @Test

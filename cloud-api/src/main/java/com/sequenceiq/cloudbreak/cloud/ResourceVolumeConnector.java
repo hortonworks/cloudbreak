@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.model.VolumeInfo;
 
@@ -46,12 +47,17 @@ public interface ResourceVolumeConnector {
      * @param volumeIds contains the list of cloud volumes being modified
      * @param diskType desired disk type of EBS volumes being modified
      * @param size desired disk size of EBS volumes being modified
+     * @param cloudStack the cloud stack being modified; carries the instance templates needed to resolve
+     *                   provider-specific details such as the disk encryption key (e.g. GCP disk-type change)
      * @param cloudResources the disk resources being modified; carries provider-specific details such as the
      *                       availability zone required by zonal resize APIs (e.g. GCP)
+     * @return the per-volume update results keyed by the volume's <b>original</b> id, so the caller can persist any
+     *         provider-side rename (id/device/size) without relying on in-place mutation of the passed resources.
+     *         Providers that update volumes in place without renaming them (AWS, Azure) return an empty map.
      * @throws Exception in case of any error
      */
-    default void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
-            List<CloudResource> cloudResources) throws Exception {
+    default Map<String, VolumeUpdateResult> updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            CloudStack cloudStack, List<CloudResource> cloudResources) throws Exception {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

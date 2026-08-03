@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -19,8 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Disk;
+import com.google.api.services.compute.model.Snapshot;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.EncryptionType;
 
@@ -77,10 +80,73 @@ public class CustomGcpDiskEncryptionServiceTest {
         verify(customGcpDiskEncryptionCreatorService, times(0)).createCustomerEncryptionKey(any(InstanceTemplate.class));
     }
 
+    @Test
+    public void testAddEncryptionKeyToSnapshotForCustomerSuppliedKeyShouldSetSourceDiskKey() {
+        CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
+        Snapshot snapshot = new Snapshot();
+        when(customGcpDiskEncryptionCreatorService.createCustomerEncryptionKey(any(InstanceTemplate.class)))
+                .thenReturn(customerEncryptionKey);
+
+        underTest.addEncryptionKeyToSnapshot(instanceTemplate(EncryptionType.CUSTOM, "RSA"), snapshot);
+
+        assertTrue(snapshot.getSourceDiskEncryptionKey().equals(customerEncryptionKey));
+        verify(customGcpDiskEncryptionCreatorService, times(1)).createCustomerEncryptionKey(any(InstanceTemplate.class));
+    }
+
+    @Test
+    public void testAddEncryptionKeyToSnapshotForKmsShouldBeNoOp() {
+        Snapshot snapshot = new Snapshot();
+
+        underTest.addEncryptionKeyToSnapshot(instanceTemplate(EncryptionType.CUSTOM, "KMS"), snapshot);
+
+        assertNull(snapshot.getSourceDiskEncryptionKey());
+        verify(customGcpDiskEncryptionCreatorService, times(0)).createCustomerEncryptionKey(any(InstanceTemplate.class));
+    }
+
+    @Test
+    public void testAddEncryptionKeyToSnapshotForDefaultEncryptionShouldBeNoOp() {
+        Snapshot snapshot = new Snapshot();
+
+        underTest.addEncryptionKeyToSnapshot(instanceTemplate(EncryptionType.DEFAULT, null), snapshot);
+
+        assertNull(snapshot.getSourceDiskEncryptionKey());
+        verify(customGcpDiskEncryptionCreatorService, times(0)).createCustomerEncryptionKey(any(InstanceTemplate.class));
+    }
+
+    @Test
+    public void testAddSourceSnapshotEncryptionKeyToDiskForCustomerSuppliedKeyShouldSetSourceSnapshotKey() {
+        CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
+        Disk disk = disk();
+        when(customGcpDiskEncryptionCreatorService.createCustomerEncryptionKey(any(InstanceTemplate.class)))
+                .thenReturn(customerEncryptionKey);
+
+        underTest.addSourceSnapshotEncryptionKeyToDisk(instanceTemplate(EncryptionType.CUSTOM, "RAW"), disk);
+
+        assertTrue(disk.getSourceSnapshotEncryptionKey().equals(customerEncryptionKey));
+        verify(customGcpDiskEncryptionCreatorService, times(1)).createCustomerEncryptionKey(any(InstanceTemplate.class));
+    }
+
+    @Test
+    public void testAddSourceSnapshotEncryptionKeyToDiskForKmsShouldBeNoOp() {
+        Disk disk = disk();
+
+        underTest.addSourceSnapshotEncryptionKeyToDisk(instanceTemplate(EncryptionType.CUSTOM, "KMS"), disk);
+
+        assertNull(disk.getSourceSnapshotEncryptionKey());
+        verify(customGcpDiskEncryptionCreatorService, times(0)).createCustomerEncryptionKey(any(InstanceTemplate.class));
+    }
+
     private InstanceTemplate instanceTemplate(EncryptionType type) {
+        return instanceTemplate(type, null);
+    }
+
+    private InstanceTemplate instanceTemplate(EncryptionType type, String keyEncryptionMethod) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, type.name());
         parameters.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "testurl");
+        if (keyEncryptionMethod != null) {
+            parameters.put(GcpInstanceTemplate.KEY_ENCRYPTION_METHOD, keyEncryptionMethod);
+        }
 
         InstanceTemplate instanceTemplate = new InstanceTemplate("large", "master", 1L,
                 new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, parameters, 1L, "image", TemporaryStorage.ATTACHED_VOLUMES, 0L);

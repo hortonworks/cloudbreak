@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -80,11 +81,12 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     @Override
-    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
-            List<CloudResource> cloudResources) {
+    public Map<String, VolumeUpdateResult> updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size,
+            CloudStack cloudStack, List<CloudResource> cloudResources) {
         LOGGER.info("Calling update volumes in AzureVolumeResourceBuilder for volumes : {} : to disk type : {} and size : {}", volumeIds,
                 diskType, size);
         azureVolumeResourceBuilder.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
+        return Map.of();
     }
 
     @Override

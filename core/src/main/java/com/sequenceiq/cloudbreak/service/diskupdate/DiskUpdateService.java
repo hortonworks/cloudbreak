@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.DiskResiz
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -44,6 +47,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -119,6 +123,9 @@ public class DiskUpdateService {
     @Inject
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
+    @Inject
+    private StackToCloudStackConverter stackToCloudStackConverter;
+
     public boolean isDiskTypeChangeSupported(String platform) {
         return cloudParameterCache.isDiskTypeChangeSupported(platform);
     }
@@ -132,7 +139,9 @@ public class DiskUpdateService {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
         AuthenticatedContext ac = getAuthenticatedContext(cloudConnector, stackDto);
         List<String> volumeIds = volumesToUpdate.stream().map(Volume::getId).toList();
-        cloudConnector.volumeConnector().updateDiskVolumes(ac, volumeIds, volumeType, size, cloudResources);
+        CloudStack cloudStack = stackToCloudStackConverter.convert(stackDto);
+        Map<String, VolumeUpdateResult> updateResultsByOldId =
+                cloudConnector.volumeConnector().updateDiskVolumes(ac, volumeIds, volumeType, size, cloudStack, cloudResources);
         for (Resource resource : stackDto.getDiskResources()) {
             Optional<VolumeSetAttributes> optionalVolumeSetAttributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class);
             if (group.equals(resource.getInstanceGroup()) && optionalVolumeSetAttributes.isPresent()) {
@@ -141,6 +150,7 @@ public class DiskUpdateService {
                 for (VolumeSetAttributes.Volume volume : volumes) {
                     if (volumeIds.contains(volume.getId())) {
                         updateVolumeTypeAndSize(volumeType, size, volume);
+                        applyVolumeUpdateResult(volume, updateResultsByOldId.get(volume.getId()));
                     }
                 }
                 volumeSetAttributes.setVolumes(volumes);
@@ -166,6 +176,26 @@ public class DiskUpdateService {
         }
         if (null != volumeType) {
             volume.setType(volumeType);
+        }
+    }
+
+    /**
+     * Applies a provider-reported rename back onto the persisted volume: id, device, and the provider-authoritative
+     * size. Some providers (GCP) apply a disk-type change by recreating the underlying disk under a new name and report
+     * the result keyed by the volume's original id. GCP also floors the new disk at the current size when a smaller
+     * size is requested, so the request size written by {@link #updateVolumeTypeAndSize} would otherwise drift below
+     * what actually exists; the provider's size wins on a rename. No-op for providers that update in place without
+     * renaming (AWS/Azure), which report no result for the volume ({@code updateResult} is {@code null}).
+     */
+    private void applyVolumeUpdateResult(VolumeSetAttributes.Volume volume, VolumeUpdateResult updateResult) {
+        if (updateResult != null && !Objects.equals(volume.getId(), updateResult.newVolumeId())) {
+            LOGGER.info("Disk was renamed during the update, syncing volume id {} -> {}, device {} -> {}, size {} -> {}.",
+                    volume.getId(), updateResult.newVolumeId(), volume.getDevice(), updateResult.newDevice(), volume.getSize(), updateResult.newSize());
+            volume.setId(updateResult.newVolumeId());
+            volume.setDevice(updateResult.newDevice());
+            if (updateResult.newSize() != null) {
+                volume.setSize(updateResult.newSize());
+            }
         }
     }
 

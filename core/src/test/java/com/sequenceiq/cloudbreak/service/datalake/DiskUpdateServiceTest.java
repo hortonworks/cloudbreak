@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,11 +39,13 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
@@ -51,6 +54,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -124,6 +128,9 @@ class DiskUpdateServiceTest {
 
     @Mock
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
+
+    @Mock
+    private StackToCloudStackConverter stackToCloudStackConverter;
 
     @InjectMocks
     private DiskUpdateService underTest;
@@ -256,7 +263,7 @@ class DiskUpdateServiceTest {
         underTest.updateDiskTypeAndSize("master", "st1", 200, List.of(volume), stackId);
 
         verify(templateService).savePure(template);
-        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200), any());
+        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200), any(), any());
         verify(resourceService).saveAll(any());
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
@@ -277,7 +284,7 @@ class DiskUpdateServiceTest {
         underTest.updateDiskTypeAndSize("master", "st1", 200, List.of(volume1), 1L);
 
         verify(templateService).savePure(template);
-        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200), any());
+        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200), any(), any());
         ArgumentCaptor<List<Resource>> saveResourcesCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveResourcesCaptor.capture());
         List<VolumeSetAttributes.Volume> volResult = saveResourcesCaptor.getValue().get(0).getAttributes().get(VolumeSetAttributes.class)
@@ -289,6 +296,91 @@ class DiskUpdateServiceTest {
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
         assertEquals("st1", resultVolumeTemplate.getVolumeType());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeSyncsRenamedDiskIdentifiers() throws Exception {
+        // Connector recreates the disk at the requested size (>= current): persisted id/device/type/size all follow it.
+        List<VolumeSetAttributes.Volume> savedVolumes = runRenameScenario(200, 200);
+
+        VolumeSetAttributes.Volume renamed = savedVolumes.get(0);
+        assertEquals("vol-1-pdssd", renamed.getId());
+        assertEquals("new-device", renamed.getDevice());
+        assertEquals("pd-ssd", renamed.getType());
+        assertEquals(200, renamed.getSize());
+        VolumeSetAttributes.Volume untouched = savedVolumes.get(1);
+        assertEquals("vol-2", untouched.getId());
+        assertEquals("other-device", untouched.getDevice());
+        assertEquals(100, untouched.getSize());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizePersistsFlooredSizeOnRenameWhenRequestedBelowCurrent() throws Exception {
+        // Requested 50 GB < current 100 GB: GCP floors the new disk at 100, so the persisted size must not drift to 50.
+        List<VolumeSetAttributes.Volume> savedVolumes = runRenameScenario(50, 100);
+
+        VolumeSetAttributes.Volume renamed = savedVolumes.get(0);
+        assertEquals("vol-1-pdssd", renamed.getId());
+        assertEquals("new-device", renamed.getDevice());
+        assertEquals(100, renamed.getSize());
+    }
+
+    private List<VolumeSetAttributes.Volume> runRenameScenario(int requestedSize, int connectorSize) throws Exception {
+        Long stackId = 1L;
+        String instanceGroup = "master";
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
+        ResourceVolumeConnector gcpResourceVolumeConnector = mock(ResourceVolumeConnector.class);
+        doReturn(gcpResourceVolumeConnector).when(cloudConnector).volumeConnector();
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        when(platformParameters.diskTypes()).thenReturn(mock(DiskTypes.class));
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
+        StackDto stack = mock(StackDto.class);
+        doReturn("AWS").when(stack).getPlatformVariant();
+        doReturn("AWS").when(stack).getCloudPlatform();
+        Workspace workspace = mock(Workspace.class);
+        doReturn(workspace).when(stack).getWorkspace();
+        doReturn(stackId).when(workspace).getId();
+        doReturn("crn:cdp:iam:us-west-1:someworkspace:user:someuser").when(stack).getResourceCrn();
+        Authenticator authenticator = mock(Authenticator.class);
+        doReturn(authenticator).when(cloudConnector).authentication();
+        doReturn(stack).when(stackDtoService).getById(stackId);
+
+        Resource resource = new Resource();
+        resource.setResourceName("res-1");
+        resource.setInstanceGroup(instanceGroup);
+        resource.setResourceType(ResourceType.AWS_VOLUMESET);
+        VolumeSetAttributes.Volume persistedVolume = new VolumeSetAttributes.Volume("vol-1", "old-device", 100, "gp2", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume otherVolume = new VolumeSetAttributes.Volume("vol-2", "other-device", 100, "gp2", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes persistedAttributes = new VolumeSetAttributes("az", false, "", List.of(persistedVolume, otherVolume), 100, "");
+        resource.setAttributes(Json.silent(persistedAttributes));
+        doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(eq(resource), eq(VolumeSetAttributes.class));
+        doCallRealMethod().when(resourceAttributeUtil).setTypedAttributes(any(), any());
+        doReturn(Set.of(resource)).when(stack).getResources();
+        doReturn(List.of(resource)).when(stack).getDiskResources();
+
+        // The connector receives its own converted copy of the resources.
+        VolumeSetAttributes.Volume copyVolume = new VolumeSetAttributes.Volume("vol-1", "old-device", 100, "gp2", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume copyOtherVolume = new VolumeSetAttributes.Volume("vol-2", "other-device", 100, "gp2", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes copyAttributes = new VolumeSetAttributes("az", false, "", List.of(copyVolume, copyOtherVolume), 100, "");
+        CloudResource cloudResourceCopy = CloudResource.builder()
+                .withType(ResourceType.AWS_VOLUMESET)
+                .withName("res-1")
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, copyAttributes))
+                .build();
+        doReturn(cloudResourceCopy).when(resourceToCloudResourceConverter).convert(resource);
+        // Simulate GCP recreating the disk under a new name: the connector reports the rename (keyed by the old id)
+        // with the provider-authoritative size, instead of mutating shared volume attributes in place.
+        doReturn(Map.of("vol-1", new VolumeUpdateResult("vol-1", "vol-1-pdssd", "new-device", connectorSize)))
+                .when(gcpResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("pd-ssd"), eq(requestedSize), any(), any());
+
+        Volume volume = mock(Volume.class);
+        doReturn("vol-1").when(volume).getId();
+        underTest.updateDiskTypeAndSize(instanceGroup, "pd-ssd", requestedSize, List.of(volume), stackId);
+
+        ArgumentCaptor<List<Resource>> saveResourcesCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceService).saveAll(saveResourcesCaptor.capture());
+        return saveResourcesCaptor.getValue().get(0).getAttributes().get(VolumeSetAttributes.class).getVolumes();
     }
 
     @Test
@@ -383,10 +475,10 @@ class DiskUpdateServiceTest {
 
         underTest.updateDiskTypeAndSize("master", null, 200, List.of(volume), stackId);
 
-        verify(gcpResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), any(), eq(200), any());
+        verify(gcpResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), any(), eq(200), any(), any());
     }
 
-    private void setUpForDiskResize(AwsResourceVolumeConnector awsResourceVolumeConnector, Template template) {
+    private void setUpForDiskResize(AwsResourceVolumeConnector awsResourceVolumeConnector, Template template) throws Exception {
         String instanceGroup = "master";
         Long stackId = 1L;
         CloudConnector cloudConnector = mock(CloudConnector.class);
@@ -402,6 +494,8 @@ class DiskUpdateServiceTest {
         when(cloudConnector.parameters()).thenReturn(platformParameters);
         doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
         doReturn(awsResourceVolumeConnector).when(cloudConnector).volumeConnector();
+        // AWS modifies volumes in place, so the connector reports no renames back to the caller.
+        doReturn(Map.of()).when(awsResourceVolumeConnector).updateDiskVolumes(any(), anyList(), any(), anyInt(), any(), any());
         StackDto stack = mock(StackDto.class);
         doReturn("AWS").when(stack).getPlatformVariant();
         doReturn("AWS").when(stack).getCloudPlatform();

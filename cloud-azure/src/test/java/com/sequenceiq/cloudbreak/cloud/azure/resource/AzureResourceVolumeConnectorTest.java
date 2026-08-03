@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @ExtendWith(MockitoExtension.class)
@@ -98,8 +99,9 @@ class AzureResourceVolumeConnectorTest {
     @Test
     void testUpdateDiskVolumes() {
         List<String> volumeIds = List.of("test-vol-1");
-        underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100, List.of());
+        Map<String, VolumeUpdateResult> result = underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100, null, List.of());
         verify(azureVolumeResourceBuilder).modifyVolumes(authenticatedContext, volumeIds, "test", 100);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -107,7 +109,7 @@ class AzureResourceVolumeConnectorTest {
         List<String> volumeIds = List.of("test-vol-1");
         doThrow(new RuntimeException("TEST")).when(azureVolumeResourceBuilder).modifyVolumes(authenticatedContext, volumeIds, "test", 100);
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100, List.of()));
+                () -> underTest.updateDiskVolumes(authenticatedContext, volumeIds, "test", 100, null, List.of()));
         assertEquals("TEST", exception.getMessage());
         verify(azureVolumeResourceBuilder).modifyVolumes(authenticatedContext, volumeIds, "test", 100);
     }
