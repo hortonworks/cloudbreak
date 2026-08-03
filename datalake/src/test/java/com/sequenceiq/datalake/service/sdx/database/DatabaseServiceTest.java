@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -393,9 +394,12 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), eq("arm64")))
-                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), new HashMap<>(), null));
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), new HashMap<>(),
+                        Map.of("test", List.of("db.m7g.large", "db.m8g.large")), null, null));
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), eq("x86_64")))
-                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("test", List.of("db.m5.large", "db.m6i.large")), null, null));
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(any())).thenReturn(true);
 
         DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
                 "initiatorUserCrn");
@@ -403,6 +407,77 @@ public class DatabaseServiceTest {
         assertThat(databaseServerV4StackRequest).isNotNull();
         assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("instanceType");
         assertThat(databaseServerV4StackRequest.getDatabaseVendor()).isEqualTo("vendor");
+        // Fallback list must match the arch actually chosen (x86 after the ARM64 re-query), not the empty ARM64 one.
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).containsExactly("db.m5.large", "db.m6i.large");
+    }
+
+    @Test
+    public void testGetDatabaseServerRequestSetsFallbackInstanceTypesWhenEntitled() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setAttributes(new Json(new HashMap<>()));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
+        env.setCrn(ENV_CRN);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("test", List.of("db.m5.large", "db.m6i.large", "db.m7i.large")), null, null));
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(any())).thenReturn(true);
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("instanceType");
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).containsExactly("db.m5.large", "db.m6i.large", "db.m7i.large");
+    }
+
+    @Test
+    public void testGetDatabaseServerRequestSkipsFallbackInstanceTypesWhenNotEntitled() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setAttributes(new Json(new HashMap<>()));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
+        env.setCrn(ENV_CRN);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("test", List.of("db.m5.large", "db.m6i.large")), null, null));
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("instanceType");
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).isNullOrEmpty();
     }
 
     @Test

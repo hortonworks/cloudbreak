@@ -28,6 +28,7 @@ import com.dyngr.core.AttemptResults;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -133,6 +134,9 @@ public class DatabaseService {
 
     @Inject
     private EventSenderService eventSenderService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
@@ -270,6 +274,7 @@ public class DatabaseService {
         Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
         String instanceType;
         Long storageSize;
+        List<String> fallbackInstanceTypes = List.of();
         // Cascade instanceType and storageSize of the previous database if they are different of the default ones.
         Optional<DatabaseServerV4Response> previousDatabaseOp = getPreviousDatabaseIfPropertiesWereModified(attributes, cloudPlatform, sdxCluster);
         if (previousDatabaseOp.isPresent()) {
@@ -287,11 +292,15 @@ public class DatabaseService {
                 databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn, databaseCapabilityType, Architecture.X86_64);
                 instanceType = databaseCapabilities.getRegionDefaultInstances().get(env.getLocation().getName());
             }
+            fallbackInstanceTypes = databaseCapabilities.getRegionFallbackInstances().getOrDefault(env.getLocation().getName(), List.of());
             storageSize = databaseConfig.getVolumeSize();
         }
 
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
         req.setInstanceType(attributes.containsKey(INSTANCE_TYPE) ? attributes.get(INSTANCE_TYPE).toString() : instanceType);
+        if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(env.getAccountId())) {
+            req.setFallbackInstanceTypes(fallbackInstanceTypes);
+        }
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(attributes.containsKey(STORAGE) ? Long.parseLong(attributes.get(STORAGE).toString()) : storageSize);
         databaseServerParameterSetter.setParameters(req, sdxCluster, env, initiatorUserCrn);
