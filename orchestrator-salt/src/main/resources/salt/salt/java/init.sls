@@ -1,4 +1,5 @@
 {%- from 'java/settings.sls' import java with context %}
+{% set tlsAdvancedControl = salt['pillar.get']('cluster:tlsAdvancedControl')%}
 
 /opt/salt/scripts/set_default_java_version.sh:
   file.managed:
@@ -141,9 +142,15 @@ change_krb5_conf_crypto_policies:
   file.managed:
     - name: /etc/krb5.conf.d/crypto-policies
     - replace: True
+{% if tlsAdvancedControl == True %}
     - contents: |
         [libdefaults]
-        permitted_enctypes = aes256-cts-hmac-sha1-96 aes256-cts-hmac-sha384-192 camellia256-cts-cmac aes128-cts-hmac-sha1-96 aes128-cts-hmac-sha256-128 camellia128-cts-cmac
+        permitted_enctypes = aes256-cts-hmac-sha384-192 aes128-cts-hmac-sha256-128 aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+{% else %}
+      - contents: |
+          [libdefaults]
+          permitted_enctypes = aes256-cts-hmac-sha1-96 aes256-cts-hmac-sha384-192 camellia256-cts-cmac aes128-cts-hmac-sha1-96 aes128-cts-hmac-sha256-128 camellia128-cts-cmac
+{% endif %}
 {% endif %}
 
 {% endif %}
