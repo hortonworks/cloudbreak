@@ -32,7 +32,21 @@ if [ -f /var/log/freeipa_replica_install_completed ]; then
   echo "Prior attempt already completed ipa-replica-install for $FQDN; skipping reinstall and re-verifying replication health in place"
 else
 
-ipa-server-install --unattended --uninstall --ignore-topology-disconnect --ignore-last-of-role
+# The uninstall is a best-effort teardown before re-join. When the DS instance is already absent
+# (fresh node, or a prior failed attempt already tore it down) ipa-server-install exits non-zero with
+# "No serverid present in sysrestore file" / "not configured". That is a no-op, not a failure, and must
+# not abort the re-join under 'set -e'. Genuine uninstall failures are still surfaced.
+uninstall_rc=0
+uninstall_out="$(ipa-server-install --unattended --uninstall --ignore-topology-disconnect --ignore-last-of-role 2>&1)" || uninstall_rc=$?
+echo "$uninstall_out"
+if [ "$uninstall_rc" -ne 0 ]; then
+  if echo "$uninstall_out" | grep -qiE 'No serverid present in sysrestore|not configured'; then
+    echo "DS instance already absent — treating uninstall as a no-op."
+  else
+    echo "ipa-server-install --uninstall failed (rc=$uninstall_rc) for a non-idempotency reason; aborting"
+    exit "$uninstall_rc"
+  fi
+fi
 
 # A failed prior attempt can leave dirsrv's GSSAPI credential cache (owned by the dirsrv user, uid
 # 389 -> /tmp/krb5cc_389) latched onto a stale/expired ticket. The freshly installed dirsrv would
