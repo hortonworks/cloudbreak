@@ -40,6 +40,8 @@ import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileConverter;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -56,8 +58,6 @@ public class UserDataBuilder {
     private static final String SALTBOOT_TLS_VERSION_1_2 = "1.2";
 
     private static final String SALTBOOT_TLS_VERSION_1_3 = "1.3";
-
-    private static final Set<String> FIPS_APPROVED_TLS13_CIPHERS = Set.of("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384");
 
     @Value("${cb.saltboot.httpsOnly:true}")
     private boolean saltbootHttpsOnly;
@@ -79,6 +79,9 @@ public class UserDataBuilder {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private CipherSuiteProvider cipherSuiteProvider;
 
     public Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, Variant variant, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmParameters, ProxyConfig proxyConfig,
@@ -212,7 +215,7 @@ public class UserDataBuilder {
         if (CollectionUtils.isEmpty(tls13Ciphers)) {
             return false;
         }
-        boolean fipsOnly = Set.copyOf(tls13Ciphers).equals(FIPS_APPROVED_TLS13_CIPHERS);
+        boolean fipsOnly = EncryptionProfileConverter.toListString(cipherSuiteProvider.getFips1403ApprovedTls13CipherSuites()).containsAll(tls13Ciphers);
         if (fipsOnly) {
             LOGGER.info("Encryption profile '{}' specifies only FIPS-approved TLS 1.3 ciphers, enabling FIPS mode for saltboot", profile.getName());
         }

@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -85,6 +86,9 @@ class UserDataBuilderTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Spy
+    private CipherSuiteProvider cipherSuiteProvider;
 
     private DetailedEnvironmentResponse environment;
 
@@ -393,6 +397,28 @@ class UserDataBuilderTest {
         profile.setName("cdp_default_tls13_fips_140_3");
         profile.setTlsVersions(Set.of("TLSv1.3"));
         profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256")));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
+
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
+
+        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
+        assertTrue(gwScript.contains("SALTBOOT_FIPS_ONLY=true"));
+        assertFalse(gwScript.contains("SALTBOOT_CIPHER_SUITES="));
+    }
+
+    @Test
+    void testSaltbootFipsModeEnabledWhenProfileHasSubsetOfFipsApprovedCiphers() throws IOException {
+        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
+                .withCrn("environment:crn")
+                .withAccountId("account-id")
+                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
+                .build();
+        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
+        EncryptionProfileResponse profile = new EncryptionProfileResponse();
+        profile.setName("cdp_default_tls13_fips_140_3");
+        profile.setTlsVersions(Set.of("TLSv1.3"));
+        profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384")));
         when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
 
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
