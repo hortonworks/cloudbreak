@@ -224,7 +224,7 @@ public class EnvironmentModificationService {
                 environment.getId(),
                 environment.getAccountId(),
                 environment.getName(),
-                environment.getCreator(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
                 environment.getResourceCrn(),
                 request);
     }
@@ -235,7 +235,7 @@ public class EnvironmentModificationService {
                 environment.getId(),
                 environment.getAccountId(),
                 environment.getName(),
-                environment.getCreator(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
                 environment.getResourceCrn(),
                 request);
     }
@@ -246,7 +246,7 @@ public class EnvironmentModificationService {
                 environment.getId(),
                 environment.getAccountId(),
                 environment.getName(),
-                environment.getCreator(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
                 environment.getResourceCrn(),
                 request);
     }
@@ -256,7 +256,7 @@ public class EnvironmentModificationService {
         return environmentReactorFlowManager.triggerSetupFinishCrossRealmTrust(
                 environment.getId(),
                 environment.getName(),
-                environment.getCreator(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
                 environment.getResourceCrn());
     }
 
@@ -265,7 +265,7 @@ public class EnvironmentModificationService {
         return environmentReactorFlowManager.triggerCancelCrossRealmTrust(
                 environment.getId(),
                 environment.getName(),
-                environment.getCreator(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
                 environment.getResourceCrn());
     }
 
@@ -274,7 +274,7 @@ public class EnvironmentModificationService {
         return environmentReactorFlowManager.triggerRepairCrossRealmTrust(
                 environment.getId(),
                 environment.getName(),
-                environment.getCreator(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
                 environment.getResourceCrn());
     }
 
