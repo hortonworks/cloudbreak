@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateInstanceTypeRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -864,8 +865,8 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public void updateInstanceTypeInDatabase(Long workspaceId, @ResourceCrn String crn, String instanceType, String groupName) {
-        stackInstanceTypeUpdateService.updateInstanceType(crn, groupName, instanceType);
+    public void updateInstanceTypeInDatabase(Long workspaceId, @RequestObject UpdateInstanceTypeRequest request) {
+        stackInstanceTypeUpdateService.updateInstanceType(request.getCrn(), request.getGroupName(), request.getInstanceType());
     }
 
     @InternalOnly

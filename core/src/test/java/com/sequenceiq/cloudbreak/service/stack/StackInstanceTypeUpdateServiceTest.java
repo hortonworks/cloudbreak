@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -13,11 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
 class StackInstanceTypeUpdateServiceTest {
@@ -41,6 +45,9 @@ class StackInstanceTypeUpdateServiceTest {
     @Mock
     private TemplateService templateService;
 
+    @Mock
+    private FlowLogService flowLogService;
+
     @InjectMocks
     private StackInstanceTypeUpdateService underTest;
 
@@ -51,6 +58,7 @@ class StackInstanceTypeUpdateServiceTest {
         Template template = instanceGroup.getTemplate();
 
         when(stackDtoService.getByCrn(CRN)).thenReturn(stackDto);
+        when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(false);
         when(instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(STACK_ID, GROUP_NAME))
                 .thenReturn(Optional.of(instanceGroup));
         when(templateService.get(TEMPLATE_ID)).thenReturn(template);
@@ -58,7 +66,18 @@ class StackInstanceTypeUpdateServiceTest {
         underTest.updateInstanceType(CRN, GROUP_NAME, NEW_INSTANCE_TYPE);
 
         verify(templateService).savePure(template);
-        assert template.getInstanceType().equals(NEW_INSTANCE_TYPE);
+        assertEquals(NEW_INSTANCE_TYPE, template.getInstanceType());
+    }
+
+    @Test
+    void testUpdateInstanceTypeThrowsWhenFlowRunning() {
+        StackDto stackDto = createStackDto();
+
+        when(stackDtoService.getByCrn(CRN)).thenReturn(stackDto);
+        when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> underTest.updateInstanceType(CRN, GROUP_NAME, NEW_INSTANCE_TYPE));
+        verifyNoInteractions(templateService);
     }
 
     @Test
@@ -66,6 +85,7 @@ class StackInstanceTypeUpdateServiceTest {
         StackDto stackDto = createStackDto();
 
         when(stackDtoService.getByCrn(CRN)).thenReturn(stackDto);
+        when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(false);
         when(instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(STACK_ID, GROUP_NAME))
                 .thenReturn(Optional.empty());
 
@@ -75,7 +95,8 @@ class StackInstanceTypeUpdateServiceTest {
 
     private StackDto createStackDto() {
         StackDto stackDto = org.mockito.Mockito.mock(StackDto.class);
-        when(stackDto.getId()).thenReturn(STACK_ID);
+        lenient().when(stackDto.getId()).thenReturn(STACK_ID);
+        lenient().when(stackDto.getName()).thenReturn("test-stack");
         return stackDto;
     }
 
