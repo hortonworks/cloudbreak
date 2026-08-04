@@ -58,7 +58,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 public abstract class AbstractCloudProvider implements CloudProvider {
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 
-    private static final String DEFAULT_ACCESS_CIDR = "0.0.0.0/0";
+    private static final String DEFAULT_ACCESS_CIDR = "10.0.0.0/8";
 
     private static final String DEFAULT_COMMERCIAL_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_140_3";
 

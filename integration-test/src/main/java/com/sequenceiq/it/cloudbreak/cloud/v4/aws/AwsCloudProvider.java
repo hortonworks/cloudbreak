@@ -40,6 +40,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBase
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
@@ -430,8 +431,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                     .withEncryptionProfile(defaultEncryptionProfile())
                     .withResourceEncryption(true);
         }
+        SecurityAccessRequest securityAccessRequest = new SecurityAccessRequest();
+        securityAccessRequest.setCidr(getAccessCIDR());
         return super.environment(environment)
-                .withFreeIpa(getAttachedFreeIpaRequest());
+                .withFreeIpa(getAttachedFreeIpaRequest())
+                .withSecurityAccess(securityAccessRequest);
     }
 
     @Override
