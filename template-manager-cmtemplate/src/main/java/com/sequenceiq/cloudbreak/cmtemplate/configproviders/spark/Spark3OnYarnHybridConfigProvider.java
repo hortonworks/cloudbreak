@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigPr
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 
 @Component
@@ -25,6 +26,10 @@ public class Spark3OnYarnHybridConfigProvider extends AbstractRoleConfigProvider
     protected static final String SPARK3_HISTORY_PATH = "/user/spark/spark3ApplicationHistory";
 
     protected static final String SPARK3_KERBEROS_FILESYSTEMS_CONFIG = "spark_kerberos_access_hadoopfilesystems";
+
+    protected static final String SPARK3_CONF_SAFETY_VALVE = "spark3-conf/spark-defaults.conf_client_config_safety_valve";
+
+    protected static final String SPARK3_CONF_DEFAULT_FS_PATTERN = "spark.hadoop.fs.defaultFS=%s";
 
     @Inject
     private HdfsConfigHelper hdfsConfigHelper;
@@ -45,8 +50,18 @@ public class Spark3OnYarnHybridConfigProvider extends AbstractRoleConfigProvider
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
         switch (roleType) {
             case SparkRoles.GATEWAY:
+                List<String> filesystems = new ArrayList<>();
+                hdfsConfigHelper.getHdfsUrl(templateProcessor, source)
+                        .ifPresent(filesystems::add);
                 ConfigUtils.getStorageLocationForServiceProperty(source, CloudStorageCdpService.REMOTE_FS.name())
-                        .ifPresent(remoteFs -> roleConfigs.add(config(SPARK3_KERBEROS_FILESYSTEMS_CONFIG, remoteFs.getValue())));
+                        .map(StorageLocationView::getValue)
+                        .ifPresent(remoteFs -> {
+                            filesystems.add(remoteFs);
+                            roleConfigs.add(config(SPARK3_CONF_SAFETY_VALVE, SPARK3_CONF_DEFAULT_FS_PATTERN.formatted(remoteFs)));
+                        });
+                if (!filesystems.isEmpty()) {
+                    roleConfigs.add(config(SPARK3_KERBEROS_FILESYSTEMS_CONFIG, String.join(",", filesystems)));
+                }
                 break;
             default:
                 break;

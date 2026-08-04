@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark.Spark3OnYarnHybridConfigProvider.SPARK3_CONF_DEFAULT_FS_PATTERN;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark.Spark3OnYarnHybridConfigProvider.SPARK3_CONF_SAFETY_VALVE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark.Spark3OnYarnHybridConfigProvider.SPARK3_HISTORY_LOG_DIR;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark.Spark3OnYarnHybridConfigProvider.SPARK3_HISTORY_PATH;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark.Spark3OnYarnHybridConfigProvider.SPARK3_KERBEROS_FILESYSTEMS_CONFIG;
@@ -65,14 +67,32 @@ class Spark3OnYarnHybridConfigProviderTest {
     }
 
     @Test
-    void getRoleConfigs() {
+    void getRoleConfigsWithoutLocalHdfs() {
+        when(hdfsConfigHelper.getHdfsUrl(templateProcessor, source)).thenReturn(Optional.empty());
         String dlHdfs = "hdfs://dl-hdfs";
         when(storageLocationView.getProperty()).thenReturn(CloudStorageCdpService.REMOTE_FS.name());
         when(storageLocationView.getValue()).thenReturn(dlHdfs);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(SparkRoles.GATEWAY, templateProcessor, source);
 
-        assertThat(result).containsExactly(config(SPARK3_KERBEROS_FILESYSTEMS_CONFIG, dlHdfs));
+        assertThat(result).containsExactly(
+                config(SPARK3_CONF_SAFETY_VALVE, SPARK3_CONF_DEFAULT_FS_PATTERN.formatted(dlHdfs)),
+                config(SPARK3_KERBEROS_FILESYSTEMS_CONFIG, dlHdfs));
+    }
+
+    @Test
+    void getRoleConfigsWithLocalHdfs() {
+        String dhHdfs = "hdfs://dh-hdfs";
+        when(hdfsConfigHelper.getHdfsUrl(templateProcessor, source)).thenReturn(Optional.of(dhHdfs));
+        String dlHdfs = "hdfs://dl-hdfs";
+        when(storageLocationView.getProperty()).thenReturn(CloudStorageCdpService.REMOTE_FS.name());
+        when(storageLocationView.getValue()).thenReturn(dlHdfs);
+
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(SparkRoles.GATEWAY, templateProcessor, source);
+
+        assertThat(result).containsExactly(
+                config(SPARK3_CONF_SAFETY_VALVE, SPARK3_CONF_DEFAULT_FS_PATTERN.formatted(dlHdfs)),
+                config(SPARK3_KERBEROS_FILESYSTEMS_CONFIG, String.join(",", dhHdfs, dlHdfs)));
     }
 
     @Test
