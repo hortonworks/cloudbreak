@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.notification.NotificationState;
@@ -46,6 +47,8 @@ import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
@@ -65,6 +68,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.view.delegate.StackViewDelegate;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class StackDtoService implements LocalPaasSdxService, MonitoringEnablementService<StackDto> {
@@ -75,6 +79,9 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
             cdhProductDetails(),
             ComponentType.CM_REPO_DETAILS
     );
+
+    @Inject
+    private DistroxOperationValidatorService distroxOperationValidatorService;
 
     @Inject
     private StackService stackService;
@@ -398,6 +405,24 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
                 .stream()
                 .map(StackDto::getResourceCrn)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<DistroXOperationValidationView> validateDistroXOperations(String environmentCrn, List<SdxClusterResponse> sdxClusterResponses) {
+        StackDto stackDto = getSdxStackDto(environmentCrn)
+                .orElseThrow(() -> new BadRequestException("No SDX cluster found for environment: " + environmentCrn));
+
+        List<DistroXOperationValidationView> distroXOperationValidationViews = new ArrayList<>();
+        for (DistroXOperations distroXOperation : DistroXOperations.values()) {
+            if (DistroXOperations.CREATE.equals(distroXOperation)) {
+                distroXOperationValidationViews.add(distroxOperationValidatorService.
+                        validateDistroXCreateOperation(environmentCrn, distroXOperation, sdxClusterResponses, stackDto.getAllNotTerminatedInstanceMetaData()));
+            } else if (DistroXOperations.START.equals(distroXOperation)) {
+                distroXOperationValidationViews.add(distroxOperationValidatorService.
+                        validateDistroXStartOperation(environmentCrn, distroXOperation, sdxClusterResponses, stackDto.getAllNotTerminatedInstanceMetaData()));
+            }
+        }
+        return distroXOperationValidationViews;
     }
 
     @Override

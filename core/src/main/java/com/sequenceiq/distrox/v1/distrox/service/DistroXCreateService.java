@@ -2,14 +2,14 @@ package com.sequenceiq.distrox.v1.distrox.service;
 
 import static java.lang.String.format;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.ReservedTagValidatorService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
@@ -167,13 +169,15 @@ public class DistroXCreateService {
 
     private void validateDatalake(DetailedEnvironmentResponse environment) {
         String environmentCrn = environment.getCrn();
-        Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environmentCrn);
-        if (sdxCrnsWithAvailability.isEmpty()) {
-            throw new BadRequestException(format("Data Lake stack cannot be found for environment: %s (%s)",
-                    environment.getName(), environmentCrn));
-        }
-        if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(isSdxAvailable())) {
-            throw new BadRequestException("Data Lake stacks of environment should be available.");
+        List<DistroXOperationValidationView> distroXOperationValidationView = platformAwareSdxConnector.validateDistroxOperations(environmentCrn);
+        DistroXOperationValidationView distroXOperationValidationViewResponse = distroXOperationValidationView.stream()
+                .filter(i -> DistroXOperations.CREATE.equals(i.getOperation()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(String.format("Validation result for operation '%s' was not found.",
+                        DistroXOperations.CREATE.name())));
+        if (!distroXOperationValidationViewResponse.isAllowed()) {
+            throw new BadRequestException(String.format("Data Hub creation is not allowed due to Data Lake being unavailable. Reason: '%s'.",
+                    Objects.toString(distroXOperationValidationViewResponse.getReason(), "")));
         }
     }
 

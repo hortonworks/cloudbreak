@@ -108,6 +108,7 @@ public class ModelDescriptions {
         public static final String ENTRIES = "Entries parameters as a json";
         public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
+        public static final String DISTROX_OPERATION = "datahub operation for which we are validating if it is allowed or not";
         public static final String REGION = "region of the stack";
         public static final String AVAILABILITY_ZONE = "availability zone of the stack";
         public static final String CREDENTIAL_NAME = "credential resource name for the stack";
@@ -119,6 +120,7 @@ public class ModelDescriptions {
         public static final String STACK_STATUS = "status of the stack";
         public static final String DETAILED_STACK_STATUS = "detailed status of the stack";
         public static final String STATUS_REASON = "status message of the stack";
+        public static final String SDX_STATUS_REASON = "Reason why the operation is not allowed, if applicable";
         public static final String STATUS_REQUEST = "status of the scale request";
         public static final String SERVER_IP = "public ambari ip of the stack";
         public static final String SERVER_FQDN = "FQDN of the gateway node for the stack";

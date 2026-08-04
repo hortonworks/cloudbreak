@@ -27,6 +27,8 @@ public class Notes {
             + "created based on a template. Stacks are always launched on behalf of a cloud user account. "
             + "Stacks support a wide range of resources, allowing you to build a highly available, reliable, "
             + "and scalable infrastructure for your application needs.";
+    public static final String OPERATION_NOTES = "Validates which Data Hub operations are permitted for a given environment CRN, " +
+            "based on the health status of the corresponding Data Lake instances.";
     public static final String CLUSTER_NOTES = "Clusters are materialised Hadoop services on a given infrastructure. "
             + "They are built based on a blueprint (running the components and services specified) and on "
             + "a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual"

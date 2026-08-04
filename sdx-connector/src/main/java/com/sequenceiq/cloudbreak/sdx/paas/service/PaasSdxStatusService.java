@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.sdx.paas.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,9 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Service
@@ -23,6 +29,9 @@ public class PaasSdxStatusService extends AbstractPaasSdxService implements Plat
 
     @Inject
     private SdxEndpoint sdxEndpoint;
+
+    @Inject
+    private Optional<LocalPaasSdxService> localPaasSdxService;
 
     @Override
     public Set<Pair<String, SdxClusterStatusResponse>> listSdxCrnStatusPair(String environmentCrn) {
@@ -43,4 +52,13 @@ public class PaasSdxStatusService extends AbstractPaasSdxService implements Plat
         }
     }
 
+    @Override
+    public List<DistroXOperationValidationView> validateDistroXOperations(String environmentCrn) {
+        if (localPaasSdxService.isPresent()) {
+            List<SdxClusterResponse> sdxClusterResponses = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    sdxEndpoint.getByEnvCrn(environmentCrn, false));
+            return localPaasSdxService.get().validateDistroXOperations(environmentCrn, sdxClusterResponses);
+        }
+        return Collections.emptyList();
+    }
 }

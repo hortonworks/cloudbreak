@@ -44,6 +44,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXOperationValidationResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXOperationValidationResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Response;
@@ -66,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.DistroXOperationValidationViewToResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceMetaDataToInstanceMetaDataV4ResponseConverter;
@@ -78,6 +81,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -129,6 +134,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     private StackDtoService stackDtoService;
 
     @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
+    @Inject
     private ClusterCommonService clusterCommonService;
 
     @Inject
@@ -145,6 +153,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private LoadBalancerUpdateService loadBalancerUpdateService;
+
+    @Inject
+    private DistroXOperationValidationViewToResponseConverter distroXOperationValidationViewToResponseConverter;
 
     @Inject
     private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewV4ResponseConverter;
@@ -224,6 +235,18 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         NameOrCrn nameOrCrn = Strings.isNullOrEmpty(environmentCrn) ? NameOrCrn.EMPTY : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         return new StackViewV4Responses(stackViewResponses);
+    }
+
+    public DistroXOperationValidationResponses validateDistroxOperations(String environmentCrn) {
+        List<DistroXOperationValidationView> distroXOperationValidationViews = platformAwareSdxConnector.validateDistroxOperations(environmentCrn);
+        Collection<DistroXOperationValidationResponse> distroXOperationValidationResponseCollection =
+                distroXOperationValidationViews.stream()
+                        .map(distroXOperationValidationViewToResponseConverter::convert)
+                        .collect(Collectors.toList());
+
+        DistroXOperationValidationResponses distroXOperationValidationResponses = new DistroXOperationValidationResponses();
+        distroXOperationValidationResponses.setResponses(distroXOperationValidationResponseCollection);
+        return distroXOperationValidationResponses;
     }
 
     public Set<StackViewV4Response> filterByServiceTypesPresent(Set<StackViewV4Response> stackViewResponses, List<String> serviceTypes) {

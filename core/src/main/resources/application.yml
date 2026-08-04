@@ -10,6 +10,12 @@ nodemanager:
   irrecoverable:
     healthchecks: NODE_MANAGER_HEALTH_CHECKER,NODE_MANAGER_SCM_HEALTH,NODEMANAGER_RECOVERY_DIRECTORY_FREE_SPACE,NODE_MANAGER_LOG_DIRECTORY_FREE_SPACE
 
+datahub-operation:
+  operations:
+    create:
+      mandatory-healthy-hostgroups: [master]
+      required-partial-hostgroups: [idbroker, gateway]
+
 management:
   endpoints:
     web:

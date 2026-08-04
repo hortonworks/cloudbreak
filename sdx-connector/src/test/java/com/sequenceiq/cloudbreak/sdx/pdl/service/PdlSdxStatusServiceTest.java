@@ -140,4 +140,11 @@ public class PdlSdxStatusServiceTest {
         assertEquals(StatusCheckResult.AVAILABLE, underTest.getAvailabilityStatusCheckResult(PrivateDatalakeDetails.StatusEnum.NOT_AVAILABLE));
     }
 
+    @Test
+    public void testValidateDistroXOperations() {
+        when(privateDatalakeDetails.getStatus()).thenReturn(PrivateDatalakeDetails.StatusEnum.AVAILABLE);
+        assertTrue(underTest.validateDistroXOperations(ENV_CRN).getFirst().isAllowed());
+        assertTrue(underTest.validateDistroXOperations(ENV_CRN).getLast().isAllowed());
+    }
+
 }

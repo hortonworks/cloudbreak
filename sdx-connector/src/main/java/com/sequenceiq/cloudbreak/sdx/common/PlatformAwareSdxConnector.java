@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.RdcConstants;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
@@ -133,6 +134,10 @@ public class PlatformAwareSdxConnector {
 
     public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentCrn) {
         return platformDependentSdxStatusServicesMap.get(calculatePlatform(environmentCrn)).listSdxCrnStatusCheckPair(environmentCrn);
+    }
+
+    public List<DistroXOperationValidationView> validateDistroxOperations(String environmentCrn) {
+        return platformDependentSdxStatusServicesMap.get(calculatePlatform(environmentCrn)).validateDistroXOperations(environmentCrn);
     }
 
     public Optional<String> getCACertsForEnvironment(String environmentCrn) {

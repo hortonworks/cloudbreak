@@ -93,6 +93,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VALIDATE_DISTROX_OPERATIONS_BY_SDX_HEALTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COMPUTE_API_LIFTIE;
@@ -611,6 +612,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.verticalscale.ha.enabled}")
     private boolean verticalScaleHaEnabled;
 
+    @Value("${auth.mock.distrox.operations.by.sdx.health.enabled}")
+    private boolean distroxOperationsBySdxHealthEnabled;
+
     @Value("${auth.mock.cloudprivatelinks.enabled}")
     private boolean cloudprivatelinksEnabled;
 
@@ -1001,6 +1005,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, mitigateReleaseFailure7218P1100Enabled, CDP_MITIGATE_RELEASE_FAILURE_7218P1100);
         addEntitlement(builder, accountId, tlsv13OnlyEnabled, CDP_CB_SUPPORTS_TLS_1_3_ONLY);
         addEntitlement(builder, accountId, verticalScaleHaEnabled, CDP_CB_VERTICAL_SCALE_HA);
+        addEntitlement(builder, accountId, distroxOperationsBySdxHealthEnabled, CDP_VALIDATE_DISTROX_OPERATIONS_BY_SDX_HEALTH);
         addEntitlement(builder, accountId, cloudprivatelinksEnabled, CDP_PRIVATELINKS);
         addEntitlement(builder, accountId, preferMinifiLoggingEnabled, CDP_CB_PREFER_MINIFI_LOGGING);
         addEntitlement(builder, accountId, personalViewCbByRightEnabled, PERSONAL_VIEW_CB_BY_RIGHT);

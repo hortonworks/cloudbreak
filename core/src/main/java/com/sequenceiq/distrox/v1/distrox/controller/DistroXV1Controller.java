@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXOperationValidationResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
@@ -238,6 +239,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @InternalOnly
     public StackV4Response postInternal(@InitiatorUserCrn String initiatorUserCrn, String accountId, DistroXV1Request request) {
         return distroxCreateService.create(request, true);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public DistroXOperationValidationResponses listDistroXOperations(@ResourceCrn String environmentCrn) {
+        return stackOperations.validateDistroxOperations(environmentCrn);
     }
 
     @Override

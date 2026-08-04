@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.sdx.common.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -7,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
 public interface PlatformAwareSdxStatusService<S> extends PlatformAwareSdxCommonService {
@@ -22,4 +24,6 @@ public interface PlatformAwareSdxStatusService<S> extends PlatformAwareSdxCommon
     }
 
     StatusCheckResult getAvailabilityStatusCheckResult(S status);
+
+    List<DistroXOperationValidationView> validateDistroXOperations(String environmentCrn);
 }

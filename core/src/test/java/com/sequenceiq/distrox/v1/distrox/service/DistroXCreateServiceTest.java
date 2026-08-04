@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -20,9 +21,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,8 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
-import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
@@ -171,11 +173,18 @@ class DistroXCreateServiceTest {
         doNothing().when(fedRampModificationService).prepare(any(), any());
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
         doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
 
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
     }
 
     @ParameterizedTest
@@ -293,7 +302,14 @@ class DistroXCreateServiceTest {
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(stackRequestConverter.convert(r)).thenReturn(converted);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
         doAs(ACTOR, () -> underTest.create(r, NOT_INTERNAL_REQUEST));
@@ -325,7 +341,14 @@ class DistroXCreateServiceTest {
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(stackRequestConverter.convert(r)).thenReturn(converted);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenThrow(CloudbreakServiceException.class);
         when(ldapConfigService.isLdapConfigExistsForEnvironment("crn", clusterName)).thenReturn(true);
@@ -404,11 +427,18 @@ class DistroXCreateServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of());
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(false);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
         assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Data Lake stack cannot be found for environment: %s (%s)", ENV_NAME, envResponse.getCrn());
+                .hasMessage("Data Hub creation is not allowed due to Data Lake being unavailable. Reason: ''.");
 
         verifyNoMoreInteractions(platformAwareSdxConnector);
     }
@@ -425,14 +455,21 @@ class DistroXCreateServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
-                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.NOT_AVAILABLE)));
+
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(false);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
         assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Data Lake stacks of environment should be available.");
+                .hasMessage("Data Hub creation is not allowed due to Data Lake being unavailable. Reason: ''.");
 
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
     }
 
     @Test
@@ -453,12 +490,18 @@ class DistroXCreateServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
-                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
         doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
 
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
     }
 
     @Test
@@ -479,12 +522,18 @@ class DistroXCreateServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
-                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
         doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
 
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
     }
 
     @Test
@@ -508,14 +557,20 @@ class DistroXCreateServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
-                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
         assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image request can not have both image id and os parameters set.");
 
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
     }
 
     @Test
@@ -538,15 +593,21 @@ class DistroXCreateServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
-                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
         when(imageOsService.isSupported(any())).thenReturn(false);
 
         assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image os 'os' is not supported in your account.");
 
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
     }
 
     @Test
@@ -563,23 +624,29 @@ class DistroXCreateServiceTest {
     @Test
     void testWithSingleServerWhenSingleServerRejectDisabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.SINGLE_SERVER, false);
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
         doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
-
     }
 
     @Test
     void testWithFlexibleServerWhenSingleServerRejectEnabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, true);
         doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
     }
 
     @Test
     void testWithFlexibleServerWhenSingleServerRejectDisabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, false);
         doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+        verify(platformAwareSdxConnector).validateDistroxOperations(any());
 
     }
 
@@ -620,8 +687,16 @@ class DistroXCreateServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         doThrow(CloudbreakServiceException.class).when(seLinuxValidationService).validateSeLinuxEntitlementGranted(SeLinux.ENFORCING);
+
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
         assertThrows(CloudbreakServiceException.class, () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
 
@@ -641,6 +716,15 @@ class DistroXCreateServiceTest {
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
 
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
+
         DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
         DistroXDatabaseAzureRequest databaseAzureRequest = new DistroXDatabaseAzureRequest();
         databaseAzureRequest.setAzureDatabaseType(azureDatabaseType);
@@ -649,8 +733,6 @@ class DistroXCreateServiceTest {
 
         when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
-                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(entitlementService.isSingleServerRejectEnabled(any())).thenReturn(singleServerRejectEnabled);
         return request;
     }

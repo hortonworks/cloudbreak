@@ -43,6 +43,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIS
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MIGRATE_DATABASE_TO_SSL_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MIGRATE_DATABASE_TO_SSL_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.OPERATIONS_BY_SDX_INSTANCE_HEALTH;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RDS_CERTIFICATE_ROTATION_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RDS_CERTIFICATE_ROTATION_BY_NAME;
@@ -99,6 +100,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXOperationValidationResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ResourceUpdateResponse;
@@ -172,6 +174,14 @@ public interface DistroXV1Endpoint {
             operationId = "postDistroXV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response post(@Valid DistroXV1Request request);
+
+    @GET
+    @Path("operationChecks/environmentCrn/{environmentCrn}")
+    @Operation(summary = OPERATIONS_BY_SDX_INSTANCE_HEALTH, description = Notes.OPERATION_NOTES,
+            operationId = "listDistroXOperationsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DistroXOperationValidationResponses listDistroXOperations(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn);
 
     @POST
     @Path("internal")

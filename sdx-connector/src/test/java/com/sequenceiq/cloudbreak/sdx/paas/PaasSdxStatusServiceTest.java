@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.sdx.paas;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -10,7 +12,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxStatusService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -69,6 +75,21 @@ public class PaasSdxStatusServiceTest {
         assertEquals(StatusCheckResult.NOT_AVAILABLE, underTest.getAvailabilityStatusCheckResult(SdxClusterStatusResponse.DATALAKE_UPGRADE_CCM_IN_PROGRESS));
         assertEquals(StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS,
                 underTest.getAvailabilityStatusCheckResult(SdxClusterStatusResponse.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS));
+    }
+
+    @Test
+    public void testValidateDistroXOperations() throws IllegalAccessException {
+        LocalPaasSdxService mockLocalSdxService = mock(LocalPaasSdxService.class);
+        FieldUtils.writeField(underTest, "localPaasSdxService", Optional.of(mockLocalSdxService), true);
+
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(true);
+        distroXOperationValidationView.setOperation(DistroXOperations.CREATE);
+        when(mockLocalSdxService.validateDistroXOperations(anyString(), anyList())).thenReturn(List.of(distroXOperationValidationView));
+        List<DistroXOperationValidationView> result = underTest.validateDistroXOperations(ENV_CRN);
+        assertEquals(DistroXOperations.CREATE, result.getFirst().getOperation());
+        assertEquals(1, result.size());
+        assertTrue(result.getFirst().isAllowed());
     }
 
     private SdxClusterResponse getSdxClusterResponse() {

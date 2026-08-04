@@ -69,7 +69,6 @@ secretrotation:
       SALT_BOOT_SECRETS: 90d
       SALT_SIGN_KEY_PAIR: 90d
       SALT_MASTER_KEY_PAIR: 90d
-
 sdx:
   db:
     aws:

@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXOperationValidationResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
@@ -47,10 +48,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.DistroXOperationValidationViewToResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
@@ -59,6 +60,9 @@ import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -138,10 +142,13 @@ class StackOperationsTest {
     private FlowLogService flowLogService;
 
     @Mock
-    private GenerateImageCatalogService generateImageCatalogService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Mock
-    private EntitlementService entitlementService;
+    private DistroXOperationValidationViewToResponseConverter distroXOperationValidationViewToResponseConverter;
+
+    @Mock
+    private GenerateImageCatalogService generateImageCatalogService;
 
     private Stack stack;
 
@@ -164,6 +171,21 @@ class StackOperationsTest {
         user = TestUtil.user(1L, "someUserId");
         stack = TestUtil.stack();
         lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
+    }
+
+    @Test
+    void testValidateDistroxOperations() {
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(true);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(anyString()))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
+
+        DistroXOperationValidationResponses distroXOperationValidationResponses = underTest.validateDistroxOperations("envCrn");
+        assertEquals(2, distroXOperationValidationResponses.getResponses().size());
     }
 
     @Test

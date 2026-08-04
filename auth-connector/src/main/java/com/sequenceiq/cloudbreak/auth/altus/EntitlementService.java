@@ -97,6 +97,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VALIDATE_DISTROX_OPERATIONS_BY_SDX_HEALTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
@@ -645,6 +646,10 @@ public class EntitlementService {
 
     public boolean isVerticalScaleHaEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_VERTICAL_SCALE_HA);
+    }
+
+    public boolean isValidateDistroxOperationsBySdxHealthEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_VALIDATE_DISTROX_OPERATIONS_BY_SDX_HEALTH);
     }
 
     public boolean isPreferMinifiLogging(String accountId) {

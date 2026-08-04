@@ -497,7 +497,7 @@ public class StackOperationService {
     FlowIdentifier start(StackView stack) {
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.startable());
-        dataLakeStatusCheckerService.validateAvailableState(stack);
+        dataLakeStatusCheckerService.validateStartOperationBasedOnDatalake(stack);
         if (stack.isAvailable()) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if (stack.isReadyForStart() || stack.isStartFailed()) {

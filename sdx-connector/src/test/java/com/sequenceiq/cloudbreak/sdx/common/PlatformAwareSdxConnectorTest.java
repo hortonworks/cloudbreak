@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -29,6 +30,8 @@ import com.dyngr.core.AttemptState;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
@@ -244,12 +247,25 @@ class PlatformAwareSdxConnectorTest {
     }
 
     @Test
-    public void testGetCACertsForEnvironment() {
+    public void testValidateDistroxOperationsPaaS() {
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView.setAllowed(true);
+        when(paasSdxStatusService.validateDistroXOperations(anyString())).thenReturn(List.of(distroXOperationValidationView));
+        List<DistroXOperationValidationView> result = underTest.validateDistroxOperations("env");
+        assertEquals(1, result.size());
+        verify(paasSdxStatusService).validateDistroXOperations(anyString());
+    }
+
+    @Test
+    public void testValidateDistroxOperationsPDL() {
         when(pdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PDL_CRN));
-        when(pdlSdxDescribeService.getCACertsForEnvironment(ENV_CRN)).thenReturn(Optional.of("certecske"));
-
-        Optional<String> response = underTest.getCACertsForEnvironment(ENV_CRN);
-
-        assertEquals("certecske", response.get());
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView.setAllowed(true);
+        when(pdlSdxStatusService.validateDistroXOperations(PDL_CRN)).thenReturn(List.of(distroXOperationValidationView));
+        List<DistroXOperationValidationView> result = underTest.validateDistroxOperations(PDL_CRN);
+        assertEquals(1, result.size());
+        verify(pdlSdxStatusService).validateDistroXOperations(anyString());
     }
 }

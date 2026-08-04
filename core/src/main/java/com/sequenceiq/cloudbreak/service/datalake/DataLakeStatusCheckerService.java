@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -18,6 +21,9 @@ public class DataLakeStatusCheckerService {
 
     @Inject
     private SdxClientService sdxClientService;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     public void validateRunningState(StackView stack) {
         if (StackType.WORKLOAD.equals(stack.getType())) {
@@ -32,19 +38,19 @@ public class DataLakeStatusCheckerService {
         }
     }
 
-    public void validateAvailableState(StackView stack) {
+    public void validateStartOperationBasedOnDatalake(StackView stack) {
         if (StackType.WORKLOAD.equals(stack.getType())) {
-            sdxClientService
-                    .getByEnvironmentCrn(stack.getEnvironmentCrn())
-                    .forEach(sdxClusterResponse -> {
-                        SdxClusterStatusResponse status = sdxClusterResponse.getStatus();
-                        if (!(status.isRollingUpgradeInProgress() || status.isAvailable())) {
-                            throw new BadRequestException(String.format("This action requires the Data Lake to be available, " +
-                                    "but the status is '%s', Reason: '%s'.",
-                                    sdxClusterResponse.getStatus().name(),
-                                    Objects.toString(sdxClusterResponse.getStatusReason(), "")));
-                        }
-                    });
+            List<DistroXOperationValidationView> distroXOperationValidationView =
+                    platformAwareSdxConnector.validateDistroxOperations(stack.getEnvironmentCrn());
+            DistroXOperationValidationView distroXOperationValidationViewResponse = distroXOperationValidationView.stream()
+                    .filter(i -> DistroXOperations.START.equals(i.getOperation()))
+                    .findFirst()
+                    .orElseThrow(() -> new BadRequestException(String.format("Validation result for operation '%s' was not found.",
+                            DistroXOperations.START.name())));
+            if (!distroXOperationValidationViewResponse.isAllowed()) {
+                throw new BadRequestException(String.format("Data Hub start is not allowed due to Data Lake being unavailable. Reason: '%s'.",
+                        Objects.toString(distroXOperationValidationViewResponse.getReason(), "")));
+            }
         }
     }
 }

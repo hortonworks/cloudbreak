@@ -16,6 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -29,6 +32,9 @@ class DataLakeStatusCheckerServiceTest {
 
     @Mock
     private SdxClientService sdxClientService;
+
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Test
     void testValidateRunningStateShouldNotThrowExceptionWhenTheSdxIsNotAvailable() {
@@ -57,50 +63,67 @@ class DataLakeStatusCheckerServiceTest {
     }
 
     @Test
-    void testValidateAvailableStateShouldNotThrowExceptionWhenInBackup() {
+    void testValidateStartOperationBasedOnDatalakeShouldNotThrowException() {
         Stack stack = createStack();
-        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, "Backup in Progress");
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(true);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
-        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
-
-        underTest.validateAvailableState(stack);
+        underTest.validateStartOperationBasedOnDatalake(stack);
     }
 
     @Test
-    void testValidateAvailableStateShouldNotThrowExceptionWhenRollingUpgradeInProgress() {
+    void testValidateStartOperationBasedOnDatalakeShouldNotThrowExceptionCreateNotAllowed() {
         Stack stack = createStack();
-        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS,
-                "Rolling upgrade in Progress");
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(true);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(false);
+        when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
-        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
-
-        underTest.validateAvailableState(stack);
+        underTest.validateStartOperationBasedOnDatalake(stack);
     }
 
     @Test
-    void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailable() {
+    void testValidateAvailableStateShouldThrowExceptionWhenStartIsNotAvailable() {
         Stack stack = createStack();
-        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
-                "Vertical Scale in Progress");
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        distroXOperationValidationView.setReason("Instance health check failed for SDX cluster");
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
-        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
-
-        BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateAvailableState(stack));
-        assertEquals("This action requires the Data Lake to be available, " +
-                "but the status is 'DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS', Reason: 'Vertical Scale in Progress'.", e.getMessage());
+        BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateStartOperationBasedOnDatalake(stack));
+        assertEquals("Data Hub start is not allowed due to Data Lake being unavailable. Reason: " +
+                "'Instance health check failed for SDX cluster'.", e.getMessage());
     }
 
     @Test
-    void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailableAndStatusDetailIsNull() {
+    void testValidateAvailableStateShouldThrowExceptionWhenSdxInstanceIsNotAvailableAndStatusDetailIsNull() {
         Stack stack = createStack();
-        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
-                null);
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(false);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
 
-        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
-
-        BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateAvailableState(stack));
-        assertEquals("This action requires the Data Lake to be available, " +
-                "but the status is 'DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS', Reason: ''.", e.getMessage());
+        BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateStartOperationBasedOnDatalake(stack));
+        assertEquals("Data Hub start is not allowed due to Data Lake being unavailable. Reason: ''.", e.getMessage());
     }
 
     private Stack createStack() {

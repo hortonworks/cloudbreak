@@ -124,6 +124,7 @@ auth:
     zookeeper.to.kraft.migration.enabled: true
     tlsv13.only.enabled: false
     verticalscale.ha.enabled: true
+    distrox.operations.by.sdx.health.enabled: true
     cloudprivatelinks.enabled: true
     prefer.minifi.logging.enabled: true
     personal.view.cb.by.right.enabled: true

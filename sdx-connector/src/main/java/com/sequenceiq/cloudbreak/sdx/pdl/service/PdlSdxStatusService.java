@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -10,13 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
-import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails.StatusEnum;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
+import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
 @Service
-public class PdlSdxStatusService extends AbstractPdlSdxService implements PlatformAwareSdxStatusService<PrivateDatalakeDetails.StatusEnum> {
+public class PdlSdxStatusService extends AbstractPdlSdxService implements PlatformAwareSdxStatusService<StatusEnum> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PdlSdxStatusService.class);
 
@@ -40,5 +42,33 @@ public class PdlSdxStatusService extends AbstractPdlSdxService implements Platfo
     public StatusCheckResult getAvailabilityStatusCheckResult(StatusEnum status) {
         // TODO CB-32262 implement a more selective availability status check
         return StatusCheckResult.AVAILABLE;
+    }
+
+    @Override
+    public List<DistroXOperationValidationView> validateDistroXOperations(String envCrn) {
+        Environment environment = getPrivateEnvForPublicEnv(envCrn);
+        boolean pvcDatalakeAvailable = environment != null
+                && environment.getPvcEnvironmentDetails() != null
+                && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null
+                && StatusEnum.AVAILABLE.equals(environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails().getStatus());
+
+        String reason;
+        if (environment == null || environment.getPvcEnvironmentDetails() == null
+                || environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() == null) {
+            reason = String.format("Could not find the datalake associated " +
+                    "with the environment with crn: '%s'", envCrn);
+        } else {
+            reason = "";
+        }
+
+        return DistroXOperations.getDistroxOperations().stream()
+                .map(distroXOperation -> {
+                    DistroXOperationValidationView response = new DistroXOperationValidationView();
+                    response.setOperation(distroXOperation);
+                    response.setAllowed(pvcDatalakeAvailable);
+                    response.setReason(reason);
+                    return response;
+                })
+                .toList();
     }
 }
