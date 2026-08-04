@@ -2,7 +2,9 @@ package com.sequenceiq.it.cloudbreak.assertion.stack;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -15,8 +17,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
@@ -81,6 +86,31 @@ public class StackAssertion {
 
     public void validateFileContentExists(DistroXTestDto distroXTestDto, String fileName, String fileContent) {
         validateFileContentExists(distroXTestDto.getResponse(), fileName, fileContent);
+    }
+
+    public void validateFileContentExists(FreeIpaTestDto freeIpaTestDto, String fileName, String fileContent) {
+        Set<InstanceMetaDataResponse> instanceMetaDatas = freeIpaTestDto.getResponse().getInstanceGroups().stream()
+                .map(InstanceGroupResponse::getMetaData)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+        try {
+            String cmd = String.format(VALIDATE_FILE_CONTENT_CMD, fileContent, fileName);
+            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnHost(instanceMetaDatas, cmd, false);
+
+            List<String> errors = results
+                    .values()
+                    .stream()
+                    .map(Pair::getValue)
+                    .filter(value -> value != null && value.contains("Failure"))
+                    .toList();
+
+            if (!errors.isEmpty()) {
+                throw new RuntimeException("File content does not exist in " + fileName);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error trying to check {} in {} on FreeIPA", fileContent, fileName, e);
+            throw new TestFailException("Error trying to check file content exists on FreeIPA: " + e.getMessage(), e);
+        }
     }
 
     private void validateFileContentExists(StackV4Response stackV4Response, String fileName, String fileContent) {

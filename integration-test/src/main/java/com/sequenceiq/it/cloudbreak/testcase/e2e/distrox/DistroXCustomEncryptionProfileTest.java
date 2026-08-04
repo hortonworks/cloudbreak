@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.it.cloudbreak.assertion.stack.StackAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.stack.EncryptionProfileAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EncryptionProfileTestClient;
@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EncryptionProfileTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -54,7 +55,7 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
     private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
-    private StackAssertion stackAssertion;
+    private EncryptionProfileAssertion encryptionProfileAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -93,6 +94,9 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(SdxTestDto.class)
@@ -102,42 +106,14 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    stackAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
-                            "SUPPORTED_TLS_VERSIONS\\s* TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
-                            "tls_ciphers\\s* TLS_AES_256_GCM_SHA384");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
-                            "ssl_protocols\\s*TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
-                            "ssl_conf_command Ciphersuites\\s*TLS_AES_256_GCM_SHA384");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
-                            "ssl_protocols\\s*TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
-                            "ssl_conf_command Ciphersuites\\s*TLS_AES_256_GCM_SHA384");
-                    return testDto;
-                })
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(VERSION_7_3_2))
                 .withEnvironment()
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    stackAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
-                            "SUPPORTED_TLS_VERSIONS\\s* TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
-                            "tls_ciphers\\s* TLS_AES_256_GCM_SHA384");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
-                            "ssl_protocols\\s*TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
-                            "ssl_conf_command Ciphersuites\\s*TLS_AES_256_GCM_SHA384");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
-                            "ssl_protocols\\s*TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
-                            "ssl_conf_command Ciphersuites\\s*TLS_AES_256_GCM_SHA384");
-                    return testDto;
-                })
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
                 .validate();
     }
 
@@ -166,6 +142,9 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertDefaultEncryptionProfile(testDto))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(SdxTestDto.class)
@@ -175,30 +154,14 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    stackAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
-                            "SUPPORTED_TLS_VERSIONS\\s* TLSv1.2,TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
-                            "ssl_protocols\\s*TLSv1.2\\s*TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
-                            "ssl_protocols\\s*TLSv1.2\\s*TLSv1.3");
-                    return testDto;
-                })
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertDefaultEncryptionProfile(testDto))
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(VERSION_7_3_2))
                 .withEnvironment()
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    stackAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
-                            "SUPPORTED_TLS_VERSIONS\\s* TLSv1.2,TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
-                            "ssl_protocols\\s*TLSv1.2\\s*TLSv1.3");
-                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
-                            "ssl_protocols\\s*TLSv1.2\\s*TLSv1.3");
-                    return testDto;
-                })
+                .then((tc, testDto, client) -> encryptionProfileAssertion.assertDefaultEncryptionProfile(testDto))
                 .validate();
     }
 }

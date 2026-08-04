@@ -11,6 +11,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -24,9 +25,14 @@ public class SaltUpdateService {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
     public FlowIdentifier updateSaltStates(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
+        LOGGER.debug("Evicting cached environment response for CRN {} before salt update so the pillar is rebuilt from fresh data", environmentCrn);
+        cachedEnvironmentClientService.evictCache(environmentCrn);
         StackEvent event = new SaltUpdateTriggerEvent(stack.getId());
         LOGGER.info("Triggering salt update flow with event: {}", event);
         return flowManager.notify(event.selector(), event);
