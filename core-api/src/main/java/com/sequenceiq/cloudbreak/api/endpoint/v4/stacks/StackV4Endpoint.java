@@ -1122,6 +1122,17 @@ public interface StackV4Endpoint {
             @QueryParam("secretType") @NotEmpty @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
 
     @PUT
+    @Path("internal/crn/{crn}/update_instance_type")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update instance type for a specific host group in CB DB", operationId = "updateInstanceTypeInDatabase",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void updateInstanceTypeInDatabase(@PathParam("workspaceId") Long workspaceId,
+            @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @QueryParam("instanceType") @NotEmpty String instanceType,
+            @QueryParam("groupName") @NotEmpty String groupName);
+
+    @PUT
     @Path("internal/crn/{crn}/modify_user_defined_tags")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update user defined tags of cluster by CRN",

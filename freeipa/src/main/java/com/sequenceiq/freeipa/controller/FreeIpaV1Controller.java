@@ -95,6 +95,7 @@ import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceTypeUpdateService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaModifyTagsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRecommendationService;
@@ -125,6 +126,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaDeletionService freeIpaDeletionService;
+
+    @Inject
+    private FreeIpaInstanceTypeUpdateService freeIpaInstanceTypeUpdateService;
 
     @Inject
     private FreeIpaDescribeService freeIpaDescribeService;
@@ -550,5 +554,11 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @InternalOnly
     public OperationStatus triggerUserDefinedTagsUpdateInternal(@ResourceCrn String environmentCrn, Map<String, String> tags) {
         return freeIpaModifyTagsService.startUserDefinedTagsModificationOperation(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(), tags);
+    }
+
+    @Override
+    @InternalOnly
+    public void updateInstanceTypeInDatabase(@ResourceCrn String environmentCrn, String instanceType) {
+        freeIpaInstanceTypeUpdateService.updateInstanceType(environmentCrn, instanceType);
     }
 }

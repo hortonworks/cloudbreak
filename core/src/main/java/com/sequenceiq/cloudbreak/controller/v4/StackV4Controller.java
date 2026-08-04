@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceTypeUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
@@ -157,6 +158,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackMigrateRdsService migrateRdsService;
+
+    @Inject
+    private StackInstanceTypeUpdateService stackInstanceTypeUpdateService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -856,6 +860,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public StepProgressResponse getSecretRotationProgress(Long workspaceId, @ResourceCrn String crn, String secretType) {
         return stackRotationService.getProgressResponse(crn, secretType);
+    }
+
+    @Override
+    @InternalOnly
+    public void updateInstanceTypeInDatabase(Long workspaceId, @ResourceCrn String crn, String instanceType, String groupName) {
+        stackInstanceTypeUpdateService.updateInstanceType(crn, groupName, instanceType);
     }
 
     @InternalOnly

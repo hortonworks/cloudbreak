@@ -451,4 +451,13 @@ public interface FreeIpaV1Endpoint {
     OperationStatus triggerUserDefinedTagsUpdateInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @Valid @NotNull Map<String, String> tags);
+
+    @PUT
+    @Path("internal/update_instance_type")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update instance type for FreeIPA cluster in FMS DB", operationId = "updateInstanceTypeInDatabase",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void updateInstanceTypeInDatabase(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
+            @QueryParam("instanceType") @NotEmpty String instanceType);
 }
