@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiHealthCheck;
@@ -26,6 +27,9 @@ public class ClouderaManagerHostServicesHealthCheck implements ClouderaManagerHo
 
     private static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
 
+    @Value("${cb.cm.healthcheck.stoppedservices.enabled:false}")
+    private boolean stoppedServicesCheckEnabled;
+
     @Override
     public HealthCheckType getHealthCheckType() {
         return HealthCheckType.SERVICES;
@@ -35,7 +39,7 @@ public class ClouderaManagerHostServicesHealthCheck implements ClouderaManagerHo
     public Optional<HealthCheck> getHealthCheck(Optional<String> runtimeVersion, ApiHost host, List<ApiService> apiServices) {
         if (CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion)) {
             Set<String> servicesWithBadHealth = collectServicesWithBadHealthOnHost(host);
-            Set<String> stoppedServices = collectStoppedServicesOnHost(host);
+            Set<String> stoppedServices = stoppedServicesCheckEnabled ? collectStoppedServicesOnHost(host) : Set.of();
             List<String> reasons = new ArrayList<>();
             if (!servicesWithBadHealth.isEmpty()) {
                 reasons.add(String.format("The following services are in bad health: %s.", Joiner.on(", ").join(servicesWithBadHealth)));

@@ -82,11 +82,13 @@ class ClouderaManagerHealthServiceTest {
 
     @BeforeEach
     void setUp() throws ApiException {
+        ClouderaManagerHostServicesHealthCheck servicesHealthCheck = new ClouderaManagerHostServicesHealthCheck();
+        ReflectionTestUtils.setField(servicesHealthCheck, "stoppedServicesCheckEnabled", true);
         ReflectionTestUtils.setField(underTest, "hostHealthChecks", Set.of(
                 new ClouderaManagerHostBasicHealthCheck(),
                 new ClouderaManagerHostCertHealthCheck(),
                 new ClouderaManagerHostServiceConfigStalenessHealthCheck(),
-                new ClouderaManagerHostServicesHealthCheck()
+                servicesHealthCheck
         ));
         lenient().when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
         lenient().when(clouderaManagerApiFactory.getServicesResourceApi(client)).thenReturn(servicesResourceApi);
@@ -363,6 +365,28 @@ class ClouderaManagerHealthServiceTest {
         );
 
         ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.11"));
+
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+    }
+
+    @Test
+    public void testStoppedServiceCheckSkippedWhenDisabled() throws ApiException {
+        ClouderaManagerHostServicesHealthCheck disabledCheck = new ClouderaManagerHostServicesHealthCheck();
+        ReflectionTestUtils.setField(disabledCheck, "stoppedServicesCheckEnabled", false);
+        ReflectionTestUtils.setField(underTest, "hostHealthChecks", Set.of(
+                new ClouderaManagerHostBasicHealthCheck(),
+                new ClouderaManagerHostCertHealthCheck(),
+                new ClouderaManagerHostServiceConfigStalenessHealthCheck(),
+                disabledCheck
+        ));
+
+        hostsAre(
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("stoppedService", ApiHealthSummary.GOOD, ApiRoleState.STOPPED))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
 
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
     }
