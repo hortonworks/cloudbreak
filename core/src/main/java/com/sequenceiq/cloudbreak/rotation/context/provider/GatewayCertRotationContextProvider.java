@@ -130,7 +130,10 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
     private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, Gateway gateway) {
         return ClusterProxyUpdateConfigRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withKnoxSecretPath(() -> clusterProxySecretProvider.generateClusterProxySecretFormat(gateway.getSignKeySecret().getSecret()))
+                .withKnoxSecretPath(() -> clusterProxySecretProvider.generateClusterProxySecretFormat(
+                            gateway.getTokenKeySecret().getSecret()
+                        )
+                )
                 .build();
     }
 
