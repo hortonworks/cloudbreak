@@ -79,6 +79,10 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> packageVersions = new HashMap<>();
 
+    @JsonProperty("tags")
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Map<String, String> tags = new HashMap<>();
+
     @JsonProperty("baseParcelUrl")
     private String baseParcelUrl;
 
@@ -175,6 +179,14 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
 
     public void setPackageVersions(Map<String, String> packageVersions) {
         this.packageVersions = packageVersions;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
     }
 
     public Long getCreated() {

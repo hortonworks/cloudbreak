@@ -238,18 +238,43 @@ public class ImageValidatorE2ETestUtil {
             throw new TestFailException("Upgrade matrix entry is not defined for image version " + imageUnderValidation.getVersion());
         }
         Architecture architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
-        int cmBuildNumber = Integer.parseInt(imageUnderValidation.getCmBuildNumber());
-        int stackBuildNumber = Integer.parseInt(imageUnderValidation.getStackDetails().getStackBuildNumber());
+        String validatedReleaseVersion = imageUnderValidation.getTags().get("release-version");
         return getImages(testContext, "cdp-default").getCdhImages().stream()
                 .filter(img -> img.getCreated() < imageUnderValidation.getCreated())
                 .filter(img -> Objects.equals(imageUnderValidation.getImageSetsByProvider().keySet(), img.getImageSetsByProvider().keySet()))
                 .filter(img -> Objects.equals(imageUnderValidation.getOs(), img.getOs()))
                 .filter(img -> Objects.equals(architecture, Architecture.fromStringWithFallback(img.getArchitecture())))
                 .filter(img -> Objects.equals(runtimeVersion, img.getVersion()))
-                .filter(img -> cmBuildNumber > Integer.parseInt(img.getCmBuildNumber()))
-                .filter(img -> stackBuildNumber > Integer.parseInt(img.getStackDetails().getStackBuildNumber()))
+                .filter(img -> compareVersions(img.getTags().get("release-version"), validatedReleaseVersion) > 0)
                 .max(Comparator.comparing(ImageV4Response::getCreated))
                 .orElseThrow(() -> new TestFailException("No upgrade source image found for " + imageUnderValidation.getUuid()));
+    }
+
+    public static int compareVersions(String version1, String version2) {
+
+        // We might be comparing images with missing release-id, even if it's highly unlikely.
+        if (Strings.isNullOrEmpty(version1) && Strings.isNotNullAndNotEmpty(version2)) {
+            return -1;
+        } else if (Strings.isNullOrEmpty(version2) && Strings.isNotNullAndNotEmpty(version1)) {
+            return 1;
+        } else if (Strings.isNullOrEmpty(version1) && Strings.isNullOrEmpty(version2)) {
+            return 0;
+        }
+
+        String[] levels1 = version1.split("\\.");
+        String[] levels2 = version2.split("\\.");
+        int maxLength = Math.max(levels1.length, levels2.length);
+        for (int i = 0; i < maxLength; i++) {
+            int v1 = i < levels1.length ? Integer.parseInt(levels1[i]) : 0;
+            int v2 = i < levels2.length ? Integer.parseInt(levels2[i]) : 0;
+            if (v1 < v2) {
+                return -1;
+            }
+            if (v1 > v2) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     private boolean shouldValidateWithSameRuntime(ImageV4Response imageUnderValidation) {
