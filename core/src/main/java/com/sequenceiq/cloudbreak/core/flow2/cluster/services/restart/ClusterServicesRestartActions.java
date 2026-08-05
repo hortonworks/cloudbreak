@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTART_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTART_SUCCESS;
 
 import java.util.Map;
 
@@ -27,6 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServic
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -39,6 +44,9 @@ public class ClusterServicesRestartActions {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private CloudbreakEventService eventService;
 
     @Bean(name = "CLUSTER_SERVICE_RESTARTING_STATE")
     public Action<?, ?> startingCluster() {
@@ -64,6 +72,7 @@ public class ClusterServicesRestartActions {
             protected void doExecute(ClusterViewContext context, ClusterServicesRestartResult payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.AVAILABLE);
                 clusterService.updateClusterConfigurationStalenessByStackId(context.getStackId(), ConfigStalenessState.UP_TO_DATE, "");
+                eventService.fireCloudbreakEvent(context.getStackId(), AVAILABLE.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTART_SUCCESS);
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
@@ -83,6 +92,7 @@ public class ClusterServicesRestartActions {
                 String errorMessage = String.format("Cluster %s failed to restart", context.getStack().getName());
                 LOGGER.error(errorMessage, payload.getException());
                 stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.CLUSTER_RESTART_FAILED, errorMessage);
+                eventService.fireCloudbreakEvent(context.getStackId(), UPDATE_FAILED.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTART_FAILED);
 
                 sendEvent(context);
             }
