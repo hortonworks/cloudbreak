@@ -25,9 +25,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
-import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterProxyRotationService {
@@ -58,14 +56,6 @@ public class ClusterProxyRotationService {
 
     @Inject
     private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
-
-    @Inject
-    private ClusterProxyService clusterProxyService;
-
-    public KeyPair readClusterProxyTokenKeys(StackView stack) {
-        ReadConfigResponse readConfigResponse = clusterProxyService.readConfig(stack);
-        return readClusterProxyTokenKeys(readConfigResponse);
-    }
 
     public KeyPair readClusterProxyTokenKeys(ReadConfigResponse readConfigResponse) {
         LOGGER.info("Reading token keys from cluster-proxy vault. Path: '{}'", readConfigResponse.getKnoxSecretRef());

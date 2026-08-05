@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.gateway;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -123,6 +124,38 @@ class GatewayServiceTest {
 
         assertEquals(input.getSignCertSecret().getRaw(), input.getSignCertDeprecated());
         assertEquals(input.getSignPubSecret().getRaw(), input.getSignPubDeprecated());
+        verify(gatewayRepository, times(1)).save(input);
+    }
+
+    @Test
+    void testMigrateWrongClusterWithBothSignSecrets() {
+        ReflectionTestUtils.setField(underTest, "httpsPort", "666");
+        Gateway input = new Gateway();
+        input.setId(GATEWAY_ID);
+        input.setSignKey("test-sign-key-raw");
+        input.setSignPub("test-sign-pub-raw");
+        when(gatewayRepository.findById(GATEWAY_ID)).thenReturn(Optional.of(input));
+        when(gatewayRepository.save(input)).thenReturn(input);
+
+        Gateway result = underTest.migrateWrongCluster(input);
+
+        assertEquals("test-sign-key-raw", result.getTokenKeySecret().getRaw());
+        assertEquals("test-sign-pub-raw", result.getTokenPubSecret().getRaw());
+        verify(gatewayRepository, times(1)).save(input);
+    }
+
+    @Test
+    void testMigrateWrongClusterWithSignKeyRawNull() {
+        ReflectionTestUtils.setField(underTest, "httpsPort", "666");
+        Gateway input = new Gateway();
+        input.setId(GATEWAY_ID);
+        // signKey defaults to Secret.EMPTY (getRaw() == null), no migration expected
+        when(gatewayRepository.findById(GATEWAY_ID)).thenReturn(Optional.of(input));
+        when(gatewayRepository.save(input)).thenReturn(input);
+
+        Gateway result = underTest.migrateWrongCluster(input);
+
+        assertNull(result.getTokenKeySecret().getRaw());
         verify(gatewayRepository, times(1)).save(input);
     }
 
