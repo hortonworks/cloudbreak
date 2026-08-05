@@ -33,6 +33,8 @@ public class DefaultBlueprintLoader {
         if (globalDefaultBlueprintMigrationEnabled) {
             LOGGER.info("Trying to acquire lock for blueprint migration.");
             lockService.lockAndRunIfLockWasSuccessful(this::migrateDefaultBlueprints, LockNumber.BLUEPRINT);
+        } else {
+            LOGGER.info("Global blueprint migration is disabled.");
         }
     }
 

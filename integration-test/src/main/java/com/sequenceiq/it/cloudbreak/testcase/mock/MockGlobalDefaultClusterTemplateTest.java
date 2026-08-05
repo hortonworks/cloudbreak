@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
@@ -43,7 +43,7 @@ import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 
 public class MockGlobalDefaultClusterTemplateTest extends AbstractMockTest {
 
-    private static final String ACCOUNT_TEMPLATE = "template-test-%s";
+    private static final int ACCOUNT_LENGTH = 5;
 
     private static final String GLOBAL_CLUSTER_DEF_CRN_PREFIX = "crn:cdp:datahub:us-west-1:cloudera_default:clusterdefinition:";
 
@@ -89,7 +89,7 @@ public class MockGlobalDefaultClusterTemplateTest extends AbstractMockTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.as(testUserCreator.createAdmin(newAccount(), "admin1"));
+        testContext.as(testUserCreator.createAdmin(RandomStringUtils.insecure().randomAlphanumeric(ACCOUNT_LENGTH), "admin1"));
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
     }
@@ -192,6 +192,7 @@ public class MockGlobalDefaultClusterTemplateTest extends AbstractMockTest {
     public void testListClusterTemplatesShowsTheSameResultsWhenNoLakeHouseAndNoInternalTenant(MockedTestContext testContext) {
         createDefaultEnvironment(testContext);
 
+        revokeEntitlement(testContext, Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE);
         revokeEntitlement(testContext, Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED);
         revokeEntitlement(testContext, Entitlement.CLOUDERA_INTERNAL_ACCOUNT);
 
@@ -294,10 +295,6 @@ public class MockGlobalDefaultClusterTemplateTest extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getName())
                 .when(clusterTemplateTestClient.createV4())
                 .validate();
-    }
-
-    private String newAccount() {
-        return String.format(ACCOUNT_TEMPLATE, UUID.randomUUID());
     }
 
     private void grantGlobalTemplateEntitlement(MockedTestContext testContext) {
