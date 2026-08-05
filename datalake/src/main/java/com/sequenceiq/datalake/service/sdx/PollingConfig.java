@@ -14,6 +14,8 @@ public class PollingConfig {
 
     private Boolean stopPollingIfExceptionOccured = Boolean.FALSE;
 
+    private long nodeFailureGraceSec;
+
     public PollingConfig(long sleepTime, TimeUnit sleepTimeUnit, long duration, TimeUnit durationTimeUnit) {
         this.sleepTime = sleepTime;
         this.duration = duration;
@@ -46,6 +48,15 @@ public class PollingConfig {
         return this;
     }
 
+    public long getNodeFailureGraceSec() {
+        return nodeFailureGraceSec;
+    }
+
+    public PollingConfig withNodeFailureGraceSec(long nodeFailureGraceSec) {
+        this.nodeFailureGraceSec = nodeFailureGraceSec;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "PollingConfig{" +
@@ -54,6 +65,7 @@ public class PollingConfig {
                 ", sleepTimeUnit=" + sleepTimeUnit +
                 ", durationTimeUnit=" + durationTimeUnit +
                 ", stopPollingIfExceptionOccured=" + stopPollingIfExceptionOccured +
+                ", nodeFailureGraceSec=" + nodeFailureGraceSec +
                 '}';
     }
 }

@@ -211,6 +211,56 @@ class CloudbreakPollerTest {
                 .isInstanceOf(UserBreakException.class);
     }
 
+    @Test
+    void pollUpdateUntilAvailableRecoversFromTransientNodeFailureWithGrace() {
+        PollingConfig gracePollingConfig = new PollingConfig(100, TimeUnit.MILLISECONDS, 2, TimeUnit.SECONDS)
+                .withNodeFailureGraceSec(5);
+        whenCheckFlowState().thenReturn(FlowState.FINISHED);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.NODE_FAILURE, Status.NODE_FAILURE))
+                .thenReturn(statusResponse(Status.NODE_FAILURE, Status.NODE_FAILURE))
+                .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
+        underTest.pollUpdateUntilAvailable("Datahub Refresh", sdxCluster, gracePollingConfig);
+        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
+    }
+
+    @Test
+    void pollUpdateUntilAvailableFailsImmediatelyOnNodeFailureWithoutGrace() {
+        whenCheckFlowState().thenReturn(FlowState.FINISHED);
+        whenCheckStackStatus().thenReturn(statusResponse(Status.NODE_FAILURE, Status.NODE_FAILURE));
+        when(sdxStatusService.getShortStatusMessage(any(StackStatusV4Response.class)))
+                .thenReturn("Stack status: NODE_FAILURE, cluster status: NODE_FAILURE");
+        UserBreakException exception = assertThrows(UserBreakException.class,
+                () -> underTest.pollUpdateUntilAvailable("Datahub Refresh", sdxCluster, pollingConfig));
+        assertEquals("Datahub Refresh failed on 'clusterName' cluster. Reason: Stack status: NODE_FAILURE, cluster status: NODE_FAILURE",
+                exception.getMessage());
+    }
+
+    @Test
+    void pollUpdateUntilAvailableFailsAfterNodeFailureGraceExpires() {
+        PollingConfig gracePollingConfig = new PollingConfig(50, TimeUnit.MILLISECONDS, 2, TimeUnit.SECONDS)
+                .withNodeFailureGraceSec(1);
+        whenCheckFlowState().thenReturn(FlowState.FINISHED);
+        whenCheckStackStatus().thenReturn(statusResponse(Status.NODE_FAILURE, Status.NODE_FAILURE));
+        when(sdxStatusService.getShortStatusMessage(any(StackStatusV4Response.class)))
+                .thenReturn("Stack status: NODE_FAILURE, cluster status: NODE_FAILURE");
+        UserBreakException exception = assertThrows(UserBreakException.class,
+                () -> underTest.pollUpdateUntilAvailable("Datahub Refresh", sdxCluster, gracePollingConfig));
+        assertEquals("Datahub Refresh failed on 'clusterName' cluster. Reason: Stack status: NODE_FAILURE, cluster status: NODE_FAILURE",
+                exception.getMessage());
+    }
+
+    @Test
+    void pollUpdateUntilAvailableFailsImmediatelyOnUpdateFailedWithGrace() {
+        PollingConfig gracePollingConfig = new PollingConfig(100, TimeUnit.MILLISECONDS, 2, TimeUnit.SECONDS)
+                .withNodeFailureGraceSec(5);
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus().thenReturn(statusResponse(Status.UPDATE_FAILED, "stack error"));
+        assertThatThrownBy(() -> underTest.pollUpdateUntilAvailable("Datahub Refresh", sdxCluster, gracePollingConfig))
+                .hasMessage("Datahub Refresh failed on 'clusterName' cluster. Reason: stack error")
+                .isInstanceOf(UserBreakException.class);
+    }
+
     private OngoingStubbing<FlowState> whenCheckFlowState() {
         return when(cloudbreakFlowService.getLastKnownFlowState(sdxCluster));
     }

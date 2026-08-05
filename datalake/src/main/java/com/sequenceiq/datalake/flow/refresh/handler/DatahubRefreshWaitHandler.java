@@ -32,8 +32,11 @@ public class DatahubRefreshWaitHandler extends ExceptionCatcherEventHandler<Data
     @Value("${sdx.datahub.refresh.sleeptime_sec:5}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.datahub.refresh.duration_min:5}")
+    @Value("${sdx.datahub.refresh.duration_min:10}")
     private int durationInMinutes;
+
+    @Value("${sdx.datahub.refresh.node_failure.grace_sec:420}")
+    private int nodeFailureGraceSec;
 
     @Inject
     private SdxRefreshService sdxRefreshService;
@@ -56,7 +59,8 @@ public class DatahubRefreshWaitHandler extends ExceptionCatcherEventHandler<Data
         Selectable response;
         try {
             LOGGER.debug("Start polling datahub refresh process for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
+                    .withNodeFailureGraceSec(nodeFailureGraceSec);
             sdxRefreshService.waitCloudbreakCluster(sdxId, pollingConfig);
             response = new SdxEvent(DatahubRefreshFlowEvent.DATAHUB_REFRESH_FINISHED_EVENT.event(), sdxId, userId);
         } catch (UserBreakException userBreakException) {

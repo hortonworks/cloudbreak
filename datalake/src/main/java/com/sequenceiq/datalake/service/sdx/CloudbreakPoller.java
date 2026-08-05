@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FAILED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -92,18 +93,20 @@ public class CloudbreakPoller extends AbstractFlowPoller {
             PollingConfig pollingConfig,
             Set<Status> targetStatuses,
             Set<Status> failedStatuses) {
+        NodeFailureGrace nodeFailureGrace = new NodeFailureGrace(pollingConfig.getNodeFailureGraceSec());
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
-                .run(() -> checkClusterStatus(process, sdxCluster, targetStatuses, failedStatuses));
+                .run(() -> checkClusterStatus(process, sdxCluster, targetStatuses, failedStatuses, nodeFailureGrace));
     }
 
     private AttemptResult<StackStatusV4Response> checkClusterStatus(
             String process,
             SdxCluster sdxCluster,
             Set<Status> targetStatuses,
-            Set<Status> failedStatuses) {
-        LOGGER.info("{} polling cloudbreak for stack status: '{}' in '{}' env", process, sdxCluster.getClusterName(), sdxCluster.getEnvName());
+            Set<Status> failedStatuses,
+            NodeFailureGrace nodeFailureGrace) {
+        LOGGER.info("{} polling Cloudbreak for stack status: '{}' in '{}' env", process, sdxCluster.getClusterName(), sdxCluster.getEnvName());
         try {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
                 LOGGER.info("{} polling cancelled in inmemory store, id: {}", process, sdxCluster.getId());
@@ -114,10 +117,10 @@ public class CloudbreakPoller extends AbstractFlowPoller {
                 LOGGER.info("{} polling will continue, cluster has an active flow in Cloudbreak.", process);
                 return AttemptResults.justContinue();
             } else {
-                return getStackResponseAttemptResult(process, sdxCluster, flowState, targetStatuses, failedStatuses);
+                return getStackResponseAttemptResult(process, sdxCluster, flowState, targetStatuses, failedStatuses, nodeFailureGrace);
             }
         } catch (NotFoundException e) {
-            LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
+            LOGGER.debug("Stack not found on CB side {}", sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
         }
     }
@@ -127,7 +130,8 @@ public class CloudbreakPoller extends AbstractFlowPoller {
             SdxCluster sdxCluster,
             FlowState flowState,
             Set<Status> targetStatuses,
-            Set<Status> failedStatuses) {
+            Set<Status> failedStatuses,
+            NodeFailureGrace nodeFailureGrace) {
         StackStatusV4Response statusResponse = getStackAndClusterStatusWithInternalActor(sdxCluster);
         LOGGER.info("Response from cloudbreak: {}", statusResponse);
         if (FAILED.equals(flowState)) {
@@ -144,12 +148,25 @@ public class CloudbreakPoller extends AbstractFlowPoller {
             LOGGER.info("{} failed. Cluster is in {} status.", process, statusResponse.getClusterStatus());
             return failedPolling(process, sdxCluster, statusResponse.getClusterStatusReason());
         } else if (FINISHED.equals(flowState)) {
+            if (hasNodeFailure(statusResponse)) {
+                Optional<AttemptResult<StackStatusV4Response>> graceResult = nodeFailureGrace.maybeContinue(process, sdxCluster);
+                if (graceResult.isPresent()) {
+                    return graceResult.get();
+                }
+            }
             String message = sdxStatusService.getShortStatusMessage(statusResponse);
             LOGGER.info("{} flow finished, but stack or cluster is not available. {}", process, message);
             return failedPolling(process, sdxCluster, message);
         } else {
+            if (!hasNodeFailure(statusResponse)) {
+                nodeFailureGrace.reset();
+            }
             return AttemptResults.justContinue();
         }
+    }
+
+    private boolean hasNodeFailure(StackStatusV4Response statusResponse) {
+        return Status.NODE_FAILURE.equals(statusResponse.getStatus()) || Status.NODE_FAILURE.equals(statusResponse.getClusterStatus());
     }
 
     private StackStatusV4Response getStackAndClusterStatusWithInternalActor(SdxCluster sdxCluster) {

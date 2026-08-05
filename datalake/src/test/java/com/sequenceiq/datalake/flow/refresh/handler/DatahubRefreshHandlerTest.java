@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -55,6 +54,9 @@ class DatahubRefreshHandlerTest {
     @Captor
     private ArgumentCaptor<Event<?>> eventCaptor;
 
+    @Captor
+    private ArgumentCaptor<PollingConfig> pollingConfigCaptor;
+
     @InjectMocks
     private DatahubRefreshWaitHandler underTest;
 
@@ -62,6 +64,7 @@ class DatahubRefreshHandlerTest {
     void setup() {
         ReflectionTestUtils.setField(underTest, "sleepTimeInSec", 1);
         ReflectionTestUtils.setField(underTest, "durationInMinutes", 2);
+        ReflectionTestUtils.setField(underTest, "nodeFailureGraceSec", 420);
         lenient().doAnswer(i -> null).when(eventBus).notify(keyCaptor.capture(), eventCaptor.capture());
     }
 
@@ -80,14 +83,19 @@ class DatahubRefreshHandlerTest {
     @Test
     void acceptSuccess() {
         DatahubRefreshWaitEvent request = new DatahubRefreshWaitEvent(SDX_ID, "user");
-        PollingConfig expectedPollingConfig = new PollingConfig(1, TimeUnit.SECONDS, 2, TimeUnit.MINUTES);
         Event.Headers headers = new Event.Headers();
         Event<DatahubRefreshWaitEvent> event = new Event<>(headers, request);
 
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 
         assertEquals(selectable.selector(), DatahubRefreshFlowEvent.DATAHUB_REFRESH_FINISHED_EVENT.selector());
-        verify(sdxRefreshService).waitCloudbreakCluster(eq(SDX_ID), refEq(expectedPollingConfig));
+        verify(sdxRefreshService).waitCloudbreakCluster(eq(SDX_ID), pollingConfigCaptor.capture());
+        PollingConfig capturedPollingConfig = pollingConfigCaptor.getValue();
+        assertThat(capturedPollingConfig.getSleepTime()).isEqualTo(1);
+        assertThat(capturedPollingConfig.getSleepTimeUnit()).isEqualTo(TimeUnit.SECONDS);
+        assertThat(capturedPollingConfig.getDuration()).isEqualTo(2);
+        assertThat(capturedPollingConfig.getDurationTimeUnit()).isEqualTo(TimeUnit.MINUTES);
+        assertThat(capturedPollingConfig.getNodeFailureGraceSec()).isEqualTo(420);
     }
 
     @ParameterizedTest
