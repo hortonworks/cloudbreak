@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
@@ -22,6 +23,7 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
     @Schema(description = DatabaseServerModelDescriptions.INSTANCE_TYPE)
     private String instanceType;
 
+    @Size(max = 3, message = "Maximum 3 fallback instance types allowed")
     @Schema(description = DatabaseServerModelDescriptions.FALLBACK_INSTANCE_TYPES, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<String> fallbackInstanceTypes = new ArrayList<>();
 

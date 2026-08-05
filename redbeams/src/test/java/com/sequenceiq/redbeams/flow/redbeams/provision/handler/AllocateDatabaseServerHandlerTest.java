@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
@@ -63,7 +64,9 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
+import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 import com.sequenceiq.redbeams.service.validation.DatabaseEncryptionValidator;
+import com.sequenceiq.redbeams.service.validation.DatabaseInstanceTypeValidator;
 
 @ExtendWith(MockitoExtension.class)
 class AllocateDatabaseServerHandlerTest {
@@ -72,11 +75,7 @@ class AllocateDatabaseServerHandlerTest {
 
     private static final String STATUS_REASON_ERROR = "myerror";
 
-    private static final String STATUS_REASON_SUCCESS = "all good";
-
     private static final long PRIVATE_ID_1 = 78L;
-
-    private static final long PRIVATE_ID_2 = 56L;
 
     private static final String ENV_CRN = "envcrn";
 
@@ -102,6 +101,12 @@ class AllocateDatabaseServerHandlerTest {
 
     @Mock
     private DatabaseEncryptionValidator databaseEncryptionValidator;
+
+    @Mock
+    private DatabaseInstanceTypeValidator databaseInstanceTypeValidator;
+
+    @Mock
+    private DBStackStatusUpdater dbStackStatusUpdater;
 
     @InjectMocks
     private AllocateDatabaseServerHandler underTest;
@@ -383,6 +388,36 @@ class AllocateDatabaseServerHandlerTest {
         databaseStack = new DatabaseStack(null, builder.build(), Map.of(), "");
     }
 
+    @Test
+    void doAcceptTestWhenInstanceTypeValidationReturnsWarning() throws Exception {
+        initCommon();
+        when(databaseInstanceTypeValidator.validate(any(), any(), any(), any(), any()))
+                .thenReturn(Optional.of("Could not validate database instance type availability"));
+
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        verify(dbStackStatusUpdater).updateStatus(eq(RESOURCE_ID), eq(DetailedDBStackStatus.CREATING_INFRASTRUCTURE), any(String.class));
+    }
+
+    @Test
+    void doAcceptTestWhenInstanceTypeValidationPassesNoWarning() throws Exception {
+        initCommon();
+        when(databaseInstanceTypeValidator.validate(any(), any(), any(), any(), any()))
+                .thenReturn(Optional.empty());
+
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), eq(DetailedDBStackStatus.CREATING_INFRASTRUCTURE), any(String.class));
+    }
+
     private void initCommon() {
         when(cloudContext.getId()).thenReturn(RESOURCE_ID);
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
@@ -401,6 +436,7 @@ class AllocateDatabaseServerHandlerTest {
         when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         lenient().when(dbStackToDatabaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
+        lenient().when(databaseInstanceTypeValidator.validate(any(), any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 
 }

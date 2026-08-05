@@ -39,6 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
@@ -51,7 +52,9 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
+import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 import com.sequenceiq.redbeams.service.validation.DatabaseEncryptionValidator;
+import com.sequenceiq.redbeams.service.validation.DatabaseInstanceTypeValidator;
 
 @Component
 public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<AllocateDatabaseServerRequest> {
@@ -97,6 +100,12 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     @Inject
     private RedbeamsMetricService metricService;
 
+    @Inject
+    private DatabaseInstanceTypeValidator databaseInstanceTypeValidator;
+
+    @Inject
+    private DBStackStatusUpdater dbStackStatusUpdater;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AllocateDatabaseServerRequest.class);
@@ -122,6 +131,7 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
                 metricService.incrementMetricCounter(MetricType.DB_INSTANCE_TYPE_FALLBACK_CONFIGURED, Optional.of(dbStack), cloudPlatform);
             }
             DatabaseStack databaseStack = setupMissingParameters(connector, cloudCredential, cloudContext.getPlatformVariant(), request, dbStack);
+            validateInstanceTypes(dbStack, request.getResourceId());
             databaseServerSslCertificatePrescriptionService
                     .prescribeSslCertificateIfNeeded(cloudContext,
                             cloudCredential,
@@ -163,6 +173,22 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
                     cloudContext, requestedInstanceType, usedInstanceType, databaseServer.getFallbackInstanceTypes());
         } else {
             LOGGER.debug("Primary instance type '{}' provisioned for {}, no fallback needed", requestedInstanceType, cloudContext);
+        }
+    }
+
+    private void validateInstanceTypes(DBStack dbStack, Long resourceId) {
+        com.sequenceiq.redbeams.domain.stack.DatabaseServer dbServer = dbStack.getDatabaseServer();
+        if (dbServer != null) {
+            Optional<String> warning = databaseInstanceTypeValidator.validate(
+                    dbServer.getInstanceType(),
+                    dbServer.getFallbackInstanceTypes(),
+                    dbStack.getEnvironmentId(),
+                    dbStack.getCloudPlatform(),
+                    dbStack.getRegion());
+            if (warning.isPresent()) {
+                LOGGER.warn("Instance type validation finished with a warning: {}", warning.get());
+                dbStackStatusUpdater.updateStatus(resourceId, DetailedDBStackStatus.CREATING_INFRASTRUCTURE, warning.get());
+            }
         }
     }
 
