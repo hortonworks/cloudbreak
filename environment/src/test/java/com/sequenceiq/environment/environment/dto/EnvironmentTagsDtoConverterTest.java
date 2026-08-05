@@ -32,7 +32,9 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.UserDefinedTagValidator;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.tags.service.AccountTagService;
@@ -79,6 +81,9 @@ class EnvironmentTagsDtoConverterTest {
 
     @Mock
     private CrnUserDetailsService crnUserDetailsService;
+
+    @Mock
+    private UserDefinedTagValidator userDefinedTagValidator;
 
     @InjectMocks
     private EnvironmentTagsDtoConverter underTest;
@@ -270,6 +275,20 @@ class EnvironmentTagsDtoConverterTest {
         EnvironmentTags resultTags = JsonUtil.readValue(result.getValue(), EnvironmentTags.class);
         assertEquals(existingDefaultTags, resultTags.getDefaultTags(), "defaultTags must be preserved unchanged to stay in sync with cloud resources.");
         verifyNoInteractions(crnUserDetailsService, costTagging, entitlementService, accountTagService);
+    }
+
+    @Test
+    void validateUserDefinedTagsAgainstDefaultTagsOnEditShouldFailWhenKeyConflictsWithDefaultTag() {
+        Map<String, String> existingDefaultTags = Map.of("owner", "originalowner");
+        EnvironmentTags existingTags = new EnvironmentTags(Map.of(), existingDefaultTags);
+        EnvironmentEditDto editDto = createMockEnvironmentEditDto(Map.of("owner", "attackerowner"));
+        when(userDefinedTagValidator.validateAgainstDefaultTags(editDto.getUserDefinedTags(), existingDefaultTags))
+                .thenReturn(ValidationResult.builder().error("User-defined tag key(s) [owner] conflict with default tag key(s).").build());
+
+        ValidationResult result = underTest.validateUserDefinedTagsAgainstDefaultTags(editDto, existingTags);
+
+        assertThat(result.hasError()).isTrue();
+        assertThat(result.getFormattedErrors()).contains("owner");
     }
 
     @Test

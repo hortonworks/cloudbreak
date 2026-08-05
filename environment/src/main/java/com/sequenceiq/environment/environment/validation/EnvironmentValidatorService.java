@@ -33,9 +33,11 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -101,6 +103,8 @@ public class EnvironmentValidatorService {
 
     private final EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator;
 
+    private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
+
     public EnvironmentValidatorService(NetworkValidator networkValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -117,7 +121,8 @@ public class EnvironmentValidatorService {
             ManagedIdentityRoleValidator encryptionRoleValidator,
             @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup,
             SeLinuxValidationService seLinuxValidationService,
-            EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator) {
+            EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator,
+            EnvironmentTagsDtoConverter environmentTagsDtoConverter) {
         this.networkValidator = networkValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -135,6 +140,7 @@ public class EnvironmentValidatorService {
         this.encryptionRoleValidator = encryptionRoleValidator;
         this.seLinuxValidationService = seLinuxValidationService;
         this.computeClusterEntitlementValidator = computeClusterEntitlementValidator;
+        this.environmentTagsDtoConverter = environmentTagsDtoConverter;
     }
 
     public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
@@ -146,11 +152,21 @@ public class EnvironmentValidatorService {
     }
 
     public ValidationResult validateTags(EnvironmentCreationDto environmentCreationDto) {
-        return tagValidator.validateTags(environmentCreationDto.getCloudPlatform(), environmentCreationDto.getTags());
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        validationResultBuilder.merge(tagValidator.validateTags(environmentCreationDto.getCloudPlatform(), environmentCreationDto.getTags()));
+        validationResultBuilder.merge(environmentTagsDtoConverter.validateUserDefinedTagsAgainstDefaultTags(environmentCreationDto));
+        return validationResultBuilder.build();
     }
 
     public ValidationResult validateTags(EnvironmentEditDto editDto) {
         return tagValidator.validateTags(editDto.getCloudPlatform(), editDto.getUserDefinedTags());
+    }
+
+    public ValidationResult validateTags(EnvironmentEditDto editDto, EnvironmentTags environmentTags) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        validationResultBuilder.merge(validateTags(editDto));
+        validationResultBuilder.merge(environmentTagsDtoConverter.validateUserDefinedTagsAgainstDefaultTags(editDto, environmentTags));
+        return validationResultBuilder.build();
     }
 
     public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {

@@ -171,8 +171,8 @@ public class EnvironmentModificationService {
         editFreeIpaNodeCount(editDto, environment);
         editFreeIpaEnableMultiAz(editDto, environment);
         editFreeIpaPlatformVariant(editDto, environment);
+        validationBuilder.merge(environmentValidatorService.validateTags(editDto, environment.getEnvironmentTags()));
         editTags(editDto, environment);
-        validationBuilder.merge(environmentValidatorService.validateTags(editDto));
 
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {

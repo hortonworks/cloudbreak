@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordSta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -105,7 +106,9 @@ import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
 import com.sequenceiq.cloudbreak.service.validation.UpdatePublicDnsEntriesInPemValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.tag.UserDefinedTagValidator;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -221,6 +224,9 @@ public class StackOperationService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private UserDefinedTagValidator userDefinedTagValidator;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -803,7 +809,19 @@ public class StackOperationService {
     public FlowIdentifier triggerUserDefinedTagsUpdate(String crn, String accountId, Map<String, String> userDefinedTags) {
         LOGGER.info("Triggering user defined tags update on stack ('{}')", crn);
         StackDto stack = stackDtoService.getByCrnWithMdcContext(crn);
+        validateUserDefinedTagsAgainstDefaultTags(stack, userDefinedTags);
         return flowManager.triggerUserDefinedTagsUpdate(stack.getId(), userDefinedTags);
+    }
+
+    private void validateUserDefinedTagsAgainstDefaultTags(StackDto stack, Map<String, String> userDefinedTags) {
+        if (stack.getTags() == null) {
+            return;
+        }
+        StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
+        ValidationResult validationResult = userDefinedTagValidator.validateAgainstDefaultTags(userDefinedTags, stackTags.getDefaultTags());
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
     }
 
     private void convertInputGroupToLowerCase(DiskUpdateRequest updateRequest) {

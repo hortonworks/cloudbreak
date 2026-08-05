@@ -16,7 +16,9 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.UserDefinedTagValidator;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.tags.domain.AccountTag;
@@ -39,18 +41,22 @@ public class EnvironmentTagsDtoConverter {
 
     private final CrnUserDetailsService crnUserDetailsService;
 
+    private final UserDefinedTagValidator userDefinedTagValidator;
+
     public EnvironmentTagsDtoConverter(CostTagging costTagging,
             EntitlementService entitlementService,
             DefaultInternalAccountTagService defaultInternalAccountTagService,
             AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
             AccountTagService accountTagService,
-            CrnUserDetailsService crnUserDetailsService) {
+            CrnUserDetailsService crnUserDetailsService,
+            UserDefinedTagValidator userDefinedTagValidator) {
         this.costTagging = costTagging;
         this.entitlementService = entitlementService;
         this.accountTagService = accountTagService;
         this.defaultInternalAccountTagService = defaultInternalAccountTagService;
         this.accountTagToAccountTagResponsesConverter = accountTagToAccountTagResponsesConverter;
         this.crnUserDetailsService = crnUserDetailsService;
+        this.userDefinedTagValidator = userDefinedTagValidator;
     }
 
     public Json getTags(EnvironmentCreationDto creationDto) {
@@ -59,6 +65,30 @@ public class EnvironmentTagsDtoConverter {
                 creationDto.getCrn(),
                 creationDto.getCloudPlatform(),
                 creationDto.getTags());
+    }
+
+    public ValidationResult validateUserDefinedTagsAgainstDefaultTags(EnvironmentCreationDto creationDto) {
+        Map<String, String> userDefinedTags = creationDto.getTags();
+        if (userDefinedTags == null || userDefinedTags.isEmpty()) {
+            return ValidationResult.empty();
+        }
+        Map<String, String> defaultTags = resolveDefaultTags(creationDto.getAccountId(),
+                creationDto.getCreator(),
+                creationDto.getCrn(),
+                creationDto.getCloudPlatform(),
+                userDefinedTags);
+        return userDefinedTagValidator.validateAgainstDefaultTags(userDefinedTags, defaultTags);
+    }
+
+    public ValidationResult validateUserDefinedTagsAgainstDefaultTags(EnvironmentEditDto editDto, EnvironmentTags environmentTags) {
+        Map<String, String> userDefinedTags = editDto.getUserDefinedTags();
+        if (userDefinedTags == null || userDefinedTags.isEmpty()) {
+            return ValidationResult.empty();
+        }
+        Map<String, String> defaultTags = Optional.ofNullable(environmentTags)
+                .map(EnvironmentTags::getDefaultTags)
+                .orElse(Map.of());
+        return userDefinedTagValidator.validateAgainstDefaultTags(userDefinedTags, defaultTags);
     }
 
     public Json getTags(EnvironmentEditDto editDto, EnvironmentTags environmentTags) {
@@ -79,6 +109,12 @@ public class EnvironmentTagsDtoConverter {
     }
 
     private Json getTags(String accountId, String creator, String crn, String cloudPlatform, Map<String, String> userDefinedTags) {
+        Map<String, String> defaultTags = resolveDefaultTags(accountId, creator, crn, cloudPlatform, userDefinedTags);
+        return new Json(new EnvironmentTags(Objects.requireNonNullElseGet(userDefinedTags, HashMap::new), defaultTags));
+    }
+
+    private Map<String, String> resolveDefaultTags(String accountId, String creator, String crn, String cloudPlatform,
+            Map<String, String> userDefinedTags) {
         boolean internalTenant = entitlementService.internalTenant(accountId);
         Set<AccountTag> accountTags = accountTagService.get(accountId);
         List<AccountTagResponse> accountTagResponses = accountTags.stream()
@@ -100,8 +136,7 @@ public class EnvironmentTagsDtoConverter {
                 .withUserDefinedTags(userDefinedTags)
                 .build();
         try {
-            Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
-            return new Json(new EnvironmentTags(Objects.requireNonNullElseGet(userDefinedTags, HashMap::new), defaultTags));
+            return costTagging.prepareDefaultTags(request);
         } catch (AccountTagValidationFailed aTVF) {
             throw new BadRequestException(aTVF.getMessage());
         } catch (Exception e) {

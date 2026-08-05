@@ -41,6 +41,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -110,6 +111,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator;
 
+    @Mock
+    private EnvironmentTagsDtoConverter environmentTagsDtoConverter;
+
     private EnvironmentValidatorService underTest;
 
     private static Stream<Arguments> freeIpaCreationArguments() {
@@ -163,7 +167,8 @@ class EnvironmentValidatorServiceTest {
                 encryptionRoleValidator,
                 1,
                 seLinuxValidationService,
-                computeClusterEntitlementValidator);
+                computeClusterEntitlementValidator,
+                environmentTagsDtoConverter);
         lenient().when(computeClusterEntitlementValidator.validate(anyString()))
                 .thenReturn(ValidationResult.builder().build());
     }
