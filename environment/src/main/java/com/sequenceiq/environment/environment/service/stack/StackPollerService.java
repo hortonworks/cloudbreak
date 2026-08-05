@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service.stack;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
@@ -157,18 +159,21 @@ public class StackPollerService {
                 .collect(Collectors.toList());
     }
 
-    public List<FlowIdentifier> updateUserDefinedTagsOnStacks(Long envId, String envCrn, Map<String, String> tags, StackType stackType) {
+    public void updateUserDefinedTagsOnStacks(Long envId, String envCrn, Map<String, String> tags, StackType stackType) {
         StackViewV4Responses stackViews = stackV4Endpoint.list(0L, envCrn, false);
         List<String> stackCrns = stackViews.getResponses().stream()
                 .filter(v -> stackType.name().equals(v.getStackType()))
                 .map(StackViewV4Response::getCrn)
                 .toList();
         LOGGER.info("User defined tags will be updated on stacks: {}", stackCrns);
-        return startStackUserDefinedTagsUpdatePolling(stackCrns,
+
+        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnStacks(stackCrns,
                 stackPollerProvider.userDefinedTagsUpdatePoller(stackCrns, envId, tags));
+
+        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
     }
 
-    private List<FlowIdentifier> startStackUserDefinedTagsUpdatePolling(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
+    private List<FlowIdentifier> triggerUserDefinedTagsUpdateOnStacks(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
         if (CollectionUtils.isNotEmpty(stackNames)) {
             try {
                 return Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
@@ -176,13 +181,32 @@ public class StackPollerService {
                         .waitPeriodly(sleepTime, TimeUnit.SECONDS)
                         .run(attemptMaker);
             } catch (PollerStoppedException e) {
-                LOGGER.warn("Stack updating timed out");
-                throw new StackOperationFailedException("Stack updating timed out", e);
+                LOGGER.warn("Stack user defined tags updating timed out");
+                throw new StackOperationFailedException("Stack user defined tags updating timed out", e);
             } catch (UserBreakException e) {
-                LOGGER.error("Stack updating aborted with error", e);
-                throw new StackOperationFailedException("Stack updating aborted with error", e);
+                LOGGER.error("Stack user defined tags updating aborted with error", e);
+                throw new StackOperationFailedException("Stack user defined tags updating aborted with error", e);
             }
         }
-        return null;
+        return Collections.emptyList();
+    }
+
+    private void awaitUserDefinedTagsUpdateCompletion(List<FlowIdentifier> flowIdentifiers, Long envId) {
+        if (CollectionUtils.isNotEmpty(flowIdentifiers)) {
+            try {
+                Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
+                        .stopIfException(true)
+                        .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                        .run(stackPollerProvider.updateUserDefinedTags(envId, flowIdentifiers));
+            } catch (PollerStoppedException e) {
+                String message = "Update user defined tags on stack timed out or error happened: " + e.getMessage();
+                LOGGER.warn(message, e);
+                throw new CloudbreakServiceException(message);
+            } catch (UserBreakException e) {
+                String message = "Update user defined tags on stack aborted with error: " + e.getMessage();
+                LOGGER.error(message, e);
+                throw new CloudbreakServiceException(message);
+            }
+        }
     }
 }

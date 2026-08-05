@@ -12,7 +12,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
+import com.sequenceiq.environment.exception.StackOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.redbeams.api.endpoint.v1.RedBeamsFlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
@@ -28,14 +31,18 @@ public class RedBeamsService {
 
     private final SupportV4Endpoint supportV4Endpoint;
 
+    private final RedBeamsFlowEndpoint redBeamsFlowEndpoint;
+
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public RedBeamsService(
             DatabaseServerV4Endpoint databaseServerV4Endpoint,
             SupportV4Endpoint supportV4Endpoint,
+            RedBeamsFlowEndpoint redBeamsFlowEndpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.databaseServerV4Endpoint = databaseServerV4Endpoint;
         this.supportV4Endpoint = supportV4Endpoint;
+        this.redBeamsFlowEndpoint = redBeamsFlowEndpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
@@ -71,6 +78,21 @@ public class RedBeamsService {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to update user defined tags for DB: {} due to: {}", crn, errorMessage);
             throw new RedbeamsOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowCheckResponse checkFlow(FlowIdentifier flowIdentifier) {
+        try {
+            LOGGER.debug("Getting stack operation status for flowIdentifier {}", flowIdentifier);
+            return switch (flowIdentifier.getType()) {
+                case FLOW -> redBeamsFlowEndpoint.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+                case FLOW_CHAIN -> redBeamsFlowEndpoint.hasFlowRunningByChainId(flowIdentifier.getPollableId());
+                case NOT_TRIGGERED -> throw new IllegalStateException("Stack flow is not triggered");
+            };
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to get operation status '{}' due to: '{}'", flowIdentifier, errorMessage, e);
+            throw new StackOperationFailedException(errorMessage, e);
         }
     }
 }

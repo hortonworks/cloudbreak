@@ -17,8 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dyngr.core.AttemptMaker;
+import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -55,16 +57,38 @@ class RedbeamsPollerServiceTest {
         DatabaseServerV4Responses responses = new DatabaseServerV4Responses(Set.of(dbResponse));
 
         FlowIdentifier expectedFlow = new FlowIdentifier(FlowType.FLOW, "flow-id-1");
-        AttemptMaker<List<FlowIdentifier>> attemptMaker = () -> com.dyngr.core.AttemptResults.finishWith(List.of(expectedFlow));
+        AttemptMaker<List<FlowIdentifier>> triggerAttemptMaker = () -> AttemptResults.finishWith(List.of(expectedFlow));
+        AttemptMaker<Void> completionAttemptMaker = () -> AttemptResults.finishWith(null);
 
         when(databaseServerV4Endpoint.list(ENV_CRN)).thenReturn(responses);
-        when(redbeamsPollerProvider.userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS)).thenReturn(attemptMaker);
+        when(redbeamsPollerProvider.userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS)).thenReturn(triggerAttemptMaker);
+        when(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID)).thenReturn(completionAttemptMaker);
 
-        List<FlowIdentifier> result = underTest.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS);
+        underTest.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS);
 
-        assertEquals(List.of(expectedFlow), result);
         verify(databaseServerV4Endpoint).list(ENV_CRN);
         verify(redbeamsPollerProvider).userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS);
+        verify(redbeamsPollerProvider).userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID);
+    }
+
+    @Test
+    void testUpdateUserDefinedTagsFailsWhenFlowFails() {
+        setPollingConfig(5, 1);
+
+        DatabaseServerV4Response dbResponse = new DatabaseServerV4Response();
+        dbResponse.setCrn(DB_CRN);
+        DatabaseServerV4Responses responses = new DatabaseServerV4Responses(Set.of(dbResponse));
+
+        FlowIdentifier expectedFlow = new FlowIdentifier(FlowType.FLOW, "flow-id-1");
+        AttemptMaker<List<FlowIdentifier>> triggerAttemptMaker = () -> AttemptResults.finishWith(List.of(expectedFlow));
+        AttemptMaker<Void> completionAttemptMaker = () -> AttemptResults.breakFor("Update user defined tags on DB stack failed.");
+
+        when(databaseServerV4Endpoint.list(ENV_CRN)).thenReturn(responses);
+        when(redbeamsPollerProvider.userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS)).thenReturn(triggerAttemptMaker);
+        when(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID)).thenReturn(completionAttemptMaker);
+
+        assertThrows(CloudbreakServiceException.class,
+                () -> underTest.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS));
     }
 
     @Test

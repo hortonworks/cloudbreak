@@ -15,6 +15,7 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -43,18 +44,21 @@ public class RedbeamsPollerService {
         this.redbeamsPollerProvider = redbeamsPollerProvider;
     }
 
-    public List<FlowIdentifier> updateUserDefinedTagsOnDatabases(Long envId, String envCrn, Map<String, String> tags) {
+    public void updateUserDefinedTagsOnDatabases(Long envId, String envCrn, Map<String, String> tags) {
         DatabaseServerV4Responses databaseServerV4Responses = databaseServerV4Endpoint.list(envCrn);
         List<String> dbCrns = databaseServerV4Responses.getResponses().stream()
                 .map(DatabaseServerV4Response::getCrn)
                 .toList();
         LOGGER.info("User defined tags will be updated on databases: {}", dbCrns);
-        return startStackUserDefinedTagsUpdatePolling(dbCrns,
+
+        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnDatabases(dbCrns,
                 redbeamsPollerProvider.userDefinedTagsUpdatePoller(dbCrns, envId, tags));
+
+        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
     }
 
-    private List<FlowIdentifier> startStackUserDefinedTagsUpdatePolling(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
-        if (CollectionUtils.isNotEmpty(stackNames)) {
+    private List<FlowIdentifier> triggerUserDefinedTagsUpdateOnDatabases(List<String> dbCrns, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
+        if (CollectionUtils.isNotEmpty(dbCrns)) {
             try {
                 return Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
                         .stopIfException(true)
@@ -69,5 +73,24 @@ public class RedbeamsPollerService {
             }
         }
         return Collections.emptyList();
+    }
+
+    private void awaitUserDefinedTagsUpdateCompletion(List<FlowIdentifier> flowIdentifiers, Long envId) {
+        if (CollectionUtils.isNotEmpty(flowIdentifiers)) {
+            try {
+                Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
+                        .stopIfException(true)
+                        .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                        .run(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(flowIdentifiers, envId));
+            } catch (PollerStoppedException e) {
+                String message = String.format("Update user defined tags on DB stack timed out or error happened: %s", e.getMessage());
+                LOGGER.warn(message, e);
+                throw new CloudbreakServiceException(message);
+            } catch (UserBreakException e) {
+                String message = String.format("Update user defined tags on DB stack aborted with error: %s", e.getMessage());
+                LOGGER.error(message, e);
+                throw new CloudbreakServiceException(message);
+            }
+        }
     }
 }

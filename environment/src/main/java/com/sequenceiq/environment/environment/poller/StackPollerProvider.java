@@ -185,6 +185,28 @@ public class StackPollerProvider {
         return flowPoller(envId, flowIdentifier, "Update Ssl config in Cloudbreak");
     }
 
+    public AttemptMaker<Void> updateUserDefinedTags(Long envId, List<FlowIdentifier> flowIdentifiers) {
+        return batchFlowPoller(envId, flowIdentifiers, "Update user defined tags on stack");
+    }
+
+    private AttemptMaker<Void> batchFlowPoller(Long envId, List<FlowIdentifier> flowIdentifiers, String flowName) {
+        List<FlowIdentifier> remaining = new ArrayList<>(flowIdentifiers);
+        return () -> {
+            List<FlowIdentifier> stillRunning = new ArrayList<>();
+            for (FlowIdentifier flowIdentifier : remaining) {
+                AttemptResult<Void> result = flowPoller(envId, flowIdentifier, flowName);
+                if (result.getState() == AttemptState.BREAK) {
+                    return result;
+                }
+                if (result.getState() == AttemptState.CONTINUE) {
+                    stillRunning.add(flowIdentifier);
+                }
+            }
+            remaining.retainAll(stillRunning);
+            return remaining.isEmpty() ? AttemptResults.finishWith(null) : AttemptResults.justContinue();
+        };
+    }
+
     private AttemptResult<Void> flowPoller(Long envId, FlowIdentifier flowIdentifier, String flowName) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
             LOGGER.info("Stack polling cancelled in in-memory store, id: {}", envId);

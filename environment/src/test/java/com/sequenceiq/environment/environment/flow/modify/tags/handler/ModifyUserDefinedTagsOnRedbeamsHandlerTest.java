@@ -5,8 +5,8 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
@@ -65,8 +65,7 @@ class ModifyUserDefinedTagsOnRedbeamsHandlerTest {
 
     @Test
     void testDoAcceptFailure() {
-        when(redbeamsPollerService.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, USER_DEFINED_TAGS))
-                .thenThrow(new RuntimeException("error"));
+        doThrow(new RuntimeException("error")).when(redbeamsPollerService).updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
 
         Selectable result = underTest.doAccept(event);
 

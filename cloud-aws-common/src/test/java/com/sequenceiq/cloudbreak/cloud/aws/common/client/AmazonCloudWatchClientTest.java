@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricResponse;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceResponse;
 
@@ -30,6 +32,17 @@ class AmazonCloudWatchClientTest {
         when(client.tagResource(request)).thenReturn(expectedResponse);
 
         TagResourceResponse response = underTest.tagResource(request);
+
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void testDescribeAlarmsForMetric() {
+        DescribeAlarmsForMetricRequest request = mock(DescribeAlarmsForMetricRequest.class);
+        DescribeAlarmsForMetricResponse expectedResponse = mock(DescribeAlarmsForMetricResponse.class);
+        when(client.describeAlarmsForMetric(request)).thenReturn(expectedResponse);
+
+        DescribeAlarmsForMetricResponse response = underTest.describeAlarmsForMetric(request);
 
         assertEquals(expectedResponse, response);
     }

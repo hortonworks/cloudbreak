@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricResponse;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsResponse;
 import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsRequest;
@@ -30,6 +32,10 @@ public class AmazonCloudWatchClient extends AmazonClient {
 
     public DescribeAlarmsResponse describeAlarms(DescribeAlarmsRequest request) {
         return client.describeAlarms(request);
+    }
+
+    public DescribeAlarmsForMetricResponse describeAlarmsForMetric(DescribeAlarmsForMetricRequest request) {
+        return client.describeAlarmsForMetric(request);
     }
 
     public DeleteAlarmsResponse deleteAlarms(DeleteAlarmsRequest deleteAlarmsRequest) {

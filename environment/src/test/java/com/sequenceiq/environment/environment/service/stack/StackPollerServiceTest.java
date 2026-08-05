@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -335,10 +337,16 @@ class StackPollerServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(responsesSet);
         when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(stackViewV4Responses);
 
+        FlowIdentifier expectedFlow = new FlowIdentifier(FlowType.FLOW, "flow-1");
         when(stackPollerProvider.userDefinedTagsUpdatePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, userDefinedTags))
+                .thenReturn(() -> AttemptResults.finishWith(List.of(expectedFlow)));
+        when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, List.of(expectedFlow)))
                 .thenReturn(() -> AttemptResults.finishWith(null));
 
         underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.DATALAKE);
+
+        verify(stackPollerProvider).userDefinedTagsUpdatePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, userDefinedTags);
+        verify(stackPollerProvider).updateUserDefinedTags(ENVIRONMENT_ID, List.of(expectedFlow));
     }
 
     @Test
@@ -354,10 +362,38 @@ class StackPollerServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(responsesSet);
         when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(stackViewV4Responses);
 
+        List<FlowIdentifier> expectedFlows = List.of(
+                new FlowIdentifier(FlowType.FLOW, "flow-1"),
+                new FlowIdentifier(FlowType.FLOW, "flow-2"));
         when(stackPollerProvider.userDefinedTagsUpdatePoller(List.of(STACK_CRN_1, STACK_CRN_2), ENVIRONMENT_ID, userDefinedTags))
+                .thenReturn(() -> AttemptResults.finishWith(expectedFlows));
+        when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows))
                 .thenReturn(() -> AttemptResults.finishWith(null));
 
         underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.WORKLOAD);
+
+        verify(stackPollerProvider).userDefinedTagsUpdatePoller(List.of(STACK_CRN_1, STACK_CRN_2), ENVIRONMENT_ID, userDefinedTags);
+        verify(stackPollerProvider).updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows);
+    }
+
+    @Test
+    void updateUserDefinedTagsThrowsWhenCompletionPollerTimesOut() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        StackViewV4Response stackView1 = createAvailableStackViewV4Response(STACK_CRN_1);
+        stackView1.setStackType("DATALAKE");
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false))
+                .thenReturn(new StackViewV4Responses(Set.of(stackView1)));
+
+        FlowIdentifier expectedFlow = new FlowIdentifier(FlowType.FLOW, "flow-1");
+        when(stackPollerProvider.userDefinedTagsUpdatePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, userDefinedTags))
+                .thenReturn(() -> AttemptResults.finishWith(List.of(expectedFlow)));
+        when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, List.of(expectedFlow)))
+                .thenReturn(AttemptResults::justContinue);
+
+        CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.DATALAKE));
+
+        assertThat(ex.getMessage()).contains("Update user defined tags on stack timed out or error happened");
     }
 
     // ---- helpers ----

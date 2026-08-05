@@ -1,9 +1,12 @@
 package com.sequenceiq.environment.environment.service.database;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +25,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.redbeams.api.endpoint.v1.RedBeamsFlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
 
@@ -30,11 +36,16 @@ class RedBeamsServiceTest {
 
     private static final String ACTOR = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
 
+    private static final String FLOW_ID = "flow-1";
+
     @Mock
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
+    private RedBeamsFlowEndpoint flowEndpoint;
 
     @InjectMocks
     private RedBeamsService redBeamsService;
@@ -94,5 +105,36 @@ class RedBeamsServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
                         redBeamsService.triggerUserDefinedTagsUpdate(crn, userDefinedTags)));
         assertEquals("Extracted error message", redbeamsOperationFailedException.getMessage());
+    }
+
+    @Test
+    void testCheckFlowWhenFlowType() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, FLOW_ID);
+
+        assertDoesNotThrow(() -> redBeamsService.checkFlow(flowIdentifier));
+
+        verify(flowEndpoint, times(1)).hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+        verify(flowEndpoint, never()).hasFlowRunningByChainId(flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testCheckFlowWhenFlowChain() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
+
+        assertDoesNotThrow(() -> redBeamsService.checkFlow(flowIdentifier));
+
+        verify(flowEndpoint, never()).hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+        verify(flowEndpoint, times(1)).hasFlowRunningByChainId(flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testCheckFlowWhenNotTriggered() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.NOT_TRIGGERED, null);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> redBeamsService.checkFlow(flowIdentifier));
+
+        verify(flowEndpoint, never()).hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+        verify(flowEndpoint, never()).hasFlowRunningByChainId(flowIdentifier.getPollableId());
+        assertEquals("Stack flow is not triggered", ex.getMessage());
     }
 }

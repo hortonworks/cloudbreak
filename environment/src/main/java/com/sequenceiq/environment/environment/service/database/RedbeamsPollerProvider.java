@@ -14,7 +14,13 @@ import org.springframework.stereotype.Component;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.core.AttemptState;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.poller.FlowResultPollerEvaluator;
+import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Component
@@ -26,11 +32,35 @@ public class RedbeamsPollerProvider {
 
     private final FlowResultPollerEvaluator flowResultPollerEvaluator;
 
+    private final StackService stackService;
+
     public RedbeamsPollerProvider(
             RedBeamsService redbeamsService,
-            FlowResultPollerEvaluator flowResultPollerEvaluator) {
+            FlowResultPollerEvaluator flowResultPollerEvaluator,
+            StackService stackService) {
         this.redbeamsService = redbeamsService;
         this.flowResultPollerEvaluator = flowResultPollerEvaluator;
+        this.stackService = stackService;
+    }
+
+    public AttemptMaker<Void> userDefinedTagsFlowsCompletionPoller(List<FlowIdentifier> flowIdentifiers, Long envId) {
+        List<FlowIdentifier> remaining = new ArrayList<>(flowIdentifiers);
+        return () -> {
+            LOGGER.info("Checking completion of user defined tags update on {} redbeams flows for environment with ID {}",
+                    remaining.size(), envId);
+            List<FlowIdentifier> stillRunning = new ArrayList<>();
+            for (FlowIdentifier flowIdentifier : remaining) {
+                AttemptResult<Void> result = updateUserDefinedTags(envId, flowIdentifier);
+                if (result.getState() == AttemptState.BREAK) {
+                    return result;
+                }
+                if (result.getState() == AttemptState.CONTINUE) {
+                    stillRunning.add(flowIdentifier);
+                }
+            }
+            remaining.retainAll(stillRunning);
+            return remaining.isEmpty() ? AttemptResults.finishWith(null) : AttemptResults.justContinue();
+        };
     }
 
     public AttemptMaker<List<FlowIdentifier>> userDefinedTagsUpdatePoller(List<String> stackCrns, Long envId, Map<String, String> tags) {
@@ -67,6 +97,26 @@ public class RedbeamsPollerProvider {
             LOGGER.warn("Failure asking Redbeams for user defined tags update, error message is: {}",
                     e.getMessage());
             return AttemptResults.breakFor(e);
+        }
+    }
+
+    public AttemptResult<Void> updateUserDefinedTags(Long envId, FlowIdentifier flowIdentifier) {
+        return flowPoller(envId, flowIdentifier, "Update user defined tags on DB stack");
+    }
+
+    private AttemptResult<Void> flowPoller(Long envId, FlowIdentifier flowIdentifier, String flowName) {
+        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            LOGGER.info("Stack polling cancelled in in-memory store, id: {}", envId);
+            return AttemptResults.breakFor("Stack polling cancelled in in-memory store, id: " + envId);
+        }
+        FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsService.checkFlow(flowIdentifier));
+        LOGGER.debug("Flow status: {}", flowCheckResponse);
+        if (flowCheckResponse.getHasActiveFlow()) {
+            return AttemptResults.justContinue();
+        } else if (flowCheckResponse.getLatestFlowFinalizedAndFailed()) {
+            return AttemptResults.breakFor(flowName + " failed.");
+        } else {
+            return AttemptResults.justFinish();
         }
     }
 

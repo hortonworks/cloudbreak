@@ -1,20 +1,28 @@
 package com.sequenceiq.environment.environment.service.database;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -24,9 +32,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.environment.environment.poller.FlowResultPollerEvaluator;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class RedbeamsPollerProviderTest {
@@ -103,5 +114,36 @@ class RedbeamsPollerProviderTest {
             verify(redbeamsService).triggerUserDefinedTagsUpdate(DB_CRN_1, TAGS);
             verify(flowResultPollerEvaluator).attemptResultFinisher(any());
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("updateUserDefinedTagsSource")
+    void testUpdateUserDefinedTags(boolean hasActiveFlow, boolean latestFlowFinalizedAndFailed, AttemptState expectedResult) {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "flow-1");
+        FlowCheckResponse flowCheckResponse = mock(FlowCheckResponse.class);
+        when(flowCheckResponse.getHasActiveFlow()).thenReturn(hasActiveFlow);
+        lenient().when(flowCheckResponse.getLatestFlowFinalizedAndFailed()).thenReturn(latestFlowFinalizedAndFailed);
+        when(redbeamsService.checkFlow(flowIdentifier)).thenReturn(flowCheckResponse);
+
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedCrn = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedCrn.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
+                    .thenAnswer(invocation -> {
+                        Supplier<Object> supplier = invocation.getArgument(0);
+                        return supplier.get();
+                    });
+
+            AttemptResult<Void> result = underTest.updateUserDefinedTags(ENV_ID, flowIdentifier);
+
+            assertEquals(expectedResult, result.getState());
+        }
+
+    }
+
+    private static Stream<Arguments> updateUserDefinedTagsSource() {
+        return Stream.of(
+                Arguments.of(false, false, AttemptState.FINISH),
+                Arguments.of(true, false, AttemptState.CONTINUE),
+                Arguments.of(false, true, AttemptState.BREAK)
+        );
     }
 }

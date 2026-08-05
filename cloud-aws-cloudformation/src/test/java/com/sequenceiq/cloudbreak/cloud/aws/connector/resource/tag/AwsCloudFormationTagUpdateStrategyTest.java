@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -46,6 +47,9 @@ import software.amazon.awssdk.services.cloudformation.model.Stack;
 import software.amazon.awssdk.services.cloudformation.model.StackResource;
 import software.amazon.awssdk.services.cloudformation.model.Tag;
 import software.amazon.awssdk.services.cloudformation.model.UpdateStackRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricResponse;
+import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,6 +107,9 @@ class AwsCloudFormationTagUpdateStrategyTest {
 
     @Mock
     private AmazonAutoScalingClient autoScalingClient;
+
+    @Mock
+    private AmazonCloudWatchClient amazonCloudWatchClient;
 
     @Mock
     private AwsTaggingService awsTaggingService;
@@ -237,7 +244,6 @@ class AwsCloudFormationTagUpdateStrategyTest {
         when(cloudFormationClient.describeStackResources(any(DescribeStackResourcesRequest.class)))
                 .thenReturn(DescribeStackResourcesResponse.builder().stackResources(List.of()).build());
 
-
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         verify(cloudFormationClient).updateStack(argThat(req ->
@@ -343,9 +349,22 @@ class AwsCloudFormationTagUpdateStrategyTest {
                 .thenReturn(asgResponse);
 
         List<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = toEc2Tags(USER_DEFINED_TAGS);
+        List<software.amazon.awssdk.services.cloudwatch.model.Tag> cloudWatchTags = toCloudWatchTags(USER_DEFINED_TAGS);
         when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(commonAwsClient.createCloudWatchClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudWatchClient);
         when(awsTaggingService.prepareEc2Tags(USER_DEFINED_TAGS)).thenReturn(ec2Tags);
+        when(awsTaggingService.prepareCloudWatchTags(USER_DEFINED_TAGS)).thenReturn(cloudWatchTags);
         when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(describeStacksResponse);
+
+        String alarmArn1 = "arn:aws:cloudwatch:us-east-1:123:alarm:alarm-i1";
+        when(amazonCloudWatchClient.describeAlarmsForMetric(any(DescribeAlarmsForMetricRequest.class)))
+                .thenReturn(DescribeAlarmsForMetricResponse.builder().metricAlarms(List.of()).build());
+        when(amazonCloudWatchClient.describeAlarmsForMetric(argThat(req ->
+                req.dimensions().stream().anyMatch(d -> INSTANCE_ID_1.equals(d.value()))
+                        && "StatusCheckFailed_System".equals(req.metricName()))))
+                .thenReturn(DescribeAlarmsForMetricResponse.builder()
+                        .metricAlarms(MetricAlarm.builder().alarmArn(alarmArn1).build())
+                        .build());
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
@@ -353,6 +372,9 @@ class AwsCloudFormationTagUpdateStrategyTest {
                 req.resources().containsAll(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3))
                         && req.tags().equals(ec2Tags)
         ));
+
+        verify(amazonCloudWatchClient).tagResource(argThat(req ->
+                req.resourceARN().equals(alarmArn1) && req.tags().equals(cloudWatchTags)));
     }
 
     @Test
@@ -387,6 +409,12 @@ class AwsCloudFormationTagUpdateStrategyTest {
     private List<software.amazon.awssdk.services.ec2.model.Tag> toEc2Tags(Map<String, String> tags) {
         return tags.entrySet().stream()
                 .map(e -> software.amazon.awssdk.services.ec2.model.Tag.builder().key(e.getKey()).value(e.getValue()).build())
+                .toList();
+    }
+
+    private List<software.amazon.awssdk.services.cloudwatch.model.Tag> toCloudWatchTags(Map<String, String> tags) {
+        return tags.entrySet().stream()
+                .map(e -> software.amazon.awssdk.services.cloudwatch.model.Tag.builder().key(e.getKey()).value(e.getValue()).build())
                 .toList();
     }
 }

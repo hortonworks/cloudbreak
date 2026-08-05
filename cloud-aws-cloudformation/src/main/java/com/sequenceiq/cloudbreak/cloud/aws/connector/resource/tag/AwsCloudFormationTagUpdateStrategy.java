@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -40,6 +41,11 @@ import software.amazon.awssdk.services.cloudformation.model.Stack;
 import software.amazon.awssdk.services.cloudformation.model.StackResource;
 import software.amazon.awssdk.services.cloudformation.model.Tag;
 import software.amazon.awssdk.services.cloudformation.model.UpdateStackRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricResponse;
+import software.amazon.awssdk.services.cloudwatch.model.Dimension;
+import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
+import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 
@@ -47,6 +53,17 @@ import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudFormationTagUpdateStrategy.class);
+
+    private static final List<String> EC2_ALARM_METRICS = List.of(
+            "CPUUtilization",
+            "StatusCheckFailed",
+            "StatusCheckFailed_Instance",
+            "StatusCheckFailed_System",
+            "DiskReadOps",
+            "DiskWriteOps",
+            "NetworkIn",
+            "NetworkOut"
+    );
 
     private static final String LAUNCH_TEMPLATE_RESOURCE_TYPE = "AWS::EC2::LaunchTemplate";
 
@@ -212,9 +229,11 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
         }
 
         String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
+        AwsCredentialView awsCredential = new AwsCredentialView(authenticatedContext.getCloudCredential());
         AmazonAutoScalingClient asgClient = awsCloudFormationClient.createAutoScalingClient(
-                new AwsCredentialView(authenticatedContext.getCloudCredential()), regionName);
+                awsCredential, regionName);
         AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
+        AmazonCloudWatchClient cloudWatchClient = commonAwsClient.createCloudWatchClient(awsCredential, regionName);
         Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = awsTaggingService.prepareEc2Tags(tags);
 
         DescribeAutoScalingGroupsResponse describeResponse = asgClient.describeAutoScalingGroups(
@@ -235,6 +254,7 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
             updateAutoScalingGroupInstanceTags(ec2Client, allInstanceIds, ec2Tags);
             LOGGER.debug("Updated tags for {} existing instances across {} Auto Scaling Groups",
                     allInstanceIds.size(), asgNames.size());
+            updateAutoScalingGroupCloudWatchAlarmTags(cloudWatchClient, allInstanceIds, tags);
         }
     }
 
@@ -256,6 +276,50 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
                 .resources(instanceIds)
                 .tags(ec2Tags)
                 .build());
+    }
+
+    private void updateAutoScalingGroupCloudWatchAlarmTags(AmazonCloudWatchClient cloudWatchClient,
+            List<String> instanceIds, Map<String, String> tags) {
+
+        List<String> alarmArns = resolveAlarmArnsForInstances(cloudWatchClient, instanceIds);
+
+        if (alarmArns.isEmpty()) {
+            LOGGER.debug("No CloudWatch alarms found for {} instances, skipping alarm tag update.", instanceIds.size());
+            return;
+        }
+
+        Collection<software.amazon.awssdk.services.cloudwatch.model.Tag> cloudWatchTags = awsTaggingService.prepareCloudWatchTags(tags);
+
+        alarmArns.forEach(arn -> {
+            cloudWatchClient.tagResource(TagResourceRequest.builder()
+                    .resourceARN(arn)
+                    .tags(cloudWatchTags)
+                    .build());
+            LOGGER.debug("Updated tags for CloudWatch alarm: {}", arn);
+        });
+
+        LOGGER.debug("Updated tags for {} CloudWatch alarms", alarmArns.size());
+    }
+
+    private List<String> resolveAlarmArnsForInstances(AmazonCloudWatchClient cloudWatchClient,
+            List<String> instanceIds) {
+        return instanceIds.stream()
+            .flatMap(instanceId -> EC2_ALARM_METRICS.stream()
+                .flatMap(metric -> {
+                    DescribeAlarmsForMetricResponse response = cloudWatchClient.describeAlarmsForMetric(
+                        DescribeAlarmsForMetricRequest.builder()
+                            .namespace("AWS/EC2")
+                            .metricName(metric)
+                            .dimensions(Dimension.builder()
+                                .name("InstanceId")
+                                .value(instanceId)
+                                .build())
+                            .build());
+                        return response.metricAlarms().stream()
+                                .map(MetricAlarm::alarmArn);
+                }))
+            .distinct()
+            .toList();
     }
 
     private void deleteLaunchTemplateAndInstanceTags(AuthenticatedContext authenticatedContext,
