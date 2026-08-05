@@ -169,6 +169,7 @@ public class ClouderaManagerRestartService {
         rollingRestartClusterArgs.setRolesToInclude(ApiRolesToInclude.ALL_ROLES);
         rollingRestartClusterArgs.setRestartServiceNames(serviceNamesToRollingRestart);
         rollingRestartClusterArgs.setStaleConfigsOnly(restartStaleOnly);
+        rollingRestartClusterArgs.setRedeployClientConfiguration(true);
 
         return clustersResourceApi.rollingRestart(stack.getName(), rollingRestartClusterArgs);
     }

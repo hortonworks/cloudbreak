@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -69,7 +70,7 @@ public class ClusterServicesRestartService {
     public boolean isRemoteDataContextRefreshNeeded(Stack stack, SdxBasicView sdxBasicView) {
         // Re-configuring DH using the Remote Data Context of Data lake.
         boolean clusterDataHub = stack.getType().equals(StackType.WORKLOAD);
-        boolean dlIsRebuild = isDatalakeCreatedAfterDataHub(sdxBasicView, stack);
+        boolean dlIsRebuild = sdxBasicView.platform().equals(TargetPlatform.PAAS) && isDatalakeCreatedAfterDataHub(sdxBasicView, stack);
         boolean resizeEntitlementEnabled = entitlementService.isDatalakeLightToMediumMigrationEnabled(Crn.fromString(stack.getResourceCrn()).getAccountId());
         LOGGER.info("Is cluster DH: {}, Is DL rebuild: {},  Is resize entitlement Enabled: {}",
                 clusterDataHub,

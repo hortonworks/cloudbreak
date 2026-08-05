@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -8,17 +9,24 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -27,6 +35,7 @@ import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -126,5 +135,39 @@ class ClusterServicesRestartServiceTest {
                         .findFirst()
                         .get();
         assertEquals(hmsRdsConfig.getId(), hmsRdsConfigSaved.getId());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("isRemoteDataContextRefreshNeededParameters")
+    void isRemoteDataContextRefreshNeeded(
+            String description,
+            StackType stackType,
+            TargetPlatform dlPlatform,
+            boolean datalakeCreatedAfterDataHub,
+            boolean resizeEntitlementEnabled,
+            boolean expected) {
+        Stack stack = new Stack();
+        stack.setResourceCrn(DATAHUB_CRN);
+        stack.setType(stackType);
+        stack.setCreated(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
+        long dlCreated = datalakeCreatedAfterDataHub
+                ? Instant.now().toEpochMilli()
+                : Instant.now().minus(7, ChronoUnit.DAYS).toEpochMilli();
+        SdxBasicView sdxBasicView = new SdxBasicView("name", "crn", "7.3.2", true, dlCreated, "dbcrn", dlPlatform);
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(any())).thenReturn(resizeEntitlementEnabled);
+
+        boolean result = underTest.isRemoteDataContextRefreshNeeded(stack, sdxBasicView);
+
+        assertEquals(expected, result);
+    }
+
+    public static Stream<Arguments> isRemoteDataContextRefreshNeededParameters() {
+        return Stream.of(
+                Arguments.of("datalake", StackType.DATALAKE, TargetPlatform.PAAS, false, true, false),
+                Arguments.of("datahub of PDL datalake", StackType.WORKLOAD, TargetPlatform.PDL, false, true, false),
+                Arguments.of("datahub of PAAS datalake created after", StackType.WORKLOAD, TargetPlatform.PAAS, true, false, false),
+                Arguments.of("datahub of PAAS datalake created before without entitlement", StackType.WORKLOAD, TargetPlatform.PAAS, true, false, false),
+                Arguments.of("datahub of PAAS datalake created before with entitlement", StackType.WORKLOAD, TargetPlatform.PAAS, true, true, true)
+        );
     }
 }
