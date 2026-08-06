@@ -88,7 +88,7 @@ public class GatewayService {
         return save(gateway);
     }
 
-    public Gateway migrateWrongCluster(Gateway gatewayView) {
+    public Gateway migrateWrongCluster(GatewayView gatewayView) {
         LOGGER.warn("Migrating gateway {} by copying sign key reference into token key fields because cluster-proxy held a null vault path.",
                 gatewayView.getId());
         Gateway gateway = repository.findById(gatewayView.getId()).orElseThrow(NotFoundException.notFound("Gateway should exist"));

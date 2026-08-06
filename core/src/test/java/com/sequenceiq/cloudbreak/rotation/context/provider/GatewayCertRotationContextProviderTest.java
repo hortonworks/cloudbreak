@@ -146,6 +146,24 @@ class GatewayCertRotationContextProviderTest {
                 secretRotationException.getMessage());
     }
 
+    @Test
+    void testGetContextsCallsMigrateWhenTokenKeySecretIsBlank() {
+        Gateway gatewayWithBlankToken = getGateway("Old");
+        Secret blankTokenKey = mock(Secret.class);
+        lenient().when(blankTokenKey.getRaw()).thenReturn(null);
+        lenient().when(blankTokenKey.getSecret()).thenReturn("tokenKeyCert");
+        when(gatewayWithBlankToken.getTokenKeySecret()).thenReturn(blankTokenKey);
+
+        when(gatewayService.getByClusterId(any())).thenReturn(Optional.of(gatewayWithBlankToken));
+        Gateway migratedGateway = getGateway("Migrated");
+        when(gatewayService.migrateWrongCluster(any())).thenReturn(migratedGateway);
+
+        Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
+
+        assertEquals(4, contexts.size());
+        assertTrue(CloudbreakSecretType.GATEWAY_CERT.getSteps().stream().allMatch(contexts::containsKey));
+    }
+
     private Gateway getGateway(String suffix) {
         Gateway result = mock(Gateway.class);
         lenient().when(result.getKnoxMaster()).thenReturn(String.format("masterSecret%s", suffix));
@@ -164,12 +182,15 @@ class GatewayCertRotationContextProviderTest {
         Secret tokenKeySecret = mock(Secret.class);
         lenient().when(result.getTokenKeySecret()).thenReturn(tokenKeySecret);
         lenient().when(tokenKeySecret.getSecret()).thenReturn("tokenKeyCert");
+        lenient().when(tokenKeySecret.getRaw()).thenReturn("tokenKeyRaw");
         Secret tokenCertSecret = mock(Secret.class);
         lenient().when(result.getTokenCertSecret()).thenReturn(tokenCertSecret);
         lenient().when(tokenCertSecret.getSecret()).thenReturn("tokenCert");
+        lenient().when(tokenCertSecret.getRaw()).thenReturn("tokenCertRaw");
         Secret tokenPubSecret = mock(Secret.class);
         lenient().when(result.getTokenPubSecret()).thenReturn(tokenPubSecret);
         lenient().when(tokenPubSecret.getSecret()).thenReturn("tokenPub");
+        lenient().when(tokenPubSecret.getRaw()).thenReturn("tokenPubRaw");
         return result;
     }
 }
