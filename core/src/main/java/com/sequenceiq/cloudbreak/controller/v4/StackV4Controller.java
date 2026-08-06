@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateInstanceTypeRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -95,6 +96,7 @@ import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceTypeUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
@@ -157,6 +159,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackMigrateRdsService migrateRdsService;
+
+    @Inject
+    private StackInstanceTypeUpdateService stackInstanceTypeUpdateService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -856,6 +861,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public StepProgressResponse getSecretRotationProgress(Long workspaceId, @ResourceCrn String crn, String secretType) {
         return stackRotationService.getProgressResponse(crn, secretType);
+    }
+
+    @Override
+    @InternalOnly
+    public void updateInstanceTypeInDatabase(Long workspaceId, @RequestObject UpdateInstanceTypeRequest request) {
+        stackInstanceTypeUpdateService.updateInstanceType(request.getCrn(), request.getGroupName(), request.getInstanceType());
     }
 
     @InternalOnly
