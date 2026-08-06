@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupF
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
+import com.sequenceiq.common.model.Architecture;
 
 @Service
 public class AzurePlatformResources implements PlatformResources {
@@ -341,6 +342,8 @@ public class AzurePlatformResources implements PlatformResources {
                 builder.withHostEncryptionSupport(azureHostEncryptionValidator.isVmSupported(virtualMachineSize.name(), azureVmCapabilities));
                 builder.withEnhancedNetwork(azureAcceleratedNetworkValidator.isSupportedForVm(virtualMachineSize.name(), azureVmCapabilities));
                 builder.withAvailabilityZones(availabilityZonesForVm);
+                AzureVmCapabilities capability = azureVmCapabilities.get(virtualMachineSize.name());
+                builder.withArchitecture(capability == null ? Architecture.X86_64 : capability.getArchitecture());
                 VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
                 types.add(vmType);
                 if (virtualMachineSize.name().equals(armVmDefault)) {

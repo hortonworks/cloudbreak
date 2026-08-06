@@ -150,6 +150,33 @@ public class VerticalScaleInstanceProviderTest {
     }
 
     @Test
+    public void testRequestWhenCurrentAndRequestedShareTheSameArchitectureShouldNotThrow() {
+        String instanceTypeNameInStack = "Standard_D8ps_v5";
+        String instanceTypeNameInRequest = "Standard_E4pds_v5";
+        Optional<VmType> current = vmTypeOptional(
+                instanceTypeNameInStack,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+        current.get().getMetaData().getProperties().put(VmTypeMeta.ARCHITECTURE, Architecture.ARM64);
+        Optional<VmType> requested = vmTypeOptional(
+                instanceTypeNameInRequest,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+        requested.get().getMetaData().getProperties().put(VmTypeMeta.ARCHITECTURE, Architecture.ARM64);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.validateInstanceTypeForVerticalScaling("AZURE", List.of(current), List.of(requested), null, Map.of()));
+    }
+
+    @Test
     public void testRequestWhenWeAreRequestedSmallerCpuInstancesShouldDropBadRequest() {
         String instanceTypeNameInStack = "m3.xlarge";
         String instanceTypeNameInRequest = "m2.xlarge";

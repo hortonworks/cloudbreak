@@ -358,6 +358,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.putVerticalScalingInWorkspace(stack, updateRequest);
     }
 
+    public void validateVerticalScaling(@NotNull Stack stack, @Valid StackVerticalScaleV4Request updateRequest) {
+        stackCommonService.validateVerticalScaleInWorkspace(stack, updateRequest);
+    }
+
     public FlowIdentifier repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
         LOGGER.debug("Starting to repair cluster with request: {}", clusterRepairRequest.toString());
         return stackCommonService.repairCluster(workspaceId, nameOrCrn, clusterRepairRequest);

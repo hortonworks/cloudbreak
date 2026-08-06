@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatal
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackResourceUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
@@ -41,8 +42,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -86,6 +89,9 @@ class StackV4ControllerTest {
     @Mock
     private StackMigrateRdsService migrateRdsService;
 
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private StackV4Controller underTest;
 
@@ -112,6 +118,17 @@ class StackV4ControllerTest {
         underTest.rangerRazEnabledInternal(WORKSPACE_ID, stackCrn, USER_CRN);
 
         verify(stackOperationService).rangerRazEnabled(stackCrn);
+    }
+
+    @Test
+    void verticalScalingValidateByNameDelegatesToStackOperations() {
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        Stack stack = mock(Stack.class);
+        when(stackService.getByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn.ofName(STACK_NAME), WORKSPACE_ID)).thenReturn(stack);
+
+        underTest.verticalScalingValidateByName(WORKSPACE_ID, STACK_NAME, USER_CRN, request);
+
+        verify(stackOperations).validateVerticalScaling(stack, request);
     }
 
     @Test

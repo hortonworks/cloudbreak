@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesR
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -71,6 +72,7 @@ public class VerticalScaleService {
 
     public FlowIdentifier verticalScaleDatalake(SdxCluster sdxCluster, StackVerticalScaleV4Request request, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
+        validateVerticalScale(sdxCluster, request, userCrn);
         LOGGER.info("Data Lake Cluster Vertical Scale flow triggered for environment {}", sdxCluster.getName());
         DatalakeStatusEnum preOperationDlStatus = sdxStatusService.getActualStatusForSdx(sdxCluster.getId()).getStatus();
         LOGGER.debug("Captured pre-operation DL status: {} for cluster {}", preOperationDlStatus, sdxCluster.getName());
@@ -87,6 +89,17 @@ public class VerticalScaleService {
         FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
         LOGGER.debug("Data Lake Cluster Vertical Scale flow trigger event sent for environment {}", sdxCluster.getName());
         return flowIdentifier;
+    }
+
+    private void validateVerticalScale(SdxCluster sdxCluster, StackVerticalScaleV4Request request, String userCrn) {
+        try {
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.verticalScalingValidateByName(0L, sdxCluster.getClusterName(), userCrn, request));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.info("Vertical scale validation failed for Data Lake {}: {}", sdxCluster.getClusterName(), errorMessage, e);
+            throw new BadRequestException(errorMessage, e);
+        }
     }
 
     private Map<String, Object> getFlowTriggerUsercrn(String userCrn) {
