@@ -25,6 +25,15 @@ public class DatabaseServer extends DynamicModel {
      */
     public static final String SSL_CERTIFICATE_IDENTIFIER = "sslCertificateIdentifier";
 
+    /**
+     * Parameter key under which a provider records the instance type it actually provisioned when automatic instance-type
+     * fallback is enabled. Absent (or equal to {@link #getFlavor()}) means the primary instance type was used; a differing
+     * value means provisioning fell back to one of the {@link #getFallbackInstanceTypes() fallback instance types}.
+     *
+     * @see #putParameter(String, Object)
+     */
+    public static final String EFFECTIVELY_USED_FLAVOR = "effectivelyUsedFlavor";
+
     private final String serverId;
 
     private final String flavor;

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -54,6 +56,8 @@ import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.metrics.MetricType;
+import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.DatabaseCapabilityService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
@@ -146,6 +150,9 @@ class AllocateDatabaseServerHandlerTest {
 
     @Mock
     private CloudResourceValidationService cloudResourceValidationService;
+
+    @Mock
+    private RedbeamsMetricService metricService;
 
     private DBStack dbStack;
 
@@ -307,6 +314,73 @@ class AllocateDatabaseServerHandlerTest {
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
         verify(resourceConnector).launchDatabaseServer(any(AuthenticatedContext.class), databaseStackArgumentCaptor.capture(), any(PersistenceNotifier.class));
         assertEquals("defaultInstanceType", databaseStackArgumentCaptor.getValue().getDatabaseServer().getFlavor());
+    }
+
+    @Test
+    void doAcceptWhenFallbackConfiguredAndPrimarySucceedsIncrementsConfiguredOnly() throws Exception {
+        setRequestDatabaseStack("db.m5.large", List.of("db.m6i.large"), null);
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        verify(metricService).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_CONFIGURED), any(), any());
+        verify(metricService, never()).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_USED), any(), any());
+        verify(metricService, never()).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_EXHAUSTED), any(), any());
+    }
+
+    @Test
+    void doAcceptWhenFallbackUsedIncrementsUsed() throws Exception {
+        setRequestDatabaseStack("db.m5.large", List.of("db.m6i.large"), "db.m6i.large");
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        verify(metricService).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_CONFIGURED), any(), any());
+        verify(metricService).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_USED), any(), any());
+    }
+
+    @Test
+    void doAcceptWhenCapacityExhaustedIncrementsExhausted() throws Exception {
+        setRequestDatabaseStack("db.m5.large", List.of("db.m6i.large"), null);
+        initCommon();
+        InsufficientCapacityException e = new InsufficientCapacityException("all instance types exhausted");
+        when(resourceConnector.launchDatabaseServer(eq(authenticatedContext), any(DatabaseStack.class), eq(persistenceNotifier))).thenThrow(e);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        verifyFailureEvent(e, selectable);
+        verify(metricService).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_EXHAUSTED), any(), any());
+    }
+
+    @Test
+    void doAcceptWhenNoFallbackConfiguredEmitsNoFallbackMetrics() throws Exception {
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        verify(metricService, never()).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_CONFIGURED), any(), any());
+        verify(metricService, never()).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_USED), any(), any());
+        verify(metricService, never()).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_EXHAUSTED), any(), any());
+    }
+
+    private void setRequestDatabaseStack(String flavor, List<String> fallbackTypes, String effectivelyUsedFlavor) {
+        com.sequenceiq.cloudbreak.cloud.model.DatabaseServer.Builder builder =
+                com.sequenceiq.cloudbreak.cloud.model.DatabaseServer.builder()
+                        .withFlavor(flavor)
+                        .withFallbackInstanceTypes(fallbackTypes);
+        if (effectivelyUsedFlavor != null) {
+            builder.withParams(Map.of(com.sequenceiq.cloudbreak.cloud.model.DatabaseServer.EFFECTIVELY_USED_FLAVOR, effectivelyUsedFlavor));
+        }
+        databaseStack = new DatabaseStack(null, builder.build(), Map.of(), "");
     }
 
     private void initCommon() {

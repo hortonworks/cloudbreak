@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessagePro
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -208,8 +209,8 @@ class AwsRdsLaunchServiceTest {
         when(awsCloudFormationErrorMessageProvider.getErrorReason(eq(authenticatedContext), eq(STACK_NAME_CF), any()))
                 .thenReturn("The requested resource failed: InsufficientDBInstanceCapacity for db.m5.large");
 
-        List<CloudResourceStatus> statuses = underTest.launch(authenticatedContext,
-                createDatabaseStack("db.m5.large", List.of("db.m6i.large", "db.m7i.large")), resourceNotifier);
+        DatabaseStack databaseStack = createDatabaseStack("db.m5.large", List.of("db.m6i.large", "db.m7i.large"));
+        List<CloudResourceStatus> statuses = underTest.launch(authenticatedContext, databaseStack, resourceNotifier);
 
         assertThat(statuses).isNotNull();
         checkOutputResourceExists(statuses, ResourceType.RDS_INSTANCE, OUT_DB_INSTANCE);
@@ -218,8 +219,23 @@ class AwsRdsLaunchServiceTest {
         verify(awsStackRequestHelper, times(2)).createCreateStackRequest(eq(authenticatedContext), stackCaptor.capture(), eq(STACK_NAME_CF), eq(CF_TEMPLATE));
         assertThat(stackCaptor.getAllValues().get(0).getDatabaseServer().getFlavor()).isEqualTo("db.m5.large");
         assertThat(stackCaptor.getAllValues().get(1).getDatabaseServer().getFlavor()).isEqualTo("db.m6i.large");
+        assertThat(databaseStack.getDatabaseServer().getParameters().get(DatabaseServer.EFFECTIVELY_USED_FLAVOR)).isEqualTo("db.m6i.large");
         verify(cfRetryClient, times(2)).createStack(any());
         verify(cfRetryClient).deleteStack(any());
+    }
+
+    @Test
+    void launchStampsPrimaryInstanceTypeWhenPrimarySucceeds() {
+        when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient)).thenReturn(CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
+        when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any())).thenReturn(null);
+
+        DatabaseStack databaseStack = createDatabaseStack("db.m5.large", List.of("db.m6i.large"));
+        List<CloudResourceStatus> statuses = underTest.launch(authenticatedContext, databaseStack, resourceNotifier);
+
+        assertThat(statuses).isNotNull();
+        assertThat(databaseStack.getDatabaseServer().getParameters().get(DatabaseServer.EFFECTIVELY_USED_FLAVOR)).isEqualTo("db.m5.large");
+        verify(cfRetryClient, times(1)).createStack(any());
+        verify(cfRetryClient, never()).deleteStack(any());
     }
 
     @Test
@@ -232,7 +248,7 @@ class AwsRdsLaunchServiceTest {
 
         assertThatThrownBy(() -> underTest.launch(authenticatedContext,
                 createDatabaseStack("db.m5.large", List.of("db.m6i.large")), resourceNotifier))
-                .isInstanceOf(CloudConnectorException.class);
+                .isInstanceOf(InsufficientCapacityException.class);
 
         verify(cfRetryClient, times(2)).createStack(any());
         verify(cfRetryClient).deleteStack(any());

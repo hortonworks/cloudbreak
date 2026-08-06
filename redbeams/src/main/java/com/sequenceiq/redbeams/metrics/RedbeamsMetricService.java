@@ -4,8 +4,10 @@ import java.util.Optional;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
+import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 @Primary
@@ -20,11 +22,20 @@ public class RedbeamsMetricService extends AbstractMetricService {
     }
 
     public void incrementMetricCounter(MetricType metricType, Optional<DBStack> dbStack) {
-        String dbVendorName = dbStack
+        incrementMetricCounter(metricType,
+                RedbeamsMetricTag.DATABASE_VENDOR.name(), databaseVendorName(dbStack));
+    }
+
+    public void incrementMetricCounter(MetricType metricType, Optional<DBStack> dbStack, String cloudPlatform) {
+        incrementMetricCounter(metricType,
+                RedbeamsMetricTag.DATABASE_VENDOR.name(), databaseVendorName(dbStack),
+                MetricTag.CLOUD_PROVIDER.name(), StringUtils.hasText(cloudPlatform) ? cloudPlatform : "UNKNOWN");
+    }
+
+    private String databaseVendorName(Optional<DBStack> dbStack) {
+        return dbStack
                 .filter(db -> db.getDatabaseServer() != null)
                 .map(db -> db.getDatabaseServer().getDatabaseVendor().displayName())
                 .orElse("UNKNOWN");
-        incrementMetricCounter(metricType,
-                RedbeamsMetricTag.DATABASE_VENDOR.name(), dbVendorName);
     }
 }

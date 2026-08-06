@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessagePro
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
@@ -168,14 +169,21 @@ public class AwsRdsLaunchService {
             try {
                 waitForStackCreationToComplete(ac, cFStackName, cfClient);
                 LOGGER.info("RDS CloudFormation stack {} created with instance type '{}'", cFStackName, instanceType);
+                stack.getDatabaseServer().putParameter(DatabaseServer.EFFECTIVELY_USED_FLAVOR, instanceType);
                 return;
             } catch (Exception e) {
                 Supplier<String> reasonSupplier = () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, CREATE_FAILED);
                 String reason = resolveErrorReasonForClassification(cFStackName, reasonSupplier);
-                if (!lastCandidate && isCapacityFailure(reason)) {
-                    LOGGER.warn("RDS instance type '{}' could not be provisioned due to capacity shortage, falling back to '{}'. Reason: {}",
-                            instanceType, instanceTypes.get(i + 1), reason);
-                    deleteRolledBackStack(ac, cFStackName, cfClient);
+                if (isCapacityFailure(reason)) {
+                    if (!lastCandidate) {
+                        LOGGER.warn("RDS instance type '{}' could not be provisioned due to capacity shortage, falling back to '{}'. Reason: {}",
+                                instanceType, instanceTypes.get(i + 1), reason);
+                        deleteRolledBackStack(ac, cFStackName, cfClient);
+                    } else {
+                        throw new InsufficientCapacityException(String.format(
+                                "RDS CloudFormation stack %s creation failed: all instance types %s exhausted due to capacity shortage. Reason: %s",
+                                cFStackName, instanceTypes, reason), e);
+                    }
                 } else {
                     handleWaiterError(String.format("RDS CloudFormation stack %s creation failed", cFStackName), reasonSupplier, e);
                 }

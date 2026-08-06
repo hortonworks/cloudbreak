@@ -6,13 +6,16 @@ import java.util.Optional;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -41,6 +44,8 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.metrics.MetricType;
+import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.DatabaseCapabilityService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
@@ -89,6 +94,9 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     @Inject
     private DatabaseEncryptionValidator databaseEncryptionValidator;
 
+    @Inject
+    private RedbeamsMetricService metricService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AllocateDatabaseServerRequest.class);
@@ -100,12 +108,19 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
         LOGGER.debug("Received event: {}", event);
         AllocateDatabaseServerRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
+        String cloudPlatform = cloudContext.getPlatform() != null ? cloudContext.getPlatform().value() : null;
+        List<String> fallbackInstanceTypes = request.getDatabaseStack().getDatabaseServer().getFallbackInstanceTypes();
+        boolean fallbackConfigured = !CollectionUtils.isEmpty(fallbackInstanceTypes);
+        DBStack dbStack = null;
         Selectable response;
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             CloudCredential cloudCredential = request.getCloudCredential();
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
-            DBStack dbStack = dbStackService.getById(request.getResourceId());
+            dbStack = dbStackService.getById(request.getResourceId());
+            if (fallbackConfigured) {
+                metricService.incrementMetricCounter(MetricType.DB_INSTANCE_TYPE_FALLBACK_CONFIGURED, Optional.of(dbStack), cloudPlatform);
+            }
             DatabaseStack databaseStack = setupMissingParameters(connector, cloudCredential, cloudContext.getPlatformVariant(), request, dbStack);
             databaseServerSslCertificatePrescriptionService
                     .prescribeSslCertificateIfNeeded(cloudContext,
@@ -123,13 +138,32 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
             cloudResourceValidationService.validateResourcesState(cloudContext, statePollerResult);
+            recordInstanceTypeFallbackIfUsed(cloudContext, databaseStack, dbStack, cloudPlatform);
             response = new AllocateDatabaseServerSuccess(request.getResourceId());
             LOGGER.debug("Launching the database stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
+            if (fallbackConfigured && ExceptionUtils.indexOfType(e, InsufficientCapacityException.class) >= 0) {
+                metricService.incrementMetricCounter(MetricType.DB_INSTANCE_TYPE_FALLBACK_EXHAUSTED, Optional.ofNullable(dbStack), cloudPlatform);
+                LOGGER.warn("RDS instance-type fallback exhausted for {}: all candidates {} failed due to capacity shortage",
+                        cloudContext, fallbackInstanceTypes, e);
+            }
             response = new AllocateDatabaseServerFailed(request.getResourceId(), e);
             LOGGER.warn("Error launching the database stack:", e);
         }
         return response;
+    }
+
+    private void recordInstanceTypeFallbackIfUsed(CloudContext cloudContext, DatabaseStack databaseStack, DBStack dbStack, String cloudPlatform) {
+        DatabaseServer databaseServer = databaseStack.getDatabaseServer();
+        String requestedInstanceType = databaseServer.getFlavor();
+        Object usedInstanceType = databaseServer.getParameters().get(DatabaseServer.EFFECTIVELY_USED_FLAVOR);
+        if (usedInstanceType != null && !usedInstanceType.equals(requestedInstanceType)) {
+            metricService.incrementMetricCounter(MetricType.DB_INSTANCE_TYPE_FALLBACK_USED, Optional.of(dbStack), cloudPlatform);
+            LOGGER.info("RDS instance-type fallback used for {}: requested '{}', provisioned '{}', candidates {}",
+                    cloudContext, requestedInstanceType, usedInstanceType, databaseServer.getFallbackInstanceTypes());
+        } else {
+            LOGGER.debug("Primary instance type '{}' provisioned for {}, no fallback needed", requestedInstanceType, cloudContext);
+        }
     }
 
     private DatabaseStack setupMissingParameters(CloudConnector cloudConnector, CloudCredential cloudCredential, CloudPlatformVariant platformVariant,
