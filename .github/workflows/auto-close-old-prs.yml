@@ -8,7 +8,7 @@ permissions:
   issues: write
 jobs:
   close-old-prs:
-    runs-on: ubuntu-latest
+    runs-on: [cb-ubuntu22]
     steps:
       - name: Close PRs created more than 30 days ago
         env:
