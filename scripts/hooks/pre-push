@@ -2,7 +2,7 @@
 #
 # Reject pushes that contain commits with messages that do not adhere
 # to the defined regex.
-
+#
 # This can be a useful pre-receive hook [1] if you want to ensure every
 # commit is associated with a ticket ID.
 #
@@ -11,26 +11,54 @@
 #
 # [1] https://help.github.com/en/enterprise/user/articles/working-with-pre-receive-hooks
 #
+# Git passes the refs being pushed on stdin, one per line:
+#   <local ref> <local sha> <remote ref> <remote sha>
+# We validate exactly the commits that would be added to the remote for
+# each pushed ref, so the check no longer depends on the currently
+# checked-out branch (which broke pushes from worktrees / already-pushed
+# HEADs and produced a spurious empty '' commit message).
+#
 
 set -e
 
 msg_regex='^[a-z]+\-[0-9]+\s?|^Merge|^Bumps.*from|^Revert'
+zero='0000000000000000000000000000000000000000'
 
 echo "[Starting] JIRA ID in commit message validation"
 
-commits=$(git log HEAD --not --remotes --max-count=10 --pretty=format:%s)
+status=0
 
-while IFS=$'\n' read -r commitMessage
-do
-	if ! echo $commitMessage | grep -iqE "$msg_regex"; then
-		echo "ERROR:"
-		echo "ERROR: Invalid commit message. Your push was rejected because the commit message: -----> '$commitMessage'" >&2;
-		echo "ERROR: Its missing the JIRA Issue. Please use the format'{JIRAPROJECT}-{TICKET_NUMBER} e.g: CB-12345 my commit message goes here." >&2;
-		echo "ERROR: Please fix the commit message and push again."
-		echo "ERROR: https://help.github.com/en/articles/changing-a-commit-message"
-		echo "ERROR"
-		exit 1
+while read -r local_ref local_sha remote_ref remote_sha; do
+	# Branch deletion (local sha all-zero): nothing to validate.
+	if [ "$local_sha" = "$zero" ]; then
+		continue
 	fi
-done <<< "$commits"
+
+	if [ "$remote_sha" = "$zero" ] || ! git cat-file -e "${remote_sha}^{commit}" 2>/dev/null; then
+		# New branch on the remote, or a remote tip we don't have
+		# locally: validate commits not already reachable from any
+		# existing remote-tracking ref.
+		commits=$(git rev-list "$local_sha" --not --remotes)
+	else
+		# Existing branch: validate only the newly pushed commits.
+		commits=$(git rev-list "$remote_sha..$local_sha")
+	fi
+
+	for commit in $commits; do
+		commitMessage=$(git log -1 --pretty=format:%s "$commit")
+		if ! echo "$commitMessage" | grep -iqE "$msg_regex"; then
+			echo "ERROR:" >&2
+			echo "ERROR: Invalid commit message. Your push was rejected because commit ${commit} message: -----> '${commitMessage}'" >&2
+			echo "ERROR: Its missing the JIRA Issue. Please use the format '{JIRAPROJECT}-{TICKET_NUMBER}' e.g: CB-12345 my commit message goes here." >&2
+			echo "ERROR: Please fix the commit message and push again." >&2
+			echo "ERROR: https://help.github.com/en/articles/changing-a-commit-message" >&2
+			status=1
+		fi
+	done
+done
+
+if [ "$status" -ne 0 ]; then
+	exit 1
+fi
 
 echo "[Finished] JIRA ID in commit message validation"
