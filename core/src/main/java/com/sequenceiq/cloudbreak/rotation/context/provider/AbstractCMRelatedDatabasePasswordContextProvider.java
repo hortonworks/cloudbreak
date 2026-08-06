@@ -39,8 +39,6 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 
 public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
 
-    private static final Integer SALT_STATE_MAX_RETRY = 3;
-
     @Inject
     private RdsConfigService rdsConfigService;
 
@@ -63,6 +61,8 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
     private ExitCriteriaProvider exitCriteriaProvider;
 
     protected abstract Predicate<RDSConfig> getRDSConfigTypePredicate();
+
+    protected abstract int getSaltStateMaxRetry();
 
     protected Map<String, SaltPillarProperties> getPillarProperties(StackDto stack) {
         try {
@@ -113,8 +113,8 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
                 .withGatewayConfig(primaryGatewayConfig)
                 .withTargets(Set.of(primaryGatewayConfig.getHostname()))
                 .withExitCriteriaModel(exitCriteriaProvider.get(stack))
-                .withMaxRetry(SALT_STATE_MAX_RETRY)
-                .withMaxRetryOnError(SALT_STATE_MAX_RETRY);
+                .withMaxRetry(getSaltStateMaxRetry())
+                .withMaxRetryOnError(getSaltStateMaxRetry());
     }
 
     protected Map<RDSConfig, Pair<String, String>> getUserPassPairs(StackDto stack) {
