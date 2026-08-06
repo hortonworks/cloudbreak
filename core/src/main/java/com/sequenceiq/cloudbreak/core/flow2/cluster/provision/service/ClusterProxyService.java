@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
@@ -85,6 +86,9 @@ public class ClusterProxyService {
     @Inject
     private ClusterProxySecretProvider clusterProxySecretProvider;
 
+    @Inject
+    private GatewayService gatewayService;
+
     public ReadConfigResponse readConfig(StackView stack) {
         return clusterProxyRegistrationClient.readConfig(stack.getResourceCrn());
     }
@@ -97,7 +101,10 @@ public class ClusterProxyService {
     }
 
     public ConfigRegistrationResponse reRegisterCluster(Stack stack) {
-        return clusterProxyRegistrationClient.registerConfig(createProxyConfigReRegisterRequest(stack));
+        ReadConfigResponse readConfigResponse = clusterProxyRegistrationClient.readConfig(stack.getResourceCrn());
+        LOGGER.info("Re-registering cluster {} with Cluster Proxy, current knox secret ref in cluster-proxy: {}",
+                stack.getResourceCrn(), readConfigResponse != null ? readConfigResponse.getKnoxSecretRef() : null);
+        return clusterProxyRegistrationClient.registerConfig(createProxyConfigReRegisterRequest(readConfigResponse, stack));
     }
 
     public void updateClusterConfigWithKnoxSecretLocation(Long stackId, String knoxSecretPathAsVaultTokenPath) {
@@ -142,7 +149,7 @@ public class ClusterProxyService {
                 .withAliases(singletonList(clusterId(stack.getCluster())))
                 .withServices(serviceConfigs(stack))
                 .withAccountId(getAccountId(stack))
-                .withKnoxSecretRef(getTokenVaultPath(stack));
+                .withKnoxSecretRef(getTokenVaultPath(null, stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
@@ -154,7 +161,7 @@ public class ClusterProxyService {
     }
 
     private ConfigUpdateRequest createConfigUpdateRequest(Stack stack) {
-        return createConfigUpdateRequest(stack, getTokenVaultPath(stack));
+        return createConfigUpdateRequest(stack, getTokenVaultPath(null, stack));
     }
 
     private ConfigUpdateRequest createConfigUpdateRequest(Stack stack, String knoxSecretPathAsVaultTokenPath) {
@@ -165,25 +172,42 @@ public class ClusterProxyService {
         );
     }
 
-    private String getTokenVaultPath(Stack stack) {
+    private String getTokenVaultPath(ReadConfigResponse readConfigResponse, Stack stack) {
         Gateway gateway = stack.getCluster().getGateway();
+        if (wrongCluster(readConfigResponse)) {
+            LOGGER.warn("Cluster {} has a null/wrong cluster-proxy knox secret ref '{}', triggering gateway migration.",
+                    stack.getResourceCrn(), readConfigResponse.getKnoxSecretRef());
+            gateway = gatewayService.migrateWrongCluster(gateway);
+        }
         if (gateway == null || gateway.getTokenKeySecret() == null) {
             return null;
         }
         String tokenSecret = gateway.getTokenKeySecret().getSecret();
         if (StringUtils.isNotBlank(tokenSecret)) {
-            return clusterProxySecretProvider.generateClusterProxySecretFormat(tokenSecret);
+            String vaultPath = clusterProxySecretProvider.generateClusterProxySecretFormat(tokenSecret);
+            LOGGER.info("Resolved knox secret vault path for cluster {}: {}", stack.getResourceCrn(), vaultPath);
+            return vaultPath;
         }
+        LOGGER.info("Resolved knox secret vault path for cluster {}: null (no token key secret ref set)", stack.getResourceCrn());
         return null;
     }
 
-    private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
+    private boolean wrongCluster(ReadConfigResponse readConfigResponse) {
+        return readConfigResponse != null
+            && readConfigResponse.getKnoxSecretRef() != null
+            && readConfigResponse.getKnoxSecretRef().contains("null:");
+    }
+
+    private ConfigRegistrationRequest createProxyConfigReRegisterRequest(ReadConfigResponse readConfigResponse, Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
                 .withServices(serviceConfigs(stack))
                 .withKnoxUrl(knoxUrlForNoCcmAndCcmV1(stack))
-                .withAccountId(getAccountId(stack))
-                .withKnoxSecretRef(getTokenVaultPath(stack));
+                .withAccountId(getAccountId(stack));
+        String tokenVaultPath = getTokenVaultPath(readConfigResponse, stack);
+        if (StringUtils.isNotBlank(tokenVaultPath)) {
+            requestBuilder.withKnoxSecretRef(tokenVaultPath);
+        }
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {

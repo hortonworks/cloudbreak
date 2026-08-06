@@ -115,6 +115,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateInstanceTypeRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -1120,6 +1121,14 @@ public interface StackV4Endpoint {
     StepProgressResponse getSecretRotationProgress(@PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @QueryParam("secretType") @NotEmpty @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
+
+    @PUT
+    @Path("internal/update_instance_type")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update instance type for a specific host group in CB DB", operationId = "updateInstanceTypeInDatabase",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void updateInstanceTypeInDatabase(@PathParam("workspaceId") Long workspaceId,
+            @Valid @NotNull UpdateInstanceTypeRequest request);
 
     @PUT
     @Path("internal/crn/{crn}/modify_user_defined_tags")

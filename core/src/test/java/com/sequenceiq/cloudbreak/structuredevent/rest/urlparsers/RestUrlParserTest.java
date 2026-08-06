@@ -105,6 +105,7 @@ public class RestUrlParserTest {
             "internal/get_database_certificate_status",
             "internal/manage_db_user",
             "internal/update_stack_volume_resources",
+            "internal/update_instance_type",
             "support/internal/defaults",
             "internal/get_clusters_names_by_encryption_profile",
             "cluster_upgrade/reinitiable"
