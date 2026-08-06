@@ -167,10 +167,10 @@ public class ClusterProxyService {
 
     private String getTokenVaultPath(Stack stack) {
         Gateway gateway = stack.getCluster().getGateway();
-        if (gateway == null || gateway.getSignKeySecret() == null) {
+        if (gateway == null || gateway.getTokenKeySecret() == null) {
             return null;
         }
-        String tokenSecret = gateway.getSignKeySecret().getSecret();
+        String tokenSecret = gateway.getTokenKeySecret().getSecret();
         if (StringUtils.isNotBlank(tokenSecret)) {
             return clusterProxySecretProvider.generateClusterProxySecretFormat(tokenSecret);
         }

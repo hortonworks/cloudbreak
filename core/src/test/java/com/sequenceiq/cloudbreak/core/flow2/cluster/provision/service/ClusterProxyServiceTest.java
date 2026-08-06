@@ -587,7 +587,7 @@ class ClusterProxyServiceTest {
         Stack stack = testStack();
         Gateway gateway = new Gateway();
         Secret secret = new Secret("vaultsecret", "vaulturl");
-        gateway.setSignKeySecret(secret);
+        gateway.setTokenKeySecretJson(secret);
         gateway.setPath("test-cluster");
         stack.getCluster().setGateway(gateway);
         return stack;
