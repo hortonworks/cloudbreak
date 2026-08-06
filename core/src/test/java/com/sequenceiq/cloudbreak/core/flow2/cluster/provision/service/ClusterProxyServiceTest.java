@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigUpdateRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -50,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
@@ -113,6 +116,9 @@ class ClusterProxyServiceTest {
 
     @Mock
     private EnvironmentService environmentService;
+
+    @Mock
+    private GatewayService gatewayService;
 
     @InjectMocks
     private ClusterProxyService underTest;
@@ -606,5 +612,67 @@ class ClusterProxyServiceTest {
     private String vaultSecretString(String password) {
         return JsonUtil.writeValueAsStringSilent(new VaultSecret("test-engine-path", "test-engine-class",
                 "/cb/test-data/secret/" + password, 1));
+    }
+
+    @Test
+    void testReRegisterClusterWrongKnoxSecretRefTriggersGatewayMigration() throws JsonProcessingException {
+        Stack stack = testStackUsingCCM();
+        Gateway originalGateway = new Gateway();
+        originalGateway.setId(42L);
+        originalGateway.setPath("test-cluster");
+        originalGateway.setSignKey("test-sign-key-raw");
+        stack.getCluster().setGateway(originalGateway);
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
+
+        ReadConfigResponse readConfigResponse = new ReadConfigResponse();
+        readConfigResponse.setKnoxSecretRef("null:some-broken-path");
+        when(clusterProxyRegistrationClient.readConfig(STACK_CRN)).thenReturn(readConfigResponse);
+
+        Gateway migratedGateway = new Gateway();
+        migratedGateway.setPath("test-cluster");
+        migratedGateway.setTokenKeySecretJson(new Secret("test-sign-key-raw", "cbvault/token-key-path"));
+        when(gatewayService.migrateWrongCluster(originalGateway)).thenReturn(migratedGateway);
+        when(clusterProxySecretProvider.generateClusterProxySecretFormat("cbvault/token-key-path")).thenReturn("vault://cluster-proxy/token-key");
+
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        underTest.reRegisterCluster(stack);
+
+        verify(gatewayService).migrateWrongCluster(originalGateway);
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        assertEquals("vault://cluster-proxy/token-key", captor.getValue().getKnoxSecretRef());
+    }
+
+    @Test
+    void testReRegisterClusterValidKnoxSecretRefDoesNotTriggerMigration() throws JsonProcessingException {
+        Stack stack = testStackUsingCCM();
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        stack.getCluster().setGateway(gateway);
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
+
+        ReadConfigResponse readConfigResponse = new ReadConfigResponse();
+        readConfigResponse.setKnoxSecretRef("cluster-proxy/valid-token-key-path");
+        when(clusterProxyRegistrationClient.readConfig(STACK_CRN)).thenReturn(readConfigResponse);
+
+        underTest.reRegisterCluster(stack);
+
+        verify(gatewayService, never()).migrateWrongCluster(any());
+    }
+
+    @Test
+    void testReRegisterClusterResolvedTokenVaultPathBlankRequestHasNoKnoxSecretRef() throws JsonProcessingException {
+        Stack stack = testStackUsingCCM();
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        // tokenKeySecret defaults to Secret.EMPTY; getSecret() == null → no knox secret ref
+        stack.getCluster().setGateway(gateway);
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
+        // readConfig returns null → wrongCluster(null) == false → no migration
+
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        underTest.reRegisterCluster(stack);
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        assertNull(captor.getValue().getKnoxSecretRef());
     }
 }

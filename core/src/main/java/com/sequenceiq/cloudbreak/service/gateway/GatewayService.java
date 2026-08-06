@@ -6,6 +6,8 @@ import java.util.Optional;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.view.GatewayView;
 
 @Service
 public class GatewayService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayService.class);
 
     @Value("${cb.https.port}")
     private String httpsPort;
@@ -82,6 +86,25 @@ public class GatewayService {
             gateway.setSignPub(gateway.getSignPubDeprecated());
         }
         return save(gateway);
+    }
+
+    public Gateway migrateWrongCluster(Gateway gatewayView) {
+        LOGGER.warn("Migrating gateway {} by copying sign key reference into token key fields because cluster-proxy held a null vault path.",
+                gatewayView.getId());
+        Gateway gateway = repository.findById(gatewayView.getId()).orElseThrow(NotFoundException.notFound("Gateway should exist"));
+        if (gateway.getSignKeySecret() != null && gateway.getSignKeySecret().getRaw() != null) {
+            gateway.setTokenKeySecret(gateway.getSignKeySecret().getRaw());
+        } else {
+            LOGGER.warn("Cannot migrate gateway {}: sign key secret is empty, skipping token key copy.", gateway.getId());
+        }
+        if (gateway.getSignPubSecret() != null && gateway.getSignPubSecret().getRaw() != null) {
+            gateway.setTokenPubSecret(gateway.getSignPubSecret().getRaw());
+        } else {
+            LOGGER.warn("Cannot migrate gateway {}: sign pub secret is empty, skipping token pub copy.", gateway.getId());
+        }
+        Gateway saved = save(gateway);
+        LOGGER.info("Migration done for gateway {}.", gateway.getId());
+        return saved;
     }
 
     public void setLegacyFieldsForServiceRollback(GatewayView gatewayView) {
