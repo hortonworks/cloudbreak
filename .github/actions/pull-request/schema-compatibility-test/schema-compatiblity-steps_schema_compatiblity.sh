@@ -23,7 +23,9 @@ main() {
       -x checkstyleMain \
       -x checkstyleTest \
       -x spotbugsMain \
-      -x spotbugsTest >> build.log
+      -x spotbugsTest \
+      -x spotlessApply \
+      -x spotlessCheck >> build.log
 
     rm -rf integration-test/integcb/.deps
     rm -rf integration-test/integcb/.schema
@@ -36,15 +38,17 @@ main() {
     CB_VERSION=$(echo $PRODUCTION_VERSION)
     echo "Version to checkout: '$CB_VERSION'"
 
-    export PRIMARYKEY_CHECK=false && \
-    git checkout -f $CB_VERSION && \
+    export PRIMARYKEY_CHECK=false
+    git checkout -f $CB_VERSION
     $(pwd)/gradlew -Penv=jenkins -b build.gradle build --quiet --no-daemon --parallel --warning-mode none \
       -x test \
       -x checkstyleMain \
       -x checkstyleTest \
       -x spotbugsMain \
-      -x spotbugsTest >> build.log && \
-    cd integration-test/ && \
+      -x spotbugsTest \
+      -x spotlessApply \
+      -x spotlessCheck >> build.log
+    cd integration-test/
     docker rm -f $(docker ps -aq) || true
 
     echo "export CPUS_FOR_CLOUDBREAK=4.0" >> integcb/Profile_template
