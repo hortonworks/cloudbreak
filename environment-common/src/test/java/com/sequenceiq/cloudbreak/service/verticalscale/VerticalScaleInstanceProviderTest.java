@@ -10,11 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,9 +39,9 @@ import com.sequenceiq.common.model.Architecture;
 @ExtendWith(MockitoExtension.class)
 public class VerticalScaleInstanceProviderTest {
 
-    private static final String INSTANCE_TYPE_1 = "instanceType1";
+    private static final String INSTANCE_TYPE_M5_XLARGE = "m5.xlarge";
 
-    private static final String INSTANCE_TYPE_2 = "instanceType2";
+    private static final String INSTANCE_TYPE_M5_2XLARGE = "m5.2xlarge";
 
     private static final String AVAILABILITY_ZONE_1 = "availabilityZone1";
 
@@ -50,6 +52,13 @@ public class VerticalScaleInstanceProviderTest {
 
     @InjectMocks
     private VerticalScaleInstanceProvider underTest;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        Field field = VerticalScaleInstanceProvider.class.getDeclaredField("minimumSupportedAzureVmGeneration");
+        field.setAccessible(true);
+        field.setInt(underTest, 5);
+    }
 
     @Test
     public void testRequestWhenWeAreRequestedSmallerMemoryInstancesShouldDropBadRequest() {
@@ -388,7 +397,7 @@ public class VerticalScaleInstanceProviderTest {
     void listInstanceTypesTestWhenNoCloudVmResponses() {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.of(), Map.of());
 
-        CloudVmTypes result = underTest.listInstanceTypes(CloudPlatform.GCP.name(), AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes(CloudPlatform.GCP.name(), AVAILABILITY_ZONE_1, INSTANCE_TYPE_M5_XLARGE, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of());
@@ -400,7 +409,7 @@ public class VerticalScaleInstanceProviderTest {
     @NullSource
     void listInstanceTypesTestWhenSuitableInstancesAndUnspecifiedAvailabilityZone(String availabilityZone) {
         VmType current = vmType(
-                INSTANCE_TYPE_1,
+                INSTANCE_TYPE_M5_XLARGE,
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
@@ -416,7 +425,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
-        CloudVmTypes result = underTest.listInstanceTypes("AWS", availabilityZone, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", availabilityZone, INSTANCE_TYPE_M5_XLARGE, allVmTypes);
 
         verifySuitableInstances(result);
     }
@@ -431,19 +440,19 @@ public class VerticalScaleInstanceProviderTest {
         assertThat(vmTypes).isNotNull();
         assertThat(vmTypes).hasSize(1);
         VmType vmType = vmTypes.iterator().next();
-        assertThat(vmType.getValue()).isEqualTo(INSTANCE_TYPE_1);
+        assertThat(vmType.getValue()).isEqualTo(INSTANCE_TYPE_M5_XLARGE);
 
         Map<String, VmType> defaultCloudVmResponses = result.getDefaultCloudVmResponses();
         assertThat(defaultCloudVmResponses).isNotNull();
         assertThat(defaultCloudVmResponses).hasSize(1);
         VmType vmTypeDefault = defaultCloudVmResponses.get(AVAILABILITY_ZONE_1);
-        assertThat(vmTypeDefault.getValue()).isEqualTo(INSTANCE_TYPE_1);
+        assertThat(vmTypeDefault.getValue()).isEqualTo(INSTANCE_TYPE_M5_XLARGE);
     }
 
     @Test
     void listInstanceTypesTestWhenInvalidAvailabilityZone() {
         VmType current = vmType(
-                INSTANCE_TYPE_1,
+                INSTANCE_TYPE_M5_XLARGE,
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
@@ -456,7 +465,7 @@ public class VerticalScaleInstanceProviderTest {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
                 Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
 
-        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_2, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_2, INSTANCE_TYPE_M5_XLARGE, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_2, Set.of()));
@@ -466,7 +475,7 @@ public class VerticalScaleInstanceProviderTest {
     @Test
     void listInstanceTypesTestWhenInvalidCurrentInstanceType() {
         VmType current = vmType(
-                INSTANCE_TYPE_1,
+                INSTANCE_TYPE_M5_XLARGE,
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
@@ -479,7 +488,7 @@ public class VerticalScaleInstanceProviderTest {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
                 Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
 
-        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_2, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_M5_2XLARGE, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_1, Set.of()));
@@ -489,7 +498,7 @@ public class VerticalScaleInstanceProviderTest {
     @Test
     void listInstanceTypesTestWhenNoSuitableInstances() {
         VmType current = vmType(
-                INSTANCE_TYPE_1,
+                INSTANCE_TYPE_M5_XLARGE,
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
@@ -505,7 +514,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(false);
         when(minimalHardwareFilter.minCpu()).thenReturn(4);
 
-        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_M5_XLARGE, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_1, Set.of()));
@@ -515,7 +524,7 @@ public class VerticalScaleInstanceProviderTest {
     @Test
     void listInstanceTypesTestWhenSuitableInstancesAndGivenAvailabilityZone() {
         VmType current = vmType(
-                INSTANCE_TYPE_1,
+                INSTANCE_TYPE_M5_XLARGE,
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
@@ -531,17 +540,17 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
-        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_M5_XLARGE, allVmTypes);
 
         verifySuitableInstances(result);
     }
 
     @Test
     public void testValidateInstanceTypeWithMultipleCurrentAndRequestedTypesSuccess() {
-        Optional<VmType> current1 = vmTypeOptional("m3.xlarge", 16, 4, null, null);
-        Optional<VmType> current2 = vmTypeOptional("m5.xlarge", 16, 4, null, null);
-        Optional<VmType> requested1 = vmTypeOptional("m3.2xlarge", 32, 8, null, null);
-        Optional<VmType> requested2 = vmTypeOptional("m5.2xlarge", 32, 8, null, null);
+        Optional<VmType> current1 = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null, null);
+        Optional<VmType> current2 = vmTypeOptional("m5d.xlarge", 16, 4, null, null);
+        Optional<VmType> requested1 = vmTypeOptional(INSTANCE_TYPE_M5_2XLARGE, 32, 8, null, null);
+        Optional<VmType> requested2 = vmTypeOptional("m5d.2xlarge", 32, 8, null, null);
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
@@ -553,12 +562,12 @@ public class VerticalScaleInstanceProviderTest {
     @Test
     public void testValidateInstanceTypeWithMultipleCurrentAndRequestedTypesFailure() {
         Optional<VmType> current = vmTypeOptional("m3.xlarge", 16, 4, null, null);
-        Optional<VmType> requested = vmTypeOptional("m5.xlarge", 16, 4, null, null);
+        Optional<VmType> requested = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null, null);
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
         Optional<VmType> currentWithEphemeral = vmTypeOptional("m3.xlarge", 16, 4, null,
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 2, 2, 2, 2));
-        Optional<VmType> requestedWithLessEphemeral = vmTypeOptional("m5.xlarge", 16, 4, null,
+        Optional<VmType> requestedWithLessEphemeral = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null,
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1));
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
@@ -576,7 +585,7 @@ public class VerticalScaleInstanceProviderTest {
     @Test
     void listInstanceTypesTestWithMultipleCurrentInstanceTypes() {
         VmType current1 = vmType(
-                INSTANCE_TYPE_1,
+                INSTANCE_TYPE_M5_XLARGE,
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
@@ -586,7 +595,7 @@ public class VerticalScaleInstanceProviderTest {
                 List.of()
         );
         VmType current2 = vmType(
-                INSTANCE_TYPE_2,
+                INSTANCE_TYPE_M5_2XLARGE,
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
@@ -603,7 +612,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1,
-                List.of(INSTANCE_TYPE_1, INSTANCE_TYPE_2), allVmTypes, null,
+                List.of(INSTANCE_TYPE_M5_XLARGE, INSTANCE_TYPE_M5_2XLARGE), allVmTypes, null,
                 com.sequenceiq.common.api.type.CdpResourceType.DEFAULT);
 
         assertThat(result).isNotNull();
@@ -632,6 +641,118 @@ public class VerticalScaleInstanceProviderTest {
                         .withArchitecture(Architecture.X86_64)
                         .create(),
                 false);
+    }
+
+    @Test
+    public void testAzureScalingToPreV5ShouldThrow() {
+        Optional<VmType> current = vmTypeOptional("Standard_D8s_v3", 16, 8, null, null);
+        Optional<VmType> requested = vmTypeOptional("Standard_D8s_v4", 16, 8, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.AZURE.name(), List.of(current), List.of(requested), null, Map.of()));
+        assertEquals("Unable to resize since scaling to generation v4 (Standard_D8s_v4) is not allowed. " +
+                "Minimum supported generation is v5.", ex.getMessage());
+    }
+
+    @Test
+    public void testAzureScalingToV5ShouldSucceed() {
+        Optional<VmType> current = vmTypeOptional("Standard_D8s_v3", 16, 8, null, null);
+        Optional<VmType> requested = vmTypeOptional("Standard_D8s_v5", 16, 8, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.AZURE.name(), List.of(current), List.of(requested), null, Map.of()));
+    }
+
+    @Test
+    public void testAzureScalingToV6ShouldThrow() {
+        Optional<VmType> current = vmTypeOptional("Standard_D8s_v5", 16, 8, null, null);
+        Optional<VmType> requested = vmTypeOptional("Standard_D8s_v6", 16, 8, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.AZURE.name(), List.of(current), List.of(requested), null, Map.of()));
+        assertEquals("Unable to resize since scaling to generation v6 (Standard_D8s_v6) is not allowed. " +
+                "Maximum supported generation is v5.", ex.getMessage());
+    }
+
+    @Test
+    public void testAzureScalingToV7ShouldThrow() {
+        Optional<VmType> current = vmTypeOptional("Standard_D8s_v5", 16, 8, null, null);
+        Optional<VmType> requested = vmTypeOptional("Standard_D8s_v7", 16, 8, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.AZURE.name(), List.of(current), List.of(requested), null, Map.of()));
+        assertEquals("Unable to resize since scaling to generation v7 (Standard_D8s_v7) is not allowed. " +
+                "Maximum supported generation is v5.", ex.getMessage());
+    }
+
+    @Test
+    public void testAzureScalingToVersionlessTypeShouldThrow() {
+        Optional<VmType> current = vmTypeOptional("Standard_D8s_v5", 16, 8, null, null);
+        Optional<VmType> requested = vmTypeOptional("Basic_A0", 16, 8, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.AZURE.name(), List.of(current), List.of(requested), null, Map.of()));
+        assertEquals("Unable to resize since instance type Basic_A0 does not have a generation suffix. " +
+                "Only v5 generation instances are supported.", ex.getMessage());
+    }
+
+    @Test
+    public void testAzureSameGenerationV5ShouldSucceed() {
+        Optional<VmType> current = vmTypeOptional("Standard_D8s_v5", 16, 8, null, null);
+        Optional<VmType> requested = vmTypeOptional("Standard_D16s_v5", 32, 16, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.AZURE.name(), List.of(current), List.of(requested), null, Map.of()));
+    }
+
+    @Test
+    public void testAwsScalingSkipsGenerationCheck() {
+        Optional<VmType> current = vmTypeOptional("m6i.xlarge", 16, 4, null, null);
+        Optional<VmType> requested = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.AWS.name(), List.of(current), List.of(requested), null, Map.of()));
+    }
+
+    @Test
+    public void testGcpScalingSkipsGenerationCheck() {
+        Optional<VmType> current = vmTypeOptional("n2-standard-8", 32, 8, null, null);
+        Optional<VmType> requested = vmTypeOptional("n1-standard-8", 32, 8, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() ->
+                underTest.validateInstanceTypeForVerticalScaling(
+                        CloudPlatform.GCP.name(), List.of(current), List.of(requested), null, Map.of()));
     }
 
 }
