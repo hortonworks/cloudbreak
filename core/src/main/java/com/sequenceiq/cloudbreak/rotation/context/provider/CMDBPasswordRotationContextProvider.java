@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 @Component
 public class CMDBPasswordRotationContextProvider extends AbstractCMRelatedDatabasePasswordContextProvider implements RotationContextProvider {
 
+    private static final Integer SALT_STATE_MAX_RETRY = 20;
+
     @Inject
     private StackDtoService stackService;
 
@@ -93,6 +95,11 @@ public class CMDBPasswordRotationContextProvider extends AbstractCMRelatedDataba
         } catch (Exception e) {
             throw new SecretRotationException(e);
         }
+    }
+
+    @Override
+    protected int getSaltStateMaxRetry() {
+        return SALT_STATE_MAX_RETRY;
     }
 
     @Override
