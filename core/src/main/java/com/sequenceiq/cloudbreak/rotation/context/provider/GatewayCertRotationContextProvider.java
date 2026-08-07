@@ -66,6 +66,16 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         GatewayView gateway = gatewayService.getByClusterId(stack.getCluster().getId())
                 .map(gatewayService::putLegacyFieldsIntoVaultIfNecessary)
                 .map(gw -> gatewayService.putLegacyTokenCertIntoVaultIfNecessary(gw, readConfigResponse))
+                .map(gw -> {
+                    if (gw.getTokenPubSecret() == null
+                            || StringUtils.isBlank(gw.getTokenPubSecret().getRaw())
+                            || gw.getTokenKeySecret() == null
+                            || StringUtils.isBlank(gw.getTokenKeySecret().getRaw())) {
+                        return gatewayService.migrateWrongCluster(gw);
+                    } else {
+                        return gw;
+                    }
+                })
                 .orElseThrow(() -> new CloudbreakRuntimeException(format("Cannot find Gateway in database, cluster id %s", stack.getCluster().getId())));
         Gateway fullGateway = gatewayService.getById(gateway.getId()).orElseThrow(() -> new SecretRotationException("Gateway cannot be found!"));
         GatewayView newGatewaySecrets = gatewayService.generateSignKeys(new Gateway());
@@ -131,7 +141,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         return ClusterProxyUpdateConfigRotationContext.builder()
                 .withResourceCrn(resourceCrn)
                 .withKnoxSecretPath(() -> clusterProxySecretProvider.generateClusterProxySecretFormat(
-                            gateway.getTokenKeySecret().getSecret()
+                                gateway.getTokenKeySecret().getSecret()
                         )
                 )
                 .build();

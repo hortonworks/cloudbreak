@@ -382,6 +382,65 @@ public class VerticalScalingValidatorServiceTest {
     }
 
     @Test
+    public void testRequestForMultiAzWithNullAvailabilityZoneResolvesFromInstanceGroupAzs() {
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
+        String instanceGroupNameInStack = "master";
+        String instanceGroupNameInRequest = "master";
+        String instanceTypeNameInStack = "e2-standard-2";
+        String instanceTypeNameInRequest = "e2-standard-4";
+        Credential credential = credential();
+        ExtendedCloudCredential extendedCloudCredential = extendedCloudCredential();
+        CloudVmTypes cloudVmTypes = cloudVmTypes(
+                "us-west2-a",
+                vmType(
+                        instanceTypeNameInStack,
+                        1,
+                        1,
+                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+                ),
+                vmType(
+                        instanceTypeNameInRequest,
+                        2,
+                        2,
+                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+                )
+        );
+
+        when(stack.isMultiAz()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(AWS);
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        when(stack.getRegion()).thenReturn("us-west2");
+        when(stack.isStopped()).thenReturn(true);
+        when(stack.getAvailabilityZone()).thenReturn(null);
+        when(stack.getPlatformvariant()).thenReturn("awsvariant");
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack,
+                Set.of("us-west2-a", "us-west2-b"))));
+        when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        when(multiAzCalculatorService.getAvailabilityZoneConnector(stack)).thenReturn(new AzureAvailabilityZoneConnector());
+        when(availabilityZoneService.findAllByInstanceGroupId(anyLong())).thenReturn(Set.of("us-west2-a", "us-west2-b").stream().map(s -> {
+            InstanceGroupAvailabilityZone availabilityZone = new InstanceGroupAvailabilityZone();
+            availabilityZone.setAvailabilityZone(s);
+            return availabilityZone;
+        }).collect(Collectors.toSet()));
+
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+        verticalScaleRequest.setGroup(instanceGroupNameInRequest);
+
+        underTest.validateRequest(stack, verticalScaleRequest);
+
+        verify(verticalScaleInstanceProvider, times(1))
+                .validateInstanceTypeForVerticalScaling(anyString(), any(List.class), any(List.class),
+                        eq(Set.of("us-west2-a", "us-west2-b")), anyMap(), any());
+    }
+
+    @Test
     public void testRequestWhenTheClusterDidNotStoppedShouldDropException() {
         ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
         String instanceGroupNameInRequest = "master1";
