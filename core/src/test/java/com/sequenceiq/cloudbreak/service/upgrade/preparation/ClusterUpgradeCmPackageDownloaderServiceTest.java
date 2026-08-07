@@ -110,6 +110,29 @@ class ClusterUpgradeCmPackageDownloaderServiceTest {
     }
 
     @Test
+    void testDownloadCmPackagesWhenCurrentBuildNumberIsNull() throws Exception {
+        Image candidateImage = mock(Image.class);
+        ClouderaManagerRepo currentRepo = new ClouderaManagerRepo().withBuildNumber(null);
+        com.sequenceiq.cloudbreak.cloud.model.Image currentModelImage = createModelImage();
+
+        when(imageService.getImage(STACK_ID)).thenReturn(currentModelImage);
+        when(imageCatalogService.getImage(WORKSPACE_ID, currentModelImage.getImageCatalogUrl(), currentModelImage.getImageCatalogName(), IMAGE_ID))
+                .thenReturn(StatedImage.statedImage(candidateImage, null, null));
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(STACK_ID)).thenReturn(currentRepo);
+        when(candidateImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER)).thenReturn("124");
+        when(clusterManagerUpgradePreparationStateParamsProvider.createParamsForCmPackageDownload(candidateImage, STACK_ID)).thenReturn(Map.of());
+        when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, "cloudera/repo/upgrade-preparation", 200, 3))
+                .thenReturn(mock(OrchestratorStateParams.class));
+
+        underTest.downloadCmPackages(STACK_ID, IMAGE_ID);
+
+        verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_CM_PACKAGES);
+        verify(clusterHostServiceRunner).redeployStates(stackDto);
+        verify(hostOrchestrator).saveCustomPillars(any(), any(), any());
+        verify(hostOrchestrator).runOrchestratorState(any(OrchestratorStateParams.class));
+    }
+
+    @Test
     void testDownloadCmPackagesNoDownloadNeeded() throws Exception {
         Image candidateImage = mock(Image.class);
         ClouderaManagerRepo currentRepo = new ClouderaManagerRepo().withBuildNumber("123");
