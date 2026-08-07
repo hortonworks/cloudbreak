@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -70,7 +71,8 @@ public class ClusterUpgradeCmPackageDownloaderService {
         Image candidateImage = getImageFromCatalog(stackId, stack.getWorkspaceId(), targetImageId);
         Long clusterId = stack.getCluster().getId();
         ClouderaManagerRepo currentClouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
-        if (currentClouderaManagerRepo.getBuildNumber().equals(candidateImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER))) {
+        String candidateCmBuildNumber = candidateImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER);
+        if (StringUtils.equals(currentClouderaManagerRepo.getBuildNumber(), candidateCmBuildNumber)) {
             LOGGER.debug("Cloudera Manager version is the same as the current one, no need to download CM packages");
         } else {
             eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_CM_PACKAGES);
