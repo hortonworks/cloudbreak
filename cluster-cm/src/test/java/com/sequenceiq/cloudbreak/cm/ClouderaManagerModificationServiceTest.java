@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.model.resetjvmparams.JvmConfigApplicability;
 import com.sequenceiq.cloudbreak.cluster.model.resetjvmparams.ResetJvmParamsDiff;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
@@ -361,6 +362,64 @@ class ClouderaManagerModificationServiceTest extends ClouderaManagerModification
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingStartRolesCommand(stack, v31Client, apiCommand.getId());
         verify(clusterCommandService, times(0)).save(any());
         verify(clusterCommandService).delete(startRoleClusterCommand);
+    }
+
+    @Test
+    void testHostsStartRolesDeletesCommandWhenPollingFails() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        ApiCommand apiCommand = new ApiCommand();
+        apiCommand.setId(1L);
+        when(clouderaManagerResourceApi.hostsStartRolesCommand(any())).thenReturn(apiCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, apiCommand.getId()))
+                .thenThrow(new ClouderaManagerOperationFailedException("Start roles command failed"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.hostsStartRoles(List.of("fqdn1", "fqdn2")));
+
+        ArgumentCaptor<ClusterCommand> clusterCommandArgumentCaptor = ArgumentCaptor.forClass(ClusterCommand.class);
+        verify(clusterCommandService).save(clusterCommandArgumentCaptor.capture());
+        verify(clusterCommandService).delete(clusterCommandArgumentCaptor.getValue());
+    }
+
+    @Test
+    void testHostsStartRolesIfCommandExistsDeletesCommandWhenPollingFails() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        ApiCommand apiCommand = new ApiCommand();
+        apiCommand.setId(1L);
+        ClusterCommand startRoleClusterCommand = new ClusterCommand();
+        startRoleClusterCommand.setCommandId(apiCommand.getId());
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(CLUSTER_ID, ClusterCommandType.HOST_START_ROLES))
+                .thenReturn(Optional.of(startRoleClusterCommand));
+        when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, apiCommand.getId()))
+                .thenThrow(new ClouderaManagerOperationFailedException("Start roles command failed"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.hostsStartRoles(List.of("fqdn1", "fqdn2")));
+
+        verify(clouderaManagerResourceApi, times(0)).hostsStartRolesCommand(any());
+        verify(clusterCommandService, times(0)).save(any());
+        verify(clusterCommandService).delete(startRoleClusterCommand);
+    }
+
+    @Test
+    void testHostsStartRolesDeletesCommandWhenPollingTimesOut() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        ApiCommand apiCommand = new ApiCommand();
+        apiCommand.setId(1L);
+        when(clouderaManagerResourceApi.hostsStartRolesCommand(any())).thenReturn(apiCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, apiCommand.getId())).thenReturn(timeout);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.hostsStartRoles(List.of("fqdn1", "fqdn2")));
+
+        ArgumentCaptor<ClusterCommand> clusterCommandArgumentCaptor = ArgumentCaptor.forClass(ClusterCommand.class);
+        verify(clusterCommandService).save(clusterCommandArgumentCaptor.capture());
+        verify(clusterCommandService, never()).delete(clusterCommandArgumentCaptor.getValue());
     }
 
     @Test
