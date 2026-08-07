@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeExternalRdsStateParamsProvider;
 import com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType;
@@ -83,9 +85,6 @@ class PostgresConfigServiceTest {
     private HostOrchestrator hostOrchestrator;
 
     @Mock
-    private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
-
-    @Mock
     private DatabaseSslService databaseSslService;
 
     @Mock
@@ -109,6 +108,9 @@ class PostgresConfigServiceTest {
     @Mock
     private EnvironmentConfigProvider environmentConfigProvider;
 
+    @Mock
+    private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
+
     @InjectMocks
     private PostgresConfigService underTest;
 
@@ -118,7 +120,7 @@ class PostgresConfigServiceTest {
     @BeforeEach
     void setUp() {
         Cluster cluster = new Cluster();
-        when(stack.getCluster()).thenReturn(cluster);
+        lenient().when(stack.getCluster()).thenReturn(cluster);
         lenient().when(externalDatabaseConfig.getGcpExternalDatabaseSslVerificationMode()).thenReturn("verify-ca");
         lenient().when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(false);
     }
@@ -643,6 +645,37 @@ class PostgresConfigServiceTest {
                 entry("tls12_ciphers", ""),
                 entry("tls13_ciphers", ""));
         verifyNoInteractions(encryptionProfileProvider);
+    }
+
+    @Test
+    void testCreateRdsConfigIfNeededDelegatesAllProvidersAndReturnsLastResult() {
+        AbstractRdsConfigProvider provider1 = mock(AbstractRdsConfigProvider.class);
+        AbstractRdsConfigProvider provider2 = mock(AbstractRdsConfigProvider.class);
+        RdsConfigWithoutCluster rdsConfig1 = mock(RdsConfigWithoutCluster.class);
+        RdsConfigWithoutCluster rdsConfig2 = mock(RdsConfigWithoutCluster.class);
+        RdsConfigWithoutCluster rdsConfig3 = mock(RdsConfigWithoutCluster.class);
+
+        when(rdsConfigProviderFactory.getAllSupportedRdsConfigProviders())
+                .thenReturn(new java.util.LinkedHashSet<>(List.of(provider1, provider2)));
+        when(provider1.createPostgresRdsConfigIfNeeded(stack)).thenReturn(Set.of(rdsConfig1));
+        when(provider2.createPostgresRdsConfigIfNeeded(stack)).thenReturn(Set.of(rdsConfig2, rdsConfig3));
+
+        Set<RdsConfigWithoutCluster> result = underTest.createRdsConfigIfNeeded(stack);
+
+        assertThat(result).size().isEqualTo(2);
+        assertThat(result).containsExactlyInAnyOrder(rdsConfig2, rdsConfig3);
+        verify(provider1).createPostgresRdsConfigIfNeeded(stack);
+        verify(provider2).createPostgresRdsConfigIfNeeded(stack);
+    }
+
+    @Test
+    void testCreateRdsConfigIfNeededReturnsEmptyWhenNoProviders() {
+        when(rdsConfigProviderFactory.getAllSupportedRdsConfigProviders())
+                .thenReturn(java.util.Collections.emptySet());
+
+        Set<RdsConfigWithoutCluster> result = underTest.createRdsConfigIfNeeded(stack);
+
+        assertThat(result).isEmpty();
     }
 
     @Test

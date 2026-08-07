@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class OozieRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -26,12 +26,6 @@ public class OozieRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    private boolean isRdsConfigNeedForOozieServer(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintJsonText();
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.doesCMComponentExistsInBlueprint("OOZIE_SERVER");
-    }
 
     @Override
     public String getDbUser() {
@@ -59,7 +53,9 @@ public class OozieRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        return isRdsConfigNeedForOozieServer(blueprint);
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
+        String blueprintText = stackDtoDelegate.getBlueprint().getBlueprintJsonText();
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return blueprintProcessor.doesCMComponentExistsInBlueprint("OOZIE_SERVER");
     }
 }

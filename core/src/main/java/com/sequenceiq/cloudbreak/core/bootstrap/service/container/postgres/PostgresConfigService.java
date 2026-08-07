@@ -30,8 +30,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -44,7 +42,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
@@ -111,9 +108,6 @@ public class PostgresConfigService {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private EnvironmentConfigProvider environmentConfigProvider;
 
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
         decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto, null);
@@ -269,11 +263,6 @@ public class PostgresConfigService {
         }
         servicePillar.put(POSTGRES_COMMON, new SaltPillarProperties("/postgresql/root-certs.sls",
                 singletonMap("postgres_root_certs", rootSslCertsMap)));
-    }
-
-    public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(Stack stack, Cluster cluster, DatabaseType databaseType) {
-        return rdsConfigProviderFactory.getRdsConfigProviderForRdsType(databaseType)
-                .createPostgresRdsConfigIfNeeded(stack, cluster);
     }
 
     public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(StackDtoDelegate stackDto) {

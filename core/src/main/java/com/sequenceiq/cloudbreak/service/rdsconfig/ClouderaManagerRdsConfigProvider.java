@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -46,7 +46,7 @@ public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider 
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
         return true;
     }
 

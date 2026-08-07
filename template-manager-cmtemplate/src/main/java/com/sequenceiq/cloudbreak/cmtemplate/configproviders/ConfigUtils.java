@@ -88,7 +88,12 @@ public class ConfigUtils {
     }
 
     public static String getCmVersion(TemplatePreparationObject source) {
-        return source.getProductDetailsView().getCm().getVersion();
+        if (source.getProductDetailsView() != null
+                && source.getProductDetailsView().getCm() != null
+                && source.getProductDetailsView().getCm().getVersion() != null) {
+            return  source.getProductDetailsView().getCm().getVersion();
+        }
+        return "";
     }
 
     public static String getCdhVersion(TemplatePreparationObject source) {

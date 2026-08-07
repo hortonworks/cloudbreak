@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -53,12 +53,6 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
         return servicePillarConfigMap;
     }
 
-    private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintJsonText();
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.doesCMComponentExistsInBlueprint("HIVEMETASTORE");
-    }
-
     @Override
     public String getDbUser() {
         return hiveDbUser;
@@ -85,7 +79,9 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        return isRdsConfigNeedForHiveMetastore(blueprint);
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
+        String blueprintText = stackDtoDelegate.getBlueprint().getBlueprintJsonText();
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return blueprintProcessor.doesCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
 }

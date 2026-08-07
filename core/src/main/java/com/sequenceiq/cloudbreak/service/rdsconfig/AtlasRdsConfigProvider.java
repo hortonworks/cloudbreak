@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class AtlasRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -58,8 +58,8 @@ public class AtlasRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway) {
-        String blueprintText = blueprint.getBlueprintJsonText();
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
+        String blueprintText = stackDtoDelegate.getBlueprint().getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return blueprintProcessor.doesCMComponentExistsInBlueprint(ATLAS_SERVER_COMPONENT)
                 && blueprintProcessor.doesCMComponentExistsInBlueprint(IDBROKER_COMPONENT)

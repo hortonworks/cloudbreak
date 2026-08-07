@@ -57,9 +57,13 @@ public class MockGlobalDefaultClusterTemplateTest extends AbstractMockTest {
 
     private static final String LAKE_HOUSE_CLUSTER_TEMPLATE_NAME = "7.3.2 - Lakehouse Optimizer for AWS";
 
+    private static final String LAKE_HOUSE_HA_CLUSTER_TEMPLATE_NAME = "7.3.2 - Lakehouse Optimizer HA for AWS";
+
     private static final String BLUEPRINT_NAME = "7.3.2 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie";
 
     private static final String LAKE_HOUSE_BLUEPRINT_NAME = "7.3.2 - Lakehouse Optimizer";
+
+    private static final String LAKE_HOUSE_HA_BLUEPRINT_NAME = "7.3.2 - Lakehouse Optimizer HA";
 
     private static final int WAIT_ENTITLEMENT_SECONDS = 5;
 
@@ -351,6 +355,10 @@ public class MockGlobalDefaultClusterTemplateTest extends AbstractMockTest {
                 .withName(LAKE_HOUSE_CLUSTER_TEMPLATE_NAME)
                 .whenException(clusterTemplateTestClient.getV4(), NotFoundException.class)
                 .validate();
+        testContext.given(ClusterTemplateTestDto.class)
+                .withName(LAKE_HOUSE_HA_CLUSTER_TEMPLATE_NAME)
+                .whenException(clusterTemplateTestClient.getV4(), NotFoundException.class)
+                .validate();
     }
 
     private void validateAllBlueprints(MockedTestContext testContext, Predicate<String> condition) {
@@ -410,6 +418,11 @@ public class MockGlobalDefaultClusterTemplateTest extends AbstractMockTest {
         testContext
                 .given(BlueprintTestDto.class)
                 .withName(LAKE_HOUSE_BLUEPRINT_NAME)
+                .whenException(blueprintTestClient.getV4(), NotFoundException.class)
+                .validate();
+        testContext
+                .given(BlueprintTestDto.class)
+                .withName(LAKE_HOUSE_HA_BLUEPRINT_NAME)
                 .whenException(blueprintTestClient.getV4(), NotFoundException.class)
                 .validate();
     }

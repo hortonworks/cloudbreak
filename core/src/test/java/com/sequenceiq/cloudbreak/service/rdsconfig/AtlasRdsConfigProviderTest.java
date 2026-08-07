@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @ExtendWith(MockitoExtension.class)
 class AtlasRdsConfigProviderTest {
@@ -73,9 +74,11 @@ class AtlasRdsConfigProviderTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("isRdsConfigNeededArguments")
     void testIsRdsConfigNeeded(String name, boolean atlasPresent, boolean idbrokerPresent, boolean hbasePresent, boolean hdfsPresent, boolean expected) {
-        Blueprint blueprint = mock(Blueprint.class);
         String blueprintText = "blueprintText";
+        Blueprint blueprint = mock(Blueprint.class);
         when(blueprint.getBlueprintJsonText()).thenReturn(blueprintText);
+        StackDtoDelegate stackDto = mock(StackDtoDelegate.class);
+        when(stackDto.getBlueprint()).thenReturn(blueprint);
 
         CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(blueprintText)).thenReturn(processor);
@@ -85,7 +88,7 @@ class AtlasRdsConfigProviderTest {
         lenient().when(processor.isServiceTypePresent(HbaseRoles.HBASE)).thenReturn(hbasePresent);
         lenient().when(processor.isServiceTypePresent(HdfsRoles.HDFS)).thenReturn(hdfsPresent);
 
-        assertThat(underTest.isRdsConfigNeeded(blueprint, false)).isEqualTo(expected);
+        assertThat(underTest.isRdsConfigNeeded(stackDto)).isEqualTo(expected);
     }
 
     private static Stream<Arguments> isRdsConfigNeededArguments() {

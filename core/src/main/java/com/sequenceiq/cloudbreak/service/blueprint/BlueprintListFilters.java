@@ -64,7 +64,8 @@ public class BlueprintListFilters {
     }
 
     public boolean isLakehouseOptimizer(BlueprintFile blueprintFile) {
-        return LAKEHOUSE_OPTIMIZER_STACK_NAME.equals(blueprintFile.getStackName());
+        return blueprintFile.getStackName() != null
+                && blueprintFile.getStackName().contains(LAKEHOUSE_OPTIMIZER_STACK_NAME);
     }
 
     public boolean isLakehouseOptimizer(String name) {

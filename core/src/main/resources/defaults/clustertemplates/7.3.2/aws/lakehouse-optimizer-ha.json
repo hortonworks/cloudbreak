@@ -1,0 +1,126 @@
+{
+  "name": "7.3.2 - Lakehouse Optimizer HA for AWS",
+  "description": "",
+  "type": "LAKEHOUSE_OPTIMIZER",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Lakehouse Optimizer HA"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "enableLoadBalancer": true,
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.4xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "clostandby",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            },
+            "placementGroup": {
+              "strategy": "PARTITION"
+            }
+          },
+          "instanceType": "m5.4xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "compute",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 150,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5d.xlarge"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5d.xlarge"
+        },
+        "nodeCount": 2,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

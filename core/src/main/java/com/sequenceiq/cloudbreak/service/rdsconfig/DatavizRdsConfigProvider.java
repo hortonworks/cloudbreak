@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.dataviz.DatavizRoles;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class DatavizRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -26,12 +26,6 @@ public class DatavizRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    private boolean isRdsConfigNeedForDataviz(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintJsonText();
-        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return cmTemplateProcessor.doesCMComponentExistsInBlueprint(DatavizRoles.DATAVIZ_WEBSERVER);
-    }
 
     @Override
     public String getDbUser() {
@@ -59,7 +53,9 @@ public class DatavizRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        return isRdsConfigNeedForDataviz(blueprint);
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
+        String blueprintText = stackDtoDelegate.getBlueprint().getBlueprintJsonText();
+        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return cmTemplateProcessor.doesCMComponentExistsInBlueprint(DatavizRoles.DATAVIZ_WEBSERVER);
     }
 }

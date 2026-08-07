@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,11 +20,9 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -75,7 +72,7 @@ public abstract class AbstractRdsConfigProvider {
      * @return salt pillar configuration information for this provider's database
      */
     public Map<String, Object> createServicePillarConfigMapIfNeeded(StackDto stackDto) {
-        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())) {
+        if (isRdsConfigNeeded(stackDto)) {
             RdsConfigWithoutCluster rdsConfig = getRdsConfig(stackDto);
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
                 Map<String, Object> postgres = new HashMap<>();
@@ -91,7 +88,7 @@ public abstract class AbstractRdsConfigProvider {
     }
 
     public Map<String, Object> createServicePillarConfigMapForRotation(StackDto stackDto) {
-        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())) {
+        if (isRdsConfigNeeded(stackDto)) {
             RdsConfigWithoutCluster rdsConfig = getRdsConfig(stackDto);
             RotationSecret databaseUser = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionUserNamePath());
             RotationSecret databasePassword = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionPasswordPath());
@@ -144,49 +141,9 @@ public abstract class AbstractRdsConfigProvider {
         }
     }
 
-    /**
-     * Creates a new RDSConfig object for this provider's database, if one is not already present in
-     * the cluster and if one is called for by the cluster blueprint. Most of the database
-     * information is based on the database type and this provider, but the database password is
-     * chosen here.
-     * <p>
-     * Note that this does not actually create the database. However, the RDSConfig object is saved
-     * and associated with the cluster.
-     *
-     * @param stack   stack for cluster
-     * @param cluster cluster to associate database with
-     * @return all RDSConfig objects for the cluster, potentially including a new one for
-     * this provider's database
-     */
-    public Set<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
-        if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())
-                && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
-            RDSConfig newRdsConfig;
-            if (isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
-                newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
-                        getDb(), getDbUser(), getRdsType());
-            } else {
-                LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
-                String databaseHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
-                newRdsConfig = createNewRdsConfigForEmbeddedDatabase(stack, cluster, stack.getDatabase(), databaseHost,
-                        getDb(), getDbUser(), getDbPort());
-            }
-            populateNewRdsConfig(stack, cluster, newRdsConfig);
-        }
-        return rdsConfigWithoutClusterService.findByClusterId(cluster.getId());
-    }
-
-    private void populateNewRdsConfig(Stack stack, Cluster cluster, RDSConfig newRdsConfig) {
-        RDSConfig rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), newRdsConfig, stack.getWorkspaceId());
-        Set<RDSConfig> rdsConfigs = new HashSet<>(cluster.getRdsConfigs());
-        rdsConfigs.add(rdsConfig);
-        cluster.setRdsConfigs(rdsConfigs);
-        clusterService.save(cluster);
-    }
-
     public Set<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(StackDtoDelegate stackDto) {
         ClusterView cluster = stackDto.getCluster();
-        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())
+        if (isRdsConfigNeeded(stackDto)
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
             StackView stack = stackDto.getStack();
@@ -257,6 +214,6 @@ public abstract class AbstractRdsConfigProvider {
 
     protected abstract String getPillarKey();
 
-    protected abstract boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway);
+    protected abstract boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate);
 
 }

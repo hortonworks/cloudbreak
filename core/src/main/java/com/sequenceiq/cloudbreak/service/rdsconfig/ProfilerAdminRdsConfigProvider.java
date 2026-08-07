@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class ProfilerAdminRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -25,12 +25,6 @@ public class ProfilerAdminRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    private boolean isRdsConfigNeedForProfilerAdmin(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintJsonText();
-        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return cmTemplateProcessor.doesCMComponentExistsInBlueprint("PROFILER_ADMIN_AGENT");
-    }
 
     @Override
     public String getDbUser() {
@@ -58,7 +52,9 @@ public class ProfilerAdminRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        return isRdsConfigNeedForProfilerAdmin(blueprint);
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
+        String blueprintText = stackDtoDelegate.getBlueprint().getBlueprintJsonText();
+        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return cmTemplateProcessor.doesCMComponentExistsInBlueprint("PROFILER_ADMIN_AGENT");
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -26,13 +26,6 @@ public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    private boolean isRdsConfigNeedForHueServer(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintJsonText();
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.doesCMComponentExistsInBlueprint("HUE_SERVER")
-                && blueprintProcessor.doesCMComponentExistsInBlueprint("HUE_LOAD_BALANCER");
-    }
 
     @Override
     public String getDbUser() {
@@ -60,7 +53,10 @@ public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        return isRdsConfigNeedForHueServer(blueprint);
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
+        String blueprintText = stackDtoDelegate.getBlueprint().getBlueprintJsonText();
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return blueprintProcessor.doesCMComponentExistsInBlueprint("HUE_SERVER")
+                && blueprintProcessor.doesCMComponentExistsInBlueprint("HUE_LOAD_BALANCER");
     }
 }

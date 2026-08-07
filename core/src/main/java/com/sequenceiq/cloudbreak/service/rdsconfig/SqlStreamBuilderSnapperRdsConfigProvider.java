@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ssb.SqlStreamBuilderRoles;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
 public class SqlStreamBuilderSnapperRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -54,8 +54,9 @@ public class SqlStreamBuilderSnapperRdsConfigProvider extends AbstractRdsConfigP
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
+    protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
+        CmTemplateProcessor blueprintProcessor =
+                cmTemplateProcessorFactory.get(stackDtoDelegate.getBlueprint().getBlueprintJsonText());
         return blueprintProcessor.doesCMComponentExistsInBlueprint(SqlStreamBuilderRoles.MATERIALIZED_VIEW_ENGINE);
     }
 }
