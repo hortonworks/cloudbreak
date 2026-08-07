@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -89,9 +89,15 @@ public class VerticalScalingValidatorService {
                 .findFirst();
         String requestedInstanceType = verticalScaleV4Request.getTemplate().getInstanceType();
         if (instanceGroupOptional.isPresent()) {
+            InstanceGroup instanceGroup = instanceGroupOptional.get();
             String availabilityZone = stack.getAvailabilityZone();
             String region = stack.getRegion();
-            String currentInstanceType = instanceGroupOptional.get().getTemplate().getInstanceType();
+            String currentInstanceType = instanceGroup.getTemplate().getInstanceType();
+            boolean validateMultiAz = stack.isMultiAz() && multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null;
+            Set<String> instanceGroupAvailabilityZones = validateMultiAz
+                    ? availabilityZoneService.findAllByInstanceGroupId(instanceGroup.getId()).stream()
+                    .map(InstanceGroupAvailabilityZone::getAvailabilityZone).collect(Collectors.toSet())
+                    : null;
             Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
             CloudVmTypes allVmTypes = cloudParameterService.getVmTypesV2(
@@ -100,16 +106,14 @@ public class VerticalScalingValidatorService {
                     stack.getPlatformvariant(),
                     CdpResourceType.FREEIPA,
                     Map.of(ARCHITECTURE, ALL_ARCHITECTURE));
-            Optional<VmType> requestInstanceForVerticalScaling = getInstance(region, availabilityZone, requestedInstanceType, allVmTypes);
-            boolean validateMultiAz = stack.isMultiAz() && multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null;
-            Set<String> availabilityZones = validateMultiAz ? availabilityZoneService.findAllByInstanceGroupId(instanceGroupOptional.get().getId()).stream()
-                    .map(InstanceGroupAvailabilityZone::getAvailabilityZone).collect(Collectors.toSet()) : null;
-            Json attributes = instanceGroupOptional.get().getTemplate().getAttributes();
+            String zoneForLookup = resolveZone(availabilityZone, instanceGroupAvailabilityZones, allVmTypes.getCloudVmResponses(), region);
+            Optional<VmType> requestInstanceForVerticalScaling = getInstance(zoneForLookup, requestedInstanceType, allVmTypes);
+            Json attributes = instanceGroup.getTemplate().getAttributes();
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     stack.getCloudPlatform(),
-                    List.of(getInstance(region, availabilityZone, currentInstanceType, allVmTypes)),
+                    List.of(getInstance(zoneForLookup, currentInstanceType, allVmTypes)),
                     List.of(requestInstanceForVerticalScaling),
-                    availabilityZones,
+                    instanceGroupAvailabilityZones,
                     attributes == null ? Map.of() : attributes.getMap(),
                     CdpResourceType.FREEIPA);
         } else {
@@ -122,15 +126,36 @@ public class VerticalScalingValidatorService {
         }
     }
 
-    private Optional<VmType> getInstance(String region, String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        return allVmTypes.getCloudVmResponses().get(getZone(region, availabilityZone))
-                .stream()
-                .filter(e -> e.getValue().equals(currentInstanceType))
+    private Optional<VmType> getInstance(String zone, String instanceType, CloudVmTypes allVmTypes) {
+        Set<VmType> vmTypes = allVmTypes.getCloudVmResponses().get(zone);
+        if (vmTypes == null) {
+            throw new BadRequestException(String.format("No VM types found for zone '%s'.", zone));
+        }
+        return vmTypes.stream()
+                .filter(e -> e.getValue().equals(instanceType))
                 .findFirst();
     }
 
-    private String getZone(String region, String availabilityZone) {
-        return Strings.isNullOrEmpty(availabilityZone) ? region : availabilityZone;
+    private String resolveZone(String stackAvailabilityZone, Set<String> instanceGroupAvailabilityZones,
+            Map<String, Set<VmType>> cloudVmResponses, String region) {
+        if (StringUtils.isNotBlank(stackAvailabilityZone)) {
+            LOGGER.debug("Using stack-level availability zone '{}' for VM type lookup.", stackAvailabilityZone);
+            return stackAvailabilityZone;
+        }
+        if (instanceGroupAvailabilityZones != null && !instanceGroupAvailabilityZones.isEmpty()) {
+            Set<String> availableZonesFromProvider = cloudVmResponses.keySet();
+            String resolvedZone = instanceGroupAvailabilityZones.stream()
+                    .filter(availableZonesFromProvider::contains)
+                    .findFirst()
+                    .orElseGet(() -> instanceGroupAvailabilityZones.iterator().next());
+            LOGGER.debug("Stack availability zone is empty, using instance group availability zone '{}' for VM type lookup.", resolvedZone);
+            return resolvedZone;
+        }
+        String resolvedZone = cloudVmResponses.keySet().stream()
+                .findFirst()
+                .orElse(region);
+        LOGGER.debug("Stack and instance group availability zones are empty, falling back to '{}' for VM type lookup.", resolvedZone);
+        return resolvedZone;
     }
 
     private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(VerticalScaleRequest verticalScaleV4Request) {

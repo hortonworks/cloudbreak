@@ -261,6 +261,62 @@ public class VerticalScalingValidatorServiceTest {
     }
 
     @Test
+    public void testValidateInstanceTypeForMultiAzWithNullAvailabilityZoneShouldFallbackToFirstMapKey() {
+        String instanceGroupNameInRequest = "compute";
+        String instanceTypeNameInStack = "e2-standard-2";
+        String instanceTypeNameInRequest = "e2-standard-4";
+
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInRequest, instanceTypeNameInStack, template)));
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        Credential credential = credential();
+        ExtendedCloudCredential cloudCredential = extendedCloudCredential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(eq(credential))).thenReturn(cloudCredential);
+        CloudVmTypes cloudVmTypes = cloudVmTypes(
+                "us-west2-a",
+                vmType(
+                        instanceTypeNameInStack,
+                        1,
+                        1,
+                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                        List.of("us-west2-a", "us-west2-b")
+                ),
+                vmType(
+                        instanceTypeNameInRequest,
+                        2,
+                        2,
+                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                        List.of("us-west2-a", "us-west2-b")
+                )
+        );
+        when(stack.isMultiAz()).thenReturn(true);
+        when(stack.getRegion()).thenReturn("us-west2");
+        when(stack.getAvailabilityZone()).thenReturn(null);
+        when(stack.getPlatformVariant()).thenReturn("GCP");
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        when(providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(any())).thenReturn(new AzureAvailabilityZoneConnector());
+        when(instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(any())).thenReturn(Set.of("us-west2-a", "us-west2-b"));
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(instanceTypeNameInRequest);
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+
+        verify(verticalScaleInstanceProvider, times(1))
+                .validateInstanceTypeForVerticalScaling(any(), any(), any(), eq(Set.of("us-west2-a", "us-west2-b")), any());
+    }
+
+    @Test
     public void testValidateInstanceTypeForMultiAzStackNotMultiAz() {
         String instanceGroupNameInRequest = "compute";
         String instanceTypeNameInStack = "m3.xlarge";
