@@ -16,10 +16,11 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -63,6 +64,8 @@ import com.sequenceiq.common.model.Architecture;
 
 @Service
 public class VerticalScalingValidatorService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScalingValidatorService.class);
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -167,6 +170,9 @@ public class VerticalScalingValidatorService {
             boolean validateMultiAz = stack.isMultiAz() && providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(stack) != null;
             String availabilityZone = stack.getAvailabilityZone();
             String region = stack.getRegion();
+            Set<String> instanceGroupAvailabilityZones = validateMultiAz
+                    ? instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(instanceGroup.getId())
+                    : null;
             List<String> currentInstanceTypes = getCurrentInstanceTypes(instanceGroup);
             Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -177,11 +183,12 @@ public class VerticalScalingValidatorService {
                     stack.getPlatformVariant(),
                     CdpResourceType.DEFAULT,
                     Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
+            String zoneForLookup = resolveZone(availabilityZone, instanceGroupAvailabilityZones, allVmTypes.getCloudVmResponses(), region);
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     stack.getCloudPlatform(),
-                    getInstances(region, availabilityZone, currentInstanceTypes, allVmTypes),
-                    getInstances(region, availabilityZone, allRequestedInstanceTypes, allVmTypes),
-                    validateMultiAz ? instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(instanceGroup.getId()) : null,
+                    getInstances(zoneForLookup, currentInstanceTypes, allVmTypes),
+                    getInstances(zoneForLookup, allRequestedInstanceTypes, allVmTypes),
+                    instanceGroupAvailabilityZones,
                     attributes == null ? Map.of() : attributes.getMap()
             );
         } else {
@@ -241,15 +248,21 @@ public class VerticalScalingValidatorService {
                 || verticalScaleV4Request.getTemplate().getTemporaryStorage() != null;
     }
 
-    private Optional<VmType> getInstance(String region, String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        return allVmTypes.getCloudVmResponses().get(getZone(region, availabilityZone))
-                .stream()
-                .filter(e -> e.getValue().equals(currentInstanceType))
+    private Optional<VmType> getInstance(String zone, String instanceType, CloudVmTypes allVmTypes) {
+        Set<VmType> vmTypes = allVmTypes.getCloudVmResponses().get(zone);
+        if (vmTypes == null) {
+            throw new BadRequestException(String.format("No VM types found for zone '%s'.", zone));
+        }
+        return vmTypes.stream()
+                .filter(e -> e.getValue().equals(instanceType))
                 .findFirst();
     }
 
-    private List<Optional<VmType>> getInstances(String region, String availabilityZone, List<String> instanceTypes, CloudVmTypes allVmTypes) {
-        Set<VmType> vmTypesInZone = allVmTypes.getCloudVmResponses().get(getZone(region, availabilityZone));
+    private List<Optional<VmType>> getInstances(String zone, List<String> instanceTypes, CloudVmTypes allVmTypes) {
+        Set<VmType> vmTypesInZone = allVmTypes.getCloudVmResponses().get(zone);
+        if (vmTypesInZone == null) {
+            throw new BadRequestException(String.format("No VM types found for zone '%s'.", zone));
+        }
         return instanceTypes.stream()
                 .map(instanceType -> vmTypesInZone.stream()
                         .filter(vmType -> vmType.getValue().equals(instanceType))
@@ -257,8 +270,26 @@ public class VerticalScalingValidatorService {
                 .collect(Collectors.toList());
     }
 
-    private String getZone(String region, String availabilityZone) {
-        return Strings.isNullOrEmpty(availabilityZone) ? region : availabilityZone;
+    private String resolveZone(String stackAvailabilityZone, Set<String> instanceGroupAvailabilityZones,
+            Map<String, Set<VmType>> cloudVmResponses, String region) {
+        if (StringUtils.isNotBlank(stackAvailabilityZone)) {
+            LOGGER.debug("Using stack-level availability zone '{}' for VM type lookup.", stackAvailabilityZone);
+            return stackAvailabilityZone;
+        }
+        if (instanceGroupAvailabilityZones != null && !instanceGroupAvailabilityZones.isEmpty()) {
+            Set<String> availableZonesFromProvider = cloudVmResponses.keySet();
+            String resolvedZone = instanceGroupAvailabilityZones.stream()
+                    .filter(availableZonesFromProvider::contains)
+                    .findFirst()
+                    .orElseGet(() -> instanceGroupAvailabilityZones.iterator().next());
+            LOGGER.debug("Stack availability zone is empty, using instance group availability zone '{}' for VM type lookup.", resolvedZone);
+            return resolvedZone;
+        }
+        String resolvedZone = cloudVmResponses.keySet().stream()
+                .findFirst()
+                .orElse(region);
+        LOGGER.debug("Stack and instance group availability zones are empty, falling back to '{}' for VM type lookup.", resolvedZone);
+        return resolvedZone;
     }
 
     public void validateInstanceTypeForDeletingDisks(Stack stack, StackDeleteVolumesRequest deleteRequest) {
