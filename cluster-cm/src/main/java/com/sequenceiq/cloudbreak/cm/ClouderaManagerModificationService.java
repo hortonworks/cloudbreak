@@ -1336,14 +1336,26 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void waitStartRolesCommand(ClusterCommand clusterCommand) {
-        ExtendedPollingResult extendedPollingResult =
-                clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, clusterCommand.getCommandId());
-        clusterCommandService.delete(clusterCommand);
-        if (extendedPollingResult.isExited()) {
+        ExtendedPollingResult extendedPollingResult;
+        try {
+            extendedPollingResult = clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, clusterCommand.getCommandId());
+        } catch (Exception e) {
+            clusterCommandService.delete(clusterCommand);
+            throw e;
+        }
+        if (extendedPollingResult.isFailure()) {
+            clusterCommandService.delete(clusterCommand);
+            throw new CloudbreakServiceException(
+                    String.format("Cloudera Manager start roles command failed with exception. CM command Id: %s", clusterCommand.getCommandId()),
+                    extendedPollingResult.getException());
+        } else if (extendedPollingResult.isExited()) {
+            clusterCommandService.delete(clusterCommand);
             throw new CancellationException("Cluster was terminated while waiting for start roles on hosts");
         } else if (extendedPollingResult.isTimeout()) {
             throw new CloudbreakServiceException(
-                    String.format("Cloudera Manager start roles command {} timed out. CM command Id: %s", clusterCommand.getCommandId()));
+                    String.format("Cloudera Manager start roles command timed out. CM command Id: %s", clusterCommand.getCommandId()));
+        } else {
+            clusterCommandService.delete(clusterCommand);
         }
     }
 
@@ -1394,7 +1406,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private static boolean validateServiceCanStopOrStart(String serviceType, Map<String, String> serviceStatusMap,
-        String excludedStatus) {
+            String excludedStatus) {
         return null != serviceStatusMap.get(serviceType.toLowerCase(Locale.ROOT))
                 && !"NA".equalsIgnoreCase(serviceStatusMap.get(serviceType.toLowerCase(Locale.ROOT)))
                 && !excludedStatus.equalsIgnoreCase(serviceStatusMap.get(serviceType.toLowerCase(Locale.ROOT)));
