@@ -44,6 +44,8 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
             String region = typeEntry.getKey().getValue();
             defaultTypes.put(region, typeEntry.getValue());
         }
+        Map<String, List<String>> fallbackTypes = source.getRegionFallbackInstanceTypeMap().entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getKey().getValue(), Map.Entry::getValue));
         Map<String, Map<String, List<String>>> regionUpgradeVersions = new HashMap<>();
         for (Map.Entry<Region, Map<String, List<String>>> upgradeEntry : source.getSupportedServerVersionsToUpgrade().entrySet()) {
             String region = upgradeEntry.getKey().getRegionName();
@@ -61,6 +63,7 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
         return new PlatformDatabaseCapabilitiesResponse(
                 includedRegions,
                 defaultTypes,
+                fallbackTypes,
                 regionUpgradeVersions,
                 source.getLatestDatabaseEngineVersion(),
                 databaseVmTypes

@@ -784,24 +784,23 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
             Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
+            Map<Region, List<String>> regionFallbackInstanceTypeMap = new HashMap<>();
             String architecture = filters.getOrDefault("architecture", Architecture.X86_64.getName());
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
                 Coordinate coordinate = regionCoordinates.get(actualRegion);
+                boolean arm = ARM64.getName().equals(architecture);
+                List<String> dbVmTypes = arm ? coordinate.getDefaultArmDbVmTypes() : coordinate.getDefaultDbVmTypes();
                 String defaultDbVmType;
-                if (ARM64.getName().equals(architecture)) {
-                    if (coordinate.getDefaultArmDbVmTypes() == null || coordinate.getDefaultArmDbVmTypes().isEmpty()) {
-                        defaultDbVmType = awsArmDatabaseVmDefault;
-                    } else {
-                        defaultDbVmType = coordinate.getDefaultArmDbVmTypes().getFirst();
-                    }
+                List<String> fallbackDbVmTypes;
+                if (dbVmTypes == null || dbVmTypes.isEmpty()) {
+                    defaultDbVmType = arm ? awsArmDatabaseVmDefault : awsDatabaseVmDefault;
+                    fallbackDbVmTypes = new ArrayList<>();
                 } else {
-                    if (coordinate.getDefaultDbVmTypes() == null || coordinate.getDefaultDbVmTypes().isEmpty()) {
-                        defaultDbVmType = getAwsDatabaseVmDefault(architecture);
-                    } else {
-                        defaultDbVmType = coordinate.getDefaultDbVmTypes().getFirst();
-                    }
+                    defaultDbVmType = dbVmTypes.getFirst();
+                    fallbackDbVmTypes = new ArrayList<>(dbVmTypes.subList(1, dbVmTypes.size()));
                 }
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType);
+                regionFallbackInstanceTypeMap.put(actualRegion, fallbackDbVmTypes);
             }
             Map<Region, Set<DatabaseVmType>> regionAvailableInstanceTypes = new HashMap<>();
             try {
@@ -812,6 +811,7 @@ public class AwsPlatformResources implements PlatformResources {
             return new PlatformDatabaseCapabilities(
                     new HashMap<>(),
                     regionDefaultInstanceTypeMap,
+                    regionFallbackInstanceTypeMap,
                     new HashMap<>(),
                     getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null),
                     regionAvailableInstanceTypes

@@ -67,7 +67,7 @@ public class AzureDatabaseCapabilityService {
     @Value("${cb.azure.database.flexible.storageEdition:ManagedDisk}")
     private String storageEdition;
 
-    @Value("${cb.azure.database.flexible.defaultInstanceType:Standard_E4ds_v4}")
+    @Value("${cb.azure.database.flexible.defaultInstanceType:Standard_E4ds_v5}")
     private String defaultFlexibleInstanceType;
 
     @Value("${cb.azure.database.singleserver.defaultInstanceType:MO_Gen5_4}")
@@ -88,11 +88,13 @@ public class AzureDatabaseCapabilityService {
         Map<Region, Optional<FlexibleServerCapability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
         enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), getZoneRedundantSupportedRegions(regions, capabilityMap));
         Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, filters);
+        Map<Region, List<String>> regionFallbackInstanceTypeMap = getRegionFallbackInstanceTypeMap(regions, regionInstanceTypeMap);
         Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade = getSupportedServerVersionsToUpgrade(regions, capabilityMap);
         Map<Region, Set<DatabaseVmType>> regionAvailableInstanceTypes = getRegionInstancesTypeMap(regions, capabilityMap);
         return new PlatformDatabaseCapabilities(
                 enabledRegions,
                 regionInstanceTypeMap,
+                regionFallbackInstanceTypeMap,
                 supportedServerVersionsToUpgrade,
                 getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null),
                 regionAvailableInstanceTypes
@@ -196,6 +198,28 @@ public class AzureDatabaseCapabilityService {
         }
         LOGGER.debug("Default flexible server instance types by regions [{}]", instanceTypeMap);
         return instanceTypeMap;
+    }
+
+    private Map<Region, List<String>> getRegionFallbackInstanceTypeMap(Map<Region, AzureCoordinate> regions, Map<Region, String> regionInstanceTypeMap) {
+        Map<Region, List<String>> fallbackInstanceTypeMap = new HashMap<>();
+        for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
+            com.azure.core.management.Region azureRegion = com.azure.core.management.Region.fromName(entry.getKey().getRegionName());
+            String primaryInstanceType = regionInstanceTypeMap.get(region(azureRegion.label()));
+            List<String> fallbackInstanceTypes = getFallbackInstanceTypes(entry.getValue().getDefaultDbVmTypes(), primaryInstanceType);
+            putRegion(fallbackInstanceTypeMap, entry.getKey(), fallbackInstanceTypes);
+        }
+        LOGGER.debug("Fallback flexible server instance types by regions [{}]", fallbackInstanceTypeMap);
+        return fallbackInstanceTypeMap;
+    }
+
+    private List<String> getFallbackInstanceTypes(List<String> defaultDbVmTypes, String primaryInstanceType) {
+        if (defaultDbVmTypes == null || defaultDbVmTypes.isEmpty()) {
+            return List.of();
+        } else {
+            return defaultDbVmTypes.stream()
+                    .filter(instanceType -> !instanceType.equals(primaryInstanceType))
+                    .toList();
+        }
     }
 
     private Map<Region, Set<DatabaseVmType>> getRegionInstancesTypeMap(Map<Region, AzureCoordinate> regions, Map<Region,

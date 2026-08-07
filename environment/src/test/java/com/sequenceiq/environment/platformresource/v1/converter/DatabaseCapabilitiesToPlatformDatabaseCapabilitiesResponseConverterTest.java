@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,6 +54,23 @@ class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverterTest {
         assertThat(source.getRegionDefaultInstanceTypeMap().size()).isEqualTo(response.getRegionDefaultInstances().size());
         assertThat(source.getLatestDatabaseEngineVersion()).isEqualTo(response.getLatestDatabaseEngineVersion());
         assertThat(response.getDatabaseVmTypes()).isEmpty();
+    }
+
+    @Test
+    public void testConvertMapsFallbackInstanceTypes() {
+        Map<Region, List<String>> regionFallbackInstanceTypeMap = new HashMap<>();
+        regionFallbackInstanceTypeMap.put(region("region1"), List.of("fallback1", "fallback2"));
+        PlatformDatabaseCapabilities source = new PlatformDatabaseCapabilities(
+                new HashMap<>(),
+                new HashMap<>(),
+                regionFallbackInstanceTypeMap,
+                new HashMap<>(),
+                "17"
+        );
+
+        PlatformDatabaseCapabilitiesResponse response = converter.convert(source);
+
+        assertThat(response.getRegionFallbackInstances()).containsEntry("region1", List.of("fallback1", "fallback2"));
     }
 
     @Test

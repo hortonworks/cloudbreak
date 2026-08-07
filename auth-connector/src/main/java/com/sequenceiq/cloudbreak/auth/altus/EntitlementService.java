@@ -66,6 +66,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
@@ -576,6 +577,10 @@ public class EntitlementService {
 
     public boolean isFallbackInstanceTypeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_FALLBACK_INSTANCETYPE);
+    }
+
+    public boolean isFallbackDatabaseInstanceTypeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FALLBACK_DATABASE_INSTANCETYPE);
     }
 
     public boolean isGcpSecureBootEnabled(String accountId) {

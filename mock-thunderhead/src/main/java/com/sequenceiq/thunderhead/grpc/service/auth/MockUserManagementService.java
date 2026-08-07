@@ -65,6 +65,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
@@ -1037,6 +1038,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, true, CDP_CB_DB_DISK_AUTO_RESIZE);
         addEntitlement(builder, accountId, true, CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION);
         addEntitlement(builder, accountId, true, CDP_FALLBACK_INSTANCETYPE);
+        addEntitlement(builder, accountId, true, CDP_FALLBACK_DATABASE_INSTANCETYPE);
 
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

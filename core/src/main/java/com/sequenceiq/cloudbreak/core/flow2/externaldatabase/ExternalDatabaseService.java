@@ -31,6 +31,7 @@ import com.dyngr.exception.UserBreakException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -131,6 +132,9 @@ public class ExternalDatabaseService {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void provisionDatabase(Stack stack, DetailedEnvironmentResponse environment) {
         String databaseCrn;
@@ -490,6 +494,12 @@ public class ExternalDatabaseService {
         }
         DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
         request.setInstanceType(instanceType);
+        if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(environment.getAccountId())) {
+            List<String> fallbackInstanceTypes = databaseCapabilities.getRegionFallbackInstances()
+                    .getOrDefault(environment.getLocation().getName(), List.of());
+            LOGGER.info("Setting fallback database instance types {} for region {}", fallbackInstanceTypes, environment.getLocation().getName());
+            request.setFallbackInstanceTypes(fallbackInstanceTypes);
+        }
         request.setDatabaseVendor(databaseStackConfig.getVendor());
         request.setStorageSize(databaseStackConfig.getVolumeSize());
         DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()

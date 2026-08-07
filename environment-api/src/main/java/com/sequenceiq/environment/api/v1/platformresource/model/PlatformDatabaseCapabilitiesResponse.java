@@ -16,6 +16,9 @@ public class PlatformDatabaseCapabilitiesResponse {
     private final Map<String, String> regionDefaultInstances;
 
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private final Map<String, List<String>> regionFallbackInstances;
+
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private final Map<String, Map<String, List<String>>> regionUpgradeVersions;
 
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -24,38 +27,44 @@ public class PlatformDatabaseCapabilitiesResponse {
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private final Map<String, Set<DatabaseVmTypeResponse>> databaseVmTypes;
 
-    public PlatformDatabaseCapabilitiesResponse(
-            Map<String, List<String>> includedRegions,
-            Map<String, String> regionDefaultInstances,
-            Map<String, Map<String, List<String>>> regionUpgradeVersions,
-            String latestDatabaseEngineVersion,
-            Map<String, Set<DatabaseVmTypeResponse>> databaseVmTypes) {
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
+            Map<String, List<String>> regionFallbackInstances, Map<String, Map<String, List<String>>> regionUpgradeVersions,
+            String latestDatabaseEngineVersion, Map<String, Set<DatabaseVmTypeResponse>> databaseVmTypes) {
         this.includedRegions = includedRegions;
         this.regionDefaultInstances = regionDefaultInstances;
+        this.regionFallbackInstances = regionFallbackInstances;
         this.regionUpgradeVersions = regionUpgradeVersions;
         this.latestDatabaseEngineVersion = latestDatabaseEngineVersion;
         this.databaseVmTypes = databaseVmTypes;
     }
 
-    public PlatformDatabaseCapabilitiesResponse(
-            Map<String, List<String>> includedRegions,
-            Map<String, String> regionDefaultInstances,
-            Map<String, Map<String, List<String>>> regionUpgradeVersions,
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
+            Map<String, List<String>> regionFallbackInstances, Map<String, Map<String, List<String>>> regionUpgradeVersions,
             String latestDatabaseEngineVersion) {
-        this(includedRegions, regionDefaultInstances, regionUpgradeVersions, latestDatabaseEngineVersion, new HashMap<>());
+        this(includedRegions, regionDefaultInstances, regionFallbackInstances, regionUpgradeVersions, latestDatabaseEngineVersion, new HashMap<>());
     }
 
-    public PlatformDatabaseCapabilitiesResponse(
-            Map<String, List<String>> includedRegions,
-            Map<String, String> regionDefaultInstances,
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
+            Map<String, Map<String, List<String>>> regionUpgradeVersions, String latestDatabaseEngineVersion,
+            Map<String, Set<DatabaseVmTypeResponse>> databaseVmTypes) {
+        this(includedRegions, regionDefaultInstances, new HashMap<>(), regionUpgradeVersions, latestDatabaseEngineVersion, databaseVmTypes);
+    }
+
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
+            Map<String, Map<String, List<String>>> regionUpgradeVersions, String latestDatabaseEngineVersion) {
+        this(includedRegions, regionDefaultInstances, new HashMap<>(), regionUpgradeVersions, latestDatabaseEngineVersion, new HashMap<>());
+    }
+
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
             String latestDatabaseEngineVersion) {
-        this(includedRegions, regionDefaultInstances, new HashMap<>(), latestDatabaseEngineVersion, new HashMap<>());
+        this(includedRegions, regionDefaultInstances, new HashMap<>(), new HashMap<>(), latestDatabaseEngineVersion, new HashMap<>());
     }
 
     public PlatformDatabaseCapabilitiesResponse() {
         this.regionUpgradeVersions = new HashMap<>();
         this.includedRegions = new HashMap<>();
         this.regionDefaultInstances = new HashMap<>();
+        this.regionFallbackInstances = new HashMap<>();
         this.latestDatabaseEngineVersion = null;
         this.databaseVmTypes = new HashMap<>();
     }
@@ -66,6 +75,10 @@ public class PlatformDatabaseCapabilitiesResponse {
 
     public Map<String, String> getRegionDefaultInstances() {
         return regionDefaultInstances;
+    }
+
+    public Map<String, List<String>> getRegionFallbackInstances() {
+        return regionFallbackInstances;
     }
 
     public Map<String, Map<String, List<String>>> getRegionUpgradeVersions() {
@@ -85,6 +98,7 @@ public class PlatformDatabaseCapabilitiesResponse {
         return "PlatformDatabaseCapabilitiesResponse{" +
                 "includedRegions=" + includedRegions +
                 ", regionDefaultInstances=" + regionDefaultInstances +
+                ", regionFallbackInstances=" + regionFallbackInstances +
                 ", regionUpgradeVersions=" + regionUpgradeVersions +
                 ", latestDatabaseEngineVersion='" + latestDatabaseEngineVersion + '\'' +
                 ", databaseVmTypes=" + databaseVmTypes +

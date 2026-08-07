@@ -43,7 +43,9 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate.AzureCoordinateBuilder;
+import com.sequenceiq.cloudbreak.cloud.model.ArchitectureVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -409,6 +411,31 @@ class AzureDatabaseCapabilityServiceTest {
         assertNull(westusServerVersions.get("17"));
     }
 
+    @Test
+    void testDatabaseCapabilitiesPopulatesFallbackInstanceTypesAndDedupsPrimary() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(
+                Region.region("westus"), azureCoordinateWithDbTypes("westus",
+                        List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("Standard_E4ds_v5")));
+        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+                Region.region("westus"), Optional.of(flexibleServerCapability));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
+        Region region1Name = Region.region(azureRegion1.name());
+        Region region1Label = Region.region(azureRegion1.label());
+        assertEquals("Standard_E4ds_v5", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+        assertEquals(List.of("Standard_E4ads_v5", "Standard_E4ds_v4"), capabilities.getRegionFallbackInstanceTypeMap().get(region1Label));
+        assertEquals(List.of("Standard_E4ads_v5", "Standard_E4ds_v4"), capabilities.getRegionFallbackInstanceTypeMap().get(region1Name));
+    }
+
     private AzureCoordinate azureCoordinate(String name) {
         return AzureCoordinateBuilder.builder()
                 .longitude("1")
@@ -417,6 +444,18 @@ class AzureDatabaseCapabilityServiceTest {
                 .key(name + "key")
                 .k8sSupported(false)
                 .entitlements(List.of())
+                .build();
+    }
+
+    private AzureCoordinate azureCoordinateWithDbTypes(String name, List<String> databaseVmTypes) {
+        return AzureCoordinateBuilder.builder()
+                .longitude("1")
+                .latitude("1")
+                .displayName(name)
+                .key(name + "key")
+                .k8sSupported(false)
+                .entitlements(List.of())
+                .defaultVmtypes(new DefaultVmTypes(new ArchitectureVmTypes(databaseVmTypes, null), null))
                 .build();
     }
 
