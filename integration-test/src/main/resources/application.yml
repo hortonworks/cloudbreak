@@ -276,10 +276,10 @@ integrationtest:
         instanceType: Standard_DS14_v2
       datahub:
         group: master
-        instanceType: Standard_D8s_v3
+        instanceType: Standard_D8s_v5
       freeipa:
         group: master
-        instanceType: Standard_D8s_v3
+        instanceType: Standard_D8s_v5
     network:
       networkId: cloud-daily
       noPublicIp: true
@@ -337,7 +337,7 @@ integrationtest:
         catalog:
           url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-marketplace-freeipa-image-catalog.json
     freeipa:
-      instanceType: Standard_D8s_v3
+      instanceType: Standard_D8s_v5
       arm64InstanceType:
       upgrade:
         centos7ImageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
