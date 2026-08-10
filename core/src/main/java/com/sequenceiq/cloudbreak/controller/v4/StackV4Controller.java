@@ -96,7 +96,6 @@ import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
-import com.sequenceiq.cloudbreak.service.stack.StackInstanceTypeUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
@@ -159,9 +158,6 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackMigrateRdsService migrateRdsService;
-
-    @Inject
-    private StackInstanceTypeUpdateService stackInstanceTypeUpdateService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -866,7 +862,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public void updateInstanceTypeInDatabase(Long workspaceId, @RequestObject UpdateInstanceTypeRequest request) {
-        stackInstanceTypeUpdateService.updateInstanceType(request.getCrn(), request.getGroupName(), request.getInstanceType());
+        throw new UnsupportedOperationException("Database only modification of the instance type is currently not supported!");
     }
 
     @InternalOnly
