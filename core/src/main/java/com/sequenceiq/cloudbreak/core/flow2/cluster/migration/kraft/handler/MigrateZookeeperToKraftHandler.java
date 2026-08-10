@@ -48,7 +48,7 @@ public class MigrateZookeeperToKraftHandler extends ExceptionCatcherEventHandler
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);
         }
         return new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId,
-                event.getData().isBrokerRollingRestartNeeded());
+                event.getData().isStaleConfigsOnly());
     }
 
     @Override

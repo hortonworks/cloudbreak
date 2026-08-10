@@ -1233,8 +1233,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void rollingRestartServiceRoleByType(String serviceType, String roleType) {
-        clouderaManagerRestartService.rollingRestartServiceRoleByType(stack, v31Client, serviceType, roleType);
+    public void rollingRestartServiceRoleByType(String serviceType, String roleType, boolean staleConfigsOnly) {
+        clouderaManagerRestartService.rollingRestartServiceRoleByType(stack, v31Client, serviceType, roleType, staleConfigsOnly);
     }
 
     @Override

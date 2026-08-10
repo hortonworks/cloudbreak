@@ -119,7 +119,8 @@ public class ClouderaManagerRestartService {
         }
     }
 
-    public void rollingRestartServiceRoleByType(StackDtoDelegate stack, ApiClient apiClient, String serviceType, String roleType) {
+    public void rollingRestartServiceRoleByType(StackDtoDelegate stack, ApiClient apiClient, String serviceType, String roleType,
+            boolean staleConfigsOnly) {
         try {
             String serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType)
                     .orElseThrow(() -> new ClouderaManagerOperationFailedException(String.format("Cannot find CM service by role '%s' in cluster '%s'.",
@@ -131,7 +132,7 @@ public class ClouderaManagerRestartService {
                 eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
                 waitForRestartExecution(apiClient, stack, optionalActiveRollingRestartCommand.get());
             } else {
-                ApiCommand apiCommand = executeRollingRestartCommandByRoleType(apiClient, stack, serviceName, roleType);
+                ApiCommand apiCommand = executeRollingRestartCommandByRoleType(apiClient, stack, serviceName, roleType, staleConfigsOnly);
                 eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
                 waitForRestartExecution(apiClient, stack, apiCommand);
             }
@@ -174,12 +175,12 @@ public class ClouderaManagerRestartService {
         return clustersResourceApi.rollingRestart(stack.getName(), rollingRestartClusterArgs);
     }
 
-    private ApiCommand executeRollingRestartCommandByRoleType(ApiClient apiClient, StackDtoDelegate stack, String serviceName, String roleType)
-            throws ApiException {
+    private ApiCommand executeRollingRestartCommandByRoleType(ApiClient apiClient, StackDtoDelegate stack, String serviceName, String roleType,
+            boolean staleConfigsOnly) throws ApiException {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         ApiRollingRestartArgs apiRollingRestartArgs = new ApiRollingRestartArgs();
         apiRollingRestartArgs.setRestartRoleTypes(List.of(roleType));
-        apiRollingRestartArgs.setStaleConfigsOnly(false);
+        apiRollingRestartArgs.setStaleConfigsOnly(staleConfigsOnly);
 
         return servicesResourceApi.rollingRestart(stack.getName(), serviceName, apiRollingRestartArgs);
     }

@@ -8,14 +8,14 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
 
     private final boolean kraftInstallNeeded;
 
-    private final boolean brokerRollingRestartNeeded;
+    private final boolean staleConfigsOnly;
 
     private Long stackId;
 
     public MigrateZookeeperToKraftContext(FlowParameters flowParameters, StackEvent event) {
         super(flowParameters);
         kraftInstallNeeded = false;
-        brokerRollingRestartNeeded = true;
+        staleConfigsOnly = false;
         stackId = event.getResourceId();
     }
 
@@ -23,15 +23,15 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
         super(flowParameters);
         stackId = event.getResourceId();
         this.kraftInstallNeeded = kraftInstallNeeded;
-        this.brokerRollingRestartNeeded = true;
+        this.staleConfigsOnly = false;
     }
 
     public MigrateZookeeperToKraftContext(FlowParameters flowParameters, StackEvent event, boolean kraftInstallNeeded,
-            boolean brokerRollingRestartNeeded) {
+            boolean staleConfigsOnly) {
         super(flowParameters);
         stackId = event.getResourceId();
         this.kraftInstallNeeded = kraftInstallNeeded;
-        this.brokerRollingRestartNeeded = brokerRollingRestartNeeded;
+        this.staleConfigsOnly = staleConfigsOnly;
     }
 
     public static MigrateZookeeperToKraftContext from(FlowParameters flowParameters, StackEvent event) {
@@ -43,8 +43,8 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
     }
 
     public static MigrateZookeeperToKraftContext from(FlowParameters flowParameters, StackEvent event, boolean kraftInstallNeeded,
-            boolean brokerRollingRestartNeeded) {
-        return new MigrateZookeeperToKraftContext(flowParameters, event, kraftInstallNeeded, brokerRollingRestartNeeded);
+            boolean staleConfigsOnly) {
+        return new MigrateZookeeperToKraftContext(flowParameters, event, kraftInstallNeeded, staleConfigsOnly);
     }
 
     public Long getStackId() {
@@ -59,8 +59,8 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
         return kraftInstallNeeded;
     }
 
-    public boolean isBrokerRollingRestartNeeded() {
-        return brokerRollingRestartNeeded;
+    public boolean isStaleConfigsOnly() {
+        return staleConfigsOnly;
     }
 
 }

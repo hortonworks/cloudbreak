@@ -48,7 +48,8 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandler extends Excep
         ClusterModificationService clusterModificationService = getClusterModificationService(stackDto);
         try {
             if (clusterModificationService.isRolePresent(stackDto.getCluster().getName(), KAFKA_BROKER_ROLE, KAFKA_SERVICE_TYPE)) {
-                clusterModificationService.rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
+                clusterModificationService.rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE,
+                        event.getData().isStaleConfigsOnly());
             } else {
                 LOGGER.debug("{} role is not present in cluster. Skipping the restart step.", KAFKA_BROKER_ROLE);
             }
@@ -57,7 +58,7 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandler extends Excep
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);
         }
         return new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_CONNECT_NODES_EVENT.name(), stackId,
-                event.getData().isBrokerRollingRestartNeeded());
+                event.getData().isStaleConfigsOnly());
     }
 
     @Override

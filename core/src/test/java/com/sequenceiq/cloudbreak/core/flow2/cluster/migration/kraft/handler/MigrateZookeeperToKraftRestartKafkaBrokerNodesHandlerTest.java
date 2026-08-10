@@ -62,6 +62,25 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
     @Test
     void testDoAcceptSuccess() {
         String clusterName = "testCluster";
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID, false);
+        HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getName()).thenReturn(clusterName);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterModificationService.isRolePresent(clusterName, KAFKA_BROKER_ROLE, KAFKA_SERVICE_TYPE)).thenReturn(true);
+
+        Selectable result = underTest.doAccept(event);
+
+        assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
+        assertEquals(START_RESTART_KAFKA_CONNECT_NODES_EVENT.name(), result.getSelector());
+        verify(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE, false);
+    }
+
+    @Test
+    void testDoAcceptSuccessWhenStaleConfigsOnlyRestartNeeded() {
+        String clusterName = "testCluster";
         MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID, true);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDto.getCluster()).thenReturn(clusterView);
@@ -75,13 +94,13 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(START_RESTART_KAFKA_CONNECT_NODES_EVENT.name(), result.getSelector());
-        verify(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
+        verify(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE, true);
     }
 
     @Test
     void testDoAcceptSuccessWhenBrokerRoleNotFound() {
         String clusterName = "testCluster";
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_CONNECT_NODES_EVENT.selector(), STACK_ID, true);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_CONNECT_NODES_EVENT.selector(), STACK_ID, false);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getName()).thenReturn(clusterName);
@@ -95,13 +114,13 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(START_RESTART_KAFKA_CONNECT_NODES_EVENT.name(), result.getSelector());
 
-        verify(clusterModificationService, times(0)).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
+        verify(clusterModificationService, times(0)).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE, false);
     }
 
     @Test
     void testDoAcceptFailure() {
         String clusterName = "testCluster";
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID, true);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID, false);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getName()).thenReturn(clusterName);
@@ -110,12 +129,13 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterModificationService.isRolePresent(clusterName, KAFKA_BROKER_ROLE, KAFKA_SERVICE_TYPE)).thenReturn(true);
 
-        doThrow(new RuntimeException("error")).when(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
+        doThrow(new RuntimeException("error")).when(clusterModificationService)
+                .rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE, false);
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftFailureEvent.class, result);
         assertEquals(FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
-        verify(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
+        verify(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE, false);
     }
 }
