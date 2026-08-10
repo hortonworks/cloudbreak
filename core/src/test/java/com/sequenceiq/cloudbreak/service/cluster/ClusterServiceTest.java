@@ -59,6 +59,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -107,6 +109,9 @@ class ClusterServiceTest {
 
     @Mock
     private CloudbreakEventService eventService;
+
+    @Mock
+    private CloudbreakMessagesService messagesService;
 
     @Mock
     private TransactionService transactionService;
@@ -301,10 +306,25 @@ class ClusterServiceTest {
 
     @Test
     void testUpdateInstancesToZombieByInstanceIds() {
+        String reason = "Cloudera Manager failed to add the node to the cluster during the upscale operation.";
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED.getMessage())).thenReturn(reason);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID))).thenReturn(List.of(createInstanceMetadata()));
-        underTest.updateInstancesToZombieByInstanceIds(STACK_ID, Set.of(INSTANCE_INSTANCE_ID));
+        underTest.updateInstancesToZombieByInstanceIds(STACK_ID, Set.of(INSTANCE_INSTANCE_ID), ResourceEvent.CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED);
         verify(instanceMetaDataService, times(1)).getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID));
-        verify(instanceMetaDataService, times(1)).updateAllInstancesToStatus(eq(List.of(INSTANCE_ID)), eq(InstanceStatus.ZOMBIE), contains("Zombie"));
+        verify(instanceMetaDataService, times(1)).updateAllInstancesToStatus(eq(List.of(INSTANCE_ID)), eq(InstanceStatus.ZOMBIE), eq(reason));
+        verify(eventService, times(1)).fireCloudbreakEvent(eq(STACK_ID), eq(Status.UPDATE_IN_PROGRESS.name()),
+                eq(ResourceEvent.CLUSTER_NODES_MARKED_AS_ZOMBIE), eq(List.of(FQDN1, reason)));
+    }
+
+    @Test
+    void testUpdateInstancesToZombieByInstanceIdsWhenNoMatchingInstanceThenNoNotification() {
+        String reason = "Cloudera Manager failed to add the node to the cluster during the upscale operation.";
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED.getMessage())).thenReturn(reason);
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID))).thenReturn(List.of(createInstanceMetadata()));
+        underTest.updateInstancesToZombieByInstanceIds(STACK_ID, Set.of("not-existing-instance-id"),
+                ResourceEvent.CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED);
+        verify(instanceMetaDataService, times(1)).updateAllInstancesToStatus(eq(List.of()), eq(InstanceStatus.ZOMBIE), eq(reason));
+        verifyNoInteractions(eventService);
     }
 
     @Test

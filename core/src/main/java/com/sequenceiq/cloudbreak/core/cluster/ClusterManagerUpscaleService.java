@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODES_MARKED_AS_ZOMBIE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODE_FAILURE_REASON_UNREACHABLE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODE_FAILURE_REASON_WAIT_FOR_HOSTS_TIMEOUT;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +24,9 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -59,6 +66,12 @@ public class ClusterManagerUpscaleService {
     @Inject
     private ClusterManagerDefaultConfigAdjuster clusterManagerDefaultConfigAdjuster;
 
+    @Inject
+    private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
     public void upscaleClusterManager(Long stackId, Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged, boolean repair)
             throws ClusterClientInitException {
         StackDto stackDto = stackDtoService.getById(stackId);
@@ -75,7 +88,7 @@ public class ClusterManagerUpscaleService {
             }
         }
         clusterService.updateInstancesToRunning(stackId, nodeReachabilityResult.getReachableNodes());
-        clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
+        clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes(), CLUSTER_NODE_FAILURE_REASON_UNREACHABLE);
 
         clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, stackDto.getNotDeletedInstanceMetaData().size(), false);
 
@@ -104,12 +117,15 @@ public class ClusterManagerUpscaleService {
         String errorMessage = getTimeoutResultMessage(result);
         LOGGER.warn(errorMessage);
         Set<Long> failedInstanceIds = collectFailedInstanceIds(stack, result);
+        String statusReason = messagesService.getMessage(CLUSTER_NODE_FAILURE_REASON_WAIT_FOR_HOSTS_TIMEOUT.getMessage());
         if (targetedUpscaleAvailable) {
-            instanceMetaDataService.updateInstanceStatuses(failedInstanceIds, InstanceStatus.ZOMBIE,
-                    "Upscaling cluster manager were not successful, waiting for hosts timed out");
+            instanceMetaDataService.updateInstanceStatuses(failedInstanceIds, InstanceStatus.ZOMBIE, statusReason);
+            if (CollectionUtils.isNotEmpty(failedInstanceIds)) {
+                String zombieNodes = String.join(", ", collectFailedInstanceIdentifiers(stack, failedInstanceIds));
+                flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_NODES_MARKED_AS_ZOMBIE, zombieNodes, statusReason);
+            }
         } else {
-            instanceMetaDataService.updateInstanceStatuses(failedInstanceIds, InstanceStatus.ORCHESTRATION_FAILED,
-                    "Upscaling cluster manager were not successful, waiting for hosts timed out");
+            instanceMetaDataService.updateInstanceStatuses(failedInstanceIds, InstanceStatus.ORCHESTRATION_FAILED, statusReason);
         }
 
         if (!targetedUpscaleAvailable || CollectionUtils.isEmpty(result.getFailedInstancePrivateIds())) {
@@ -142,5 +158,15 @@ public class ClusterManagerUpscaleService {
             failedInstanceIds.addAll(instanceIdsInServicesRunningStatus);
         }
         return failedInstanceIds;
+    }
+
+    private List<String> collectFailedInstanceIdentifiers(StackView stack, Set<Long> failedInstanceIds) {
+        return instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stack.getId()).stream()
+                .filter(instanceMetadataView -> failedInstanceIds.contains(instanceMetadataView.getId()))
+                .map(instanceMetadataView -> instanceMetadataView.getDiscoveryFQDN() != null
+                        ? instanceMetadataView.getDiscoveryFQDN()
+                        : instanceMetadataView.getInstanceId() != null
+                                ? instanceMetadataView.getInstanceId() : String.valueOf(instanceMetadataView.getId()))
+                .collect(Collectors.toList());
     }
 }

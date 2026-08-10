@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODES_MARKED_AS_ZOMBIE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODE_FAILURE_REASON_NO_FQDN;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_REGENERATE_KEYTABS_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_REINSTALL_COMPONENTS_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RESTART_ALL_STARTED;
@@ -19,6 +21,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_MANAGE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_COMPONENTS_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_MANAGEMENT_SERVER_STARTED;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -61,6 +65,9 @@ class ClusterUpscaleFlowService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     void clusterManagerRepairSingleMasterStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPSCALE_IN_PROGRESS, "Repairing single master of cluster finished.");
@@ -152,31 +159,35 @@ class ClusterUpscaleFlowService {
                     .orElse(null);
             if (instanceGroupDto != null) {
                 List<InstanceMetadataView> notDeletedInstanceMetaDataSet = instanceGroupDto.getNotDeletedAndNotZombieInstanceMetaData();
-                failedInstances += updateMissingHostsMetaDatas(notDeletedInstanceMetaDataSet, repair);
+                failedInstances += updateMissingHostsMetaDatas(stack.getId(), notDeletedInstanceMetaDataSet, repair);
             }
         }
         return failedInstances;
     }
 
-    private int updateMissingHostsMetaDatas(Collection<InstanceMetadataView> instanceMetaData, boolean repair) {
+    private int updateMissingHostsMetaDatas(Long stackId, Collection<InstanceMetadataView> instanceMetaData, boolean repair) {
         List<String> upscaleHostNames = getHostNames(instanceMetaData);
         Collection<String> successHosts = new HashSet<>(upscaleHostNames);
-        if (repair) {
-            return updateMissingHostMetaDatas(successHosts, instanceMetaData, InstanceStatus.ORCHESTRATION_FAILED);
-        } else {
-            return updateMissingHostMetaDatas(successHosts, instanceMetaData, InstanceStatus.ZOMBIE);
+        String reason = messagesService.getMessage(CLUSTER_NODE_FAILURE_REASON_NO_FQDN.getMessage());
+        InstanceStatus failedStatus = repair ? InstanceStatus.ORCHESTRATION_FAILED : InstanceStatus.ZOMBIE;
+        List<String> failedNodes = updateMissingHostMetaDatas(successHosts, instanceMetaData, failedStatus, reason);
+        if (!repair && !failedNodes.isEmpty()) {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_NODES_MARKED_AS_ZOMBIE,
+                    String.join(", ", failedNodes), reason);
         }
+        return failedNodes.size();
     }
 
-    private int updateMissingHostMetaDatas(Collection<String> successHosts, Iterable<InstanceMetadataView> instanceMetaDatas, InstanceStatus instanceStatus) {
-        int failedHosts = 0;
+    private List<String> updateMissingHostMetaDatas(Collection<String> successHosts, Iterable<InstanceMetadataView> instanceMetaDatas,
+            InstanceStatus instanceStatus, String reason) {
+        List<String> failedNodes = new ArrayList<>();
         for (InstanceMetadataView metaData : instanceMetaDatas) {
             if (!successHosts.contains(metaData.getDiscoveryFQDN())) {
-                instanceMetaDataService.updateInstanceStatus(metaData, instanceStatus, "Cluster upscale failed. Host does not have fqdn.");
-                failedHosts++;
+                instanceMetaDataService.updateInstanceStatus(metaData, instanceStatus, reason);
+                failedNodes.add(metaData.getInstanceId() != null ? metaData.getInstanceId() : String.valueOf(metaData.getPrivateId()));
             }
         }
-        return failedHosts;
+        return failedNodes;
     }
 
     private List<String> getHostNames(Collection<InstanceMetadataView> instanceMetaDatas) {

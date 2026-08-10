@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -303,7 +304,8 @@ class ClusterUpscaleServiceTest {
         inOrder.verify(clusterApi, times(0)).restartAll(false);
         inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
-        inOrder.verify(clusterService, times(1)).updateInstancesToZombieByInstanceIds(eq(STACK_ID), eq(Set.of("instanceId1")));
+        inOrder.verify(clusterService, times(1)).updateInstancesToZombieByInstanceIds(eq(STACK_ID), eq(Set.of("instanceId1")),
+                eq(CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED));
     }
 
     @Test

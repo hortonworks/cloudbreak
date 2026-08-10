@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_UPSCALE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL;
@@ -136,7 +137,7 @@ public class ClusterUpscaleService {
                     CLUSTER_SCALING_UPSCALE_FAILED, Joiner.on(",").join(se.getFailedInstanceIds()));
             if (!request.isRepair() && !request.isPrimaryGatewayChanged()
                     && entitlementService.targetedUpscaleSupported(stackDto.getAccountId())) {
-                clusterService.updateInstancesToZombieByInstanceIds(stackDto.getId(), se.getFailedInstanceIds());
+                clusterService.updateInstancesToZombieByInstanceIds(stackDto.getId(), se.getFailedInstanceIds(), CLUSTER_NODE_FAILURE_REASON_CM_UPSCALE_FAILED);
             } else {
                 clusterService.updateInstancesToOrchestrationFailedByInstanceIds(stackDto.getId(), se.getFailedInstanceIds());
                 throw se;

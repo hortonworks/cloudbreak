@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ORCHESTRATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
@@ -12,6 +13,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.R
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOSTS_STATES_UPDATED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_NODES_MARKED_AS_ZOMBIE;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
@@ -76,6 +78,8 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRdcViewExtender;
@@ -128,6 +132,9 @@ public class ClusterService implements LocalPaasRdcViewExtender {
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -244,30 +251,44 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         instanceMetaDataService.updateAllInstancesToStatus(instanceMetadataIds, SERVICES_RUNNING, "Services are running");
     }
 
-    public void updateInstancesToZombie(Long stackId, Set<Node> unreachableNodes) {
+    public void updateInstancesToZombie(Long stackId, Set<Node> unreachableNodes, ResourceEvent reason) {
         Set<String> unreachableInstanceIds = unreachableNodes.stream()
                 .map(Node::getInstanceId)
                 .collect(Collectors.toSet());
-        updateInstancesToZombieByInstanceIds(stackId, unreachableInstanceIds);
+        updateInstancesToZombieByInstanceIds(stackId, unreachableInstanceIds, reason);
     }
 
-    public void updateInstancesToZombieByInstanceIds(Long stackId, Set<String> unreachableInstanceIds) {
-        updateInstanceStatusesByInstanceIds(stackId, unreachableInstanceIds, ZOMBIE, "Detected as Zombie instance metadata");
+    public void updateInstancesToZombieByInstanceIds(Long stackId, Set<String> unreachableInstanceIds, ResourceEvent reason) {
+        String reasonMessage = messagesService.getMessage(reason.getMessage());
+        List<String> updatedInstances = updateInstanceStatusesByInstanceIds(stackId, unreachableInstanceIds, ZOMBIE, reasonMessage);
+        notifyAboutZombieNodes(stackId, updatedInstances, reasonMessage);
     }
 
     public void updateInstancesToOrchestrationFailedByInstanceIds(Long stackId, Set<String> unreachableInstanceIds) {
         updateInstanceStatusesByInstanceIds(stackId, unreachableInstanceIds, ORCHESTRATION_FAILED, "Detected as ORCHESTRATION_FAILED instance metadata");
     }
 
-    private void updateInstanceStatusesByInstanceIds(Long stackId, Set<String> unreachableInstanceIds, InstanceStatus newInstanceStatus,
+    private List<String> updateInstanceStatusesByInstanceIds(Long stackId, Set<String> unreachableInstanceIds, InstanceStatus newInstanceStatus,
             String newStatusReason) {
         LOGGER.debug("Update instance statuses to {}, instanceIds: {}", newInstanceStatus, unreachableInstanceIds);
         List<? extends InstanceMetadataView> notDeletedInstanceMetadatas = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stackId);
-        List<Long> instanceMetadataIds = notDeletedInstanceMetadatas.stream()
+        List<? extends InstanceMetadataView> matchingInstanceMetadatas = notDeletedInstanceMetadatas.stream()
                 .filter(instanceMetadata -> unreachableInstanceIds.contains(instanceMetadata.getInstanceId()))
+                .collect(Collectors.toList());
+        List<Long> instanceMetadataIds = matchingInstanceMetadatas.stream()
                 .map(InstanceMetadataView::getId)
                 .collect(Collectors.toList());
         instanceMetaDataService.updateAllInstancesToStatus(instanceMetadataIds, newInstanceStatus, newStatusReason);
+        return matchingInstanceMetadatas.stream()
+                .map(instanceMetadata -> instanceMetadata.getDiscoveryFQDN() != null ? instanceMetadata.getDiscoveryFQDN() : instanceMetadata.getInstanceId())
+                .collect(Collectors.toList());
+    }
+
+    private void notifyAboutZombieNodes(Long stackId, List<String> zombieInstances, String reason) {
+        if (!zombieInstances.isEmpty()) {
+            eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_NODES_MARKED_AS_ZOMBIE,
+                    List.of(String.join(", ", zombieInstances), reason));
+        }
     }
 
     public String getStackRepositoryJson(Long stackId) {
