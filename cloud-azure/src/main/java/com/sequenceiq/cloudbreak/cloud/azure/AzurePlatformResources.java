@@ -105,7 +105,7 @@ public class AzurePlatformResources implements PlatformResources {
     @Value("${cb.azure.default.max.disk.size:32767}")
     private int maxDiskSize;
 
-    @Value("${cb.azure.default.vmtype:Standard_D16s_v5}")
+    @Value("${cb.azure.default.vmtype:Standard_D16s_v3}")
     private String armVmDefault;
 
     @Value("${distrox.restrict.instance.types:true}")
@@ -308,7 +308,7 @@ public class AzurePlatformResources implements PlatformResources {
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value())
                 .orElseThrow(() -> new CloudbreakServiceException("Could not fetch VM types using region"));
         vmTypes = vmTypes.stream()
-                .filter(filterOutUnsupportedGenerations())
+                .filter(filterOutV6Instances())
                 .collect(Collectors.toSet());
 
         Map<String, List<String>> availabilityZones = client.getAvailabilityZones(region.value());
@@ -502,8 +502,7 @@ public class AzurePlatformResources implements PlatformResources {
                 );
     }
 
-    private Predicate<VirtualMachineSize> filterOutUnsupportedGenerations() {
-        return e -> e.name().toLowerCase(Locale.ROOT).endsWith("_v5");
+    private Predicate<VirtualMachineSize> filterOutV6Instances() {
+        return e -> !e.name().toLowerCase(Locale.ROOT).endsWith("_v6");
     }
-
 }
