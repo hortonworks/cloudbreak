@@ -13,7 +13,6 @@ import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaInternalV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.UpdateInstanceTypeRequest;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceTypeUpdateService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeDefaultOutboundService;
 
 @Controller
@@ -22,9 +21,6 @@ public class FreeIpaInternalV1Controller implements FreeIpaInternalV1Endpoint {
 
     @Inject
     private FreeIpaUpgradeDefaultOutboundService upgradeDefaultOutboundService;
-
-    @Inject
-    private FreeIpaInstanceTypeUpdateService freeIpaInstanceTypeUpdateService;
 
     @Override
     @InternalOnly
@@ -36,6 +32,6 @@ public class FreeIpaInternalV1Controller implements FreeIpaInternalV1Endpoint {
     @Override
     @InternalOnly
     public void updateInstanceTypeInDatabase(@RequestObject UpdateInstanceTypeRequest request) {
-        freeIpaInstanceTypeUpdateService.updateInstanceType(request.getEnvironmentCrn(), request.getInstanceType());
+        throw new UnsupportedOperationException("Database only modification of the instance type is currently not supported!");
     }
 }
