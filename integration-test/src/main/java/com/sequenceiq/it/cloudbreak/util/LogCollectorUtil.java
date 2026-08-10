@@ -31,19 +31,26 @@ public class LogCollectorUtil {
     private static final List<String> SALT_ISSUE_LOGS = List.of("/var/log/saltboot.log", "/var/log/nginx/access.log", "/var/log/nginx/error.log",
             "/var/log/salt/master", "/var/log/salt/minion", "/var/log/messages");
 
-    private static final Map<String, List<String>> LOG_FILES_TO_COLLECT_ON_ISSUE =
-            Map.of("There are missing nodes from salt network response", List.of("/var/log/saltboot.log", "/var/log/nginx/access.log", "/var/log/messages"),
-                    "There are missing nodes for file upload", SALT_ISSUE_LOGS,
-                    "Collecting minion IP addresses failed", SALT_ISSUE_LOGS,
-                    "There are missing minions from salt response",
-                    List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/salt/minion",
-                            "/var/log/cloud-init.log", "/var/log/cloud-init-output.log"),
-                    "SocketTimeoutException", List.of("/var/log/salt/master", "/var/log/salt/minion", "/var/log/saltboot.log", "/var/log/messages"),
-                    "User data script failed", List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log"),
-                    "Failed to retrieve the server's certificate from Nginx",
-                    List.of("/var/log/nginx/access.log", "/var/log/nginx/error.log", "/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log"),
-                    "CA server", List.of(SOS_LOG)
-            );
+    private static final Map<String, List<String>> LOG_FILES_TO_COLLECT_ON_ISSUE = Map.ofEntries(
+            Map.entry("There are missing nodes from salt network response",
+                    List.of("/var/log/saltboot.log", "/var/log/nginx/access.log", "/var/log/messages")),
+            Map.entry("There are missing nodes for file upload",
+                    SALT_ISSUE_LOGS),
+            Map.entry("Collecting minion IP addresses failed",
+                    SALT_ISSUE_LOGS),
+            Map.entry("There are missing minions from salt response",
+                    List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/salt/minion", "/var/log/cloud-init.log", "/var/log/cloud-init-output.log")),
+            Map.entry("SocketTimeoutException",
+                    List.of("/var/log/salt/master", "/var/log/salt/minion", "/var/log/saltboot.log", "/var/log/messages")),
+            Map.entry("User data script failed",
+                    List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log")),
+            Map.entry("Failed to retrieve the server's certificate from Nginx",
+                    List.of("/var/log/nginx/access.log", "/var/log/nginx/error.log", "/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log")),
+            Map.entry("CA server",
+                    List.of(SOS_LOG)),
+            Map.entry("Failed to start freeipa services",
+                    List.of("/var/log/cdp-luks", "/var/log/messages", "/var/log/cloud-init.log", "/var/log/cloud-init-output.log", "/var/log/user-data.log"))
+    );
 
     @Value("${integrationtest.outputdir:.}")
     private String workingDirectory;
