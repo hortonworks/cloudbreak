@@ -1,5 +1,7 @@
 {%- from 'minifi/settings.sls' import minifi with context %}
 {%- from 'telemetry/settings.sls' import telemetry with context %}
+{%- set partition_interval_min = minifi.partitionIntervalMin | default(5) | int %}
+{%- set partition_interval_ms = partition_interval_min * 60 * 1000 %}
 {% if providerPrefix != "databus" %}
 
 MiNiFi Config Version: 3
@@ -9,11 +11,11 @@ Flow Controller:
 Processors:
 {% for logfile in telemetry.logs %}
 {%- if not ("type" in logfile and logfile["type"] == "salt" and not minifi.dbusIncludeSaltLogs) %}
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ ("TailFile_" + logfile["label"]) | uuid }}
     name: TailFile_{{ logfile["label"] | replace('.', '') }}
     class: org.apache.nifi.processors.standard.TailFile
     scheduling strategy: TIMER_DRIVEN
-    scheduling period: 5 min
+    scheduling period: {{ partition_interval_min }} min
     auto-terminated relationships list: []
     Properties:
       {%- set full_path = logfile["path"] %}
@@ -33,6 +35,26 @@ Processors:
       {#- Convert glob pattern to regex #}
       {%- set regex_filename = filename.replace('.', '\\\\.').replace('*', '.*').replace('?', '.') %}
 
+      {#- POSIX ERE exclusion via top-level alternation (no groups, no quantifiers) #}
+      {%- if "excludes" in logfile and logfile["excludes"] %}
+        {%- set main_glob_prefix = filename.split('*')[0] %}
+        {%- set main_glob_suffix = filename[filename.index('*') + 1:] if '*' in filename else '' %}
+        {%- set main_prefix_escaped = main_glob_prefix.replace('.', '\\\\.') %}
+        {%- set main_suffix_escaped = main_glob_suffix.replace('.', '\\\\.').replace('*', '.*').replace('?', '.') %}
+        {%- set alternatives = [] %}
+        {%- do alternatives.append(main_prefix_escaped + main_suffix_escaped) %}
+        {%- for exclude_path in logfile["excludes"] %}
+          {%- set exclude_filename = exclude_path[exclude_path.rfind('/') + 1:] %}
+          {%- set exclude_glob_prefix = exclude_filename.split('*')[0] %}
+          {%- set ext = exclude_glob_prefix[main_glob_prefix | length:] %}
+          {%- for i in range(ext | length) %}
+            {%- set char_prefix = ext[:i].replace('.', '\\\\.') %}
+            {%- do alternatives.append(main_prefix_escaped + char_prefix + "[^" + ext[i] + "].*" + main_suffix_escaped) %}
+          {%- endfor %}
+        {%- endfor %}
+        {%- set regex_filename = alternatives | join("|") %}
+      {%- endif %}
+
       tail-base-directory: {{ basepath }}
       File to Tail: "{{ regex_filename }}"
       tail-mode: Multiple file
@@ -45,7 +67,7 @@ Processors:
       Rolling Filename Pattern: ${filename}*
       Result Mode: Flow file per batch
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ ("UpdateAttr_" + logfile["label"]) | uuid }}
     name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
     class: org.apache.nifi.processors.standard.UpdateAttribute
     scheduling strategy: EVENT_DRIVEN
@@ -61,7 +83,7 @@ Processors:
 {% endif %}
 {% endfor %}
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "MergeContent" | uuid }}
     name: MergeContent
     class: org.apache.nifi.processors.standard.MergeContent
     scheduling strategy: EVENT_DRIVEN
@@ -71,23 +93,25 @@ Processors:
     Properties:
       Attribute Strategy: Keep Only Common Attributes
       Maximum number of Bins: 200
-      Max Bin Age: 5 min
+      Max Bin Age: {{ partition_interval_min }} min
       Minimum Number of Entries: 1
       Maximum Number of Entries: 10000
       Batch Size: 1000
       Merge Strategy: Bin-Packing Algorithm
       Correlation Attribute Name: filenamePrefix
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "UpdateAttributeFilename" | uuid }}
     name: UpdateAttributeFilename
     class: org.apache.nifi.processors.standard.UpdateAttribute
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
       - failure
     Properties:
-      filename: ${filenamePrefix}-${hostname()}-${now():minus(300000):divide(300000):multiply(300000):format("%M", "UTC")}-${now():format("%M%S", "UTC")}.log
+      upload_date: ${now():format('%Y-%m-%d', 'UTC')}
+      upload_hour: ${now():format('%H', 'UTC')}
+      filename: ${filenamePrefix}-${hostname()}-${now():minus({{ partition_interval_ms }}):divide({{ partition_interval_ms }}):multiply({{ partition_interval_ms }}):format("%M", "UTC")}-${now():format("%M%S", "UTC")}.log
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "CompressContent" | uuid }}
     name: CompressContent
     class: org.apache.nifi.processors.standard.CompressContent
     scheduling strategy: EVENT_DRIVEN
@@ -102,44 +126,41 @@ Processors:
 
 {%- if minifi.providerPrefix == "s3" %}
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "UploadToProvider_s3" | uuid }}
     name: UploadToProvider
     class: org.apache.nifi.minifi.aws.processors.PutS3Object
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
         - success
-        - failure
     Properties:
       Bucket: {{minifi.s3LogArchiveBucketName}}
       Region: {{minifi.region}}
       AWS Credentials Provider service: AWSCredentialsService
-      Object Key: {{minifi.logFolderName}}/${now():format('%Y-%m-%d', 'UTC')}/${now():format('%H', 'UTC')}/${filename}
+      Object Key: {{minifi.logFolderName}}/${upload_date}/${upload_hour}/${filename}
 
 {%- elif minifi.providerPrefix == "abfs" %}
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "UploadToProvider_abfs" | uuid }}
     name: UploadToProvider
     class: org.apache.nifi.minifi.azure.processors.PutAzureBlobStorage
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
       - success
-      - failure
     Properties:
       Container Name: {{ minifi.azureContainer }}
       Credential Configuration Strategy: Default Credential
-      Blob: {{ minifi.logFolderName }}/${now():format('%Y-%m-%d', 'UTC')}/${now():format('%H', 'UTC')}/${filename}
+      Blob: {{ minifi.logFolderName }}/${upload_date}/${upload_hour}/${filename}
       Azure Storage Credentials Service: AzureStorageCredentialsService
 
 {%- elif minifi.providerPrefix == "gcs" %}
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "UploadToProvider_gcs" | uuid }}
     name: UploadToProvider
     class: org.apache.nifi.minifi.gcp.processors.PutGCSObject
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
         - success
-        - failure
     Properties:
       Bucket: {{ minifi.gcsBucket }}
-      Key: {{ minifi.logFolderName }}/${now():format('%Y-%m-%d', 'UTC')}/${now():format('%H', 'UTC')}/${filename}
+      Key: {{ minifi.logFolderName }}/${upload_date}/${upload_hour}/${filename}
       GCP Credentials Provider Service: GCPCredentialsControllerService
 
 {% endif %}
@@ -150,20 +171,20 @@ Controller Services:
 {%- if minifi.providerPrefix == "s3" %}
 
   - name: AWSCredentialsService
-    id: {{ salt['random.get_str'](32) | uuid }}
+    id: {{ "AWSCredentialsService" | uuid }}
     class: org.apache.nifi.minifi.aws.controllers.AWSCredentialsService
     Properties:
       Use Default Credentials: true
 {%- elif minifi.providerPrefix == "abfs" %}
   - name: AzureStorageCredentialsService
-    id: {{ salt['random.get_str'](32) | uuid }}
+    id: {{ "AzureStorageCredentialsService" | uuid }}
     class: org.apache.nifi.minifi.azure.controllers.AzureStorageCredentialsService
     Properties:
       Storage Account Name: {{ minifi.azureStorageAccount }}
       Credential Configuration Strategy: Default Credential
 {%- elif minifi.providerPrefix == "gcs" %}
   - name: GCPCredentialsControllerService
-    id: {{ salt['random.get_str'](32) | uuid }}
+    id: {{ "GCPCredentialsControllerService" | uuid }}
     class: org.apache.nifi.minifi.gcp.controllers.GCPCredentialsControllerService
     Properties:
       Credentials Location: Use Compute Engine Credentials
@@ -174,14 +195,14 @@ Connections:
 {% for logfile in telemetry.logs %}
 {%- if not ("type" in logfile and logfile["type"] == "salt" and not minifi.dbusIncludeSaltLogs) %}
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ ("conn_TailFile_to_UpdateAttr_" + logfile["label"]) | uuid }}
     name: TailFile/success/UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
     source name: TailFile_{{ logfile["label"] | replace('.', '') }}
     source relationship names:
       - success
     destination name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ ("conn_UpdateAttr_to_Merge_" + logfile["label"]) | uuid }}
     name: UpdateAttributeLogLabel/success/MergeContent_{{ logfile["label"] | replace('.', '') }}
     source name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
     source relationship names:
@@ -191,25 +212,32 @@ Connections:
 {% endif %}
 {% endfor %}
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "conn_Merge_to_UpdateFilename" | uuid }}
     name: MergeContent/merged/UpdateAttributeFilename
     source name: MergeContent
     source relationship names:
       - merged
     destination name: UpdateAttributeFilename
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "conn_UpdateFilename_to_Compress" | uuid }}
     name: UpdateAttributeFilename/success/CompressContent
     source name: UpdateAttributeFilename
     source relationship names:
       - success
     destination name: CompressContent
 
-  - id: {{ salt['random.get_str'](32) | uuid }}
+  - id: {{ "conn_Compress_to_Upload" | uuid }}
     name: CompressContent/success/UploadToProvider
     source name: CompressContent
     source relationship names:
       - success
+    destination name: UploadToProvider
+
+  - id: {{ "conn_Upload_retry" | uuid }}
+    name: UploadToProvider/failure/UploadToProvider
+    source name: UploadToProvider
+    source relationship names:
+      - failure
     destination name: UploadToProvider
 
 Remote Process Groups: []

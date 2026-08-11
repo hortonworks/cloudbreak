@@ -1,7 +1,6 @@
 {%- from 'minifi/settings.sls' import minifi with context %}
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {% set os = salt['grains.get']('os') %}
-{% set restart_sleep_time = 1200 %}
 {% set cpuarch = salt['grains.get']('cpuarch') %}
 {% if minifi.cloudStorageLoggingEnabled %}
 {% if not minifi.minifiInstalled %}
