@@ -9,6 +9,7 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.crossrealm.TrustDirection;
 
 @Component
 public class ActiveDirectoryTrustInstructionsBuilder {
@@ -19,6 +20,13 @@ public class ActiveDirectoryTrustInstructionsBuilder {
             CrossRealmTrust crossRealmTrust) {
         ActiveDirectoryTrustSetupCommands adCommands = new ActiveDirectoryTrustSetupCommands();
         adCommands.setCommands(activeDirectoryKdcCommandsBuilder.buildCommands(trustCommandType, stack, freeIpa, crossRealmTrust));
+        return adCommands;
+    }
+
+    public ActiveDirectoryTrustSetupCommands buildInstructions(TrustCommandType trustCommandType, Stack stack, FreeIpa freeIpa,
+            CrossRealmTrust crossRealmTrust, TrustDirection trustDirection) {
+        ActiveDirectoryTrustSetupCommands adCommands = new ActiveDirectoryTrustSetupCommands();
+        adCommands.setCommands(activeDirectoryKdcCommandsBuilder.buildCommands(trustCommandType, stack, freeIpa, crossRealmTrust, trustDirection));
         return adCommands;
     }
 }

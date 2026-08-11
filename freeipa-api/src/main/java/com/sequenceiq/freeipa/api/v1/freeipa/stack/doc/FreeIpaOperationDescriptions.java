@@ -34,6 +34,8 @@ public final class FreeIpaOperationDescriptions {
     public static final String ADD_CROSS_REALM_TRUST = "Add cross-realm trust of FreeIPA with Active Directory";
     public static final String SETUP_FINISH_CROSS_REALM_TRUST = "Finish setting up cross-realm trust of FreeIPA with another KDC Server";
     public static final String TRUST_SETUP_COMMANDS = "Get commands to be run for cross-realm trust setup";
+    public static final String DIRECTIONAL_TRUST_SETUP_COMMANDS =
+            "Get one-way and two-way commands to be run for cross-realm trust setup";
     public static final String TRUST_CLEANUP_COMMANDS = "Get commands to be run for cross-realm trust cleanup after cancel";
     public static final String TRUST_VALIDATION_COMMANDS = "Get commands to be run for validation cross-realm trust on the trusting side";
     public static final String BIND_USER_CREATE = "Creates kerberos and ldap bind users for cluster";

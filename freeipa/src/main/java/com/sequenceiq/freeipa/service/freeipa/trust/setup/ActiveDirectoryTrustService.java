@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.DirectionalTrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -28,6 +29,7 @@ import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.crossrealm.TrustDirection;
 import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryBaseClusterTrustCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryTrustInstructionsBuilder;
 
@@ -126,6 +128,26 @@ public class ActiveDirectoryTrustService extends TrustProvider {
             response.setBaseClusterCommands(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, trustCommandType, freeIpa,
                     crossRealmTrust, loadBalancer));
         }
+        return response;
+    }
+
+    @Override
+    public DirectionalTrustSetupCommandsResponse buildDirectionalTrustSetupCommandsResponse(String environmentCrn, Stack stack, FreeIpa freeIpa,
+            CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer) {
+        DirectionalTrustSetupCommandsResponse response = new DirectionalTrustSetupCommandsResponse();
+        response.setEnvironmentCrn(environmentCrn);
+        response.setKdcType(kdcType().name());
+
+        TrustSetupCommandsResponse oneWayResponse = new TrustSetupCommandsResponse();
+        oneWayResponse.setActiveDirectoryCommands(
+                activeDirectoryTrustInstructionsBuilder.buildInstructions(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust, TrustDirection.ONE_WAY));
+        response.setOneWay(oneWayResponse);
+
+        TrustSetupCommandsResponse twoWayResponse = new TrustSetupCommandsResponse();
+        twoWayResponse.setActiveDirectoryCommands(
+                activeDirectoryTrustInstructionsBuilder.buildInstructions(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust, TrustDirection.TWO_WAY));
+        response.setTwoWay(twoWayResponse);
+
         return response;
     }
 }
