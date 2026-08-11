@@ -17,6 +17,7 @@ Assistant-oriented playbooks live under **`.agent/skills/`**. The files are **pl
 - **cb-testing**: JUnit 5 + Mockito unit tests, Spring integration tests, the authorization-compliance test, flow-chain graph tests, Gradle/jacoco commands and coverage gates — load when writing tests or before opening a PR.
 - **cdp-docs**: Official CDP Public Cloud documentation lookup and verification.
 - **cb-cloud-providers**: Read-first AWS/Azure/GCP CLI/MCP recipes for inspecting live cloud state.
+- **cb-new-runtime**: Introduce a new Cloudera Runtime (CR) version — Data Lake + Data Hub blueprints, cluster templates, `application.yml` runtime properties, upgrade matrix, and the count-assertion tests to bump; plus how to later make it the default. Load when RE raises a new-CR ticket.
 
 The end-to-end Jira-to-PR workflow (reproduction-first testing, PR quality bar) lives in **`.agent/WORKFLOW.md`**.
 
