@@ -213,9 +213,55 @@ class FreeIpaConfigServiceTest {
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
         assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
+        // A valid encryption profile CRN is set, so the directory server hardening pillar entries are emitted.
+        assertTrue(encryptionMap.containsKey("dirsrvTlsMinVersion"));
+        assertTrue(encryptionMap.containsKey("dirsrvTlsMaxVersion"));
+        assertTrue(encryptionMap.containsKey("dirsrvCipherSuites"));
         assertEquals(CERTMONGER_ENROLL_TTLS, freeIpaConfigView.getCertMongerConfig().getEnrollTtls());
         Map<String, Object> certmongerMap = (Map<String, Object>) freeIpaConfigView.toMap().get("certmonger");
         assertEquals(CERTMONGER_ENROLL_TTLS, certmongerMap.get("enroll_ttls"));
+    }
+
+    @Test
+    void createFreeIpaConfigsWithoutEncryptionProfileCrnOmitsDirsrvHardening() {
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        freeIpa.setAdminPassword(PASSWORD);
+        Stack stack = new Stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setRegion("region");
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.ENFORCING);
+        stack.setSecurityConfig(securityConfig);
+        stack.setEnvironmentCrn(ENV_CRN);
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
+        stack.setAccountId(ACCOUNT);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+
+        when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(mock(GatewayConfig.class));
+        when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        // No encryption profile selected during environment creation -> the environment falls back to the platform default.
+        when(detailedEnvironmentResponse.getEncryptionProfileCrn()).thenReturn(null);
+        when(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(null)).thenReturn(encryptionProfileResponse);
+
+        Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
+        FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(stack, ImmutableSet.of(node));
+
+        Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
+        // No profile CRN -> directory server hardening must be skipped so the default install behaviour is preserved.
+        assertFalse(encryptionMap.containsKey("dirsrvTlsMinVersion"));
+        assertFalse(encryptionMap.containsKey("dirsrvTlsMaxVersion"));
+        assertFalse(encryptionMap.containsKey("dirsrvCipherSuites"));
     }
 
     @Test

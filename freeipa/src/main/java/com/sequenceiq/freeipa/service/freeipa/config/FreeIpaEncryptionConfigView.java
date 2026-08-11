@@ -25,16 +25,20 @@ public class FreeIpaEncryptionConfigView {
 
     private final String tls13CipherSuites;
 
+    private final boolean hardenDirectoryServer;
+
     private final String dirsrvTlsMinVersion;
 
     private final String dirsrvTlsMaxVersion;
 
     private final String dirsrvCipherSuites;
 
-    public FreeIpaEncryptionConfigView(EncryptionProfileProvider encryptionProfileProvider, EncryptionProfileResponse encryptionProfileResponse) {
+    public FreeIpaEncryptionConfigView(EncryptionProfileProvider encryptionProfileProvider, EncryptionProfileResponse encryptionProfileResponse,
+            boolean hardenDirectoryServer) {
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
         boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();
+        this.hardenDirectoryServer = hardenDirectoryServer;
         tlsVersionsSpaceSeparated = EncryptionProfileConverter.getTlsVersionsSeparatedBySpace(userTlsVersions);
         tlsCipherSuites = encryptionProfileProvider.getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, legacyEncryptionProfile);
         tlsCipherSuitesRedHat8 = encryptionProfileProvider.getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, legacyEncryptionProfile);
@@ -66,9 +70,11 @@ public class FreeIpaEncryptionConfigView {
         result.put("tlsCipherSuitesRedHat8", tlsCipherSuitesRedHat8);
         result.put("tls12CipherSuites", tls12CipherSuites);
         result.put("tls13CipherSuites", tls13CipherSuites);
-        result.put("dirsrvTlsMinVersion", dirsrvTlsMinVersion);
-        result.put("dirsrvTlsMaxVersion", dirsrvTlsMaxVersion);
-        result.put("dirsrvCipherSuites", dirsrvCipherSuites);
+        if (hardenDirectoryServer) {
+            result.put("dirsrvTlsMinVersion", dirsrvTlsMinVersion);
+            result.put("dirsrvTlsMaxVersion", dirsrvTlsMaxVersion);
+            result.put("dirsrvCipherSuites", dirsrvCipherSuites);
+        }
         return result;
     }
 }

@@ -44,7 +44,7 @@ class FreeIpaConfigViewTest {
                 .withKerberosSecretLocation(KERBEROS_SECRET_LOCATION)
                 .withBackupConfig(backupConfigView)
                 .withSeLinux(SeLinux.PERMISSIVE.name())
-                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse))
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse, true))
                 .withSecretEncryptionEnabled(secretEncryptionEnabled)
                 .withCertmongerConfig(FreeIpaCertMongerConfigView.builder().withEnrollTtls(ttls).build())
                 .build();
@@ -64,7 +64,7 @@ class FreeIpaConfigViewTest {
 
         FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withBackupConfig(backupConfigView)
-                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse))
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse, true))
                 .build();
 
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
@@ -84,7 +84,7 @@ class FreeIpaConfigViewTest {
 
         FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withBackupConfig(backupConfigView)
-                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse))
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse, true))
                 .build();
 
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();

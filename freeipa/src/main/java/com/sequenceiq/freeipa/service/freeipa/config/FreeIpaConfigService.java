@@ -119,6 +119,8 @@ public class FreeIpaConfigService {
             adTrustEnabled = false;
         }
         LOGGER.debug("AD trust is {}", adTrustEnabled ? "enabled" : "disabled");
+        String encryptionProfileCrn = environmentResponse.getEncryptionProfileCrn();
+        boolean encryptionProfileCrnSet = StringUtils.isNotBlank(encryptionProfileCrn) && Crn.isCrn(encryptionProfileCrn);
         return builder
                 .withRealm(freeIpa.getDomain().toUpperCase(Locale.ROOT))
                 .withDomain(freeIpa.getDomain())
@@ -136,7 +138,7 @@ public class FreeIpaConfigService {
                 .withKerberosSecretLocation(kerberosSecretLocation)
                 .withSeLinux(seLinux)
                 .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider,
-                        cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(environmentResponse.getEncryptionProfileCrn())))
+                        cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(encryptionProfileCrn), encryptionProfileCrnSet))
                 .withLbConfig(loadBalancerService.findByStackId(stack.getId())
                         .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))

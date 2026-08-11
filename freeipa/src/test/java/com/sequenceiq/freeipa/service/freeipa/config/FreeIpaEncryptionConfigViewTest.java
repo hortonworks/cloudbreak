@@ -23,7 +23,7 @@ class FreeIpaEncryptionConfigViewTest {
                 Set.of(TlsVersion.TLS_1_3.getVersion()),
                 Map.of(TlsVersion.TLS_1_3.getVersion(), List.of("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384")));
 
-        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile).toMap();
+        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile, true).toMap();
 
         assertThat(result.get("dirsrvTlsMinVersion")).isEqualTo("TLS1.3");
         assertThat(result.get("dirsrvTlsMaxVersion")).isEqualTo("TLS1.3");
@@ -38,7 +38,7 @@ class FreeIpaEncryptionConfigViewTest {
                         TlsVersion.TLS_1_2.getVersion(), List.of("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
                         TlsVersion.TLS_1_3.getVersion(), List.of("TLS_AES_128_GCM_SHA256")));
 
-        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile).toMap();
+        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile, true).toMap();
 
         assertThat(result.get("dirsrvTlsMinVersion")).isEqualTo("TLS1.2");
         assertThat(result.get("dirsrvTlsMaxVersion")).isEqualTo("TLS1.3");
@@ -51,7 +51,7 @@ class FreeIpaEncryptionConfigViewTest {
                 Set.of(TlsVersion.TLS_1_2.getVersion()),
                 Map.of(TlsVersion.TLS_1_2.getVersion(), List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
 
-        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile).toMap();
+        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile, true).toMap();
 
         assertThat(result.get("dirsrvTlsMinVersion")).isEqualTo("TLS1.2");
         assertThat(result.get("dirsrvTlsMaxVersion")).isEqualTo("TLS1.2");
@@ -62,13 +62,28 @@ class FreeIpaEncryptionConfigViewTest {
     void emptyTlsVersionsYieldEmptyDirsrvValuesSoTheSaltStateIsSkipped() {
         EncryptionProfileResponse profile = profile("empty", Set.of(), Map.of());
 
-        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile).toMap();
+        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile, true).toMap();
 
         // With no TLS versions the min/max and cipher pillar values are empty, and ssl-ciphers.sls
         // guards (`{% if tlsMin and tlsMax %}` / `{% if ciphers %}`) skip the dirsrv hardening entirely.
         assertThat(result.get("dirsrvTlsMinVersion")).isEqualTo("");
         assertThat(result.get("dirsrvTlsMaxVersion")).isEqualTo("");
         assertThat(result.get("dirsrvCipherSuites")).isEqualTo("");
+    }
+
+    @Test
+    void hardenDirectoryServerFalseOmitsDirsrvPillarSoDefaultInstallIsUnchanged() {
+        // hardenDirectoryServer=false models the case where no encryption profile was selected during environment
+        // creation (FreeIpaConfigService sets it from whether the environment has an encryption profile CRN). Even for a
+        // profile that would otherwise pin TLS 1.3, the dirsrv pillar keys are omitted entirely, so ssl-ciphers.sls skips
+        // the dirsrv TLS/cipher changes and the default install behaviour is preserved.
+        EncryptionProfileResponse profile = profile("cdp_default_tls13_fips_140_3",
+                Set.of(TlsVersion.TLS_1_3.getVersion()),
+                Map.of(TlsVersion.TLS_1_3.getVersion(), List.of("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384")));
+
+        Map<String, Object> result = new FreeIpaEncryptionConfigView(encryptionProfileProvider, profile, false).toMap();
+
+        assertThat(result).doesNotContainKeys("dirsrvTlsMinVersion", "dirsrvTlsMaxVersion", "dirsrvCipherSuites");
     }
 
     private EncryptionProfileResponse profile(String name, Set<String> tlsVersions, Map<String, List<String>> cipherSuites) {
