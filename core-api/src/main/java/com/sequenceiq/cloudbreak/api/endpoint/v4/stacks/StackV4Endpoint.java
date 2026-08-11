@@ -75,6 +75,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROO
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_STACK_SECRETS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SEND_NOTIFICATION;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.UPDATE_VOLUME_RESOURCE_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VALIDATE_VERTICAL_SCALE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
@@ -871,6 +872,18 @@ public interface StackV4Endpoint {
             operationId = "verticalScalingInternalByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier verticalScalingByName(
+            @PathParam("workspaceId") Long workspaceId,
+            @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
+            @Valid StackVerticalScaleV4Request updateRequest);
+
+    @POST
+    @Path("internal/{name}/validate_vertical_scaling")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = VALIDATE_VERTICAL_SCALE_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "verticalScalingValidateInternalByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void verticalScalingValidateByName(
             @PathParam("workspaceId") Long workspaceId,
             @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,

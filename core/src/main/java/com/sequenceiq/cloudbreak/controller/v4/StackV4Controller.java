@@ -704,6 +704,14 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
+    public void verticalScalingValidateByName(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn,
+            StackVerticalScaleV4Request updateRequest) {
+        Stack stack = stackService.getByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        stackOperations.validateVerticalScaling(stack, updateRequest);
+    }
+
+    @Override
+    @InternalOnly
     public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(Long workspaceId, @ResourceCrn String environmentCrn) {
         List<SubnetIdWithResourceNameAndCrn> allUsedSubnets = stackOperations.getUsedSubnetsByEnvironment(environmentCrn);
         return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
