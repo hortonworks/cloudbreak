@@ -22,15 +22,6 @@ public class CachedEnvironmentClientService {
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;
 
-    @Cacheable(cacheNames = FREEIPA_ENVIRONMENT_CACHE, key = "#environment")
-    public DetailedEnvironmentResponse getByName(String environment) {
-        try {
-            return environmentEndpoint.getByName(environment);
-        } catch (WebApplicationException e) {
-            throw webApplicationExceptionHandler.handleException(e);
-        }
-    }
-
     @Cacheable(cacheNames = FREEIPA_ENVIRONMENT_CACHE, key = "#environmentCrn")
     public DetailedEnvironmentResponse getByCrn(String environmentCrn) {
         try {
