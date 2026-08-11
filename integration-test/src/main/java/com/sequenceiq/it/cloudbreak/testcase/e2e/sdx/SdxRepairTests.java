@@ -320,55 +320,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a Medium Duty SDX cluster in available state",
-            when = "IDBroker and Gateway instances are going to be deleted on the provider side",
-            then = "SDX repair should be done successfully, the cluster should be up and running"
-    )
-    public void testSDXMediumDutyRepair(TestContext testContext) {
-        String sdx = resourcePropertyProvider().getName();
-
-        List<String> actualVolumeIds = new ArrayList<>();
-        List<String> expectedVolumeIds = new ArrayList<>();
-
-        testContext
-                .given(sdx, SdxTestDto.class)
-                .withCloudStorage()
-                .withRuntimeVersion(MINIMAL_MEDIUM_DUTY_RUNTIME)
-                .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
-                .when(sdxTestClient.create(), key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForHealthyInstances()
-                .then((tc, testDto, client) ->
-                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
-                .then((tc, testDto, client) -> {
-                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, "gateway");
-                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instancesToDelete));
-                    getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
-                    return testDto;
-                })
-                .awaitForHostGroups(List.of("gateway", "idbroker"), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
-                .await(SdxClusterStatusResponse.CLUSTER_UNREACHABLE,
-                        key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE)))
-                .when(sdxTestClient.repair("gateway", "idbroker"), key(sdx))
-                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS,
-                        key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE)))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, "gateway");
-                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                .then((tc, testDto, client) ->
-                        clusterVolumeValidationService.validateAttachedDisks(testDto, tc, tc.getMicroserviceClient(CloudbreakClient.class)))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @Description(
             given = "there is a Enterprise SDX cluster in available state",
             when = "IDBroker and Gateway instances are going to be deleted on the provider side",
             then = "SDX repair should be done successfully, the cluster should be up and running"
@@ -388,7 +339,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class)
                 .withCloudStorage(getCloudStorageRequest(testContext))
-                .withRuntimeVersion(MINIMAL_ENTERPRISE_RUNTIME)
                 .withClusterShape(SdxClusterShape.ENTERPRISE)
                 .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))

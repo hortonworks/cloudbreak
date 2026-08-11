@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -25,7 +26,8 @@ import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 @Component
 public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
 
-    private static final String MDL_RESIZE_FIXED_RUNTIME_VERSION = "7.2.17";
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -74,7 +76,7 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
                 .withReportClusterLogs()
                 .given(sdxKey, SdxInternalTestDto.class)
                 .withCloudStorage(cloudStorageRequest)
-                .withRuntimeVersion(MDL_RESIZE_FIXED_RUNTIME_VERSION)
+                .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion())
                 .withClusterShape(SdxClusterShape.CUSTOM)
                 .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal(), key(sdxKey))
