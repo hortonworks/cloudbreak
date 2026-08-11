@@ -15,6 +15,9 @@ public abstract class AbstractVirtualMachinesResponse implements Serializable {
     @Schema(description = PlatformResourceModelDescription.VIRTUAL_MACHINES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<VmTypeResponse> virtualMachines = new HashSet<>();
 
+    @Schema(description = PlatformResourceModelDescription.VIRTUAL_MACHINES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<VmTypeResponse> deprecatedVirtualMachines = new HashSet<>();
+
     @Schema(description = PlatformResourceModelDescription.DEFAULT_VIRTUAL_MACHINES)
     private VmTypeResponse defaultVirtualMachine;
 
@@ -24,6 +27,14 @@ public abstract class AbstractVirtualMachinesResponse implements Serializable {
 
     public void setVirtualMachines(Set<VmTypeResponse> virtualMachines) {
         this.virtualMachines = virtualMachines;
+    }
+
+    public Set<VmTypeResponse> getDeprecatedVirtualMachines() {
+        return deprecatedVirtualMachines;
+    }
+
+    public void setDeprecatedVirtualMachines(Set<VmTypeResponse> deprecatedVirtualMachines) {
+        this.deprecatedVirtualMachines = deprecatedVirtualMachines;
     }
 
     public VmTypeResponse getDefaultVirtualMachine() {
@@ -38,6 +49,7 @@ public abstract class AbstractVirtualMachinesResponse implements Serializable {
     public String toString() {
         return "AbstractVirtualMachinesResponse{" +
                 "virtualMachines=" + virtualMachines +
+                ", deprecatedVirtualMachines=" + deprecatedVirtualMachines +
                 ", defaultVirtualMachine=" + defaultVirtualMachine +
                 '}';
     }

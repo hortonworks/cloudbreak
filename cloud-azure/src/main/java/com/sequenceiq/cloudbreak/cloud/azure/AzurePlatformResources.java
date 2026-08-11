@@ -14,13 +14,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -99,6 +99,29 @@ public class AzurePlatformResources implements PlatformResources {
 
     private static final int NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE = 0;
 
+    private static final List<Pattern> AZURE_DEPRECATED_FAMILY_PATTERNS = List.of(
+            // Compute Optimized: F (Standard_F4), Fs (Standard_F4s), Fsv2 (Standard_F4s_v2)
+            Pattern.compile("Standard_F\\d+", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("Standard_F\\d+s", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("Standard_F\\d+s_v2", Pattern.CASE_INSENSITIVE),
+            // General Purpose: D v1 (Standard_D2), Ds v1 (Standard_DS2)
+            Pattern.compile("Standard_D\\d+", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("Standard_DS\\d+", Pattern.CASE_INSENSITIVE),
+            // General Purpose: Dv2 (Standard_D2_v2), Dsv2 (Standard_DS2_v2)
+            Pattern.compile("Standard_D\\d+_v2", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("Standard_DS\\d+_v2", Pattern.CASE_INSENSITIVE),
+            // General Purpose: Av2 (Standard_A2_v2), Amv2 (Standard_A2m_v2)
+            Pattern.compile("Standard_A\\d+m?_v2", Pattern.CASE_INSENSITIVE),
+            // General Purpose: B-series v1 (Standard_B2s, Standard_B4ms) — no version suffix
+            Pattern.compile("Standard_B\\d+[a-z]*", Pattern.CASE_INSENSITIVE),
+            // Memory Optimized: G (Standard_G1), Gs (Standard_GS1)
+            Pattern.compile("Standard_G\\d+", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("Standard_GS\\d+", Pattern.CASE_INSENSITIVE),
+            // Storage Optimized: Ls v1 (Standard_L8s), Lsv2 (Standard_L8s_v2)
+            Pattern.compile("Standard_L\\d+s", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("Standard_L\\d+s_v2", Pattern.CASE_INSENSITIVE)
+    );
+
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AZURE_ENABLED_TYPES_LIST.stream()
             .filter(it -> !it.isEmpty())
             .anyMatch(di -> vmt.value().equals(di));
@@ -106,7 +129,7 @@ public class AzurePlatformResources implements PlatformResources {
     @Value("${cb.azure.default.max.disk.size:32767}")
     private int maxDiskSize;
 
-    @Value("${cb.azure.default.vmtype:Standard_D16s_v3}")
+    @Value("${cb.azure.default.vmtype:Standard_D16s_v5}")
     private String armVmDefault;
 
     @Value("${distrox.restrict.instance.types:true}")
@@ -306,21 +329,17 @@ public class AzurePlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachinesNonExtended(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
-        Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value())
-                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch VM types using region"));
-        vmTypes = vmTypes.stream()
-                .filter(filterOutV6Instances())
-                .collect(Collectors.toSet());
-
-        Map<String, List<String>> availabilityZones = client.getAvailabilityZones(region.value());
         Map<String, AzureVmCapabilities> azureVmCapabilities = client.getHostCapabilities(region.value());
-
-        Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
-        Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
+        Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value())
+                .orElseThrow(() -> new CloudbreakServiceException("Could not fetch VM types using region"))
+                .stream()
+                .filter(filterOutGen1UnsupportedVms(azureVmCapabilities))
+                .collect(Collectors.toSet());
+        Map<String, List<String>> availabilityZones = client.getAvailabilityZones(region.value());
 
         Set<VmType> types = new HashSet<>();
+        Set<VmType> deprecatedTypes = new HashSet<>();
         VmType defaultVmType = null;
-        Set<String> vmTypesWithoutResourceDisks = new HashSet<>();
         LOGGER.debug("Requested Filters are {}", filters);
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
             List<String> availabilityZonesForVm = availabilityZones.getOrDefault(virtualMachineSize.name(), new ArrayList<>());
@@ -346,6 +365,9 @@ public class AzurePlatformResources implements PlatformResources {
                 builder.withArchitecture(capability == null ? Architecture.X86_64 : capability.getArchitecture());
                 VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
                 types.add(vmType);
+                if (isDeprecatedVmType(virtualMachineSize)) {
+                    deprecatedTypes.add(vmType);
+                }
                 if (virtualMachineSize.name().equals(armVmDefault)) {
                     defaultVmType = vmType;
                 }
@@ -354,11 +376,14 @@ public class AzurePlatformResources implements PlatformResources {
                         virtualMachineSize.name(), availabilityZonesForVm);
             }
         }
-        LOGGER.debug("The following Azure VM types have been filtered out, because there is no resource disk available with them: {}",
-                String.join(", ", vmTypesWithoutResourceDisks));
+
+        Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
+        Map<String, Set<VmType>> deprecatedCloudVmResponses = new HashMap<>();
+        Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
         cloudVmResponses.put(region.value(), types);
+        deprecatedCloudVmResponses.put(region.value(), deprecatedTypes);
         defaultCloudVmResponses.put(region.value(), defaultVmType);
-        return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+        return new CloudVmTypes(cloudVmResponses, deprecatedCloudVmResponses, defaultCloudVmResponses);
     }
 
     @Override
@@ -505,7 +530,16 @@ public class AzurePlatformResources implements PlatformResources {
                 );
     }
 
-    private Predicate<VirtualMachineSize> filterOutV6Instances() {
-        return e -> !e.name().toLowerCase(Locale.ROOT).endsWith("_v6");
+    private static boolean isDeprecatedVmType(VirtualMachineSize vmType) {
+        return AZURE_DEPRECATED_FAMILY_PATTERNS.stream()
+                .anyMatch(pattern -> pattern.matcher(vmType.name()).matches());
     }
+
+    private static Predicate<VirtualMachineSize> filterOutGen1UnsupportedVms(Map<String, AzureVmCapabilities> azureVmCapabilities) {
+        return e -> {
+            AzureVmCapabilities capabilities = azureVmCapabilities.get(e.name());
+            return capabilities == null || capabilities.isGen1Supported();
+        };
+    }
+
 }

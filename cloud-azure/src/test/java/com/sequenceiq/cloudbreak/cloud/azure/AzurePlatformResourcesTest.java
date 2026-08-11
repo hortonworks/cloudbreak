@@ -14,7 +14,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -75,7 +76,7 @@ class AzurePlatformResourcesTest {
 
     private static final int NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE = 0;
 
-    private static final String ARM_VM_DEFAULT = "Standard_D4s_v3";
+    private static final String ARM_VM_DEFAULT = "Standard_D4s_v5";
 
     private static final int MAX_DISK_SIZE = 2048;
 
@@ -110,8 +111,8 @@ class AzurePlatformResourcesTest {
     void testVirtualMachinesWhenNoInstanceTypeShouldBeFilteredOut() {
         Region region = region("westeruope");
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
-        virtualMachineSizes.add(createVirtualMachineSize("Standard_DS2_v2", 20000));
-        virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
+        virtualMachineSizes.add(createVirtualMachineSize("Standard_D2s_v5", 20000));
+        virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v5", 1400000));
         when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(Map.of());
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
@@ -152,18 +153,18 @@ class AzurePlatformResourcesTest {
     void testVirtualMachinesWhenInstanceTypeHasZeroResourceDiskMustBePresented() {
         Region region = region("westeruope");
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
-        VirtualMachineSize d2sTypeWithoutResourceDisk = createVirtualMachineSize("Standard_D2s_v4", 0);
-        VirtualMachineSize e64sVmTypeWithoutResourceDisk = createVirtualMachineSize("Standard_E64s_v4", 0);
-        virtualMachineSizes.add(createVirtualMachineSize("Standard_DS2_v2", 20000));
+        VirtualMachineSize d2sTypeWithoutResourceDisk = createVirtualMachineSize("Standard_D2s_v5", 0);
+        VirtualMachineSize e64sVmTypeWithoutResourceDisk = createVirtualMachineSize("Standard_E64s_v5", 0);
+        virtualMachineSizes.add(createVirtualMachineSize(ARM_VM_DEFAULT, 20000));
         virtualMachineSizes.add(d2sTypeWithoutResourceDisk);
-        virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
+        virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v5", 1400000));
         virtualMachineSizes.add(e64sVmTypeWithoutResourceDisk);
         when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         Map<String, List<String>> zoneInfo = new HashMap<>();
-        zoneInfo.put("Standard_D2s_v4", List.of("1", "2"));
-        zoneInfo.put("Standard_E64s_v4", List.of("2", "3"));
-        zoneInfo.put("Standard_DS2_v2", List.of("1"));
-        zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
+        zoneInfo.put(ARM_VM_DEFAULT, List.of("1", "2"));
+        zoneInfo.put("Standard_E64s_v5", List.of("2", "3"));
+        zoneInfo.put("Standard_D2s_v5", List.of("1"));
+        zoneInfo.put("Standard_E64ds_v5", List.of("1", "2", "3"));
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureHostEncryptionValidator.isVmSupported(any(), anyMap())).thenReturn(true);
@@ -195,28 +196,28 @@ class AzurePlatformResourcesTest {
 
     static Object []  [] dataForFilterVirtualMachines() {
         return new Object [][] {
-                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of(), "Standard_DS2_v2", List.of("1"),
-                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                {Map.of("Standard_D2s_v5", List.of("1", "2"), "Standard_E64s_v5", List.of(), ARM_VM_DEFAULT, List.of("1"),
+                        "Standard_E64ds_v5", List.of("1", "2", "3")),
                         List.of("1"),
-                        Set.of("Standard_DS2_v2", "Standard_D2s_v4", "Standard_E64ds_v4")},
-                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("2", "3"), "Standard_DS2_v2", List.of("1"),
-                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        Set.of("Standard_D2s_v5", ARM_VM_DEFAULT, "Standard_E64ds_v5")},
+                {Map.of("Standard_D2s_v5", List.of("1", "2"), "Standard_E64s_v5", List.of("2", "3"), ARM_VM_DEFAULT, List.of("1"),
+                        "Standard_E64ds_v5", List.of("1", "2", "3")),
                         List.of("3", "1", "2"),
-                        Set.of("Standard_E64ds_v4")},
-                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
-                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        Set.of("Standard_E64ds_v5")},
+                {Map.of("Standard_D2s_v5", List.of("1", "2"), "Standard_E64s_v5", List.of("1", "2"), ARM_VM_DEFAULT, List.of("1"),
+                        "Standard_E64ds_v5", List.of("1", "2", "3")),
                         List.of("1", "2"),
-                        Set.of("Standard_D2s_v4", "Standard_E64s_v4", "Standard_E64ds_v4")},
-                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
-                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        Set.of("Standard_D2s_v5", "Standard_E64s_v5", "Standard_E64ds_v5")},
+                {Map.of("Standard_D2s_v5", List.of("1", "2"), "Standard_E64s_v5", List.of("1", "2"), ARM_VM_DEFAULT, List.of("1"),
+                        "Standard_E64ds_v5", List.of("1", "2", "3")),
                         null,
-                        Set.of("Standard_D2s_v4", "Standard_E64s_v4", "Standard_DS2_v2", "Standard_E64ds_v4")},
-                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
-                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        Set.of("Standard_D2s_v5", "Standard_E64s_v5", ARM_VM_DEFAULT, "Standard_E64ds_v5")},
+                {Map.of("Standard_D2s_v5", List.of("1", "2"), "Standard_E64s_v5", List.of("1", "2"), ARM_VM_DEFAULT, List.of("1"),
+                        "Standard_E64ds_v5", List.of("1", "2", "3")),
                         List.of(),
-                        Set.of("Standard_D2s_v4", "Standard_E64s_v4", "Standard_DS2_v2", "Standard_E64ds_v4")},
-                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
-                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        Set.of("Standard_D2s_v5", "Standard_E64s_v5", ARM_VM_DEFAULT, "Standard_E64ds_v5")},
+                {Map.of("Standard_D2s_v5", List.of("1", "2"), "Standard_E64s_v5", List.of("1", "2"), ARM_VM_DEFAULT, List.of("1"),
+                        "Standard_E64ds_v5", List.of("1", "2", "3")),
                         List.of("4"),
                         Set.of()}
         };
@@ -258,12 +259,12 @@ class AzurePlatformResourcesTest {
     @Test
     void testVirtualMachinesForFiltersAzForInstanceIsNull() {
         Map<String, List<String>> zoneInfo = new HashMap<>();
-        zoneInfo.put("Standard_D2s_v4", List.of("1", "2"));
-        zoneInfo.put("Standard_DS2_v2", List.of("1"));
-        zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
-        zoneInfo.put("Standard_E64s_v4", null);
+        zoneInfo.put("Standard_D2s_v5", List.of("1", "2"));
+        zoneInfo.put(ARM_VM_DEFAULT, List.of("1"));
+        zoneInfo.put("Standard_E64ds_v5", List.of("1", "2", "3"));
+        zoneInfo.put("Standard_E64s_v5", null);
         List<String> availabilityZones = List.of("1");
-        Set<String> expectedVirtualMachines = Set.of("Standard_DS2_v2", "Standard_D2s_v4", "Standard_E64ds_v4");
+        Set<String> expectedVirtualMachines = Set.of("Standard_D2s_v5", ARM_VM_DEFAULT, "Standard_E64ds_v5");
         Region region = region("westus2");
 
         Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
@@ -303,12 +304,12 @@ class AzurePlatformResourcesTest {
                 .build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
-        virtualMachineSizes.add(createVirtualMachineSize("Standard_D8_v3", 20000));
+        virtualMachineSizes.add(createVirtualMachineSize("Standard_D8_v5", 20000));
         when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
-        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("Standard_D8_v3"));
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("Standard_D8_v5"));
 
-        assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
+        assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v5"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
     }
 
@@ -326,15 +327,15 @@ class AzurePlatformResourcesTest {
 
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("unsupported"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
-        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
-        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v3"));
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v5"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v5"));
 
         when(azureClient.getVmTypes(region.value())).thenReturn(Optional.of(virtualMachineSizes));
 
         instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>());
 
-        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
-        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v3"));
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v5"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v5"));
     }
 
     private VirtualMachineSize createVirtualMachineSize(String name, int resourceDiskSizeInMB) {
@@ -444,39 +445,62 @@ class AzurePlatformResourcesTest {
     }
 
     @Test
-    void testGetCloudVmTypesForSupportedVmTypesAndFilterOutV6Family() {
-        ReflectionTestUtils.setField(underTest, "armVmDefault", "Standard_D4s_v3");
+    void testGetCloudVmTypesKeepsDeprecatedAndGen2OnlyFilteringStillApplies() {
+        ReflectionTestUtils.setField(underTest, "armVmDefault", ARM_VM_DEFAULT);
 
         when(azureClientService.getClient(any())).thenReturn(azureClient);
 
-        VirtualMachineSize vmA = mockVmSize("Standard_D4s_v3");
-        VirtualMachineSize vmB = mockVmSize("Standard_D2s_v3");
+        // ARM_VM_DEFAULT = Standard_D4s_v5 — not deprecated, not gen2-only → kept, becomes default
+        // Standard_D2_v2 — deprecated (Dsv2 family), kept in cloudVmResponses and tracked in deprecatedCloudVmResponses
+        // Standard_D2_v6 — not deprecated, but gen2-only (_v6 suffix) → removed
+        // Standard_D4s_v7 — not deprecated, but gen2-only (_v7 suffix) → removed
+        // Basic_A0 — no version suffix, not deprecated → kept
+        // Standard_D1 — deprecated (D family without version), kept in cloudVmResponses and tracked in deprecatedCloudVmResponses
+        // Standard_E16s_v5 — not deprecated, not gen2-only → kept
+        VirtualMachineSize vmA = mockVmSize(ARM_VM_DEFAULT);
+        VirtualMachineSize vmB = mockVmSize("Standard_D2_v2");
         VirtualMachineSize vmC = mockVmSize("Standard_D2_v6");
-        Set<VirtualMachineSize> vmSizes = new HashSet<>(Arrays.asList(vmA, vmB, vmC));
-        when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(vmSizes));
+        VirtualMachineSize vmD = mockVmSize("Standard_D4s_v7");
+        VirtualMachineSize vmE = mockVmSize("Basic_A0");
+        VirtualMachineSize vmF = mockVmSize("Standard_D1");
+        VirtualMachineSize vmG = mockVmSize("Standard_E16s_v5");
+        Set<VirtualMachineSize> vmSizes = new HashSet<>(Arrays.asList(vmA, vmB, vmC, vmD, vmE, vmF, vmG));
         when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(vmSizes));
 
         Map<String, List<String>> azs = new HashMap<>();
-        azs.put("Standard_D4s_v3", Arrays.asList("1", "2"));
-        azs.put("Standard_D2s_v3", Arrays.asList("1", "3"));
+        azs.put(ARM_VM_DEFAULT, Arrays.asList("1", "2"));
+        azs.put("Standard_D2_v2", Arrays.asList("1", "3"));
+        azs.put("Standard_D2_v6", Arrays.asList("1", "2"));
+        azs.put("Standard_D4s_v7", Arrays.asList("1", "2"));
+        azs.put("Basic_A0", Arrays.asList("1", "2"));
+        azs.put("Standard_D1", Arrays.asList("1", "2"));
+        azs.put("Standard_E16s_v5", Arrays.asList("1", "2"));
         when(azureClient.getAvailabilityZones(REGION)).thenReturn(azs);
 
+        AzureVmCapabilities gen2OnlyCaps = mock(AzureVmCapabilities.class);
+        when(gen2OnlyCaps.isGen1Supported()).thenReturn(false);
         Map<String, AzureVmCapabilities> capabilities = new HashMap<>();
-        capabilities.put("Standard_D4s_v3", mock(AzureVmCapabilities.class));
-        capabilities.put("Standard_D2s_v3", mock(AzureVmCapabilities.class));
+        capabilities.put(ARM_VM_DEFAULT, gen1SupportedCapabilities());
+        capabilities.put("Basic_A0", gen1SupportedCapabilities());
+        capabilities.put("Standard_E16s_v5", gen1SupportedCapabilities());
+        capabilities.put("Standard_D2_v6", gen2OnlyCaps);
+        capabilities.put("Standard_D4s_v7", gen2OnlyCaps);
         when(azureClient.getHostCapabilities(REGION)).thenReturn(capabilities);
         when(azureHostEncryptionValidator.isVmSupported(anyString(), anyMap())).thenReturn(true);
-        when(azureAcceleratedNetworkValidator.isSupportedForVm(eq("Standard_D4s_v3"), anyMap())).thenReturn(true);
-        when(azureAcceleratedNetworkValidator.isSupportedForVm(eq("Standard_D2s_v3"), anyMap())).thenReturn(false);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(anyString(), anyMap())).thenReturn(true);
 
         CloudVmTypes result = underTest.virtualMachinesNonExtended(cloudCredential, region(REGION), Map.of());
 
         Set<VmType> returnedTypes = result.getCloudVmResponses().get(REGION);
+        Set<VmType> deprecatedTypes = result.getDeprecatedCloudVmResponses().get(REGION);
         VmType defaultType = result.getDefaultCloudVmResponses().get(REGION);
         assertThat(returnedTypes)
                 .extracting(VmType::value)
-                .containsExactlyInAnyOrder("Standard_D4s_v3", "Standard_D2s_v3");
-        assertThat(defaultType.value()).isEqualTo("Standard_D4s_v3");
+                .containsExactlyInAnyOrder(ARM_VM_DEFAULT, "Basic_A0", "Standard_E16s_v5", "Standard_D2_v2", "Standard_D1");
+        assertThat(deprecatedTypes)
+                .extracting(VmType::value)
+                .containsExactlyInAnyOrder("Standard_D2_v2", "Standard_D1");
+        assertThat(defaultType.value()).isEqualTo(ARM_VM_DEFAULT);
     }
 
     @Test
@@ -499,8 +523,10 @@ class AzurePlatformResourcesTest {
 
         AzureVmCapabilities armCapability = mock(AzureVmCapabilities.class);
         when(armCapability.getArchitecture()).thenReturn(Architecture.ARM64);
+        when(armCapability.isGen1Supported()).thenReturn(true);
         AzureVmCapabilities x64Capability = mock(AzureVmCapabilities.class);
         when(x64Capability.getArchitecture()).thenReturn(Architecture.X86_64);
+        when(x64Capability.isGen1Supported()).thenReturn(true);
         Map<String, AzureVmCapabilities> capabilities = new HashMap<>();
         capabilities.put("Standard_E4pds_v5", armCapability);
         capabilities.put("Standard_D8s_v5", x64Capability);
@@ -517,6 +543,92 @@ class AzurePlatformResourcesTest {
                 .containsEntry("Standard_E4pds_v5", Architecture.ARM64)
                 .containsEntry("Standard_D8s_v5", Architecture.X86_64)
                 .containsEntry("Standard_D2s_v5", Architecture.X86_64);
+    }
+
+    static Stream<String> deprecatedFamilyNames() {
+        return Stream.of(
+                // Compute Optimized F-series
+                "Standard_F4", "Standard_F8s", "Standard_F4s_v2",
+                // General Purpose D v1 and Dv2 only (v3/v4 are NOT capacity-restricted)
+                "Standard_D2", "Standard_DS4", "Standard_D2_v2", "Standard_DS2_v2",
+                // General Purpose A-series
+                "Standard_A2_v2", "Standard_A4m_v2",
+                // General Purpose B-series
+                "Standard_B2s", "Standard_B4ms", "Standard_B8ms",
+                // Memory Optimized G-series
+                "Standard_G1", "Standard_GS2",
+                // Storage Optimized L-series
+                "Standard_L8s", "Standard_L8s_v2"
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("deprecatedFamilyNames")
+    void testDeprecatedFamilyIsMarkedDeprecated(String vmName) {
+        Boolean deprecated = ReflectionTestUtils.invokeMethod(underTest, "isDeprecatedVmType", mockVmSize(vmName));
+        assertThat(deprecated)
+                .as("Expected %s to be marked deprecated", vmName)
+                .isTrue();
+    }
+
+    static Stream<String> nonDeprecatedFamilyNames() {
+        return Stream.of(
+                // D-series v3/v4 — NOT in the capacity restriction list
+                "Standard_D4_v3", "Standard_D4s_v3", "Standard_D4_v4", "Standard_D4s_v4",
+                "Standard_D4ds_v4", "Standard_D4d_v4",
+                // D-series v5+
+                "Standard_D4s_v5", "Standard_D2_v6",
+                // E-series (not deprecated)
+                "Standard_E8s_v5", "Standard_E16s_v6",
+                // L-series v3+ (not deprecated)
+                "Standard_L8s_v3", "Standard_L16s_v4", "Standard_L8as_v3", "Standard_L16as_v3",
+                // FX-series (not deprecated)
+                "Standard_FX4mds"
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("nonDeprecatedFamilyNames")
+    void testNonDeprecatedFamilyIsNotMarkedDeprecated(String vmName) {
+        Boolean deprecated = ReflectionTestUtils.invokeMethod(underTest, "isDeprecatedVmType", mockVmSize(vmName));
+        assertThat(deprecated)
+                .as("Expected %s to NOT be marked deprecated", vmName)
+                .isFalse();
+    }
+
+    @Test
+    void testGen1UnsupportedFilterRemovesVm() {
+        AzureVmCapabilities gen2OnlyCaps = mock(AzureVmCapabilities.class);
+        when(gen2OnlyCaps.isGen1Supported()).thenReturn(false);
+        Map<String, AzureVmCapabilities> caps = Map.of("Standard_D2_v6", gen2OnlyCaps);
+
+        Predicate<VirtualMachineSize> filter = ReflectionTestUtils.invokeMethod(underTest, "filterOutGen1UnsupportedVms", caps);
+
+        assertThat(filter.test(mockVmSize("Standard_D2_v6"))).isFalse();
+    }
+
+    @Test
+    void testGen1UnsupportedFilterKeepsVmWhenGen1Supported() {
+        AzureVmCapabilities gen1AndGen2Caps = mock(AzureVmCapabilities.class);
+        when(gen1AndGen2Caps.isGen1Supported()).thenReturn(true);
+        Map<String, AzureVmCapabilities> caps = Map.of("Standard_D4s_v5", gen1AndGen2Caps);
+
+        Predicate<VirtualMachineSize> filter = ReflectionTestUtils.invokeMethod(underTest, "filterOutGen1UnsupportedVms", caps);
+
+        assertThat(filter.test(mockVmSize("Standard_D4s_v5"))).isTrue();
+    }
+
+    @Test
+    void testGen1UnsupportedFilterKeepsVmWhenCapabilitiesAbsent() {
+        Predicate<VirtualMachineSize> filter = ReflectionTestUtils.invokeMethod(underTest, "filterOutGen1UnsupportedVms", Map.of());
+
+        assertThat(filter.test(mockVmSize("Standard_D4s_v5"))).isTrue();
+    }
+
+    private AzureVmCapabilities gen1SupportedCapabilities() {
+        AzureVmCapabilities caps = mock(AzureVmCapabilities.class);
+        when(caps.isGen1Supported()).thenReturn(true);
+        return caps;
     }
 
     private VirtualMachineSize mockVmSize(String name) {

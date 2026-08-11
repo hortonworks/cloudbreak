@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,10 +51,42 @@ class AzureVmCapabilitiesTest {
         assertEquals(Architecture.X86_64, underTest.getArchitecture());
     }
 
+    @Test
+    void testGen1SupportedWhenHyperVGenerationsContainsV1() {
+        AzureVmCapabilities caps = new AzureVmCapabilities("Standard_D4s_v5", List.of(capability("HyperVGenerations", "V1,V2")));
+
+        assertThat(caps.isGen1Supported()).isTrue();
+        assertThat(caps.isGen2Supported()).isTrue();
+    }
+
+    @Test
+    void testGen1NotSupportedWhenHyperVGenerationsIsV2Only() {
+        AzureVmCapabilities caps = new AzureVmCapabilities("Standard_D4s_v6", List.of(capability("HyperVGenerations", "V2")));
+
+        assertThat(caps.isGen1Supported()).isFalse();
+        assertThat(caps.isGen2Supported()).isTrue();
+    }
+
+    @Test
+    void testBothSupportedWhenHyperVGenerationsCapabilityAbsent() {
+        AzureVmCapabilities caps = new AzureVmCapabilities("Standard_D4s_v5", List.of());
+
+        assertThat(caps.isGen1Supported()).isTrue();
+        assertThat(caps.isGen2Supported()).isTrue();
+    }
+
+    @Test
+    void testBothSupportedWhenCapabilitiesNull() {
+        AzureVmCapabilities caps = new AzureVmCapabilities("Standard_D4s_v5", null);
+
+        assertThat(caps.isGen1Supported()).isTrue();
+        assertThat(caps.isGen2Supported()).isTrue();
+    }
+
     private ResourceSkuCapabilities capability(String name, String value) {
-        ResourceSkuCapabilities capability = mock(ResourceSkuCapabilities.class);
-        when(capability.name()).thenReturn(name);
-        when(capability.value()).thenReturn(value);
-        return capability;
+        ResourceSkuCapabilities cap = mock(ResourceSkuCapabilities.class);
+        when(cap.name()).thenReturn(name);
+        when(cap.value()).thenReturn(value);
+        return cap;
     }
 }

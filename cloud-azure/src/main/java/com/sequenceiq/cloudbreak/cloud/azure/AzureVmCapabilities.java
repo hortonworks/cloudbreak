@@ -17,6 +17,8 @@ public class AzureVmCapabilities {
 
     private static final String AZURE_X64 = "x64";
 
+    private static final String HYPER_V_GENERATIONS = "HyperVGenerations";
+
     private final String name;
 
     private boolean encryptionAtHostSupported;
@@ -24,6 +26,8 @@ public class AzureVmCapabilities {
     private boolean acceleratedNetworkingEnabled;
 
     private Architecture architecture = Architecture.X86_64;
+
+    private String hyperVGenerations;
 
     public AzureVmCapabilities(String name, List<ResourceSkuCapabilities> skuCapabilities) {
         this.name = name;
@@ -37,6 +41,9 @@ public class AzureVmCapabilities {
             skuCapabilities.stream()
                     .filter(c -> CPU_ARCHITECTURE_TYPE.equalsIgnoreCase(c.name()))
                     .findFirst().ifPresent(resourceSkuCapabilities -> architecture = toArchitecture(resourceSkuCapabilities.value()));
+            skuCapabilities.stream()
+                    .filter(c -> HYPER_V_GENERATIONS.equalsIgnoreCase(c.name()))
+                    .findFirst().ifPresent(c -> hyperVGenerations = c.value());
         }
     }
 
@@ -63,5 +70,13 @@ public class AzureVmCapabilities {
 
     public Architecture getArchitecture() {
         return architecture;
+    }
+
+    public boolean isGen1Supported() {
+        return hyperVGenerations == null || hyperVGenerations.contains("V1");
+    }
+
+    public boolean isGen2Supported() {
+        return hyperVGenerations == null || hyperVGenerations.contains("V2");
     }
 }

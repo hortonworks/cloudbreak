@@ -39,17 +39,7 @@ public class VerticalScaleInstanceProvider {
     private MinimalHardwareFilter minimalHardwareFilter;
 
     public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        return listInstanceTypes(cloudPlatform, availabilityZone, currentInstanceType, allVmTypes, null, CdpResourceType.DEFAULT);
-    }
-
-    public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, String currentInstanceType,
-            CloudVmTypes allVmTypes, Set<String> instanceGroupAvailabilityZones) {
-        return listInstanceTypes(cloudPlatform, availabilityZone, currentInstanceType, allVmTypes, instanceGroupAvailabilityZones, CdpResourceType.DEFAULT);
-    }
-
-    public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, String currentInstanceType,
-            CloudVmTypes allVmTypes, Set<String> instanceGroupAvailabilityZones, CdpResourceType cdpResourceType) {
-        return listInstanceTypes(cloudPlatform, availabilityZone, List.of(currentInstanceType), allVmTypes, instanceGroupAvailabilityZones, cdpResourceType);
+        return listInstanceTypes(cloudPlatform, availabilityZone, List.of(currentInstanceType), allVmTypes, null, CdpResourceType.DEFAULT);
     }
 
     public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, List<String> currentInstanceTypes,
@@ -94,8 +84,14 @@ public class VerticalScaleInstanceProvider {
             return new CloudVmTypes(Map.of(availabilityZoneForSelection, Set.of()), Map.of());
         }
 
+        Set<VmType> deprecatedSuitableInstances = allVmTypes.getDeprecatedCloudVmResponses()
+                .getOrDefault(availabilityZoneForSelection, Set.of())
+                .stream()
+                .filter(suitableInstances::contains)
+                .collect(Collectors.toSet());
         return new CloudVmTypes(
                 Map.of(availabilityZoneForSelection, suitableInstances),
+                Map.of(availabilityZoneForSelection, deprecatedSuitableInstances),
                 Map.of(availabilityZoneForSelection, suitableInstances.stream().findFirst().get())
         );
     }
@@ -290,13 +286,6 @@ public class VerticalScaleInstanceProvider {
                     requestedInstanceTypeName, CdpResourceType.FREEIPA.equals(cdpResourceType) ? minimalHardwareFilter.minFreeIpaCpu()
                             : minimalHardwareFilter.minCpu()));
         }
-    }
-
-    private Optional<VmType> getInstance(String currentInstanceType, Set<VmType> vmTypes) {
-        return vmTypes
-                .stream()
-                .filter(e -> e.getValue().equals(currentInstanceType))
-                .findFirst();
     }
 
     private List<Optional<VmType>> getInstances(List<String> instanceTypes, Set<VmType> allVmTypes) {

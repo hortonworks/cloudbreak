@@ -23,11 +23,12 @@ public class CloudVmTypesToPlatformVmTypesV1ResponseConverter {
     private VmTypeToVmTypeV1ResponseConverter vmTypeToVmTypeV1ResponseConverter;
 
     public PlatformVmtypesResponse convert(CloudVmTypes source) {
-        Map<String, VirtualMachinesResponse> result = new HashMap<>();
+        Map<String, VirtualMachinesResponse> responseVmTypes = new HashMap<>();
+
         for (Entry<String, Set<VmType>> entry : source.getCloudVmResponses().entrySet()) {
-            Set<VmTypeResponse> vmTypeResponse = new HashSet<>();
+            Set<VmTypeResponse> vmTypeResponses = new HashSet<>();
             for (VmType vmType : entry.getValue()) {
-                vmTypeResponse.add(vmTypeToVmTypeV1ResponseConverter.convert(vmType));
+                vmTypeResponses.add(vmTypeToVmTypeV1ResponseConverter.convert(vmType));
             }
 
             VirtualMachinesResponse virtualMachinesResponse = new VirtualMachinesResponse();
@@ -35,9 +36,21 @@ public class CloudVmTypesToPlatformVmTypesV1ResponseConverter {
             if (defaultVmType != null) {
                 virtualMachinesResponse.setDefaultVirtualMachine(vmTypeToVmTypeV1ResponseConverter.convert(defaultVmType));
             }
-            virtualMachinesResponse.setVirtualMachines(vmTypeResponse);
-            result.put(entry.getKey(), virtualMachinesResponse);
+            virtualMachinesResponse.setVirtualMachines(vmTypeResponses);
+            responseVmTypes.put(entry.getKey(), virtualMachinesResponse);
         }
-        return new PlatformVmtypesResponse(result);
+
+        for (Entry<String, Set<VmType>> entry : source.getDeprecatedCloudVmResponses().entrySet()) {
+            Set<VmTypeResponse> deprecatedVmTypeResponses = new HashSet<>();
+            for (VmType vmType : entry.getValue()) {
+                deprecatedVmTypeResponses.add(vmTypeToVmTypeV1ResponseConverter.convert(vmType));
+            }
+            VirtualMachinesResponse virtualMachinesResponse = responseVmTypes.get(entry.getKey());
+            if (virtualMachinesResponse != null) {
+                virtualMachinesResponse.setDeprecatedVirtualMachines(deprecatedVmTypeResponses);
+            }
+        }
+
+        return new PlatformVmtypesResponse(responseVmTypes);
     }
 }
