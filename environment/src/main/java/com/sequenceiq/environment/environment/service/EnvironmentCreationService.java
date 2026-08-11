@@ -245,10 +245,21 @@ public class EnvironmentCreationService {
             validationBuilder.merge(validatorService.validateExternalizedComputeCluster(creationDto.getExternalizedComputeCluster(),
                     creationDto.getAccountId(), environmentSubnets));
         }
+        validationBuilder.merge(validateEncryptionProfile(creationDto));
+
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private ValidationResult validateEncryptionProfile(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (StringUtils.isNotEmpty(creationDto.getEncryptionProfileCrn()) &&
+                !entitlementService.isConfigureEncryptionProfileEnabled(creationDto.getAccountId())) {
+            validationResultBuilder.error("Account not entitled for encryption profile. Please contact your CDP administrator to enable it.");
+        }
+        return validationResultBuilder.build();
     }
 
     private ValidationResult validateResourceGroupUsage(EnvironmentCreationDto creationDto) {

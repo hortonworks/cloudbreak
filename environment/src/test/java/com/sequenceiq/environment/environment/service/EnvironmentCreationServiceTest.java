@@ -929,6 +929,61 @@ class EnvironmentCreationServiceTest {
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
     }
 
+    @Test
+    void testEncryptionProfileValidationFailureWhenEntitlementDisabled() {
+        EnvironmentCreationDto environmentCreationDto = creationDtoWithEncryptionProfile("encryption-profile-crn");
+        Environment environment = azureEnvironment();
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        assertThatThrownBy(() -> environmentCreationServiceUnderTest.create(environmentCreationDto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Account not entitled for encryption profile");
+
+        verify(entitlementService).isConfigureEncryptionProfileEnabled(ACCOUNT_ID);
+        verify(environmentService, never()).save(any());
+        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testEncryptionProfileValidationSuccessWhenEntitlementEnabled() {
+        EnvironmentCreationDto environmentCreationDto = creationDtoWithEncryptionProfile("encryption-profile-crn");
+        Environment environment = azureEnvironment();
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(entitlementService).isConfigureEncryptionProfileEnabled(ACCOUNT_ID);
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    @Test
+    void testCreateWhenEncryptionProfileCrnIsNull() {
+        EnvironmentCreationDto environmentCreationDto = creationDtoWithEncryptionProfile(null);
+        Environment environment = azureEnvironment();
+        lenientHappyCreatePath(environmentCreationDto, environment);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(entitlementService, never()).isConfigureEncryptionProfileEnabled(any());
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    private EnvironmentCreationDto creationDtoWithEncryptionProfile(String encryptionProfileCrn) {
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
+        return EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withCrn("crn")
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withEncryptionProfileCrn(encryptionProfileCrn)
+                .withLocation(LocationDto.builder().withName("test").withDisplayName("test").withLatitude(0.1).withLongitude(0.1).build())
+                .build();
+    }
+
     private EnvironmentCreationDto azureCreationDto(ResourceGroupUsagePattern resourceGroupUsagePattern) {
         AzureResourceGroupDto azureResourceGroupDto = AzureResourceGroupDto.builder()
                 .withResourceGroupUsagePattern(resourceGroupUsagePattern)
