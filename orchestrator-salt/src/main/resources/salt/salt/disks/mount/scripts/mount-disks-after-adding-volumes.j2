@@ -99,19 +99,20 @@ mount_instance_store() {
     echo "$counter"
 }
 
-unmount_and_mount_block_store() {
+unmount_and_mount_store() {
     local counter=$1
     local volume=$2
+    local prefix=${3:-fs}
     local uuid=$(get_disk_uuid "/dev/$volume")
-    log $LOG_FILE "mounting volume $volume with uuid ${uuid} to path /hadoopfs/fs${counter}"
+    log $LOG_FILE "mounting volume $volume with uuid ${uuid} to path /hadoopfs/${prefix}${counter}"
     local mount_point=$(awk -v uuid="UUID=$uuid" '$1 == uuid {print $2}' /etc/fstab)
     if [[ -z "$mount_point" ]]; then
-        unmount_storage "/hadoopfs/fs${counter}" "/hadoopfs\/fs${counter}/d"
+        unmount_storage "/hadoopfs/${prefix}${counter}" "/hadoopfs\/${prefix}${counter}/d"
         format_disks_if_unformatted "/dev/$volume" "$counter"
         if [[ -z "$uuid" ]]; then
             uuid=$(get_disk_uuid "/dev/$volume")
         fi
-        mount_one "UUID=$uuid /hadoopfs/fs${counter} $FS_TYPE defaults,noatime,nofail 0 2"
+        mount_one "UUID=$uuid /hadoopfs/${prefix}${counter} $FS_TYPE defaults,noatime,nofail 0 2"
         ((counter++))
     else
         log $LOG_FILE "Skipping: UUID ${uuid} is already mounted/configured at ${mount_point}"
@@ -165,7 +166,7 @@ mount_all_attached_disks_aws() {
               hadoop_ephfs_dir_counter=$(mount_instance_store "$hadoop_ephfs_dir_counter" "$volume")
           elif ! not_elastic_block_store $dev_path $LOG_FILE ; then
               log $LOG_FILE volume $volume is a EBS volume and starting to unmount and mount it
-              hadoop_fs_dir_counter=$(unmount_and_mount_block_store "$hadoop_fs_dir_counter" "$volume")
+              hadoop_fs_dir_counter=$(unmount_and_mount_store "$hadoop_fs_dir_counter" "$volume")
           fi
       done
 
@@ -197,10 +198,90 @@ mount_all_attached_disks_azure() {
           local current_mount=$(awk -v u="UUID=$uuid" '$1==u {print $2}' /etc/fstab)
           [[ "$current_mount" =~ ^/(dbfs|boot)$ ]] && continue
           if [[ "/dev/$volume" > "$non_ebs_device_id" ]]; then
-              hadoop_fs_dir_counter=$(unmount_and_mount_block_store "$hadoop_fs_dir_counter" "$volume")
+              hadoop_fs_dir_counter=$(unmount_and_mount_store "$hadoop_fs_dir_counter" "$volume")
           else
               log $LOG_FILE volume $volume is not EBS, skipping it
           fi
+      done
+
+    return $((return_value))
+}
+
+# Kernel names (e.g. "nvme0n1") of GCP local SSDs (instance store), matched via the
+# GCP guest-environment by-id symlinks. Consistent with mount-instance-storage.j2.
+get_gcp_local_ssd_device_names() {
+    local names=""
+    for link in /dev/disk/by-id/google-local-nvme-ssd-* /dev/disk/by-id/google-local-ssd-*; do
+        [[ -e "$link" ]] || continue
+        names="$names $(basename "$(readlink -f "$link")")"
+    done
+    echo "$names" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' '
+}
+
+is_in_list() {
+    local needle=$1
+    local haystack=$2
+    for item in $haystack; do
+        [[ "$item" == "$needle" ]] && return 0
+    done
+    return 1
+}
+
+mount_all_attached_disks_gcp() {
+      local return_value=0
+      local hadoop_fs_dir_counter
+      local hadoop_ephfs_dir_counter=1
+
+      # GCP local SSDs (instance store) are identified via the guest-environment by-id symlinks.
+      # Everything else attached (excluding root and /dbfs) is treated as block storage.
+      local local_ssd_names=$(get_gcp_local_ssd_device_names)
+      log $LOG_FILE "GCP local SSD (instance store) devices: $local_ssd_names"
+
+      local all_volumes=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
+      local root_disk=$(get_root_disk)
+
+      local instance_store_volumes=""
+      local block_store_volumes=""
+      for volume in $all_volumes; do
+          local dev_path="/dev/$volume"
+          [[ "$dev_path" == "$root_disk" ]] && continue
+          local uuid=$(get_disk_uuid "$dev_path")
+          local current_mount=$(awk -v u="UUID=$uuid" '$1==u {print $2}' /etc/fstab)
+          [[ "$current_mount" == "/dbfs" ]] && continue
+          if is_in_list "$volume" "$local_ssd_names"; then
+              instance_store_volumes="$instance_store_volumes $volume"
+          else
+              block_store_volumes="$block_store_volumes $volume"
+          fi
+      done
+      log $LOG_FILE "instance store volumes: $instance_store_volumes | block store volumes: $block_store_volumes"
+
+      local mixed=false
+      [[ -n "${instance_store_volumes// }" && -n "${block_store_volumes// }" ]] && mixed=true
+      log $LOG_FILE "mixed instance/block storage: $mixed"
+
+      local ephfs_already_exists=$(grep "/hadoopfs/ephfs" /etc/fstab)
+      if [[ "$mixed" == "true" && -z "$ephfs_already_exists" ]]; then
+          log $LOG_FILE "Hybrid transition detected on GCP: resetting all non-critical mounts."
+          unmount_all_storages
+          hadoop_fs_dir_counter=1
+      else
+          hadoop_fs_dir_counter=$(( $(get_hadoopfs_dir_counter) + 1 ))
+      fi
+
+      for volume in $instance_store_volumes; do
+          if [[ "$mixed" == "true" ]]; then
+              log $LOG_FILE "Routing instance store $volume to ephfs"
+              hadoop_ephfs_dir_counter=$(unmount_and_mount_store "$hadoop_ephfs_dir_counter" "$volume" ephfs)
+          else
+              log $LOG_FILE "Routing instance store $volume to fs (single storage type)"
+              hadoop_fs_dir_counter=$(unmount_and_mount_store "$hadoop_fs_dir_counter" "$volume")
+          fi
+      done
+
+      for volume in $block_store_volumes; do
+          log $LOG_FILE "Routing block store $volume to fs"
+          hadoop_fs_dir_counter=$(unmount_and_mount_store "$hadoop_fs_dir_counter" "$volume")
       done
 
     return $((return_value))
@@ -230,6 +311,8 @@ mount_common() {
     mkdir /hadoopfs
     if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
       mount_all_attached_disks_azure
+    elif [[ "$CLOUD_PLATFORM" == "GCP" ]]; then
+      mount_all_attached_disks_gcp
     else
       mount_all_attached_disks_aws
     fi
