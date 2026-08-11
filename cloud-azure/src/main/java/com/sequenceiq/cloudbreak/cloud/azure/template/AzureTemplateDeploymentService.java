@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.template;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -10,11 +11,13 @@ import org.springframework.stereotype.Component;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.resources.models.Deployment;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureFallbackAwareDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStackViewProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateDeploymentRequest;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
@@ -56,27 +59,48 @@ public class AzureTemplateDeploymentService {
     @Inject
     private RetryService retry;
 
+    @Inject
+    private AzureFallbackAwareDeploymentService azureFallbackAwareDeploymentService;
+
     public Deployment getTemplateDeployment(AzureClient client, CloudStack stack, AuthenticatedContext ac, AzureStackView azureStackView,
             AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-        String template = getTemplate(stack, azureStackView, ac, stackName, client, azureInstanceTemplateOperation);
+        String template = getRenderedTemplate(stack, azureStackView, ac, stackName, client, azureInstanceTemplateOperation).template();
         String parameters = azureTemplateBuilder.buildParameters();
 
-        return retry.testWith1SecDelayMax5Times(() -> {
-            try {
-                return client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
-            } catch (ManagementException e) {
-                if (e.getValue() != null && e.getValue().getDetails() != null) {
-                    String details = e.getValue().getDetails().stream().map(ManagementError::getMessage).collect(Collectors.joining(", "));
-                    if (details.contains("Please check the power state later")) {
-                        throw new Retry.ActionFailedException("VMs not started in time.", e);
-                    }
+        return retry.testWith1SecDelayMax5Times(() -> submit(() ->
+                client.createTemplateDeployment(resourceGroupName, stackName, template, parameters)));
+    }
+
+    public Deployment getTemplateDeploymentWithFallback(AzureClient client, CloudStack stack, AuthenticatedContext ac, AzureStackView azureStackView,
+            AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
+        CloudContext cloudContext = ac.getCloudContext();
+        String stackName = azureUtils.getStackName(cloudContext);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        RenderedTemplate rendered = getRenderedTemplate(stack, azureStackView, ac, stackName, client, azureInstanceTemplateOperation);
+        String parameters = azureTemplateBuilder.buildParameters();
+        AzureTemplateDeploymentRequest request = new AzureTemplateDeploymentRequest(
+                client, resourceGroupName, stackName, rendered.template(), parameters, azureStackView,
+                cloudContext, stack, rendered.credentialView(), rendered.customImageId(), azureInstanceTemplateOperation, rendered.marketplaceImage());
+
+        return retry.testWith1SecDelayMax5Times(() -> submit(() ->
+                azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(request)));
+    }
+
+    private Deployment submit(Supplier<Deployment> action) {
+        try {
+            return action.get();
+        } catch (ManagementException e) {
+            if (e.getValue() != null && e.getValue().getDetails() != null) {
+                String details = e.getValue().getDetails().stream().map(ManagementError::getMessage).collect(Collectors.joining(", "));
+                if (details.contains("Please check the power state later")) {
+                    throw new Retry.ActionFailedException("VMs not started in time.", e);
                 }
-                throw e;
             }
-        });
+            throw e;
+        }
     }
 
     public Optional<ManagementError> runWhatIfAnalysis(AzureClient client, CloudStack stack, AuthenticatedContext ac) {
@@ -85,30 +109,34 @@ public class AzureTemplateDeploymentService {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureStackView azureStackView = azureStackViewProvider
                 .getAzureStack(new AzureCredentialView(ac.getCloudCredential()), stack, client, ac);
-        String template = getTemplate(stack, azureStackView, ac, stackName, client, AzureInstanceTemplateOperation.PROVISION);
+        String template = getRenderedTemplate(stack, azureStackView, ac, stackName, client, AzureInstanceTemplateOperation.PROVISION).template();
         return client.runWhatIfAnalysis(resourceGroupName, stackName, template);
     }
 
-    private String getTemplate(CloudStack stack, AzureStackView azureStackView, AuthenticatedContext ac,
+    private RenderedTemplate getRenderedTemplate(CloudStack stack, AzureStackView azureStackView, AuthenticatedContext ac,
             String stackName, AzureClient client, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
-        String template;
         Image stackImage = stack.getImage();
         CloudContext cloudContext = ac.getCloudContext();
+        AzureCredentialView credentialView = createCredential(ac);
         if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
-            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
-            template = azureTemplateBuilder.build(stackName, null, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation,
-                    azureMarketplaceImage);
-        } else {
-            String customImageId = azureStorage.getCustomImage(client, ac, stack).getId();
-            template = azureTemplateBuilder
-                    .build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation,
-                            azureImageFormatValidator.hasSourceImagePlan(stackImage) ? azureMarketplaceImageProviderService.getSourceImage(stackImage) : null);
+            AzureMarketplaceImage marketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
+            String template = azureTemplateBuilder.build(stackName, null, credentialView, azureStackView, cloudContext, stack, azureInstanceTemplateOperation,
+                    marketplaceImage);
+            return new RenderedTemplate(template, null, marketplaceImage, credentialView);
         }
-        return template;
+        String customImageId = azureStorage.getCustomImage(client, ac, stack).getId();
+        AzureMarketplaceImage sourcePlanImage = azureImageFormatValidator.hasSourceImagePlan(stackImage)
+                ? azureMarketplaceImageProviderService.getSourceImage(stackImage) : null;
+        String template = azureTemplateBuilder.build(stackName, customImageId, credentialView, azureStackView, cloudContext, stack,
+                azureInstanceTemplateOperation, sourcePlanImage);
+        return new RenderedTemplate(template, customImageId, sourcePlanImage, credentialView);
     }
 
     private AzureCredentialView createCredential(AuthenticatedContext ac) {
         return new AzureCredentialView(ac.getCloudCredential());
+    }
+
+    private record RenderedTemplate(String template, String customImageId, AzureMarketplaceImage marketplaceImage, AzureCredentialView credentialView) {
     }
 
 }

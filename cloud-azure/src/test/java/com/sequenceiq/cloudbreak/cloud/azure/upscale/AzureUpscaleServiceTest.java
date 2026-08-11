@@ -188,7 +188,7 @@ class AzureUpscaleServiceTest {
         when(azureImageFormatValidator.hasSourceImagePlan(eq(image))).thenReturn(true);
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+        when(azureTemplateDeploymentService.getTemplateDeploymentWithFallback(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
@@ -210,7 +210,7 @@ class AzureUpscaleServiceTest {
         assertEquals(ResourceStatus.IN_PROGRESS, actual.get(0).getStatus());
 
         verify(cloudResourceHelper).getScaledGroups(stack);
-        verify(azureTemplateDeploymentService).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
+        verify(azureTemplateDeploymentService).getTemplateDeploymentWithFallback(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
         verify(templateDeployment).exportTemplate();
         verify(azureCloudResourceService).getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP);
         verify(azureCloudResourceService).getNetworkResources(resources);
@@ -258,7 +258,8 @@ class AzureUpscaleServiceTest {
         assertFalse(exception instanceof CloudImageException, "Should not fallback in case of source image signing");
 
         verify(azureImageTermsSignerService).sign(any(), eq(azureMpImage), any());
-        verify(azureTemplateDeploymentService, never()).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
+        verify(azureTemplateDeploymentService, never()).getTemplateDeploymentWithFallback(client, stack, ac, azureStackView,
+                AzureInstanceTemplateOperation.UPSCALE);
     }
 
     @Test
@@ -278,7 +279,7 @@ class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+        when(azureTemplateDeploymentService.getTemplateDeploymentWithFallback(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
@@ -300,7 +301,7 @@ class AzureUpscaleServiceTest {
         assertEquals(ResourceStatus.IN_PROGRESS, actual.get(0).getStatus());
 
         verify(cloudResourceHelper).getScaledGroups(stack);
-        verify(azureTemplateDeploymentService).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
+        verify(azureTemplateDeploymentService).getTemplateDeploymentWithFallback(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
         verify(templateDeployment).exportTemplate();
         verify(azureCloudResourceService).getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP);
         verify(azureCloudResourceService).getNetworkResources(resources);
@@ -393,7 +394,7 @@ class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+        when(azureTemplateDeploymentService.getTemplateDeploymentWithFallback(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
@@ -449,7 +450,7 @@ class AzureUpscaleServiceTest {
         AzureTestUtils.setDetails(cloudError, details);
         ManagementError managementError = AzureTestUtils.managementError("code", "Please check the power state later");
         details.add(managementError);
-        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+        when(azureTemplateDeploymentService.getTemplateDeploymentWithFallback(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenThrow(new Retry.ActionFailedException("VMs not started in time.", new ApiErrorException("Error", null, cloudError)));
         when(azureUtils.convertToCloudConnectorException(any(ApiErrorException.class), anyString())).thenCallRealMethod();
         when(azureUtils.convertToCloudConnectorException(any(Throwable.class), anyString())).thenCallRealMethod();

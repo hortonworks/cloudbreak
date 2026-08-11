@@ -26,6 +26,8 @@ public class AzureProperties {
 
     private final Instance storageOptimizedInstance = new Instance();
 
+    private final Instance arm64Instance = new Instance();
+
     private final Cloudstorage cloudstorage = new Cloudstorage();
 
     private final Network network = new Network();
@@ -96,6 +98,10 @@ public class AzureProperties {
 
     public Instance getStorageOptimizedInstance() {
         return storageOptimizedInstance;
+    }
+
+    public Instance getArm64Instance() {
+        return arm64Instance;
     }
 
     public Cloudstorage getCloudStorage() {

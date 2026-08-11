@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.constant.AzureConstants;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 class AzurePlatformResourcesTest {
@@ -476,6 +477,46 @@ class AzurePlatformResourcesTest {
                 .extracting(VmType::value)
                 .containsExactlyInAnyOrder("Standard_D4s_v3", "Standard_D2s_v3");
         assertThat(defaultType.value()).isEqualTo("Standard_D4s_v3");
+    }
+
+    @Test
+    void testVirtualMachinesNonExtendedPopulatesArchitectureFromCapabilities() {
+        ReflectionTestUtils.setField(underTest, "armVmDefault", "Standard_E4pds_v5");
+
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        VirtualMachineSize armVm = mockVmSize("Standard_E4pds_v5");
+        VirtualMachineSize x64Vm = mockVmSize("Standard_D8s_v5");
+        VirtualMachineSize noCapabilityVm = mockVmSize("Standard_D2s_v5");
+        Set<VirtualMachineSize> vmSizes = new HashSet<>(Arrays.asList(armVm, x64Vm, noCapabilityVm));
+        when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(vmSizes));
+
+        Map<String, List<String>> azs = new HashMap<>();
+        azs.put("Standard_E4pds_v5", Arrays.asList("1", "2"));
+        azs.put("Standard_D8s_v5", Arrays.asList("1", "2"));
+        azs.put("Standard_D2s_v5", Arrays.asList("1", "2"));
+        when(azureClient.getAvailabilityZones(REGION)).thenReturn(azs);
+
+        AzureVmCapabilities armCapability = mock(AzureVmCapabilities.class);
+        when(armCapability.getArchitecture()).thenReturn(Architecture.ARM64);
+        AzureVmCapabilities x64Capability = mock(AzureVmCapabilities.class);
+        when(x64Capability.getArchitecture()).thenReturn(Architecture.X86_64);
+        Map<String, AzureVmCapabilities> capabilities = new HashMap<>();
+        capabilities.put("Standard_E4pds_v5", armCapability);
+        capabilities.put("Standard_D8s_v5", x64Capability);
+        // Standard_D2s_v5 intentionally has no capability entry -> should fall back to X86_64.
+        when(azureClient.getHostCapabilities(REGION)).thenReturn(capabilities);
+        when(azureHostEncryptionValidator.isVmSupported(anyString(), anyMap())).thenReturn(true);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(anyString(), anyMap())).thenReturn(true);
+
+        CloudVmTypes result = underTest.virtualMachinesNonExtended(cloudCredential, region(REGION), Map.of());
+
+        Map<String, Architecture> architectureByVmType = result.getCloudVmResponses().get(REGION).stream()
+                .collect(Collectors.toMap(VmType::value, vmType -> vmType.getMetaData().getArchitecture()));
+        assertThat(architectureByVmType)
+                .containsEntry("Standard_E4pds_v5", Architecture.ARM64)
+                .containsEntry("Standard_D8s_v5", Architecture.X86_64)
+                .containsEntry("Standard_D2s_v5", Architecture.X86_64);
     }
 
     private VirtualMachineSize mockVmSize(String name) {

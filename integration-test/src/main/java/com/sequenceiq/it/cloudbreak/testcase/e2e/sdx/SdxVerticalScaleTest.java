@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static java.lang.String.format;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
@@ -23,20 +25,23 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
-import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
+public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
+
+    private static final String ARCHITECTURE_CHANGE_REJECTED_MESSAGE = "Unable to resize since changing CPU architecture is not supported.";
 
     private static final Map<String, String> SDX_TAGS = Map.of("sdxTagKey", "sdxTagValue");
 
@@ -58,9 +63,6 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private SdxUtil sdxUtil;
-
-    @Inject
     private SshJClient sshJClient;
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
@@ -72,6 +74,8 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
     )
     public void testSdxVolumesVerticalScale(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
+        String crossArchScaleKey = "crossArchScaleKey";
+        String targetInstanceGroup = "master";
         testContext
             .given("telemetry", TelemetryTestDto.class)
             .withLogging()
@@ -85,6 +89,19 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .when(sdxTestClient.describeInternalWithResources())
             .awaitForHealthyInstances()
             .useAlternativeServiceEndpointIfConfigured()
+            // Negative: once the cluster is stopped, resizing to a different CPU architecture must be rejected pre-flight, before any flow starts.
+            .given(crossArchScaleKey, VerticalScalingTestDto.class)
+            .withGroup(targetInstanceGroup)
+            .withInstanceType(testContext.getCloudProvider().getDefaultInstanceType(Architecture.ARM64))
+            .given(SdxInternalTestDto.class)
+            .when(sdxTestClient.stopInternal())
+            .await(SdxClusterStatusResponse.STOPPED)
+            .whenException(sdxTestClient.verticalScale(crossArchScaleKey), BadRequestException.class,
+                    expectedMessage(ARCHITECTURE_CHANGE_REJECTED_MESSAGE))
+            .given(SdxInternalTestDto.class)
+            .when(sdxTestClient.startInternal())
+            .await(SdxClusterStatusResponse.RUNNING)
+            .awaitForHealthyInstances()
             .given(SdxInternalTestDto.class)
             .when(sdxTestClient.updateDisks(UPDATE_SIZE, testContext.getCloudProvider().getModifyDiskVolumeType(), TEST_INSTANCE_GROUP,
                     DiskType.ADDITIONAL_DISK))

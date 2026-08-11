@@ -48,6 +48,8 @@ public final class AzureInstanceView {
 
     private final String managedIdentity;
 
+    private final String flavorOverride;
+
     private AzureInstanceView(Builder builder) {
         instance = builder.instance;
         instanceTemplate = instance.getTemplate();
@@ -63,6 +65,7 @@ public final class AzureInstanceView {
         rootVolumeSize = builder.rootVolumeSize;
         customImageId = builder.customImageId;
         managedIdentity = builder.managedIdentity;
+        flavorOverride = builder.flavorOverride;
     }
 
     public CloudInstance getInstance() {
@@ -95,10 +98,11 @@ public final class AzureInstanceView {
     }
 
     /**
-     * Used in freemarker template.
+     * Used in freemarker template. Returns the flavor override (set by the instance-type fallback loop) when present,
+     * otherwise the flavor configured on the instance template.
      */
     public String getFlavor() {
-        return instanceTemplate.getFlavor();
+        return flavorOverride != null ? flavorOverride : instanceTemplate.getFlavor();
     }
 
     /**
@@ -226,6 +230,23 @@ public final class AzureInstanceView {
         return new Builder(instance);
     }
 
+    public Builder toBuilder() {
+        return new Builder(instance)
+                .withStackName(stackName)
+                .withStackNamePrefixLength(stackNamePrefixLength)
+                .withType(type)
+                .withAttachedDiskStorage(attachedDiskStorage)
+                .withRootDiskStorageType(rootDiskStorageType)
+                .withGroupName(groupName)
+                .withAvailabilitySetName(availabilitySetName)
+                .withManagedDisk(managedDisk)
+                .withSubnetId(subnetId)
+                .withRootVolumeSize(rootVolumeSize)
+                .withCustomImageId(customImageId)
+                .withManagedIdentity(managedIdentity)
+                .withFlavorOverride(flavorOverride);
+    }
+
     public static class Builder {
 
         private CloudInstance instance;
@@ -253,6 +274,8 @@ public final class AzureInstanceView {
         private String customImageId;
 
         private String managedIdentity;
+
+        private String flavorOverride;
 
         private Builder(CloudInstance instance) {
             withInstance(instance);
@@ -320,6 +343,11 @@ public final class AzureInstanceView {
 
         public Builder withManagedIdentity(String managedIdentity) {
             this.managedIdentity = managedIdentity;
+            return this;
+        }
+
+        public Builder withFlavorOverride(String flavorOverride) {
+            this.flavorOverride = flavorOverride;
             return this;
         }
 

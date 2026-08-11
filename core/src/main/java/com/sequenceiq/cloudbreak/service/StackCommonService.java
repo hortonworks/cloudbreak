@@ -356,6 +356,12 @@ public class StackCommonService {
         return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
     }
 
+    public void validateVerticalScaleInWorkspace(Stack stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        MDCBuilder.buildMdcContext(stack);
+        stackVerticalScaleV4Request.setStackId(stack.getId());
+        validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
+    }
+
     private void validateScalingRequest(StackView stack, String instanceGroupName, Integer scalingAdjustment) {
         if (KRAFT_HOST_GROUP.equalsIgnoreCase(instanceGroupName)) {
             throw new BadRequestException(String.format("Resizing is not supported for %s host group", instanceGroupName));

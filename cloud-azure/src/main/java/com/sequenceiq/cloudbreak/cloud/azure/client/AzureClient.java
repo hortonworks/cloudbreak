@@ -1213,6 +1213,27 @@ public class AzureClient {
         }).orElse(null);
     }
 
+    public Map<String, String> getVmToSkuFamilies(String region) throws ProviderAuthenticationFailedException {
+        return handleException(() -> {
+            if (StringUtils.isEmpty(region)) {
+                LOGGER.error("Region is not provided so not fetching VM SKU family information");
+                return Map.<String, String>of();
+            }
+            String criteria = "location eq '" + RegionUtil.findByLabelOrName(region).name() + "'";
+            LOGGER.debug("Fetch VM SKU family map from Azure for region {} and criteria {}", region, criteria);
+            AzureListResult<ResourceSkuInner> azureResult = azureListResultFactory.create(azure
+                    .virtualMachines()
+                    .manager()
+                    .serviceClient()
+                    .getResourceSkus()
+                    .list(criteria, null, com.azure.core.util.Context.NONE));
+            return azureResult.getStream()
+                    .filter(sku -> "virtualMachines".equalsIgnoreCase(sku.resourceType()))
+                    .filter(sku -> sku.name() != null && sku.family() != null)
+                    .collect(Collectors.toMap(ResourceSkuInner::name, ResourceSkuInner::family, (a, b) -> a));
+        }).orElse(Map.<String, String>of());
+    }
+
     public String getServicePrincipalId() {
         return azure.accessManagement().servicePrincipals().getByName(azureClientFactory.getAccessKey()).id();
     }

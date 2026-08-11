@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,13 +20,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.resourcemanager.compute.models.ResourceSkuCapabilities;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureVmCapabilities;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureVirtualMachineTypeProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureAcceleratedNetworkValidatorTest {
@@ -107,5 +113,29 @@ public class AzureAcceleratedNetworkValidatorTest {
         String vmType = "vmType";
 
         assertFalse(underTest.isSupportedForVm(vmType, azureVmCapabilities));
+    }
+
+    @Test
+    public void testValidateUsesOverriddenFlavorSoTheMapMatchesTheTemplateLookup() {
+        AzureAcceleratedNetworkValidator withRealProvider = new AzureAcceleratedNetworkValidator();
+        ReflectionTestUtils.setField(withRealProvider, "azureVirtualMachineTypeProvider",
+                new AzureVirtualMachineTypeProvider());
+        String original = "Standard_D8_v3";
+        String override = "Standard_D16_v3";
+        InstanceTemplate template = new InstanceTemplate(original, "master", null,
+                Collections.emptyList(), null, Collections.emptyMap(), null, null, TemporaryStorage.ATTACHED_VOLUMES, 0L);
+        CloudInstance instance = new CloudInstance(null, template, null, "subnet-1", "az1");
+        AzureInstanceView overridden = AzureInstanceView.builder(instance).build()
+                .toBuilder().withFlavorOverride(override).build();
+        Map<String, List<AzureInstanceView>> instanceGroups = Map.of("CORE", List.of(overridden));
+        AzureStackView stackView = mock(AzureStackView.class);
+        when(stackView.getInstancesByGroupType()).thenReturn(instanceGroups);
+        VmTypeMeta meta = VmTypeMeta.VmTypeMetaBuilder.builder().withEnhancedNetwork(true).create();
+        vmTypes.add(VmType.vmTypeWithMeta(override, meta, true));
+
+        Map<String, Boolean> result = withRealProvider.validate(stackView, vmTypes);
+
+        assertTrue(result.containsKey(override), "acceleratedNetworkEnabled map must be keyed by the overridden flavor");
+        assertFalse(result.containsKey(original), "acceleratedNetworkEnabled map must NOT contain the original flavor after override");
     }
 }

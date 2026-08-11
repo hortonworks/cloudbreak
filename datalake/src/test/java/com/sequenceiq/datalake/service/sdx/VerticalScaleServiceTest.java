@@ -1,9 +1,20 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +26,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -48,6 +62,40 @@ public class VerticalScaleServiceTest {
 
     @InjectMocks
     private VerticalScaleService underTest;
+
+    @Test
+    public void testVerticalScaleDatalakeRejectsCrossArchitecturePreFlight() {
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        when(sdxCluster.getClusterName()).thenReturn("test-cluster");
+        StackVerticalScaleV4Request request = mock(StackVerticalScaleV4Request.class);
+        String message = "Unable to resize since changing CPU architecture is not supported.";
+        WebApplicationException webApplicationException = new BadRequestException(message);
+        doThrow(webApplicationException).when(stackV4Endpoint)
+                .verticalScalingValidateByName(anyLong(), eq("test-cluster"), anyString(), eq(request));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(message);
+
+        com.sequenceiq.cloudbreak.common.exception.BadRequestException thrown = assertThrows(
+                com.sequenceiq.cloudbreak.common.exception.BadRequestException.class,
+                () -> underTest.verticalScaleDatalake(sdxCluster, request, "TEST-CRN"));
+
+        assertEquals(message, thrown.getMessage());
+        verify(eventSender, never()).sendEvent(any(), any());
+    }
+
+    @Test
+    public void testVerticalScaleDatalakeTriggersFlowWhenValidationPasses() {
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        when(sdxCluster.getClusterName()).thenReturn("test-cluster");
+        StackVerticalScaleV4Request request = mock(StackVerticalScaleV4Request.class);
+        SdxStatusEntity statusEntity = mock(SdxStatusEntity.class);
+        when(statusEntity.getStatus()).thenReturn(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster.getId())).thenReturn(statusEntity);
+
+        underTest.verticalScaleDatalake(sdxCluster, request, "TEST-CRN");
+
+        verify(stackV4Endpoint).verticalScalingValidateByName(anyLong(), eq("test-cluster"), anyString(), eq(request));
+        verify(eventSender).sendEvent(any(), any());
+    }
 
     @Test
     public void testUpdateDisksDatalake() {
