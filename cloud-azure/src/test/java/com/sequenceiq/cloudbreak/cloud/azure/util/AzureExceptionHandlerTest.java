@@ -153,6 +153,15 @@ public class AzureExceptionHandlerTest {
         assertThrows(MsalServiceException.class, () -> underTest.handleException(runnable));
     }
 
+    @Test
+    void handleExceptionRunnableWhenNotFoundThrowsOriginalException() {
+        Runnable runnable = () -> {
+            throw getManagementException(HttpStatus.NOT_FOUND);
+        };
+
+        assertThrows(ManagementException.class, () -> underTest.handleException(runnable));
+    }
+
     @ParameterizedTest
     @EnumSource(value = HttpStatus.class, names = {"UNAUTHORIZED", "FORBIDDEN"}, mode = EnumSource.Mode.EXCLUDE)
     void handleExceptionWhenOtherThanMsalExceptionUnauthorizedOrForbiddenThenThrowsOriginalException(HttpStatus httpStatus) {
@@ -231,7 +240,7 @@ public class AzureExceptionHandlerTest {
 
     private ManagementException getManagementException(HttpStatus httpStatus) {
         HttpResponse httpResponse = mock(HttpResponse.class);
-        when(httpResponse.getStatusCode()).thenReturn(httpStatus.value());
+        lenient().when(httpResponse.getStatusCode()).thenReturn(httpStatus.value());
         return new ManagementException("", httpResponse);
     }
 

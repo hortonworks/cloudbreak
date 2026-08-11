@@ -10,9 +10,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -67,6 +70,9 @@ public class RdsStartHandlerTest {
     @InjectMocks
     private RdsStartHandler victim;
 
+    @Captor
+    private ArgumentCaptor<Event<SdxStartFailedEvent>> sdxStartFailedEventCaptor;
+
     @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
@@ -103,11 +109,12 @@ public class RdsStartHandlerTest {
     @Test
     public void shouldHandleUserBreakExceptionWithSdxStartFailedEvent() {
         when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
-        doThrow(UserBreakException.class).when(databaseService).start(sdxCluster);
+        UserBreakException userBreakException = new UserBreakException("userBreakException");
+        doThrow(userBreakException).when(databaseService).start(sdxCluster);
 
         victim.accept(event);
 
-        verify(eventBus).notify(eq(SdxStartFailedEvent.class.getSimpleName()), any(Event.class));
+        verifySdxStartFailedEvent(userBreakException, true);
     }
 
     @Test
@@ -117,26 +124,41 @@ public class RdsStartHandlerTest {
 
         victim.accept(event);
 
-        verify(eventBus).notify(eq(SdxStartFailedEvent.class.getSimpleName()), any(Event.class));
+        verifySdxStartFailedEvent(new PollerStoppedException("Database start timed out after 0 minutes"), true);
     }
 
     @Test
     public void shouldHandlePollerExceptionWithSdxStartFailedEvent() {
         when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
-        doThrow(PollerException.class).when(databaseService).start(sdxCluster);
+        PollerException pollerException = new PollerException("pollerException");
+        doThrow(pollerException).when(databaseService).start(sdxCluster);
 
         victim.accept(event);
 
-        verify(eventBus).notify(eq(SdxStartFailedEvent.class.getSimpleName()), any(Event.class));
+        verifySdxStartFailedEvent(pollerException, false);
     }
 
     @Test
     public void shouldHandleExceptionWithSdxStartFailedEvent() {
         when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
-        doThrow(RuntimeException.class).when(databaseService).start(sdxCluster);
+        RuntimeException runtimeException = new RuntimeException("");
+        doThrow(runtimeException).when(databaseService).start(sdxCluster);
 
         victim.accept(event);
 
-        verify(eventBus).notify(eq(SdxStartFailedEvent.class.getSimpleName()), any(Event.class));
+        verifySdxStartFailedEvent(runtimeException, false);
+    }
+
+    private void verifySdxStartFailedEvent(Exception ex, boolean includeExceptionDetails) {
+        verify(eventBus).notify(eq(SdxStartFailedEvent.class.getSimpleName()), sdxStartFailedEventCaptor.capture());
+        SdxStartFailedEvent event = sdxStartFailedEventCaptor.getValue().getData();
+        Assertions.assertThat(event)
+                .returns(SDX_ID, SdxStartFailedEvent::getResourceId)
+                .returns(USER_ID, SdxStartFailedEvent::getUserId)
+                .returns(includeExceptionDetails, SdxStartFailedEvent::isIncludeExceptionDetailsInNotification);
+        // PollerStoppedException.equals() is not implemented so just check for class and message
+        Assertions.assertThat(event.getException())
+                .hasSameClassAs(ex)
+                .hasMessage(ex.getMessage());
     }
 }

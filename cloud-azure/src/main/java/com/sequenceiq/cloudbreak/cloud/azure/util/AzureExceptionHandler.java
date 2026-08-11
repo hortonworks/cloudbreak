@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDeploymentCapacityError;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 
 @Component
 public class AzureExceptionHandler {
@@ -41,6 +44,17 @@ public class AzureExceptionHandler {
     private static final int UNAUTHORIZED_CODE = 401;
 
     private static final int CONFLICT = 409;
+
+    @Inject
+    private AzureCapacityErrorMessageProvider azureCapacityErrorMessageProvider;
+
+    public void handleException(Runnable function) {
+        Supplier<Void> supplier = () -> {
+            function.run();
+            return null;
+        };
+        handleException(supplier, null, AzureExceptionHandlerParameters.builder().build());
+    }
 
     public <T> Optional<T> handleException(Supplier<T> function) {
         return handleException(function, DEFAULT_EXCEPTION_HANDLER_PARAMETERS);
@@ -78,6 +92,10 @@ public class AzureExceptionHandler {
                 LOGGER.debug("Handle not found exception is turned on");
                 return Optional.empty();
             }
+            if (isCapacityError(me)) {
+                LOGGER.debug("Re-throwing as InsufficientCapacityException", me);
+                throw new InsufficientCapacityException(me);
+            }
             throw me;
         }
     }
@@ -98,19 +116,6 @@ public class AzureExceptionHandler {
             }
         }
         LOGGER.warn(errorMessageBuilder.toString());
-    }
-
-    public void handleException(Runnable function) {
-        try {
-            function.run();
-        } catch (MsalServiceException e) {
-            if (UNAUTHORIZED_CODE == e.statusCode()) {
-                LOGGER.warn("AuthenticationException has thrown during azure operation", e);
-                throw new ProviderAuthenticationFailedException(e.getMessage());
-            } else {
-                throw e;
-            }
-        }
     }
 
     public boolean isNotFound(ManagementException exception) {
@@ -190,5 +195,9 @@ public class AzureExceptionHandler {
             }
         }
         return false;
+    }
+
+    public AzureCapacityErrorMessageProvider capacityErrorMessageProvider() {
+        return azureCapacityErrorMessageProvider;
     }
 }

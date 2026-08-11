@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.client;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureCapacityErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 
 public abstract class AbstractAzureServiceClient {
@@ -26,6 +27,10 @@ public abstract class AbstractAzureServiceClient {
 
     protected void handleException(Runnable function) {
         azureExceptionHandler.handleException(function);
+    }
+
+    protected AzureCapacityErrorMessageProvider capacityErrorMessageProvider() {
+        return azureExceptionHandler.capacityErrorMessageProvider();
     }
 
     protected AzureListResultFactory getAzureListResultFactory() {

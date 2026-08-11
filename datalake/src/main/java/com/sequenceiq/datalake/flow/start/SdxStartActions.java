@@ -171,7 +171,9 @@ public class SdxStartActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
+                SdxCluster sdxCluster = payload.isIncludeExceptionDetailsInNotification()
+                        ? sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(failedStatus, statusReason, payload.getResourceId())
+                        : sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_START_FAILED, sdxCluster);
                 sendEvent(context, SDX_START_FAILED_HANDLED_EVENT.event(), payload);
             }

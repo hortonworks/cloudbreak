@@ -18,6 +18,7 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 import io.micrometer.common.util.StringUtils;
@@ -37,7 +38,12 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
     }
 
     public void startFlexibleServer(String resourceGroupName, String serverName) {
-        handleException(() -> postgreSqlFlexibleManager.servers().start(resourceGroupName, serverName));
+        try {
+            handleException(() -> postgreSqlFlexibleManager.servers().start(resourceGroupName, serverName));
+        } catch (InsufficientCapacityException e) {
+            LOGGER.debug("Rethrowing InsufficientCapacityException with a Flexible Server specific message", e);
+            throw new InsufficientCapacityException(capacityErrorMessageProvider().getFlexibleServerCapacityErrorMessage(), e.getCause());
+        }
     }
 
     public void stopFlexibleServer(String resourceGroupName, String serverName) {

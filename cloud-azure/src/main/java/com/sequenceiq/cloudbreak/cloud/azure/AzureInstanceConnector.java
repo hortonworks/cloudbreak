@@ -14,15 +14,18 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureCapacityErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.util.ReactiveUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.util.SchedulerProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -42,6 +45,9 @@ public class AzureInstanceConnector implements InstanceConnector {
     @Inject
     private SchedulerProvider schedulerProvider;
 
+    @Inject
+    private AzureCapacityErrorMessageProvider azureCapacityErrorMessageProvider;
+
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         throw new CloudOperationNotSupportedException("Azure ARM doesn't provide access to the VM console output yet.");
@@ -60,31 +66,40 @@ public class AzureInstanceConnector implements InstanceConnector {
         } else {
             LOGGER.info("Starting vms on Azure: {} in {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()), timeboundInMs);
         }
-        List<CloudVmInstanceStatus> statuses = new CopyOnWriteArrayList<>();
-        List<Mono<Void>> startCompletables = new ArrayList<>();
-        for (CloudInstance vm : vms) {
-            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
-            AzureClient azureClient = ac.getParameter(AzureClient.class);
-            startCompletables.add(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getInstanceId(), timeboundInMs)
-                    .doOnError(throwable -> {
-                        if (timeboundInMs != null) {
-                            if (throwable instanceof TimeoutException) {
-                                LOGGER.error("Timeout Error happened on azure instance start: {}", vm, throwable);
-                                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN, throwable.getMessage()));
-                            } else {
-                                LOGGER.error("Error happened on azure instance start: {}", vm, throwable);
-                                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
-                            }
-                        } else {
-                            LOGGER.error("Error happend on azure instance start: {}", vm, throwable);
-                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
-                        }
-                    })
-                    .doOnSuccess((i) -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED)))
-                    .subscribeOn(schedulerProvider.io()));
+        if (vms.isEmpty()) {
+            return List.of();
         }
-        ReactiveUtils.waitAll(startCompletables);
-        return statuses;
+        AzureClient azureClient = ac.getParameter(AzureClient.class);
+        List<Mono<CloudVmInstanceStatus>> startMonos = new ArrayList<>();
+        for (CloudInstance vm : vms) {
+            startMonos.add(startOne(ac, azureClient, vm, timeboundInMs));
+        }
+        // Each mono in startMonos has an onErrorResume that maps errors to a CloudVmInstanceStatus, so the merged
+        // Flux is guaranteed to only emit values (never errors) - plain Flux.merge is enough.
+        List<CloudVmInstanceStatus> result = Flux.merge(startMonos).collectList().block();
+        return result == null ? List.of() : result;
+    }
+
+    private Mono<CloudVmInstanceStatus> startOne(AuthenticatedContext ac, AzureClient azureClient, CloudInstance vm, Long timeboundInMs) {
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
+        return azureClient.startVirtualMachineAsync(resourceGroupName, vm.getInstanceId(), timeboundInMs)
+                .thenReturn(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED))
+                .onErrorResume(throwable -> Mono.just(toStartFailureStatus(vm, throwable, timeboundInMs)))
+                .subscribeOn(schedulerProvider.io());
+    }
+
+    private CloudVmInstanceStatus toStartFailureStatus(CloudInstance vm, Throwable throwable, Long timeboundInMs) {
+        if (timeboundInMs != null && throwable instanceof TimeoutException) {
+            LOGGER.error("Timeout Error happened on azure instance start: {}", vm, throwable);
+            return new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN, throwable.getMessage());
+        }
+        if (throwable instanceof InsufficientCapacityException) {
+            LOGGER.error("Capacity error on azure instance start: {}", vm, throwable);
+            String statusReason = azureCapacityErrorMessageProvider.getInstanceCapacityErrorMessage(vm.getTemplate().getFlavor());
+            return new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, statusReason);
+        }
+        LOGGER.error("Error happened on azure instance start: {}", vm, throwable);
+        return new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage());
     }
 
     @Override
@@ -151,7 +166,7 @@ public class AzureInstanceConnector implements InstanceConnector {
     private Mono<Void> doReboot(CloudVmInstanceStatus vm, List<CloudVmInstanceStatus> statuses,
                                 Mono<Void> asyncCall) {
         return asyncCall.doOnError(throwable -> {
-                    LOGGER.error("Error happend on azure instance reboot: {}", vm, throwable);
+                    LOGGER.error("Error happened on azure instance reboot: {}", vm, throwable);
                     statuses.add(new CloudVmInstanceStatus(vm.getCloudInstance(), InstanceStatus.FAILED, throwable.getMessage()));
                 })
                 .doOnSuccess((i) -> statuses.add(new CloudVmInstanceStatus(vm.getCloudInstance(), InstanceStatus.STARTED)))

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -27,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.core.http.HttpResponse;
 import com.azure.core.http.rest.PagedIterable;
@@ -40,8 +43,10 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Servers;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureCapacityErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,8 +58,13 @@ class AzureFlexibleServerClientTest {
 
     private static final String NEW_PASSWORD = "newPassword";
 
+    private static final String FLEXIBLE_SERVER_CAPACITY_ERROR_MESSAGE = "flexible server capacity error message";
+
     @Spy
     private AzureExceptionHandler azureExceptionHandler;
+
+    @Mock
+    private AzureCapacityErrorMessageProvider azureCapacityErrorMessageProvider;
 
     @Mock
     private PostgreSqlManager postgreSqlFlexibleManager;
@@ -72,6 +82,8 @@ class AzureFlexibleServerClientTest {
             return new AzureListResult(pagedIterable, azureExceptionHandler);
         });
         lenient().when(azureListResultFactory.list(any())).thenCallRealMethod();
+        ReflectionTestUtils.setField(azureExceptionHandler, "azureCapacityErrorMessageProvider", azureCapacityErrorMessageProvider);
+        lenient().when(azureCapacityErrorMessageProvider.getFlexibleServerCapacityErrorMessage()).thenReturn(FLEXIBLE_SERVER_CAPACITY_ERROR_MESSAGE);
     }
 
     @Test
@@ -81,6 +93,17 @@ class AzureFlexibleServerClientTest {
         underTest.startFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME);
         verify(postgreSqlFlexibleManager, times(1)).servers();
         verify(servers, times(1)).start(RESOURCE_GROUP_NAME, SERVER_NAME);
+    }
+
+    @Test
+    void testStartFlexibleServerWithInsufficientCapacityException() {
+        Servers servers = mock(Servers.class);
+        when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
+        doThrow(InsufficientCapacityException.class).when(servers).start(RESOURCE_GROUP_NAME, SERVER_NAME);
+
+        assertThatThrownBy(() -> underTest.startFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME))
+                .isInstanceOf(InsufficientCapacityException.class)
+                .hasMessage(FLEXIBLE_SERVER_CAPACITY_ERROR_MESSAGE);
     }
 
     @Test

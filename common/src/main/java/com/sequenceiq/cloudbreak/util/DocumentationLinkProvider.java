@@ -76,4 +76,8 @@ public class DocumentationLinkProvider {
     public static String nifiMigrationLink() {
         return "https://docs.cloudera.com/dataflow/cloud/migration-tool/topics/cdf-migration-tool.html";
     }
+
+    public static String azureFlexibleServerVerticalScalingLink() {
+        return "https://learn.microsoft.com/en-us/azure/postgresql/scale/concepts-scaling-resources#vertical-scaling";
+    }
 }

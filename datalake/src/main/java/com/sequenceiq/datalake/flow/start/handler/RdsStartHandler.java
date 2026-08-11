@@ -75,11 +75,11 @@ public class RdsStartHandler extends ExceptionCatcherEventHandler<RdsWaitingToSt
             response = new RdsStartSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxStartFailedEvent(sdxId, userId, userBreakException);
+            response = new SdxStartFailedEvent(sdxId, userId, userBreakException, true);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxStartFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database start timed out after " + durationInMinutes + " minutes"));
+            PollerStoppedException exception = new PollerStoppedException("Database start timed out after " + durationInMinutes + " minutes");
+            response = new SdxStartFailedEvent(sdxId, userId, exception, true);
         } catch (PollerException exception) {
             LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
             response = new SdxStartFailedEvent(sdxId, userId, exception);

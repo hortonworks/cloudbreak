@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,8 +32,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureCapacityErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.util.SchedulerProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -57,6 +61,9 @@ class AzureInstanceConnectorTest {
     @Mock
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
+    @Mock
+    private AzureCapacityErrorMessageProvider azureCapacityErrorMessageProvider;
+
     @InjectMocks
     private AzureInstanceConnector underTest;
 
@@ -65,6 +72,41 @@ class AzureInstanceConnectorTest {
         MockitoAnnotations.initMocks(this);
         lenient().when(schedulerProvider.io()).thenReturn(Schedulers.immediate());
         inputList = getCloudInstances();
+    }
+
+    @Test
+    void startWithLimitedRetry() {
+        AuthenticatedContext ac = mock();
+        List<CloudInstance> vms = List.of(
+                new CloudInstance("vm1", mock(), mock(), "", ""),
+                new CloudInstance("vm2", mock(), mock(), "", ""),
+                new CloudInstance("vm3", mock(), mock(), "", ""),
+                new CloudInstance("vm4", mock(), mock(), "", "")
+        );
+        long timeboundInMs = 1L;
+
+        String resourceGroup = "resourceGroup";
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(), any(DynamicModel.class))).thenReturn(resourceGroup);
+        String instanceCapacityError = "instance capacity error";
+        when(azureCapacityErrorMessageProvider.getInstanceCapacityErrorMessage(any())).thenReturn(instanceCapacityError);
+
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.startVirtualMachineAsync(resourceGroup, vms.get(0).getInstanceId(), timeboundInMs))
+                .thenReturn(Mono.empty());
+        when(azureClient.startVirtualMachineAsync(resourceGroup, vms.get(1).getInstanceId(), timeboundInMs))
+                .thenReturn(Mono.error(new TimeoutException("timeout")));
+        when(azureClient.startVirtualMachineAsync(resourceGroup, vms.get(2).getInstanceId(), timeboundInMs))
+                .thenReturn(Mono.error(new InsufficientCapacityException("capacity")));
+        when(azureClient.startVirtualMachineAsync(resourceGroup, vms.get(3).getInstanceId(), timeboundInMs))
+                .thenReturn(Mono.error(new RuntimeException("other error")));
+
+        List<CloudVmInstanceStatus> result = underTest.startWithLimitedRetry(ac, List.of(), vms, timeboundInMs);
+
+        Assertions.assertThat(result).containsExactlyInAnyOrder(
+                new CloudVmInstanceStatus(vms.get(0), InstanceStatus.STARTED),
+                new CloudVmInstanceStatus(vms.get(1), InstanceStatus.UNKNOWN, "timeout"),
+                new CloudVmInstanceStatus(vms.get(2), InstanceStatus.FAILED, instanceCapacityError),
+                new CloudVmInstanceStatus(vms.get(3), InstanceStatus.FAILED, "other error"));
     }
 
     @Test
