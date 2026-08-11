@@ -8,20 +8,15 @@ import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -39,11 +34,6 @@ import com.sequenceiq.common.model.Architecture;
 public class VerticalScaleInstanceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScaleInstanceProvider.class);
-
-    private static final Pattern AZURE_GENERATION_PATTERN = Pattern.compile(".*_v(\\d+)$", Pattern.CASE_INSENSITIVE);
-
-    @Value("${cb.azure.verticalscale.minimum.generation:5}")
-    private int minimumSupportedAzureVmGeneration;
 
     @Inject
     private MinimalHardwareFilter minimalHardwareFilter;
@@ -163,7 +153,6 @@ public class VerticalScaleInstanceProvider {
                     validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
                     validateHostEncryption(currentInstanceType, requestedInstanceType, additionalProperties);
                     validateEnhancedNetwork(currentInstanceType, requestedInstanceType);
-                    validateAzureMinimumGeneration(cloudPlatform, requestedInstanceType);
                     if (instanceGroupAvailabilityZones != null) {
                         validateInstanceSupportsExistingZones(instanceGroupAvailabilityZones, requestedInstanceTypeMetaData.getAvailabilityZones(),
                                 requestedInstanceTypeName);
@@ -225,38 +214,6 @@ public class VerticalScaleInstanceProvider {
                         + " instance type which does not support enhanced network.");
             }
         }
-    }
-
-    private void validateAzureMinimumGeneration(String cloudPlatform, VmType requestedInstanceType) {
-        if (!CloudPlatform.AZURE.name().equalsIgnoreCase(cloudPlatform)) {
-            return;
-        }
-        OptionalInt requestedGen = parseAzureGeneration(requestedInstanceType.getValue());
-        if (requestedGen.isEmpty()) {
-            throw new BadRequestException(String.format(
-                    "Unable to resize since instance type %s does not have a generation suffix. Only v%d generation instances are supported.",
-                    requestedInstanceType.getValue(), minimumSupportedAzureVmGeneration));
-        }
-        if (requestedGen.getAsInt() < minimumSupportedAzureVmGeneration) {
-            throw new BadRequestException(String.format(
-                    "Unable to resize since scaling to generation v%d (%s) is not allowed. Minimum supported generation is v%d.",
-                    requestedGen.getAsInt(), requestedInstanceType.getValue(),
-                    minimumSupportedAzureVmGeneration));
-        }
-        if (requestedGen.getAsInt() > minimumSupportedAzureVmGeneration) {
-            throw new BadRequestException(String.format(
-                    "Unable to resize since scaling to generation v%d (%s) is not allowed. Maximum supported generation is v%d.",
-                    requestedGen.getAsInt(), requestedInstanceType.getValue(),
-                    minimumSupportedAzureVmGeneration));
-        }
-    }
-
-    private OptionalInt parseAzureGeneration(String instanceTypeName) {
-        Matcher matcher = AZURE_GENERATION_PATTERN.matcher(instanceTypeName.toLowerCase(Locale.ROOT));
-        if (matcher.find()) {
-            return OptionalInt.of(Integer.parseInt(matcher.group(1)));
-        }
-        return OptionalInt.empty();
     }
 
     private void validateResourceDisk(VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
