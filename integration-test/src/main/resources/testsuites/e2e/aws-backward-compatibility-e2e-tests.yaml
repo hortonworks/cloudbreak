@@ -16,4 +16,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzRepairTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeWithMultiAzEnabledTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxVolumesVerticalScaleTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxVerticalScaleTest
