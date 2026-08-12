@@ -189,7 +189,7 @@ public class RollingVerticalScaleStartInstancesHandler extends ExceptionCatcherE
             ExtendedPollingResult pollingResult = clusterStatusService.waitForHostHealthyServices(new HashSet<>(instancesToWaitFor), runtimeVersion);
 
             if (!pollingResult.isSuccess()) {
-                Set<Long> failedHostIds = pollingResult.getFailedInstancePrivateIds();
+                Set<Long> failedHostIds = Optional.ofNullable(pollingResult.getFailedInstancePrivateIds()).orElse(Set.of());
                 List<String> failedInstanceIds = instancesToWaitFor.stream()
                         .filter(instance -> failedHostIds.contains(instance.getPrivateId()))
                         .map(InstanceMetadataView::getInstanceId).toList();

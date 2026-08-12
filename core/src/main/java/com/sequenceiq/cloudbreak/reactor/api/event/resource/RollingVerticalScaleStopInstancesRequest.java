@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,6 +28,8 @@ public class RollingVerticalScaleStopInstancesRequest extends StackEvent {
 
     private final RollingVerticalScaleResult rollingVerticalScaleResult;
 
+    private final Map<String, String> instanceTypeByInstanceId;
+
     @JsonCreator
     public RollingVerticalScaleStopInstancesRequest(
             @JsonProperty("resourceId") Long resourceId,
@@ -35,7 +38,8 @@ public class RollingVerticalScaleStopInstancesRequest extends StackEvent {
             @JsonProperty("cloudResources") List<CloudResource> cloudResources,
             @JsonProperty("cloudInstances") List<CloudInstance> cloudInstances,
             @JsonProperty("targetInstanceType") String targetInstanceType,
-            @JsonProperty("rollingVerticalScaleResult") RollingVerticalScaleResult rollingVerticalScaleResult) {
+            @JsonProperty("rollingVerticalScaleResult") RollingVerticalScaleResult rollingVerticalScaleResult,
+            @JsonProperty("instanceTypeByInstanceId") Map<String, String> instanceTypeByInstanceId) {
         super(EventSelectorUtil.selector(RollingVerticalScaleStopInstancesRequest.class), resourceId);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
@@ -43,6 +47,7 @@ public class RollingVerticalScaleStopInstancesRequest extends StackEvent {
         this.cloudResources = cloudResources;
         this.targetInstanceType = targetInstanceType;
         this.rollingVerticalScaleResult = rollingVerticalScaleResult;
+        this.instanceTypeByInstanceId = instanceTypeByInstanceId != null ? instanceTypeByInstanceId : Map.of();
     }
 
     public CloudCredential getCloudCredential() {
@@ -69,6 +74,10 @@ public class RollingVerticalScaleStopInstancesRequest extends StackEvent {
         return rollingVerticalScaleResult;
     }
 
+    public Map<String, String> getInstanceTypeByInstanceId() {
+        return instanceTypeByInstanceId;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", RollingVerticalScaleStopInstancesRequest.class.getSimpleName() + "[", "]")
@@ -76,6 +85,7 @@ public class RollingVerticalScaleStopInstancesRequest extends StackEvent {
                 .add("cloudResources=" + cloudResources)
                 .add("targetInstanceType=" + targetInstanceType)
                 .add("rollingVerticalScaleResult=" + rollingVerticalScaleResult)
+                .add("instanceTypeByInstanceId=" + instanceTypeByInstanceId)
                 .add(super.toString())
                 .toString();
     }

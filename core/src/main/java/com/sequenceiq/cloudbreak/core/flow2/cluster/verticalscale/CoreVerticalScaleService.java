@@ -91,7 +91,7 @@ public class CoreVerticalScaleService {
     }
 
     public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request,
-            Integer instanceStorageCount, Integer instanceStorageSize) {
+            Integer instanceStorageCount, Integer instanceStorageSize, Set<String> instanceIds) {
         Stack stack = stackService.getById(stackId);
         Optional<InstanceGroup> optionalGroup = instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(stackId,
                 stackVerticalScaleV4Request.getGroup());
@@ -102,10 +102,7 @@ public class CoreVerticalScaleService {
             String instanceType = requestedTemplate.getInstanceType();
             if (!Strings.isNullOrEmpty(instanceType)) {
                 template.setInstanceType(instanceType);
-                group.getNotDeletedAndNotZombieInstanceMetaDataSet().stream().forEach(instanceMetaData -> {
-                    instanceMetaData.setProviderInstanceType(instanceType);
-                    instanceMetaDataService.save(instanceMetaData);
-                });
+                updateProviderInstanceType(group, instanceType, instanceIds);
                 template.setInstanceStorageCount(instanceStorageCount);
                 template.setInstanceStorageSize(instanceStorageSize);
             }
@@ -124,6 +121,15 @@ public class CoreVerticalScaleService {
             }
             templateService.savePure(template);
         }
+    }
+
+    private void updateProviderInstanceType(InstanceGroup group, String instanceType, Set<String> instanceIds) {
+        group.getNotDeletedAndNotZombieInstanceMetaDataSet().stream()
+                .filter(im -> instanceIds == null || instanceIds.contains(im.getInstanceId()))
+                .forEach(im -> {
+                    im.setProviderInstanceType(instanceType);
+                    instanceMetaDataService.save(im);
+                });
     }
 
     private static void setFallbackInstanceTypesIfNecessary(InstanceTemplateV4Request requestedTemplate, Template template) {

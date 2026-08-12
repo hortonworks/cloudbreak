@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.rollingvs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -19,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleResult;
@@ -67,7 +68,7 @@ public class RollingVerticalScaleStopInstancesHandler extends ExceptionCatcherEv
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
-            List<CloudInstance> targetCloudInstances = getTargetCloudInstances(connector, authenticatedContext,
+            List<CloudInstance> targetCloudInstances = getTargetCloudInstances(request.getInstanceTypeByInstanceId(),
                     rollingVerticalScaleResult, request.getCloudInstances(), request.getTargetInstanceType());
             List<String> targetInstanceIds = targetCloudInstances.stream().map(CloudInstance::getInstanceId).toList();
             rollingVerticalScaleService.stopInstances(request.getResourceId(), targetInstanceIds, rollingVerticalScaleResult.getGroup());
@@ -136,14 +137,12 @@ public class RollingVerticalScaleStopInstancesHandler extends ExceptionCatcherEv
         }
     }
 
-    private List<CloudInstance> getTargetCloudInstances(CloudConnector connector, AuthenticatedContext ac, RollingVerticalScaleResult result,
+    private List<CloudInstance> getTargetCloudInstances(Map<String, String> instanceTypeByInstanceId, RollingVerticalScaleResult result,
             List<CloudInstance> cloudInstances, String targetInstanceType) {
-        List<String> instanceIds = cloudInstances.stream().map(CloudInstance::getInstanceId).toList();
-        InstanceTypeMetadata instanceTypeMetadata = connector.metadata().collectInstanceTypes(ac, instanceIds);
         List<CloudInstance> targetInstanceIds = new ArrayList<>();
         for (CloudInstance cloudInstance : cloudInstances) {
-            String instanceType = instanceTypeMetadata.getInstanceTypes().get(cloudInstance.getInstanceId());
-            if (instanceType.equals(targetInstanceType)) {
+            String instanceType = instanceTypeByInstanceId.get(cloudInstance.getInstanceId());
+            if (Objects.equals(instanceType, targetInstanceType)) {
                 LOGGER.debug("Skipping vertical scaling for instance {} with instance type {} as it already matches the target type.",
                         cloudInstance.getInstanceId(), targetInstanceType);
                 result.setStatus(cloudInstance.getInstanceId(), RollingVerticalScaleStatus.SUCCESS);

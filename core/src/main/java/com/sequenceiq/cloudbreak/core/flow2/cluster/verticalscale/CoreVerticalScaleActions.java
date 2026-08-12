@@ -137,7 +137,7 @@ public class CoreVerticalScaleActions {
             protected void doExecute(ClusterViewContext context, CoreVerticalScaleResult payload, Map<Object, Object> variables) {
                 String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
                 coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request(),
-                        payload.getInstanceStorageCount(), payload.getInstanceStorageSize());
+                        payload.getInstanceStorageCount(), payload.getInstanceStorageSize(), null);
                 coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request(), previousInstanceType);
                 sendEvent(context);
             }
