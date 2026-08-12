@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.DirectionalTrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.MitTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
@@ -107,6 +108,15 @@ public class MitKdcTrustService extends TrustProvider {
         response.setMitCommands(mitTrustInstructionsBuilder.buildInstructions(trustCommandType, stack, freeIpa, crossRealmTrust));
         response.setBaseClusterCommands(mitBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, trustCommandType, freeIpa,
                 crossRealmTrust, loadBalancer));
+        return response;
+    }
+
+    @Override
+    public DirectionalTrustSetupCommandsResponse buildDirectionalTrustSetupCommandsResponse(String environmentCrn, Stack stack, FreeIpa freeIpa,
+            CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer) {
+        DirectionalTrustSetupCommandsResponse response = new DirectionalTrustSetupCommandsResponse();
+        response.setEnvironmentCrn(environmentCrn);
+        response.setKdcType(kdcType().name());
         return response;
     }
 
