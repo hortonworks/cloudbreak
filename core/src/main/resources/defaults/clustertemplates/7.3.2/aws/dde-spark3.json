@@ -27,6 +27,7 @@
             }
           },
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -49,6 +50,7 @@
             }
           },
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -71,6 +73,7 @@
             }
           },
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "GATEWAY"
@@ -93,6 +96,7 @@
             }
           },
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -115,6 +119,7 @@
             }
           },
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"

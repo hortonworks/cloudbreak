@@ -24,7 +24,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"]
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -45,7 +46,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r5.2xlarge"
+          "instanceType": "r5.2xlarge",
+          "fallbackInstanceTypes": ["r6i.2xlarge", "r7i.2xlarge"]
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -66,7 +68,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"]
         },
         "nodeCount": 2,
         "type": "CORE",

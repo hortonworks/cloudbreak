@@ -27,7 +27,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.4xlarge"
+          "instanceType": "m5.4xlarge",
+          "fallbackInstanceTypes": ["m6i.4xlarge", "m7i.4xlarge"]
         },
         "nodeCount": 2,
         "type": "GATEWAY",
@@ -38,6 +39,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "r5.4xlarge",
+          "fallbackInstanceTypes": ["r6i.4xlarge", "r7i.4xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -55,6 +57,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -74,6 +77,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -92,6 +96,7 @@
         "name": "broker",
         "template": {
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -120,7 +125,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -141,7 +147,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -162,7 +169,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",

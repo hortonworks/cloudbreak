@@ -26,7 +26,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"]
         },
         "type": "GATEWAY"
       }

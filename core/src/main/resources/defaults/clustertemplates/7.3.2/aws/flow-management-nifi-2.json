@@ -18,6 +18,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "attachedVolumes": [
             {
               "size": 100,
@@ -34,6 +35,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -53,6 +55,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "m5.xlarge",
+          "fallbackInstanceTypes": ["m6i.xlarge", "m7i.xlarge"],
           "rootVolume": {
             "size": 100
           },
