@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
@@ -43,6 +44,7 @@ import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupEvent;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.ActiveDirectoryTrustService;
@@ -96,6 +98,9 @@ class TrustManagementServiceTest {
 
     @Mock
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
+    @Mock
+    private EnvironmentService environmentService;
 
     @Mock
     private ActiveDirectoryTrustService adTrustProvider;
@@ -243,6 +248,7 @@ class TrustManagementServiceTest {
     void returnsTrustSetupCommandsResponseWhenStatusIsAllowed() {
         TrustSetupCommandsResponse expectedResponse = mock(TrustSetupCommandsResponse.class);
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_ACTIVE);
+        when(environmentService.getEnvironmentType(ENV_CRN)).thenReturn(EnvironmentType.HYBRID);
         when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(adTrustProvider);
         when(adTrustProvider.buildTrustSetupCommandsResponse(TrustCommandType.SETUP, ENV_CRN, stack, freeIpa, crossRealmTrust, loadBalancer))
                 .thenReturn(expectedResponse);
@@ -255,6 +261,7 @@ class TrustManagementServiceTest {
     @Test
     void throwsBadRequestExceptionWhenTrustStatusIsNotAllowed() {
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED);
+        when(environmentService.getEnvironmentType(ENV_CRN)).thenReturn(EnvironmentType.HYBRID);
 
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> underTest.getTrustCommands(ACCOUNT_ID, ENV_CRN, TrustCommandType.SETUP));

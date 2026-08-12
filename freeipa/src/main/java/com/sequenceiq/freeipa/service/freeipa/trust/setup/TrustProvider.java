@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.DirectionalTrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -134,6 +135,9 @@ public abstract class TrustProvider {
             FreeIpa freeIpa, CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer);
 
     public abstract TrustSetupCommandsResponse buildTrustSetupCommandsResponse(TrustCommandType trustCommandType, String environmentCrn, Stack stack,
+            FreeIpa freeIpa, CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer);
+
+    public abstract DirectionalTrustSetupCommandsResponse buildDirectionalTrustSetupCommandsResponse(String environmentCrn, Stack stack,
             FreeIpa freeIpa, CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer);
 
     protected StackService getStackService() {
