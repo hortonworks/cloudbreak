@@ -1,0 +1,155 @@
+{
+  "cluster": {
+    "blueprintName": "7.3.3 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
+    "validateBlueprint": false
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "instanceGroups": [
+    {
+      "name": "core",
+      "template": {
+        "instanceType": "m5.2xlarge",
+        "fallbackInstanceTypes": [ "m5a.2xlarge", "m6i.2xlarge" ],
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 512,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 3,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "auxiliary",
+      "template": {
+        "instanceType": "m5.xlarge",
+        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "solr_scale_out",
+      "template": {
+        "instanceType": "m5.xlarge",
+        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 256,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "kafka_scale_out",
+      "template": {
+        "instanceType": "c5.large",
+        "fallbackInstanceTypes": [ "c5a.large", "c6i.large" ],
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "raz_scale_out",
+      "template": {
+        "instanceType": "c5.xlarge",
+        "fallbackInstanceTypes": [ "c5a.xlarge", "c6i.xlarge" ],
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "atlas_scale_out",
+      "template": {
+        "instanceType": "m5.xlarge",
+        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "hms_scale_out",
+      "template": {
+        "instanceType": "m5.xlarge",
+        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "t3.medium",
+        "fallbackInstanceTypes": [ "t3a.medium", "t2.medium" ],
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    }
+  ]
+}
