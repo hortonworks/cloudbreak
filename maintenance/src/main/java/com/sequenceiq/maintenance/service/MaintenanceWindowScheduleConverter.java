@@ -21,6 +21,7 @@ import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWind
 import com.sequenceiq.maintenance.domain.MaintenanceEnumValues;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSkip;
+import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
 @Component
 public class MaintenanceWindowScheduleConverter {

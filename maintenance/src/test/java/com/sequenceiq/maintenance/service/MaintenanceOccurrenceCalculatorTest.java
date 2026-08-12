@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
+import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
 class MaintenanceOccurrenceCalculatorTest {
 
@@ -122,5 +123,52 @@ class MaintenanceOccurrenceCalculatorTest {
         assertThat(upcoming).isNotEmpty();
         assertThat(upcoming.get(0).windowStart()).isEqualTo(Instant.parse("2025-01-06T09:00:00Z").toEpochMilli());
         assertThat(calculator.findNextUpcomingOccurrence(schedule, now)).contains(upcoming.get(0));
+    }
+
+    @Test
+    void findOccurrenceContainingResolvesMonthlyDayOfMonthWithDurationBasedLookback() {
+        MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
+        schedule.setRecurrenceKind(MaintenanceRecurrenceKind.MONTHLY_DAY_OF_MONTH);
+        schedule.setTimezone("UTC");
+        schedule.setDurationMinutes(60);
+        schedule.setStartLocalTime("09:00");
+        schedule.setDayOfMonth(15);
+
+        long windowStart = Instant.parse("2025-02-15T09:00:00Z").toEpochMilli();
+        long now = Instant.parse("2025-02-15T09:30:00Z").toEpochMilli();
+
+        assertThat(calculator.findOccurrenceContaining(schedule, now).orElseThrow().windowStart()).isEqualTo(windowStart);
+    }
+
+    @Test
+    void findOccurrenceContainingResolvesMonthlyNthWeekdayWithDurationBasedLookback() {
+        MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
+        schedule.setRecurrenceKind(MaintenanceRecurrenceKind.MONTHLY_NTH_WEEKDAY);
+        schedule.setTimezone("UTC");
+        schedule.setDurationMinutes(60);
+        schedule.setStartLocalTime("08:00");
+        schedule.setDayOfWeek(DayOfWeek.MONDAY);
+        schedule.setWeekOrdinal(4);
+
+        long windowStart = Instant.parse("2025-02-24T08:00:00Z").toEpochMilli();
+        long now = Instant.parse("2025-02-24T08:30:00Z").toEpochMilli();
+
+        assertThat(calculator.findOccurrenceContaining(schedule, now).orElseThrow().windowStart()).isEqualTo(windowStart);
+    }
+
+    @Test
+    void findOccurrenceContainingReturnsActiveHalfOpenInterval() {
+        MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
+        schedule.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY);
+        schedule.setTimezone("UTC");
+        schedule.setDurationMinutes(60);
+        schedule.setStartLocalTime("09:00");
+        schedule.setDayOfWeek(DayOfWeek.MONDAY);
+
+        long start = Instant.parse("2025-01-06T09:00:00Z").toEpochMilli();
+        long end = Instant.parse("2025-01-06T10:00:00Z").toEpochMilli();
+        assertThat(calculator.findOccurrenceContaining(schedule, start).orElseThrow().windowStart()).isEqualTo(start);
+        assertThat(calculator.findOccurrenceContaining(schedule, end - 1).orElseThrow().windowEnd()).isEqualTo(end);
+        assertThat(calculator.findOccurrenceContaining(schedule, end)).isEmpty();
     }
 }

@@ -23,6 +23,7 @@ import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSkip;
 import com.sequenceiq.maintenance.exception.ConflictException;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowSkipRepository;
+import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
 @Service
 public class MaintenanceWindowSkipService {

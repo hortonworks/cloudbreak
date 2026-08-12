@@ -12,20 +12,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.quartz.CronExpression;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
+import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
+/**
+ * Expands a {@link MaintenanceWindowSchedule} into concrete {@link WindowOccurrence} intervals according to its
+ * recurrence kind. All occurrences use half-open intervals {@code [windowStart, windowEnd)} in epoch milliseconds;
+ * local start times are interpreted in the schedule's timezone.
+ */
 @Component
 public class MaintenanceOccurrenceCalculator {
 
-    private static final long MILLIS_PER_MINUTE = 60_000L;
-
+    /**
+     * All occurrences whose start falls in {@code [rangeStartInclusiveMs, rangeEndExclusiveMs)}.
+     */
     public List<WindowOccurrence> expandOccurrences(MaintenanceWindowSchedule schedule, long rangeStartInclusiveMs, long rangeEndExclusiveMs) {
         ZoneId zone = ZoneId.of(schedule.getTimezone());
-        long durationMs = schedule.getDurationMinutes() * MILLIS_PER_MINUTE;
+        long durationMs = TimeUnit.MINUTES.toMillis(schedule.getDurationMinutes());
         return switch (schedule.getRecurrenceKind()) {
             case WEEKLY -> expandWeekly(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs);
             case MONTHLY_NTH_WEEKDAY -> expandMonthlyNthWeekday(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs);
@@ -34,6 +42,9 @@ public class MaintenanceOccurrenceCalculator {
         };
     }
 
+    /**
+     * Earliest upcoming occurrence from {@link #listUpcomingOccurrences}, or empty if none within the occurrence horizon.
+     */
     public Optional<WindowOccurrence> findNextUpcomingOccurrence(MaintenanceWindowSchedule schedule, long nowMs) {
         return listUpcomingOccurrences(schedule, nowMs).stream().findFirst();
     }
@@ -42,11 +53,24 @@ public class MaintenanceOccurrenceCalculator {
      * Occurrences whose window has not yet ended ({@code windowEnd > nowMs}), including any window currently in progress.
      */
     public List<WindowOccurrence> listUpcomingOccurrences(MaintenanceWindowSchedule schedule, long nowMs) {
-        long durationMs = schedule.getDurationMinutes() * MILLIS_PER_MINUTE;
+        long durationMs = TimeUnit.MINUTES.toMillis(schedule.getDurationMinutes());
         long horizonEnd = nowMs + MaintenanceWindowScheduleValidator.OCCURRENCE_HORIZON_MS;
         return expandOccurrences(schedule, nowMs - durationMs, horizonEnd).stream()
                 .filter(occurrence -> occurrence.windowEnd() > nowMs)
                 .toList();
+    }
+
+    /**
+     * Returns the occurrence whose half-open interval {@code [windowStart, windowEnd)} contains {@code nowMs}, if any.
+     * Any occurrence containing {@code nowMs} must have started within {@code durationMs} of it; the extra day of
+     * lookback is defensive slack for DST/timezone folds at monthly boundaries.
+     */
+    public Optional<WindowOccurrence> findOccurrenceContaining(MaintenanceWindowSchedule schedule, long nowMs) {
+        long durationMs = TimeUnit.MINUTES.toMillis(schedule.getDurationMinutes());
+        long lookbackMs = durationMs + TimeUnit.DAYS.toMillis(1);
+        return expandOccurrences(schedule, nowMs - lookbackMs, nowMs + 1).stream()
+                .filter(occurrence -> occurrence.windowStart() <= nowMs && nowMs < occurrence.windowEnd())
+                .findFirst();
     }
 
     private List<WindowOccurrence> expandWeekly(

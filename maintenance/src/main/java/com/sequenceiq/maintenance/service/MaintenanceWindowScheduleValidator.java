@@ -19,13 +19,14 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowScheduleRepository;
+import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
 @Component
 public class MaintenanceWindowScheduleValidator {
 
     public static final long OCCURRENCE_HORIZON_MS = 90L * 24 * 60 * 60 * 1000;
 
-    private static final long MIN_DURATION_MINUTES = 60;
+    public static final int MIN_DURATION_MINUTES = 60;
 
     private static final long MIN_WINDOW_START_GAP_MS = 24L * 60 * 60 * 1000;
 

@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS maintenance_window_task (
    id                      BIGSERIAL PRIMARY KEY,
    account_id              VARCHAR(255) NOT NULL,
    resource_crn            VARCHAR(255) NOT NULL,
+   environment_crn         VARCHAR(255) NOT NULL,
    task_type               VARCHAR(64) NOT NULL,
    work_item_id            VARCHAR(255) NOT NULL, -- (e.g. secret id, runtime:7.2.18);
    task_kind               VARCHAR(16) NOT NULL,  -- EVERY_WINDOW | ONE_SHOT

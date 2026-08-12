@@ -1,4 +1,4 @@
-package com.sequenceiq.maintenance.service;
+package com.sequenceiq.maintenance.service.model;
 
 public record WindowOccurrence(long windowStart, long windowEnd) {
 

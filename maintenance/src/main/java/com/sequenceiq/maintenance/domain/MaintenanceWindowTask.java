@@ -34,6 +34,9 @@ public class MaintenanceWindowTask implements Serializable {
     @Column(name = "resource_crn", nullable = false)
     private String resourceCrn;
 
+    @Column(name = "environment_crn", nullable = false)
+    private String environmentCrn;
+
     @Column(name = "task_type", nullable = false)
     private String taskType;
 
@@ -118,6 +121,14 @@ public class MaintenanceWindowTask implements Serializable {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public String getTaskType() {
@@ -278,6 +289,7 @@ public class MaintenanceWindowTask implements Serializable {
                 "id=" + id +
                 ", accountId='" + accountId + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
                 ", taskType='" + taskType + '\'' +
                 ", workItemId='" + workItemId + '\'' +
                 ", taskKind=" + taskKind +
