@@ -43,7 +43,7 @@
     {% set dbus_include_salt_logs = False %}
 {% endif %}
 
-{% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
+{% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin', 5) %}
 {% set minifi_installed = salt['file.directory_exists' ]('/etc/nifi-minifi-cpp') %}
 {% set minifi_package_version = salt['pkg.version']('nifi-minifi-cpp') %}
 

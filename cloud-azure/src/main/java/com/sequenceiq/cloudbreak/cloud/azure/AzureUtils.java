@@ -286,7 +286,8 @@ public class AzureUtils {
                 String volumeType = template.getVolumes().getFirst().getType();
                 String flavor = template.getFlavor();
                 AzureDiskType diskType = AzureDiskType.getByValue(volumeType);
-                validateStorageTypeForGroup(diskType, flavor);
+                // TODO: https://cloudera.atlassian.net/browse/CB-34088
+//                validateStorageTypeForGroup(diskType, flavor);
             } else {
                 LOGGER.debug("No volume was attached for instance group {}, skipping storage validation", group.getName());
             }
