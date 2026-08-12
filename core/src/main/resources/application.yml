@@ -168,7 +168,7 @@ cb:
     read.timeout: 10000
     skipEntitlementCheckPlatforms: MOCK
   runtimes:
-    latest: "7.3.2"
+    latest: "7.3.3"
     gov: "7.2.18"
 
   host.discovery.custom.hostname.enabled: false
@@ -574,6 +574,39 @@ cb:
           7.3.2 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE=cdp-sdx-without-hdfs-hbase;
           7.3.2 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph=cdp-sdx-enterprise-without-hdfs-hbase;
           7.3.2 - Semantic Search=cdp-semantic-search;
+        7.3.3: >
+          7.3.3 - SDX Micro Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-micro;
+          7.3.3 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
+          7.3.3 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
+          7.3.3 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
+          7.3.3 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
+          7.3.3 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
+          7.3.3 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
+          7.3.3 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive=cdp-hybrid-data-engineering-spark3-ha;
+          7.3.3 - Data Mart: Apache Impala, Hue=cdp-data-mart;
+          7.3.3 - Hybrid Data Mart: Apache Impala, Hue=cdp-hybrid-data-mart;
+          7.3.3 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark3=cdp-rt-data-mart-spark3;
+          7.3.3 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;
+          7.3.3 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming;
+          7.3.3 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-small;
+          7.3.3 - Hybrid Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-hybrid-streaming-small;
+          7.3.3 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small;
+          7.3.3 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management;
+          7.3.3 - NiFi 2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small-nifi-2;
+          7.3.3 - NiFi 2 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-nifi-2;
+          7.3.3 - Data Discovery and Exploration for Spark3=cdp-dde-spark3;
+          7.3.3 - Search Analytics=cdp-search-analytics;
+          7.3.3 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
+          7.3.3 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
+          7.3.3 - Streaming Analytics Light Duty High Availability with Apache Flink=cdp-flink-light-ha;
+          7.3.3 - Streaming Analytics Heavy Duty High Availability with Apache Flink=cdp-flink-heavy-ha;
+          7.3.3 - COD Edge Node=cdp-cod-edge-node;
+          7.3.3 - Lakehouse Optimizer=cdp-lakehouse-optimizer;
+          7.3.3 - Iceberg Replication Service=cdp-iceberg;
+          7.3.3 - Data Visualization=cdp-dataviz;
+          7.3.3 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE=cdp-sdx-without-hdfs-hbase;
+          7.3.3 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph=cdp-sdx-enterprise-without-hdfs-hbase;
+          7.3.3 - Semantic Search=cdp-semantic-search;
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
 
