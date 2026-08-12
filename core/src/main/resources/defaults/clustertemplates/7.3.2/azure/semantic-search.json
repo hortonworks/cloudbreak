@@ -22,7 +22,7 @@
               "type": "StandardSSD_LRS"
             }
           ],
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8s_v5",
           "cloudPlatform": "AZURE"
         }
       },
@@ -39,7 +39,7 @@
               "type": "Premium_LRS"
             }
           ],
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8s_v5",
           "cloudPlatform": "AZURE"
         }
       },
@@ -56,7 +56,7 @@
               "type": "Premium_LRS"
             }
           ],
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8s_v5",
           "cloudPlatform": "AZURE"
         }
       },
@@ -90,7 +90,7 @@
               "type": "Premium_LRS"
             }
           ],
-          "instanceType": "Standard_E8s_v3",
+          "instanceType": "Standard_E8s_v5",
           "cloudPlatform": "AZURE"
         }
       },
@@ -107,7 +107,7 @@
               "type": "Premium_LRS"
             }
           ],
-          "instanceType": "Standard_E8s_v3",
+          "instanceType": "Standard_E8s_v5",
           "cloudPlatform": "AZURE"
         }
       }
