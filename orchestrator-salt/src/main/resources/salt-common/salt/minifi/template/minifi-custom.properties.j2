@@ -19,7 +19,7 @@
 
 nifi.flowfile.repository.rocksdb.compression=auto
 nifi.extension.path={{ extensionPaths | join(',') }}
-nifi.flow.engine.threads=5
+nifi.flow.engine.threads=8
 nifi.content.repository.class.name=FileSystemRepository
 nifi.flowfile.repository.rocksdb.write.buffer.size=2 MB
 nifi.flowfile.repository.rocksdb.max.write.buffer.number=2
