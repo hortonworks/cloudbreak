@@ -42,13 +42,15 @@ extend_partition() {
     esac
 }
 
-extend_azure_partition() {
+rescan_device() {
   device=$1
   LOG_FILE=$2
   local devicename="${device#/dev/*}"
   local mountpoint_for_device=$(lsblk -n -oMOUNTPOINT,NAME | grep -w "${devicename}" | awk '{print $1}')
   local rescan_path="/sys/class/block/${devicename}/device/rescan"
-  if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
+  # Azure and GCP do not surface an online disk resize to the guest kernel automatically (AWS/EBS does),
+  # and the resize flow never reboots, so rescan the device to pick up the new size before growing the fs.
+  if [[ "$CLOUD_PLATFORM" == "AZURE" || "$CLOUD_PLATFORM" == "GCP" ]]; then
     log $LOG_FILE "cloud platform: ${CLOUD_PLATFORM}"
     log $LOG_FILE "device being scanned for growing: ${devicename}"
     log $LOG_FILE "mount point for device (if any): $mountpoint_for_device"
@@ -84,7 +86,7 @@ main() {
       device=$root_disk
     fi
     # Rescan once before growpart/resize so the kernel sees Azure's expanded disk size
-    extend_azure_partition "$device" "$LOG_FILE"
+    rescan_device "$device" "$LOG_FILE"
     if [[ $device == "$root_disk" ]]; then
       root_partition_number=$(get_root_disk_partition_number)
       if growpart -N "$device" "$root_partition_number"; then
