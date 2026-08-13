@@ -38,6 +38,7 @@ import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StackService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 
 /**
  * This class lets the Datalake module handle Flow Structured Events.
@@ -74,6 +75,9 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
 
     @Inject
     private AccountIdService accountIdService;
+
+    @Inject
+    private DatabaseService databaseService;
 
     @Value("${info.app.version:}")
     private String serviceVersion;
@@ -149,7 +153,21 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
         databaseDetails.setAttributes(Optional.ofNullable(sdxDatabase.getAttributes()).map(Json::getValue).orElse(""));
         databaseDetails.setEngineVersion(sdxDatabase.getDatabaseEngineVersion());
         databaseDetails.setDbSslEnabled(resolveDbSslEnabled(sdxCluster, sdxDatabase));
+        databaseDetails.setInstanceType(resolveDbInstanceType(sdxDatabase));
         return databaseDetails;
+    }
+
+    private String resolveDbInstanceType(SdxDatabase sdxDatabase) {
+        String databaseCrn = sdxDatabase.getDatabaseCrn();
+        if (databaseCrn == null || databaseCrn.isBlank()) {
+            return null;
+        }
+        try {
+            return databaseService.getDatabaseServerTelemetry(databaseCrn).getInstanceType();
+        } catch (Exception e) {
+            LOGGER.warn("Cannot read DB instance type from redbeams for datalake database crn: {}", databaseCrn, e);
+            return null;
+        }
     }
 
     private boolean resolveDbSslEnabled(SdxCluster sdxCluster, SdxDatabase sdxDatabase) {

@@ -22,6 +22,9 @@ public interface DBStackRepository extends JpaRepository<DBStack, Long>, JobReso
 
     Optional<DBStack> findByResourceCrn(String crn);
 
+    @Query("SELECT d.databaseServer.instanceType FROM DBStack d WHERE d.resourceCrn = :crn")
+    Optional<String> findDatabaseServerInstanceTypeByResourceCrn(@Param("crn") String crn);
+
     @Query("SELECT d.id FROM DBStack d LEFT JOIN d.dbStackStatus dss WHERE dss.status IN :statuses")
     Set<Long> findAllByStatusIn(@Param("statuses") Set<Status> statuses);
 

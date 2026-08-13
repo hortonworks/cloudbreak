@@ -252,6 +252,7 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         databaseDetails.setAvailabilityType("HA");
         databaseDetails.setEngineVersion("14");
         databaseDetails.setAttributes("attr");
+        databaseDetails.setInstanceType("db.m5.large");
         stackDetails.setDatabaseDetails(databaseDetails);
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
@@ -261,6 +262,7 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         assertEquals(databaseDetails.getAttributes(), result.getDatabaseDetails().getAttributes());
         assertEquals(databaseDetails.getEngineVersion(), result.getDatabaseDetails().getEngineVersion());
         assertEquals(databaseDetails.getAvailabilityType(), result.getDatabaseDetails().getAvailabilityType());
+        assertEquals(databaseDetails.getInstanceType(), result.getDatabaseDetails().getInstanceType());
     }
 
     @Test
@@ -276,6 +278,7 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         assertEquals("", result.getDatabaseDetails().getAttributes());
         assertEquals("", result.getDatabaseDetails().getEngineVersion());
         assertEquals("", result.getDatabaseDetails().getAvailabilityType());
+        assertEquals("", result.getDatabaseDetails().getInstanceType());
     }
 
     @Test
@@ -285,6 +288,7 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         databaseDetails.setAvailabilityType("HA");
         databaseDetails.setEngineVersion("14");
         databaseDetails.setAttributes("attr");
+        databaseDetails.setInstanceType("db.m5.large");
         stackDetails.setDatabaseDetails(databaseDetails);
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
@@ -294,6 +298,7 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         assertEquals(databaseDetails.getAttributes(), result.getDatabaseDetails().getAttributes());
         assertEquals(databaseDetails.getEngineVersion(), result.getDatabaseDetails().getEngineVersion());
         assertEquals(databaseDetails.getAvailabilityType(), result.getDatabaseDetails().getAvailabilityType());
+        assertEquals(databaseDetails.getInstanceType(), result.getDatabaseDetails().getInstanceType());
     }
 
     @Test
@@ -309,6 +314,7 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         assertEquals("", result.getDatabaseDetails().getAttributes());
         assertEquals("", result.getDatabaseDetails().getEngineVersion());
         assertEquals("", result.getDatabaseDetails().getAvailabilityType());
+        assertEquals("", result.getDatabaseDetails().getInstanceType());
     }
 
 }

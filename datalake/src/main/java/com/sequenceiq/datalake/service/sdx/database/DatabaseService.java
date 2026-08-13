@@ -62,6 +62,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTelemetryV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -419,6 +420,11 @@ public class DatabaseService {
     public DatabaseServerV4Response getDatabaseServerV4Response(String databaseServerCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> databaseServerV4Endpoint.getByCrn(databaseServerCrn));
+    }
+
+    public DatabaseServerTelemetryV4Response getDatabaseServerTelemetry(String databaseServerCrn) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> databaseServerV4Endpoint.getTelemetryByCrn(databaseServerCrn));
     }
 
     public SdxDatabase updateDatabaseTypeFromRedbeams(SdxDatabase sdxDatabase) {

@@ -108,6 +108,7 @@ public class StructuredEventToCDPClusterDetailsConverter {
                     .setAvailabilityType(Objects.requireNonNullElse(databaseDetails.getAvailabilityType(), ""))
                     .setSslEnabled(databaseDetails.isDbSslEnabled())
                     .setAttributes(Objects.requireNonNullElse(databaseDetails.getAttributes(), ""))
+                    .setInstanceType(Objects.requireNonNullElse(databaseDetails.getInstanceType(), ""))
                     .build());
         } else {
             return Optional.empty();

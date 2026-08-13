@@ -26,6 +26,7 @@ public final class OperationDescriptions {
         public static final String LIST_CERTIFICATE_STATUS = "list certificate status for database servers";
         public static final String GET_BY_NAME = "get a database server by name";
         public static final String GET_BY_CRN = "get a database server by CRN";
+        public static final String GET_TELEMETRY_BY_CRN = "get telemetry information of a database server by CRN";
         public static final String GET_BY_CLUSTER_CRN = "get a database server by cluster CRN";
         public static final String LIST_BY_CLUSTER_CRN = "list database servers by cluster CRN";
 

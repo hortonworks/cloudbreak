@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -30,9 +32,11 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CustomConfigurationsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTelemetryV4Response;
 
 @ExtendWith(MockitoExtension.class)
 public class StackToStackDetailsConverterTest {
@@ -59,6 +63,9 @@ public class StackToStackDetailsConverterTest {
 
     @Mock
     private DatabaseService databaseService;
+
+    @Mock
+    private RedbeamsClientService redbeamsClientService;
 
     @InjectMocks
     private StackToStackDetailsConverter underTest;
@@ -281,6 +288,40 @@ public class StackToStackDetailsConverterTest {
         assertEquals(database.getAttributes().getValue(), result.getDatabaseDetails().getAttributes());
         assertEquals(database.getExternalDatabaseAvailabilityType().name(), result.getDatabaseDetails().getAvailabilityType());
         assertEquals(database.getExternalDatabaseEngineVersion(), result.getDatabaseDetails().getEngineVersion());
+    }
+
+    @Test
+    void testInstanceTypeWhenRemoteDb() {
+        Stack stack = createStack();
+        stack.getCluster().setDatabaseServerCrn(DB_SERVER_CRN);
+        DatabaseServerTelemetryV4Response response = new DatabaseServerTelemetryV4Response();
+        response.setInstanceType("db.m5.large");
+        when(redbeamsClientService.getTelemetryByCrn(DB_SERVER_CRN)).thenReturn(response);
+
+        StackDetails result = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
+
+        assertEquals("db.m5.large", result.getDatabaseDetails().getInstanceType());
+    }
+
+    @Test
+    void testInstanceTypeWhenNoDatabaseServerCrn() {
+        Stack stack = createStack();
+
+        StackDetails result = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
+
+        assertNull(result.getDatabaseDetails().getInstanceType());
+        verify(redbeamsClientService, never()).getTelemetryByCrn(any());
+    }
+
+    @Test
+    void testInstanceTypeWhenRedbeamsThrows() {
+        Stack stack = createStack();
+        stack.getCluster().setDatabaseServerCrn(DB_SERVER_CRN);
+        when(redbeamsClientService.getTelemetryByCrn(DB_SERVER_CRN)).thenThrow(new RuntimeException("boom"));
+
+        StackDetails result = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
+
+        assertNull(result.getDatabaseDetails().getInstanceType());
     }
 
     private Stack createStack() {

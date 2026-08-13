@@ -53,6 +53,8 @@ public final class Notes {
             "Gets information on a database server by its name.";
         public static final String GET_BY_CRN =
             "Gets information on a database server by its CRN.";
+        public static final String GET_TELEMETRY_BY_CRN =
+            "Gets lightweight telemetry information on a database server by its CRN.";
         public static final String GET_BY_CLUSTER_CRN =
                 "Gets information on a database server by cluster CRN";
         public static final String LIST_BY_CLUSTER_CRN =

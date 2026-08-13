@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
@@ -63,6 +64,9 @@ public class StackToStackDetailsConverter {
 
     @Inject
     private DatabaseService databaseService;
+
+    @Inject
+    private RedbeamsClientService redbeamsClientService;
 
     public StackDetails convert(StackView source, ClusterView cluster, List<InstanceGroupDto> instanceGroupDtos) {
         StackDetails stackDetails = new StackDetails();
@@ -123,7 +127,21 @@ public class StackToStackDetailsConverter {
                 databaseDetails.setDbSslEnabled(cluster.getDbSslEnabled() == null ? Boolean.FALSE : cluster.getDbSslEnabled());
             });
         }
+        databaseDetails.setInstanceType(resolveDbInstanceType(cluster));
         return databaseDetails;
+    }
+
+    private String resolveDbInstanceType(ClusterView cluster) {
+        String databaseServerCrn = cluster == null ? null : cluster.getDatabaseServerCrn();
+        if (!RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn)) {
+            return null;
+        }
+        try {
+            return redbeamsClientService.getTelemetryByCrn(databaseServerCrn).getInstanceType();
+        } catch (Exception e) {
+            LOGGER.warn("Cannot read DB instance type from redbeams for database server crn: {}", databaseServerCrn, e);
+            return null;
+        }
     }
 
     private boolean getMultiAz(List<InstanceGroupDto> instanceGroupDtos) {

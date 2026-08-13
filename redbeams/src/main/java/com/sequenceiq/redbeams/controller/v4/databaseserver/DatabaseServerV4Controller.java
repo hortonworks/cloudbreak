@@ -57,6 +57,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDa
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTelemetryV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
@@ -75,6 +76,7 @@ import com.sequenceiq.redbeams.service.RedbeamsTagUpdaterService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerSslCertificateConfigService;
 import com.sequenceiq.redbeams.service.rotation.RedbeamsRotationService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsRotateSslService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
@@ -145,6 +147,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Inject
     private RedbeamsTagUpdaterService redbeamsTagUpdaterService;
 
+    @Inject
+    private DBStackService dbStackService;
+
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public DatabaseServerV4Responses list(@ResourceCrn String environmentCrn) {
@@ -181,6 +186,14 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerV4Response getByCrn(@ResourceCrn String crn) {
         DatabaseServerConfig server = databaseServerConfigService.getByCrn(crn);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
+    }
+
+    @Override
+    @InternalOnly
+    public DatabaseServerTelemetryV4Response getTelemetryByCrn(@ResourceCrn String crn) {
+        DatabaseServerTelemetryV4Response response = new DatabaseServerTelemetryV4Response();
+        dbStackService.getDatabaseServerInstanceTypeByCrn(crn).ifPresent(response::setInstanceType);
+        return response;
     }
 
     @Override

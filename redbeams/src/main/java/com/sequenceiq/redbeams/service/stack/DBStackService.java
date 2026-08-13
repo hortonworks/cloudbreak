@@ -45,6 +45,10 @@ public class DBStackService implements PayloadContextProvider, ResourceIdProvide
                 .orElseThrow(() -> new NotFoundException(String.format("Stack with crn [%s] not found", crn)));
     }
 
+    public Optional<String> getDatabaseServerInstanceTypeByCrn(String crn) {
+        return dbStackRepository.findDatabaseServerInstanceTypeByResourceCrn(crn);
+    }
+
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
         return getByCrn(resourceCrn).getId();

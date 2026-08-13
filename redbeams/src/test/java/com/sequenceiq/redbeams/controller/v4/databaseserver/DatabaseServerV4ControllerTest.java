@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.controller.v4.databaseserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,6 +40,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseS
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTelemetryV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
@@ -145,6 +147,9 @@ public class DatabaseServerV4ControllerTest {
     @Mock
     private RedbeamsTagUpdaterService redbeamsTagUpdaterService;
 
+    @Mock
+    private com.sequenceiq.redbeams.service.stack.DBStackService dbStackService;
+
     private DatabaseServerConfig server;
 
     private DatabaseServerConfig server2;
@@ -232,6 +237,24 @@ public class DatabaseServerV4ControllerTest {
         DatabaseServerV4Response response = underTest.getByCrn(SERVER_CRN);
 
         assertEquals(serverResponse.getId().longValue(), response.getId().longValue());
+    }
+
+    @Test
+    public void testGetTelemetryByCrn() {
+        when(dbStackService.getDatabaseServerInstanceTypeByCrn(SERVER_CRN)).thenReturn(Optional.of("db.m5.large"));
+
+        DatabaseServerTelemetryV4Response response = underTest.getTelemetryByCrn(SERVER_CRN);
+
+        assertEquals("db.m5.large", response.getInstanceType());
+    }
+
+    @Test
+    public void testGetTelemetryByCrnWhenInstanceTypeAbsent() {
+        when(dbStackService.getDatabaseServerInstanceTypeByCrn(SERVER_CRN)).thenReturn(Optional.empty());
+
+        DatabaseServerTelemetryV4Response response = underTest.getTelemetryByCrn(SERVER_CRN);
+
+        assertNull(response.getInstanceType());
     }
 
     @Test

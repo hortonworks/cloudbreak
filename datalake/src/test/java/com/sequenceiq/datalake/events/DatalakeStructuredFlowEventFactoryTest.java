@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -43,6 +44,8 @@ import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StackService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTelemetryV4Response;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
@@ -75,6 +78,9 @@ class DatalakeStructuredFlowEventFactoryTest {
     private AccountIdService accountIdService;
 
     @Mock
+    private DatabaseService databaseService;
+
+    @Mock
     private SdxStatusEntity mockSdxStatusEntity;
 
     @Mock
@@ -90,6 +96,7 @@ class DatalakeStructuredFlowEventFactoryTest {
         ReflectionTestUtils.setField(underTest, "stackService", stackService);
         ReflectionTestUtils.setField(underTest, "sdxDatabaseRepository", sdxDatabaseRepository);
         ReflectionTestUtils.setField(underTest, "accountIdService", accountIdService);
+        ReflectionTestUtils.setField(underTest, "databaseService", databaseService);
         cluster = createSdxCluster();
         setUpSdxStatusEntity(cluster);
         lenient().when(mockNodeConfig.getId()).thenReturn("nodeId");
@@ -125,6 +132,37 @@ class DatalakeStructuredFlowEventFactoryTest {
         DatabaseDetails databaseDetails = datalakeDetails.getDatabaseDetails();
         assertEquals("1", databaseDetails.getEngineVersion());
         assertEquals("HA", databaseDetails.getAvailabilityType());
+        assertNull(databaseDetails.getInstanceType());
+    }
+
+    @Test
+    void testInstanceTypeWhenRedbeamsReturnsValue() {
+        cluster.getSdxDatabase().setDatabaseCrn("crn:cdp:redbeams:us-west-1:default:databaseServer:server");
+        DatabaseServerTelemetryV4Response response = new DatabaseServerTelemetryV4Response();
+        response.setInstanceType("db.m5.large");
+        doReturn(response).when(databaseService).getDatabaseServerTelemetry("crn:cdp:redbeams:us-west-1:default:databaseServer:server");
+
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+
+        assertEquals("db.m5.large", result.getPayload().getDatabaseDetails().getInstanceType());
+    }
+
+    @Test
+    void testInstanceTypeWhenRedbeamsThrows() {
+        cluster.getSdxDatabase().setDatabaseCrn("crn:cdp:redbeams:us-west-1:default:databaseServer:server");
+        doThrow(new RuntimeException("boom")).when(databaseService).getDatabaseServerTelemetry(any());
+
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+
+        assertNull(result.getPayload().getDatabaseDetails().getInstanceType());
+    }
+
+    @Test
+    void testInstanceTypeWhenCrnAbsent() {
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+
+        assertNull(result.getPayload().getDatabaseDetails().getInstanceType());
+        verify(databaseService, never()).getDatabaseServerTelemetry(any());
     }
 
     @Test

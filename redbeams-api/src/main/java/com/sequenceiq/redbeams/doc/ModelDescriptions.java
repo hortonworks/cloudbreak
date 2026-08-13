@@ -27,6 +27,7 @@ public final class ModelDescriptions {
     public static final String DATABASE_SERVER_RESPONSES = "A set of multiple database server responses";
     public static final String SSL_CONFIG_RESPONSE = "Response for the SSL config of a database server";
     public static final String DATABASE_SERVER_STATUS_RESPONSE = "Response containing status information about a database server";
+    public static final String DATABASE_SERVER_TELEMETRY_RESPONSE = "Response containing telemetry information about a database server";
     public static final String DATABASE_SERVER_TEST_REQUEST = "Request for testing connectivity to a database server";
     public static final String DATABASE_SERVER_TEST_RESPONSE = "Response for testing connectivity to a database server";
     public static final String DATABASE_TEST_REQUEST = "Request for testing connectivity to a database";

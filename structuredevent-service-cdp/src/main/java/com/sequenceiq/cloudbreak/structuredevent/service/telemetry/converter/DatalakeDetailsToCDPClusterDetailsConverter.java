@@ -34,7 +34,8 @@ public class DatalakeDetailsToCDPClusterDetailsConverter {
             builder.setEngineVersion(Objects.requireNonNullElse(databaseDetails.getEngineVersion(), ""))
                     .setAvailabilityType(Objects.requireNonNullElse(databaseDetails.getAvailabilityType(), ""))
                     .setSslEnabled(databaseDetails.isDbSslEnabled())
-                    .setAttributes(Objects.requireNonNullElse(databaseDetails.getAttributes(), ""));
+                    .setAttributes(Objects.requireNonNullElse(databaseDetails.getAttributes(), ""))
+                    .setInstanceType(Objects.requireNonNullElse(databaseDetails.getInstanceType(), ""));
         }
         return builder.build();
     }

@@ -16,6 +16,8 @@ public class DatabaseDetails implements Serializable {
 
     private boolean dbSslEnabled;
 
+    private String instanceType;
+
     public String getEngineVersion() {
         return engineVersion;
     }
@@ -48,6 +50,14 @@ public class DatabaseDetails implements Serializable {
         this.dbSslEnabled = dbSslEnabled;
     }
 
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
+    }
+
     @Override
     public String toString() {
         return "DatabaseDetails{" +
@@ -55,6 +65,7 @@ public class DatabaseDetails implements Serializable {
                 ", availabilityType='" + availabilityType + '\'' +
                 ", attributes='" + attributes + '\'' +
                 ", dbSslEnabled='" + dbSslEnabled + '\'' +
+                ", instanceType='" + instanceType + '\'' +
                 '}';
     }
 }

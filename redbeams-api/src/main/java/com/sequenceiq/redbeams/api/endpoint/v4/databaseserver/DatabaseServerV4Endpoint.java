@@ -48,6 +48,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDa
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTelemetryV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
@@ -92,6 +93,16 @@ public interface DatabaseServerV4Endpoint {
             operationId = "getDatabaseServerByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response getByCrn(
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn
+    );
+
+    @GET
+    @Path("internal/crn/{crn}/telemetry")
+    @Operation(summary = DatabaseServerOpDescription.GET_TELEMETRY_BY_CRN, description = DatabaseServerNotes.GET_TELEMETRY_BY_CRN,
+            operationId = "getDatabaseServerTelemetryByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerTelemetryV4Response getTelemetryByCrn(
             @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );

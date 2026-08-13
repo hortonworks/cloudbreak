@@ -24,6 +24,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDat
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTelemetryV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
@@ -49,6 +50,17 @@ public class RedbeamsClientService {
                     () -> redbeamsServerEndpoint.getByCrn(dbCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to GET DatabaseServer properties by dbCrn: %s", dbCrn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public DatabaseServerTelemetryV4Response getTelemetryByCrn(String dbCrn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> redbeamsServerEndpoint.getTelemetryByCrn(dbCrn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to GET DatabaseServer telemetry by dbCrn: %s", dbCrn);
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
