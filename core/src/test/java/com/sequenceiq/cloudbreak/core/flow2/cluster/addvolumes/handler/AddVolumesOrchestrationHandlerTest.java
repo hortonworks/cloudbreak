@@ -3,12 +3,16 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_ORCHESTRATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.FAILURE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 import java.util.Map;
@@ -61,11 +65,11 @@ class AddVolumesOrchestrationHandlerTest {
 
     @BeforeEach
     void setUp() {
-        doReturn(ResourceType.AWS_VOLUMESET).when(stack).getDiskResourceType();
+        lenient().doReturn(ResourceType.AWS_VOLUMESET).when(stack).getDiskResourceType();
         doReturn(stack).when(stackService).getByIdWithLists(STACK_ID);
         Resource resource = mock(Resource.class);
         List<Resource> resources = List.of(resource);
-        doReturn(resources).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("test"),
+        lenient().doReturn(resources).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("test"),
                     eq(List.of(ResourceType.AWS_VOLUMESET)));
 
         handlerRequest = new AddVolumesOrchestrationHandlerEvent(STACK_ID, 2L, "gp2", 400L, CloudVolumeUsageType.GENERAL, "test");
@@ -87,6 +91,34 @@ class AddVolumesOrchestrationHandlerTest {
         assertEquals(FAILURE_EVENT.event(), response.getSelector());
         AddVolumesFailedEvent failedEvent = (AddVolumesFailedEvent) response;
         assertEquals("TEST", failedEvent.getException().getMessage());
+    }
+
+    @Test
+    void testMountVolumesForGcpDiskSet() throws Exception {
+        doReturn(ResourceType.GCP_ATTACHED_DISKSET).when(stack).getDiskResourceType();
+        List<Resource> resources = List.of(mock(Resource.class));
+        doReturn(resources).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("test"),
+                eq(List.of(ResourceType.GCP_ATTACHED_DISKSET)));
+        Map<String, Map<String, String>> fstabInformation = Map.of("test", Map.of("fstab", "test-fstab", "uuid", "123"));
+        doReturn(fstabInformation).when(addVolumesService).redeployStatesAndMountDisks(stack, "test");
+
+        Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
+
+        assertEquals(ADD_VOLUMES_ORCHESTRATION_FINISHED_EVENT.event(), response.getSelector());
+        verify(diskUpdateService, times(1)).parseFstabAndPersistDiskInformation(fstabInformation, stack);
+    }
+
+    @Test
+    void testMountVolumesFailsWhenDiskResourceTypeIsNeitherVolumeSetNorDiskSet() throws Exception {
+        doReturn(ResourceType.GCP_DISK).when(stack).getDiskResourceType();
+
+        Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
+
+        assertEquals(FAILURE_EVENT.event(), response.getSelector());
+        AddVolumesFailedEvent failedEvent = (AddVolumesFailedEvent) response;
+        assertEquals("No disk found to mount!", failedEvent.getException().getMessage());
+        verifyNoInteractions(addVolumesService);
+        verify(diskUpdateService, never()).parseFstabAndPersistDiskInformation(any(), eq(stack));
     }
 
 }

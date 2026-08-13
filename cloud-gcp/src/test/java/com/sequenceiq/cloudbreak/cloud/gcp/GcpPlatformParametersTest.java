@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.GcpEnabledInstanceTypes.GCP_EN
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
@@ -111,7 +110,7 @@ class GcpPlatformParametersTest {
 
     @Test
     void testAddDiskSupported() {
-        assertFalse(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED));
+        assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED));
     }
 
     @Test

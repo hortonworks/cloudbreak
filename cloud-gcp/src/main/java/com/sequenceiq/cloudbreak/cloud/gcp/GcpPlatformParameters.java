@@ -118,7 +118,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         // GCP disk *type* changes are still rejected by StackOperationService.validatePlatformAndRequest, so this does
         // not enable full type-change support.
         specialParameters.getSpecialParameters().put(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED, Boolean.TRUE);
-        specialParameters.getSpecialParameters().put(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED, Boolean.FALSE);
+        specialParameters.getSpecialParameters().put(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED, Boolean.TRUE);
         return specialParameters;
     }
 

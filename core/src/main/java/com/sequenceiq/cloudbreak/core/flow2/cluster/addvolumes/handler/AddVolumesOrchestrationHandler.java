@@ -62,7 +62,7 @@ public class AddVolumesOrchestrationHandler extends ExceptionCatcherEventHandler
             LOGGER.debug("Starting the mounting of additional volumes for group: {}", requestGroup);
 
             ResourceType diskResourceType = stack.getDiskResourceType();
-            if (diskResourceType != null && diskResourceType.toString().contains("VOLUMESET")) {
+            if (diskResourceType != null && (diskResourceType.toString().contains("VOLUMESET") || diskResourceType.toString().contains("DISKSET"))) {
                 LOGGER.debug("Collecting resources based on stack id {} and resource type {} filtered by instance group {}.", stackId, diskResourceType,
                         requestGroup);
                 List<Resource> resourceList = resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(stackId, requestGroup,
