@@ -59,6 +59,7 @@ setup_autotls_token:
     - content: "cert_request_token_file=/etc/cloudera-scm-agent/cmagent.token"
     - after: "use_tls=.*"
     - backup: False
+    - unless: grep -q "^cert_request_token_file=" /etc/cloudera-scm-agent/config.ini
 
 {% if internal_loadbalancer_san|length > 0 %}
 
@@ -74,7 +75,7 @@ setup_autotls_san:
     - name: /etc/cloudera-scm-agent/config.ini
     - mode: ensure
     - content: "subject_alt_names={{ internal_loadbalancer_san }}"
-    - after: "cert_request_token_file=.*"
+    - after: "^cert_request_token_file=.*"
     - backup: False
     - quiet: True
     - unless: grep -q "^subject_alt_names=" /etc/cloudera-scm-agent/config.ini
