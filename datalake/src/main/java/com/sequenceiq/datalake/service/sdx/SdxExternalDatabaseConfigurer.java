@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.DatabaseBase;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
@@ -73,6 +76,7 @@ public class SdxExternalDatabaseConfigurer {
         }
         SdxDatabase sdxDatabase = DatabaseParameterInitUtil.setupDatabaseInitParams(databaseAvailabilityType, dbEngineVersion);
         configureAzureDatabase(cloudPlatform, azureDatabaseType, internalDatabaseRequest, databaseRequest, sdxDatabase);
+        applyDatabaseInstanceType(internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),
                 sdxDatabase.getDatabaseEngineVersion());
         validate(cloudPlatform, sdxCluster.getClusterName(), sdxDatabase);
@@ -160,6 +164,21 @@ public class SdxExternalDatabaseConfigurer {
             SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
         if (CloudPlatform.AZURE == cloudPlatform && sdxDatabase.hasExternalDatabase()) {
             azureDatabaseAttributesService.configureAzureDatabase(azureDatabaseType, internalDatabaseRequest, databaseRequest, sdxDatabase);
+        }
+    }
+
+    private void applyDatabaseInstanceType(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
+        String databaseInstanceType = Optional.ofNullable(databaseRequest)
+                .map(SdxDatabaseRequest::getDatabaseInstanceType)
+                .orElse(Optional.ofNullable(internalDatabaseRequest)
+                        .map(DatabaseBase::getDatabaseInstanceType)
+                        .orElse(null));
+        if (StringUtils.isNotBlank(databaseInstanceType)) {
+            Json attributes = sdxDatabase.getAttributes();
+            Map<String, Object> params = attributes == null ? new HashMap<>() : new HashMap<>(attributes.getMap());
+            params.put("instancetype", databaseInstanceType);
+            sdxDatabase.setAttributes(new Json(params));
+            LOGGER.debug("Applied customer-requested database instance type '{}' to SdxDatabase attributes", databaseInstanceType);
         }
     }
 }

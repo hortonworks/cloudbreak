@@ -493,12 +493,19 @@ public class ExternalDatabaseService {
             instanceType = databaseCapabilities.getRegionDefaultInstances().get(environment.getLocation().getName());
         }
         DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
-        request.setInstanceType(instanceType);
-        if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(environment.getAccountId())) {
-            List<String> fallbackInstanceTypes = databaseCapabilities.getRegionFallbackInstances()
-                    .getOrDefault(environment.getLocation().getName(), List.of());
-            LOGGER.info("Setting fallback database instance types {} for region {}", fallbackInstanceTypes, environment.getLocation().getName());
-            request.setFallbackInstanceTypes(fallbackInstanceTypes);
+        String requestedInstanceType = attributes.containsKey("instancetype")
+                ? attributes.get("instancetype").toString() : null;
+        if (requestedInstanceType != null) {
+            LOGGER.info("Using customer-requested database instance type '{}'; skipping fallback instance types", requestedInstanceType);
+            request.setInstanceType(requestedInstanceType);
+        } else {
+            request.setInstanceType(instanceType);
+            if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(environment.getAccountId())) {
+                List<String> fallbackInstanceTypes = databaseCapabilities.getRegionFallbackInstances()
+                        .getOrDefault(environment.getLocation().getName(), List.of());
+                LOGGER.info("Setting fallback database instance types {} for region {}", fallbackInstanceTypes, environment.getLocation().getName());
+                request.setFallbackInstanceTypes(fallbackInstanceTypes);
+            }
         }
         request.setDatabaseVendor(databaseStackConfig.getVendor());
         request.setStorageSize(databaseStackConfig.getVolumeSize());

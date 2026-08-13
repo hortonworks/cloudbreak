@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,8 @@ public class DatabaseRequestToDatabaseConverter {
 
     private static final String DATABASE_SSL_ENABLED = "databaseSslEnabled";
 
+    private static final String DATABASE_INSTANCE_TYPE_KEY = "instancetype";
+
     @Inject
     private EnvironmentDatabaseService environmentDatabaseService;
 
@@ -39,6 +42,7 @@ public class DatabaseRequestToDatabaseConverter {
             database.setAttributes(configureAzureDatabaseIfNeeded(cloudPlatform, source, source.getAvailabilityType()).orElse(null));
             database.setDatalakeDatabaseAvailabilityType(source.getDatalakeDatabaseAvailabilityType());
             database.setAttributes(addDbSslEnabledIfNeeded(database.getAttributes(), disableDbSslEnforcement));
+            database.setAttributes(addDatabaseInstanceTypeIfPresent(database.getAttributes(), source.getDatabaseInstanceType()));
         }
         return database;
     }
@@ -96,5 +100,14 @@ public class DatabaseRequestToDatabaseConverter {
         if (flexibleServerDelegatedSubnetId != null) {
             params.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, flexibleServerDelegatedSubnetId);
         }
+    }
+
+    private Json addDatabaseInstanceTypeIfPresent(Json existing, String databaseInstanceType) {
+        if (StringUtils.isBlank(databaseInstanceType)) {
+            return existing;
+        }
+        Map<String, Object> params = existing != null ? new HashMap<>(existing.getMap()) : new HashMap<>();
+        params.put(DATABASE_INSTANCE_TYPE_KEY, databaseInstanceType);
+        return new Json(params);
     }
 }

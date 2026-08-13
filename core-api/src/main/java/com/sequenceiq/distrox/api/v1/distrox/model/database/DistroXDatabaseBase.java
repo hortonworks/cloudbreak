@@ -13,6 +13,8 @@ public abstract class DistroXDatabaseBase {
     @Pattern(regexp = POSTGRES_VERSION_REGEX, message = "Not a valid database major version")
     private String databaseEngineVersion;
 
+    private String databaseInstanceType;
+
     public DistroXDatabaseAvailabilityType getAvailabilityType() {
         return availabilityType;
     }
@@ -27,5 +29,13 @@ public abstract class DistroXDatabaseBase {
 
     public void setDatabaseEngineVersion(String databaseEngineVersion) {
         this.databaseEngineVersion = databaseEngineVersion;
+    }
+
+    public String getDatabaseInstanceType() {
+        return databaseInstanceType;
+    }
+
+    public void setDatabaseInstanceType(String databaseInstanceType) {
+        this.databaseInstanceType = databaseInstanceType;
     }
 }

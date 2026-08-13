@@ -21,6 +21,7 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
         request.setAvailabilityType(convertAvailabilityType(source.getAvailabilityType()));
         request.setDatabaseEngineVersion(source.getDatabaseEngineVersion());
         request.setDatabaseAzureRequest(convertDistroxDatabaseAzureRequest(source.getDatabaseAzureRequest()));
+        request.setDatabaseInstanceType(source.getDatabaseInstanceType());
         return request;
     }
 
@@ -31,6 +32,7 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
         }
         request.setDatabaseEngineVersion(source.getDatabaseEngineVersion());
         request.setDatabaseAzureRequest(convertDatabaseAzureRequest(source.getDatabaseAzureRequest()));
+        request.setDatabaseInstanceType(source.getDatabaseInstanceType());
         return request;
     }
 

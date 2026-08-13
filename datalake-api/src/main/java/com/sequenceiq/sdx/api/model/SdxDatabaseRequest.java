@@ -27,6 +27,9 @@ public class SdxDatabaseRequest {
     @Schema(description = ModelDescriptions.AZURE_DATABASE_REQUEST)
     private SdxDatabaseAzureRequest sdxDatabaseAzureRequest;
 
+    @Schema(description = ModelDescriptions.DATABASE_INSTANCE_TYPE)
+    private String databaseInstanceType;
+
     public Boolean getCreate() {
         return create;
     }
@@ -59,6 +62,14 @@ public class SdxDatabaseRequest {
         this.sdxDatabaseAzureRequest = sdxDatabaseAzureRequest;
     }
 
+    public String getDatabaseInstanceType() {
+        return databaseInstanceType;
+    }
+
+    public void setDatabaseInstanceType(String databaseInstanceType) {
+        this.databaseInstanceType = databaseInstanceType;
+    }
+
     @Override
     public String toString() {
         return "SdxDatabaseRequest{" +
@@ -66,6 +77,7 @@ public class SdxDatabaseRequest {
                 ", availabilityType=" + availabilityType +
                 ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
                 ", sdxDatabaseAzureRequest=" + sdxDatabaseAzureRequest +
+                ", databaseInstanceType='" + databaseInstanceType + '\'' +
                 '}';
     }
 }

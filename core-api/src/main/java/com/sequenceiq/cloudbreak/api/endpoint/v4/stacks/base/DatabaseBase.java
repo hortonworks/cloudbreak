@@ -22,6 +22,9 @@ public abstract class DatabaseBase implements Serializable {
     @Pattern(regexp = POSTGRES_VERSION_REGEX, message = "Not a valid database major version")
     private String databaseEngineVersion;
 
+    @Schema(description = "Requested database instance type; when absent the environment default is used")
+    private String databaseInstanceType;
+
     public DatabaseAvailabilityType getAvailabilityType() {
         return availabilityType;
     }
@@ -46,12 +49,21 @@ public abstract class DatabaseBase implements Serializable {
         this.datalakeDatabaseAvailabilityType = datalakeDatabaseAvailabilityType;
     }
 
+    public String getDatabaseInstanceType() {
+        return databaseInstanceType;
+    }
+
+    public void setDatabaseInstanceType(String databaseInstanceType) {
+        this.databaseInstanceType = databaseInstanceType;
+    }
+
     @Override
     public String toString() {
         return "DatabaseBase{" +
                 "availabilityType=" + availabilityType +
                 ", datalakeDatabaseAvailabilityType=" + datalakeDatabaseAvailabilityType +
                 ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
+                ", databaseInstanceType='" + databaseInstanceType + '\'' +
                 '}';
     }
 }

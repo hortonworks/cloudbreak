@@ -46,6 +46,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.core.AttemptResults;
@@ -965,6 +966,297 @@ class ExternalDatabaseServiceTest {
         underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         verify(redbeamsClient, never()).upgradeByCrn(anyString(), any());
+    }
+
+    @Test
+    void updateToLatestSslCert() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
+        when(redbeamsClient.updateToLatestSslCert(RDBMS_CRN)).thenReturn(flowIdentifier);
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
+
+        underTest.updateToLatestSslCert(cluster);
+
+        verify(redbeamsClient).updateToLatestSslCert(RDBMS_CRN);
+        verify(redbeamsClient).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+    }
+
+    @Test
+    void updateToLatestSslCertWhenCrnNull() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(null);
+
+        underTest.updateToLatestSslCert(cluster);
+
+        verify(redbeamsClient, never()).updateToLatestSslCert(anyString());
+    }
+
+    @Test
+    void updateToLatestSslCertWhenNotFound() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        when(redbeamsClient.updateToLatestSslCert(RDBMS_CRN)).thenThrow(new NotFoundException("not found"));
+
+        underTest.updateToLatestSslCert(cluster);
+
+        verify(redbeamsClient).updateToLatestSslCert(RDBMS_CRN);
+        verify(redbeamsClient, never()).hasFlowRunningByFlowId(anyString());
+    }
+
+    @Test
+    void turnOnSslOnProvider() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
+        when(redbeamsClient.turnOnSslOnProvider(RDBMS_CRN)).thenReturn(flowIdentifier);
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
+
+        underTest.turnOnSslOnProvider(cluster);
+
+        verify(redbeamsClient).turnOnSslOnProvider(RDBMS_CRN);
+        verify(redbeamsClient).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+    }
+
+    @Test
+    void turnOnSslOnProviderWhenCrnNull() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(null);
+
+        underTest.turnOnSslOnProvider(cluster);
+
+        verify(redbeamsClient, never()).turnOnSslOnProvider(anyString());
+    }
+
+    @Test
+    void turnOnSslOnProviderWhenNotFound() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        when(redbeamsClient.turnOnSslOnProvider(RDBMS_CRN)).thenThrow(new NotFoundException("not found"));
+
+        underTest.turnOnSslOnProvider(cluster);
+
+        verify(redbeamsClient).turnOnSslOnProvider(RDBMS_CRN);
+        verify(redbeamsClient, never()).hasFlowRunningByFlowId(anyString());
+    }
+
+    @Test
+    void rotateSSLCertificate() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
+        when(redbeamsClient.rotateSslCert(RDBMS_CRN)).thenReturn(flowIdentifier);
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
+
+        underTest.rotateSSLCertificate(cluster);
+
+        verify(redbeamsClient).rotateSslCert(RDBMS_CRN);
+        verify(redbeamsClient).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+    }
+
+    @Test
+    void rotateSSLCertificateWhenCrnNull() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(null);
+
+        underTest.rotateSSLCertificate(cluster);
+
+        verify(redbeamsClient, never()).rotateSslCert(anyString());
+    }
+
+    @Test
+    void rotateSSLCertificateWhenNotFound() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        when(redbeamsClient.rotateSslCert(RDBMS_CRN)).thenThrow(new NotFoundException("not found"));
+
+        underTest.rotateSSLCertificate(cluster);
+
+        verify(redbeamsClient).rotateSslCert(RDBMS_CRN);
+        verify(redbeamsClient, never()).hasFlowRunningByFlowId(anyString());
+    }
+
+    @Test
+    void migrateRdsToTls() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+
+        underTest.migrateRdsToTls(cluster);
+
+        verify(redbeamsClient).migrateRdsToTls(RDBMS_CRN);
+    }
+
+    @Test
+    void migrateRdsToTlsWhenCrnNull() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(null);
+
+        underTest.migrateRdsToTls(cluster);
+
+        verify(redbeamsClient, never()).migrateRdsToTls(anyString());
+    }
+
+    @Test
+    void migrateRdsToTlsWhenNotFound() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        when(redbeamsClient.migrateRdsToTls(RDBMS_CRN)).thenThrow(new NotFoundException("not found"));
+
+        underTest.migrateRdsToTls(cluster);
+
+        verify(redbeamsClient).migrateRdsToTls(RDBMS_CRN);
+    }
+
+    @Test
+    void findExistingDatabaseByStackViewFound() {
+        StackView stackView = mock(StackView.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(stackView.getResourceCrn()).thenReturn(CLUSTER_CRN);
+        DatabaseServerV4Response response = new DatabaseServerV4Response();
+        response.setCrn(RDBMS_CRN);
+        when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenReturn(response);
+
+        Optional<DatabaseServerV4Response> result = underTest.findExistingDatabase(stackView, clusterView, ENV_CRN);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getCrn()).isEqualTo(RDBMS_CRN);
+    }
+
+    @Test
+    void findExistingDatabaseByStackViewNotFound() {
+        StackView stackView = mock(StackView.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(stackView.getResourceCrn()).thenReturn(CLUSTER_CRN);
+        when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenThrow(new NotFoundException("not found"));
+
+        Optional<DatabaseServerV4Response> result = underTest.findExistingDatabase(stackView, clusterView, ENV_CRN);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findExistingDatabaseByStackViewReturnsNull() {
+        StackView stackView = mock(StackView.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(stackView.getResourceCrn()).thenReturn(CLUSTER_CRN);
+        when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenReturn(null);
+
+        Optional<DatabaseServerV4Response> result = underTest.findExistingDatabase(stackView, clusterView, ENV_CRN);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findExistingDatabaseByStackDtoFound() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getResourceCrn()).thenReturn(CLUSTER_CRN);
+        when(stackDto.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        DatabaseServerV4Response response = new DatabaseServerV4Response();
+        response.setCrn(RDBMS_CRN);
+        when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenReturn(response);
+
+        Optional<DatabaseServerV4Response> result = underTest.findExistingDatabase(stackDto);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getCrn()).isEqualTo(RDBMS_CRN);
+    }
+
+    @Test
+    void findExistingDatabaseByStackDtoNotFound() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getResourceCrn()).thenReturn(CLUSTER_CRN);
+        when(stackDto.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenThrow(new NotFoundException("not found"));
+
+        Optional<DatabaseServerV4Response> result = underTest.findExistingDatabase(stackDto);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void startDatabaseWhenNotFound() throws JsonProcessingException {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        Mockito.doThrow(new NotFoundException("not found")).when(redbeamsClient).startByCrn(RDBMS_CRN);
+
+        underTest.startDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
+
+        verify(redbeamsClient).startByCrn(RDBMS_CRN);
+        verify(databaseObtainerService, never()).obtainAttemptResult(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    void stopDatabaseWhenNotFound() throws JsonProcessingException {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        Mockito.doThrow(new NotFoundException("not found")).when(redbeamsClient).stopByCrn(RDBMS_CRN);
+
+        underTest.stopDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
+
+        verify(redbeamsClient).stopByCrn(RDBMS_CRN);
+        verify(databaseObtainerService, never()).obtainAttemptResult(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    void terminateDatabaseWhenNotFound() throws JsonProcessingException {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        when(redbeamsClient.deleteByCrn(eq(RDBMS_CRN), anyBoolean())).thenThrow(new NotFoundException("not found"));
+
+        underTest.terminateDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse, true);
+
+        verify(redbeamsClient).deleteByCrn(RDBMS_CRN, true);
+        verify(databaseObtainerService, never()).obtainAttemptResult(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    void provisionDatabaseWithCustomInstanceType() throws JsonProcessingException {
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        database.setAttributes(new Json(Map.of("instancetype", "custom.instance.type")));
+        stack.setDatabase(database);
+        stack.setCluster(cluster);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "defaultInstanceType"), null));
+
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
+        verify(redbeamsClient).create(captor.capture());
+        assertThat(captor.getValue().getDatabaseServer().getInstanceType()).isEqualTo("custom.instance.type");
+        assertThat(captor.getValue().getDatabaseServer().getFallbackInstanceTypes()).isEmpty();
+        verify(entitlementService, never()).isFallbackDatabaseInstanceTypeEnabled(anyString());
+    }
+
+    @Test
+    void preValidateShouldFailIfDatabaseCrnIsEmpty() {
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.preValidateDatabaseSecretRotation(""));
+        assertEquals("No database server crn found, rotation is not possible.", secretRotationException.getMessage());
+        verify(redbeamsClient, never()).getLastFlowId(anyString());
+    }
+
+    @Test
+    void rotateDatabaseSecretWithAdditionalProperties() {
+        Map<String, String> additionalProps = Map.of("key1", "value1");
+        when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, RDBMS_FLOW_ID));
+        when(redbeamsClient.hasFlowChainRunningByFlowChainId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
+
+        underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, additionalProps);
+
+        ArgumentCaptor<RotateDatabaseServerSecretV4Request> requestCaptor = ArgumentCaptor.forClass(RotateDatabaseServerSecretV4Request.class);
+        verify(redbeamsClient).rotateSecret(requestCaptor.capture());
+        RotateDatabaseServerSecretV4Request request = requestCaptor.getValue();
+        assertEquals(additionalProps, request.getAdditionalProperties());
     }
 
     @ParameterizedTest
