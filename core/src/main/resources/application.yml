@@ -960,7 +960,7 @@ vm:
         - version: 17
           minRuntimeVersion: 7.3.1.500
         - version: 21
-          minRuntimeVersion: 7.3.1
+          minRuntimeVersion: 7.3.2.30000
 
 retry:
   errors:
