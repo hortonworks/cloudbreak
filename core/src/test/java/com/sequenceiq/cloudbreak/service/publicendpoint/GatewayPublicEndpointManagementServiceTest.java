@@ -232,7 +232,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setCrn("epCrn");
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+        when(encryptionProfileService.getEncryptionProfile(any(), any())).thenReturn(response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
 
@@ -277,7 +277,7 @@ class GatewayPublicEndpointManagementServiceTest {
         cluster.setFqdn(fqdn);
         doThrow(new PemDnsEntryCreateOrUpdateException("Uh-Oh"))
                 .when(dnsManagementService).createOrUpdateDnsEntryWithIp(any(), anyString(), anyString(), anyBoolean(), anyList());
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(new EncryptionProfileResponse());
+        when(encryptionProfileService.getEncryptionProfile(any(), any())).thenReturn(new EncryptionProfileResponse());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CloudbreakServiceException actual = assertThrows(CloudbreakServiceException.class, () -> underTest.renewCertificate(stack));
@@ -339,7 +339,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setCrn("epCrn");
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+        when(encryptionProfileService.getEncryptionProfile(any(), any())).thenReturn(response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -470,7 +470,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setCrn("epCrn");
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+        when(encryptionProfileService.getEncryptionProfile(any(), any())).thenReturn(response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
@@ -514,8 +514,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
                 eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
-
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(new EncryptionProfileResponse());
+        when(encryptionProfileService.getEncryptionProfile(any(), any())).thenReturn(new EncryptionProfileResponse());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -772,7 +771,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setCrn("epCrn");
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+        when(encryptionProfileService.getEncryptionProfile(any(), any())).thenReturn(response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -828,7 +827,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setCrn("epCrn");
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+        when(encryptionProfileService.getEncryptionProfile(any(), any())).thenReturn(response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -1102,9 +1101,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setCrn("epCrn");
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
-
-
+        when(encryptionProfileService.getEncryptionProfile(eq(stack), eq(environment))).thenReturn(response);
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
 
@@ -1113,6 +1110,93 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(environmentClientService, times(1)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(1)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
+        verify(certificateCreationService, times(1))
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
+        verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
+    }
+
+    @Test
+    void testGenerateAlternativeCertAndSaveForStackUsesClusterEncryptionProfileWhenSet() throws IOException {
+        Security.addProvider(new BouncyCastleFipsProvider());
+        SecurityConfig securityConfig = new SecurityConfig();
+        Cluster cluster = TestUtil.cluster();
+        cluster.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:cluster-own-profile");
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
+        String commonName = "hashofshorthostname." + environmentDomain;
+        String fqdn = endpointName + '.' + environmentDomain;
+        String envName = "anEnvName";
+
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
+                .withName(envName)
+                .withEnvironmentDomain(environmentDomain)
+                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:env-profile")
+                .build();
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
+        when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
+        when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.13.2.0");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        EncryptionProfileResponse clusterProfile = new EncryptionProfileResponse();
+        clusterProfile.setCrn(cluster.getEncryptionProfileCrn());
+        when(encryptionProfileService.getEncryptionProfile(eq(stack), eq(environment))).thenReturn(clusterProfile);
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateAlternativeCertAndSaveForStack(stack));
+
+        verify(encryptionProfileService, times(1)).getEncryptionProfile(eq(stack), eq(environment));
+        verify(certificateCreationService, times(1))
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
+        verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
+    }
+
+    @Test
+    void testGenerateAlternativeCertAndSaveForStackFallsBackToEnvironmentEncryptionProfile() throws IOException {
+        Security.addProvider(new BouncyCastleFipsProvider());
+        SecurityConfig securityConfig = new SecurityConfig();
+        Cluster cluster = TestUtil.cluster();
+        cluster.setEncryptionProfileCrn(null);
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
+        String commonName = "hashofshorthostname." + environmentDomain;
+        String fqdn = endpointName + '.' + environmentDomain;
+        String envName = "anEnvName";
+        String envEncryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:env-profile";
+
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
+                .withName(envName)
+                .withEnvironmentDomain(environmentDomain)
+                .withEncryptionProfileCrn(envEncryptionProfileCrn)
+                .build();
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
+        when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
+        when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.13.2.0");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        EncryptionProfileResponse envProfile = new EncryptionProfileResponse();
+        envProfile.setCrn(envEncryptionProfileCrn);
+        when(encryptionProfileService.getEncryptionProfile(eq(stack), eq(environment))).thenReturn(envProfile);
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateAlternativeCertAndSaveForStack(stack));
+
+        verify(encryptionProfileService, times(1)).getEncryptionProfile(eq(stack), eq(environment));
         verify(certificateCreationService, times(1))
                 .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
         verify(securityConfigService, times(1)).save(any(SecurityConfig.class));

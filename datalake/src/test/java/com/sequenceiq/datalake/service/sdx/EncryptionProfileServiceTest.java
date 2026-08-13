@@ -24,9 +24,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +52,12 @@ class EncryptionProfileServiceTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private SdxService sdxService;
+
+    @Mock
+    private SdxReactorFlowManager sdxReactorFlowManager;
 
     @InjectMocks
     private EncryptionProfileService underTest;
@@ -166,13 +176,84 @@ class EncryptionProfileServiceTest {
     }
 
     @Test
-    void testEnableEncryptionProfileByCrn() {
+    void testEnableEncryptionProfileByCrnWhenEntitlementNotGrantedThenThrowsBadRequestException() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.enableEncryptionProfileByCrn(DATALAKE_CRN, "epName"));
+
+        assertEquals("Enable encryption profile is not granted to the account", exception.getMessage());
+        verify(sdxReactorFlowManager, never()).triggerEnableEncryptionProfile(any(), any());
+    }
+
+    @Test
+    void testEnableEncryptionProfileByCrnWhenEncryptionProfileNameIsGivenThenResolvesViaGetByName() {
+        String encryptionProfileName = "epName";
+        String resolvedCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
+        EncryptionProfileResponse profile = new EncryptionProfileResponse();
+        profile.setCrn(resolvedCrn);
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(1L);
         when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(encryptionProfileEndpoint.getByName(encryptionProfileName)).thenReturn(profile);
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenReturn(sdxCluster);
+        when(sdxReactorFlowManager.triggerEnableEncryptionProfile(sdxCluster, resolvedCrn))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
 
-        underTest.enableEncryptionProfileByCrn(DATALAKE_CRN, "encryptionProfileCrn");
+        underTest.enableEncryptionProfileByCrn(DATALAKE_CRN, encryptionProfileName);
 
-        verify(stackService, times(1))
-                .enableEncryptionProfile(DATALAKE_CRN, "encryptionProfileCrn");
+        verify(encryptionProfileEndpoint, times(1)).getByName(encryptionProfileName);
+        verify(encryptionProfileEndpoint, never()).getByCrn(anyString());
+        verify(sdxReactorFlowManager, times(1)).triggerEnableEncryptionProfile(sdxCluster, resolvedCrn);
+    }
+
+    @Test
+    void testEnableEncryptionProfileByCrnWhenEncryptionProfileCrnIsGivenThenResolvesViaGetByCrn() {
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
+        EncryptionProfileResponse profile = new EncryptionProfileResponse();
+        profile.setCrn(encryptionProfileCrn);
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(1L);
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(encryptionProfileEndpoint.getByCrn(encryptionProfileCrn)).thenReturn(profile);
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenReturn(sdxCluster);
+        when(sdxReactorFlowManager.triggerEnableEncryptionProfile(sdxCluster, encryptionProfileCrn))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
+
+        underTest.enableEncryptionProfileByCrn(DATALAKE_CRN, encryptionProfileCrn);
+
+        verify(encryptionProfileEndpoint, times(1)).getByCrn(encryptionProfileCrn);
+        verify(encryptionProfileEndpoint, never()).getByName(anyString());
+        verify(sdxReactorFlowManager, times(1)).triggerEnableEncryptionProfile(sdxCluster, encryptionProfileCrn);
+    }
+
+    @Test
+    void testEnableEncryptionProfileByCrnWhenProfileNotFoundThenThrowsBadRequestException() {
+        String encryptionProfileName = "missing";
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(encryptionProfileEndpoint.getByName(encryptionProfileName)).thenReturn(null);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.enableEncryptionProfileByCrn(DATALAKE_CRN, encryptionProfileName));
+
+        assertEquals("Encryption profile 'missing' not found", exception.getMessage());
+        verify(sdxReactorFlowManager, never()).triggerEnableEncryptionProfile(any(), any());
+    }
+
+    @Test
+    void testEnableEncryptionProfileByCrnWhenEncryptionProfileNameOrCrnIsBlankThenTriggersFlowWithNullCrn() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(1L);
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenReturn(sdxCluster);
+        when(sdxReactorFlowManager.triggerEnableEncryptionProfile(sdxCluster, null))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
+
+        underTest.enableEncryptionProfileByCrn(DATALAKE_CRN, "");
+
+        verify(encryptionProfileEndpoint, never()).getByName(anyString());
+        verify(encryptionProfileEndpoint, never()).getByCrn(anyString());
+        verify(sdxReactorFlowManager, times(1)).triggerEnableEncryptionProfile(sdxCluster, null);
     }
 
     @Test

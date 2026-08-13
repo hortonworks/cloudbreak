@@ -7,17 +7,17 @@ import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class UpdateSslConfigTriggerEvent extends StackEvent {
+public class EnableEncryptionProfileTriggerEvent extends StackEvent {
 
     private final String encryptionProfileCrn;
 
-    public UpdateSslConfigTriggerEvent(String selector, Long stackId) {
+    public EnableEncryptionProfileTriggerEvent(String selector, Long stackId) {
         super(selector, stackId);
         this.encryptionProfileCrn = null;
     }
 
     @JsonCreator
-    public UpdateSslConfigTriggerEvent(
+    public EnableEncryptionProfileTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
@@ -32,6 +32,6 @@ public class UpdateSslConfigTriggerEvent extends StackEvent {
 
     @Override
     public boolean equalsEvent(StackEvent other) {
-        return isClassAndEqualsEvent(UpdateSslConfigTriggerEvent.class, other);
+        return isClassAndEqualsEvent(EnableEncryptionProfileTriggerEvent.class, other);
     }
 }

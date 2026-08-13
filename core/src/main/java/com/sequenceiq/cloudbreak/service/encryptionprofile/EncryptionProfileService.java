@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -48,7 +48,7 @@ public class EncryptionProfileService {
     @Inject
     private EnvironmentConfigProvider environmentConfigProvider;
 
-    public String getEncryptionProfileByCrnOrDefault(DetailedEnvironmentResponse environmentResponse, StackDto stackDto) {
+    public String getEncryptionProfileByCrnOrDefault(DetailedEnvironmentResponse environmentResponse, StackDtoDelegate stackDto) {
         ClusterView clusterView = stackDto.getCluster();
         String encryptionProfileCrn;
 
@@ -168,7 +168,7 @@ public class EncryptionProfileService {
         }
     }
 
-    public EncryptionProfileResponse getEncryptionProfile(StackDto stackDto, DetailedEnvironmentResponse environmentResponse) {
+    public EncryptionProfileResponse getEncryptionProfile(StackDtoDelegate stackDto, DetailedEnvironmentResponse environmentResponse) {
         DetailedEnvironmentResponse environment = environmentResponse != null
                 ? environmentResponse
                 : environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());

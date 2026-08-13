@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.UpdateSslConfigFailedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
 
-abstract class AbstractUpdateSslConfigsOnClusterAction<P extends Payload>
-        extends AbstractAction<UpdateSslConfigsOnClusterState, UpdateSslConfigsOnClusterStateSelectors, StackContext, P> {
+abstract class AbstractEnableEncryptionProfileOnClusterAction<P extends Payload>
+        extends AbstractAction<EnableEncryptionProfileOnClusterState, EnableEncryptionProfileOnClusterStateSelectors, StackContext, P> {
 
     @Inject
     private StackDtoService stackDtoService;
@@ -38,13 +38,13 @@ abstract class AbstractUpdateSslConfigsOnClusterAction<P extends Payload>
     @Inject
     private StackUtil stackUtil;
 
-    protected AbstractUpdateSslConfigsOnClusterAction(Class<P> payloadClass) {
+    protected AbstractEnableEncryptionProfileOnClusterAction(Class<P> payloadClass) {
         super(payloadClass);
     }
 
     @Override
     protected StackContext createFlowContext(FlowParameters flowParameters,
-            StateContext<UpdateSslConfigsOnClusterState, UpdateSslConfigsOnClusterStateSelectors> stateContext, P payload) {
+            StateContext<EnableEncryptionProfileOnClusterState, EnableEncryptionProfileOnClusterStateSelectors> stateContext, P payload) {
         StackDto stack = stackDtoService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -66,6 +66,6 @@ abstract class AbstractUpdateSslConfigsOnClusterAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new UpdateSslConfigFailedEvent(payload.getResourceId(), ex);
+        return new EnableEncryptionProfileFailedEvent(payload.getResourceId(), ex);
     }
 }

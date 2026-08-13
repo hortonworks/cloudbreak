@@ -1,35 +1,28 @@
 package com.sequenceiq.environment.environment.flow.encryptionprofile.handler;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.stack.StackPollerService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class UpdateSslConfigClustersHandler extends ExceptionCatcherEventHandler<EnableEncryptionProfileEvent> {
+public class EnableEncryptionProfileOnFreeIpaHandler extends ExceptionCatcherEventHandler<EnableEncryptionProfileEvent> {
 
-    private final EnvironmentService environmentService;
+    private final FreeIpaPollerService freeIpaPollerService;
 
-    private final StackPollerService stackPollerService;
-
-    protected UpdateSslConfigClustersHandler(EnvironmentService environmentService, StackPollerService stackPollerService) {
-        this.environmentService = environmentService;
-        this.stackPollerService = stackPollerService;
+    protected EnableEncryptionProfileOnFreeIpaHandler(FreeIpaPollerService freeIpaPollerService) {
+        this.freeIpaPollerService = freeIpaPollerService;
     }
 
     @Override
     public String selector() {
-        return EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_IN_CLUSTERS_HANDLER_EVENT.name();
+        return EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_FREEIPA_HANDLER_EVENT.name();
     }
 
     @Override
@@ -42,12 +35,11 @@ public class UpdateSslConfigClustersHandler extends ExceptionCatcherEventHandler
     protected Selectable doAccept(HandlerEvent<EnableEncryptionProfileEvent> event) {
         EnableEncryptionProfileEvent payload = event.getData();
         try {
-            Optional<Environment> environmentOp = environmentService.getById(payload.getResourceId());
-            environmentOp.ifPresent(environment -> stackPollerService.waitForUpdateSslConfigs(environment.getResourceCrn(), environment.getId()));
+            freeIpaPollerService.waitForSaltUpdate(payload.getResourceId(), payload.getResourceCrn());
 
             return EnableEncryptionProfileEvent
                     .builder()
-                    .withSelector(EnableEncryptionProfileStateSelectors.FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector())
+                    .withSelector(EnableEncryptionProfileStateSelectors.ENABLE_ENCRYPTION_PROFILE_ON_STACKS_EVENT.selector())
                     .withResourceId(payload.getResourceId())
                     .withResourceName(payload.getResourceName())
                     .withResourceCrn(payload.getResourceCrn())
@@ -56,7 +48,7 @@ public class UpdateSslConfigClustersHandler extends ExceptionCatcherEventHandler
 
         } catch (Exception e) {
             return new EnableEncryptionProfileFailedEvent(payload.getResourceId(), payload.getResourceName(),
-                    payload.getEncryptionProfileCrn(), e);
+                    payload.getResourceCrn(), e);
         }
     }
 }

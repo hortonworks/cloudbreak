@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXDiskUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.EnableEncryptionProfileTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RdsUpgradeChainTriggerEvent;
@@ -105,7 +106,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.UpdateSslConfigTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserFlowStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
@@ -673,9 +673,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerUpdateSslConfigsOnCluster(Long stackId, String encryptionProfileCrn) {
-        String selector = FlowChainTriggers.UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new UpdateSslConfigTriggerEvent(selector, stackId, new Promise<>(), encryptionProfileCrn));
+    public FlowIdentifier triggerEnableEncryptionProfileOnCluster(Long stackId, String encryptionProfileCrn) {
+        String selector = FlowChainTriggers.ENABLE_ENCRYPTION_PROFILE_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new EnableEncryptionProfileTriggerEvent(selector, stackId, new Promise<>(), encryptionProfileCrn));
     }
 
     public FlowIdentifier triggerDisableEncryptionProfileChain(Long stackId) {

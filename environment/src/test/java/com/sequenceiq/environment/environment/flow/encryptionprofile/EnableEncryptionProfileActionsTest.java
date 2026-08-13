@@ -92,6 +92,23 @@ class EnableEncryptionProfileActionsTest {
     }
 
     @Test
+    public void testEnableEncryptionProfileOnStacksAction() throws Exception {
+        AbstractEnableEncryptionProfileActions<EnableEncryptionProfileEvent> enableEncryptionProfileOnStacksAction =
+                (AbstractEnableEncryptionProfileActions<EnableEncryptionProfileEvent>) underTest.enableEncryptionProfileOnStacksAction();
+        EnableEncryptionProfileEvent enableEncryptionProfileEvent = EnableEncryptionProfileEvent.builder().build();
+
+        initActionPrivateFields(enableEncryptionProfileOnStacksAction);
+
+        Event event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(enableEncryptionProfileOnStacksAction).doExecute(context, enableEncryptionProfileEvent, Map.of());
+
+        verify(eventBus)
+                .notify(eq(EnableEncryptionProfileStateSelectors.ENABLE_ENCRYPTION_PROFILE_ON_STACKS_HANDLER_EVENT.selector()), eq(event));
+    }
+
+    @Test
     public void testFinishedAction() throws Exception {
         AbstractEnableEncryptionProfileActions<EnableEncryptionProfileEvent> finishedAction =
                 (AbstractEnableEncryptionProfileActions<EnableEncryptionProfileEvent>) underTest.finishedAction();

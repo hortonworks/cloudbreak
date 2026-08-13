@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.handler;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.UpdateSslConfigsOnClusterStateSelectors.FAILED_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.UpdateSslConfigsOnClusterStateSelectors.FINISH_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.UpdateSslConfigsOnClusterStateSelectors.GENERATE_ALTERNATIVE_CERTIFICATE_HANDLER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterStateSelectors.FAILED_ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterStateSelectors.FINISH_ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterStateSelectors.GENERATE_ALTERNATIVE_CERTIFICATE_HANDLER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -20,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.UpdateSslConfigEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.EnableEncryptionProfileOnClusterEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
@@ -42,11 +43,11 @@ class GenerateAlternativeCertificateHandlerTest {
     @Mock
     private StackDto stackDto;
 
-    private UpdateSslConfigEvent event;
+    private EnableEncryptionProfileOnClusterEvent event;
 
     @BeforeEach
     void setUp() {
-        event = new UpdateSslConfigEvent(GENERATE_ALTERNATIVE_CERTIFICATE_HANDLER_EVENT.name(), 1L, "epCrn");
+        event = new EnableEncryptionProfileOnClusterEvent(GENERATE_ALTERNATIVE_CERTIFICATE_HANDLER_EVENT.name(), 1L, "epCrn");
     }
 
     @Test
@@ -57,7 +58,7 @@ class GenerateAlternativeCertificateHandlerTest {
     @Test
     void testDefaultFailureEvent() {
         Selectable response = underTest.defaultFailureEvent(1L, new Exception("failed"), new Event<>(event));
-        assertEquals(FAILED_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT.selector(), response.getSelector());
+        assertEquals(FAILED_ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT.selector(), response.getSelector());
         assertEquals("failed", response.getException().getMessage());
     }
 
@@ -70,7 +71,7 @@ class GenerateAlternativeCertificateHandlerTest {
 
         assertEquals(1L, response.getResourceId());
         verify(gatewayPublicEndpointManagementService, times(1)).generateAlternativeCertAndSaveForStack(stackDto);
-        assertEquals(FINISH_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT.selector(), response.getSelector());
+        assertEquals(FINISH_ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT.selector(), response.getSelector());
     }
 
     @Test
@@ -82,20 +83,18 @@ class GenerateAlternativeCertificateHandlerTest {
 
         assertEquals(1L, response.getResourceId());
         verify(gatewayPublicEndpointManagementService, never()).generateAlternativeCertAndSaveForStack(any());
-        assertEquals(FINISH_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT.selector(), response.getSelector());
+        assertEquals(FINISH_ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT.selector(), response.getSelector());
     }
 
     @Test
-    void testGenerateAlternativeCertAndSaveForStackHandlerFailure() {
+    void testGenerateAlternativeCertAndSaveForStackHandlerFailurePropagatesException() {
         when(stackDtoService.getById(event.getResourceId())).thenReturn(stackDto);
         when(gatewayPublicEndpointManagementService.isCertRenewalTriggerable(stackDto.getStack())).thenReturn(true);
         doThrow(new CloudbreakServiceException("Cert generation failed"))
                 .when(gatewayPublicEndpointManagementService).generateAlternativeCertAndSaveForStack(stackDto);
 
-        Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
-
-        assertEquals(event.getResourceId(), selectable.getResourceId());
-        assertEquals(FAILED_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT.name(), selectable.selector());
-        assertEquals("Cert generation failed", selectable.getException().getMessage());
+        CloudbreakServiceException thrown = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.doAccept(new HandlerEvent<>(new Event<>(event))));
+        assertEquals("Cert generation failed", thrown.getMessage());
     }
 }

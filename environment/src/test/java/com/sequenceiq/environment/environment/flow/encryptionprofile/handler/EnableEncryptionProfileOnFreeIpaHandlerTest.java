@@ -1,16 +1,12 @@
 package com.sequenceiq.environment.environment.flow.encryptionprofile.handler;
 
+import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.ENABLE_ENCRYPTION_PROFILE_ON_STACKS_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT;
-import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT;
-import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_IN_CLUSTERS_HANDLER_EVENT;
+import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_FREEIPA_HANDLER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,37 +18,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.stack.StackPollerService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateSslConfigClustersHandlerTest {
+class EnableEncryptionProfileOnFreeIpaHandlerTest {
 
     @Mock
-    private EnvironmentService environmentService;
-
-    @Mock
-    private StackPollerService stackPollerService;
+    private FreeIpaPollerService freeIpaPollerService;
 
     @InjectMocks
-    private UpdateSslConfigClustersHandler underTest;
-
-    @Mock
-    private Environment environment;
+    private EnableEncryptionProfileOnFreeIpaHandler underTest;
 
     private EnableEncryptionProfileEvent event;
 
     @BeforeEach
     void setUp() {
-        event = new EnableEncryptionProfileEvent(UPDATE_SSL_CONFIG_IN_CLUSTERS_HANDLER_EVENT.name(), 1L, "envName", "envCrn", "epCrn");
+        event = new EnableEncryptionProfileEvent(UPDATE_SSL_CONFIG_FREEIPA_HANDLER_EVENT.name(), 1L, "envName", "envCrn", "epCrn");
     }
 
     @Test
     void testSelector() {
-        assertEquals(UPDATE_SSL_CONFIG_IN_CLUSTERS_HANDLER_EVENT.name(), underTest.selector());
+        assertEquals(UPDATE_SSL_CONFIG_FREEIPA_HANDLER_EVENT.name(), underTest.selector());
     }
 
     @Test
@@ -63,24 +51,18 @@ class UpdateSslConfigClustersHandlerTest {
     }
 
     @Test
-    void testUpdateSslConfigClustersHandlerSuccess() {
-        when(environmentService.getById(event.getResourceId())).thenReturn(Optional.of(environment));
-        when(environment.getId()).thenReturn(1L);
-        when(environment.getResourceCrn()).thenReturn("envCrn");
-
+    void testEnableEncryptionProfileOnFreeIpaHandlerSuccess() {
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
-        verify(stackPollerService, times(1)).waitForUpdateSslConfigs(environment.getResourceCrn(), environment.getId());
+        verify(freeIpaPollerService, times(1)).waitForSaltUpdate(event.getResourceId(), event.getResourceCrn());
         assertEquals(event.getResourceId(), response.getResourceId());
-        assertEquals(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector(), response.getSelector());
+        assertEquals(ENABLE_ENCRYPTION_PROFILE_ON_STACKS_EVENT.selector(), response.getSelector());
     }
 
     @Test
-    void testUpdateSslConfigClustersHandlerFailure() {
-        when(environmentService.getById(event.getResourceId())).thenReturn(Optional.of(environment));
-
+    void testEnableEncryptionProfileOnFreeIpaHandlerFailure() {
         doThrow(new CloudbreakServiceException("failed"))
-                .when(stackPollerService).waitForUpdateSslConfigs(any(), any());
+                .when(freeIpaPollerService).waitForSaltUpdate(event.getResourceId(), event.getResourceCrn());
 
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 

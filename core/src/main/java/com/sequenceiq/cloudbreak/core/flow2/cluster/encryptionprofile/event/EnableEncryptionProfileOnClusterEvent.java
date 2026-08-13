@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class UpdateSslConfigEvent extends StackEvent {
+public class EnableEncryptionProfileOnClusterEvent extends StackEvent {
 
     private final String encryptionProfileCrn;
 
     @JsonCreator
-    public UpdateSslConfigEvent(
+    public EnableEncryptionProfileOnClusterEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("encryptionProfileCrn") String encryptionProfileCrn) {
@@ -25,7 +25,7 @@ public class UpdateSslConfigEvent extends StackEvent {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", UpdateSslConfigEvent.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", EnableEncryptionProfileOnClusterEvent.class.getSimpleName() + "[", "]")
                 .add("selector=" + getSelector())
                 .add("stackId=" + getResourceId())
                 .add("encryptionProfileCrn=" + encryptionProfileCrn)

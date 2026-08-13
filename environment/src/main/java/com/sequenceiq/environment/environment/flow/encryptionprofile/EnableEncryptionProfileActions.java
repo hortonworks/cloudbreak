@@ -6,11 +6,11 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.ENABLE_EN
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.VALIDATE_ENABLE_ENCRYPTION_PROFILE_STATE;
+import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.ENABLE_ENCRYPTION_PROFILE_ON_STACKS_HANDLER_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.FINALIZE_ENABLE_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.HANDLED_FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.SET_ENCRYPTION_PROFILE_HANDLER_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_FREEIPA_HANDLER_EVENT;
-import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_IN_CLUSTERS_HANDLER_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.VALIDATE_ENABLE_ENCRYPTION_PROFILE_HANDLER_EVENT;
 
 import java.util.Map;
@@ -87,13 +87,12 @@ public class EnableEncryptionProfileActions {
         };
     }
 
-    @Bean(name = "UPDATE_SSL_CONFIG_CLUSTERS_STATE")
-    public Action<?, ?> updateSslConfigsInClustersAction() {
+    @Bean(name = "ENABLE_ENCRYPTION_PROFILE_ON_STACKS_STATE")
+    public Action<?, ?> enableEncryptionProfileOnStacksAction() {
         return new AbstractEnableEncryptionProfileActions<>(EnableEncryptionProfileEvent.class) {
-
             @Override
             protected void doExecute(CommonContext context, EnableEncryptionProfileEvent payload, Map<Object, Object> variables) {
-                sendEvent(context, UPDATE_SSL_CONFIG_IN_CLUSTERS_HANDLER_EVENT.selector(), payload);
+                sendEvent(context, ENABLE_ENCRYPTION_PROFILE_ON_STACKS_HANDLER_EVENT.selector(), payload);
             }
         };
     }

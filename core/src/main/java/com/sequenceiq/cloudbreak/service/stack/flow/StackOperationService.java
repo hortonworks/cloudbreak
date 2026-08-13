@@ -854,7 +854,7 @@ public class StackOperationService {
     }
 
     public FlowIdentifier updateSslConfigsOnCluster(NameOrCrn nameOrCrn, String accountId, String encryptionProfileNameOrCrn) {
-        LOGGER.info("Triggering update encryption profile on on stack ('{}')", nameOrCrn.getNameOrCrn());
+        LOGGER.info("Triggering enable encryption profile on stack ('{}')", nameOrCrn.getNameOrCrn());
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         String encryptionProfileCrn = null;
         if (StringUtils.isNotEmpty(encryptionProfileNameOrCrn)) {
@@ -862,7 +862,7 @@ public class StackOperationService {
                     .getEncryptionProfileOrThrowException(encryptionProfileNameOrCrn).getCrn();
         }
         encryptionProfileValidator.validate(stack);
-        return flowManager.triggerUpdateSslConfigsOnCluster(stack.getId(), encryptionProfileCrn);
+        return flowManager.triggerEnableEncryptionProfileOnCluster(stack.getId(), encryptionProfileCrn);
     }
 
     public FlowIdentifier disableEncryptionProfile(NameOrCrn nameOrCrn, String accountId) {

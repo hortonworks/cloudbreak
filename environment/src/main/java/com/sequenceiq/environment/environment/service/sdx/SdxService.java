@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
 import java.util.List;
+import java.util.Set;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -15,11 +16,13 @@ import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxEncryptionProfileEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SupportV1Endpoint;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.support.DatalakePlatformSupportRequirements;
@@ -39,6 +42,8 @@ public class SdxService {
 
     private final OperationEndpoint sdxOperationEndpoint;
 
+    private final SdxEncryptionProfileEndpoint sdxEncryptionProfileEndpoint;
+
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public SdxService(
@@ -47,12 +52,14 @@ public class SdxService {
             SupportV1Endpoint sdxSupportV1Endpoint,
             SdxInternalEndpoint sdxInternalEndpoint,
             OperationEndpoint sdxOperationEndpoint,
+            SdxEncryptionProfileEndpoint sdxEncryptionProfileEndpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.sdxEndpoint = sdxEndpoint;
         this.sdxUpgradeEndpoint = sdxUpgradeEndpoint;
         this.sdxInternalEndpoint = sdxInternalEndpoint;
         this.sdxOperationEndpoint = sdxOperationEndpoint;
         this.sdxSupportV1Endpoint = sdxSupportV1Endpoint;
+        this.sdxEncryptionProfileEndpoint = sdxEncryptionProfileEndpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
@@ -62,6 +69,16 @@ public class SdxService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to get SDX cluster by crn '%s' due to '%s'.", clusterCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public SdxClusterDetailResponse getDetailByCrn(String clusterCrn) {
+        try {
+            return sdxEndpoint.getDetailByCrn(clusterCrn, Set.of());
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to get SDX cluster detail by crn '{}' due to '{}'.", clusterCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -163,6 +180,18 @@ public class SdxService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to update salt on SDX cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowIdentifier enableEncryptionProfile(String datalakeCrn, String encryptionProfileCrn) {
+        try {
+            LOGGER.debug("Calling SDX enable encryption profile by datalake CRN {}", datalakeCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> sdxEncryptionProfileEndpoint.enableEncryptionProfileByCrn(datalakeCrn, encryptionProfileCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to enable encryption profile on SDX cluster by crn '{}' due to '{}'.", datalakeCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }

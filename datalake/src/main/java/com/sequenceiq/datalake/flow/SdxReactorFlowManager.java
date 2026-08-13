@@ -83,6 +83,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartE
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
+import com.sequenceiq.datalake.flow.encryptionprofile.event.SdxEnableEncryptionProfileTriggerEvent;
 import com.sequenceiq.datalake.flow.imdupdate.event.SdxInstanceMetadataUpdateEvent;
 import com.sequenceiq.datalake.flow.java.SetDatalakeDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
@@ -493,6 +494,14 @@ public class SdxReactorFlowManager {
         DatalakeUpdatePublicDnsEntriesTriggerEvent datalakeUpdatePublicDnsEntriesTriggerEvent =
                 new DatalakeUpdatePublicDnsEntriesTriggerEvent(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_EVENT.event(), cluster.getId(), initiatorUserCrn);
         return notify(datalakeUpdatePublicDnsEntriesTriggerEvent.selector(), datalakeUpdatePublicDnsEntriesTriggerEvent, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerEnableEncryptionProfile(SdxCluster cluster, String encryptionProfileCrn) {
+        LOGGER.info("Trigger Enable Encryption Profile flow for Datalake: {}", cluster.getClusterName());
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxEnableEncryptionProfileTriggerEvent triggerEvent =
+                SdxEnableEncryptionProfileTriggerEvent.from(cluster.getId(), userId, encryptionProfileCrn);
+        return notify(triggerEvent.selector(), triggerEvent, cluster.getClusterName());
     }
 
     public FlowIdentifier triggerZookeeperToKraftMigrationFlow(SdxCluster cluster) {

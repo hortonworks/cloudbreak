@@ -337,6 +337,26 @@ class SdxReactorFlowManagerTest {
     }
 
     @Test
+    public void testTriggerEnableEncryptionProfile() {
+        ArgumentCaptor<com.sequenceiq.datalake.flow.encryptionprofile.event.SdxEnableEncryptionProfileTriggerEvent> captor =
+                ArgumentCaptor.forClass(com.sequenceiq.datalake.flow.encryptionprofile.event.SdxEnableEncryptionProfileTriggerEvent.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        doReturn(1L).when(sdxCluster).getId();
+        doReturn("TEST").when(sdxCluster).getClusterName();
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:tenant:encryptionProfile:custom-123";
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerEnableEncryptionProfile(sdxCluster, encryptionProfileCrn));
+
+        verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
+        assertEquals(1L, captor.getValue().getResourceId());
+        assertEquals(USER_CRN, captor.getValue().getUserId());
+        assertEquals(encryptionProfileCrn, captor.getValue().getEncryptionProfileCrn());
+        assertEquals(com.sequenceiq.datalake.flow.encryptionprofile.SdxEnableEncryptionProfileEvent
+                .SDX_ENABLE_ENCRYPTION_PROFILE_EVENT.event(), captor.getValue().getSelector());
+        assertEquals("flowId", result.getPollableId());
+    }
+
+    @Test
     public void testTriggerRestartClusterServices() {
         ArgumentCaptor<DatalakeRestartServicesStartEvent> captor = ArgumentCaptor.forClass(DatalakeRestartServicesStartEvent.class);
         SdxCluster sdxCluster = mock(SdxCluster.class);

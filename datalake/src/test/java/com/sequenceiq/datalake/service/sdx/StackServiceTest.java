@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @ExtendWith(MockitoExtension.class)
 class StackServiceTest {
@@ -50,11 +49,4 @@ class StackServiceTest {
         verify(stackV4Endpoint).getWithResources(0L, "test", entries, "accountId");
     }
 
-    @Test
-    void testEnableEncryptionProfile() {
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.enableEncryptionProfile("datalakeCrn",
-                "encryptionProfileCrn"));
-
-        verify(stackV4Endpoint).updateSslConfigurationsByCrn(0L, "datalakeCrn", "encryptionProfileCrn");
-    }
 }

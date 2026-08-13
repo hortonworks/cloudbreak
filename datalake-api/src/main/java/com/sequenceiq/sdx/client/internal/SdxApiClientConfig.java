@@ -14,6 +14,7 @@ import com.sequenceiq.sdx.api.SdxApi;
 import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxEncryptionProfileEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
@@ -98,5 +99,11 @@ public class SdxApiClientConfig {
     @ConditionalOnBean(name = "sdxApiClientWebTarget")
     SupportV1Endpoint createSupportV1Endpoint(WebTarget sdxApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, SupportV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "sdxApiClientWebTarget")
+    SdxEncryptionProfileEndpoint createSdxEncryptionProfileEndpoint(WebTarget sdxApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, SdxEncryptionProfileEndpoint.class);
     }
 }

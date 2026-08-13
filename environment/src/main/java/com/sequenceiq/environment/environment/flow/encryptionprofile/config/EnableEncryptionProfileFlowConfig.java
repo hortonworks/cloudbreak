@@ -6,19 +6,19 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnviro
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_ON_STACKS_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.FINAL_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.SET_ENCRYPTION_PROFILE_STATE;
-import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.UPDATE_SSL_CONFIG_CLUSTERS_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.UPDATE_SSL_CONFIG_FREEIPA_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.VALIDATE_ENABLE_ENCRYPTION_PROFILE_STATE;
+import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.ENABLE_ENCRYPTION_PROFILE_ON_STACKS_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.FINALIZE_ENABLE_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.HANDLED_FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.SET_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_FREEIPA_EVENT;
-import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_IN_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.VALIDATE_ENABLE_ENCRYPTION_PROFILE_EVENT;
 
 import java.util.List;
@@ -50,10 +50,10 @@ public class EnableEncryptionProfileFlowConfig extends AbstractFlowConfiguration
             .from(SET_ENCRYPTION_PROFILE_STATE).to(UPDATE_SSL_CONFIG_FREEIPA_STATE)
             .event(UPDATE_SSL_CONFIG_FREEIPA_EVENT).defaultFailureEvent()
 
-            .from(UPDATE_SSL_CONFIG_FREEIPA_STATE).to(UPDATE_SSL_CONFIG_CLUSTERS_STATE)
-            .event(UPDATE_SSL_CONFIG_IN_CLUSTERS_EVENT).defaultFailureEvent()
+            .from(UPDATE_SSL_CONFIG_FREEIPA_STATE).to(ENABLE_ENCRYPTION_PROFILE_ON_STACKS_STATE)
+            .event(ENABLE_ENCRYPTION_PROFILE_ON_STACKS_EVENT).defaultFailureEvent()
 
-            .from(UPDATE_SSL_CONFIG_CLUSTERS_STATE).to(ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE)
+            .from(ENABLE_ENCRYPTION_PROFILE_ON_STACKS_STATE).to(ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE)
             .event(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT).defaultFailureEvent()
 
             .from(ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE).to(FINAL_STATE)

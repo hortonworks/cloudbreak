@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.ENABLE_ENCRYPTION_PROFILE_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
@@ -74,11 +74,11 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXDiskUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.EnableEncryptionProfileTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RollingVerticalScaleFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.UpdateSslConfigTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreRootVolumeUpdateTriggerEvent;
@@ -239,7 +239,7 @@ class ReactorFlowManagerTest {
         underTest.triggerZookeeperToKraftMigrationFinalization(STACK_ID);
         underTest.triggerZookeeperToKraftMigrationRollback(STACK_ID);
         underTest.triggerUpdatePublicDnsEntriesInPem(STACK_ID);
-        underTest.triggerUpdateSslConfigsOnCluster(STACK_ID, "encryptionProfileCrn");
+        underTest.triggerEnableEncryptionProfileOnCluster(STACK_ID, "encryptionProfileCrn");
         underTest.triggerResetJvmParams(STACK_ID);
         underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true, false);
         underTest.triggerUserDefinedTagsUpdate(STACK_ID, Map.of("custom", "value"));
@@ -547,13 +547,13 @@ class ReactorFlowManagerTest {
     }
 
     @Test
-    void testTriggerUpdateSslConfigsOnCluster() {
-        underTest.triggerUpdateSslConfigsOnCluster(1L, "epCrn");
+    void testTriggerEnableEncryptionProfileOnCluster() {
+        underTest.triggerEnableEncryptionProfileOnCluster(1L, "epCrn");
 
-        ArgumentCaptor<UpdateSslConfigTriggerEvent> eventCaptor = ArgumentCaptor.forClass(UpdateSslConfigTriggerEvent.class);
-        verify(reactorNotifier).notify(eq(1L), eq(UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT), eventCaptor.capture());
+        ArgumentCaptor<EnableEncryptionProfileTriggerEvent> eventCaptor = ArgumentCaptor.forClass(EnableEncryptionProfileTriggerEvent.class);
+        verify(reactorNotifier).notify(eq(1L), eq(ENABLE_ENCRYPTION_PROFILE_CHAIN_TRIGGER_EVENT), eventCaptor.capture());
         assertEquals(1L, eventCaptor.getValue().getResourceId());
-        assertEquals(UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT, eventCaptor.getValue().getSelector());
+        assertEquals(ENABLE_ENCRYPTION_PROFILE_CHAIN_TRIGGER_EVENT, eventCaptor.getValue().getSelector());
         assertEquals("epCrn", eventCaptor.getValue().getEncryptionProfileCrn());
     }
 

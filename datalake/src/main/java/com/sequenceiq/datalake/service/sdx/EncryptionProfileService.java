@@ -18,10 +18,12 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-    import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @Service
@@ -41,6 +43,12 @@ public class EncryptionProfileService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Inject
+    private SdxService sdxService;
+
+    @Inject
+    private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Inject
     private StackService stackService;
@@ -122,19 +130,44 @@ public class EncryptionProfileService {
     }
 
     public FlowIdentifier enableEncryptionProfileByCrn(String datalakeCrn, String encryptionProfileNameOrCrn) {
+        if (!entitlementService.isChangeEncryptionProfileEnabled(Crn.safeFromString(datalakeCrn).getAccountId())) {
+            throw new BadRequestException("Enable encryption profile is not granted to the account");
+        }
         try {
-            if (!entitlementService.isChangeEncryptionProfileEnabled(Crn.safeFromString(datalakeCrn).getAccountId())) {
-                throw new BadRequestException("Enable encryption profile is not granted to the account");
+            String encryptionProfileCrn;
+            if (StringUtils.isBlank(encryptionProfileNameOrCrn)) {
+                LOGGER.info("Triggering Enable Encryption Profile flow for datalake {} "
+                        + "(env-level profile will be inherited)", datalakeCrn);
+                encryptionProfileCrn = null;
+            } else {
+                encryptionProfileCrn = resolveEncryptionProfileCrn(encryptionProfileNameOrCrn);
+                LOGGER.info("Triggering Enable Encryption Profile flow for datalake: {}, encryptionProfileCrn: {}",
+                        datalakeCrn, encryptionProfileCrn);
             }
-            return stackService.enableEncryptionProfile(datalakeCrn, encryptionProfileNameOrCrn);
-        } catch (Exception e) {
-            String errorMessage = (e instanceof WebApplicationException wae)
-                    ? webApplicationExceptionMessageExtractor.getErrorMessage(wae)
-                    : e.getMessage();
+            SdxCluster sdxCluster = sdxService.getByCrn(datalakeCrn);
+            return sdxReactorFlowManager.triggerEnableEncryptionProfile(sdxCluster, encryptionProfileCrn);
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (WebApplicationException wae) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(wae);
             String message = String.format("Failed to enable encryption profile for CRN: %s. Error: %s", datalakeCrn, errorMessage);
+            LOGGER.error(message, wae);
+            throw new CloudbreakServiceException(message, wae);
+        } catch (Exception e) {
+            String message = String.format("Failed to enable encryption profile for CRN: %s. Error: %s", datalakeCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    private String resolveEncryptionProfileCrn(String encryptionProfileNameOrCrn) {
+        EncryptionProfileResponse profile = Crn.isCrn(encryptionProfileNameOrCrn)
+                ? getByCrn(encryptionProfileNameOrCrn)
+                : getByName(encryptionProfileNameOrCrn);
+        if (profile == null || StringUtils.isBlank(profile.getCrn())) {
+            throw new BadRequestException(format("Encryption profile '%s' not found", encryptionProfileNameOrCrn));
+        }
+        return profile.getCrn();
     }
 
     public FlowIdentifier disableEncryptionProfile(String datalakeCrn) {

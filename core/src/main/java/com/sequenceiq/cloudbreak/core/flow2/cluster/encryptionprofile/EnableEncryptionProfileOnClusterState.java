@@ -4,14 +4,14 @@ import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestar
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 
-public enum UpdateSslConfigsOnClusterState implements FlowState {
+public enum EnableEncryptionProfileOnClusterState implements FlowState {
 
     INIT_STATE,
     SET_ENCRYPTION_PROFILE_STATE,
     UPDATE_CM_POLICY_STATE,
     GENERATE_ALTERNATIVE_CERTIFICATE_STATE,
-    UPDATE_SSL_CONFIGS_ON_CLUSTER_FINISHED_STATE,
-    UPDATE_SSL_CONFIGS_ON_CLUSTER_FAILED_STATE,
+    ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_FINISHED_STATE,
+    ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_FAILED_STATE,
     FINAL_STATE;
 
     @Override

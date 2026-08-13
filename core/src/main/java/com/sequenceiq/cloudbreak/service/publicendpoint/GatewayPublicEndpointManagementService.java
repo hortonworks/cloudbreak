@@ -301,7 +301,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-            String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileByCrnOrDefault(environment.getEncryptionProfileCrn()).getCrn();
+            String encryptionProfileCrn = encryptionProfileService.getEncryptionProfile(stack, environment).getCrn();
 
             if (entitlementService.isConfigureEncryptionProfileEnabled(accountId) &&
                     isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_13_2_0)

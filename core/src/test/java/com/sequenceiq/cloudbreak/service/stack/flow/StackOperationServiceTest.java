@@ -1003,7 +1003,7 @@ class StackOperationServiceTest {
         underTest.updateSslConfigsOnCluster(nameOrCrn, "accountId", encryptionProfileName);
 
         verify(encryptionProfileValidator, times(1)).validate(stack);
-        verify(flowManager, times(1)).triggerUpdateSslConfigsOnCluster(eq(STACK_ID), eq(encryptionProfileCrn));
+        verify(flowManager, times(1)).triggerEnableEncryptionProfileOnCluster(eq(STACK_ID), eq(encryptionProfileCrn));
     }
 
     @Test

@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.handler;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.UpdateSslConfigsOnClusterStateSelectors.FAILED_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.UpdateSslConfigsOnClusterStateSelectors.SET_ENCRYPTION_PROFILE_HANDLER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.UpdateSslConfigsOnClusterStateSelectors.UPDATE_CM_POLICY_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterStateSelectors.FAILED_ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterStateSelectors.SET_ENCRYPTION_PROFILE_HANDLER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterStateSelectors.UPDATE_CM_POLICY_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.UpdateSslConfigEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.EnableEncryptionProfileOnClusterEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
@@ -40,11 +43,11 @@ class SetEncryptionProfileHandlerTest {
     @Mock
     private Stack stack;
 
-    private UpdateSslConfigEvent event;
+    private EnableEncryptionProfileOnClusterEvent event;
 
     @BeforeEach
     void setUp() {
-        event = new UpdateSslConfigEvent(SET_ENCRYPTION_PROFILE_HANDLER_EVENT.name(), 1L, "epCrn");
+        event = new EnableEncryptionProfileOnClusterEvent(SET_ENCRYPTION_PROFILE_HANDLER_EVENT.name(), 1L, "epCrn");
     }
 
     @Test
@@ -55,7 +58,7 @@ class SetEncryptionProfileHandlerTest {
     @Test
     void testDefaultFailureEvent() {
         Selectable response = underTest.defaultFailureEvent(1L, new Exception("failed"), new Event<>(event));
-        assertEquals(FAILED_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT.selector(), response.getSelector());
+        assertEquals(FAILED_ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT.selector(), response.getSelector());
         assertEquals("failed", response.getException().getMessage());
     }
 
@@ -73,15 +76,26 @@ class SetEncryptionProfileHandlerTest {
     }
 
     @Test
-    void testSetEncryptionProfileHandlerFailure() {
+    void testSetEncryptionProfileHandlerWithNullCrnCallsShouldProceedToNextStep() {
+        EnableEncryptionProfileOnClusterEvent nullCrnEvent =
+                new EnableEncryptionProfileOnClusterEvent(SET_ENCRYPTION_PROFILE_HANDLER_EVENT.name(), 1L, null);
+        when(stackService.getByIdWithListsInTransaction(nullCrnEvent.getResourceId())).thenReturn(stack);
+
+        Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(nullCrnEvent)));
+
+        verify(encryptionProfileService, times(1)).setEncryptionProfile(isNull(), eq(stack));
+        assertEquals(1L, response.getResourceId());
+        assertEquals(UPDATE_CM_POLICY_EVENT.selector(), response.getSelector());
+    }
+
+    @Test
+    void testSetEncryptionProfileHandlerFailurePropagatesException() {
         when(stackService.getByIdWithListsInTransaction(event.getResourceId())).thenReturn(stack);
         doThrow(new CloudbreakServiceException("failed"))
                 .when(encryptionProfileService).setEncryptionProfile(event.getEncryptionProfileCrn(), stack);
 
-        Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
-
-        assertEquals(event.getResourceId(), selectable.getResourceId());
-        assertEquals(FAILED_UPDATE_SSL_CONFIGS_ON_CLUSTER_EVENT.name(), selectable.selector());
-        assertEquals("failed", selectable.getException().getMessage());
+        CloudbreakServiceException thrown = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.doAccept(new HandlerEvent<>(new Event<>(event))));
+        assertEquals("failed", thrown.getMessage());
     }
 }

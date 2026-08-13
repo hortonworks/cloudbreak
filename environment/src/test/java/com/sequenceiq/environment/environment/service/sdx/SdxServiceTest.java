@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -26,9 +27,11 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxEncryptionProfileEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +49,8 @@ class SdxServiceTest {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:1234:environment:e1";
 
+    private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:1234:encryptionProfile:ep";
+
     @InjectMocks
     private SdxService underTest;
 
@@ -60,6 +65,9 @@ class SdxServiceTest {
 
     @Mock
     private OperationEndpoint sdxOperationEndpoint;
+
+    @Mock
+    private SdxEncryptionProfileEndpoint sdxEncryptionProfileEndpoint;
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
@@ -114,6 +122,30 @@ class SdxServiceTest {
     }
 
     @Test
+    void getDetailByCrnSuccess() {
+        SdxClusterDetailResponse detail = new SdxClusterDetailResponse();
+        detail.setCrn(SDX_CRN);
+        when(sdxEndpoint.getDetailByCrn(SDX_CRN, Set.of())).thenReturn(detail);
+
+        SdxClusterDetailResponse result = underTest.getDetailByCrn(SDX_CRN);
+
+        assertThat(result).isSameAs(detail);
+        verify(sdxEndpoint).getDetailByCrn(SDX_CRN, Set.of());
+    }
+
+    @Test
+    void getDetailByCrnFailure() {
+        WebApplicationException cause = new WebApplicationException("cause");
+        when(sdxEndpoint.getDetailByCrn(SDX_CRN, Set.of())).thenThrow(cause);
+
+        assertThatThrownBy(() -> underTest.getDetailByCrn(SDX_CRN))
+                .isInstanceOf(SdxOperationFailedException.class)
+                .hasCause(cause)
+                .hasMessage(EXTRACTED_MESSAGE);
+        verify(webApplicationExceptionMessageExtractor).getErrorMessage(cause);
+    }
+
+    @Test
     void listByEnvironmentCrnFailure() {
         WebApplicationException cause = new WebApplicationException("cause");
         when(sdxEndpoint.getByEnvCrn(ENV_CRN, false)).thenThrow(cause);
@@ -140,6 +172,28 @@ class SdxServiceTest {
         when(sdxInternalEndpoint.updateSalt(SDX_CRN, CURRENT_USER_CRN)).thenThrow(cause);
 
         assertThatThrownBy(() -> doAsCurrentUserCrn(() -> underTest.updateSalt(SDX_CRN)))
+                .isInstanceOf(SdxOperationFailedException.class)
+                .hasCause(cause)
+                .hasMessage(EXTRACTED_MESSAGE);
+        verify(webApplicationExceptionMessageExtractor).getErrorMessage(cause);
+    }
+
+    @Test
+    void enableEncryptionProfileSuccess() {
+        when(sdxEncryptionProfileEndpoint.enableEncryptionProfileByCrn(SDX_CRN, ENCRYPTION_PROFILE_CRN)).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = doAsCurrentUserCrn(() -> underTest.enableEncryptionProfile(SDX_CRN, ENCRYPTION_PROFILE_CRN));
+
+        assertThat(result).isEqualTo(flowIdentifier);
+        verify(sdxEncryptionProfileEndpoint).enableEncryptionProfileByCrn(SDX_CRN, ENCRYPTION_PROFILE_CRN);
+    }
+
+    @Test
+    void enableEncryptionProfileFailure() {
+        WebApplicationException cause = new WebApplicationException("cause");
+        when(sdxEncryptionProfileEndpoint.enableEncryptionProfileByCrn(SDX_CRN, ENCRYPTION_PROFILE_CRN)).thenThrow(cause);
+
+        assertThatThrownBy(() -> doAsCurrentUserCrn(() -> underTest.enableEncryptionProfile(SDX_CRN, ENCRYPTION_PROFILE_CRN)))
                 .isInstanceOf(SdxOperationFailedException.class)
                 .hasCause(cause)
                 .hasMessage(EXTRACTED_MESSAGE);
