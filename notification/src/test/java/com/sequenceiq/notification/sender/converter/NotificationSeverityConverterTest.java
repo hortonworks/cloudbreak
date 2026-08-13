@@ -21,6 +21,7 @@ public class NotificationSeverityConverterTest {
     @Test
     @DisplayName("convert(NotificationSeverity) should map all severities correctly")
     void testConvertFromDomainAllMappings() {
+        assertEquals(SeverityType.Value.DEFAULT, underTest.convert(NotificationSeverity.DEFAULT));
         assertEquals(SeverityType.Value.DEBUG, underTest.convert(NotificationSeverity.DEBUG));
         assertEquals(SeverityType.Value.INFO, underTest.convert(NotificationSeverity.INFO));
         assertEquals(SeverityType.Value.WARNING, underTest.convert(NotificationSeverity.WARNING));
@@ -45,8 +46,8 @@ public class NotificationSeverityConverterTest {
     }
 
     @Test
-    @DisplayName("convert(SeverityType.Value) should map DEFAULT value to INFO via default branch")
+    @DisplayName("convert(SeverityType.Value) should map DEFAULT value to DEFAULT via default branch")
     void testConvertFromProtoDefaultValue() {
-        assertEquals(NotificationSeverity.INFO, underTest.convert(SeverityType.Value.DEFAULT));
+        assertEquals(NotificationSeverity.DEFAULT, underTest.convert(SeverityType.Value.DEFAULT));
     }
 }

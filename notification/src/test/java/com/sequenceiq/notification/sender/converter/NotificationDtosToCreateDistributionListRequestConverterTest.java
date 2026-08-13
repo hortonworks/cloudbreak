@@ -91,19 +91,19 @@ public class NotificationDtosToCreateDistributionListRequestConverterTest {
 
         Set<CreateDistributionListRequest> result = underTest.convert(dtos);
         assertEquals(2, result.size());
-        CreateDistributionListRequest c1 = result.stream().filter(r -> r.getResourceCrn().equals("crn:cluster:1")).findFirst().orElse(null);
-        CreateDistributionListRequest c2 = result.stream().filter(r -> r.getResourceCrn().equals("crn:cluster:2")).findFirst().orElse(null);
+        CreateDistributionListRequest c1 = result.stream().filter(r -> r.getParentResourceCrn().equals("crn:cluster:1")).findFirst().orElse(null);
+        CreateDistributionListRequest c2 = result.stream().filter(r -> r.getParentResourceCrn().equals("crn:cluster:2")).findFirst().orElse(null);
         assertNotNull(c1);
         assertNotNull(c2);
-        assertEquals("cluster1", c1.getResourceName());
-        assertEquals("cluster2", c2.getResourceName());
+        assertEquals("cluster1", c1.getTargetResourceName());
+        assertEquals("cluster2", c2.getTargetResourceName());
         assertEquals(1, c1.getEventChannelPreferences().size());
         EventChannelPreference p1 = c1.getEventChannelPreferences().getFirst();
         assertEquals(Set.of(ChannelType.EMAIL, ChannelType.SLACK), p1.channelType());
         assertEquals(Set.of(NotificationSeverity.WARNING, NotificationSeverity.INFO), p1.eventSeverityList());
         EventChannelPreference p2 = c2.getEventChannelPreferences().getFirst();
         assertEquals(Set.of(ChannelType.EMAIL), p2.channelType());
-        assertEquals(Set.of(NotificationSeverity.WARNING), p2.eventSeverityList());
+        assertEquals(Set.of(NotificationSeverity.INFO, NotificationSeverity.WARNING, NotificationSeverity.ERROR), p2.eventSeverityList());
     }
 
     @Test
@@ -127,8 +127,8 @@ public class NotificationDtosToCreateDistributionListRequestConverterTest {
         Set<CreateDistributionListRequest> result = underTest.convert(dtos);
         assertEquals(1, result.size());
         CreateDistributionListRequest req = result.iterator().next();
-        assertEquals("crn:valid", req.getResourceCrn());
-        assertEquals("valid-name", req.getResourceName());
+        assertEquals("crn:valid", req.getParentResourceCrn());
+        assertEquals("valid-name", req.getTargetResourceName());
         assertEquals(1, req.getEventChannelPreferences().size());
         EventChannelPreference pref = req.getEventChannelPreferences().getFirst();
         assertEquals(Set.of(ChannelType.EMAIL), pref.channelType());
@@ -178,8 +178,8 @@ public class NotificationDtosToCreateDistributionListRequestConverterTest {
         // Validate results
         assertEquals(1, result.size());
         CreateDistributionListRequest request = result.iterator().next();
-        assertEquals("crn:cluster:1", request.getResourceCrn());
-        assertEquals("cluster1", request.getResourceName());
+        assertEquals("crn:cluster:1", request.getParentResourceCrn());
+        assertEquals("cluster1", request.getTargetResourceName());
 
         // Should have two separate event channel preferences
         assertEquals(2, request.getEventChannelPreferences().size());
@@ -204,7 +204,7 @@ public class NotificationDtosToCreateDistributionListRequestConverterTest {
     private NotificationType createMockNotificationType(String eventTypeId, NotificationSeverity defaultSeverity) {
         NotificationType mockType = mock(NotificationType.class);
         when(mockType.getEventTypeId()).thenReturn(eventTypeId);
-        when(mockType.getNotificationSeverity()).thenReturn(defaultSeverity);
+        when(mockType.getNotificationSeverity()).thenReturn(Set.of(defaultSeverity));
         // Mock other methods as needed
         when(mockType.getChannelTypes()).thenReturn(Set.of(ChannelType.EMAIL));
         when(mockType.getNotificationFormFactor()).thenReturn(NotificationFormFactor.DISTRIBUTION_LIST);

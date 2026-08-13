@@ -30,7 +30,7 @@ public class NotificationGeneratorDtoToNotificationConverter<T extends BaseNotif
                                     .resourceName(notificationGeneratorDto.getResourceName())
                                     .name(notificationGeneratorDto.getName())
                                     .type(notificationType)
-                                    .severity(notificationType.getNotificationSeverity())
+                                    .severity(notificationGeneratorDto.getSeverity())
                                     .accountId(notificationGeneratorDto.getAccountId())
                                     .created(System.currentTimeMillis())
                                     .channelType(entry.getKey())

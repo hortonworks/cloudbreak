@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -29,12 +30,17 @@ public class ParametersService {
 
     private final EnvironmentService environmentService;
 
-    public ParametersService(BaseParametersRepository baseParametersRepository,
+    private final CredentialService credentialService;
+
+    public ParametersService(
+            BaseParametersRepository baseParametersRepository,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
-            EnvironmentService environmentService) {
+            EnvironmentService environmentService,
+            CredentialService credentialService) {
         this.baseParametersRepository = baseParametersRepository;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.environmentService = environmentService;
+        this.credentialService = credentialService;
     }
 
     @SuppressWarnings("unchecked")
@@ -69,16 +75,31 @@ public class ParametersService {
         } else {
             Optional<BaseParameters> baseParametersOptional = baseParametersRepository.findByEnvironmentId(environmentId);
             if (baseParametersOptional.isEmpty()) {
-                LOGGER.warn("Environment parameters not found for environment id: {}", environmentId);
+                String uuid = distributionList.generateDistributionListUuid();
+                EnvironmentParametersConverter environmentParametersConverter =
+                        environmentParamsConverterMap.get(CloudPlatform.valueOf(
+                                credentialService.findByEnvironmentId(environmentId).getCloudPlatform()));
+                Optional<Environment> environmentById = environmentService.findEnvironmentById(environmentId);
+                if (environmentById.isPresent()) {
+                    BaseParameters baseParameters = environmentParametersConverter.convert(
+                            environmentById.get(),
+                            ParametersDto.builder()
+                                    .withDistributionList(uuid)
+                                    .build());
+                    saveDistributionList(baseParameters, environmentId, uuid);
+                }
             } else {
                 BaseParameters baseParameters = baseParametersOptional.get();
                 String uuid = distributionList.generateDistributionListUuid();
-
                 baseParameters.setDistributionList(uuid);
-                baseParametersRepository.save(baseParameters);
-                LOGGER.debug("Distribution list updated for environment id: {} with uuid {}", environmentId, uuid);
+                saveDistributionList(baseParameters, environmentId, uuid);
             }
         }
+    }
+
+    private void saveDistributionList(BaseParameters baseParameters, Long environmentId, String uuid) {
+        baseParametersRepository.save(baseParameters);
+        LOGGER.debug("Distribution list updated for environment id: {} with uuid {}", environmentId, uuid);
     }
 
     private CloudPlatform getCloudPlatform(Environment environment) {

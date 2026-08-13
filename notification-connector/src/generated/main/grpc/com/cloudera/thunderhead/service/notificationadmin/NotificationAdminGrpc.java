@@ -573,6 +573,99 @@ public final class NotificationAdminGrpc {
     return getGetPublishedEventStatusMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest,
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse> getCreateOrUpdateDistributionListGroupMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateOrUpdateDistributionListGroup",
+      requestType = com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest,
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse> getCreateOrUpdateDistributionListGroupMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse> getCreateOrUpdateDistributionListGroupMethod;
+    if ((getCreateOrUpdateDistributionListGroupMethod = NotificationAdminGrpc.getCreateOrUpdateDistributionListGroupMethod) == null) {
+      synchronized (NotificationAdminGrpc.class) {
+        if ((getCreateOrUpdateDistributionListGroupMethod = NotificationAdminGrpc.getCreateOrUpdateDistributionListGroupMethod) == null) {
+          NotificationAdminGrpc.getCreateOrUpdateDistributionListGroupMethod = getCreateOrUpdateDistributionListGroupMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateOrUpdateDistributionListGroup"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new NotificationAdminMethodDescriptorSupplier("CreateOrUpdateDistributionListGroup"))
+              .build();
+        }
+      }
+    }
+    return getCreateOrUpdateDistributionListGroupMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest,
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse> getListDistributionListGroupsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListDistributionListGroups",
+      requestType = com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.class,
+      responseType = com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest,
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse> getListDistributionListGroupsMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse> getListDistributionListGroupsMethod;
+    if ((getListDistributionListGroupsMethod = NotificationAdminGrpc.getListDistributionListGroupsMethod) == null) {
+      synchronized (NotificationAdminGrpc.class) {
+        if ((getListDistributionListGroupsMethod = NotificationAdminGrpc.getListDistributionListGroupsMethod) == null) {
+          NotificationAdminGrpc.getListDistributionListGroupsMethod = getListDistributionListGroupsMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListDistributionListGroups"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new NotificationAdminMethodDescriptorSupplier("ListDistributionListGroups"))
+              .build();
+        }
+      }
+    }
+    return getListDistributionListGroupsMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest,
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse> getDeleteDistributionListGroupMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteDistributionListGroup",
+      requestType = com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest,
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse> getDeleteDistributionListGroupMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse> getDeleteDistributionListGroupMethod;
+    if ((getDeleteDistributionListGroupMethod = NotificationAdminGrpc.getDeleteDistributionListGroupMethod) == null) {
+      synchronized (NotificationAdminGrpc.class) {
+        if ((getDeleteDistributionListGroupMethod = NotificationAdminGrpc.getDeleteDistributionListGroupMethod) == null) {
+          NotificationAdminGrpc.getDeleteDistributionListGroupMethod = getDeleteDistributionListGroupMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteDistributionListGroup"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new NotificationAdminMethodDescriptorSupplier("DeleteDistributionListGroup"))
+              .build();
+        }
+      }
+    }
+    return getDeleteDistributionListGroupMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -818,6 +911,36 @@ public final class NotificationAdminGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetPublishedEventStatusMethod(), responseObserver);
     }
+
+    /**
+     * <pre>
+     * CreateOrUpdateDistributionListGroup :: Creates or updates multiple distribution lists grouped by a parent resource.
+     * </pre>
+     */
+    default void createOrUpdateDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateOrUpdateDistributionListGroupMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * ListDistributionListGroups :: Lists a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    default void listDistributionListGroups(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListDistributionListGroupsMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * DeleteDistributionListGroup :: Deletes a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    default void deleteDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteDistributionListGroupMethod(), responseObserver);
+    }
   }
 
   /**
@@ -1050,6 +1173,39 @@ public final class NotificationAdminGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetPublishedEventStatusMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * CreateOrUpdateDistributionListGroup :: Creates or updates multiple distribution lists grouped by a parent resource.
+     * </pre>
+     */
+    public void createOrUpdateDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateOrUpdateDistributionListGroupMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * ListDistributionListGroups :: Lists a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public void listDistributionListGroups(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListDistributionListGroupsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * DeleteDistributionListGroup :: Deletes a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public void deleteDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteDistributionListGroupMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -1250,6 +1406,36 @@ public final class NotificationAdminGrpc {
       return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
           getChannel(), getGetPublishedEventStatusMethod(), getCallOptions(), request);
     }
+
+    /**
+     * <pre>
+     * CreateOrUpdateDistributionListGroup :: Creates or updates multiple distribution lists grouped by a parent resource.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse createOrUpdateDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateOrUpdateDistributionListGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * ListDistributionListGroups :: Lists a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse listDistributionListGroups(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListDistributionListGroupsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * DeleteDistributionListGroup :: Deletes a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse deleteDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteDistributionListGroupMethod(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -1449,6 +1635,36 @@ public final class NotificationAdminGrpc {
     public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusResponse getPublishedEventStatus(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetPublishedEventStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * CreateOrUpdateDistributionListGroup :: Creates or updates multiple distribution lists grouped by a parent resource.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse createOrUpdateDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateOrUpdateDistributionListGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * ListDistributionListGroups :: Lists a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse listDistributionListGroups(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListDistributionListGroupsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * DeleteDistributionListGroup :: Deletes a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse deleteDistributionListGroup(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteDistributionListGroupMethod(), getCallOptions(), request);
     }
   }
 
@@ -1668,6 +1884,39 @@ public final class NotificationAdminGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetPublishedEventStatusMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * CreateOrUpdateDistributionListGroup :: Creates or updates multiple distribution lists grouped by a parent resource.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse> createOrUpdateDistributionListGroup(
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateOrUpdateDistributionListGroupMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * ListDistributionListGroups :: Lists a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse> listDistributionListGroups(
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListDistributionListGroupsMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * DeleteDistributionListGroup :: Deletes a distribution list group and its associated resource distribution lists.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse> deleteDistributionListGroup(
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteDistributionListGroupMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_PUBLISH_BROADCAST_EVENT = 0;
@@ -1688,6 +1937,9 @@ public final class NotificationAdminGrpc {
   private static final int METHODID_LIST_DRAFT_BROADCAST_EVENTS = 15;
   private static final int METHODID_PUBLISH_EMAIL_TARGETED_EVENT = 16;
   private static final int METHODID_GET_PUBLISHED_EVENT_STATUS = 17;
+  private static final int METHODID_CREATE_OR_UPDATE_DISTRIBUTION_LIST_GROUP = 18;
+  private static final int METHODID_LIST_DISTRIBUTION_LIST_GROUPS = 19;
+  private static final int METHODID_DELETE_DISTRIBUTION_LIST_GROUP = 20;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1777,6 +2029,18 @@ public final class NotificationAdminGrpc {
         case METHODID_GET_PUBLISHED_EVENT_STATUS:
           serviceImpl.getPublishedEventStatus((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_OR_UPDATE_DISTRIBUTION_LIST_GROUP:
+          serviceImpl.createOrUpdateDistributionListGroup((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse>) responseObserver);
+          break;
+        case METHODID_LIST_DISTRIBUTION_LIST_GROUPS:
+          serviceImpl.listDistributionListGroups((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_DISTRIBUTION_LIST_GROUP:
+          serviceImpl.deleteDistributionListGroup((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1922,6 +2186,27 @@ public final class NotificationAdminGrpc {
               com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusRequest,
               com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusResponse>(
                 service, METHODID_GET_PUBLISHED_EVENT_STATUS)))
+        .addMethod(
+          getCreateOrUpdateDistributionListGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest,
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse>(
+                service, METHODID_CREATE_OR_UPDATE_DISTRIBUTION_LIST_GROUP)))
+        .addMethod(
+          getListDistributionListGroupsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest,
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse>(
+                service, METHODID_LIST_DISTRIBUTION_LIST_GROUPS)))
+        .addMethod(
+          getDeleteDistributionListGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest,
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse>(
+                service, METHODID_DELETE_DISTRIBUTION_LIST_GROUP)))
         .build();
   }
 
@@ -1988,6 +2273,9 @@ public final class NotificationAdminGrpc {
               .addMethod(getListDraftBroadcastEventsMethod())
               .addMethod(getPublishEmailTargetedEventMethod())
               .addMethod(getGetPublishedEventStatusMethod())
+              .addMethod(getCreateOrUpdateDistributionListGroupMethod())
+              .addMethod(getListDistributionListGroupsMethod())
+              .addMethod(getDeleteDistributionListGroupMethod())
               .build();
         }
       }

@@ -148,6 +148,10 @@ public class CredentialService implements CompositeAuthResourcePropertyProvider 
         return credentialRetrievalService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId, type);
     }
 
+    public Credential findByEnvironmentId(Long environmentId) {
+        return credentialRetrievalService.findByEnvironmentId(environmentId);
+    }
+
     public Credential getByEnvironmentNameAndAccountId(String environmentName, String accountId, CredentialType type) {
         return credentialRetrievalService.getByEnvironmentNameAndAccountId(environmentName, accountId, type);
     }

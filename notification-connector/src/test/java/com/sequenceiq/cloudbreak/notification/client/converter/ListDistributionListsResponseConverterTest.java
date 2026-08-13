@@ -28,8 +28,8 @@ class ListDistributionListsResponseConverterTest {
 
     @Test
     void testConvertEmptyList() {
-        NotificationAdminProto.ListDistributionListsResponse proto = NotificationAdminProto
-                .ListDistributionListsResponse.newBuilder().build();
+        NotificationAdminProto.ListDistributionListGroupsResponse proto = NotificationAdminProto
+                .ListDistributionListGroupsResponse.newBuilder().build();
         ListDistributionListsResponseDto dto = underTest.convert(proto);
         assertNotNull(dto.distributionLists());
         assertTrue(dto.distributionLists().isEmpty());
@@ -58,8 +58,8 @@ class ListDistributionListsResponseConverterTest {
                 // no slack channels, no email addresses
                 .build();
 
-        NotificationAdminProto.ListDistributionListsResponse proto = NotificationAdminProto
-                .ListDistributionListsResponse.newBuilder()
+        NotificationAdminProto.ListDistributionListGroupsResponse proto = NotificationAdminProto
+                .ListDistributionListGroupsResponse.newBuilder()
                 .addDistributionLists(dist1)
                 .addDistributionLists(dist2)
                 .build();

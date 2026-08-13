@@ -135,7 +135,9 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -1541,8 +1543,30 @@ public class MockUserManagementService extends UserManagementImplBase {
     }
 
     private ResourceAssignee createResourceAssignee(UmsResourceRole resourceRole) {
+        String account = this.accountUsers.keySet().stream().findFirst().get();
+        Set<String> mails = this.accountUsers.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .map(e -> {
+                    int atIndex = e.toLowerCase(Locale.ROOT).lastIndexOf("@");
+                    if (atIndex != -1) {
+                        String email = e.substring(0, atIndex + 1) + "cloudera.com";
+                        LOGGER.info("Creating resource assignee for account {} with email {}", account, email);
+                        return email;
+                    } else {
+                        String email = e + "@cloudera.com";
+                        LOGGER.info("Creating resource assignee for account {} with email {}", account, email);
+                        return email;
+                    }
+                })
+                .collect(Collectors.toSet());
         return ResourceAssignee.newBuilder()
-                .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                .setAssigneeCrn(
+                        mails.stream()
+                                .map(e -> String.format("crn:cdp:iam:us-west-1:%s:user:%s", account, e))
+                                .findFirst()
+                                .get()
+                )
                 .setResourceRoleCrn(String.format("crn:altus:iam:us-west-1:altus:resourceRole:%s", resourceRole.getResourceRoleName()))
                 .build();
     }

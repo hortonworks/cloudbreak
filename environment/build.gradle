@@ -70,6 +70,7 @@ dependencies {
     implementation     project(":environment-common")
     implementation     project(":notification-sender")
     implementation     project(":notification")
+    implementation     project(":notification-domain")
     implementation     project(":cloud-reactor")
     implementation     project(":cloud-reactor-api")
     implementation     project(":datalake-api")

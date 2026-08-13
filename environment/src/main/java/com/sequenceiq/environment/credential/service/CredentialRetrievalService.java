@@ -95,6 +95,11 @@ public class CredentialRetrievalService {
                 .orElseThrow(notFound("Credential with environmentCrn:", environmentCrn));
     }
 
+    public Credential findByEnvironmentId(Long environmentId) {
+        return credentialRepository.findByEnvironmentId(environmentId)
+                .orElseThrow(notFound("Credential with environmentId:", environmentId));
+    }
+
     public Credential getByEnvironmentNameAndAccountId(String environmentName, String accountId, CredentialType type) {
         return credentialRepository.findByEnvironmentNameAndAccountId(environmentName, accountId, enabledPlatforms, type)
                 .orElseThrow(notFound("Credential with environmentName:", environmentName));

@@ -2,35 +2,39 @@ package com.sequenceiq.cloudbreak.notification.client;
 
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateAccountMetadataRequest;
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateAccountMetadataResponse;
-import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListRequest;
-import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListResponse;
-import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListRequest;
-import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListResponse;
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.Event;
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventMessage;
-import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListsRequest;
-import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListsResponse;
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.MessageType;
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.PublishTargetedEventRequest;
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.SeverityType;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminGrpc;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminGrpc.NotificationAdminBlockingStub;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusRequest;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusResponse;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.PublishTargetedEventResponse;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.PublishedEventTypeDetails;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListDto;
 
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 public class NotificationServiceClient {
 
@@ -146,43 +150,70 @@ public class NotificationServiceClient {
         }, "get event status", "event type: " + eventTypeId + ", resource: " + resourceCrn);
     }
 
-    public CreateOrUpdateDistributionListResponse createOrUpdateDistributionList(CreateOrUpdateDistributionListDto dto) {
+    public Optional<CreateOrUpdateDistributionListGroupResponse> createOrUpdateDistributionList(CreateOrUpdateDistributionListDto dto) {
         return executeWithErrorHandling(() -> {
             LOGGER.info("Creating or updating distribution list for resource: {}", dto.resourceCrn());
 
-            CreateOrUpdateDistributionListRequest.Builder requestBuilder =
-                    CreateOrUpdateDistributionListRequest.newBuilder()
-                            .setResourceCrn(dto.resourceCrn())
-                            .setResourceName(dto.resourceName())
-                            .setParentResourceCrn(dto.resourceCrn())
+            CreateOrUpdateDistributionListGroupRequest.Builder createOrUpdateDistributionListGroupRequest =
+                    CreateOrUpdateDistributionListGroupRequest.newBuilder()
+                            .setParentResourceCrn(dto.parentResourceCrn())
                             .setAccountId(Crn.safeFromString(dto.resourceCrn()).getAccountId())
                             .setDistributionListManagementType(dto.distributionListManagementType());
 
+            if (dto.distributionListId() != null) {
+                createOrUpdateDistributionListGroupRequest.setDistributionListGroupId(dto.distributionListId());
+            }
+
+            ResourceDistributionListConfig.Builder configBuilder =
+                    ResourceDistributionListConfig.newBuilder()
+                            .setResourceCrn(dto.resourceCrn())
+                            .setResourceName(dto.resourceName());
+
             if (CollectionUtils.isNotEmpty(dto.eventChannelPreferences())) {
-                requestBuilder.addAllEventChannelPreferences(dto.eventChannelPreferences());
+                configBuilder.addAllEventChannelPreferences(dto.eventChannelPreferences());
             }
 
             if (CollectionUtils.isNotEmpty(dto.emailAddresses())) {
-                requestBuilder.addAllEmailAddresses(dto.emailAddresses());
-            }
-
-            if (dto.distributionListId() != null) {
-                requestBuilder.setDistributionListId(dto.distributionListId());
-            }
-
-            if (dto.parentResourceCrn() != null) {
-                requestBuilder.setParentResourceCrn(dto.parentResourceCrn());
+                configBuilder.addAllEmailAddresses(dto.emailAddresses());
             }
 
             if (CollectionUtils.isNotEmpty(dto.slackChannelIds())) {
-                requestBuilder.addAllSlackChannelIds(dto.slackChannelIds());
+                configBuilder.addAllSlackChannelIds(dto.slackChannelIds());
             }
 
-            CreateOrUpdateDistributionListResponse response =
-                    createNotificationServiceAdminStub().createOrUpdateDistributionList(requestBuilder.build());
+            createOrUpdateDistributionListGroupRequest.addAllResourcesToUpsert(List.of(configBuilder.build()));
 
-            LOGGER.info("Created or updated distribution list for resource: {}", dto.resourceCrn());
-            return response;
+            try {
+                CreateOrUpdateDistributionListGroupResponse response =
+                        createNotificationServiceAdminStub()
+                                .createOrUpdateDistributionListGroup(createOrUpdateDistributionListGroupRequest.build());
+                LOGGER.info("Created or updated distribution list for resource: {}", dto.resourceCrn());
+                return Optional.ofNullable(response);
+            } catch (StatusRuntimeException e) {
+                if (e.getStatus().getCode() == Status.Code.ALREADY_EXISTS) {
+                    Optional<NotificationAdminProto.DistributionList> alreadyExistingDistributionList = listDistributionLists(dto.parentResourceCrn())
+                            .getDistributionListsList()
+                            .stream()
+                            .filter(tmp -> tmp.getResourceCrn().equals(dto.resourceCrn()))
+                            .findFirst();
+                    if (alreadyExistingDistributionList.isPresent()) {
+                        NotificationAdminProto.DistributionList distributionList = alreadyExistingDistributionList.get();
+                        CreateOrUpdateDistributionListGroupResponse createOrUpdateDistributionListGroupResponse =
+                                CreateOrUpdateDistributionListGroupResponse.newBuilder()
+                                .setDistributionListGroupId(distributionList.getDistributionListId())
+                                .setParentResourceCrn(distributionList.getParentResourceCrn())
+                                .build();
+
+                        LOGGER.warn("Distribution list already exists for resource {}, skipping...", dto.resourceCrn(), e);
+                        return Optional.ofNullable(createOrUpdateDistributionListGroupResponse);
+                    } else {
+                        return Optional.empty();
+                    }
+                } else {
+                    LOGGER.error("Error while creating or updating distribution list for resource: {}", dto.resourceCrn(), e);
+                    throw e;
+                }
+            }
         }, "create/update distribution list", "resource: " + dto.resourceCrn());
     }
 
@@ -192,31 +223,33 @@ public class NotificationServiceClient {
      * @param name the name of the distribution list to delete
      * @return the delete distribution list response
      */
-    public DeleteDistributionListResponse deleteDistributionList(String name) {
+    public DeleteDistributionListGroupResponse deleteDistributionList(String name, String accountId) {
         return executeWithErrorHandling(() -> {
-            DeleteDistributionListRequest request =
-                    DeleteDistributionListRequest.newBuilder()
-                            .setDistributionListId(name)
+            NotificationAdminProto.DeleteDistributionListGroupRequest request =
+                    NotificationAdminProto.DeleteDistributionListGroupRequest.newBuilder()
+                            .setDistributionListGroupId(name)
+                            .setAccountId(accountId)
                             .build();
 
-            DeleteDistributionListResponse response =
-                    createNotificationServiceAdminStub().deleteDistributionList(request);
+            DeleteDistributionListGroupResponse response =
+                    createNotificationServiceAdminStub().deleteDistributionListGroup(request);
 
             LOGGER.info("Deleted distribution list with name: {}", name);
             return response;
         }, "delete distribution list", "name: " + name);
     }
 
-    public ListDistributionListsResponse listDistributionLists(String resourceCrn) {
+    public ListDistributionListGroupsResponse listDistributionLists(String resourceCrn) {
         return executeWithErrorHandling(() -> {
-            ListDistributionListsRequest request =
-                    ListDistributionListsRequest.newBuilder()
-                            .setResourceCrn(resourceCrn)
+            ListDistributionListGroupsRequest listDistributionListGroupsRequest =
+                    ListDistributionListGroupsRequest.newBuilder()
+                            .setParentResourceCrn(resourceCrn)
                             .setAccountId(Crn.safeFromString(resourceCrn).getAccountId())
                             .build();
 
-            ListDistributionListsResponse response =
-                    createNotificationServiceAdminStub().listDistributionLists(request);
+            ListDistributionListGroupsResponse response =
+                    createNotificationServiceAdminStub()
+                            .listDistributionListGroups(listDistributionListGroupsRequest);
 
             LOGGER.info("Listed distribution lists for resource CRN: {}", resourceCrn);
             return response;
@@ -248,7 +281,7 @@ public class NotificationServiceClient {
         }, "create/update account metadata", "account: " + accountId);
     }
 
-    private NotificationAdminGrpc.NotificationAdminBlockingStub createNotificationServiceAdminStub() {
+    private NotificationAdminBlockingStub createNotificationServiceAdminStub() {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         return stubProvider.newInternalAdminStub(channel, requestId,
                 notificationServiceConfig.getGrpcTimeoutSec(), notificationServiceConfig.internalCrnForIamServiceAsString(),

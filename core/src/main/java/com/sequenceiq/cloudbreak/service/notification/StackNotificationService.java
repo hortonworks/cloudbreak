@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.notification;
 
+import static com.sequenceiq.notification.domain.NotificationSeverity.ERROR;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -18,6 +20,8 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.conf.EnvironmentInternalClientConfiguration;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.notification.domain.DistributionListActionType;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDtos;
 import com.sequenceiq.notification.service.NotificationSendingService;
 
@@ -70,7 +74,9 @@ public class StackNotificationService {
                         status,
                         detailedStackStatus,
                         statusReason,
-                        accountId).get();
+                        ERROR,
+                        accountId
+                ).get();
                 if (success) {
                     LOGGER.info("Notification was sent about Cluster health change for cluster: {}", stack.getName());
                 } else {
@@ -85,17 +91,29 @@ public class StackNotificationService {
         }
     }
 
-    private Future<Boolean> sendNotification(Stack stack, Status newStatus,
-        DetailedStackStatus newDetailedStatus, String statusReason, String accountId) throws TransactionService.TransactionExecutionException {
+    private Future<Boolean> sendNotification(
+            Stack stack,
+            Status newStatus,
+            DetailedStackStatus newDetailedStatus,
+            String statusReason,
+            NotificationSeverity severity,
+            String accountId
+    ) throws TransactionService.TransactionExecutionException {
         return intermediateBuilderExecutor.submit(() -> {
             try {
                 environmentInternalClientConfiguration.cloudbreakInternalCrnClientClient()
                         .withInternalCrn()
                         .environmentInternalEndpoint()
-                        .createOrUpdateDistributionListByEnvironmentCrn(stack.getEnvironmentCrn());
+                        .createOrUpdateDistributionListByEnvironmentCrn(
+                                stack.getEnvironmentCrn(),
+                                stack.getResourceCrn(),
+                                stack.getResourceName(),
+                                severity.name(),
+                                DistributionListActionType.REGISTRATION.name()
+                        );
 
                 NotificationGeneratorDtos notificationGeneratorDtos = stackNotificationDataPreparetionService
-                        .notificationGeneratorDtos(stack, newStatus, newDetailedStatus, statusReason, accountId);
+                        .notificationGeneratorDtos(stack, newStatus, newDetailedStatus, statusReason, severity, accountId);
 
                 notificationSendingService.processAndImmediatelySend(notificationGeneratorDtos);
                 return true;

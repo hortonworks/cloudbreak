@@ -9,11 +9,7 @@ repositories {
 }
 
 dependencies {
-  implementation project(":notification-domain")
-  implementation project(":notification-connector")
-  implementation project(':authorization-common-api')
-  implementation project(':auth-connector')
-  implementation project(':usage-collection')
+  implementation project(":common")
 
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion

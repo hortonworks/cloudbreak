@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.v1;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -20,7 +21,9 @@ import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseCo
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.notification.WebSocketNotificationController;
 import com.sequenceiq.notification.domain.DistributionList;
+import com.sequenceiq.notification.domain.DistributionListActionType;
 import com.sequenceiq.notification.domain.NotificationGroupType;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.sender.DistributionListManagementService;
 
 @Controller
@@ -67,12 +70,21 @@ public class EnvironmentInternalV1Controller extends WebSocketNotificationContro
 
     @Override
     @InternalOnly
-    public void createOrUpdateDistributionListByEnvironmentCrn(@ResourceCrn String crn) {
-        EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
+    public void createOrUpdateDistributionListByEnvironmentCrn(
+            @ResourceCrn String environmentCrn,
+            String targetResourceCrn,
+            String targetResourceName,
+            String notificationSeverity,
+            String actionType) {
+        EnvironmentDto environmentDto = environmentService.internalGetByCrn(environmentCrn);
         Optional<DistributionList> distributionList = distributionListManagementService.createOrUpdateList(
                 environmentDto.getResourceCrn(),
-                environmentDto.getResourceName(),
-                NotificationGroupType.ENVIRONMENT
+                environmentDto.getName(),
+                StringUtils.isEmpty(targetResourceName) ? environmentDto.getName() : targetResourceName,
+                StringUtils.isEmpty(targetResourceCrn) ? environmentDto.getResourceCrn() : targetResourceCrn,
+                NotificationGroupType.byCrn(targetResourceCrn),
+                NotificationSeverity.fromString(notificationSeverity),
+                DistributionListActionType.fromString(actionType)
         );
         distributionList.ifPresent(list ->
                 parametersService.updateDistributionListDetails(environmentDto.getId(), list));

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.notification.client.dto.ListDistributionListsRe
 @Component
 public class ListDistributionListsResponseConverter {
 
-    public ListDistributionListsResponseDto convert(NotificationAdminProto.ListDistributionListsResponse proto) {
+    public ListDistributionListsResponseDto convert(NotificationAdminProto.ListDistributionListGroupsResponse proto) {
         if (proto == null) {
             return new ListDistributionListsResponseDto(null);
         } else {

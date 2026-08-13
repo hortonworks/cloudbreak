@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentInternalEndpoint;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDtos;
 import com.sequenceiq.notification.service.NotificationSendingService;
 
@@ -86,14 +87,16 @@ class StackNotificationServiceTest {
         EnvironmentServiceCrnEndpoints environmentServiceCrnEndpoints = mock(EnvironmentServiceCrnEndpoints.class);
         EnvironmentInternalEndpoint environmentInternalEndpoint = mock(EnvironmentInternalEndpoint.class);
 
-        doNothing().when(environmentInternalEndpoint).createOrUpdateDistributionListByEnvironmentCrn(anyString());
+        doNothing().when(environmentInternalEndpoint).createOrUpdateDistributionListByEnvironmentCrn(
+                anyString(), anyString(), anyString(), anyString(), anyString());
         when(environmentServiceCrnEndpoints.environmentInternalEndpoint()).thenReturn(environmentInternalEndpoint);
         when(environmentInternalCrnClient.withInternalCrn()).thenReturn(environmentServiceCrnEndpoints);
         when(environmentInternalClientConfiguration.cloudbreakInternalCrnClientClient()).thenReturn(environmentInternalCrnClient);
         when(stackNotificationTypePreparationService.isNotificationRequiredByStackStatus(newStatus)).thenReturn(true);
         when(entitlementService.isCdpCbNotificationSendingEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.isCdpCbNotificationSendingEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
-        when(stackNotificationDataPreparationService.notificationGeneratorDtos(stack, newStatus, newDetailedStatus, statusReason, TEST_ACCOUNT_ID))
+        when(stackNotificationDataPreparationService.notificationGeneratorDtos(stack, newStatus, newDetailedStatus, statusReason,
+                NotificationSeverity.ERROR, TEST_ACCOUNT_ID))
                 .thenReturn(notificationGeneratorDtos);
         when(future.get()).thenReturn(true);
 

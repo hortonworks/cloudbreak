@@ -23,6 +23,7 @@ public abstract class BaseEnvironmentParametersConverter implements EnvironmentP
         baseParameters.setName(environment.getName());
         baseParameters.setAccountId(environment.getAccountId());
         baseParameters.setEnvironment(environmentViewConverter.convert(environment));
+        baseParameters.setDistributionList(parametersDto.getDistributionList());
         postConvert(baseParameters, environment, parametersDto);
         return baseParameters;
     }

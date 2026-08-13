@@ -43,7 +43,8 @@ public class NotificationDtosToCreateDistributionListRequestConverter {
 
             LOGGER.debug("Grouped notifications into {} resource CRNs for distribution list processing", groupedNotifications.size());
 
-            Set<CreateDistributionListRequest> distributionListRequests = groupedNotifications.entrySet().stream()
+            Set<CreateDistributionListRequest> distributionListRequests = groupedNotifications.entrySet()
+                    .stream()
                     .map(this::createRequest)
                     .collect(Collectors.toSet());
             LOGGER.debug("Created distribution list requests {}", distributionListRequests);
@@ -69,16 +70,24 @@ public class NotificationDtosToCreateDistributionListRequestConverter {
                 AggregatedPreference preference = aggregatedPreferences.computeIfAbsent(eventTypeId, k -> new AggregatedPreference());
                 Optional.ofNullable(dto.getChannelType()).ifPresent(preference.channelTypes::add);
 
-                NotificationSeverity severity = Optional.ofNullable(dto.getSeverity()).orElse(type.getNotificationSeverity());
-                Optional.ofNullable(severity).ifPresent(preference.severities::add);
+                NotificationSeverity dtoSeverity = dto.getSeverity();
+                Set<NotificationSeverity> severity = dtoSeverity == null ? type.getNotificationSeverity() : Set.of(dtoSeverity);
+                Optional.ofNullable(severity).ifPresent(preference.severities::addAll);
             }
         }
 
-        List<EventChannelPreference> preferences = aggregatedPreferences.entrySet().stream()
+        List<EventChannelPreference> preferences = aggregatedPreferences.entrySet()
+                .stream()
                 .map(e -> new EventChannelPreference(e.getKey(), e.getValue().channelTypes, e.getValue().severities))
                 .collect(Collectors.toList());
 
-        return new CreateDistributionListRequest(resourceCrn, resourceName, preferences);
+        return new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(resourceCrn)
+                .withParentResourceName(resourceName)
+                .withTargetResourceCrn(resourceCrn)
+                .withTargetResourceName(resourceName)
+                .withEventChannelPreferences(preferences)
+                .build();
     }
 
     private static class AggregatedPreference {

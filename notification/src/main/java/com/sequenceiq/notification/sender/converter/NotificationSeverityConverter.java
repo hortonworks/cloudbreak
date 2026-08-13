@@ -14,6 +14,7 @@ public class NotificationSeverityConverter {
         }
 
         return switch (severity) {
+            case DEFAULT -> SeverityType.Value.DEFAULT;
             case DEBUG -> SeverityType.Value.DEBUG;
             case INFO -> SeverityType.Value.INFO;
             case WARNING -> SeverityType.Value.WARNING;
@@ -28,11 +29,12 @@ public class NotificationSeverityConverter {
         }
 
         return switch (severityType) {
+            case INFO -> NotificationSeverity.INFO;
             case DEBUG -> NotificationSeverity.DEBUG;
             case WARNING -> NotificationSeverity.WARNING;
             case ERROR -> NotificationSeverity.ERROR;
             case CRITICAL -> NotificationSeverity.CRITICAL;
-            default -> NotificationSeverity.INFO;
+            default -> NotificationSeverity.DEFAULT;
         };
     }
 

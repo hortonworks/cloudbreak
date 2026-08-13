@@ -2,7 +2,6 @@ package com.sequenceiq.environment.parameters.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,7 +15,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
@@ -37,6 +39,12 @@ class ParametersServiceTest {
 
     @Mock
     private Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap;
+
+    @Mock
+    private EnvironmentService environmentService;
+
+    @Mock
+    private CredentialService credentialService;
 
     @InjectMocks
     private ParametersService underTest;
@@ -64,8 +72,21 @@ class ParametersServiceTest {
     }
 
     @Test
-    void updateDistributionListDetailsDoesNothingWhenParametersMissing() {
+    void updateDistributionListDetailsCreatesParametersWhenMissing() {
         when(baseParametersRepository.findByEnvironmentId(ENVIRONMENT_ID)).thenReturn(Optional.empty());
+
+        Credential credential = new Credential();
+        credential.setCloudPlatform("AWS");
+        when(credentialService.findByEnvironmentId(ENVIRONMENT_ID)).thenReturn(credential);
+
+        Environment environment = new Environment();
+        environment.setAccountId("accountId");
+        environment.setCloudPlatform("AWS");
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+
+        AwsParameters createdParams = new AwsParameters();
+        when(environmentParamsConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentParametersConverter);
+        when(environmentParametersConverter.convert(any(Environment.class), any(ParametersDto.class))).thenReturn(createdParams);
 
         DistributionList dl = new DistributionList();
         dl.setResourceName("envName");
@@ -75,7 +96,7 @@ class ParametersServiceTest {
         underTest.updateDistributionListDetails(ENVIRONMENT_ID, dl);
 
         verify(baseParametersRepository).findByEnvironmentId(ENVIRONMENT_ID);
-        verify(baseParametersRepository, never()).save(any());
+        verify(baseParametersRepository).save(createdParams);
     }
 
     @Test
@@ -83,7 +104,6 @@ class ParametersServiceTest {
         BaseParameters params = new AwsParameters();
         params.setDistributionList("oldValue");
         when(baseParametersRepository.findByEnvironmentId(ENVIRONMENT_ID)).thenReturn(Optional.of(params));
-        when(baseParametersRepository.save(params)).thenReturn(params);
 
         DistributionList dl = new DistributionList();
         dl.setResourceName("envName");

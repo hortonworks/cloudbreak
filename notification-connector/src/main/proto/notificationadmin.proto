@@ -145,6 +145,36 @@ service NotificationAdmin {
     option (options.MethodExtension.mutating) = false;
     option (options.MethodExtension.right) = "notificationadmin/getPublishedEventStatus";
   }
+
+  // CreateOrUpdateDistributionListGroup :: Creates or updates multiple distribution lists grouped by a parent resource.
+  rpc CreateOrUpdateDistributionListGroup (CreateOrUpdateDistributionListGroupRequest)
+      returns (CreateOrUpdateDistributionListGroupResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.right) = "notificationadmin/createOrUpdateDistributionListGroup";
+  }
+
+  // ListDistributionListGroups :: Lists a distribution list group and its associated resource distribution lists.
+  rpc ListDistributionListGroups (ListDistributionListGroupsRequest)
+      returns (ListDistributionListGroupsResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.pagingDefaultMaxItems) = 50;
+    option (options.MethodExtension.right) = "notificationadmin/listDistributionListGroups";
+  }
+
+  // DeleteDistributionListGroup :: Deletes a distribution list group and its associated resource distribution lists.
+  rpc DeleteDistributionListGroup (DeleteDistributionListGroupRequest)
+      returns (DeleteDistributionListGroupResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.right) = "notificationadmin/deleteDistributionListGroup";
+  }
 }
 
 // Represents the type of notification messages.
@@ -698,4 +728,113 @@ message GetPublishedEventStatusRequest {
 message GetPublishedEventStatusResponse {
   // Object containing published event status details.
   PublishedEventStatus publishedEventStatus = 1;
+}
+
+// Configuration for a specific resource within a bulk request.
+message ResourceDistributionListConfig {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  option (options.MessageExtension.formFactor) = "public";
+  // CRN of the specific resource (e.g., Data Hub or Data Lake).
+  string resourceCrn = 1 [(options.FieldExtension.required) = true];
+  // Name of the specific resource.
+  string resourceName = 2 [(options.FieldExtension.required) = true];
+  // Channel preference (events, channels, severities) the resource subscribed to.
+  repeated EventChannelPreference eventChannelPreferences = 3;
+  // List of recipient email addresses.
+  repeated string emailAddresses = 4;
+  // List of recipient slack channels.
+  repeated string slackChannelIds = 5;
+  // Optional identifier of an existing distribution list, if specified, is used for an update.
+  string distributionListId = 6;
+}
+
+// Request object for distribution list group creation/update.
+message CreateOrUpdateDistributionListGroupRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  option (options.MessageExtension.formFactor) = "public";
+  // Account ID for which the distribution lists has to be created.
+  string accountId = 1 [(options.FieldExtension.required) = true];
+  // The parent resource CRN that groups these resources.
+  string parentResourceCrn = 2 [(options.FieldExtension.required) = true];
+  // Indicates how the distribution list is managed.
+  string distributionListManagementType = 3 [(options.FieldExtension.required) = true];
+  // The list of individual resource configurations.
+  repeated ResourceDistributionListConfig resourcesToUpsert = 4;
+  // Optional identifier of an existing distribution list group, if specified, is used for an update.
+  string distributionListGroupId = 5;
+}
+
+// Response object for distribution list group creation/update.
+message CreateOrUpdateDistributionListGroupResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  option (options.MessageExtension.formFactor) = "public";
+  // Identifier of the distribution list group.
+  string distributionListGroupId = 1;
+  // The parent resource CRN that groups resources.
+  string parentResourceCrn = 2;
+  // Details of all created/updated distribution lists.
+  repeated DistributionListDetails distributionListDetails = 3;
+}
+
+// Request object for ListDistributionListGroups.
+message ListDistributionListGroupsRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  option (options.MessageExtension.formFactor) = "public";
+  // Account ID for which the distribution lists has to be fetched.
+  string accountId = 1;
+  oneof admin_parent_resource_one_of {
+    // CRN of the parent resource for which the distribution lists have to be returned.
+    string parentResourceCrn = 2;
+    // Identifier of an existing distribution list group.
+    string distributionListGroupId = 3;
+  }
+  // The page size.
+  int32 pageSize = 4 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 50];
+  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+  string pageToken = 5 [(options.FieldExtension.pagingInputToken) = true];
+  // The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+  string distributionListManagementType = 6;
+}
+
+// Response object for ListDistributionListGroups.
+message ListDistributionListGroupsResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  option (options.MessageExtension.formFactor) = "public";
+  // List of distribution lists.
+  repeated DistributionList distributionLists = 1 [(options.FieldExtension.pagingResult) = true];
+  // The token to use when requesting the next set of results. If not present, there are no additional results.
+  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
+  // This field represents the total number of distribution list subscriptions.
+  int32 totalDistributionLists = 3;
+}
+
+// Request object for the deletion of Distribution List Groups.
+message DeleteDistributionListGroupRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  option (options.MessageExtension.formFactor) = "public";
+  // Account ID for which the distribution lists has to be deleted.
+  string accountId = 1;
+  oneof admin_parent_resource_one_of {
+    // CRN of the parent resource for which the distribution lists have to be deleted.
+    string parentResourceCrn = 2;
+    // Identifier of an existing distribution list group.
+    string distributionListGroupId = 3;
+  }
+}
+
+// Response object for the deletion of Distribution List Groups.
+message DeleteDistributionListGroupResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  option (options.MessageExtension.formFactor) = "public";
+  // Response string which describes the number of records deleted.
+  string recordsDeleted = 1;
 }

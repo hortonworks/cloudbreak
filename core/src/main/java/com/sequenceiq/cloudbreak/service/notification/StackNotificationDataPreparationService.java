@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.notification.config.CDPConsoleUrlProvider;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDtos;
 import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDtos;
@@ -76,18 +77,30 @@ public class StackNotificationDataPreparationService {
         this.environmentService = environmentService;
     }
 
-    public NotificationGeneratorDtos notificationGeneratorDtos(Stack stack, Status newStatus,
-        DetailedStackStatus newDetailedStatus, String statusReason, String accountId) throws TransactionService.TransactionExecutionException {
+    public NotificationGeneratorDtos notificationGeneratorDtos(
+            Stack stack,
+            Status newStatus,
+            DetailedStackStatus newDetailedStatus,
+            String statusReason,
+            NotificationSeverity severity,
+            String accountId
+    ) throws TransactionService.TransactionExecutionException {
         return transactionService.required(() ->
                 NotificationGeneratorDtos.builder()
-                        .notification(Set.of(prepareResults(stack, newStatus, newDetailedStatus, statusReason, accountId)))
+                        .notification(Set.of(prepareResults(stack, newStatus, newDetailedStatus, statusReason, severity, accountId)))
                         .notificationType(stackNotificationTypePreparationService.notificationType(newStatus))
                         .build()
         );
     }
 
-    private NotificationGeneratorDto prepareResults(Stack stack, Status newStatus,
-        DetailedStackStatus newDetailedStatus, String statusReason, String accountId) {
+    private NotificationGeneratorDto prepareResults(
+            Stack stack,
+            Status newStatus,
+            DetailedStackStatus newDetailedStatus,
+            String statusReason,
+            NotificationSeverity severity,
+            String accountId
+    ) {
         DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         ExtendedCloudCredential extendedCloudCredential = extendedCloudCredentialConverter.convert(credential);
@@ -95,6 +108,7 @@ public class StackNotificationDataPreparationService {
                 .resourceCrn(stack.getResourceCrn())
                 .name(stack.getName())
                 .resourceName(stack.getName() + "_" + stack.getResourceCrn())
+                .severity(severity)
                 .additionalData(
                         BaseNotificationRegisterAdditionalDataDtos.builder()
                                 .results(List.of(

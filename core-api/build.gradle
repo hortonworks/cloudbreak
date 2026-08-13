@@ -21,6 +21,7 @@ dependencies {
   implementation project(':structuredevent-model')
   implementation project(':environment-api')
   implementation project(':custom-configurations-api')
+  implementation project(":notification-domain")
   api project(':flow-api')
 
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion

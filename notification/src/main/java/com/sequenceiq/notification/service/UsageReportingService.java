@@ -85,10 +85,10 @@ public class UsageReportingService {
     private UsageProto.NotificationSeverity.Value getNotificationSeverity(NotificationSeverity notificationSeverity) {
         return switch (notificationSeverity) {
             case DEBUG -> UsageProto.NotificationSeverity.Value.DEBUG;
-            case INFO -> UsageProto.NotificationSeverity.Value.INFO;
             case WARNING -> UsageProto.NotificationSeverity.Value.WARNING;
             case ERROR -> UsageProto.NotificationSeverity.Value.ERROR;
             case CRITICAL -> UsageProto.NotificationSeverity.Value.CRITICAL;
+            default -> UsageProto.NotificationSeverity.Value.INFO;
         };
     }
 

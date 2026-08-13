@@ -6,13 +6,14 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListResponseDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.DistributionListDto;
 
 @Component
 public class CreateOrUpdateDistributionListResponseConverter {
 
-    public CreateOrUpdateDistributionListResponseDto convert(NotificationAdminProto.CreateOrUpdateDistributionListResponse proto) {
+    public CreateOrUpdateDistributionListResponseDto convert(CreateOrUpdateDistributionListGroupResponse proto) {
         if (proto == null) {
             return new CreateOrUpdateDistributionListResponseDto(null);
         }

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.endpoint;
 
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
 
 import java.util.List;
@@ -14,7 +15,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
@@ -38,7 +38,7 @@ public interface EnvironmentInternalEndpoint {
             operationId = "policyValidationInternalByEnvironmentCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PolicyValidationErrorResponses policyValidationByEnvironmentCrn(
-        @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+        @ValidCrn(resource = ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("service") List<String> services);
 
     @GET
@@ -47,7 +47,7 @@ public interface EnvironmentInternalEndpoint {
     @Operation(summary = EnvironmentOpDescription.INTERNAL_CONSUMPTION_LIST, description = ENVIRONMENT_NOTES,
             operationId = "getEnvironmentV1InternalByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SimpleEnvironmentResponse internalGetByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+    SimpleEnvironmentResponse internalGetByCrn(@ValidCrn(resource = ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("withNetwork") @DefaultValue("false") boolean withNetwork);
 
     @POST
@@ -56,6 +56,11 @@ public interface EnvironmentInternalEndpoint {
     @Operation(summary = EnvironmentOpDescription.CREATE_DISTRIBUTION_LIST, description = ENVIRONMENT_NOTES,
             operationId = "createDistributionListByEnvironmentCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void createOrUpdateDistributionListByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+    void createOrUpdateDistributionListByEnvironmentCrn(
+            @ValidCrn(resource = ENVIRONMENT) @PathParam("crn") String environmentCrn,
+            @QueryParam("targetResourceCrn") String targetResourceCrn,
+            @QueryParam("targetResourceName") String targetResourceName,
+            @DefaultValue("ERROR") @QueryParam("notificationSeverity") String notificationSeverity,
+            @DefaultValue("REGISTRATION") @QueryParam("actionType") String actionType);
 
 }

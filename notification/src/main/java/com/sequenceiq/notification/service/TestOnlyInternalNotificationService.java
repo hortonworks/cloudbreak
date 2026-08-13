@@ -72,13 +72,15 @@ public class TestOnlyInternalNotificationService {
     }
 
     public void testCreateOrUpdateDistributionLists(String resourceCrn) {
-        CreateDistributionListRequest request = new CreateDistributionListRequest();
-        request.setResourceCrn(resourceCrn);
-        request.setResourceName(Crn.fromString(resourceCrn).getResource());
-        request.setEventChannelPreferences(NotificationType.getEventTypeIds(NotificationGroupType.ENVIRONMENT)
-                .stream()
-                .map(id -> new EventChannelPreference(id, Set.of(ChannelType.EMAIL), Set.of(NotificationSeverity.WARNING)))
-                .toList());
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(resourceCrn)
+                .withParentResourceName(Crn.fromString(resourceCrn).getResource())
+                .withTargetResourceName(Crn.fromString(resourceCrn).getResource())
+                .withEventChannelPreferences(NotificationType.getEventTypeIds(NotificationGroupType.ENVIRONMENT)
+                        .stream()
+                        .map(id -> new EventChannelPreference(id, Set.of(ChannelType.EMAIL), Set.of(NotificationSeverity.ERROR)))
+                        .toList())
+                .build();
         distributionListManagementService.createOrUpdateLists(Set.of(request));
     }
 

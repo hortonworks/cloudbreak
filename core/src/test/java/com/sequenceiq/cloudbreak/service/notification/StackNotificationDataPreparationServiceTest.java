@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.notification.config.CDPConsoleUrlProvider;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.domain.NotificationType;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDtos;
@@ -113,7 +114,8 @@ class StackNotificationDataPreparationServiceTest {
         when(cdpConsoleUrlProvider.getClusterUrl(any(), any(), any())).thenReturn("http://example.com");
         when(cloudPlatformConnectors.getDefault(any())).thenReturn(cloudConnector);
 
-        NotificationGeneratorDtos result = underTest.notificationGeneratorDtos(stack, newStatus, newDetailedStatus, TEST_REASON, TEST_ACCOUNT_ID);
+        NotificationGeneratorDtos result = underTest.notificationGeneratorDtos(stack, newStatus, newDetailedStatus, TEST_REASON,
+                NotificationSeverity.ERROR, TEST_ACCOUNT_ID);
 
         assertNotNull(result);
         assertEquals(NotificationType.STACK_HEALTH, result.getNotificationType());

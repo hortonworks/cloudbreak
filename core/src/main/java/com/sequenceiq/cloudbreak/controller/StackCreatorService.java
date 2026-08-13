@@ -237,7 +237,12 @@ public class StackCreatorService {
         stackStub.setWorkspace(workspace);
         stackStub.setCreator(user);
         StackType stackType = determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest);
-        stackStub.setNotificationState(fromStateWithDisableIfNull(stackRequest.getNotificationState()));
+        stackStub.setNotificationState(
+                fromStateWithDisableIfNull(
+                    stackRequest.getNotificationState(),
+                    entitlementService.isCdpCbNotificationSendingEnabled(accountId)
+                )
+        );
         stackStub.setType(stackType);
         stackStub.setMultiAz(stackRequest.isEnableMultiAz());
         String platformString = stackStub.getCloudPlatform().toLowerCase(Locale.ROOT);

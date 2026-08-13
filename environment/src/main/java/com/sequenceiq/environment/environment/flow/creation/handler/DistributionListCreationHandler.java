@@ -5,7 +5,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.notification.domain.ChannelType.EMAIL;
 import static com.sequenceiq.notification.domain.NotificationGroupType.ENVIRONMENT;
-import static com.sequenceiq.notification.domain.NotificationSeverity.WARNING;
+import static com.sequenceiq.notification.domain.NotificationSeverity.ERROR;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,12 +67,15 @@ public class DistributionListCreationHandler extends ExceptionCatcherEventHandle
             Long environmentId = environmentDto.getId();
             List<EventChannelPreference> preferences = NotificationType.getEventTypeIds(ENVIRONMENT)
                     .stream()
-                    .map(id -> new EventChannelPreference(id, Set.of(EMAIL), Set.of(WARNING)))
+                    .map(id -> new EventChannelPreference(id, Set.of(EMAIL), Set.of(ERROR)))
                     .toList();
-            CreateDistributionListRequest request = new CreateDistributionListRequest(
-                    environmentDto.getResourceCrn(),
-                    environmentDto.getName(),
-                    preferences);
+            CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                    .withParentResourceCrn(environmentDto.getResourceCrn())
+                    .withParentResourceName(environmentDto.getName())
+                    .withTargetResourceCrn(environmentDto.getResourceCrn())
+                    .withTargetResourceName(environmentDto.getName())
+                    .withEventChannelPreferences(preferences)
+                    .build();
             Optional<DistributionList> distributionList = distributionListManagementService.createOrUpdateList(request);
             distributionList.ifPresent(list -> parametersService.updateDistributionListDetails(environmentId, list));
             return getEnvCreateEvent(environmentDto);

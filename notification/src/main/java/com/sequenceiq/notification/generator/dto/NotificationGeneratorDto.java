@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.notification.domain.ChannelType;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDtos;
 
 public class NotificationGeneratorDto<T extends BaseNotificationRegisterAdditionalDataDtos> {
@@ -18,6 +19,8 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
     private String resourceCrn;
 
     private String resourceName;
+
+    private NotificationSeverity severity;
 
     private T additionalData;
 
@@ -59,6 +62,14 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
         return channelMessages;
     }
 
+    public NotificationSeverity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(NotificationSeverity severity) {
+        this.severity = severity;
+    }
+
     public void setChannelMessages(Map<ChannelType, String> channelMessages) {
         this.channelMessages = channelMessages;
     }
@@ -84,6 +95,7 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
                 && Objects.equals(accountId, that.accountId)
                 && Objects.equals(resourceCrn, that.resourceCrn)
                 && Objects.equals(resourceName, that.resourceName)
+                && Objects.equals(severity, that.severity)
                 && Objects.equals(additionalData, that.additionalData)
                 && Objects.equals(channelMessages, that.channelMessages);
     }
@@ -95,13 +107,14 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
                 ", accountId='" + accountId + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", resourceName='" + resourceName + '\'' +
+                ", severity='" + severity + '\'' +
                 ", additionalData=" + additionalData +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, accountId, resourceCrn, resourceName, additionalData, channelMessages);
+        return Objects.hash(name, accountId, resourceCrn, resourceName, additionalData, channelMessages, severity);
     }
 
     public static NotificationGeneratorDto.Builder builder() {
@@ -117,6 +130,8 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
         private String resourceCrn;
 
         private String resourceName;
+
+        private NotificationSeverity severity;
 
         private T additionalData;
 
@@ -152,11 +167,17 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
             return this;
         }
 
+        public Builder<T> severity(NotificationSeverity severity) {
+            this.severity = severity;
+            return this;
+        }
+
         public Builder<T> notificationGeneratorDto(NotificationGeneratorDto<T> dto) {
             this.resourceCrn = dto.getResourceCrn();
             this.name = dto.getName();
             this.accountId = dto.getAccountId();
             this.additionalData = (T) dto.getAdditionalData();
+            this.severity = dto.getSeverity();
             return this;
         }
 
@@ -176,6 +197,7 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
             notification.setName(name);
             notification.setChannelMessages(channelMessages);
             notification.setAdditionalData(additionalData);
+            notification.setSeverity(severity);
             return notification;
         }
     }

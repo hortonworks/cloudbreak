@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.notification.client;
 
-import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListsResponse;
-
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -13,7 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto;
-import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListResponse;
+import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.PublishTargetedEventResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.notification.client.converter.CreateOrUpdateDistributionListResponseConverter;
@@ -100,12 +99,22 @@ public class GrpcNotificationClient {
                 request.getDistributionListManagementType()
         );
 
-        CreateOrUpdateDistributionListResponse response = serviceClient.createOrUpdateDistributionList(dto);
+        Optional<CreateOrUpdateDistributionListGroupResponse> response = serviceClient.createOrUpdateDistributionList(dto);
+        if (response.isPresent()) {
+            LOGGER.debug("Created or updated distribution list for resource [{}] with response [{}]",
+                    request.getResourceCrn(), response);
+            return distributionListCreated(response);
+        }
+        return distributionListNotCreatedAsAlreadyExist();
+    }
 
-        LOGGER.debug("Created or updated distribution list for resource [{}] with ID [{}]",
-                request.getResourceCrn(), response);
+    private CreateOrUpdateDistributionListResponseDto distributionListCreated(
+            Optional<CreateOrUpdateDistributionListGroupResponse> response) {
+        return createOrUpdateConverter.convert(response.get());
+    }
 
-        return createOrUpdateConverter.convert(response);
+    private CreateOrUpdateDistributionListResponseDto distributionListNotCreatedAsAlreadyExist() {
+        return new CreateOrUpdateDistributionListResponseDto(List.of());
     }
 
     /**
@@ -118,14 +127,14 @@ public class GrpcNotificationClient {
         NotificationServiceClient serviceClient = makeClient(channelWrapper.getChannel());
 
         LOGGER.debug("Deleting distribution list with ID [{}]", request.distributionListId());
-        serviceClient.deleteDistributionList(request.distributionListId());
+        serviceClient.deleteDistributionList(request.distributionListId(), request.accountId());
         LOGGER.debug("Deleted distribution list with ID [{}]", request.distributionListId());
     }
 
     public ListDistributionListsResponseDto listDistributionLists(ListDistributionListsRequestDto request) {
         NotificationServiceClient serviceClient = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Listing distribution lists for resource CRN [{}]", request.resourceCrn());
-        ListDistributionListsResponse response =
+        NotificationAdminProto.ListDistributionListGroupsResponse response =
                 serviceClient.listDistributionLists(request.resourceCrn());
         LOGGER.debug("Listed distribution lists for resource CRN [{}], response: {}", request.resourceCrn(), response);
         return listDistributionListsConverter.convert(response);

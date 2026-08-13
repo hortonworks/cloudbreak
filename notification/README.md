@@ -19,17 +19,30 @@ graph TD
 
 ## Steps
 
-### 1. Prepare Notification Data
+### 1. Mow-dev via Load Balancer
+
+The notification service is exposed via a network load balancer to be able to be accessed without port-forwarding. This enables exposing and using it during local testing.
+
+```notification-internal.dps.mow-dev.cloudera.com:80```
+
+### 2. Port forwarding
+
+Besides the NLB access, port forwarding “thunderhead-notification” could be used; notifications are accepted without additional authentication.
+
+```kubectl port-forward svc/thunderhead-notification 8888:80 -n thunderhead-notification```
+
+
+### 3. Prepare Notification Data
 
 Instead of creating a DTO directly, it's a good practice to have a dedicated service for preparing notification data. In our example, `StackNotificationDataPreparationService` is responsible for creating `NotificationGeneratorDtos` from a `Stack` object.
 
 This service will create the appropriate DTO and wrap it in `NotificationGeneratorDtos` along with the `NotificationType`.
 
-### 2. Implement a new notification generator
+### 4. Implement a new notification generator
 
 Next, you need to create a notification generator that will transform your DTO into a notification message. This is done by implementing the `NotificationContentGenerator` interface. For stack status changes, there are generators that create email subjects and bodies.
 
-### 3. Call `processAndImmediatelySend` from a service
+### 5. Call `processAndImmediatelySend` from a service
 
 Finally, a service like `StackNotificationService` orchestrates the process. It calls the data preparation service and then sends the notification using `NotificationSendingService`.
 

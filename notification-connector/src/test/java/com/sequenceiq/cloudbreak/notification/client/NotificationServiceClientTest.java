@@ -94,6 +94,8 @@ class NotificationServiceClientTest {
         return Stream.of(ClientMethod.values())
                 .flatMap(method -> Stream.of(Status.Code.values())
                         .filter(code -> code != Status.Code.OK)
+                        .filter(code -> !(method == ClientMethod.CREATE_OR_UPDATE_DISTRIBUTION_LIST
+                                && code == Status.Code.ALREADY_EXISTS))
                         .map(statusCode -> Arguments.of(method, statusCode, getExpectedExceptionType(statusCode))));
     }
 
@@ -180,13 +182,13 @@ class NotificationServiceClientTest {
         CREATE_OR_UPDATE_DISTRIBUTION_LIST {
             @Override
             void setupSuccess(NotificationAdminGrpc.NotificationAdminBlockingStub stub) {
-                when(stub.createOrUpdateDistributionList(any(NotificationAdminProto.CreateOrUpdateDistributionListRequest.class)))
-                        .thenReturn(NotificationAdminProto.CreateOrUpdateDistributionListResponse.newBuilder().build());
+                when(stub.createOrUpdateDistributionListGroup(any(NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.class)))
+                        .thenReturn(NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.newBuilder().build());
             }
 
             @Override
             void setupException(NotificationAdminGrpc.NotificationAdminBlockingStub stub, Status.Code statusCode) {
-                when(stub.createOrUpdateDistributionList(any(NotificationAdminProto.CreateOrUpdateDistributionListRequest.class)))
+                when(stub.createOrUpdateDistributionListGroup(any(NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.class)))
                         .thenThrow(new StatusRuntimeException(statusCode.toStatus()));
             }
 
@@ -198,7 +200,7 @@ class NotificationServiceClientTest {
                         null,
                         null,
                         null,
-                        null,
+                        RESOURCE_CRN,
                         null,
                         NotificationAdminProto.DistributionListManagementType.Value.USER_MANAGED.name());
                 return client.createOrUpdateDistributionList(dto);
@@ -206,42 +208,43 @@ class NotificationServiceClientTest {
 
             @Override
             void verify(NotificationAdminGrpc.NotificationAdminBlockingStub stub) {
-                org.mockito.Mockito.verify(stub).createOrUpdateDistributionList(any(NotificationAdminProto.CreateOrUpdateDistributionListRequest.class));
+                org.mockito.Mockito.verify(stub).createOrUpdateDistributionListGroup(
+                        any(NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.class));
             }
         },
         DELETE_DISTRIBUTION_LIST {
             @Override
             void setupSuccess(NotificationAdminGrpc.NotificationAdminBlockingStub stub) {
-                when(stub.deleteDistributionList(any(NotificationAdminProto.DeleteDistributionListRequest.class)))
-                        .thenReturn(NotificationAdminProto.DeleteDistributionListResponse.newBuilder().build());
+                when(stub.deleteDistributionListGroup(any(NotificationAdminProto.DeleteDistributionListGroupRequest.class)))
+                        .thenReturn(NotificationAdminProto.DeleteDistributionListGroupResponse.newBuilder().build());
             }
 
             @Override
             void setupException(NotificationAdminGrpc.NotificationAdminBlockingStub stub, Status.Code statusCode) {
-                when(stub.deleteDistributionList(any(NotificationAdminProto.DeleteDistributionListRequest.class)))
+                when(stub.deleteDistributionListGroup(any(NotificationAdminProto.DeleteDistributionListGroupRequest.class)))
                         .thenThrow(new StatusRuntimeException(statusCode.toStatus()));
             }
 
             @Override
             Object call(NotificationServiceClient client) {
-                return client.deleteDistributionList(DISTRIBUTION_LIST_ID);
+                return client.deleteDistributionList(DISTRIBUTION_LIST_ID, ACCOUNT_ID);
             }
 
             @Override
             void verify(NotificationAdminGrpc.NotificationAdminBlockingStub stub) {
-                org.mockito.Mockito.verify(stub).deleteDistributionList(any(NotificationAdminProto.DeleteDistributionListRequest.class));
+                org.mockito.Mockito.verify(stub).deleteDistributionListGroup(any(NotificationAdminProto.DeleteDistributionListGroupRequest.class));
             }
         },
         LIST_DISTRIBUTION_LISTS {
             @Override
             void setupSuccess(NotificationAdminGrpc.NotificationAdminBlockingStub stub) {
-                when(stub.listDistributionLists(any(NotificationAdminProto.ListDistributionListsRequest.class)))
-                        .thenReturn(NotificationAdminProto.ListDistributionListsResponse.newBuilder().build());
+                when(stub.listDistributionListGroups(any(NotificationAdminProto.ListDistributionListGroupsRequest.class)))
+                        .thenReturn(NotificationAdminProto.ListDistributionListGroupsResponse.newBuilder().build());
             }
 
             @Override
             void setupException(NotificationAdminGrpc.NotificationAdminBlockingStub stub, Status.Code statusCode) {
-                when(stub.listDistributionLists(any(NotificationAdminProto.ListDistributionListsRequest.class)))
+                when(stub.listDistributionListGroups(any(NotificationAdminProto.ListDistributionListGroupsRequest.class)))
                         .thenThrow(new StatusRuntimeException(statusCode.toStatus()));
             }
 
@@ -252,7 +255,7 @@ class NotificationServiceClientTest {
 
             @Override
             void verify(NotificationAdminGrpc.NotificationAdminBlockingStub stub) {
-                org.mockito.Mockito.verify(stub).listDistributionLists(any(NotificationAdminProto.ListDistributionListsRequest.class));
+                org.mockito.Mockito.verify(stub).listDistributionListGroups(any(NotificationAdminProto.ListDistributionListGroupsRequest.class));
             }
         },
         CREATE_OR_UPDATE_ACCOUNT_METADATA {

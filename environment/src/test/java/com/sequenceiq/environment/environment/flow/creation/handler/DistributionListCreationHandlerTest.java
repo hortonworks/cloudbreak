@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -20,6 +21,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +34,7 @@ import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.notification.domain.DistributionList;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.sender.DistributionListManagementService;
 import com.sequenceiq.notification.sender.dto.CreateDistributionListRequest;
 
@@ -79,7 +82,8 @@ class DistributionListCreationHandlerTest {
                 .resourceCrn(ENV_CRN)
                 .build();
 
-        when(distributionListManagementService.createOrUpdateList(any(CreateDistributionListRequest.class)))
+        ArgumentCaptor<CreateDistributionListRequest> requestCaptor = ArgumentCaptor.forClass(CreateDistributionListRequest.class);
+        when(distributionListManagementService.createOrUpdateList(requestCaptor.capture()))
                 .thenReturn(Optional.of(distributionList));
 
         HandlerEvent<EnvironmentDto> handlerEvent = new HandlerEvent<>(new Event<>(environmentDto));
@@ -87,9 +91,16 @@ class DistributionListCreationHandlerTest {
 
         assertNotNull(result);
         assertEquals(FINISH_ENV_CREATION_EVENT.selector(), result.getSelector());
-        verify(distributionListManagementService).createOrUpdateList(any(CreateDistributionListRequest.class));
         verify(parametersService).updateDistributionListDetails(ENV_ID, distributionList);
         verify(eventSenderService, never()).sendEventAndNotification(any(), anyString(), any(), anySet());
+
+        CreateDistributionListRequest capturedRequest = requestCaptor.getValue();
+        assertEquals(ENV_CRN, capturedRequest.getTargetResourceCrn());
+        assertEquals(ENV_NAME, capturedRequest.getTargetResourceName());
+        assertEquals(ENV_CRN, capturedRequest.getParentResourceCrn());
+        assertNotNull(capturedRequest.getEventChannelPreferences());
+        assertTrue(capturedRequest.getEventChannelPreferences().stream()
+                .allMatch(pref -> pref.eventSeverityList().contains(NotificationSeverity.ERROR)));
     }
 
     @Test

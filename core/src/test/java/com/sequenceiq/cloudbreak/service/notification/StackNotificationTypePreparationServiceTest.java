@@ -47,8 +47,8 @@ class StackNotificationTypePreparationServiceTest {
         assertEquals(NotificationType.STACK_RESIZE, underTest.notificationType(Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED));
         assertEquals(NotificationType.STACK_RESIZE, underTest.notificationType(Status.UPDATE_FAILED));
         assertEquals(NotificationType.STACK_HEALTH, underTest.notificationType(Status.BACKUP_FAILED));
-        assertEquals(NotificationType.STACK_REPAIR, underTest.notificationType(Status.RESTORE_FAILED));
-        assertEquals(NotificationType.STACK_REPAIR, underTest.notificationType(Status.RECOVERY_FAILED));
+        assertEquals(NotificationType.STACK_HEALTH, underTest.notificationType(Status.RESTORE_FAILED));
+        assertEquals(NotificationType.STACK_HEALTH, underTest.notificationType(Status.RECOVERY_FAILED));
         assertEquals(NotificationType.STACK_PROVISIONING, underTest.notificationType(Status.CREATE_FAILED));
         assertEquals(NotificationType.STACK_PROVISIONING, underTest.notificationType(Status.ENABLE_SECURITY_FAILED));
         assertEquals(NotificationType.STACK_START_STOP, underTest.notificationType(Status.START_FAILED));
@@ -154,7 +154,7 @@ class StackNotificationTypePreparationServiceTest {
         result.put(Status.WAIT_FOR_SYNC,                                false);
         result.put(Status.MAINTENANCE_MODE_ENABLED,                     false);
         result.put(Status.AMBIGUOUS,                                    false);
-        result.put(Status.UNREACHABLE,                                  false);
+        result.put(Status.UNREACHABLE,                                  true);
         result.put(Status.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,       false);
         result.put(Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,       false);
         result.put(Status.EXTERNAL_DATABASE_DELETION_FINISHED,          false);

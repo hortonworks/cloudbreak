@@ -12,8 +12,12 @@ public enum NotificationState {
         return fromString(notificationState, true);
     }
 
-    public static NotificationState fromStateWithDisableIfNull(NotificationState notificationState) {
-        return notificationState == null ? NotificationState.DISABLED : notificationState;
+    public static NotificationState fromStateWithDisableIfNull(NotificationState notificationState, boolean notificationSendingEnabled) {
+        if (notificationSendingEnabled) {
+            return notificationState == null ? NotificationState.ENABLED : notificationState;
+        } else {
+            return NotificationState.DISABLED;
+        }
     }
 
     private static NotificationState fromString(String notificationState, boolean disableIfNull) {

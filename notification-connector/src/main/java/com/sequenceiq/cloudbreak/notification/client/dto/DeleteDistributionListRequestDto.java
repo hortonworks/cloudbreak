@@ -1,4 +1,4 @@
 package com.sequenceiq.cloudbreak.notification.client.dto;
 
-public record DeleteDistributionListRequestDto(String distributionListId) {
+public record DeleteDistributionListRequestDto(String distributionListId, String accountId) {
 }

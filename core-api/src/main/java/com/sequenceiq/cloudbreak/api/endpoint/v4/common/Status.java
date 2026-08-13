@@ -4,11 +4,14 @@ import static java.lang.String.format;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
+import com.sequenceiq.notification.domain.NotificationSeverity;
+import com.sequenceiq.notification.domain.NotificationType;
 
 public enum Status {
     REQUESTED(StatusKind.PROGRESS),
@@ -16,26 +19,26 @@ public enum Status {
     AVAILABLE(StatusKind.FINAL),
     DATAHUB_DISK_UPDATE_VALIDATION_IN_PROGRESS(StatusKind.PROGRESS),
     DATAHUB_DISK_UPDATE_VALIDATION_FAILED(StatusKind.FINAL),
-    DATAHUB_DISK_UPDATE_FAILED(StatusKind.FINAL),
-    DATAHUB_DISK_UPDATE_RESIZE_FAILED(StatusKind.FINAL),
+    DATAHUB_DISK_UPDATE_FAILED(StatusKind.FINAL, NotificationType.STACK_RESIZE, NotificationSeverity.ERROR),
+    DATAHUB_DISK_UPDATE_RESIZE_FAILED(StatusKind.FINAL, NotificationType.STACK_RESIZE, NotificationSeverity.ERROR),
     UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     UPDATE_REQUESTED(StatusKind.PROGRESS),
-    UPDATE_FAILED(StatusKind.FINAL),
+    UPDATE_FAILED(StatusKind.FINAL, NotificationType.STACK_RESIZE, NotificationSeverity.ERROR),
     BACKUP_IN_PROGRESS(StatusKind.PROGRESS),
-    BACKUP_FAILED(StatusKind.FINAL),
+    BACKUP_FAILED(StatusKind.FINAL, NotificationType.STACK_HEALTH, NotificationSeverity.WARNING),
     BACKUP_FINISHED(StatusKind.FINAL),
     RESTORE_IN_PROGRESS(StatusKind.PROGRESS),
-    RESTORE_FAILED(StatusKind.FINAL),
+    RESTORE_FAILED(StatusKind.FINAL, NotificationType.STACK_HEALTH, NotificationSeverity.ERROR),
     RESTORE_FINISHED(StatusKind.FINAL),
     RECOVERY_IN_PROGRESS(StatusKind.PROGRESS),
     RECOVERY_REQUESTED(StatusKind.PROGRESS),
-    RECOVERY_FAILED(StatusKind.FINAL),
-    CREATE_FAILED(StatusKind.FINAL),
-    ENABLE_SECURITY_FAILED(StatusKind.FINAL),
+    RECOVERY_FAILED(StatusKind.FINAL, NotificationType.STACK_HEALTH, NotificationSeverity.ERROR),
+    CREATE_FAILED(StatusKind.FINAL, NotificationType.STACK_PROVISIONING, NotificationSeverity.ERROR),
+    ENABLE_SECURITY_FAILED(StatusKind.FINAL, NotificationType.STACK_PROVISIONING, NotificationSeverity.ERROR),
     PRE_DELETE_IN_PROGRESS(StatusKind.PROGRESS),
     DELETE_IN_PROGRESS(StatusKind.PROGRESS),
     DELETE_FAILED(StatusKind.FINAL),
-    DELETED_ON_PROVIDER_SIDE(StatusKind.FINAL),
+    DELETED_ON_PROVIDER_SIDE(StatusKind.FINAL, NotificationType.STACK_HEALTH, NotificationSeverity.ERROR),
     DELETE_COMPLETED(StatusKind.FINAL),
     STOPPED(StatusKind.FINAL),
     @Deprecated
@@ -44,33 +47,33 @@ public enum Status {
     START_REQUESTED(StatusKind.PROGRESS),
     STOP_IN_PROGRESS(StatusKind.PROGRESS),
     START_IN_PROGRESS(StatusKind.PROGRESS),
-    START_FAILED(StatusKind.FINAL),
-    STOP_FAILED(StatusKind.FINAL),
+    START_FAILED(StatusKind.FINAL, NotificationType.STACK_START_STOP, NotificationSeverity.ERROR),
+    STOP_FAILED(StatusKind.FINAL, NotificationType.STACK_START_STOP, NotificationSeverity.ERROR),
     WAIT_FOR_SYNC(StatusKind.PROGRESS),
     MAINTENANCE_MODE_ENABLED(StatusKind.FINAL),
     AMBIGUOUS(StatusKind.FINAL),
-    UNREACHABLE(StatusKind.FINAL),
-    NODE_FAILURE(StatusKind.FINAL),
+    UNREACHABLE(StatusKind.FINAL, NotificationType.STACK_HEALTH, NotificationSeverity.ERROR),
+    NODE_FAILURE(StatusKind.FINAL, NotificationType.STACK_HEALTH, NotificationSeverity.ERROR),
     EXTERNAL_DATABASE_CREATION_IN_PROGRESS(StatusKind.PROGRESS),
-    EXTERNAL_DATABASE_CREATION_FAILED(StatusKind.FINAL),
+    EXTERNAL_DATABASE_CREATION_FAILED(StatusKind.FINAL, NotificationType.STACK_PROVISIONING, NotificationSeverity.ERROR),
     EXTERNAL_DATABASE_DELETION_IN_PROGRESS(StatusKind.PROGRESS),
     EXTERNAL_DATABASE_DELETION_FINISHED(StatusKind.PROGRESS),
     EXTERNAL_DATABASE_DELETION_FAILED(StatusKind.FINAL),
     EXTERNAL_DATABASE_START_IN_PROGRESS(StatusKind.PROGRESS),
     EXTERNAL_DATABASE_START_FINISHED(StatusKind.FINAL),
-    EXTERNAL_DATABASE_START_FAILED(StatusKind.FINAL),
+    EXTERNAL_DATABASE_START_FAILED(StatusKind.FINAL, NotificationType.STACK_START_STOP, NotificationSeverity.ERROR),
     EXTERNAL_DATABASE_STOP_IN_PROGRESS(StatusKind.PROGRESS),
     @Deprecated
     EXTERNAL_DATABASE_STOP_FINISHED(StatusKind.PROGRESS),
-    EXTERNAL_DATABASE_STOP_FAILED(StatusKind.FINAL),
+    EXTERNAL_DATABASE_STOP_FAILED(StatusKind.FINAL, NotificationType.STACK_START_STOP, NotificationSeverity.ERROR),
     EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS(StatusKind.PROGRESS),
     EXTERNAL_DATABASE_UPGRADE_FINISHED(StatusKind.PROGRESS),
-    EXTERNAL_DATABASE_UPGRADE_FAILED(StatusKind.FINAL),
+    EXTERNAL_DATABASE_UPGRADE_FAILED(StatusKind.FINAL, NotificationType.STACK_UPGRADE, NotificationSeverity.ERROR),
     LOAD_BALANCER_UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     LOAD_BALANCER_UPDATE_FINISHED(StatusKind.FINAL),
-    LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL),
+    LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL, NotificationType.STACK_UPGRADE, NotificationSeverity.ERROR),
     UPGRADE_CCM_IN_PROGRESS(StatusKind.PROGRESS),
-    UPGRADE_CCM_FAILED(StatusKind.FINAL),
+    UPGRADE_CCM_FAILED(StatusKind.FINAL, NotificationType.STACK_UPGRADE, NotificationSeverity.ERROR),
     UPGRADE_CCM_FINISHED(StatusKind.FINAL),
     DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS(StatusKind.PROGRESS),
     STALE(StatusKind.FINAL);
@@ -108,8 +111,30 @@ public enum Status {
 
     private final StatusKind statusKind;
 
+    private final Optional<NotificationType> notificationTypeOptional;
+
+    private final Optional<NotificationSeverity> severityOptional;
+
     Status(StatusKind statusKind) {
+        this(statusKind, Optional.empty(), Optional.empty());
+    }
+
+    Status(StatusKind statusKind, NotificationType notificationType, NotificationSeverity severity) {
+        this(statusKind, Optional.ofNullable(notificationType), Optional.ofNullable(severity));
+    }
+
+    Status(StatusKind statusKind, Optional<NotificationType> notificationType, Optional<NotificationSeverity> severity) {
         this.statusKind = statusKind;
+        this.notificationTypeOptional = notificationType;
+        this.severityOptional = severity;
+    }
+
+    public boolean shouldTriggerNotification() {
+        return this.notificationTypeOptional.isPresent();
+    }
+
+    public NotificationType getNotificationType() {
+        return notificationTypeOptional.orElse(null);
     }
 
     public static Set<Status> getAvailableStatuses() {

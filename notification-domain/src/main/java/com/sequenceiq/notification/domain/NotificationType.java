@@ -1,5 +1,13 @@
 package com.sequenceiq.notification.domain;
 
+import static com.sequenceiq.notification.domain.ChannelType.EMAIL;
+import static com.sequenceiq.notification.domain.NotificationFormFactor.DISTRIBUTION_LIST;
+import static com.sequenceiq.notification.domain.NotificationGroupType.DATAHUB;
+import static com.sequenceiq.notification.domain.NotificationGroupType.DATALAKE;
+import static com.sequenceiq.notification.domain.NotificationGroupType.ENVIRONMENT;
+import static com.sequenceiq.notification.domain.NotificationSeverity.ERROR;
+import static com.sequenceiq.notification.domain.NotificationSeverity.INFO;
+import static com.sequenceiq.notification.domain.NotificationSeverity.WARNING;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Arrays;
@@ -8,64 +16,64 @@ import java.util.Set;
 public enum NotificationType {
     AZURE_DEFAULT_OUTBOUND(
             "templates/environment/email/azure_default_outbound_template.ftl",
-            Set.of(ChannelType.EMAIL),
-            NotificationFormFactor.DISTRIBUTION_LIST,
-            NotificationSeverity.WARNING,
-            NotificationGroupType.ENVIRONMENT,
+            Set.of(EMAIL),
+            DISTRIBUTION_LIST,
+            Set.of(INFO, WARNING, ERROR),
+            Set.of(ENVIRONMENT),
             "b1417842-1eef-4d65-ac36-02a0e32d424e",
             "Cloudera Data Platform - Azure Default Outbound Warning: %s"
     ),
     STACK_PROVISIONING(
             "templates/stack/email/stack_health_template.ftl",
-            Set.of(ChannelType.EMAIL),
-            NotificationFormFactor.DISTRIBUTION_LIST,
-            NotificationSeverity.WARNING,
-            NotificationGroupType.ENVIRONMENT,
+            Set.of(EMAIL),
+            DISTRIBUTION_LIST,
+            Set.of(INFO, WARNING, ERROR),
+            Set.of(DATAHUB, DATALAKE),
             "216b0ab7-f6ed-4e0a-a5d5-6a16a37d2e81",
             "Cloudera Data Platform - Provisioning Alert: %s"
     ),
     STACK_START_STOP(
             "templates/stack/email/stack_health_template.ftl",
-            Set.of(ChannelType.EMAIL),
-            NotificationFormFactor.DISTRIBUTION_LIST,
-            NotificationSeverity.WARNING,
-            NotificationGroupType.ENVIRONMENT,
+            Set.of(EMAIL),
+            DISTRIBUTION_LIST,
+            Set.of(INFO, WARNING, ERROR),
+            Set.of(DATAHUB, DATALAKE),
             "216b0ab7-f6ed-4e0a-a5d5-6a16a37d2e83",
             "Cloudera Data Platform - Start/Stop Alert: %s"
     ),
     STACK_RESIZE(
             "templates/stack/email/stack_health_template.ftl",
-            Set.of(ChannelType.EMAIL),
-            NotificationFormFactor.DISTRIBUTION_LIST,
-            NotificationSeverity.WARNING,
-            NotificationGroupType.ENVIRONMENT,
+            Set.of(EMAIL),
+            DISTRIBUTION_LIST,
+            Set.of(INFO, WARNING, ERROR),
+            Set.of(DATAHUB, DATALAKE),
             "216b0ab7-f6ed-4e0a-a5d5-6a16a37d2e85",
             "Cloudera Data Platform - Resize Alert: %s"
     ),
     STACK_UPGRADE(
             "templates/stack/email/stack_health_template.ftl",
-            Set.of(ChannelType.EMAIL),
-            NotificationFormFactor.DISTRIBUTION_LIST,
-            NotificationSeverity.WARNING,
-            NotificationGroupType.ENVIRONMENT,
+            Set.of(EMAIL),
+            DISTRIBUTION_LIST,
+            Set.of(INFO, WARNING, ERROR),
+            Set.of(DATAHUB, DATALAKE),
             "216b0ab7-f6ed-4e0a-a5d5-6a16a37d2e86",
             "Cloudera Data Platform - Upgrade Alert: %s"
     ),
     STACK_REPAIR(
             "templates/stack/email/stack_health_template.ftl",
-            Set.of(ChannelType.EMAIL),
-            NotificationFormFactor.DISTRIBUTION_LIST,
-            NotificationSeverity.WARNING,
-            NotificationGroupType.ENVIRONMENT,
+            Set.of(EMAIL),
+            DISTRIBUTION_LIST,
+            Set.of(INFO, WARNING, ERROR),
+            Set.of(DATAHUB, DATALAKE),
             "216b0ab7-f6ed-4e0a-a5d5-6a16a37d2e87",
             "Cloudera Data Platform - Repair Alert: %s"
     ),
     STACK_HEALTH(
             "templates/stack/email/stack_health_template.ftl",
-            Set.of(ChannelType.EMAIL),
-            NotificationFormFactor.DISTRIBUTION_LIST,
-            NotificationSeverity.WARNING,
-            NotificationGroupType.ENVIRONMENT,
+            Set.of(EMAIL),
+            DISTRIBUTION_LIST,
+            Set.of(INFO, WARNING, ERROR),
+            Set.of(DATAHUB, DATALAKE),
             "216b0ab7-f6ed-4e0a-a5d5-6a16a37d2e82",
             "Cloudera Data Platform - Health Alert: %s"
     );
@@ -76,28 +84,28 @@ public enum NotificationType {
 
     private final NotificationFormFactor notificationFormFactor;
 
-    private final NotificationSeverity notificationSeverity;
+    private final Set<NotificationSeverity> notificationSeverity;
 
     private final String eventTypeId;
 
     private final String subjectTemplate;
 
-    private NotificationGroupType groupType;
+    private Set<NotificationGroupType> groupTypes;
 
     @SuppressWarnings("ExecutableStatementCount")
     NotificationType(
             String template,
             Set<ChannelType> channelTypes,
             NotificationFormFactor notificationFormFactor,
-            NotificationSeverity notificationSeverity,
-            NotificationGroupType groupType,
+            Set<NotificationSeverity> notificationSeverity,
+            Set<NotificationGroupType> groupTypes,
             String eventTypeId,
             String subjectTemplate) {
         this.template = template;
         this.channelTypes = channelTypes;
         this.notificationFormFactor = notificationFormFactor;
         this.notificationSeverity = notificationSeverity;
-        this.groupType = groupType;
+        this.groupTypes = groupTypes;
         this.eventTypeId = eventTypeId;
         this.subjectTemplate = subjectTemplate;
     }
@@ -114,7 +122,7 @@ public enum NotificationType {
         return notificationFormFactor;
     }
 
-    public NotificationSeverity getNotificationSeverity() {
+    public Set<NotificationSeverity> getNotificationSeverity() {
         return notificationSeverity;
     }
 
@@ -126,13 +134,13 @@ public enum NotificationType {
         return subjectTemplate;
     }
 
-    public NotificationGroupType getGroupType() {
-        return groupType;
+    public Set<NotificationGroupType> getGroupTypes() {
+        return groupTypes;
     }
 
     public static Set<String> getEventTypeIds(NotificationGroupType notificationGroupType) {
         return Arrays.stream(NotificationType.values())
-                .filter(e -> e.groupType.equals(notificationGroupType))
+                .filter(e -> e.groupTypes.contains(notificationGroupType))
                 .map(NotificationType::getEventTypeId)
                 .collect(toSet());
     }
@@ -150,7 +158,7 @@ public enum NotificationType {
                 ", channelTypes=" + channelTypes +
                 ", notificationFormFactor=" + notificationFormFactor +
                 ", notificationSeverity=" + notificationSeverity +
-                ", groupType=" + groupType +
+                ", groupTypes=" + groupTypes +
                 ", eventTypeId='" + eventTypeId + '\'' +
                 ", subjectTemplate='" + subjectTemplate + '\'' +
                 '}';

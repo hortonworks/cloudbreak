@@ -152,17 +152,21 @@ class CentralNotificationSenderServiceTest {
                 .build();
         NotificationSendingDtos dtos = new NotificationSendingDtos(List.of(notification1, notification2));
 
-        CreateDistributionListRequest request1 = getDistributionListRequest("crn1");
-        request1.setResourceName("name1");
         List<EventChannelPreference> eventChannelPreferences = List.of(new EventChannelPreference(
                 "b1417842-1eef-4d65-ac36-02a0e32d424e",
                 Set.of(ChannelType.EMAIL),
-                Set.of(NotificationType.AZURE_DEFAULT_OUTBOUND.getNotificationSeverity())
+                NotificationType.AZURE_DEFAULT_OUTBOUND.getNotificationSeverity()
         ));
-        request1.setEventChannelPreferences(eventChannelPreferences);
-        CreateDistributionListRequest request2 = getDistributionListRequest("crn2");
-        request2.setResourceName("name2");
-        request2.setEventChannelPreferences(eventChannelPreferences);
+        CreateDistributionListRequest request1 = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn("crn1")
+                .withTargetResourceName("name1")
+                .withEventChannelPreferences(eventChannelPreferences)
+                .build();
+        CreateDistributionListRequest request2 = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn("crn2")
+                .withTargetResourceName("name2")
+                .withEventChannelPreferences(eventChannelPreferences)
+                .build();
 
         Set<CreateDistributionListRequest> expectedResourceCrns = Set.of(request1, request2);
         when(converter.convert(dtos)).thenReturn(expectedResourceCrns);
@@ -173,9 +177,9 @@ class CentralNotificationSenderServiceTest {
     }
 
     private CreateDistributionListRequest getDistributionListRequest(String resourceCrn) {
-        CreateDistributionListRequest request = new CreateDistributionListRequest();
-        request.setResourceCrn(resourceCrn);
-        return request;
+        return new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(resourceCrn)
+                .build();
     }
 
 }

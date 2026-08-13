@@ -1,5 +1,9 @@
 package com.sequenceiq.notification.sender;
 
+import static com.sequenceiq.notification.domain.ChannelType.EMAIL;
+import static com.sequenceiq.notification.domain.NotificationGroupType.ENVIRONMENT;
+import static com.sequenceiq.notification.domain.NotificationSeverity.ERROR;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,6 +35,7 @@ import com.sequenceiq.cloudbreak.notification.client.dto.ListDistributionListsRe
 import com.sequenceiq.notification.config.NotificationConfig;
 import com.sequenceiq.notification.domain.ChannelType;
 import com.sequenceiq.notification.domain.DistributionList;
+import com.sequenceiq.notification.domain.DistributionListActionType;
 import com.sequenceiq.notification.domain.DistributionListManagementType;
 import com.sequenceiq.notification.domain.EventChannelPreference;
 import com.sequenceiq.notification.domain.NotificationGroupType;
@@ -74,76 +80,152 @@ public class DistributionListManagementService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<DistributionList> createOrUpdateList(String resourceCrn, String resourceName, NotificationGroupType notificationGroupType) {
+    public Optional<DistributionList> createOrUpdateList(
+            String parentResourceCrn,
+            String parentResourceName,
+            String targetResourceName,
+            String targetResourceCrn,
+            NotificationGroupType notificationGroupType,
+            NotificationSeverity notificationSeverity,
+            DistributionListActionType distributionListActionType) {
         List<EventChannelPreference> preferences = NotificationType.getEventTypeIds(notificationGroupType)
                 .stream()
-                .map(id -> new EventChannelPreference(id, Set.of(ChannelType.EMAIL), Set.of(NotificationSeverity.WARNING)))
+                .map(id -> new EventChannelPreference(id, Set.of(ChannelType.EMAIL), Set.of(notificationSeverity)))
                 .toList();
-        CreateDistributionListRequest request = new CreateDistributionListRequest(
-                resourceCrn,
-                resourceName,
-                preferences);
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(parentResourceCrn)
+                .withParentResourceName(parentResourceName)
+                .withTargetResourceCrn(targetResourceCrn)
+                .withTargetResourceName(targetResourceName)
+                .withEventChannelPreferences(preferences)
+                .withActionType(distributionListActionType)
+                .build();
         return createOrUpdateList(request);
     }
 
     public Optional<DistributionList> createOrUpdateList(CreateDistributionListRequest request) {
-        String resourceCrnAsString = request.getResourceCrn();
-        Crn resourceCrn = Crn.safeFromString(resourceCrnAsString);
-        boolean enabled = config.isEnabled(resourceCrn);
+        String targetResourceCrnAsString = request.getTargetResourceCrn();
+        Crn targetResourceCrn = Crn.safeFromString(targetResourceCrnAsString);
+        boolean enabled = config.isEnabled(targetResourceCrn);
         LOGGER.debug("Creating or updating distribution list enabled: {} with request: {}", enabled, request);
         if (enabled) {
             List<EventChannelPreference> eventChannelPreferences = request.getEventChannelPreferences();
-            String accountId = resourceCrn.getAccountId();
-            String resourceName = request.getResourceName();
+            String accountId = targetResourceCrn.getAccountId();
             try {
-                List<DistributionList> existingDistributionLists = listDistributionListsForResource(resourceCrnAsString);
+                List<DistributionList> existingDistributionLists = queryTargetLists(request);
                 if (hasDistributionListForResource(existingDistributionLists)) {
-                    return updateDistributionList(
+                    LOGGER.info("Distribution list already exists for resourceCrn: {}, updating it now!", targetResourceCrnAsString);
+                    return insertorUpdateDistributionListConfig(
                             existingDistributionLists,
-                            resourceCrn,
                             accountId,
-                            resourceCrnAsString,
-                            eventChannelPreferences
+                            request.getParentResourceCrn(),
+                            request.getTargetResourceCrn(),
+                            request.getTargetResourceName(),
+                            eventChannelPreferences,
+                            request.getActionType()
                     );
                 } else {
-                    return createDistributionList(
+                    List<DistributionList> distributionLists = queryParentLists(request);
+                    if (noParentDistributionList(distributionLists)) {
+                        LOGGER.info("No distribution list exists for parent resourceCrn: {}, creating one now!", request.getParentResourceCrn());
+                        Optional<DistributionList> distributionList = createParentDistributionList(request, accountId);
+                        if (distributionList.isPresent()) {
+                            distributionLists = List.of(distributionList.get());
+                        }
+                    }
+                    LOGGER.info("Distribution list already exists for resourceCrn: {}, updating it now!", targetResourceCrnAsString);
+                    Optional<DistributionList> resourceDistributionList = insertorUpdateDistributionListConfig(
+                            distributionLists,
                             accountId,
-                            resourceCrnAsString,
-                            resourceName,
-                            eventChannelPreferences
+                            request.getParentResourceCrn(),
+                            request.getTargetResourceCrn(),
+                            request.getTargetResourceName(),
+                            eventChannelPreferences,
+                            request.getActionType()
                     );
+                    return resourceDistributionList.isPresent() && !noParentDistributionList(distributionLists) ?
+                            getEnvironmentDistributionList(distributionLists) : resourceDistributionList;
                 }
             } catch (Exception e) {
-                LOGGER.warn("Error during creating or updating distribution list for resourceCrn: {}", resourceCrnAsString, e);
+                LOGGER.warn("Error during creating or updating distribution list for resourceCrn: {}", targetResourceCrnAsString, e);
             }
         }
         return Optional.empty();
     }
 
-    private Optional<DistributionList> updateDistributionList(List<DistributionList> existingDistributionLists, Crn resourceCrn, String accountId,
-            String resourceCrnAsString, List<EventChannelPreference> eventChannelPreferences) {
+    private Optional<DistributionList> getEnvironmentDistributionList(List<DistributionList> distributionLists) {
+        return distributionLists
+                .stream()
+                .filter(e -> Crn.fromString(e.getResourceCrn()).getService().equals(Crn.Service.ENVIRONMENTS))
+                .findFirst();
+    }
+
+    private List<DistributionList> queryTargetLists(CreateDistributionListRequest request) {
+        return listDistributionListsForResource(request.getTargetResourceCrn());
+    }
+
+    private List<DistributionList> queryParentLists(CreateDistributionListRequest request) {
+        return listDistributionListsForResource(request.getParentResourceCrn());
+    }
+
+    private boolean noParentDistributionList(List<DistributionList> distributionLists) {
+        return distributionLists.isEmpty();
+    }
+
+    private @NonNull Optional<DistributionList> createParentDistributionList(CreateDistributionListRequest request, String accountId) {
+        return createDistributionList(
+                accountId,
+                request.getParentResourceCrn(),
+                request.getParentResourceCrn(),
+                request.getParentResourceName(),
+                NotificationType.getEventTypeIds(ENVIRONMENT)
+                        .stream()
+                        .map(id -> new EventChannelPreference(id, Set.of(EMAIL), Set.of(ERROR)))
+                        .toList()
+        );
+    }
+
+    private Optional<DistributionList> insertorUpdateDistributionListConfig(
+            List<DistributionList> existingDistributionLists,
+            String accountId,
+            String parentResourceCrn,
+            String targetResourceCrn,
+            String targetResourceName,
+            List<EventChannelPreference> eventChannelPreferences,
+            DistributionListActionType actionType) {
         DistributionList existingDistributionList = existingDistributionLists.getFirst();
-        if (!userManagedList(existingDistributionList)) {
+        if (updateEnabled(actionType, existingDistributionList)) {
             LOGGER.warn("Distribution list with id {} and non user-managed type {} exists for resourceCrn: {}, updating it now!",
                     existingDistributionList.getExternalId(),
                     existingDistributionList.getType(),
-                    resourceCrn);
+                    targetResourceCrn);
             DistributionList distributionList = updateDistributionList(
+                    parentResourceCrn,
+                    targetResourceCrn,
+                    targetResourceName,
                     existingDistributionList,
-                    getEmailList(accountId, getUserWithResourceRoles(accountId, resourceCrnAsString)),
-                    channelPreferenceConverter.convert(eventChannelPreferences));
+                    getEmailList(accountId, getUserWithResourceRoles(accountId, targetResourceCrn)),
+                    channelPreferenceConverter.convert(eventChannelPreferences)
+            );
             return Optional.ofNullable(distributionList);
         } else {
             LOGGER.warn("Distribution list with id {} and type {} already exists for resourceCrn: {}, nothing to do..",
                     existingDistributionList.getExternalId(),
                     existingDistributionList.getType(),
-                    resourceCrn);
+                    parentResourceCrn);
         }
         return Optional.empty();
     }
 
-    private Optional<DistributionList> createDistributionList(String accountId, String resourceCrnAsString, String resourceName,
-            List<EventChannelPreference> eventChannelPreferences) {
+    private boolean updateEnabled(DistributionListActionType actionType, DistributionList existingDistributionList) {
+        boolean userManagedList = userManagedList(existingDistributionList);
+        boolean registration = DistributionListActionType.REGISTRATION.equals(actionType);
+        LOGGER.debug("User managed list: {}, registration: {}", userManagedList, registration);
+        return !userManagedList || registration;
+    }
+
+    private Optional<DistributionList> createDistributionList(String accountId, String parentResourceCrn,
+            String resourceCrnAsString, String resourceName, List<EventChannelPreference> eventChannelPreferences) {
         // This is a security requirement of Notification Service
         Set<String> emailList = getEmailList(accountId, getUserWithResourceRoles(accountId, resourceCrnAsString));
         createAccountMetadataForResource(
@@ -151,6 +233,7 @@ public class DistributionListManagementService {
                 emailList);
 
         DistributionList distributionList = createDistributionList(
+                parentResourceCrn,
                 resourceCrnAsString,
                 resourceName,
                 emailList,
@@ -224,40 +307,49 @@ public class DistributionListManagementService {
         grpcNotificationClient.createOrUpdateAccountMetadata(new CreateOrUpdateAccountMetadataDto(accountId, allowedDomains));
     }
 
-    private DistributionList updateDistributionList(DistributionList existingDistributionList,
-            Set<String> emailList, List<EventChannelPreferenceDto> eventChannelPreferences) {
+    private DistributionList updateDistributionList(
+            String parentResourceCrn,
+            String targetResourceCrn,
+            String targetResourceName,
+            DistributionList existingDistributionList,
+            Set<String> emailList,
+            List<EventChannelPreferenceDto> eventChannelPreferences
+    ) {
         LOGGER.debug("Updating existing distribution list id {} for resourceCrn {}",
                 existingDistributionList.getExternalId(), existingDistributionList.getResourceCrn());
         CreateOrUpdateDistributionListRequestDto request = new CreateOrUpdateDistributionListRequestDto();
-        request.setResourceCrn(existingDistributionList.getResourceCrn());
-        request.setResourceName(existingDistributionList.getResourceName());
+        request.setResourceCrn(targetResourceCrn);
+        request.setResourceName(targetResourceName);
+        request.setParentResourceCrn(parentResourceCrn);
         request.setEventChannelPreferences(eventChannelPreferences);
         request.setEmailAddresses(emailList);
         request.setDistributionListId(existingDistributionList.getExternalId());
         request.setDistributionListManagementType(existingDistributionList.getType().name());
         CreateOrUpdateDistributionListResponseDto response = grpcNotificationClient.createOrUpdateDistributionList(request);
-        return getList(response, existingDistributionList.getResourceName());
+        return getList(response, parentResourceCrn, targetResourceName);
     }
 
-    private DistributionList createDistributionList(String resourceCrn, String resourceName, Set<String> emailList,
-            List<EventChannelPreferenceDto> eventChannelPreferences) {
+    private DistributionList createDistributionList(String parentResourceCrn, String resourceCrn, String resourceName,
+                                                    Set<String> emailList, List<EventChannelPreferenceDto> eventChannelPreferences) {
         LOGGER.debug("Creating new distribution list for resourceCrn: {} with {} emails", resourceCrn, emailList.size());
         CreateOrUpdateDistributionListRequestDto request = new CreateOrUpdateDistributionListRequestDto();
         request.setResourceCrn(resourceCrn);
+        request.setParentResourceCrn(parentResourceCrn);
         request.setResourceName(resourceName);
         request.setEventChannelPreferences(eventChannelPreferences);
         request.setEmailAddresses(emailList);
         request.setDistributionListManagementType(DistributionListManagementType.USER_MANAGED.name());
         CreateOrUpdateDistributionListResponseDto response = grpcNotificationClient.createOrUpdateDistributionList(request);
-        return getList(response, resourceName);
+        return getList(response, parentResourceCrn, resourceName);
     }
 
     public void deleteDistributionList(String resourceCrn) {
         LOGGER.debug("Deleting distribution list(s) for resourceCrn: {} ", resourceCrn);
         List<DistributionList> distributionLists = listDistributionListsForResource(resourceCrn);
         for (DistributionList distributionList : distributionLists) {
+            Crn crn = Crn.safeFromString(distributionList.getResourceCrn());
             grpcNotificationClient.deleteDistributionList(
-                    new DeleteDistributionListRequestDto(distributionList.getExternalId()));
+                    new DeleteDistributionListRequestDto(distributionList.getExternalId(), crn.getAccountId()));
         }
         LOGGER.debug("Deleted distribution list(s) for resourceCrn: {} ", resourceCrn);
     }
@@ -286,15 +378,19 @@ public class DistributionListManagementService {
         return lists;
     }
 
-    private DistributionList getList(CreateOrUpdateDistributionListResponseDto response, String resourceName) {
-        DistributionListDto details = Optional.ofNullable(response)
-                .map(CreateOrUpdateDistributionListResponseDto::distributionLists)
-                .map(List::getFirst)
-                .orElse(null);
+    private DistributionList getList(CreateOrUpdateDistributionListResponseDto response, String parentResourceName, String resourceName) {
+        DistributionListDto details = null;
+        if (response != null && CollectionUtils.isNotEmpty(response.distributionLists())) {
+            details = Optional.ofNullable(response)
+                    .map(CreateOrUpdateDistributionListResponseDto::distributionLists)
+                    .map(List::getFirst)
+                    .orElse(null);
+        }
         if (details != null) {
             DistributionList distributionList = new DistributionList();
             distributionList.setExternalId(details.distributionListId());
             distributionList.setResourceCrn(details.resourceCrn());
+            distributionList.setParentResourceCrn(parentResourceName);
             distributionList.setResourceName(resourceName);
             distributionList.setType(DistributionListManagementType.USER_MANAGED);
             return distributionList;

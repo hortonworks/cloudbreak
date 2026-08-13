@@ -54423,6 +54423,9464 @@ public final class NotificationAdminProto {
 
   }
 
+  public interface ResourceDistributionListConfigOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:notificationadmin.ResourceDistributionListConfig)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * CRN of the specific resource (e.g., Data Hub or Data Lake).
+     * </pre>
+     *
+     * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The resourceCrn.
+     */
+    java.lang.String getResourceCrn();
+    /**
+     * <pre>
+     * CRN of the specific resource (e.g., Data Hub or Data Lake).
+     * </pre>
+     *
+     * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for resourceCrn.
+     */
+    com.google.protobuf.ByteString
+        getResourceCrnBytes();
+
+    /**
+     * <pre>
+     * Name of the specific resource.
+     * </pre>
+     *
+     * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The resourceName.
+     */
+    java.lang.String getResourceName();
+    /**
+     * <pre>
+     * Name of the specific resource.
+     * </pre>
+     *
+     * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for resourceName.
+     */
+    com.google.protobuf.ByteString
+        getResourceNameBytes();
+
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference> 
+        getEventChannelPreferencesList();
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference getEventChannelPreferences(int index);
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    int getEventChannelPreferencesCount();
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder> 
+        getEventChannelPreferencesOrBuilderList();
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder getEventChannelPreferencesOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @return A list containing the emailAddresses.
+     */
+    java.util.List<java.lang.String>
+        getEmailAddressesList();
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @return The count of emailAddresses.
+     */
+    int getEmailAddressesCount();
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @param index The index of the element to return.
+     * @return The emailAddresses at the given index.
+     */
+    java.lang.String getEmailAddresses(int index);
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the emailAddresses at the given index.
+     */
+    com.google.protobuf.ByteString
+        getEmailAddressesBytes(int index);
+
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @return A list containing the slackChannelIds.
+     */
+    java.util.List<java.lang.String>
+        getSlackChannelIdsList();
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @return The count of slackChannelIds.
+     */
+    int getSlackChannelIdsCount();
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @param index The index of the element to return.
+     * @return The slackChannelIds at the given index.
+     */
+    java.lang.String getSlackChannelIds(int index);
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the slackChannelIds at the given index.
+     */
+    com.google.protobuf.ByteString
+        getSlackChannelIdsBytes(int index);
+
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListId = 6;</code>
+     * @return The distributionListId.
+     */
+    java.lang.String getDistributionListId();
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListId = 6;</code>
+     * @return The bytes for distributionListId.
+     */
+    com.google.protobuf.ByteString
+        getDistributionListIdBytes();
+  }
+  /**
+   * <pre>
+   * Configuration for a specific resource within a bulk request.
+   * </pre>
+   *
+   * Protobuf type {@code notificationadmin.ResourceDistributionListConfig}
+   */
+  public static final class ResourceDistributionListConfig extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:notificationadmin.ResourceDistributionListConfig)
+      ResourceDistributionListConfigOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ResourceDistributionListConfig.newBuilder() to construct.
+    private ResourceDistributionListConfig(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ResourceDistributionListConfig() {
+      resourceCrn_ = "";
+      resourceName_ = "";
+      eventChannelPreferences_ = java.util.Collections.emptyList();
+      emailAddresses_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      slackChannelIds_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      distributionListId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ResourceDistributionListConfig();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ResourceDistributionListConfig_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ResourceDistributionListConfig_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder.class);
+    }
+
+    public static final int RESOURCECRN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object resourceCrn_ = "";
+    /**
+     * <pre>
+     * CRN of the specific resource (e.g., Data Hub or Data Lake).
+     * </pre>
+     *
+     * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The resourceCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getResourceCrn() {
+      java.lang.Object ref = resourceCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resourceCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * CRN of the specific resource (e.g., Data Hub or Data Lake).
+     * </pre>
+     *
+     * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for resourceCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getResourceCrnBytes() {
+      java.lang.Object ref = resourceCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resourceCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESOURCENAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object resourceName_ = "";
+    /**
+     * <pre>
+     * Name of the specific resource.
+     * </pre>
+     *
+     * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The resourceName.
+     */
+    @java.lang.Override
+    public java.lang.String getResourceName() {
+      java.lang.Object ref = resourceName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resourceName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the specific resource.
+     * </pre>
+     *
+     * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for resourceName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getResourceNameBytes() {
+      java.lang.Object ref = resourceName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resourceName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int EVENTCHANNELPREFERENCES_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference> eventChannelPreferences_;
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference> getEventChannelPreferencesList() {
+      return eventChannelPreferences_;
+    }
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder> 
+        getEventChannelPreferencesOrBuilderList() {
+      return eventChannelPreferences_;
+    }
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    @java.lang.Override
+    public int getEventChannelPreferencesCount() {
+      return eventChannelPreferences_.size();
+    }
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference getEventChannelPreferences(int index) {
+      return eventChannelPreferences_.get(index);
+    }
+    /**
+     * <pre>
+     * Channel preference (events, channels, severities) the resource subscribed to.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder getEventChannelPreferencesOrBuilder(
+        int index) {
+      return eventChannelPreferences_.get(index);
+    }
+
+    public static final int EMAILADDRESSES_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.LazyStringArrayList emailAddresses_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @return A list containing the emailAddresses.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getEmailAddressesList() {
+      return emailAddresses_;
+    }
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @return The count of emailAddresses.
+     */
+    public int getEmailAddressesCount() {
+      return emailAddresses_.size();
+    }
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @param index The index of the element to return.
+     * @return The emailAddresses at the given index.
+     */
+    public java.lang.String getEmailAddresses(int index) {
+      return emailAddresses_.get(index);
+    }
+    /**
+     * <pre>
+     * List of recipient email addresses.
+     * </pre>
+     *
+     * <code>repeated string emailAddresses = 4;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the emailAddresses at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getEmailAddressesBytes(int index) {
+      return emailAddresses_.getByteString(index);
+    }
+
+    public static final int SLACKCHANNELIDS_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.LazyStringArrayList slackChannelIds_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @return A list containing the slackChannelIds.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getSlackChannelIdsList() {
+      return slackChannelIds_;
+    }
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @return The count of slackChannelIds.
+     */
+    public int getSlackChannelIdsCount() {
+      return slackChannelIds_.size();
+    }
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @param index The index of the element to return.
+     * @return The slackChannelIds at the given index.
+     */
+    public java.lang.String getSlackChannelIds(int index) {
+      return slackChannelIds_.get(index);
+    }
+    /**
+     * <pre>
+     * List of recipient slack channels.
+     * </pre>
+     *
+     * <code>repeated string slackChannelIds = 5;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the slackChannelIds at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getSlackChannelIdsBytes(int index) {
+      return slackChannelIds_.getByteString(index);
+    }
+
+    public static final int DISTRIBUTIONLISTID_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object distributionListId_ = "";
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListId = 6;</code>
+     * @return The distributionListId.
+     */
+    @java.lang.Override
+    public java.lang.String getDistributionListId() {
+      java.lang.Object ref = distributionListId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distributionListId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListId = 6;</code>
+     * @return The bytes for distributionListId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDistributionListIdBytes() {
+      java.lang.Object ref = distributionListId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distributionListId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, resourceCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resourceName_);
+      }
+      for (int i = 0; i < eventChannelPreferences_.size(); i++) {
+        output.writeMessage(3, eventChannelPreferences_.get(i));
+      }
+      for (int i = 0; i < emailAddresses_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, emailAddresses_.getRaw(i));
+      }
+      for (int i = 0; i < slackChannelIds_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, slackChannelIds_.getRaw(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, distributionListId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, resourceCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resourceName_);
+      }
+      for (int i = 0; i < eventChannelPreferences_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, eventChannelPreferences_.get(i));
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < emailAddresses_.size(); i++) {
+          dataSize += computeStringSizeNoTag(emailAddresses_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getEmailAddressesList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < slackChannelIds_.size(); i++) {
+          dataSize += computeStringSizeNoTag(slackChannelIds_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getSlackChannelIdsList().size();
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, distributionListId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig other = (com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig) obj;
+
+      if (!getResourceCrn()
+          .equals(other.getResourceCrn())) return false;
+      if (!getResourceName()
+          .equals(other.getResourceName())) return false;
+      if (!getEventChannelPreferencesList()
+          .equals(other.getEventChannelPreferencesList())) return false;
+      if (!getEmailAddressesList()
+          .equals(other.getEmailAddressesList())) return false;
+      if (!getSlackChannelIdsList()
+          .equals(other.getSlackChannelIdsList())) return false;
+      if (!getDistributionListId()
+          .equals(other.getDistributionListId())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + RESOURCECRN_FIELD_NUMBER;
+      hash = (53 * hash) + getResourceCrn().hashCode();
+      hash = (37 * hash) + RESOURCENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getResourceName().hashCode();
+      if (getEventChannelPreferencesCount() > 0) {
+        hash = (37 * hash) + EVENTCHANNELPREFERENCES_FIELD_NUMBER;
+        hash = (53 * hash) + getEventChannelPreferencesList().hashCode();
+      }
+      if (getEmailAddressesCount() > 0) {
+        hash = (37 * hash) + EMAILADDRESSES_FIELD_NUMBER;
+        hash = (53 * hash) + getEmailAddressesList().hashCode();
+      }
+      if (getSlackChannelIdsCount() > 0) {
+        hash = (37 * hash) + SLACKCHANNELIDS_FIELD_NUMBER;
+        hash = (53 * hash) + getSlackChannelIdsList().hashCode();
+      }
+      hash = (37 * hash) + DISTRIBUTIONLISTID_FIELD_NUMBER;
+      hash = (53 * hash) + getDistributionListId().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Configuration for a specific resource within a bulk request.
+     * </pre>
+     *
+     * Protobuf type {@code notificationadmin.ResourceDistributionListConfig}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:notificationadmin.ResourceDistributionListConfig)
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ResourceDistributionListConfig_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ResourceDistributionListConfig_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        resourceCrn_ = "";
+        resourceName_ = "";
+        if (eventChannelPreferencesBuilder_ == null) {
+          eventChannelPreferences_ = java.util.Collections.emptyList();
+        } else {
+          eventChannelPreferences_ = null;
+          eventChannelPreferencesBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        emailAddresses_ =
+            com.google.protobuf.LazyStringArrayList.emptyList();
+        slackChannelIds_ =
+            com.google.protobuf.LazyStringArrayList.emptyList();
+        distributionListId_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ResourceDistributionListConfig_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig build() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig buildPartial() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig result = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig result) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0)) {
+            eventChannelPreferences_ = java.util.Collections.unmodifiableList(eventChannelPreferences_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.eventChannelPreferences_ = eventChannelPreferences_;
+        } else {
+          result.eventChannelPreferences_ = eventChannelPreferencesBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.resourceCrn_ = resourceCrn_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.resourceName_ = resourceName_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          emailAddresses_.makeImmutable();
+          result.emailAddresses_ = emailAddresses_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          slackChannelIds_.makeImmutable();
+          result.slackChannelIds_ = slackChannelIds_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.distributionListId_ = distributionListId_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig) {
+          return mergeFrom((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig other) {
+        if (other == com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.getDefaultInstance()) return this;
+        if (!other.getResourceCrn().isEmpty()) {
+          resourceCrn_ = other.resourceCrn_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getResourceName().isEmpty()) {
+          resourceName_ = other.resourceName_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (eventChannelPreferencesBuilder_ == null) {
+          if (!other.eventChannelPreferences_.isEmpty()) {
+            if (eventChannelPreferences_.isEmpty()) {
+              eventChannelPreferences_ = other.eventChannelPreferences_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureEventChannelPreferencesIsMutable();
+              eventChannelPreferences_.addAll(other.eventChannelPreferences_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.eventChannelPreferences_.isEmpty()) {
+            if (eventChannelPreferencesBuilder_.isEmpty()) {
+              eventChannelPreferencesBuilder_.dispose();
+              eventChannelPreferencesBuilder_ = null;
+              eventChannelPreferences_ = other.eventChannelPreferences_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              eventChannelPreferencesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getEventChannelPreferencesFieldBuilder() : null;
+            } else {
+              eventChannelPreferencesBuilder_.addAllMessages(other.eventChannelPreferences_);
+            }
+          }
+        }
+        if (!other.emailAddresses_.isEmpty()) {
+          if (emailAddresses_.isEmpty()) {
+            emailAddresses_ = other.emailAddresses_;
+            bitField0_ |= 0x00000008;
+          } else {
+            ensureEmailAddressesIsMutable();
+            emailAddresses_.addAll(other.emailAddresses_);
+          }
+          onChanged();
+        }
+        if (!other.slackChannelIds_.isEmpty()) {
+          if (slackChannelIds_.isEmpty()) {
+            slackChannelIds_ = other.slackChannelIds_;
+            bitField0_ |= 0x00000010;
+          } else {
+            ensureSlackChannelIdsIsMutable();
+            slackChannelIds_.addAll(other.slackChannelIds_);
+          }
+          onChanged();
+        }
+        if (!other.getDistributionListId().isEmpty()) {
+          distributionListId_ = other.distributionListId_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                resourceCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                resourceName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.parser(),
+                        extensionRegistry);
+                if (eventChannelPreferencesBuilder_ == null) {
+                  ensureEventChannelPreferencesIsMutable();
+                  eventChannelPreferences_.add(m);
+                } else {
+                  eventChannelPreferencesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 26
+              case 34: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureEmailAddressesIsMutable();
+                emailAddresses_.add(s);
+                break;
+              } // case 34
+              case 42: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureSlackChannelIdsIsMutable();
+                slackChannelIds_.add(s);
+                break;
+              } // case 42
+              case 50: {
+                distributionListId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object resourceCrn_ = "";
+      /**
+       * <pre>
+       * CRN of the specific resource (e.g., Data Hub or Data Lake).
+       * </pre>
+       *
+       * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The resourceCrn.
+       */
+      public java.lang.String getResourceCrn() {
+        java.lang.Object ref = resourceCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          resourceCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the specific resource (e.g., Data Hub or Data Lake).
+       * </pre>
+       *
+       * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for resourceCrn.
+       */
+      public com.google.protobuf.ByteString
+          getResourceCrnBytes() {
+        java.lang.Object ref = resourceCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          resourceCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the specific resource (e.g., Data Hub or Data Lake).
+       * </pre>
+       *
+       * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The resourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        resourceCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the specific resource (e.g., Data Hub or Data Lake).
+       * </pre>
+       *
+       * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResourceCrn() {
+        resourceCrn_ = getDefaultInstance().getResourceCrn();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the specific resource (e.g., Data Hub or Data Lake).
+       * </pre>
+       *
+       * <code>string resourceCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for resourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        resourceCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object resourceName_ = "";
+      /**
+       * <pre>
+       * Name of the specific resource.
+       * </pre>
+       *
+       * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The resourceName.
+       */
+      public java.lang.String getResourceName() {
+        java.lang.Object ref = resourceName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          resourceName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the specific resource.
+       * </pre>
+       *
+       * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for resourceName.
+       */
+      public com.google.protobuf.ByteString
+          getResourceNameBytes() {
+        java.lang.Object ref = resourceName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          resourceName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the specific resource.
+       * </pre>
+       *
+       * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The resourceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        resourceName_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the specific resource.
+       * </pre>
+       *
+       * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResourceName() {
+        resourceName_ = getDefaultInstance().getResourceName();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the specific resource.
+       * </pre>
+       *
+       * <code>string resourceName = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for resourceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        resourceName_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference> eventChannelPreferences_ =
+        java.util.Collections.emptyList();
+      private void ensureEventChannelPreferencesIsMutable() {
+        if (!((bitField0_ & 0x00000004) != 0)) {
+          eventChannelPreferences_ = new java.util.ArrayList<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference>(eventChannelPreferences_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder> eventChannelPreferencesBuilder_;
+
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference> getEventChannelPreferencesList() {
+        if (eventChannelPreferencesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(eventChannelPreferences_);
+        } else {
+          return eventChannelPreferencesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public int getEventChannelPreferencesCount() {
+        if (eventChannelPreferencesBuilder_ == null) {
+          return eventChannelPreferences_.size();
+        } else {
+          return eventChannelPreferencesBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference getEventChannelPreferences(int index) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          return eventChannelPreferences_.get(index);
+        } else {
+          return eventChannelPreferencesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder setEventChannelPreferences(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference value) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEventChannelPreferencesIsMutable();
+          eventChannelPreferences_.set(index, value);
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder setEventChannelPreferences(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder builderForValue) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          ensureEventChannelPreferencesIsMutable();
+          eventChannelPreferences_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder addEventChannelPreferences(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference value) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEventChannelPreferencesIsMutable();
+          eventChannelPreferences_.add(value);
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder addEventChannelPreferences(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference value) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEventChannelPreferencesIsMutable();
+          eventChannelPreferences_.add(index, value);
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder addEventChannelPreferences(
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder builderForValue) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          ensureEventChannelPreferencesIsMutable();
+          eventChannelPreferences_.add(builderForValue.build());
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder addEventChannelPreferences(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder builderForValue) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          ensureEventChannelPreferencesIsMutable();
+          eventChannelPreferences_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder addAllEventChannelPreferences(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference> values) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          ensureEventChannelPreferencesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, eventChannelPreferences_);
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder clearEventChannelPreferences() {
+        if (eventChannelPreferencesBuilder_ == null) {
+          eventChannelPreferences_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public Builder removeEventChannelPreferences(int index) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          ensureEventChannelPreferencesIsMutable();
+          eventChannelPreferences_.remove(index);
+          onChanged();
+        } else {
+          eventChannelPreferencesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder getEventChannelPreferencesBuilder(
+          int index) {
+        return getEventChannelPreferencesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder getEventChannelPreferencesOrBuilder(
+          int index) {
+        if (eventChannelPreferencesBuilder_ == null) {
+          return eventChannelPreferences_.get(index);  } else {
+          return eventChannelPreferencesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder> 
+           getEventChannelPreferencesOrBuilderList() {
+        if (eventChannelPreferencesBuilder_ != null) {
+          return eventChannelPreferencesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(eventChannelPreferences_);
+        }
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder addEventChannelPreferencesBuilder() {
+        return getEventChannelPreferencesFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder addEventChannelPreferencesBuilder(
+          int index) {
+        return getEventChannelPreferencesFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Channel preference (events, channels, severities) the resource subscribed to.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.EventChannelPreference eventChannelPreferences = 3;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder> 
+           getEventChannelPreferencesBuilderList() {
+        return getEventChannelPreferencesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder> 
+          getEventChannelPreferencesFieldBuilder() {
+        if (eventChannelPreferencesBuilder_ == null) {
+          eventChannelPreferencesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreference.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.EventChannelPreferenceOrBuilder>(
+                  eventChannelPreferences_,
+                  ((bitField0_ & 0x00000004) != 0),
+                  getParentForChildren(),
+                  isClean());
+          eventChannelPreferences_ = null;
+        }
+        return eventChannelPreferencesBuilder_;
+      }
+
+      private com.google.protobuf.LazyStringArrayList emailAddresses_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      private void ensureEmailAddressesIsMutable() {
+        if (!emailAddresses_.isModifiable()) {
+          emailAddresses_ = new com.google.protobuf.LazyStringArrayList(emailAddresses_);
+        }
+        bitField0_ |= 0x00000008;
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @return A list containing the emailAddresses.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getEmailAddressesList() {
+        emailAddresses_.makeImmutable();
+        return emailAddresses_;
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @return The count of emailAddresses.
+       */
+      public int getEmailAddressesCount() {
+        return emailAddresses_.size();
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @param index The index of the element to return.
+       * @return The emailAddresses at the given index.
+       */
+      public java.lang.String getEmailAddresses(int index) {
+        return emailAddresses_.get(index);
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the emailAddresses at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getEmailAddressesBytes(int index) {
+        return emailAddresses_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @param index The index to set the value at.
+       * @param value The emailAddresses to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEmailAddresses(
+          int index, java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureEmailAddressesIsMutable();
+        emailAddresses_.set(index, value);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @param value The emailAddresses to add.
+       * @return This builder for chaining.
+       */
+      public Builder addEmailAddresses(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureEmailAddressesIsMutable();
+        emailAddresses_.add(value);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @param values The emailAddresses to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllEmailAddresses(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureEmailAddressesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, emailAddresses_);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEmailAddresses() {
+        emailAddresses_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient email addresses.
+       * </pre>
+       *
+       * <code>repeated string emailAddresses = 4;</code>
+       * @param value The bytes of the emailAddresses to add.
+       * @return This builder for chaining.
+       */
+      public Builder addEmailAddressesBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        ensureEmailAddressesIsMutable();
+        emailAddresses_.add(value);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringArrayList slackChannelIds_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      private void ensureSlackChannelIdsIsMutable() {
+        if (!slackChannelIds_.isModifiable()) {
+          slackChannelIds_ = new com.google.protobuf.LazyStringArrayList(slackChannelIds_);
+        }
+        bitField0_ |= 0x00000010;
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @return A list containing the slackChannelIds.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getSlackChannelIdsList() {
+        slackChannelIds_.makeImmutable();
+        return slackChannelIds_;
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @return The count of slackChannelIds.
+       */
+      public int getSlackChannelIdsCount() {
+        return slackChannelIds_.size();
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @param index The index of the element to return.
+       * @return The slackChannelIds at the given index.
+       */
+      public java.lang.String getSlackChannelIds(int index) {
+        return slackChannelIds_.get(index);
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the slackChannelIds at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getSlackChannelIdsBytes(int index) {
+        return slackChannelIds_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @param index The index to set the value at.
+       * @param value The slackChannelIds to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSlackChannelIds(
+          int index, java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureSlackChannelIdsIsMutable();
+        slackChannelIds_.set(index, value);
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @param value The slackChannelIds to add.
+       * @return This builder for chaining.
+       */
+      public Builder addSlackChannelIds(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureSlackChannelIdsIsMutable();
+        slackChannelIds_.add(value);
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @param values The slackChannelIds to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllSlackChannelIds(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureSlackChannelIdsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, slackChannelIds_);
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSlackChannelIds() {
+        slackChannelIds_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of recipient slack channels.
+       * </pre>
+       *
+       * <code>repeated string slackChannelIds = 5;</code>
+       * @param value The bytes of the slackChannelIds to add.
+       * @return This builder for chaining.
+       */
+      public Builder addSlackChannelIdsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        ensureSlackChannelIdsIsMutable();
+        slackChannelIds_.add(value);
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object distributionListId_ = "";
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListId = 6;</code>
+       * @return The distributionListId.
+       */
+      public java.lang.String getDistributionListId() {
+        java.lang.Object ref = distributionListId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distributionListId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListId = 6;</code>
+       * @return The bytes for distributionListId.
+       */
+      public com.google.protobuf.ByteString
+          getDistributionListIdBytes() {
+        java.lang.Object ref = distributionListId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distributionListId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListId = 6;</code>
+       * @param value The distributionListId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        distributionListId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListId = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistributionListId() {
+        distributionListId_ = getDefaultInstance().getDistributionListId();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListId = 6;</code>
+       * @param value The bytes for distributionListId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        distributionListId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:notificationadmin.ResourceDistributionListConfig)
+    }
+
+    // @@protoc_insertion_point(class_scope:notificationadmin.ResourceDistributionListConfig)
+    private static final com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig();
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ResourceDistributionListConfig>
+        PARSER = new com.google.protobuf.AbstractParser<ResourceDistributionListConfig>() {
+      @java.lang.Override
+      public ResourceDistributionListConfig parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ResourceDistributionListConfig> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ResourceDistributionListConfig> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CreateOrUpdateDistributionListGroupRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:notificationadmin.CreateOrUpdateDistributionListGroupRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be created.
+     * </pre>
+     *
+     * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The accountId.
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be created.
+     * </pre>
+     *
+     * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for accountId.
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The parent resource CRN that groups these resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The parentResourceCrn.
+     */
+    java.lang.String getParentResourceCrn();
+    /**
+     * <pre>
+     * The parent resource CRN that groups these resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    com.google.protobuf.ByteString
+        getParentResourceCrnBytes();
+
+    /**
+     * <pre>
+     * Indicates how the distribution list is managed.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+     * @return The distributionListManagementType.
+     */
+    java.lang.String getDistributionListManagementType();
+    /**
+     * <pre>
+     * Indicates how the distribution list is managed.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for distributionListManagementType.
+     */
+    com.google.protobuf.ByteString
+        getDistributionListManagementTypeBytes();
+
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig> 
+        getResourcesToUpsertList();
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig getResourcesToUpsert(int index);
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    int getResourcesToUpsertCount();
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder> 
+        getResourcesToUpsertOrBuilderList();
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder getResourcesToUpsertOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list group, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 5;</code>
+     * @return The distributionListGroupId.
+     */
+    java.lang.String getDistributionListGroupId();
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list group, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 5;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes();
+  }
+  /**
+   * <pre>
+   * Request object for distribution list group creation/update.
+   * </pre>
+   *
+   * Protobuf type {@code notificationadmin.CreateOrUpdateDistributionListGroupRequest}
+   */
+  public static final class CreateOrUpdateDistributionListGroupRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:notificationadmin.CreateOrUpdateDistributionListGroupRequest)
+      CreateOrUpdateDistributionListGroupRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CreateOrUpdateDistributionListGroupRequest.newBuilder() to construct.
+    private CreateOrUpdateDistributionListGroupRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CreateOrUpdateDistributionListGroupRequest() {
+      accountId_ = "";
+      parentResourceCrn_ = "";
+      distributionListManagementType_ = "";
+      resourcesToUpsert_ = java.util.Collections.emptyList();
+      distributionListGroupId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateOrUpdateDistributionListGroupRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.Builder.class);
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object accountId_ = "";
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be created.
+     * </pre>
+     *
+     * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The accountId.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be created.
+     * </pre>
+     *
+     * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for accountId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PARENTRESOURCECRN_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object parentResourceCrn_ = "";
+    /**
+     * <pre>
+     * The parent resource CRN that groups these resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The parentResourceCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getParentResourceCrn() {
+      java.lang.Object ref = parentResourceCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        parentResourceCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The parent resource CRN that groups these resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getParentResourceCrnBytes() {
+      java.lang.Object ref = parentResourceCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        parentResourceCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTIONLISTMANAGEMENTTYPE_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object distributionListManagementType_ = "";
+    /**
+     * <pre>
+     * Indicates how the distribution list is managed.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+     * @return The distributionListManagementType.
+     */
+    @java.lang.Override
+    public java.lang.String getDistributionListManagementType() {
+      java.lang.Object ref = distributionListManagementType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distributionListManagementType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Indicates how the distribution list is managed.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for distributionListManagementType.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDistributionListManagementTypeBytes() {
+      java.lang.Object ref = distributionListManagementType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distributionListManagementType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESOURCESTOUPSERT_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig> resourcesToUpsert_;
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig> getResourcesToUpsertList() {
+      return resourcesToUpsert_;
+    }
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder> 
+        getResourcesToUpsertOrBuilderList() {
+      return resourcesToUpsert_;
+    }
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    @java.lang.Override
+    public int getResourcesToUpsertCount() {
+      return resourcesToUpsert_.size();
+    }
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig getResourcesToUpsert(int index) {
+      return resourcesToUpsert_.get(index);
+    }
+    /**
+     * <pre>
+     * The list of individual resource configurations.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder getResourcesToUpsertOrBuilder(
+        int index) {
+      return resourcesToUpsert_.get(index);
+    }
+
+    public static final int DISTRIBUTIONLISTGROUPID_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object distributionListGroupId_ = "";
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list group, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 5;</code>
+     * @return The distributionListGroupId.
+     */
+    @java.lang.Override
+    public java.lang.String getDistributionListGroupId() {
+      java.lang.Object ref = distributionListGroupId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distributionListGroupId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Optional identifier of an existing distribution list group, if specified, is used for an update.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 5;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes() {
+      java.lang.Object ref = distributionListGroupId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distributionListGroupId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(parentResourceCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, parentResourceCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListManagementType_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, distributionListManagementType_);
+      }
+      for (int i = 0; i < resourcesToUpsert_.size(); i++) {
+        output.writeMessage(4, resourcesToUpsert_.get(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListGroupId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, distributionListGroupId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(parentResourceCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, parentResourceCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListManagementType_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, distributionListManagementType_);
+      }
+      for (int i = 0; i < resourcesToUpsert_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, resourcesToUpsert_.get(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListGroupId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, distributionListGroupId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest other = (com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest) obj;
+
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getParentResourceCrn()
+          .equals(other.getParentResourceCrn())) return false;
+      if (!getDistributionListManagementType()
+          .equals(other.getDistributionListManagementType())) return false;
+      if (!getResourcesToUpsertList()
+          .equals(other.getResourcesToUpsertList())) return false;
+      if (!getDistributionListGroupId()
+          .equals(other.getDistributionListGroupId())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + PARENTRESOURCECRN_FIELD_NUMBER;
+      hash = (53 * hash) + getParentResourceCrn().hashCode();
+      hash = (37 * hash) + DISTRIBUTIONLISTMANAGEMENTTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getDistributionListManagementType().hashCode();
+      if (getResourcesToUpsertCount() > 0) {
+        hash = (37 * hash) + RESOURCESTOUPSERT_FIELD_NUMBER;
+        hash = (53 * hash) + getResourcesToUpsertList().hashCode();
+      }
+      hash = (37 * hash) + DISTRIBUTIONLISTGROUPID_FIELD_NUMBER;
+      hash = (53 * hash) + getDistributionListGroupId().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for distribution list group creation/update.
+     * </pre>
+     *
+     * Protobuf type {@code notificationadmin.CreateOrUpdateDistributionListGroupRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:notificationadmin.CreateOrUpdateDistributionListGroupRequest)
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        accountId_ = "";
+        parentResourceCrn_ = "";
+        distributionListManagementType_ = "";
+        if (resourcesToUpsertBuilder_ == null) {
+          resourcesToUpsert_ = java.util.Collections.emptyList();
+        } else {
+          resourcesToUpsert_ = null;
+          resourcesToUpsertBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        distributionListGroupId_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest build() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest buildPartial() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest result = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest result) {
+        if (resourcesToUpsertBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0)) {
+            resourcesToUpsert_ = java.util.Collections.unmodifiableList(resourcesToUpsert_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.resourcesToUpsert_ = resourcesToUpsert_;
+        } else {
+          result.resourcesToUpsert_ = resourcesToUpsertBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.accountId_ = accountId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.parentResourceCrn_ = parentResourceCrn_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.distributionListManagementType_ = distributionListManagementType_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.distributionListGroupId_ = distributionListGroupId_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest other) {
+        if (other == com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getParentResourceCrn().isEmpty()) {
+          parentResourceCrn_ = other.parentResourceCrn_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getDistributionListManagementType().isEmpty()) {
+          distributionListManagementType_ = other.distributionListManagementType_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (resourcesToUpsertBuilder_ == null) {
+          if (!other.resourcesToUpsert_.isEmpty()) {
+            if (resourcesToUpsert_.isEmpty()) {
+              resourcesToUpsert_ = other.resourcesToUpsert_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureResourcesToUpsertIsMutable();
+              resourcesToUpsert_.addAll(other.resourcesToUpsert_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.resourcesToUpsert_.isEmpty()) {
+            if (resourcesToUpsertBuilder_.isEmpty()) {
+              resourcesToUpsertBuilder_.dispose();
+              resourcesToUpsertBuilder_ = null;
+              resourcesToUpsert_ = other.resourcesToUpsert_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              resourcesToUpsertBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getResourcesToUpsertFieldBuilder() : null;
+            } else {
+              resourcesToUpsertBuilder_.addAllMessages(other.resourcesToUpsert_);
+            }
+          }
+        }
+        if (!other.getDistributionListGroupId().isEmpty()) {
+          distributionListGroupId_ = other.distributionListGroupId_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                parentResourceCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                distributionListManagementType_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.parser(),
+                        extensionRegistry);
+                if (resourcesToUpsertBuilder_ == null) {
+                  ensureResourcesToUpsertIsMutable();
+                  resourcesToUpsert_.add(m);
+                } else {
+                  resourcesToUpsertBuilder_.addMessage(m);
+                }
+                break;
+              } // case 34
+              case 42: {
+                distributionListGroupId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be created.
+       * </pre>
+       *
+       * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The accountId.
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be created.
+       * </pre>
+       *
+       * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for accountId.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be created.
+       * </pre>
+       *
+       * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        accountId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be created.
+       * </pre>
+       *
+       * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountId() {
+        accountId_ = getDefaultInstance().getAccountId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be created.
+       * </pre>
+       *
+       * <code>string accountId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        accountId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object parentResourceCrn_ = "";
+      /**
+       * <pre>
+       * The parent resource CRN that groups these resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The parentResourceCrn.
+       */
+      public java.lang.String getParentResourceCrn() {
+        java.lang.Object ref = parentResourceCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          parentResourceCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups these resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for parentResourceCrn.
+       */
+      public com.google.protobuf.ByteString
+          getParentResourceCrnBytes() {
+        java.lang.Object ref = parentResourceCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          parentResourceCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups these resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        parentResourceCrn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups these resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearParentResourceCrn() {
+        parentResourceCrn_ = getDefaultInstance().getParentResourceCrn();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups these resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        parentResourceCrn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object distributionListManagementType_ = "";
+      /**
+       * <pre>
+       * Indicates how the distribution list is managed.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+       * @return The distributionListManagementType.
+       */
+      public java.lang.String getDistributionListManagementType() {
+        java.lang.Object ref = distributionListManagementType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distributionListManagementType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Indicates how the distribution list is managed.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for distributionListManagementType.
+       */
+      public com.google.protobuf.ByteString
+          getDistributionListManagementTypeBytes() {
+        java.lang.Object ref = distributionListManagementType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distributionListManagementType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Indicates how the distribution list is managed.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+       * @param value The distributionListManagementType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListManagementType(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        distributionListManagementType_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates how the distribution list is managed.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistributionListManagementType() {
+        distributionListManagementType_ = getDefaultInstance().getDistributionListManagementType();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates how the distribution list is managed.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 3 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for distributionListManagementType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListManagementTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        distributionListManagementType_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig> resourcesToUpsert_ =
+        java.util.Collections.emptyList();
+      private void ensureResourcesToUpsertIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          resourcesToUpsert_ = new java.util.ArrayList<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig>(resourcesToUpsert_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder> resourcesToUpsertBuilder_;
+
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig> getResourcesToUpsertList() {
+        if (resourcesToUpsertBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(resourcesToUpsert_);
+        } else {
+          return resourcesToUpsertBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public int getResourcesToUpsertCount() {
+        if (resourcesToUpsertBuilder_ == null) {
+          return resourcesToUpsert_.size();
+        } else {
+          return resourcesToUpsertBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig getResourcesToUpsert(int index) {
+        if (resourcesToUpsertBuilder_ == null) {
+          return resourcesToUpsert_.get(index);
+        } else {
+          return resourcesToUpsertBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder setResourcesToUpsert(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig value) {
+        if (resourcesToUpsertBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResourcesToUpsertIsMutable();
+          resourcesToUpsert_.set(index, value);
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder setResourcesToUpsert(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder builderForValue) {
+        if (resourcesToUpsertBuilder_ == null) {
+          ensureResourcesToUpsertIsMutable();
+          resourcesToUpsert_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder addResourcesToUpsert(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig value) {
+        if (resourcesToUpsertBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResourcesToUpsertIsMutable();
+          resourcesToUpsert_.add(value);
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder addResourcesToUpsert(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig value) {
+        if (resourcesToUpsertBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResourcesToUpsertIsMutable();
+          resourcesToUpsert_.add(index, value);
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder addResourcesToUpsert(
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder builderForValue) {
+        if (resourcesToUpsertBuilder_ == null) {
+          ensureResourcesToUpsertIsMutable();
+          resourcesToUpsert_.add(builderForValue.build());
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder addResourcesToUpsert(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder builderForValue) {
+        if (resourcesToUpsertBuilder_ == null) {
+          ensureResourcesToUpsertIsMutable();
+          resourcesToUpsert_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder addAllResourcesToUpsert(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig> values) {
+        if (resourcesToUpsertBuilder_ == null) {
+          ensureResourcesToUpsertIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, resourcesToUpsert_);
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder clearResourcesToUpsert() {
+        if (resourcesToUpsertBuilder_ == null) {
+          resourcesToUpsert_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public Builder removeResourcesToUpsert(int index) {
+        if (resourcesToUpsertBuilder_ == null) {
+          ensureResourcesToUpsertIsMutable();
+          resourcesToUpsert_.remove(index);
+          onChanged();
+        } else {
+          resourcesToUpsertBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder getResourcesToUpsertBuilder(
+          int index) {
+        return getResourcesToUpsertFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder getResourcesToUpsertOrBuilder(
+          int index) {
+        if (resourcesToUpsertBuilder_ == null) {
+          return resourcesToUpsert_.get(index);  } else {
+          return resourcesToUpsertBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder> 
+           getResourcesToUpsertOrBuilderList() {
+        if (resourcesToUpsertBuilder_ != null) {
+          return resourcesToUpsertBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(resourcesToUpsert_);
+        }
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder addResourcesToUpsertBuilder() {
+        return getResourcesToUpsertFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder addResourcesToUpsertBuilder(
+          int index) {
+        return getResourcesToUpsertFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The list of individual resource configurations.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.ResourceDistributionListConfig resourcesToUpsert = 4;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder> 
+           getResourcesToUpsertBuilderList() {
+        return getResourcesToUpsertFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder> 
+          getResourcesToUpsertFieldBuilder() {
+        if (resourcesToUpsertBuilder_ == null) {
+          resourcesToUpsertBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfig.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ResourceDistributionListConfigOrBuilder>(
+                  resourcesToUpsert_,
+                  ((bitField0_ & 0x00000008) != 0),
+                  getParentForChildren(),
+                  isClean());
+          resourcesToUpsert_ = null;
+        }
+        return resourcesToUpsertBuilder_;
+      }
+
+      private java.lang.Object distributionListGroupId_ = "";
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list group, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 5;</code>
+       * @return The distributionListGroupId.
+       */
+      public java.lang.String getDistributionListGroupId() {
+        java.lang.Object ref = distributionListGroupId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distributionListGroupId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list group, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 5;</code>
+       * @return The bytes for distributionListGroupId.
+       */
+      public com.google.protobuf.ByteString
+          getDistributionListGroupIdBytes() {
+        java.lang.Object ref = distributionListGroupId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distributionListGroupId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list group, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 5;</code>
+       * @param value The distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        distributionListGroupId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list group, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistributionListGroupId() {
+        distributionListGroupId_ = getDefaultInstance().getDistributionListGroupId();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional identifier of an existing distribution list group, if specified, is used for an update.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 5;</code>
+       * @param value The bytes for distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        distributionListGroupId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:notificationadmin.CreateOrUpdateDistributionListGroupRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:notificationadmin.CreateOrUpdateDistributionListGroupRequest)
+    private static final com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CreateOrUpdateDistributionListGroupRequest>
+        PARSER = new com.google.protobuf.AbstractParser<CreateOrUpdateDistributionListGroupRequest>() {
+      @java.lang.Override
+      public CreateOrUpdateDistributionListGroupRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CreateOrUpdateDistributionListGroupRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CreateOrUpdateDistributionListGroupRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CreateOrUpdateDistributionListGroupResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:notificationadmin.CreateOrUpdateDistributionListGroupResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Identifier of the distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 1;</code>
+     * @return The distributionListGroupId.
+     */
+    java.lang.String getDistributionListGroupId();
+    /**
+     * <pre>
+     * Identifier of the distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 1;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes();
+
+    /**
+     * <pre>
+     * The parent resource CRN that groups resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The parentResourceCrn.
+     */
+    java.lang.String getParentResourceCrn();
+    /**
+     * <pre>
+     * The parent resource CRN that groups resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    com.google.protobuf.ByteString
+        getParentResourceCrnBytes();
+
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails> 
+        getDistributionListDetailsList();
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails getDistributionListDetails(int index);
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    int getDistributionListDetailsCount();
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder> 
+        getDistributionListDetailsOrBuilderList();
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder getDistributionListDetailsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Response object for distribution list group creation/update.
+   * </pre>
+   *
+   * Protobuf type {@code notificationadmin.CreateOrUpdateDistributionListGroupResponse}
+   */
+  public static final class CreateOrUpdateDistributionListGroupResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:notificationadmin.CreateOrUpdateDistributionListGroupResponse)
+      CreateOrUpdateDistributionListGroupResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CreateOrUpdateDistributionListGroupResponse.newBuilder() to construct.
+    private CreateOrUpdateDistributionListGroupResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CreateOrUpdateDistributionListGroupResponse() {
+      distributionListGroupId_ = "";
+      parentResourceCrn_ = "";
+      distributionListDetails_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateOrUpdateDistributionListGroupResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.Builder.class);
+    }
+
+    public static final int DISTRIBUTIONLISTGROUPID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object distributionListGroupId_ = "";
+    /**
+     * <pre>
+     * Identifier of the distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 1;</code>
+     * @return The distributionListGroupId.
+     */
+    @java.lang.Override
+    public java.lang.String getDistributionListGroupId() {
+      java.lang.Object ref = distributionListGroupId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distributionListGroupId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Identifier of the distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 1;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes() {
+      java.lang.Object ref = distributionListGroupId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distributionListGroupId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PARENTRESOURCECRN_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object parentResourceCrn_ = "";
+    /**
+     * <pre>
+     * The parent resource CRN that groups resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The parentResourceCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getParentResourceCrn() {
+      java.lang.Object ref = parentResourceCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        parentResourceCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The parent resource CRN that groups resources.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getParentResourceCrnBytes() {
+      java.lang.Object ref = parentResourceCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        parentResourceCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTIONLISTDETAILS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails> distributionListDetails_;
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails> getDistributionListDetailsList() {
+      return distributionListDetails_;
+    }
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder> 
+        getDistributionListDetailsOrBuilderList() {
+      return distributionListDetails_;
+    }
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    @java.lang.Override
+    public int getDistributionListDetailsCount() {
+      return distributionListDetails_.size();
+    }
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails getDistributionListDetails(int index) {
+      return distributionListDetails_.get(index);
+    }
+    /**
+     * <pre>
+     * Details of all created/updated distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder getDistributionListDetailsOrBuilder(
+        int index) {
+      return distributionListDetails_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListGroupId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, distributionListGroupId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(parentResourceCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, parentResourceCrn_);
+      }
+      for (int i = 0; i < distributionListDetails_.size(); i++) {
+        output.writeMessage(3, distributionListDetails_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListGroupId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, distributionListGroupId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(parentResourceCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, parentResourceCrn_);
+      }
+      for (int i = 0; i < distributionListDetails_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, distributionListDetails_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse other = (com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse) obj;
+
+      if (!getDistributionListGroupId()
+          .equals(other.getDistributionListGroupId())) return false;
+      if (!getParentResourceCrn()
+          .equals(other.getParentResourceCrn())) return false;
+      if (!getDistributionListDetailsList()
+          .equals(other.getDistributionListDetailsList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DISTRIBUTIONLISTGROUPID_FIELD_NUMBER;
+      hash = (53 * hash) + getDistributionListGroupId().hashCode();
+      hash = (37 * hash) + PARENTRESOURCECRN_FIELD_NUMBER;
+      hash = (53 * hash) + getParentResourceCrn().hashCode();
+      if (getDistributionListDetailsCount() > 0) {
+        hash = (37 * hash) + DISTRIBUTIONLISTDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getDistributionListDetailsList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for distribution list group creation/update.
+     * </pre>
+     *
+     * Protobuf type {@code notificationadmin.CreateOrUpdateDistributionListGroupResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:notificationadmin.CreateOrUpdateDistributionListGroupResponse)
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        distributionListGroupId_ = "";
+        parentResourceCrn_ = "";
+        if (distributionListDetailsBuilder_ == null) {
+          distributionListDetails_ = java.util.Collections.emptyList();
+        } else {
+          distributionListDetails_ = null;
+          distributionListDetailsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse build() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse buildPartial() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse result = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse result) {
+        if (distributionListDetailsBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0)) {
+            distributionListDetails_ = java.util.Collections.unmodifiableList(distributionListDetails_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.distributionListDetails_ = distributionListDetails_;
+        } else {
+          result.distributionListDetails_ = distributionListDetailsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.distributionListGroupId_ = distributionListGroupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.parentResourceCrn_ = parentResourceCrn_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse other) {
+        if (other == com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.getDefaultInstance()) return this;
+        if (!other.getDistributionListGroupId().isEmpty()) {
+          distributionListGroupId_ = other.distributionListGroupId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getParentResourceCrn().isEmpty()) {
+          parentResourceCrn_ = other.parentResourceCrn_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (distributionListDetailsBuilder_ == null) {
+          if (!other.distributionListDetails_.isEmpty()) {
+            if (distributionListDetails_.isEmpty()) {
+              distributionListDetails_ = other.distributionListDetails_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureDistributionListDetailsIsMutable();
+              distributionListDetails_.addAll(other.distributionListDetails_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.distributionListDetails_.isEmpty()) {
+            if (distributionListDetailsBuilder_.isEmpty()) {
+              distributionListDetailsBuilder_.dispose();
+              distributionListDetailsBuilder_ = null;
+              distributionListDetails_ = other.distributionListDetails_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              distributionListDetailsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getDistributionListDetailsFieldBuilder() : null;
+            } else {
+              distributionListDetailsBuilder_.addAllMessages(other.distributionListDetails_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                distributionListGroupId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                parentResourceCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.parser(),
+                        extensionRegistry);
+                if (distributionListDetailsBuilder_ == null) {
+                  ensureDistributionListDetailsIsMutable();
+                  distributionListDetails_.add(m);
+                } else {
+                  distributionListDetailsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object distributionListGroupId_ = "";
+      /**
+       * <pre>
+       * Identifier of the distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 1;</code>
+       * @return The distributionListGroupId.
+       */
+      public java.lang.String getDistributionListGroupId() {
+        java.lang.Object ref = distributionListGroupId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distributionListGroupId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Identifier of the distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 1;</code>
+       * @return The bytes for distributionListGroupId.
+       */
+      public com.google.protobuf.ByteString
+          getDistributionListGroupIdBytes() {
+        java.lang.Object ref = distributionListGroupId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distributionListGroupId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Identifier of the distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 1;</code>
+       * @param value The distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        distributionListGroupId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Identifier of the distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistributionListGroupId() {
+        distributionListGroupId_ = getDefaultInstance().getDistributionListGroupId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Identifier of the distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 1;</code>
+       * @param value The bytes for distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        distributionListGroupId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object parentResourceCrn_ = "";
+      /**
+       * <pre>
+       * The parent resource CRN that groups resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return The parentResourceCrn.
+       */
+      public java.lang.String getParentResourceCrn() {
+        java.lang.Object ref = parentResourceCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          parentResourceCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return The bytes for parentResourceCrn.
+       */
+      public com.google.protobuf.ByteString
+          getParentResourceCrnBytes() {
+        java.lang.Object ref = parentResourceCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          parentResourceCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @param value The parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        parentResourceCrn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearParentResourceCrn() {
+        parentResourceCrn_ = getDefaultInstance().getParentResourceCrn();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The parent resource CRN that groups resources.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @param value The bytes for parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        parentResourceCrn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails> distributionListDetails_ =
+        java.util.Collections.emptyList();
+      private void ensureDistributionListDetailsIsMutable() {
+        if (!((bitField0_ & 0x00000004) != 0)) {
+          distributionListDetails_ = new java.util.ArrayList<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails>(distributionListDetails_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder> distributionListDetailsBuilder_;
+
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails> getDistributionListDetailsList() {
+        if (distributionListDetailsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(distributionListDetails_);
+        } else {
+          return distributionListDetailsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public int getDistributionListDetailsCount() {
+        if (distributionListDetailsBuilder_ == null) {
+          return distributionListDetails_.size();
+        } else {
+          return distributionListDetailsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails getDistributionListDetails(int index) {
+        if (distributionListDetailsBuilder_ == null) {
+          return distributionListDetails_.get(index);
+        } else {
+          return distributionListDetailsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder setDistributionListDetails(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails value) {
+        if (distributionListDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDistributionListDetailsIsMutable();
+          distributionListDetails_.set(index, value);
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder setDistributionListDetails(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder builderForValue) {
+        if (distributionListDetailsBuilder_ == null) {
+          ensureDistributionListDetailsIsMutable();
+          distributionListDetails_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder addDistributionListDetails(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails value) {
+        if (distributionListDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDistributionListDetailsIsMutable();
+          distributionListDetails_.add(value);
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder addDistributionListDetails(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails value) {
+        if (distributionListDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDistributionListDetailsIsMutable();
+          distributionListDetails_.add(index, value);
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder addDistributionListDetails(
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder builderForValue) {
+        if (distributionListDetailsBuilder_ == null) {
+          ensureDistributionListDetailsIsMutable();
+          distributionListDetails_.add(builderForValue.build());
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder addDistributionListDetails(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder builderForValue) {
+        if (distributionListDetailsBuilder_ == null) {
+          ensureDistributionListDetailsIsMutable();
+          distributionListDetails_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder addAllDistributionListDetails(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails> values) {
+        if (distributionListDetailsBuilder_ == null) {
+          ensureDistributionListDetailsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, distributionListDetails_);
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder clearDistributionListDetails() {
+        if (distributionListDetailsBuilder_ == null) {
+          distributionListDetails_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public Builder removeDistributionListDetails(int index) {
+        if (distributionListDetailsBuilder_ == null) {
+          ensureDistributionListDetailsIsMutable();
+          distributionListDetails_.remove(index);
+          onChanged();
+        } else {
+          distributionListDetailsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder getDistributionListDetailsBuilder(
+          int index) {
+        return getDistributionListDetailsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder getDistributionListDetailsOrBuilder(
+          int index) {
+        if (distributionListDetailsBuilder_ == null) {
+          return distributionListDetails_.get(index);  } else {
+          return distributionListDetailsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder> 
+           getDistributionListDetailsOrBuilderList() {
+        if (distributionListDetailsBuilder_ != null) {
+          return distributionListDetailsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(distributionListDetails_);
+        }
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder addDistributionListDetailsBuilder() {
+        return getDistributionListDetailsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder addDistributionListDetailsBuilder(
+          int index) {
+        return getDistributionListDetailsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Details of all created/updated distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionListDetails distributionListDetails = 3;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder> 
+           getDistributionListDetailsBuilderList() {
+        return getDistributionListDetailsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder> 
+          getDistributionListDetailsFieldBuilder() {
+        if (distributionListDetailsBuilder_ == null) {
+          distributionListDetailsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetails.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListDetailsOrBuilder>(
+                  distributionListDetails_,
+                  ((bitField0_ & 0x00000004) != 0),
+                  getParentForChildren(),
+                  isClean());
+          distributionListDetails_ = null;
+        }
+        return distributionListDetailsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:notificationadmin.CreateOrUpdateDistributionListGroupResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:notificationadmin.CreateOrUpdateDistributionListGroupResponse)
+    private static final com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CreateOrUpdateDistributionListGroupResponse>
+        PARSER = new com.google.protobuf.AbstractParser<CreateOrUpdateDistributionListGroupResponse>() {
+      @java.lang.Override
+      public CreateOrUpdateDistributionListGroupResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CreateOrUpdateDistributionListGroupResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CreateOrUpdateDistributionListGroupResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ListDistributionListGroupsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:notificationadmin.ListDistributionListGroupsRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be fetched.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The accountId.
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be fetched.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be returned.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return Whether the parentResourceCrn field is set.
+     */
+    boolean hasParentResourceCrn();
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be returned.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The parentResourceCrn.
+     */
+    java.lang.String getParentResourceCrn();
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be returned.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    com.google.protobuf.ByteString
+        getParentResourceCrnBytes();
+
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return Whether the distributionListGroupId field is set.
+     */
+    boolean hasDistributionListGroupId();
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The distributionListGroupId.
+     */
+    java.lang.String getDistributionListGroupId();
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes();
+
+    /**
+     * <pre>
+     * The page size.
+     * </pre>
+     *
+     * <code>int32 pageSize = 4 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 50];</code>
+     * @return The pageSize.
+     */
+    int getPageSize();
+
+    /**
+     * <pre>
+     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+     * </pre>
+     *
+     * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+     * @return The pageToken.
+     */
+    java.lang.String getPageToken();
+    /**
+     * <pre>
+     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+     * </pre>
+     *
+     * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+     * @return The bytes for pageToken.
+     */
+    com.google.protobuf.ByteString
+        getPageTokenBytes();
+
+    /**
+     * <pre>
+     * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 6;</code>
+     * @return The distributionListManagementType.
+     */
+    java.lang.String getDistributionListManagementType();
+    /**
+     * <pre>
+     * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 6;</code>
+     * @return The bytes for distributionListManagementType.
+     */
+    com.google.protobuf.ByteString
+        getDistributionListManagementTypeBytes();
+
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.AdminParentResourceOneOfCase getAdminParentResourceOneOfCase();
+  }
+  /**
+   * <pre>
+   * Request object for ListDistributionListGroups.
+   * </pre>
+   *
+   * Protobuf type {@code notificationadmin.ListDistributionListGroupsRequest}
+   */
+  public static final class ListDistributionListGroupsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:notificationadmin.ListDistributionListGroupsRequest)
+      ListDistributionListGroupsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ListDistributionListGroupsRequest.newBuilder() to construct.
+    private ListDistributionListGroupsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ListDistributionListGroupsRequest() {
+      accountId_ = "";
+      pageToken_ = "";
+      distributionListManagementType_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDistributionListGroupsRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.Builder.class);
+    }
+
+    private int adminParentResourceOneOfCase_ = 0;
+    @SuppressWarnings("serial")
+    private java.lang.Object adminParentResourceOneOf_;
+    public enum AdminParentResourceOneOfCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      PARENTRESOURCECRN(2),
+      DISTRIBUTIONLISTGROUPID(3),
+      ADMINPARENTRESOURCEONEOF_NOT_SET(0);
+      private final int value;
+      private AdminParentResourceOneOfCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static AdminParentResourceOneOfCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static AdminParentResourceOneOfCase forNumber(int value) {
+        switch (value) {
+          case 2: return PARENTRESOURCECRN;
+          case 3: return DISTRIBUTIONLISTGROUPID;
+          case 0: return ADMINPARENTRESOURCEONEOF_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public AdminParentResourceOneOfCase
+    getAdminParentResourceOneOfCase() {
+      return AdminParentResourceOneOfCase.forNumber(
+          adminParentResourceOneOfCase_);
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object accountId_ = "";
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be fetched.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The accountId.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be fetched.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PARENTRESOURCECRN_FIELD_NUMBER = 2;
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be returned.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return Whether the parentResourceCrn field is set.
+     */
+    public boolean hasParentResourceCrn() {
+      return adminParentResourceOneOfCase_ == 2;
+    }
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be returned.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The parentResourceCrn.
+     */
+    public java.lang.String getParentResourceCrn() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 2) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (adminParentResourceOneOfCase_ == 2) {
+          adminParentResourceOneOf_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be returned.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    public com.google.protobuf.ByteString
+        getParentResourceCrnBytes() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 2) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        if (adminParentResourceOneOfCase_ == 2) {
+          adminParentResourceOneOf_ = b;
+        }
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTIONLISTGROUPID_FIELD_NUMBER = 3;
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return Whether the distributionListGroupId field is set.
+     */
+    public boolean hasDistributionListGroupId() {
+      return adminParentResourceOneOfCase_ == 3;
+    }
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The distributionListGroupId.
+     */
+    public java.lang.String getDistributionListGroupId() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 3) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (adminParentResourceOneOfCase_ == 3) {
+          adminParentResourceOneOf_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    public com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 3) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        if (adminParentResourceOneOfCase_ == 3) {
+          adminParentResourceOneOf_ = b;
+        }
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PAGESIZE_FIELD_NUMBER = 4;
+    private int pageSize_ = 0;
+    /**
+     * <pre>
+     * The page size.
+     * </pre>
+     *
+     * <code>int32 pageSize = 4 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 50];</code>
+     * @return The pageSize.
+     */
+    @java.lang.Override
+    public int getPageSize() {
+      return pageSize_;
+    }
+
+    public static final int PAGETOKEN_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object pageToken_ = "";
+    /**
+     * <pre>
+     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+     * </pre>
+     *
+     * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+     * @return The pageToken.
+     */
+    @java.lang.Override
+    public java.lang.String getPageToken() {
+      java.lang.Object ref = pageToken_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pageToken_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+     * </pre>
+     *
+     * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+     * @return The bytes for pageToken.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPageTokenBytes() {
+      java.lang.Object ref = pageToken_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pageToken_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTIONLISTMANAGEMENTTYPE_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object distributionListManagementType_ = "";
+    /**
+     * <pre>
+     * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 6;</code>
+     * @return The distributionListManagementType.
+     */
+    @java.lang.Override
+    public java.lang.String getDistributionListManagementType() {
+      java.lang.Object ref = distributionListManagementType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distributionListManagementType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+     * </pre>
+     *
+     * <code>string distributionListManagementType = 6;</code>
+     * @return The bytes for distributionListManagementType.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDistributionListManagementTypeBytes() {
+      java.lang.Object ref = distributionListManagementType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distributionListManagementType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (adminParentResourceOneOfCase_ == 2) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, adminParentResourceOneOf_);
+      }
+      if (adminParentResourceOneOfCase_ == 3) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, adminParentResourceOneOf_);
+      }
+      if (pageSize_ != 0) {
+        output.writeInt32(4, pageSize_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, pageToken_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListManagementType_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, distributionListManagementType_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (adminParentResourceOneOfCase_ == 2) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, adminParentResourceOneOf_);
+      }
+      if (adminParentResourceOneOfCase_ == 3) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, adminParentResourceOneOf_);
+      }
+      if (pageSize_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, pageSize_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, pageToken_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(distributionListManagementType_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, distributionListManagementType_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest other = (com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest) obj;
+
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (getPageSize()
+          != other.getPageSize()) return false;
+      if (!getPageToken()
+          .equals(other.getPageToken())) return false;
+      if (!getDistributionListManagementType()
+          .equals(other.getDistributionListManagementType())) return false;
+      if (!getAdminParentResourceOneOfCase().equals(other.getAdminParentResourceOneOfCase())) return false;
+      switch (adminParentResourceOneOfCase_) {
+        case 2:
+          if (!getParentResourceCrn()
+              .equals(other.getParentResourceCrn())) return false;
+          break;
+        case 3:
+          if (!getDistributionListGroupId()
+              .equals(other.getDistributionListGroupId())) return false;
+          break;
+        case 0:
+        default:
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + PAGESIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getPageSize();
+      hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
+      hash = (53 * hash) + getPageToken().hashCode();
+      hash = (37 * hash) + DISTRIBUTIONLISTMANAGEMENTTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getDistributionListManagementType().hashCode();
+      switch (adminParentResourceOneOfCase_) {
+        case 2:
+          hash = (37 * hash) + PARENTRESOURCECRN_FIELD_NUMBER;
+          hash = (53 * hash) + getParentResourceCrn().hashCode();
+          break;
+        case 3:
+          hash = (37 * hash) + DISTRIBUTIONLISTGROUPID_FIELD_NUMBER;
+          hash = (53 * hash) + getDistributionListGroupId().hashCode();
+          break;
+        case 0:
+        default:
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for ListDistributionListGroups.
+     * </pre>
+     *
+     * Protobuf type {@code notificationadmin.ListDistributionListGroupsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:notificationadmin.ListDistributionListGroupsRequest)
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        accountId_ = "";
+        pageSize_ = 0;
+        pageToken_ = "";
+        distributionListManagementType_ = "";
+        adminParentResourceOneOfCase_ = 0;
+        adminParentResourceOneOf_ = null;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest build() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest buildPartial() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest result = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.accountId_ = accountId_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.pageSize_ = pageSize_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.pageToken_ = pageToken_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.distributionListManagementType_ = distributionListManagementType_;
+        }
+      }
+
+      private void buildPartialOneofs(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest result) {
+        result.adminParentResourceOneOfCase_ = adminParentResourceOneOfCase_;
+        result.adminParentResourceOneOf_ = this.adminParentResourceOneOf_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest other) {
+        if (other == com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.getPageSize() != 0) {
+          setPageSize(other.getPageSize());
+        }
+        if (!other.getPageToken().isEmpty()) {
+          pageToken_ = other.pageToken_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getDistributionListManagementType().isEmpty()) {
+          distributionListManagementType_ = other.distributionListManagementType_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        switch (other.getAdminParentResourceOneOfCase()) {
+          case PARENTRESOURCECRN: {
+            adminParentResourceOneOfCase_ = 2;
+            adminParentResourceOneOf_ = other.adminParentResourceOneOf_;
+            onChanged();
+            break;
+          }
+          case DISTRIBUTIONLISTGROUPID: {
+            adminParentResourceOneOfCase_ = 3;
+            adminParentResourceOneOf_ = other.adminParentResourceOneOf_;
+            onChanged();
+            break;
+          }
+          case ADMINPARENTRESOURCEONEOF_NOT_SET: {
+            break;
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                java.lang.String s = input.readStringRequireUtf8();
+                adminParentResourceOneOfCase_ = 2;
+                adminParentResourceOneOf_ = s;
+                break;
+              } // case 18
+              case 26: {
+                java.lang.String s = input.readStringRequireUtf8();
+                adminParentResourceOneOfCase_ = 3;
+                adminParentResourceOneOf_ = s;
+                break;
+              } // case 26
+              case 32: {
+                pageSize_ = input.readInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 42: {
+                pageToken_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                distributionListManagementType_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int adminParentResourceOneOfCase_ = 0;
+      private java.lang.Object adminParentResourceOneOf_;
+      public AdminParentResourceOneOfCase
+          getAdminParentResourceOneOfCase() {
+        return AdminParentResourceOneOfCase.forNumber(
+            adminParentResourceOneOfCase_);
+      }
+
+      public Builder clearAdminParentResourceOneOf() {
+        adminParentResourceOneOfCase_ = 0;
+        adminParentResourceOneOf_ = null;
+        onChanged();
+        return this;
+      }
+
+      private int bitField0_;
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be fetched.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return The accountId.
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be fetched.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be fetched.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        accountId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be fetched.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountId() {
+        accountId_ = getDefaultInstance().getAccountId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be fetched.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        accountId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be returned.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return Whether the parentResourceCrn field is set.
+       */
+      @java.lang.Override
+      public boolean hasParentResourceCrn() {
+        return adminParentResourceOneOfCase_ == 2;
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be returned.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return The parentResourceCrn.
+       */
+      @java.lang.Override
+      public java.lang.String getParentResourceCrn() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 2) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (adminParentResourceOneOfCase_ == 2) {
+            adminParentResourceOneOf_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be returned.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return The bytes for parentResourceCrn.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getParentResourceCrnBytes() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 2) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          if (adminParentResourceOneOfCase_ == 2) {
+            adminParentResourceOneOf_ = b;
+          }
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be returned.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @param value The parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        adminParentResourceOneOfCase_ = 2;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be returned.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearParentResourceCrn() {
+        if (adminParentResourceOneOfCase_ == 2) {
+          adminParentResourceOneOfCase_ = 0;
+          adminParentResourceOneOf_ = null;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be returned.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @param value The bytes for parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        adminParentResourceOneOfCase_ = 2;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return Whether the distributionListGroupId field is set.
+       */
+      @java.lang.Override
+      public boolean hasDistributionListGroupId() {
+        return adminParentResourceOneOfCase_ == 3;
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return The distributionListGroupId.
+       */
+      @java.lang.Override
+      public java.lang.String getDistributionListGroupId() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 3) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (adminParentResourceOneOfCase_ == 3) {
+            adminParentResourceOneOf_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return The bytes for distributionListGroupId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getDistributionListGroupIdBytes() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 3) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          if (adminParentResourceOneOfCase_ == 3) {
+            adminParentResourceOneOf_ = b;
+          }
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @param value The distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        adminParentResourceOneOfCase_ = 3;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistributionListGroupId() {
+        if (adminParentResourceOneOfCase_ == 3) {
+          adminParentResourceOneOfCase_ = 0;
+          adminParentResourceOneOf_ = null;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @param value The bytes for distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        adminParentResourceOneOfCase_ = 3;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int pageSize_ ;
+      /**
+       * <pre>
+       * The page size.
+       * </pre>
+       *
+       * <code>int32 pageSize = 4 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 50];</code>
+       * @return The pageSize.
+       */
+      @java.lang.Override
+      public int getPageSize() {
+        return pageSize_;
+      }
+      /**
+       * <pre>
+       * The page size.
+       * </pre>
+       *
+       * <code>int32 pageSize = 4 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 50];</code>
+       * @param value The pageSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPageSize(int value) {
+
+        pageSize_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The page size.
+       * </pre>
+       *
+       * <code>int32 pageSize = 4 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 50];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPageSize() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        pageSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object pageToken_ = "";
+      /**
+       * <pre>
+       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+       * </pre>
+       *
+       * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+       * @return The pageToken.
+       */
+      public java.lang.String getPageToken() {
+        java.lang.Object ref = pageToken_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pageToken_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+       * </pre>
+       *
+       * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+       * @return The bytes for pageToken.
+       */
+      public com.google.protobuf.ByteString
+          getPageTokenBytes() {
+        java.lang.Object ref = pageToken_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pageToken_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+       * </pre>
+       *
+       * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+       * @param value The pageToken to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPageToken(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        pageToken_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+       * </pre>
+       *
+       * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPageToken() {
+        pageToken_ = getDefaultInstance().getPageToken();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+       * </pre>
+       *
+       * <code>string pageToken = 5 [(.options.FieldExtension.pagingInputToken) = true];</code>
+       * @param value The bytes for pageToken to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPageTokenBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        pageToken_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object distributionListManagementType_ = "";
+      /**
+       * <pre>
+       * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 6;</code>
+       * @return The distributionListManagementType.
+       */
+      public java.lang.String getDistributionListManagementType() {
+        java.lang.Object ref = distributionListManagementType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distributionListManagementType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 6;</code>
+       * @return The bytes for distributionListManagementType.
+       */
+      public com.google.protobuf.ByteString
+          getDistributionListManagementTypeBytes() {
+        java.lang.Object ref = distributionListManagementType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distributionListManagementType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 6;</code>
+       * @param value The distributionListManagementType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListManagementType(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        distributionListManagementType_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistributionListManagementType() {
+        distributionListManagementType_ = getDefaultInstance().getDistributionListManagementType();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The optional distribution list management type, if specified, only distribution lists related to this type will be returned.
+       * </pre>
+       *
+       * <code>string distributionListManagementType = 6;</code>
+       * @param value The bytes for distributionListManagementType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListManagementTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        distributionListManagementType_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:notificationadmin.ListDistributionListGroupsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:notificationadmin.ListDistributionListGroupsRequest)
+    private static final com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ListDistributionListGroupsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ListDistributionListGroupsRequest>() {
+      @java.lang.Override
+      public ListDistributionListGroupsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ListDistributionListGroupsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ListDistributionListGroupsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ListDistributionListGroupsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:notificationadmin.ListDistributionListGroupsResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList> 
+        getDistributionListsList();
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList getDistributionLists(int index);
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    int getDistributionListsCount();
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder> 
+        getDistributionListsOrBuilderList();
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder getDistributionListsOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * The token to use when requesting the next set of results. If not present, there are no additional results.
+     * </pre>
+     *
+     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+     * @return The nextPageToken.
+     */
+    java.lang.String getNextPageToken();
+    /**
+     * <pre>
+     * The token to use when requesting the next set of results. If not present, there are no additional results.
+     * </pre>
+     *
+     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+     * @return The bytes for nextPageToken.
+     */
+    com.google.protobuf.ByteString
+        getNextPageTokenBytes();
+
+    /**
+     * <pre>
+     * This field represents the total number of distribution list subscriptions.
+     * </pre>
+     *
+     * <code>int32 totalDistributionLists = 3;</code>
+     * @return The totalDistributionLists.
+     */
+    int getTotalDistributionLists();
+  }
+  /**
+   * <pre>
+   * Response object for ListDistributionListGroups.
+   * </pre>
+   *
+   * Protobuf type {@code notificationadmin.ListDistributionListGroupsResponse}
+   */
+  public static final class ListDistributionListGroupsResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:notificationadmin.ListDistributionListGroupsResponse)
+      ListDistributionListGroupsResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ListDistributionListGroupsResponse.newBuilder() to construct.
+    private ListDistributionListGroupsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ListDistributionListGroupsResponse() {
+      distributionLists_ = java.util.Collections.emptyList();
+      nextPageToken_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDistributionListGroupsResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.Builder.class);
+    }
+
+    public static final int DISTRIBUTIONLISTS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList> distributionLists_;
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList> getDistributionListsList() {
+      return distributionLists_;
+    }
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder> 
+        getDistributionListsOrBuilderList() {
+      return distributionLists_;
+    }
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    @java.lang.Override
+    public int getDistributionListsCount() {
+      return distributionLists_.size();
+    }
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList getDistributionLists(int index) {
+      return distributionLists_.get(index);
+    }
+    /**
+     * <pre>
+     * List of distribution lists.
+     * </pre>
+     *
+     * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder getDistributionListsOrBuilder(
+        int index) {
+      return distributionLists_.get(index);
+    }
+
+    public static final int NEXTPAGETOKEN_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object nextPageToken_ = "";
+    /**
+     * <pre>
+     * The token to use when requesting the next set of results. If not present, there are no additional results.
+     * </pre>
+     *
+     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+     * @return The nextPageToken.
+     */
+    @java.lang.Override
+    public java.lang.String getNextPageToken() {
+      java.lang.Object ref = nextPageToken_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        nextPageToken_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The token to use when requesting the next set of results. If not present, there are no additional results.
+     * </pre>
+     *
+     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+     * @return The bytes for nextPageToken.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNextPageTokenBytes() {
+      java.lang.Object ref = nextPageToken_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        nextPageToken_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TOTALDISTRIBUTIONLISTS_FIELD_NUMBER = 3;
+    private int totalDistributionLists_ = 0;
+    /**
+     * <pre>
+     * This field represents the total number of distribution list subscriptions.
+     * </pre>
+     *
+     * <code>int32 totalDistributionLists = 3;</code>
+     * @return The totalDistributionLists.
+     */
+    @java.lang.Override
+    public int getTotalDistributionLists() {
+      return totalDistributionLists_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < distributionLists_.size(); i++) {
+        output.writeMessage(1, distributionLists_.get(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, nextPageToken_);
+      }
+      if (totalDistributionLists_ != 0) {
+        output.writeInt32(3, totalDistributionLists_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < distributionLists_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, distributionLists_.get(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, nextPageToken_);
+      }
+      if (totalDistributionLists_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, totalDistributionLists_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse other = (com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse) obj;
+
+      if (!getDistributionListsList()
+          .equals(other.getDistributionListsList())) return false;
+      if (!getNextPageToken()
+          .equals(other.getNextPageToken())) return false;
+      if (getTotalDistributionLists()
+          != other.getTotalDistributionLists()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getDistributionListsCount() > 0) {
+        hash = (37 * hash) + DISTRIBUTIONLISTS_FIELD_NUMBER;
+        hash = (53 * hash) + getDistributionListsList().hashCode();
+      }
+      hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
+      hash = (53 * hash) + getNextPageToken().hashCode();
+      hash = (37 * hash) + TOTALDISTRIBUTIONLISTS_FIELD_NUMBER;
+      hash = (53 * hash) + getTotalDistributionLists();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for ListDistributionListGroups.
+     * </pre>
+     *
+     * Protobuf type {@code notificationadmin.ListDistributionListGroupsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:notificationadmin.ListDistributionListGroupsResponse)
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        if (distributionListsBuilder_ == null) {
+          distributionLists_ = java.util.Collections.emptyList();
+        } else {
+          distributionLists_ = null;
+          distributionListsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        nextPageToken_ = "";
+        totalDistributionLists_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_ListDistributionListGroupsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse build() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse buildPartial() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse result = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse result) {
+        if (distributionListsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            distributionLists_ = java.util.Collections.unmodifiableList(distributionLists_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.distributionLists_ = distributionLists_;
+        } else {
+          result.distributionLists_ = distributionListsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.nextPageToken_ = nextPageToken_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.totalDistributionLists_ = totalDistributionLists_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse other) {
+        if (other == com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse.getDefaultInstance()) return this;
+        if (distributionListsBuilder_ == null) {
+          if (!other.distributionLists_.isEmpty()) {
+            if (distributionLists_.isEmpty()) {
+              distributionLists_ = other.distributionLists_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureDistributionListsIsMutable();
+              distributionLists_.addAll(other.distributionLists_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.distributionLists_.isEmpty()) {
+            if (distributionListsBuilder_.isEmpty()) {
+              distributionListsBuilder_.dispose();
+              distributionListsBuilder_ = null;
+              distributionLists_ = other.distributionLists_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              distributionListsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getDistributionListsFieldBuilder() : null;
+            } else {
+              distributionListsBuilder_.addAllMessages(other.distributionLists_);
+            }
+          }
+        }
+        if (!other.getNextPageToken().isEmpty()) {
+          nextPageToken_ = other.nextPageToken_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (other.getTotalDistributionLists() != 0) {
+          setTotalDistributionLists(other.getTotalDistributionLists());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.parser(),
+                        extensionRegistry);
+                if (distributionListsBuilder_ == null) {
+                  ensureDistributionListsIsMutable();
+                  distributionLists_.add(m);
+                } else {
+                  distributionListsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                nextPageToken_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 24: {
+                totalDistributionLists_ = input.readInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList> distributionLists_ =
+        java.util.Collections.emptyList();
+      private void ensureDistributionListsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          distributionLists_ = new java.util.ArrayList<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList>(distributionLists_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder> distributionListsBuilder_;
+
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList> getDistributionListsList() {
+        if (distributionListsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(distributionLists_);
+        } else {
+          return distributionListsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public int getDistributionListsCount() {
+        if (distributionListsBuilder_ == null) {
+          return distributionLists_.size();
+        } else {
+          return distributionListsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList getDistributionLists(int index) {
+        if (distributionListsBuilder_ == null) {
+          return distributionLists_.get(index);
+        } else {
+          return distributionListsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder setDistributionLists(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList value) {
+        if (distributionListsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDistributionListsIsMutable();
+          distributionLists_.set(index, value);
+          onChanged();
+        } else {
+          distributionListsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder setDistributionLists(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder builderForValue) {
+        if (distributionListsBuilder_ == null) {
+          ensureDistributionListsIsMutable();
+          distributionLists_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          distributionListsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder addDistributionLists(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList value) {
+        if (distributionListsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDistributionListsIsMutable();
+          distributionLists_.add(value);
+          onChanged();
+        } else {
+          distributionListsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder addDistributionLists(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList value) {
+        if (distributionListsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDistributionListsIsMutable();
+          distributionLists_.add(index, value);
+          onChanged();
+        } else {
+          distributionListsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder addDistributionLists(
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder builderForValue) {
+        if (distributionListsBuilder_ == null) {
+          ensureDistributionListsIsMutable();
+          distributionLists_.add(builderForValue.build());
+          onChanged();
+        } else {
+          distributionListsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder addDistributionLists(
+          int index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder builderForValue) {
+        if (distributionListsBuilder_ == null) {
+          ensureDistributionListsIsMutable();
+          distributionLists_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          distributionListsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder addAllDistributionLists(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList> values) {
+        if (distributionListsBuilder_ == null) {
+          ensureDistributionListsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, distributionLists_);
+          onChanged();
+        } else {
+          distributionListsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder clearDistributionLists() {
+        if (distributionListsBuilder_ == null) {
+          distributionLists_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          distributionListsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public Builder removeDistributionLists(int index) {
+        if (distributionListsBuilder_ == null) {
+          ensureDistributionListsIsMutable();
+          distributionLists_.remove(index);
+          onChanged();
+        } else {
+          distributionListsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder getDistributionListsBuilder(
+          int index) {
+        return getDistributionListsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder getDistributionListsOrBuilder(
+          int index) {
+        if (distributionListsBuilder_ == null) {
+          return distributionLists_.get(index);  } else {
+          return distributionListsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder> 
+           getDistributionListsOrBuilderList() {
+        if (distributionListsBuilder_ != null) {
+          return distributionListsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(distributionLists_);
+        }
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder addDistributionListsBuilder() {
+        return getDistributionListsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder addDistributionListsBuilder(
+          int index) {
+        return getDistributionListsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * List of distribution lists.
+       * </pre>
+       *
+       * <code>repeated .notificationadmin.DistributionList distributionLists = 1 [(.options.FieldExtension.pagingResult) = true];</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder> 
+           getDistributionListsBuilderList() {
+        return getDistributionListsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder> 
+          getDistributionListsFieldBuilder() {
+        if (distributionListsBuilder_ == null) {
+          distributionListsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionList.Builder, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DistributionListOrBuilder>(
+                  distributionLists_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          distributionLists_ = null;
+        }
+        return distributionListsBuilder_;
+      }
+
+      private java.lang.Object nextPageToken_ = "";
+      /**
+       * <pre>
+       * The token to use when requesting the next set of results. If not present, there are no additional results.
+       * </pre>
+       *
+       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+       * @return The nextPageToken.
+       */
+      public java.lang.String getNextPageToken() {
+        java.lang.Object ref = nextPageToken_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          nextPageToken_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The token to use when requesting the next set of results. If not present, there are no additional results.
+       * </pre>
+       *
+       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+       * @return The bytes for nextPageToken.
+       */
+      public com.google.protobuf.ByteString
+          getNextPageTokenBytes() {
+        java.lang.Object ref = nextPageToken_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          nextPageToken_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The token to use when requesting the next set of results. If not present, there are no additional results.
+       * </pre>
+       *
+       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+       * @param value The nextPageToken to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNextPageToken(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        nextPageToken_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The token to use when requesting the next set of results. If not present, there are no additional results.
+       * </pre>
+       *
+       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearNextPageToken() {
+        nextPageToken_ = getDefaultInstance().getNextPageToken();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The token to use when requesting the next set of results. If not present, there are no additional results.
+       * </pre>
+       *
+       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
+       * @param value The bytes for nextPageToken to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNextPageTokenBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        nextPageToken_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private int totalDistributionLists_ ;
+      /**
+       * <pre>
+       * This field represents the total number of distribution list subscriptions.
+       * </pre>
+       *
+       * <code>int32 totalDistributionLists = 3;</code>
+       * @return The totalDistributionLists.
+       */
+      @java.lang.Override
+      public int getTotalDistributionLists() {
+        return totalDistributionLists_;
+      }
+      /**
+       * <pre>
+       * This field represents the total number of distribution list subscriptions.
+       * </pre>
+       *
+       * <code>int32 totalDistributionLists = 3;</code>
+       * @param value The totalDistributionLists to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTotalDistributionLists(int value) {
+
+        totalDistributionLists_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * This field represents the total number of distribution list subscriptions.
+       * </pre>
+       *
+       * <code>int32 totalDistributionLists = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTotalDistributionLists() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        totalDistributionLists_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:notificationadmin.ListDistributionListGroupsResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:notificationadmin.ListDistributionListGroupsResponse)
+    private static final com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ListDistributionListGroupsResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ListDistributionListGroupsResponse>() {
+      @java.lang.Override
+      public ListDistributionListGroupsResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ListDistributionListGroupsResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ListDistributionListGroupsResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListGroupsResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DeleteDistributionListGroupRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:notificationadmin.DeleteDistributionListGroupRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be deleted.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The accountId.
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be deleted.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be deleted.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return Whether the parentResourceCrn field is set.
+     */
+    boolean hasParentResourceCrn();
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be deleted.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The parentResourceCrn.
+     */
+    java.lang.String getParentResourceCrn();
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be deleted.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    com.google.protobuf.ByteString
+        getParentResourceCrnBytes();
+
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return Whether the distributionListGroupId field is set.
+     */
+    boolean hasDistributionListGroupId();
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The distributionListGroupId.
+     */
+    java.lang.String getDistributionListGroupId();
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes();
+
+    com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.AdminParentResourceOneOfCase getAdminParentResourceOneOfCase();
+  }
+  /**
+   * <pre>
+   * Request object for the deletion of Distribution List Groups.
+   * </pre>
+   *
+   * Protobuf type {@code notificationadmin.DeleteDistributionListGroupRequest}
+   */
+  public static final class DeleteDistributionListGroupRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:notificationadmin.DeleteDistributionListGroupRequest)
+      DeleteDistributionListGroupRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DeleteDistributionListGroupRequest.newBuilder() to construct.
+    private DeleteDistributionListGroupRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DeleteDistributionListGroupRequest() {
+      accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteDistributionListGroupRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.Builder.class);
+    }
+
+    private int adminParentResourceOneOfCase_ = 0;
+    @SuppressWarnings("serial")
+    private java.lang.Object adminParentResourceOneOf_;
+    public enum AdminParentResourceOneOfCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      PARENTRESOURCECRN(2),
+      DISTRIBUTIONLISTGROUPID(3),
+      ADMINPARENTRESOURCEONEOF_NOT_SET(0);
+      private final int value;
+      private AdminParentResourceOneOfCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static AdminParentResourceOneOfCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static AdminParentResourceOneOfCase forNumber(int value) {
+        switch (value) {
+          case 2: return PARENTRESOURCECRN;
+          case 3: return DISTRIBUTIONLISTGROUPID;
+          case 0: return ADMINPARENTRESOURCEONEOF_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public AdminParentResourceOneOfCase
+    getAdminParentResourceOneOfCase() {
+      return AdminParentResourceOneOfCase.forNumber(
+          adminParentResourceOneOfCase_);
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object accountId_ = "";
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be deleted.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The accountId.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Account ID for which the distribution lists has to be deleted.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PARENTRESOURCECRN_FIELD_NUMBER = 2;
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be deleted.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return Whether the parentResourceCrn field is set.
+     */
+    public boolean hasParentResourceCrn() {
+      return adminParentResourceOneOfCase_ == 2;
+    }
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be deleted.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The parentResourceCrn.
+     */
+    public java.lang.String getParentResourceCrn() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 2) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (adminParentResourceOneOfCase_ == 2) {
+          adminParentResourceOneOf_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * CRN of the parent resource for which the distribution lists have to be deleted.
+     * </pre>
+     *
+     * <code>string parentResourceCrn = 2;</code>
+     * @return The bytes for parentResourceCrn.
+     */
+    public com.google.protobuf.ByteString
+        getParentResourceCrnBytes() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 2) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        if (adminParentResourceOneOfCase_ == 2) {
+          adminParentResourceOneOf_ = b;
+        }
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTIONLISTGROUPID_FIELD_NUMBER = 3;
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return Whether the distributionListGroupId field is set.
+     */
+    public boolean hasDistributionListGroupId() {
+      return adminParentResourceOneOfCase_ == 3;
+    }
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The distributionListGroupId.
+     */
+    public java.lang.String getDistributionListGroupId() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 3) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (adminParentResourceOneOfCase_ == 3) {
+          adminParentResourceOneOf_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Identifier of an existing distribution list group.
+     * </pre>
+     *
+     * <code>string distributionListGroupId = 3;</code>
+     * @return The bytes for distributionListGroupId.
+     */
+    public com.google.protobuf.ByteString
+        getDistributionListGroupIdBytes() {
+      java.lang.Object ref = "";
+      if (adminParentResourceOneOfCase_ == 3) {
+        ref = adminParentResourceOneOf_;
+      }
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        if (adminParentResourceOneOfCase_ == 3) {
+          adminParentResourceOneOf_ = b;
+        }
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (adminParentResourceOneOfCase_ == 2) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, adminParentResourceOneOf_);
+      }
+      if (adminParentResourceOneOfCase_ == 3) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, adminParentResourceOneOf_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (adminParentResourceOneOfCase_ == 2) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, adminParentResourceOneOf_);
+      }
+      if (adminParentResourceOneOfCase_ == 3) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, adminParentResourceOneOf_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest other = (com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest) obj;
+
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getAdminParentResourceOneOfCase().equals(other.getAdminParentResourceOneOfCase())) return false;
+      switch (adminParentResourceOneOfCase_) {
+        case 2:
+          if (!getParentResourceCrn()
+              .equals(other.getParentResourceCrn())) return false;
+          break;
+        case 3:
+          if (!getDistributionListGroupId()
+              .equals(other.getDistributionListGroupId())) return false;
+          break;
+        case 0:
+        default:
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      switch (adminParentResourceOneOfCase_) {
+        case 2:
+          hash = (37 * hash) + PARENTRESOURCECRN_FIELD_NUMBER;
+          hash = (53 * hash) + getParentResourceCrn().hashCode();
+          break;
+        case 3:
+          hash = (37 * hash) + DISTRIBUTIONLISTGROUPID_FIELD_NUMBER;
+          hash = (53 * hash) + getDistributionListGroupId().hashCode();
+          break;
+        case 0:
+        default:
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the deletion of Distribution List Groups.
+     * </pre>
+     *
+     * Protobuf type {@code notificationadmin.DeleteDistributionListGroupRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:notificationadmin.DeleteDistributionListGroupRequest)
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        accountId_ = "";
+        adminParentResourceOneOfCase_ = 0;
+        adminParentResourceOneOf_ = null;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest build() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest buildPartial() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest result = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.accountId_ = accountId_;
+        }
+      }
+
+      private void buildPartialOneofs(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest result) {
+        result.adminParentResourceOneOfCase_ = adminParentResourceOneOfCase_;
+        result.adminParentResourceOneOf_ = this.adminParentResourceOneOf_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest other) {
+        if (other == com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        switch (other.getAdminParentResourceOneOfCase()) {
+          case PARENTRESOURCECRN: {
+            adminParentResourceOneOfCase_ = 2;
+            adminParentResourceOneOf_ = other.adminParentResourceOneOf_;
+            onChanged();
+            break;
+          }
+          case DISTRIBUTIONLISTGROUPID: {
+            adminParentResourceOneOfCase_ = 3;
+            adminParentResourceOneOf_ = other.adminParentResourceOneOf_;
+            onChanged();
+            break;
+          }
+          case ADMINPARENTRESOURCEONEOF_NOT_SET: {
+            break;
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                java.lang.String s = input.readStringRequireUtf8();
+                adminParentResourceOneOfCase_ = 2;
+                adminParentResourceOneOf_ = s;
+                break;
+              } // case 18
+              case 26: {
+                java.lang.String s = input.readStringRequireUtf8();
+                adminParentResourceOneOfCase_ = 3;
+                adminParentResourceOneOf_ = s;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int adminParentResourceOneOfCase_ = 0;
+      private java.lang.Object adminParentResourceOneOf_;
+      public AdminParentResourceOneOfCase
+          getAdminParentResourceOneOfCase() {
+        return AdminParentResourceOneOfCase.forNumber(
+            adminParentResourceOneOfCase_);
+      }
+
+      public Builder clearAdminParentResourceOneOf() {
+        adminParentResourceOneOfCase_ = 0;
+        adminParentResourceOneOf_ = null;
+        onChanged();
+        return this;
+      }
+
+      private int bitField0_;
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be deleted.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return The accountId.
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be deleted.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be deleted.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        accountId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be deleted.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountId() {
+        accountId_ = getDefaultInstance().getAccountId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account ID for which the distribution lists has to be deleted.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        accountId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be deleted.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return Whether the parentResourceCrn field is set.
+       */
+      @java.lang.Override
+      public boolean hasParentResourceCrn() {
+        return adminParentResourceOneOfCase_ == 2;
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be deleted.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return The parentResourceCrn.
+       */
+      @java.lang.Override
+      public java.lang.String getParentResourceCrn() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 2) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (adminParentResourceOneOfCase_ == 2) {
+            adminParentResourceOneOf_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be deleted.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return The bytes for parentResourceCrn.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getParentResourceCrnBytes() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 2) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          if (adminParentResourceOneOfCase_ == 2) {
+            adminParentResourceOneOf_ = b;
+          }
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be deleted.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @param value The parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        adminParentResourceOneOfCase_ = 2;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be deleted.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearParentResourceCrn() {
+        if (adminParentResourceOneOfCase_ == 2) {
+          adminParentResourceOneOfCase_ = 0;
+          adminParentResourceOneOf_ = null;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the parent resource for which the distribution lists have to be deleted.
+       * </pre>
+       *
+       * <code>string parentResourceCrn = 2;</code>
+       * @param value The bytes for parentResourceCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentResourceCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        adminParentResourceOneOfCase_ = 2;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return Whether the distributionListGroupId field is set.
+       */
+      @java.lang.Override
+      public boolean hasDistributionListGroupId() {
+        return adminParentResourceOneOfCase_ == 3;
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return The distributionListGroupId.
+       */
+      @java.lang.Override
+      public java.lang.String getDistributionListGroupId() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 3) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (adminParentResourceOneOfCase_ == 3) {
+            adminParentResourceOneOf_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return The bytes for distributionListGroupId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getDistributionListGroupIdBytes() {
+        java.lang.Object ref = "";
+        if (adminParentResourceOneOfCase_ == 3) {
+          ref = adminParentResourceOneOf_;
+        }
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          if (adminParentResourceOneOfCase_ == 3) {
+            adminParentResourceOneOf_ = b;
+          }
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @param value The distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        adminParentResourceOneOfCase_ = 3;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistributionListGroupId() {
+        if (adminParentResourceOneOfCase_ == 3) {
+          adminParentResourceOneOfCase_ = 0;
+          adminParentResourceOneOf_ = null;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Identifier of an existing distribution list group.
+       * </pre>
+       *
+       * <code>string distributionListGroupId = 3;</code>
+       * @param value The bytes for distributionListGroupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistributionListGroupIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        adminParentResourceOneOfCase_ = 3;
+        adminParentResourceOneOf_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:notificationadmin.DeleteDistributionListGroupRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:notificationadmin.DeleteDistributionListGroupRequest)
+    private static final com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DeleteDistributionListGroupRequest>
+        PARSER = new com.google.protobuf.AbstractParser<DeleteDistributionListGroupRequest>() {
+      @java.lang.Override
+      public DeleteDistributionListGroupRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DeleteDistributionListGroupRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DeleteDistributionListGroupRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DeleteDistributionListGroupResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:notificationadmin.DeleteDistributionListGroupResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Response string which describes the number of records deleted.
+     * </pre>
+     *
+     * <code>string recordsDeleted = 1;</code>
+     * @return The recordsDeleted.
+     */
+    java.lang.String getRecordsDeleted();
+    /**
+     * <pre>
+     * Response string which describes the number of records deleted.
+     * </pre>
+     *
+     * <code>string recordsDeleted = 1;</code>
+     * @return The bytes for recordsDeleted.
+     */
+    com.google.protobuf.ByteString
+        getRecordsDeletedBytes();
+  }
+  /**
+   * <pre>
+   * Response object for the deletion of Distribution List Groups.
+   * </pre>
+   *
+   * Protobuf type {@code notificationadmin.DeleteDistributionListGroupResponse}
+   */
+  public static final class DeleteDistributionListGroupResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:notificationadmin.DeleteDistributionListGroupResponse)
+      DeleteDistributionListGroupResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DeleteDistributionListGroupResponse.newBuilder() to construct.
+    private DeleteDistributionListGroupResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DeleteDistributionListGroupResponse() {
+      recordsDeleted_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteDistributionListGroupResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.Builder.class);
+    }
+
+    public static final int RECORDSDELETED_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object recordsDeleted_ = "";
+    /**
+     * <pre>
+     * Response string which describes the number of records deleted.
+     * </pre>
+     *
+     * <code>string recordsDeleted = 1;</code>
+     * @return The recordsDeleted.
+     */
+    @java.lang.Override
+    public java.lang.String getRecordsDeleted() {
+      java.lang.Object ref = recordsDeleted_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        recordsDeleted_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Response string which describes the number of records deleted.
+     * </pre>
+     *
+     * <code>string recordsDeleted = 1;</code>
+     * @return The bytes for recordsDeleted.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRecordsDeletedBytes() {
+      java.lang.Object ref = recordsDeleted_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        recordsDeleted_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(recordsDeleted_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, recordsDeleted_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(recordsDeleted_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, recordsDeleted_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse other = (com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse) obj;
+
+      if (!getRecordsDeleted()
+          .equals(other.getRecordsDeleted())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + RECORDSDELETED_FIELD_NUMBER;
+      hash = (53 * hash) + getRecordsDeleted().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the deletion of Distribution List Groups.
+     * </pre>
+     *
+     * Protobuf type {@code notificationadmin.DeleteDistributionListGroupResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:notificationadmin.DeleteDistributionListGroupResponse)
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.class, com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        recordsDeleted_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.internal_static_notificationadmin_DeleteDistributionListGroupResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse build() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse buildPartial() {
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse result = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.recordsDeleted_ = recordsDeleted_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse other) {
+        if (other == com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse.getDefaultInstance()) return this;
+        if (!other.getRecordsDeleted().isEmpty()) {
+          recordsDeleted_ = other.recordsDeleted_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                recordsDeleted_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object recordsDeleted_ = "";
+      /**
+       * <pre>
+       * Response string which describes the number of records deleted.
+       * </pre>
+       *
+       * <code>string recordsDeleted = 1;</code>
+       * @return The recordsDeleted.
+       */
+      public java.lang.String getRecordsDeleted() {
+        java.lang.Object ref = recordsDeleted_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          recordsDeleted_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Response string which describes the number of records deleted.
+       * </pre>
+       *
+       * <code>string recordsDeleted = 1;</code>
+       * @return The bytes for recordsDeleted.
+       */
+      public com.google.protobuf.ByteString
+          getRecordsDeletedBytes() {
+        java.lang.Object ref = recordsDeleted_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          recordsDeleted_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Response string which describes the number of records deleted.
+       * </pre>
+       *
+       * <code>string recordsDeleted = 1;</code>
+       * @param value The recordsDeleted to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRecordsDeleted(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        recordsDeleted_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Response string which describes the number of records deleted.
+       * </pre>
+       *
+       * <code>string recordsDeleted = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRecordsDeleted() {
+        recordsDeleted_ = getDefaultInstance().getRecordsDeleted();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Response string which describes the number of records deleted.
+       * </pre>
+       *
+       * <code>string recordsDeleted = 1;</code>
+       * @param value The bytes for recordsDeleted to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRecordsDeletedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        recordsDeleted_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:notificationadmin.DeleteDistributionListGroupResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:notificationadmin.DeleteDistributionListGroupResponse)
+    private static final com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DeleteDistributionListGroupResponse>
+        PARSER = new com.google.protobuf.AbstractParser<DeleteDistributionListGroupResponse>() {
+      @java.lang.Override
+      public DeleteDistributionListGroupResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DeleteDistributionListGroupResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DeleteDistributionListGroupResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.DeleteDistributionListGroupResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_notificationadmin_MessageType_descriptor;
   private static final 
@@ -54708,6 +64166,41 @@ public final class NotificationAdminProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_notificationadmin_GetPublishedEventStatusResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_notificationadmin_ResourceDistributionListConfig_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_notificationadmin_ResourceDistributionListConfig_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_notificationadmin_ListDistributionListGroupsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_notificationadmin_ListDistributionListGroupsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_notificationadmin_ListDistributionListGroupsResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_notificationadmin_ListDistributionListGroupsResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_notificationadmin_DeleteDistributionListGroupRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_notificationadmin_DeleteDistributionListGroupRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_notificationadmin_DeleteDistributionListGroupResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_notificationadmin_DeleteDistributionListGroupResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -54885,93 +64378,150 @@ public final class NotificationAdminProto {
       "blished_event_details_oneof\"h\n\037GetPublis" +
       "hedEventStatusResponse\022E\n\024publishedEvent" +
       "Status\030\001 \001(\0132\'.notificationadmin.Publish" +
-      "edEventStatus2\222\032\n\021NotificationAdmin\022\253\001\n\025" +
-      "PublishBroadcastEvent\022/.notificationadmi" +
-      "n.PublishBroadcastEventRequest\0320.notific" +
-      "ationadmin.PublishBroadcastEventResponse" +
-      "\"/\202\246\035\'notificationadmin/publishBroadcast" +
-      "Event\310\246\035\001\022\247\001\n\024PublishTargetedEvent\022..not" +
-      "ificationadmin.PublishTargetedEventReque" +
-      "st\032/.notificationadmin.PublishTargetedEv" +
-      "entResponse\".\202\246\035&notificationadmin/publi" +
-      "shTargetedEvent\310\246\035\001\022\214\001\n\031ListBroadcastEve" +
-      "ntCatalog\0223.notificationadmin.ListBroadc" +
-      "astEventCatalogRequest\0324.notificationadm" +
-      "in.ListBroadcastEventCatalogResponse\"\004\310\246" +
-      "\035\000\022\223\001\n\032ListBroadcastNotifications\0224.noti" +
-      "ficationadmin.ListBroadcastNotifications" +
-      "Request\0325.notificationadmin.ListBroadcas" +
-      "tNotificationsResponse\"\010\230\246\035d\310\246\035\000\022\303\001\n\033Del" +
-      "etePendingBroadcastEvent\0225.notificationa" +
-      "dmin.DeletePendingBroadcastEventRequest\032" +
-      "6.notificationadmin.DeletePendingBroadca" +
-      "stEventResponse\"5\202\246\035-notificationadmin/d" +
-      "eletePendingBroadcastEvent\310\246\035\001\022\303\001\n\032ListP" +
-      "endingBroadcastEvents\0224.notificationadmi" +
-      "n.ListPendingBroadcastEventsRequest\0325.no" +
-      "tificationadmin.ListPendingBroadcastEven" +
-      "tsResponse\"8\202\246\035,notificationadmin/listPe" +
-      "ndingBroadcastEvents\230\246\035d\310\246\035\000\022\313\001\n\035CreateO" +
-      "rUpdateAccountMetadata\0227.notificationadm" +
-      "in.CreateOrUpdateAccountMetadataRequest\032" +
-      "8.notificationadmin.CreateOrUpdateAccoun" +
-      "tMetadataResponse\"7\202\246\035/notificationadmin" +
-      "/createOrUpdateAccountMetadata\310\246\035\001\022\237\001\n\022G" +
-      "etAccountMetadata\022,.notificationadmin.Ge" +
-      "tAccountMetadataRequest\032-.notificationad" +
-      "min.GetAccountMetadataResponse\",\202\246\035$noti" +
-      "ficationadmin/getAccountMetadata\310\246\035\000\022\317\001\n" +
-      "\036CreateOrUpdateDistributionList\0228.notifi" +
-      "cationadmin.CreateOrUpdateDistributionLi" +
-      "stRequest\0329.notificationadmin.CreateOrUp" +
-      "dateDistributionListResponse\"8\202\246\0350notifi" +
-      "cationadmin/createOrUpdateDistributionLi" +
-      "st\310\246\035\001\022\253\001\n\025ListDistributionLists\022/.notif" +
-      "icationadmin.ListDistributionListsReques" +
-      "t\0320.notificationadmin.ListDistributionLi" +
-      "stsResponse\"/\202\246\035\'notificationadmin/listD" +
-      "istributionLists\310\246\035\000\022\236\001\n\023GetDistribution" +
-      "List\022-.notificationadmin.GetDistribution" +
-      "ListRequest\032..notificationadmin.GetDistr" +
-      "ibutionListResponse\"(\202\246\035 notification/ge" +
-      "tDistributionList\310\246\035\000\022\252\001\n\026DeleteDistribu" +
-      "tionList\0220.notificationadmin.DeleteDistr" +
-      "ibutionListRequest\0321.notificationadmin.D" +
-      "eleteDistributionListResponse\"+\202\246\035#notif" +
-      "ication/deleteDistributionList\310\246\035\001\022\332\001\n\"D" +
-      "eleteDistributionListsForResource\022<.noti" +
-      "ficationadmin.DeleteDistributionListsFor" +
-      "ResourceRequest\032=.notificationadmin.Dele" +
-      "teDistributionListsForResourceResponse\"7" +
-      "\202\246\035/notification/deleteDistributionLists" +
-      "ForResource\310\246\035\001\022\273\001\n\031ListResourceSubscrip" +
-      "tions\0223.notificationadmin.ListResourceSu" +
-      "bscriptionsRequest\0324.notificationadmin.L" +
-      "istResourceSubscriptionsResponse\"3\202\246\035+no" +
-      "tificationadmin/listResourceSubscription" +
-      "s\310\246\035\000\022\256\001\n#ListPublishedBroadcastNotifica" +
-      "tions\022=.notificationadmin.ListPublishedB" +
-      "roadcastNotificationsRequest\032>.notificat" +
-      "ionadmin.ListPublishedBroadcastNotificat" +
-      "ionsResponse\"\010\230\246\035d\310\246\035\000\022\273\001\n\030ListDraftBroa" +
-      "dcastEvents\0222.notificationadmin.ListDraf" +
-      "tBroadcastEventsRequest\0323.notificationad" +
-      "min.ListDraftBroadcastEventsResponse\"6\202\246" +
-      "\035*notificationadmin/listDraftBroadcastEv" +
-      "ents\230\246\035d\310\246\035\000\022\273\001\n\031PublishEmailTargetedEve" +
-      "nt\0223.notificationadmin.PublishEmailTarge" +
-      "tedEventRequest\0324.notificationadmin.Publ" +
-      "ishEmailTargetedEventResponse\"3\202\246\035+notif" +
-      "icationadmin/publishEmailTargetedEvent\310\246" +
-      "\035\001\022\263\001\n\027GetPublishedEventStatus\0221.notific" +
-      "ationadmin.GetPublishedEventStatusReques" +
-      "t\0322.notificationadmin.GetPublishedEventS" +
-      "tatusResponse\"1\202\246\035)notificationadmin/get" +
-      "PublishedEventStatus\310\246\035\000\0328\212\304\023&\n\021notifica" +
-      "tionadmin\022\021NotificationAdmin\230\304\023\001\242\304\023\006publ" +
-      "icBP\n2com.cloudera.thunderhead.service.n" +
-      "otificationadminB\026NotificationAdminProto" +
-      "\200\210\'\001b\006proto3"
+      "edEventStatus\"\222\002\n\036ResourceDistributionLi" +
+      "stConfig\022\031\n\013resourceCrn\030\001 \001(\tB\004\320\265\030\001\022\032\n\014r" +
+      "esourceName\030\002 \001(\tB\004\320\265\030\001\022J\n\027eventChannelP" +
+      "references\030\003 \003(\0132).notificationadmin.Eve" +
+      "ntChannelPreference\022\026\n\016emailAddresses\030\004 " +
+      "\003(\t\022\027\n\017slackChannelIds\030\005 \003(\t\022\032\n\022distribu" +
+      "tionListId\030\006 \001(\t: \200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
+      "\242\227\"\006public\"\245\002\n*CreateOrUpdateDistributio" +
+      "nListGroupRequest\022\027\n\taccountId\030\001 \001(\tB\004\320\265" +
+      "\030\001\022\037\n\021parentResourceCrn\030\002 \001(\tB\004\320\265\030\001\022,\n\036d" +
+      "istributionListManagementType\030\003 \001(\tB\004\320\265\030" +
+      "\001\022L\n\021resourcesToUpsert\030\004 \003(\01321.notificat" +
+      "ionadmin.ResourceDistributionListConfig\022" +
+      "\037\n\027distributionListGroupId\030\005 \001(\t: \200\227\"\001\212\227" +
+      "\"\016IN_DEVELOPMENT\242\227\"\006public\"\330\001\n+CreateOrU" +
+      "pdateDistributionListGroupResponse\022\037\n\027di" +
+      "stributionListGroupId\030\001 \001(\t\022\031\n\021parentRes" +
+      "ourceCrn\030\002 \001(\t\022K\n\027distributionListDetail" +
+      "s\030\003 \003(\0132*.notificationadmin.Distribution" +
+      "ListDetails: \200\227\"\001\212\227\"\016IN_DEVELOPMENT\242\227\"\006p" +
+      "ublic\"\231\002\n!ListDistributionListGroupsRequ" +
+      "est\022\021\n\taccountId\030\001 \001(\t\022\033\n\021parentResource" +
+      "Crn\030\002 \001(\tH\000\022!\n\027distributionListGroupId\030\003" +
+      " \001(\tH\000\022\036\n\010pageSize\030\004 \001(\005B\014\220\265\030\001\330\265\030\001\340\265\0302\022\027" +
+      "\n\tpageToken\030\005 \001(\tB\004\230\265\030\001\022&\n\036distributionL" +
+      "istManagementType\030\006 \001(\t: \200\227\"\001\212\227\"\016IN_DEVE" +
+      "LOPMENT\242\227\"\006publicB\036\n\034admin_parent_resour" +
+      "ce_one_of\"\311\001\n\"ListDistributionListGroups" +
+      "Response\022D\n\021distributionLists\030\001 \003(\0132#.no" +
+      "tificationadmin.DistributionListB\004\240\265\030\001\022\033" +
+      "\n\rnextPageToken\030\002 \001(\tB\004\250\265\030\001\022\036\n\026totalDist" +
+      "ributionLists\030\003 \001(\005: \200\227\"\001\212\227\"\016IN_DEVELOPM" +
+      "ENT\242\227\"\006public\"\271\001\n\"DeleteDistributionList" +
+      "GroupRequest\022\021\n\taccountId\030\001 \001(\t\022\033\n\021paren" +
+      "tResourceCrn\030\002 \001(\tH\000\022!\n\027distributionList" +
+      "GroupId\030\003 \001(\tH\000: \200\227\"\001\212\227\"\016IN_DEVELOPMENT\242" +
+      "\227\"\006publicB\036\n\034admin_parent_resource_one_o" +
+      "f\"_\n#DeleteDistributionListGroupResponse" +
+      "\022\026\n\016recordsDeleted\030\001 \001(\t: \200\227\"\001\212\227\"\016IN_DEV" +
+      "ELOPMENT\242\227\"\006public2\340\037\n\021NotificationAdmin" +
+      "\022\253\001\n\025PublishBroadcastEvent\022/.notificatio" +
+      "nadmin.PublishBroadcastEventRequest\0320.no" +
+      "tificationadmin.PublishBroadcastEventRes" +
+      "ponse\"/\202\246\035\'notificationadmin/publishBroa" +
+      "dcastEvent\310\246\035\001\022\247\001\n\024PublishTargetedEvent\022" +
+      "..notificationadmin.PublishTargetedEvent" +
+      "Request\032/.notificationadmin.PublishTarge" +
+      "tedEventResponse\".\202\246\035&notificationadmin/" +
+      "publishTargetedEvent\310\246\035\001\022\214\001\n\031ListBroadca" +
+      "stEventCatalog\0223.notificationadmin.ListB" +
+      "roadcastEventCatalogRequest\0324.notificati" +
+      "onadmin.ListBroadcastEventCatalogRespons" +
+      "e\"\004\310\246\035\000\022\223\001\n\032ListBroadcastNotifications\0224" +
+      ".notificationadmin.ListBroadcastNotifica" +
+      "tionsRequest\0325.notificationadmin.ListBro" +
+      "adcastNotificationsResponse\"\010\230\246\035d\310\246\035\000\022\303\001" +
+      "\n\033DeletePendingBroadcastEvent\0225.notifica" +
+      "tionadmin.DeletePendingBroadcastEventReq" +
+      "uest\0326.notificationadmin.DeletePendingBr" +
+      "oadcastEventResponse\"5\202\246\035-notificationad" +
+      "min/deletePendingBroadcastEvent\310\246\035\001\022\303\001\n\032" +
+      "ListPendingBroadcastEvents\0224.notificatio" +
+      "nadmin.ListPendingBroadcastEventsRequest" +
+      "\0325.notificationadmin.ListPendingBroadcas" +
+      "tEventsResponse\"8\202\246\035,notificationadmin/l" +
+      "istPendingBroadcastEvents\230\246\035d\310\246\035\000\022\313\001\n\035Cr" +
+      "eateOrUpdateAccountMetadata\0227.notificati" +
+      "onadmin.CreateOrUpdateAccountMetadataReq" +
+      "uest\0328.notificationadmin.CreateOrUpdateA" +
+      "ccountMetadataResponse\"7\202\246\035/notification" +
+      "admin/createOrUpdateAccountMetadata\310\246\035\001\022" +
+      "\237\001\n\022GetAccountMetadata\022,.notificationadm" +
+      "in.GetAccountMetadataRequest\032-.notificat" +
+      "ionadmin.GetAccountMetadataResponse\",\202\246\035" +
+      "$notificationadmin/getAccountMetadata\310\246\035" +
+      "\000\022\317\001\n\036CreateOrUpdateDistributionList\0228.n" +
+      "otificationadmin.CreateOrUpdateDistribut" +
+      "ionListRequest\0329.notificationadmin.Creat" +
+      "eOrUpdateDistributionListResponse\"8\202\246\0350n" +
+      "otificationadmin/createOrUpdateDistribut" +
+      "ionList\310\246\035\001\022\253\001\n\025ListDistributionLists\022/." +
+      "notificationadmin.ListDistributionListsR" +
+      "equest\0320.notificationadmin.ListDistribut" +
+      "ionListsResponse\"/\202\246\035\'notificationadmin/" +
+      "listDistributionLists\310\246\035\000\022\236\001\n\023GetDistrib" +
+      "utionList\022-.notificationadmin.GetDistrib" +
+      "utionListRequest\032..notificationadmin.Get" +
+      "DistributionListResponse\"(\202\246\035 notificati" +
+      "on/getDistributionList\310\246\035\000\022\252\001\n\026DeleteDis" +
+      "tributionList\0220.notificationadmin.Delete" +
+      "DistributionListRequest\0321.notificationad" +
+      "min.DeleteDistributionListResponse\"+\202\246\035#" +
+      "notification/deleteDistributionList\310\246\035\001\022" +
+      "\332\001\n\"DeleteDistributionListsForResource\022<" +
+      ".notificationadmin.DeleteDistributionLis" +
+      "tsForResourceRequest\032=.notificationadmin" +
+      ".DeleteDistributionListsForResourceRespo" +
+      "nse\"7\202\246\035/notification/deleteDistribution" +
+      "ListsForResource\310\246\035\001\022\273\001\n\031ListResourceSub" +
+      "scriptions\0223.notificationadmin.ListResou" +
+      "rceSubscriptionsRequest\0324.notificationad" +
+      "min.ListResourceSubscriptionsResponse\"3\202" +
+      "\246\035+notificationadmin/listResourceSubscri" +
+      "ptions\310\246\035\000\022\256\001\n#ListPublishedBroadcastNot" +
+      "ifications\022=.notificationadmin.ListPubli" +
+      "shedBroadcastNotificationsRequest\032>.noti" +
+      "ficationadmin.ListPublishedBroadcastNoti" +
+      "ficationsResponse\"\010\230\246\035d\310\246\035\000\022\273\001\n\030ListDraf" +
+      "tBroadcastEvents\0222.notificationadmin.Lis" +
+      "tDraftBroadcastEventsRequest\0323.notificat" +
+      "ionadmin.ListDraftBroadcastEventsRespons" +
+      "e\"6\202\246\035*notificationadmin/listDraftBroadc" +
+      "astEvents\230\246\035d\310\246\035\000\022\273\001\n\031PublishEmailTarget" +
+      "edEvent\0223.notificationadmin.PublishEmail" +
+      "TargetedEventRequest\0324.notificationadmin" +
+      ".PublishEmailTargetedEventResponse\"3\202\246\035+" +
+      "notificationadmin/publishEmailTargetedEv" +
+      "ent\310\246\035\001\022\263\001\n\027GetPublishedEventStatus\0221.no" +
+      "tificationadmin.GetPublishedEventStatusR" +
+      "equest\0322.notificationadmin.GetPublishedE" +
+      "ventStatusResponse\"1\202\246\035)notificationadmi" +
+      "n/getPublishedEventStatus\310\246\035\000\022\203\002\n#Create" +
+      "OrUpdateDistributionListGroup\022=.notifica" +
+      "tionadmin.CreateOrUpdateDistributionList" +
+      "GroupRequest\032>.notificationadmin.CreateO" +
+      "rUpdateDistributionListGroupResponse\"]\202\246" +
+      "\0355notificationadmin/createOrUpdateDistri" +
+      "butionListGroup\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035" +
+      "\001\332\246\035\006public\022\337\001\n\032ListDistributionListGrou" +
+      "ps\0224.notificationadmin.ListDistributionL" +
+      "istGroupsRequest\0325.notificationadmin.Lis" +
+      "tDistributionListGroupsResponse\"T\202\246\035,not" +
+      "ificationadmin/listDistributionListGroup" +
+      "s\230\246\0352\240\246\035\001\252\246\035\016IN_DEVELOPMENT\332\246\035\006public\022\343\001" +
+      "\n\033DeleteDistributionListGroup\0225.notifica" +
+      "tionadmin.DeleteDistributionListGroupReq" +
+      "uest\0326.notificationadmin.DeleteDistribut" +
+      "ionListGroupResponse\"U\202\246\035-notificationad" +
+      "min/deleteDistributionListGroup\240\246\035\001\252\246\035\016I" +
+      "N_DEVELOPMENT\310\246\035\001\332\246\035\006public\0328\212\304\023&\n\021notif" +
+      "icationadmin\022\021NotificationAdmin\230\304\023\001\242\304\023\006p" +
+      "ublicBP\n2com.cloudera.thunderhead.servic" +
+      "e.notificationadminB\026NotificationAdminPr" +
+      "oto\200\210\'\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -55320,6 +64870,48 @@ public final class NotificationAdminProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_notificationadmin_GetPublishedEventStatusResponse_descriptor,
         new java.lang.String[] { "PublishedEventStatus", });
+    internal_static_notificationadmin_ResourceDistributionListConfig_descriptor =
+      getDescriptor().getMessageTypes().get(57);
+    internal_static_notificationadmin_ResourceDistributionListConfig_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_notificationadmin_ResourceDistributionListConfig_descriptor,
+        new java.lang.String[] { "ResourceCrn", "ResourceName", "EventChannelPreferences", "EmailAddresses", "SlackChannelIds", "DistributionListId", });
+    internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_descriptor =
+      getDescriptor().getMessageTypes().get(58);
+    internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_notificationadmin_CreateOrUpdateDistributionListGroupRequest_descriptor,
+        new java.lang.String[] { "AccountId", "ParentResourceCrn", "DistributionListManagementType", "ResourcesToUpsert", "DistributionListGroupId", });
+    internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_descriptor =
+      getDescriptor().getMessageTypes().get(59);
+    internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_notificationadmin_CreateOrUpdateDistributionListGroupResponse_descriptor,
+        new java.lang.String[] { "DistributionListGroupId", "ParentResourceCrn", "DistributionListDetails", });
+    internal_static_notificationadmin_ListDistributionListGroupsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(60);
+    internal_static_notificationadmin_ListDistributionListGroupsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_notificationadmin_ListDistributionListGroupsRequest_descriptor,
+        new java.lang.String[] { "AccountId", "ParentResourceCrn", "DistributionListGroupId", "PageSize", "PageToken", "DistributionListManagementType", "AdminParentResourceOneOf", });
+    internal_static_notificationadmin_ListDistributionListGroupsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(61);
+    internal_static_notificationadmin_ListDistributionListGroupsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_notificationadmin_ListDistributionListGroupsResponse_descriptor,
+        new java.lang.String[] { "DistributionLists", "NextPageToken", "TotalDistributionLists", });
+    internal_static_notificationadmin_DeleteDistributionListGroupRequest_descriptor =
+      getDescriptor().getMessageTypes().get(62);
+    internal_static_notificationadmin_DeleteDistributionListGroupRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_notificationadmin_DeleteDistributionListGroupRequest_descriptor,
+        new java.lang.String[] { "AccountId", "ParentResourceCrn", "DistributionListGroupId", "AdminParentResourceOneOf", });
+    internal_static_notificationadmin_DeleteDistributionListGroupResponse_descriptor =
+      getDescriptor().getMessageTypes().get(63);
+    internal_static_notificationadmin_DeleteDistributionListGroupResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_notificationadmin_DeleteDistributionListGroupResponse_descriptor,
+        new java.lang.String[] { "RecordsDeleted", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.datetime);
@@ -55332,8 +64924,12 @@ public final class NotificationAdminProto {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.skipLogging);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.audit);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.formFactor);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenReason);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.formFactor);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.hidden);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.mutating);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.pagingDefaultMaxItems);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.right);

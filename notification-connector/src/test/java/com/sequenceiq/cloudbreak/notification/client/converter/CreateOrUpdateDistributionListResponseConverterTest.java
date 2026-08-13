@@ -34,9 +34,10 @@ class CreateOrUpdateDistributionListResponseConverterTest {
                 .setDistributionListId("dl-2")
                 .setResourceCrn("crn:cdp:environments:us-west-1:tenant:environment:env2")
                 .build();
-        NotificationAdminProto.CreateOrUpdateDistributionListResponse proto = NotificationAdminProto.CreateOrUpdateDistributionListResponse.newBuilder()
-                .addDistributionListDetails(details1)
-                .addDistributionListDetails(details2)
+        NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse proto =
+                NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse.newBuilder()
+                        .addDistributionListDetails(details1)
+                        .addDistributionListDetails(details2)
                 .build();
 
         CreateOrUpdateDistributionListResponseDto result = underTest.convert(proto);
@@ -57,8 +58,8 @@ class CreateOrUpdateDistributionListResponseConverterTest {
 
     @Test
     void testConvertWhenProtoHasNoDistributionListDetails() {
-        NotificationAdminProto.CreateOrUpdateDistributionListResponse proto = NotificationAdminProto
-                .CreateOrUpdateDistributionListResponse.newBuilder().build();
+        NotificationAdminProto.CreateOrUpdateDistributionListGroupResponse proto = NotificationAdminProto
+                .CreateOrUpdateDistributionListGroupResponse.newBuilder().build();
         CreateOrUpdateDistributionListResponseDto result = underTest.convert(proto);
         assertNotNull(result);
         assertNotNull(result.distributionLists(), "Should return an empty (not null) list when proto has none");

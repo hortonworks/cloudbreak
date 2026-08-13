@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.notification.client.GrpcNotificationClient;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateAccountMetadataDto;
+import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListRequestDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListResponseDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.DeleteDistributionListRequestDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.DistributionListDetailsDto;
@@ -88,17 +89,26 @@ class DistributionListManagementServiceTest {
     }
 
     private UserWithResourceRole userWithEmail(String email) {
-        UserManagementProto.User user = UserManagementProto.User.newBuilder()
+        String userCrn = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:user1";
+        return new UserWithResourceRole(userCrn, "roleCrn");
+    }
+
+    private UserManagementProto.User userProtoWithEmail(String email) {
+        return UserManagementProto.User.newBuilder()
                 .setEmail(email)
                 .setCrn("crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:user1")
                 .build();
-        return new UserWithResourceRole(user.getCrn(), "roleCrn");
     }
 
     @Test
     void createOrUpdateListWhenNotificationsDisabledReturnsNull() {
         when(notificationConfig.isEnabled(Crn.fromString(RESOURCE_CRN))).thenReturn(false);
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isEmpty());
         verify(notificationConfig).isEnabled(any(Crn.class));
@@ -111,6 +121,7 @@ class DistributionListManagementServiceTest {
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
         when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
                 "dl-1",
@@ -124,20 +135,31 @@ class DistributionListManagementServiceTest {
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of(existingDto)));
         DistributionListDto responseDto = new DistributionListDto("dl-1", RESOURCE_CRN);
-        when(grpcNotificationClient.createOrUpdateDistributionList(any())).thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto)));
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto)));
 
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
 
         assertTrue(result.isPresent());
         assertEquals("dl-1", result.get().getExternalId());
         assertEquals(RESOURCE_CRN, result.get().getResourceCrn());
-        verify(grpcNotificationClient).createOrUpdateDistributionList(any());
+        verify(grpcNotificationClient).createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class));
     }
 
     @Test
-    void createOrUpdateListWhenExistingUserManagedReturnsNull() {
+    void createOrUpdateListWhenExistingUserManagedWithRegistrationUpdates() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
+        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
+        when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
+        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
+        when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
                 "dl-2",
                 RESOURCE_CRN,
@@ -149,11 +171,20 @@ class DistributionListManagementServiceTest {
         );
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of(existingDto)));
+        DistributionListDto responseDto = new DistributionListDto("dl-2", RESOURCE_CRN);
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto)));
 
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
-        assertTrue(result.isEmpty());
-        verify(grpcNotificationClient, never()).createOrUpdateDistributionList(any());
+        assertTrue(result.isPresent());
+        assertEquals("dl-2", result.get().getExternalId());
+        verify(grpcNotificationClient).createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class));
     }
 
     @Test
@@ -161,16 +192,25 @@ class DistributionListManagementServiceTest {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        // duplicate email
         when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com"),
                 userWithEmail("user1@example.com")));
-        when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
+        when(channelPreferenceConverter.convert(any(List.class))).thenReturn(List.of(samplePreferenceDto));
+        // First call: list for target (empty), second call: list for parent (also empty)
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of()));
         DistributionListDto responseDto = new DistributionListDto("dl-new", RESOURCE_CRN);
-        when(grpcNotificationClient.createOrUpdateDistributionList(any())).thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto)));
+        // First call: create parent distribution list, second call: insertDistributionListConfig
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto)));
 
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withParentResourceName(RESOURCE_NAME)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isPresent());
         assertEquals("dl-new", result.get().getExternalId());
@@ -182,7 +222,12 @@ class DistributionListManagementServiceTest {
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of()));
         doThrow(new RuntimeException("boom")).when(roleCrnGenerator).getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID);
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isEmpty());
     }
@@ -193,6 +238,7 @@ class DistributionListManagementServiceTest {
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
         when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
                 "dl-x",
@@ -205,9 +251,15 @@ class DistributionListManagementServiceTest {
         );
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of(existingDto)));
-        when(grpcNotificationClient.createOrUpdateDistributionList(any())).thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of()));
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of()));
 
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isEmpty());
     }
@@ -218,12 +270,19 @@ class DistributionListManagementServiceTest {
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
         when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of()));
-        when(grpcNotificationClient.createOrUpdateDistributionList(any())).thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of()));
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of()));
 
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isEmpty());
     }
@@ -234,6 +293,7 @@ class DistributionListManagementServiceTest {
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
         when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
                 "dl-null",
@@ -247,9 +307,14 @@ class DistributionListManagementServiceTest {
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of(existingDto)));
         // response null
-        when(grpcNotificationClient.createOrUpdateDistributionList(any())).thenReturn(null);
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class))).thenReturn(null);
 
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isEmpty());
     }
@@ -260,14 +325,20 @@ class DistributionListManagementServiceTest {
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
         when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of()));
         // distributionLists null
         CreateOrUpdateDistributionListResponseDto response = new CreateOrUpdateDistributionListResponseDto(null);
-        when(grpcNotificationClient.createOrUpdateDistributionList(any())).thenReturn(response);
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class))).thenReturn(response);
 
-        CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isEmpty());
     }
@@ -278,18 +349,33 @@ class DistributionListManagementServiceTest {
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
         when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
-        when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
-        // First create succeeds, second returns empty list -> null
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
+        when(channelPreferenceConverter.convert(any(List.class))).thenReturn(List.of(samplePreferenceDto));
+        // All list calls return empty (no existing distribution lists)
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
-                .thenReturn(new ListDistributionListsResponseDto(List.of()))
                 .thenReturn(new ListDistributionListsResponseDto(List.of()));
         DistributionListDto responseDto1 = new DistributionListDto("dl-a", RESOURCE_CRN);
-        when(grpcNotificationClient.createOrUpdateDistributionList(any()))
+        // First two calls succeed (parent create + insert), then next two return empty
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto1)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto1)))
                 .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto1)))
                 .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of()));
 
-        CreateDistributionListRequest req1 = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME + "1", List.of(samplePreference));
-        CreateDistributionListRequest req2 = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME + "2", List.of(samplePreference));
+        CreateDistributionListRequest req1 = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withParentResourceName(RESOURCE_NAME)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME + "1")
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
+        CreateDistributionListRequest req2 = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withParentResourceName(RESOURCE_NAME)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME + "2")
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
         List<DistributionList> results = underTest.createOrUpdateLists(Set.of(req1, req2));
         assertEquals(1, results.size());
         assertTrue(results.stream().anyMatch(dl -> dl != null && "dl-a".equals(dl.getExternalId())));

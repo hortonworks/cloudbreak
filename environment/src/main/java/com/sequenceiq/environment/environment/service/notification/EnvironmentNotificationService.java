@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service.notification;
 
+import static com.sequenceiq.notification.domain.NotificationSeverity.WARNING;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -75,6 +77,7 @@ public class EnvironmentNotificationService {
                 .name(environmentViewName)
                 .resourceName(environmentViewName + "_" + actualEnvironmentCrn)
                 .additionalData(targets(actualEnvironmentCrn))
+                .severity(WARNING)
                 .accountId(crn.getAccountId())
                 .build();
     }

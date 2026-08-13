@@ -19,8 +19,14 @@ class NotificationStateTest {
 
     @Test
     void testFromStateWithFallback() {
-        assertEquals(NotificationState.ENABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.ENABLED));
-        assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.DISABLED));
-        assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(null));
+        // notificationSendingEnabled = true: returns the state as-is, or ENABLED if null
+        assertEquals(NotificationState.ENABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.ENABLED, true));
+        assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.DISABLED, true));
+        assertEquals(NotificationState.ENABLED, NotificationState.fromStateWithDisableIfNull(null, true));
+
+        // notificationSendingEnabled = false: always returns DISABLED regardless of input state
+        assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.ENABLED, false));
+        assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.DISABLED, false));
+        assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(null, false));
     }
 }

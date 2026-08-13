@@ -36,6 +36,7 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.terms.service.TermsService;
 import com.sequenceiq.notification.domain.DistributionList;
 import com.sequenceiq.notification.domain.DistributionListManagementType;
+import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,6 +96,7 @@ class EnvironmentNotificationServiceTest {
         assertEquals(ENV_CRN, dto.getResourceCrn());
         assertEquals(ENV_NAME, dto.getName());
         assertEquals(ACCOUNT_ID, dto.getAccountId());
+        assertEquals(NotificationSeverity.WARNING, dto.getSeverity());
     }
 
     @Test
