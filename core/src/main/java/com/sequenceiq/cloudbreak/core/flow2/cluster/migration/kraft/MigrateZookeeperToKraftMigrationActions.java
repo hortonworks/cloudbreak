@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_BROKER_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_CONNECT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_KRAFT_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT;
@@ -73,6 +74,34 @@ public class MigrateZookeeperToKraftMigrationActions {
         };
     }
 
+    @Bean(name = "RESTART_KAFKA_KRAFT_NODES_STATE")
+    public Action<?, ?> restartKafkaKraftNodesAction() {
+        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftEvent.class) {
+
+            @Override
+            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    MigrateZookeeperToKraftEvent payload) {
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isStaleConfigsOnly());
+            }
+
+            @Override
+            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftEvent payload, Map<Object, Object> variables) {
+                LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka KRaft nodes state started {}", payload);
+                Long stackId = payload.getResourceId();
+                stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
+                String nextEvent = RESTART_KAFKA_KRAFT_NODES_EVENT.event();
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isStaleConfigsOnly()));
+            }
+
+            @Override
+            protected Object getFailurePayload(MigrateZookeeperToKraftEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+                    Exception ex) {
+                return new MigrateZookeeperToKraftFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
     @Bean(name = "RESTART_KAFKA_BROKER_NODES_STATE")
     public Action<?, ?> restartKafkaBrokerNodesAction() {
         return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftEvent.class) {
@@ -87,8 +116,6 @@ public class MigrateZookeeperToKraftMigrationActions {
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka broker nodes state started {}", payload);
                 Long stackId = payload.getResourceId();
-                stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
-                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
                 String nextEvent = RESTART_KAFKA_BROKER_NODES_EVENT.event();
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isStaleConfigsOnly()));
             }

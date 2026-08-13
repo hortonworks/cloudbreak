@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_KRAFT_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -65,7 +65,7 @@ class MigrateZookeeperToKraftValidationHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
-        assertEquals(START_RESTART_KAFKA_BROKER_NODES_EVENT.name(), result.getSelector());
+        assertEquals(START_RESTART_KAFKA_KRAFT_NODES_EVENT.name(), result.getSelector());
     }
 
     @Test
@@ -115,7 +115,7 @@ class MigrateZookeeperToKraftValidationHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
-        assertEquals(START_RESTART_KAFKA_BROKER_NODES_EVENT.name(), result.getSelector());
+        assertEquals(START_RESTART_KAFKA_KRAFT_NODES_EVENT.name(), result.getSelector());
     }
 
     @Test

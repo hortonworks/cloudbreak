@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_KRAFT_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT;
 
 import jakarta.inject.Inject;
@@ -66,7 +66,7 @@ public class MigrateZookeeperToKraftValidationHandler extends ExceptionCatcherEv
             LOGGER.error("Migrate Zookeeper to KRaft validation failed.", e);
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);
         }
-        return new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_BROKER_NODES_EVENT.name(), stackId,
+        return new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_KRAFT_NODES_EVENT.name(), stackId,
                 event.getData().isStaleConfigsOnly());
     }
 
