@@ -2,7 +2,10 @@ package com.sequenceiq.it.util.cleanup;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import jakarta.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -264,8 +267,9 @@ public class CleanupWaitUtil {
                             .collect(Collectors.toList()).isEmpty()
             );
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check distroxes are available: {}", e.getMessage(), e);
-            return false;
+            // Transient failure — assume still present so the poll keeps going rather than declaring success on a glitch.
+            LOG.warn("Transient error during check distroxes are available, assuming still present: {}", e.getMessage(), e);
+            return true;
         }
     }
 
@@ -284,9 +288,14 @@ public class CleanupWaitUtil {
         try {
             cloudbreakClient.distroXV1Endpoint().getByName(distroxName, Collections.emptySet());
             return true;
-        } catch (Exception e) {
-            LOG.warn("Exception has been occurred while checking {} distrox is available: {}", distroxName, e.getMessage(), e);
+        } catch (NotFoundException e) {
+            LOG.info("{} distrox not found (404) — treating as deleted", distroxName);
             return false;
+        } catch (Exception e) {
+            // Transient failure — assume the resource is still there so we keep polling rather than
+            // falsely reporting success on a network/auth glitch.
+            LOG.warn("Transient error while checking {} distrox availability, assuming still present: {}", distroxName, e.getMessage(), e);
+            return true;
         }
     }
 
@@ -308,8 +317,9 @@ public class CleanupWaitUtil {
                             .map(SdxClusterResponse::getName).count() == 0)
             );
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check sdxes are available: {}", e.getMessage(), e);
-            return false;
+            // Transient failure — assume still present so the poll keeps going rather than declaring success on a glitch.
+            LOG.warn("Transient error during check sdxes are available, assuming still present: {}", e.getMessage(), e);
+            return true;
         }
     }
 
@@ -328,9 +338,13 @@ public class CleanupWaitUtil {
         try {
             sdxClient.sdxEndpoint().get(sdxName);
             return true;
-        } catch (Exception e) {
-            LOG.warn("Exception has been occurred while checking {} sdx is available: {}", sdxName, e.getMessage(), e);
+        } catch (NotFoundException e) {
+            LOG.info("{} sdx not found (404) — treating as deleted", sdxName);
             return false;
+        } catch (Exception e) {
+            // Transient failure — keep polling instead of declaring success on a glitch.
+            LOG.warn("Transient error while checking {} sdx availability, assuming still present: {}", sdxName, e.getMessage(), e);
+            return true;
         }
     }
 
@@ -349,8 +363,9 @@ public class CleanupWaitUtil {
             return !(environment.environmentV1Endpoint().list(null).getResponses().stream()
                     .map(EnvironmentBaseResponse::getName).count() == 0);
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check environments are available: {}", e.getMessage(), e);
-            return false;
+            // Transient failure — assume still present so the poll keeps going rather than declaring success on a glitch.
+            LOG.warn("Transient error during check environments are available, assuming still present: {}", e.getMessage(), e);
+            return true;
         }
     }
 
@@ -370,8 +385,9 @@ public class CleanupWaitUtil {
             return environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                     .anyMatch(response -> response.getName().equalsIgnoreCase(environmentName));
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred while checking {} environment is available: {}", environmentName, e.getMessage(), e);
-            return false;
+            // Transient failure — assume still present so we keep polling rather than declaring success on a glitch.
+            LOG.warn("Transient error while checking {} environment availability, assuming still present: {}", environmentName, e.getMessage(), e);
+            return true;
         }
     }
 
@@ -393,7 +409,9 @@ public class CleanupWaitUtil {
                             .anyMatch(response -> response.getStatus().equals(Status.DELETE_FAILED))
             );
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check distroxes DELETE_FAILED state: {}", e.getMessage(), e);
+            // Transient failure — cannot confirm DELETE_FAILED so assume not failed and let the "are available"
+            // check drive the poll loop instead.
+            LOG.warn("Transient error during check distroxes DELETE_FAILED state, assuming not failed: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -412,8 +430,11 @@ public class CleanupWaitUtil {
     private boolean checkDistroxDeleteFailedStatus(CloudbreakClient cloudbreakClient, String distroxName) {
         try {
             return cloudbreakClient.distroXV1Endpoint().getByName(distroxName, Collections.emptySet()).getStatus().equals(Status.DELETE_FAILED);
+        } catch (NotFoundException e) {
+            // Resource is gone — definitely not in DELETE_FAILED state.
+            return false;
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred while checking {} distrox's DELETE_FAILED state: {}", distroxName, e.getMessage(), e);
+            LOG.warn("Transient error while checking {} distrox's DELETE_FAILED state, assuming not failed: {}", distroxName, e.getMessage(), e);
             return false;
         }
     }
@@ -436,7 +457,9 @@ public class CleanupWaitUtil {
                             .anyMatch(response -> response.getStatus().equals(SdxClusterStatusResponse.DELETE_FAILED))
             );
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check sdxes DELETE_FAILED state: {}", e.getMessage(), e);
+            // Transient failure — cannot confirm DELETE_FAILED so assume not failed and let the "are available"
+            // check drive the poll loop instead.
+            LOG.warn("Transient error during check sdxes DELETE_FAILED state, assuming not failed: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -455,8 +478,11 @@ public class CleanupWaitUtil {
     private boolean checkSdxDeleteFailedStatus(SdxClient sdxClient, String sdxName) {
         try {
             return sdxClient.sdxEndpoint().get(sdxName).getStatus().equals(SdxClusterStatusResponse.DELETE_FAILED);
+        } catch (NotFoundException e) {
+            // Resource is gone — definitely not in DELETE_FAILED state.
+            return false;
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred while checking {} sdx's DELETE_FAILED state: {}", sdxName, e.getMessage(), e);
+            LOG.warn("Transient error while checking {} sdx's DELETE_FAILED state, assuming not failed: {}", sdxName, e.getMessage(), e);
             return false;
         }
     }
@@ -476,7 +502,9 @@ public class CleanupWaitUtil {
             return environment.environmentV1Endpoint().list(null).getResponses().stream()
                     .anyMatch(response -> response.getEnvironmentStatus().equals(EnvironmentStatus.DELETE_FAILED));
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check environments DELETE_FAILED state: {}", e.getMessage(), e);
+            // Transient failure — cannot confirm DELETE_FAILED so assume not failed and let the "are available"
+            // check drive the poll loop instead.
+            LOG.warn("Transient error during check environments DELETE_FAILED state, assuming not failed: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -494,15 +522,19 @@ public class CleanupWaitUtil {
      */
     private boolean checkEnvironmentDeleteFailedStatus(EnvironmentClient environmentClient, String environmentName) {
         try {
-            EnvironmentStatus environmentStatus = environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
+            Optional<EnvironmentStatus> environmentStatus = environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                     .filter(response -> response.getName().equalsIgnoreCase(environmentName))
                     .findFirst()
-                    .map(EnvironmentBaseResponse::getEnvironmentStatus)
-                    .orElse(EnvironmentStatus.ARCHIVED);
-            LOG.info("{} environment actual state is: {}", environmentName, environmentStatus);
-            return environmentStatus.equals(EnvironmentStatus.DELETE_FAILED);
+                    .map(EnvironmentBaseResponse::getEnvironmentStatus);
+            if (environmentStatus.isEmpty()) {
+                // Not in the list — the environment has been deleted; not DELETE_FAILED.
+                LOG.info("{} environment is no longer listed — treating as deleted", environmentName);
+                return false;
+            }
+            LOG.info("{} environment actual state is: {}", environmentName, environmentStatus.get());
+            return environmentStatus.get().equals(EnvironmentStatus.DELETE_FAILED);
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred while checking {} environment's DELETE_FAILED state: {}", environmentName, e.getMessage(), e);
+            LOG.warn("Transient error while checking {} environment's DELETE_FAILED state, assuming not failed: {}", environmentName, e.getMessage(), e);
             return false;
         }
     }

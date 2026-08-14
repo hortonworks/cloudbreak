@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -25,8 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -42,9 +40,17 @@ import com.sequenceiq.sdx.client.SdxClient;
 public class CleanupUtil extends CleanupClientUtil {
     private static final Logger LOG = LoggerFactory.getLogger(CleanupUtil.class);
 
-    private final Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> clients = new HashMap<>();
+    private static final String TYPE_DISTROX = "distroxName";
 
-    private final MultiValueMap<String, String> deletedResources = new LinkedMultiValueMap<>();
+    private static final String TYPE_STACK = "stackName";
+
+    private static final String TYPE_SDX = "sdxName";
+
+    private static final String TYPE_CREDENTIAL = "credentialName";
+
+    private static final String TYPE_ENVIRONMENT = "environmentName";
+
+    private final Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> clients = new HashMap<>();
 
     @Value("${integrationtest.outputdir:.}")
     private String outputDirectory;
@@ -56,65 +62,85 @@ public class CleanupUtil extends CleanupClientUtil {
     private CleanupWaitUtil waitUtil;
 
     public void cleanupAllResources() {
-        if (resourceFilesArePresent() && !cleanupAfterAbort) {
-            cleanupDistroxes();
-            cleanupSdxes();
-            cleanupEnvironments();
-            cleanupCredentials();
-        } else {
-            EnvironmentClient environmentClient = createEnvironmentClient();
-            List<String> foundChildEnvironmentNames = new ArrayList<>(getChildEnvironments(environmentClient).values());
-            List<String> foundEnvironmentNames = new ArrayList<>(getEnvironments(environmentClient).values());
-            List<String> foundCredentialNames = getCredentials(environmentClient);
+        CleanupReport report = new CleanupReport();
+        try {
+            if (resourceFilesArePresent() && !cleanupAfterAbort) {
+                cleanupDistroxes(report);
+                cleanupSdxes(report);
+                cleanupEnvironments(report);
+                cleanupCredentials(report);
+            } else {
+                EnvironmentClient environmentClient = createEnvironmentClient();
+                setEnvironmentClient(environmentClient);
+                List<String> foundChildEnvironmentNames = new ArrayList<>(getChildEnvironments(environmentClient).values());
+                List<String> foundEnvironmentNames = new ArrayList<>(getEnvironments(environmentClient).values());
+                List<String> foundCredentialNames = getCredentials(environmentClient);
 
-            if (!foundChildEnvironmentNames.isEmpty()) {
-                LOG.info("Found child environments: '{}'", foundChildEnvironmentNames);
-                deleteEnvironments(environmentClient, foundChildEnvironmentNames);
+                if (!foundChildEnvironmentNames.isEmpty()) {
+                    LOG.info("Found child environments: '{}'", foundChildEnvironmentNames);
+                    deleteEnvironments(environmentClient, foundChildEnvironmentNames, report);
+                }
+                if (!foundEnvironmentNames.isEmpty()) {
+                    LOG.info("Found environments: '{}'", foundEnvironmentNames);
+                    deleteEnvironments(environmentClient, foundEnvironmentNames, report);
+                } else {
+                    LOG.info("Cannot find any environment!");
+                }
+                if (!foundCredentialNames.isEmpty()) {
+                    LOG.info("Found credentials: '{}'", foundCredentialNames);
+                    deleteCredentials(environmentClient, foundCredentialNames, report);
+                } else {
+                    LOG.info("Cannot find any credential!");
+                }
             }
-            if (!foundEnvironmentNames.isEmpty()) {
-                LOG.info("Found environments: '{}'", foundEnvironmentNames);
-                deleteEnvironments(environmentClient, foundEnvironmentNames);
-            } else {
-                LOG.info("Cannot find any environment!");
-            }
-            if (!foundCredentialNames.isEmpty()) {
-                LOG.info("Found credentials: '{}'", foundCredentialNames);
-                deleteCredentials(environmentClient, foundCredentialNames);
-            } else {
-                LOG.info("Cannot find any credential!");
-            }
+        } finally {
+            logCleanupSummary(report);
         }
     }
 
     public void cleanupDistroxes() {
+        cleanupDistroxes(new CleanupReport());
+    }
+
+    private void cleanupDistroxes(CleanupReport report) {
         CloudbreakClient cloudbreakClient = createCloudbreakClient();
         EnvironmentClient environmentClient = createEnvironmentClient();
         List<String> foundDistroxNames = getDistroxes(environmentClient, cloudbreakClient);
 
         setCloudbreakClient(cloudbreakClient);
+        setEnvironmentClient(environmentClient);
         LOG.info("Found distroxes: '{}'", foundDistroxNames);
         if (!foundDistroxNames.isEmpty()) {
-            deleteResources(foundDistroxNames, "distroxName");
+            deleteResources(foundDistroxNames, TYPE_DISTROX, report);
         } else {
             LOG.info("Cannot find any distrox");
         }
     }
 
     public void cleanupSdxes() {
+        cleanupSdxes(new CleanupReport());
+    }
+
+    private void cleanupSdxes(CleanupReport report) {
         SdxClient sdxClient = createSdxClient();
         EnvironmentClient environmentClient = createEnvironmentClient();
         List<String> foundSdxNames = getSdxes(environmentClient, sdxClient);
 
         setSdxClient(sdxClient);
+        setEnvironmentClient(environmentClient);
         LOG.info("Found data lakes (sdxes): '{}'", foundSdxNames);
         if (!foundSdxNames.isEmpty()) {
-            deleteResources(foundSdxNames, "sdxName");
+            deleteResources(foundSdxNames, TYPE_SDX, report);
         } else {
             LOG.info("Cannot find any sdx");
         }
     }
 
     public void cleanupEnvironments() {
+        cleanupEnvironments(new CleanupReport());
+    }
+
+    private void cleanupEnvironments(CleanupReport report) {
         EnvironmentClient environmentClient = createEnvironmentClient();
         List<String> foundChildEnvironmentNames = new ArrayList<>(getChildEnvironments(environmentClient).values());
         List<String> foundEnvironmentNames = new ArrayList<>(getEnvironments(environmentClient).values());
@@ -122,24 +148,28 @@ public class CleanupUtil extends CleanupClientUtil {
         setEnvironmentClient(environmentClient);
         if (!foundChildEnvironmentNames.isEmpty()) {
             LOG.info("Found child environments: '{}'", foundChildEnvironmentNames);
-            deleteResources(foundChildEnvironmentNames, "environmentName");
+            deleteResources(foundChildEnvironmentNames, TYPE_ENVIRONMENT, report);
         }
         if (!foundEnvironmentNames.isEmpty()) {
             LOG.info("Found environments: '{}'", foundEnvironmentNames);
-            deleteResources(foundEnvironmentNames, "environmentName");
+            deleteResources(foundEnvironmentNames, TYPE_ENVIRONMENT, report);
         } else {
             LOG.info("Cannot find any environment!");
         }
     }
 
     public void cleanupCredentials() {
+        cleanupCredentials(new CleanupReport());
+    }
+
+    private void cleanupCredentials(CleanupReport report) {
         EnvironmentClient environmentClient = createEnvironmentClient();
         List<String> foundCredentialNames = getCredentials(environmentClient);
 
         setEnvironmentClient(environmentClient);
         LOG.info("Found credentials: '{}'", foundCredentialNames);
         if (!foundCredentialNames.isEmpty()) {
-            deleteResources(foundCredentialNames, "credentialName");
+            deleteResources(foundCredentialNames, TYPE_CREDENTIAL, report);
         } else {
             LOG.info("Cannot find any credential!");
         }
@@ -230,9 +260,10 @@ public class CleanupUtil extends CleanupClientUtil {
         }
     }
 
-    private void deleteResources(List<String> foundResources, String resourceNameType) {
+    private void deleteResources(List<String> foundResources, String resourceNameType, CleanupReport report) {
         List<Path> fileList = new ArrayList<>();
-        AtomicBoolean e2eCleanupFailed = new AtomicBoolean(false);
+        List<String> attemptedResources = new ArrayList<>();
+        Map<String, String> deleteFailures = new HashMap<>();
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(outputDirectory))) {
             for (Path path : stream) {
@@ -247,43 +278,98 @@ public class CleanupUtil extends CleanupClientUtil {
             throw new RuntimeException(String.format("Cannot find resource file at path: '%s', because of: %s",
                     Paths.get(outputDirectory).toAbsolutePath().normalize(), e.getMessage()));
         }
-        fileList.forEach(filePath -> {
+        for (Path filePath : fileList) {
             LOG.info("Processing resource file: '{}'", filePath.getFileName());
             List<String> resourcesName = Optional.ofNullable(getResourcesFromFile(resourceNameType, filePath))
                     .orElse(List.of());
-            resourcesName.forEach(resourceName -> {
-                if (foundResources.contains(resourceName)) {
-                    LOG.info("{}:{} will be deleted!", resourceNameType, foundResources.stream()
-                            .filter(resourceName::equals).findAny().orElse(null));
+            for (String resourceName : resourcesName) {
+                if (!foundResources.contains(resourceName)) {
+                    LOG.info("Cannot find '{}:{}' via the API — treating as already cleaned up.", resourceNameType, resourceName);
+                    continue;
+                }
+                LOG.info("{}:{} will be deleted!", resourceNameType, resourceName);
+                attemptedResources.add(resourceName);
+                try {
                     switch (resourceNameType) {
-                        case "distroxName":
-                        case "stackName":
+                        case TYPE_DISTROX:
+                        case TYPE_STACK:
                             deleteDistrox(getCloudbreakClient(), resourceName);
-                            deletedResources.add(resourceNameType, resourceName);
                             break;
-                        case "sdxName":
+                        case TYPE_SDX:
                             deleteSdx(getSdxClient(), resourceName);
-                            deletedResources.add(resourceNameType, resourceName);
                             break;
-                        case "credentialName":
+                        case TYPE_CREDENTIAL:
                             deleteCredential(getEnvironmentClient(), resourceName);
-                            deletedResources.add(resourceNameType, resourceName);
-                            e2eCleanupFailed.set(true);
                             break;
                         default:
                             deleteEnvironment(getEnvironmentClient(), resourceName);
-                            deletedResources.add(resourceNameType, resourceName);
                             break;
                     }
-                } else {
-                    LOG.info("Cannot find '{}:{}'! So End To End cleanup have been done successfully.", resourceNameType, resourceName);
+                } catch (RuntimeException ex) {
+                    // Do not abort the whole resource-type pass on a single failure — record it and continue so that
+                    // the final report reflects every leftover, not just the first one.
+                    LOG.error("Deleting {}:{} failed, continuing with the rest: {}", resourceNameType, resourceName, ex.getMessage(), ex);
+                    deleteFailures.put(resourceName, ex.getMessage());
                 }
-            });
-        });
-        validateE2ECleanup(e2eCleanupFailed, deletedResources);
+            }
+        }
+        List<String> leftoverResources = findLeftoverResources(resourceNameType, attemptedResources);
+
+        // Feed the per-run accumulators: everything we attempted and neither errored nor is still
+        // present counts as successfully deleted for the summary at the end of cleanupAllResources().
+        List<String> successfullyDeleted = attemptedResources.stream()
+                .filter(name -> !deleteFailures.containsKey(name))
+                .filter(name -> !leftoverResources.contains(name))
+                .collect(Collectors.toList());
+        report.recordDeleted(resourceNameType, successfullyDeleted);
+        report.recordLeftovers(resourceNameType, leftoverResources);
+        report.recordDeleteErrors(resourceNameType, deleteFailures);
+
+        validateE2ECleanup(resourceNameType, attemptedResources, deleteFailures, leftoverResources);
     }
 
-    private void deleteEnvironments(EnvironmentClient environmentClient, List<String> environmentNames) {
+    /**
+     * Re-query the appropriate API after deletion to determine which of the resources we attempted to delete
+     * are actually still present. A resource missing from the response (or a 404 on the per-name endpoint)
+     * means the delete succeeded; anything still visible is a genuine leftover. On a re-list failure
+     * (transient network / auth), we conservatively treat all attempted resources as leftovers rather than
+     * silently declaring success — same principle as CleanupWaitUtil.check*IsAvailable.
+     */
+    private List<String> findLeftoverResources(String resourceNameType, List<String> attemptedResources) {
+        if (attemptedResources.isEmpty()) {
+            return List.of();
+        }
+        try {
+            Set<String> stillPresent;
+            switch (resourceNameType) {
+                case TYPE_DISTROX:
+                case TYPE_STACK:
+                    stillPresent = new HashSet<>(getDistroxes(getEnvironmentClient(), getCloudbreakClient()));
+                    break;
+                case TYPE_SDX:
+                    stillPresent = new HashSet<>(getSdxes(getEnvironmentClient(), getSdxClient()));
+                    break;
+                case TYPE_CREDENTIAL:
+                    stillPresent = new HashSet<>(getCredentials(getEnvironmentClient()));
+                    break;
+                default:
+                    EnvironmentClient environmentClient = getEnvironmentClient();
+                    stillPresent = new HashSet<>();
+                    stillPresent.addAll(getChildEnvironments(environmentClient).values());
+                    stillPresent.addAll(getEnvironments(environmentClient).values());
+                    break;
+            }
+            return attemptedResources.stream()
+                    .filter(stillPresent::contains)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            LOG.error("Could not re-list '{}' resources to verify cleanup, treating all attempted as still present: {}",
+                    resourceNameType, e.getMessage(), e);
+            return new ArrayList<>(attemptedResources);
+        }
+    }
+
+    private void deleteEnvironments(EnvironmentClient environmentClient, List<String> environmentNames, CleanupReport report) {
         try {
             environmentNames.forEach(environmentName -> LOG.info("Environment with name: {} will be deleted!", environmentName));
             environmentClient.environmentV1Endpoint().deleteMultipleByNames(new HashSet<>(environmentNames), true, false);
@@ -295,6 +381,8 @@ public class CleanupUtil extends CleanupClientUtil {
                 if (waitResult == WaitResult.TIMEOUT) {
                     throw new RuntimeException(String.format("Timeout: Deleting %s environment has been timed out!", environmentName));
                 }
+                // Record per-environment success as the wait for that env clears.
+                report.recordDeleted(TYPE_ENVIRONMENT, environmentName);
             });
         } catch (Exception e) {
             LOG.error("One or more environment cannot be deleted, because of: {}", e.getMessage(), e);
@@ -321,6 +409,10 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public void deleteCredentials(EnvironmentClient environmentClient, List<String> credentialNames) {
+        deleteCredentials(environmentClient, credentialNames, new CleanupReport());
+    }
+
+    private void deleteCredentials(EnvironmentClient environmentClient, List<String> credentialNames, CleanupReport report) {
         waitUtil.waitForEnvironmentsCleanup(environmentClient);
         try {
             credentialNames.forEach(credentialName -> LOG.info("Credential with name: {} will be deleted!", credentialName));
@@ -328,6 +420,20 @@ public class CleanupUtil extends CleanupClientUtil {
         } catch (Exception e) {
             LOG.error("One or more credential cannot be deleted, because of: {}", e.getMessage(), e);
             throw new RuntimeException(String.format("One or more credential cannot be deleted, because of: %s", e.getMessage()));
+        }
+        // deleteMultiple returning normally means the API accepted the batch — verify per-credential
+        // via a re-list so we do not repeat the original false-positive bug on partial failure.
+        List<String> stillPresent = findLeftoverResources(TYPE_CREDENTIAL, credentialNames);
+        List<String> deleted = credentialNames.stream()
+                .filter(name -> !stillPresent.contains(name))
+                .collect(Collectors.toList());
+        report.recordDeleted(TYPE_CREDENTIAL, deleted);
+        report.recordLeftovers(TYPE_CREDENTIAL, stillPresent);
+        if (!stillPresent.isEmpty()) {
+            LOG.error("End To End cleanup failed: credential(s) '{}' still present after deleteMultiple.", stillPresent);
+            throw new RuntimeException(String.format(
+                    "End To End cleanup failed for resource type '%s': %d credential(s) still present after delete.",
+                    TYPE_CREDENTIAL, stillPresent.size()));
         }
     }
 
@@ -378,16 +484,78 @@ public class CleanupUtil extends CleanupClientUtil {
         }
     }
 
-    private void validateE2ECleanup(AtomicBoolean e2eCleanupFailed, MultiValueMap<String, String> resourceNames) {
-        if (e2eCleanupFailed.get()) {
-            resourceNames
-                    .forEach((type, names) ->
-                            LOG.error("End To End cleanup have been failed, because of resource '{}' with name(s) '{}' found left behind!", type, names)
-                    );
-            throw new RuntimeException(String.format("End To End cleanup have been failed, because of '%d' resource(s) found left behind!",
-                    resourceNames.size()));
+    /**
+     * Reports cleanup outcome for a single resource type. Only fails when either a delete call errored out
+     * or the post-delete re-list still shows the resource — a successful delete whose follow-up GET returns
+     * 404 is a success, not a leftover.
+     */
+    private void validateE2ECleanup(String resourceNameType, List<String> attemptedResources,
+            Map<String, String> deleteFailures, List<String> leftoverResources) {
+        if (attemptedResources.isEmpty()) {
+            LOG.info("End To End cleanup for resource type '{}': nothing to delete.", resourceNameType);
+            return;
+        }
+        if (deleteFailures.isEmpty() && leftoverResources.isEmpty()) {
+            LOG.info("End To End cleanup for resource type '{}' succeeded — {} resource(s) deleted: {}",
+                    resourceNameType, attemptedResources.size(), attemptedResources);
+            return;
+        }
+        if (!deleteFailures.isEmpty()) {
+            deleteFailures.forEach((name, reason) ->
+                    LOG.error("End To End cleanup failed: delete of '{}:{}' errored — {}", resourceNameType, name, reason));
+        }
+        if (!leftoverResources.isEmpty()) {
+            LOG.error("End To End cleanup failed: resource '{}' with name(s) '{}' still present after delete!",
+                    resourceNameType, leftoverResources);
+        }
+        int problemCount = deleteFailures.size() + leftoverResources.size();
+        throw new RuntimeException(String.format(
+                "End To End cleanup failed for resource type '%s': %d resource(s) could not be cleaned up (delete errors: %d, still present: %d).",
+                resourceNameType, problemCount, deleteFailures.size(), leftoverResources.size()));
+    }
+
+    /**
+     * Renders a single, consolidated summary block at the end of a cleanup run so operators do not
+     * have to scroll through the Jenkins console log. Called from cleanupAllResources()'s finally
+     * block so it also prints when the run aborts mid-way.
+     */
+    private void logCleanupSummary(CleanupReport report) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(System.lineSeparator());
+        sb.append("=========================== CLEANUP SUMMARY ===========================").append(System.lineSeparator());
+        sb.append(String.format("Deleted: %d | Still present: %d | Delete errors: %d",
+                        report.deletedCount(), report.leftoverCount(), report.errorCount()))
+                .append(System.lineSeparator());
+
+        if (report.isEmpty()) {
+            sb.append("Nothing to clean up.").append(System.lineSeparator());
         } else {
-            LOG.info("End To End cleanup have been success, because of cannot found any resource left behind!");
+            Map<String, List<String>> deleted = report.getDeletedByType();
+            Map<String, List<String>> leftovers = report.getLeftoversByType();
+            Map<String, Map<String, String>> errors = report.getDeleteErrorsByType();
+            if (!deleted.isEmpty()) {
+                sb.append("--- Deleted successfully ---").append(System.lineSeparator());
+                deleted.forEach((type, names) ->
+                        sb.append(String.format("  %s (%d): %s", type, names.size(), names)).append(System.lineSeparator()));
+            }
+            if (!leftovers.isEmpty()) {
+                sb.append("--- Still present after delete ---").append(System.lineSeparator());
+                leftovers.forEach((type, names) ->
+                        sb.append(String.format("  %s (%d): %s", type, names.size(), names)).append(System.lineSeparator()));
+            }
+            if (!errors.isEmpty()) {
+                sb.append("--- Delete errors ---").append(System.lineSeparator());
+                errors.forEach((type, byName) -> byName.forEach((name, reason) ->
+                        sb.append(String.format("  %s: %s — %s", type, name, reason)).append(System.lineSeparator())));
+            }
+        }
+        sb.append("=======================================================================");
+
+        String summary = sb.toString();
+        if (report.leftoverCount() > 0 || report.errorCount() > 0) {
+            LOG.error(summary);
+        } else {
+            LOG.info(summary);
         }
     }
 
