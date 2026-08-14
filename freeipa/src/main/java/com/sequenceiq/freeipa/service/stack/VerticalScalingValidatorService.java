@@ -142,20 +142,20 @@ public class VerticalScalingValidatorService {
             LOGGER.debug("Using stack-level availability zone '{}' for VM type lookup.", stackAvailabilityZone);
             return stackAvailabilityZone;
         }
-        if (instanceGroupAvailabilityZones != null && !instanceGroupAvailabilityZones.isEmpty()) {
-            Set<String> availableZonesFromProvider = cloudVmResponses.keySet();
-            String resolvedZone = instanceGroupAvailabilityZones.stream()
-                    .filter(availableZonesFromProvider::contains)
-                    .findFirst()
-                    .orElseGet(() -> instanceGroupAvailabilityZones.iterator().next());
-            LOGGER.debug("Stack availability zone is empty, using instance group availability zone '{}' for VM type lookup.", resolvedZone);
-            return resolvedZone;
+        Set<String> availableZonesFromProvider = cloudVmResponses.keySet();
+        Optional<String> instanceGroupZone = instanceGroupAvailabilityZones == null ? Optional.empty()
+                : instanceGroupAvailabilityZones.stream()
+                        .filter(availableZonesFromProvider::contains)
+                        .findFirst();
+        if (instanceGroupZone.isPresent()) {
+            LOGGER.debug("Using instance group availability zone '{}' for VM type lookup.", instanceGroupZone.get());
+            return instanceGroupZone.get();
         }
-        String resolvedZone = cloudVmResponses.keySet().stream()
-                .findFirst()
-                .orElse(region);
-        LOGGER.debug("Stack and instance group availability zones are empty, falling back to '{}' for VM type lookup.", resolvedZone);
-        return resolvedZone;
+        String fallbackZone = availableZonesFromProvider.contains(region)
+                ? region
+                : availableZonesFromProvider.stream().findFirst().orElse(region);
+        LOGGER.debug("No availability zone matched a provider VM type key, falling back to '{}' for VM type lookup.", fallbackZone);
+        return fallbackZone;
     }
 
     private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(VerticalScaleRequest verticalScaleV4Request) {
