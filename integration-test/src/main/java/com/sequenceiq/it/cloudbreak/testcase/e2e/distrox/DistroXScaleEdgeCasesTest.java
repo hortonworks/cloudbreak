@@ -31,7 +31,6 @@ public class DistroXScaleEdgeCasesTest extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultDatalake(testContext);
     }
 

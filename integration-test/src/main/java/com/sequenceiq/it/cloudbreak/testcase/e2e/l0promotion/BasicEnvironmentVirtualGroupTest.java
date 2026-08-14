@@ -64,7 +64,6 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest implements
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         useRealUmsUser(testContext, L0UserKeys.USER_ACCOUNT_ADMIN);
-        initializeDefaultBlueprints(testContext);
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);

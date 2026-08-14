@@ -53,7 +53,6 @@ public class FreeIpaRecipeDetachTest extends AbstractMockTest {
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

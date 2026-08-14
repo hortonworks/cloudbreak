@@ -96,7 +96,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         createCmBlueprint(testContext);
         createDefaultDatalake(testContext);
     }

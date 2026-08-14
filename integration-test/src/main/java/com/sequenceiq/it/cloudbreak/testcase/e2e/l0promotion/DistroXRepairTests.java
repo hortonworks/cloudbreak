@@ -58,7 +58,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
         assertSupportedCloudPlatform(CloudPlatform.AZURE);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createStorageOptimizedDatahub(testContext);
     }

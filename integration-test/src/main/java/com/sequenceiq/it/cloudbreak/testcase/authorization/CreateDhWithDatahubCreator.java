@@ -79,7 +79,6 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
         testContext.as(AuthUserKeys.ACCOUNT_ADMIN);
         testContext.as(ENV_CREATOR_B);
         //hacky way to let access to image catalog
-        initializeDefaultBlueprints(testContext);
         createDefaultImageCatalog(testContext);
         testContext.as(AuthUserKeys.ENV_CREATOR_A);
         testContext.as(AuthUserKeys.ZERO_RIGHTS);

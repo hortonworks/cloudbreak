@@ -87,7 +87,6 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         testContext.as(L0UserKeys.USER_ACCOUNT_ADMIN);
 
-        initializeDefaultBlueprints(testContext);
         testContext.as(L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createRecipeAndApplyOnFreeIpaAndMasterNodes(testContext);

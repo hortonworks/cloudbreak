@@ -41,7 +41,6 @@ public class PreconditionGovTest extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         initUsers(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
     }
 

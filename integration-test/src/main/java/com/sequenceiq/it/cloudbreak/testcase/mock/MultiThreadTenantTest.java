@@ -37,7 +37,6 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -104,7 +103,6 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
         createAdminUser(testContext, tenant, user);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         return testContext;
     }
 
@@ -170,12 +168,6 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     protected void createAdminUser(MockedTestContext testContext, String tenant, String user) {
         testContext.as(testUserCreator.createAdmin(tenant, user));
-    }
-
-    protected void initializeDefaultBlueprints(MockedTestContext testContext) {
-        testContext
-                .init(BlueprintTestDto.class)
-                .when(blueprintTestClient.listV4());
     }
 
     /**

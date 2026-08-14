@@ -218,7 +218,6 @@ public class EnvironmentEditTest extends AbstractMockTest {
         String initialCidr = "192.168.0.0/16";
         String secondaryCidr = "10.0.0.0/16";
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         testContext
                 .given(HttpMock.class)
                 .mockSpi().getNetworkCidr().get().clearMockResponse()

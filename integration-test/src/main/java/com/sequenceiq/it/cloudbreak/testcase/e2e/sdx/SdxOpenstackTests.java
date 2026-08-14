@@ -67,7 +67,6 @@ public class SdxOpenstackTests extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createImageCatalogs(testContext);
     }

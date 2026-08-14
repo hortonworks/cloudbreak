@@ -39,7 +39,6 @@ public class ModifyProxyConfigE2ETest extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         createProxyConfig(testContext);
         createProxyConfig2(testContext);
         createDefaultEnvironment(testContext);

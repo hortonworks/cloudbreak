@@ -35,7 +35,6 @@ public class DistroXCustomTest extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

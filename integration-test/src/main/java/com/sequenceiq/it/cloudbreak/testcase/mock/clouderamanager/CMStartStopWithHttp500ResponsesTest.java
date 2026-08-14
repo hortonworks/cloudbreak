@@ -32,7 +32,6 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultDatalake(testContext);
         createCmBlueprint(testContext);
     }

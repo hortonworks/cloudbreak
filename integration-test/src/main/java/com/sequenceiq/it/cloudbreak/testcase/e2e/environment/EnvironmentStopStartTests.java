@@ -119,7 +119,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 10800000)

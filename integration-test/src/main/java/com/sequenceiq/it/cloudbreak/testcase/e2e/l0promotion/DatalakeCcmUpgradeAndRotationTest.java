@@ -87,7 +87,6 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
     }
 

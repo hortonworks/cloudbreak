@@ -56,7 +56,6 @@ public class DistroXEphemeralTests extends AbstractE2EWithReusableResourcesTest 
     protected void setupClass(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
 

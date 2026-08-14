@@ -68,7 +68,6 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
     protected void setupTest(TestContext testContext) {
         imageValidatorE2ETestUtil.setupTest(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         createEnvironment(testContext, Boolean.TRUE, 2);
     }
 

@@ -40,7 +40,6 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultDatalake(testContext);
     }

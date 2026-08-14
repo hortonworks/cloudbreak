@@ -42,7 +42,6 @@ public class DistroXResilientScaleTests extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultDatahub(testContext);
     }
 

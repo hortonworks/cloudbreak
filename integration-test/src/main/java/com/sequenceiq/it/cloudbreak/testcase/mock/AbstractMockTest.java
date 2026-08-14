@@ -42,7 +42,6 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
         createDefaultEnvironment(testContext);
         createDefaultFreeIpa(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
     }
 
     protected void createDefaultFreeIpa(TestContext testContext) {

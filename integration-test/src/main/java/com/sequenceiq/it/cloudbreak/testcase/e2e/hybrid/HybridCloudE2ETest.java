@@ -124,7 +124,6 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         assertSupportedCloudPlatform(CloudPlatform.AWS);
 
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext

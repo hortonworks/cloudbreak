@@ -46,7 +46,6 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultDatalake(testContext);
         createCmBlueprint(testContext);
     }

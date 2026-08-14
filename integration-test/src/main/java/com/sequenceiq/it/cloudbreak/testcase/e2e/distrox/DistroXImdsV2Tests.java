@@ -34,7 +34,6 @@ public class DistroXImdsV2Tests extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultDatahubWithAutoTlsAndExternalDb(testContext);
     }
 

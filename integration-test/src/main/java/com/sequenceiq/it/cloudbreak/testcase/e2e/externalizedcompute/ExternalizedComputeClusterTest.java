@@ -46,7 +46,6 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createExtendedCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

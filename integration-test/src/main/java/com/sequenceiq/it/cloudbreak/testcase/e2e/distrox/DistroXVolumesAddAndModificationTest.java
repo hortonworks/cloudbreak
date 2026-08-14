@@ -90,7 +90,6 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
         assertNotSupportedCloudPlatform(CloudPlatform.GCP);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createAndWaitDatalake(testContext);

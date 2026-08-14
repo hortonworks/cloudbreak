@@ -77,7 +77,6 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
         testContext.as(AuthUserKeys.ACCOUNT_ADMIN);
         testContext.as(AuthUserKeys.ENV_CREATOR_B);
         //hacky way to let access to image catalog
-        initializeDefaultBlueprints(testContext);
         createDefaultImageCatalog(testContext);
         testContext.as(AuthUserKeys.ENV_ADMIN_A);
         testContext.as(ENV_CREATOR_A);

@@ -32,7 +32,6 @@ public class DistroXJavaTests extends AbstractMockTest {
         createDefaultEnvironment(testContext);
         createDefaultFreeIpa(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         createDatalakeWithVersion(testContext, "7.3.1");
     }
 

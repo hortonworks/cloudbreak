@@ -43,7 +43,6 @@ public class DataStewardTest extends AbstractIntegrationTest {
     protected void setupTest(TestContext testContext) {
         testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
         testContext.as(AuthUserKeys.ACCOUNT_ADMIN);
-        initializeDefaultBlueprints(testContext);
         createDefaultImageCatalog(testContext);
         testContext.as(AuthUserKeys.ENV_CREATOR_A);
         testContext.as(ENV_DATA_STEWARD);

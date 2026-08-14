@@ -33,7 +33,6 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         initializeAzureMarketplaceTermsPolicy(testContext);
         createEnvironmentWithFreeIpa(testContext);

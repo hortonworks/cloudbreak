@@ -63,7 +63,6 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
     @Override
     protected void setupTest(TestContext testContext) {
         imageValidatorE2ETestUtil.setupTest(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
     }
 

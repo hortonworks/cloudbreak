@@ -35,7 +35,6 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDatalakeWithoutDatabase(testContext);

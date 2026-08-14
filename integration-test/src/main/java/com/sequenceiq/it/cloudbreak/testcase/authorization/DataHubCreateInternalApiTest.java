@@ -54,7 +54,6 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
         testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
         testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
         testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
-        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

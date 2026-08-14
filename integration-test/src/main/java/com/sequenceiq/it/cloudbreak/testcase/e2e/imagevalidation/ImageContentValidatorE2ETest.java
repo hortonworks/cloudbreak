@@ -65,7 +65,6 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
     protected void setupClass(TestContext testContext) {
         imageValidatorE2ETestUtil.setupTest(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
         Architecture architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
         createEnvironmentWithFreeIpa(testContext, architecture);

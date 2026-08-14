@@ -50,7 +50,6 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultDatalake(testContext);
     }
 

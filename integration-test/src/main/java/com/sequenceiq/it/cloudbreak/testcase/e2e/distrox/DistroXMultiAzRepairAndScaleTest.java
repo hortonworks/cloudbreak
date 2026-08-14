@@ -51,7 +51,6 @@ public class DistroXMultiAzRepairAndScaleTest extends AbstractE2EWithReusableRes
     protected void setupClass(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         initializeAzureMarketplaceTermsPolicy(testContext);
         createEnvironmentWithFreeIpa(testContext);

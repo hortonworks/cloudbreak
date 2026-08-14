@@ -31,7 +31,6 @@ import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.TermsPolicyDto;
-import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
@@ -443,13 +442,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void useRealUmsUser(TestContext testContext, String key) {
         testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
         testContext.as(key);
-    }
-
-    protected void initializeDefaultBlueprints(TestContext testContext) {
-        testContext
-                .init(BlueprintTestDto.class)
-                .when(blueprintTestClient.listV4())
-                .validate();
     }
 
     protected SdxCloudStorageRequest getCloudStorageRequest(TestContext testContext) {

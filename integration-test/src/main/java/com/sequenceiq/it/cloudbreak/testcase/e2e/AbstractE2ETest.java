@@ -94,7 +94,6 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     protected void initializeTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         initializeAzureMarketplaceTermsPolicy(testContext);
     }
 

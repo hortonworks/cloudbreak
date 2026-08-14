@@ -53,7 +53,6 @@ public class FreeIpaRepairTest extends AbstractMockTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultEnvironment(testContext);
     }
 

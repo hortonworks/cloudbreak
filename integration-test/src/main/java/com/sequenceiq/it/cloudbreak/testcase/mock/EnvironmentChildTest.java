@@ -41,7 +41,6 @@ public class EnvironmentChildTest extends AbstractMockTest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
     }

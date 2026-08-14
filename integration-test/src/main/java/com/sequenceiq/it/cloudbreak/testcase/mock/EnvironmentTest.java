@@ -68,7 +68,6 @@ public class EnvironmentTest extends AbstractMockTest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

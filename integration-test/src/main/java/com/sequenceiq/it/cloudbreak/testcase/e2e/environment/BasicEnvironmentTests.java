@@ -25,7 +25,6 @@ public class BasicEnvironmentTests extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

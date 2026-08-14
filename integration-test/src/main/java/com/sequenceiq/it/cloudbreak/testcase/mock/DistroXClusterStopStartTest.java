@@ -28,7 +28,6 @@ public class DistroXClusterStopStartTest extends AbstractMockTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultDatahub(testContext);
     }
 

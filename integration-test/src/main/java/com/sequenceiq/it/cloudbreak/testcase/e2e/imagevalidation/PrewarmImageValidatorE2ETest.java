@@ -48,7 +48,6 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
     protected void setupTest(TestContext testContext) {
         imageValidatorE2ETestUtil.setupTest(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
         architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
         createEnvironmentWithFreeIpa(testContext, architecture);

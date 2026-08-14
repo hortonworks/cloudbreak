@@ -43,7 +43,6 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
         testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
         testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
         //hacky way to let access to image catalog
-        initializeDefaultBlueprints(testContext);
         resourceCreator.createDefaultImageCatalog(testContext);
         testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
         testContext.given(UmsTestDto.class)

@@ -51,7 +51,6 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
 
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
         createDefaultEnvironment(testContext);
     }
 
