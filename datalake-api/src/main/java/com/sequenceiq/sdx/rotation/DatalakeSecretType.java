@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDB
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.FREEIPA_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.ROLLBACK_NOT_SUPPORTED;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_HIGHSTATE;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_STATUS_CHECK;
@@ -29,8 +30,8 @@ public enum DatalakeSecretType implements SecretType {
     SALT_BOOT_SECRETS(List.of(CLOUDBREAK_ROTATE_POLLING)),
     SALT_MASTER_KEY_PAIR(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
     SALT_SIGN_KEY_PAIR(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
-    CM_INTERMEDIATE_CA_CERT(List.of(CLOUDBREAK_ROTATE_POLLING)),
-    PRIVATE_HOST_CERTS(List.of(CLOUDBREAK_ROTATE_POLLING)),
+    CM_INTERMEDIATE_CA_CERT(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(ROLLBACK_NOT_SUPPORTED)),
+    PRIVATE_HOST_CERTS(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(ROLLBACK_NOT_SUPPORTED)),
     LDAP_BIND_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING)),
     SSSD_IPA_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
     STACK_ENCRYPTION_KEYS(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),

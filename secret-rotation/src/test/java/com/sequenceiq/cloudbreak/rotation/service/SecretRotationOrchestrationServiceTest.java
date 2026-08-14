@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_5;
 import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +11,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -183,5 +185,37 @@ public class SecretRotationOrchestrationServiceTest {
         verify(statusService, times(1)).rollbackFinished(eq(RESOURCE), eq(TEST));
         verify(usageService, times(1)).rollbackFinished(eq(TEST), eq(RESOURCE), isNull());
         verify(usageService, times(1)).rotationFailed(eq(TEST), eq(RESOURCE), eq(ROLLBACK_REASON), isNull());
+        verify(statusService, never()).rotationFailed(any(), any(), any());
+    }
+
+    @Test
+    public void testRollbackWhenNotSupportedRoutesToFailureInsteadOfRollback() {
+        when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
+
+        underTest.rollbackIfNeeded(TEST_5, RESOURCE, null, null, new SecretRotationException(ROLLBACK_REASON));
+
+        verify(statusService, times(1)).rotationFailed(eq(RESOURCE), eq(TEST_5), eq(ROLLBACK_REASON));
+        verify(stepProgressService, times(1)).deleteCurrentRotation(any());
+        verify(usageService, times(1)).rotationFailed(eq(TEST_5), eq(RESOURCE), eq(ROLLBACK_REASON), isNull());
+
+        verifyNoInteractions(rollbackService);
+        verify(statusService, never()).rollbackStarted(any(), any(), any());
+        verify(statusService, never()).rollbackFinished(any(), any());
+        verify(usageService, never()).rollbackStarted(any(), any(), any());
+        verify(usageService, never()).rollbackFinished(any(), any(), any());
+    }
+
+    @Test
+    public void testRollbackWhenNotSupportedAndFailureStatusThrowsRethrowsWithoutMarkingRollbackFailed() {
+        when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
+        RuntimeException failure = new RuntimeException("status update failed");
+        doThrow(failure).when(statusService).rotationFailed(eq(RESOURCE), eq(TEST_5), eq(ROLLBACK_REASON));
+
+        assertThrows(RuntimeException.class,
+                () -> underTest.rollbackIfNeeded(TEST_5, RESOURCE, null, null, new SecretRotationException(ROLLBACK_REASON)));
+
+        verify(statusService, never()).rollbackFailed(any(), any(), any());
+        verify(usageService, never()).rollbackFailed(any(), any(), any(), any());
+        verifyNoInteractions(rollbackService);
     }
 }

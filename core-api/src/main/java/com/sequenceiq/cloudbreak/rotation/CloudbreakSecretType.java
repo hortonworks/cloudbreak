@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_D
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.POST_FLOW;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.ROLLBACK_NOT_SUPPORTED;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_HIGHSTATE;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_STATUS_CHECK;
@@ -33,8 +34,8 @@ public enum CloudbreakSecretType implements SecretType {
     GATEWAY_CERT(List.of(VAULT, CUSTOM_JOB, CM_SERVICE_ROLE_RESTART, CLUSTER_PROXY_UPDATE)),
     CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
     SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA)),
-    CM_INTERMEDIATE_CA_CERT(List.of(CUSTOM_JOB), Set.of(POST_FLOW)),
-    PRIVATE_HOST_CERTS(List.of(CUSTOM_JOB), Set.of(POST_FLOW, SKIP_STATUS_CHECK)),
+    CM_INTERMEDIATE_CA_CERT(List.of(CUSTOM_JOB), Set.of(POST_FLOW, ROLLBACK_NOT_SUPPORTED)),
+    PRIVATE_HOST_CERTS(List.of(CUSTOM_JOB), Set.of(POST_FLOW, SKIP_STATUS_CHECK, ROLLBACK_NOT_SUPPORTED)),
     LDAP_BIND_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CUSTOM_JOB, SALT_STATE_APPLY)),
     SSSD_IPA_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, SALT_PILLAR), Set.of(SKIP_SALT_UPDATE)),
     DBUS_UMS_ACCESS_KEY(List.of(UMS_DATABUS_CREDENTIAL, CUSTOM_JOB, CM_SERVICE)),

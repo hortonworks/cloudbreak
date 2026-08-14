@@ -101,16 +101,25 @@ public class SecretRotationOrchestrationService {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROLLBACK, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             try {
-                statusService.rollbackStarted(resourceCrn, secretType, rollbackReason.getMessage());
-                usageService.rollbackStarted(secretType, resourceCrn, executionType);
-                rollbackService.rollback(rotationMetadata);
-                progressService.deleteCurrentRotation(rotationMetadata);
-                statusService.rollbackFinished(resourceCrn, secretType);
-                usageService.rollbackFinished(secretType, resourceCrn, executionType);
+                if (secretType.rollbackNotSupported()) {
+                    LOGGER.warn("Rotation failed for secret type {} which does not support rollback, " +
+                            "routing to failure state instead of rollback.", secretType);
+                    statusService.rotationFailed(resourceCrn, secretType, rollbackReason.getMessage());
+                    progressService.deleteCurrentRotation(rotationMetadata);
+                } else {
+                    statusService.rollbackStarted(resourceCrn, secretType, rollbackReason.getMessage());
+                    usageService.rollbackStarted(secretType, resourceCrn, executionType);
+                    rollbackService.rollback(rotationMetadata);
+                    progressService.deleteCurrentRotation(rotationMetadata);
+                    statusService.rollbackFinished(resourceCrn, secretType);
+                    usageService.rollbackFinished(secretType, resourceCrn, executionType);
+                }
                 usageService.rotationFailed(secretType, resourceCrn, rollbackReason.getMessage(), executionType);
             } catch (Exception e) {
-                statusService.rollbackFailed(resourceCrn, secretType, e.getMessage());
-                usageService.rollbackFailed(secretType, resourceCrn, e.getMessage(), executionType);
+                if (!secretType.rollbackNotSupported()) {
+                    statusService.rollbackFailed(resourceCrn, secretType, e.getMessage());
+                    usageService.rollbackFailed(secretType, resourceCrn, e.getMessage(), executionType);
+                }
                 throw e;
             }
         }

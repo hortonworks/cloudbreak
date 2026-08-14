@@ -23,6 +23,7 @@ Rotation framework has been created based on this idea.
   - `SKIP_SALT_UPDATE`: every rotation flowchain begins with a salt update flow to update salt states if needed. If there is no salt related action for the given secret type, you can use this, to skip the salt update flow.
   - `SKIP_SALT_HIGHSTATE`: you have also option to skip salt highstate part of the salt update flow, if you need to update salt states, but you do not want to execute salt highstate for the entire cluster/resource.
   - `SKIP_STATUS_CHECK`: normally, we allow rotation for working clusters, but this option allows us to execute the rotation for resources with other statuses too, if needed and possible.
+  - `ROLLBACK_NOT_SUPPORTED`: the given secret type has no meaningful rollback (e.g. cert rotations whose real work runs in a non-reversible `POST_FLOW`). On a rotation failure the rollback flow step skips the actual rollback execution and related status changes, so we don't report a misleading no-op rollback. Recovery for such types is a retry (the rotate step must be idempotent).
 
 ## Secret rotation flow
 - during secret rotation we are creating a flowchain and every secret will have an own flow in the flowchain
