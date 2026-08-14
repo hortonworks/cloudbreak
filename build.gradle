@@ -84,6 +84,7 @@ allprojects {
   ext['mockito.version'] = mockitoVersion
   ext['quartz.version'] = quartzVersion
   ext['opentelemetry.version'] = openTelemetryVersion
+  ext['httpclient5.version'] = httpClientVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
