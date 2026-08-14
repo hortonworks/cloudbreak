@@ -141,9 +141,6 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         if (autoscaleState.isEnableAutoscaling()) {
             alertValidator.validateIfStackIsAvailable(cluster);
         }
-        if (Boolean.TRUE.equals(autoscaleState.getUseStopStartMechanism())) {
-            alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
-        }
         alertValidator.validateScheduleWithStopStart(cluster, autoscaleState);
         try {
             transactionService.required(() -> asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
@@ -162,13 +159,8 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         if (autoscaleClusterRequest.getEnableAutoscaling()) {
             alertValidator.validateIfStackIsAvailable(cluster);
         }
-        alertValidator.validateEntitlementAndDisableIfNotEntitled(cluster);
         alertValidator.validateDistroXAutoscaleClusterRequest(cluster, autoscaleClusterRequest);
         alertValidator.validateScheduleWithStopStart(autoscaleClusterRequest);
-
-        if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())) {
-            alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
-        }
 
         String policyHostGroup = asClusterCommonService.determineLoadBasedPolicyHostGroup(cluster).orElse(null);
         try {

@@ -400,21 +400,17 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 newFailedNodeNamesWithReason.keySet(),
                 newHealthyHostNames);
         if (!failedInstances.isEmpty()) {
-            if (stackUtil.stopStartScalingEntitlementEnabled(stack.getStack())) {
-                Set<InstanceMetadataView> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
-                long stoppedInstancesCount = stoppedInstances.size();
-                Set<String> computeGroups = getComputeHostGroups(stack.getBlueprint());
-                boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroupName()).allMatch(computeGroups::contains);
-                if (stoppedInstancesCount > 0 && stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
-                    // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
-                    //  when there are some STOPPED instances
-                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
-                } else {
-                    LOGGER.debug("WithStopStartEntitlement, putting cluster into NODE_FAILURE. Counts: stoppedInstanceCount={}, failedInstanceCount={}",
-                            stoppedInstancesCount, failedInstances.size());
-                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
-                }
+            Set<InstanceMetadataView> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
+            long stoppedInstancesCount = stoppedInstances.size();
+            Set<String> computeGroups = getComputeHostGroups(stack.getBlueprint());
+            boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroupName()).allMatch(computeGroups::contains);
+            if (stoppedInstancesCount > 0 && stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
+                // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
+                //  when there are some STOPPED instances
+                clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
             } else {
+                LOGGER.debug("WithStopStartEntitlement, putting cluster into NODE_FAILURE. Counts: stoppedInstanceCount={}, failedInstanceCount={}",
+                        stoppedInstancesCount, failedInstances.size());
                 clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
             }
         } else if (STATES_FROM_AVAILABLE_ALLOWED.contains(stack.getStatus())) {

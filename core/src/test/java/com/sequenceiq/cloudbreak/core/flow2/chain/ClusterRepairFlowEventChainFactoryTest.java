@@ -315,7 +315,6 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1, host2));
         when(stackDto.getStack().getType()).thenReturn(StackType.WORKLOAD);
-        lenient().when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 

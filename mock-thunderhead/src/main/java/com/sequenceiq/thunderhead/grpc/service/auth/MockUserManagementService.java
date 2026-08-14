@@ -99,10 +99,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_IN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COMPUTE_API_LIFTIE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COMPUTE_API_LIFTIE_BETA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COMPUTE_UI;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_IMPALA_SCHEDULE_BASED_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
@@ -1022,10 +1018,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, true, CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED);
         addEntitlement(builder, accountId, true, CDP_AZURE_UAE_CENTRAL);
         addEntitlement(builder, accountId, true, DATAHUB_IMPALA_SCHEDULE_BASED_SCALING);
-        addEntitlement(builder, accountId, true, DATAHUB_GCP_AUTOSCALING);
-        addEntitlement(builder, accountId, true, DATAHUB_AWS_STOP_START_SCALING);
-        addEntitlement(builder, accountId, true, DATAHUB_AZURE_STOP_START_SCALING);
-        addEntitlement(builder, accountId, true, DATAHUB_GCP_STOP_START_SCALING);
         addEntitlement(builder, accountId, true, DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY);
         addEntitlement(builder, accountId, true, LOCAL_DEV);
         addEntitlement(builder, accountId, true, CDP_CP_CUSTOM_DL_TEMPLATE);

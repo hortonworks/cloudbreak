@@ -293,8 +293,7 @@ class MockUserManagementServiceTest {
         List<String> entitlements = account.getEntitlementsList().stream()
                 .map(Entitlement::getEntitlementName)
                 .toList();
-        assertThat(entitlements).contains("CLOUDERA_INTERNAL_ACCOUNT",
-                "DATAHUB_GCP_AUTOSCALING", "LOCAL_DEV", "CDP_CM_ADMIN_CREDENTIALS");
+        assertThat(entitlements).contains("CLOUDERA_INTERNAL_ACCOUNT", "LOCAL_DEV", "CDP_CM_ADMIN_CREDENTIALS");
     }
 
     @ParameterizedTest(name = "{0}")

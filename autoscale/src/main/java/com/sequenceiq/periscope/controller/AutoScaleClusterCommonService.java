@@ -25,7 +25,6 @@ import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AlertType;
@@ -44,7 +43,6 @@ import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NodeDeletionService;
 import com.sequenceiq.periscope.service.UsageReportingService;
@@ -79,9 +77,6 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
 
     @Inject
     private AlertService alertService;
-
-    @Inject
-    private EntitlementValidationService entitlementValidationService;
 
     public List<Cluster> getDistroXClusters() {
         return clusterService.findDistroXByTenant(restRequestThreadLocalService.getCloudbreakTenant());
@@ -127,10 +122,9 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
 
     public Cluster setStopStartScalingState(Long clusterId, Boolean requestedState, boolean hasTimeAlerts, boolean hasLoadAlerts) {
         Cluster cluster = clusterService.findById(clusterId);
-        boolean allowedPerEntitlement = canEnableStopStartBasedOnEntitlement(cluster);
 
         boolean targetState = false;
-        if (allowedPerEntitlement && !hasTimeAlerts && hasLoadAlerts) {
+        if (!hasTimeAlerts && hasLoadAlerts) {
             if (requestedState == null || requestedState) {
                 targetState = true;
             }
@@ -139,10 +133,6 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
             return clusterService.setStopStartScalingState(cluster, targetState);
         }
         return cluster;
-    }
-
-    private boolean canEnableStopStartBasedOnEntitlement(Cluster cluster) {
-        return entitlementValidationService.stopStartAutoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform());
     }
 
     public void deleteAlertsForClusterCrn(String stackCrn) {

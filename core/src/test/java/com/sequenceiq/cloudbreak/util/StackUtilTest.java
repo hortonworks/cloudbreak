@@ -31,7 +31,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -58,7 +57,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
-import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -266,16 +264,6 @@ class StackUtilTest {
         assertThat(result).hasSize(1);
         Node node = result.stream().findFirst().get();
         assertThat(node.getHostname()).isEqualTo("node3.example.com");
-    }
-
-    @Test
-    void testStopStartScalingEntitlementEnabledForMock() {
-        ReflectionTestUtils.setField(stackUtil, "skipStartStopEntitlementCheckPlatforms", Set.of("MOCK"));
-        StackView stackView = mock(StackView.class);
-        when(stackView.getResourceCrn()).thenReturn(DATAHUB_CRN);
-        when(stackView.getCloudPlatform()).thenReturn("MOCK");
-        boolean entitlementEnabled = stackUtil.stopStartScalingEntitlementEnabled(stackView);
-        assertTrue(entitlementEnabled);
     }
 
     private InstanceMetaData getInstanceMetaData(String fqdn) {

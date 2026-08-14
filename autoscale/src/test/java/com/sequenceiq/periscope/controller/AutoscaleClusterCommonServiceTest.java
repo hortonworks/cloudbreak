@@ -6,12 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,19 +21,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.domain.LoadAlert;
-import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.model.NameOrCrn;
 import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.EntitlementValidationService;
 
 @ExtendWith(MockitoExtension.class)
 public class AutoscaleClusterCommonServiceTest {
@@ -59,9 +51,6 @@ public class AutoscaleClusterCommonServiceTest {
 
     @Mock
     private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Mock
-    private EntitlementValidationService entitlementValidationService;
 
     private String tenant = "testTenant";
 
@@ -138,178 +127,6 @@ public class AutoscaleClusterCommonServiceTest {
 
         assertThrows(NotFoundException.class,
                 () -> underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN)));
-    }
-
-    @Test
-    public void testSetAutoScaleStateStopStartWhenEntitled() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-        LoadAlert loadAlert = new LoadAlert();
-        loadAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        loadAlert.setScalingPolicy(scalingPolicy);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(true);
-
-        Set<LoadAlert> loadAlerts = Set.of(loadAlert);
-        cluster.setLoadAlerts(loadAlerts);
-        cluster.setStopStartScalingEnabled(null);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable()));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, true);
-    }
-
-    @Test
-    public void testSetAutoScaleStateStopStartNotEntitled() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-        LoadAlert loadAlert = new LoadAlert();
-        loadAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        loadAlert.setScalingPolicy(scalingPolicy);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(false);
-
-        Set<LoadAlert> loadAlerts = Set.of(loadAlert);
-        cluster.setLoadAlerts(loadAlerts);
-        cluster.setStopStartScalingEnabled(null);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable()));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, false);
-    }
-
-    @Test
-    public void testSetAutoScaleStateStopStartWithTimeAlerts() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-        TimeAlert timeAlert = new TimeAlert();
-        timeAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        timeAlert.setScalingPolicy(scalingPolicy);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(false);
-
-        Set<TimeAlert> timeAlerts = Set.of(timeAlert);
-        cluster.setTimeAlerts(timeAlerts);
-        cluster.setStopStartScalingEnabled(null);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable()));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, false);
-    }
-
-    @Test
-    public void testSetAutoScaleStateStopStartWithTimeAlertsWithStopStartAsTrue() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-        TimeAlert timeAlert = new TimeAlert();
-        timeAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        timeAlert.setScalingPolicy(scalingPolicy);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(false);
-
-        Set<TimeAlert> timeAlerts = Set.of(timeAlert);
-        cluster.setTimeAlerts(timeAlerts);
-        cluster.setStopStartScalingEnabled(true);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable()));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, false);
-    }
-
-    @Test
-    public void testSetStopStartScalingState() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-        LoadAlert loadAlert = new LoadAlert();
-        loadAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        loadAlert.setScalingPolicy(scalingPolicy);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(true);
-
-        Set<LoadAlert> loadAlerts = Set.of(loadAlert);
-        cluster.setLoadAlerts(loadAlerts);
-        cluster.setStopStartScalingEnabled(null);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setStopStartScalingState(cluster.getId(), cluster.isStopStartScalingEnabled(),
-                false, true));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, true);
-    }
-
-    @Test
-    public void testSetStopStartScalingStateNotEntitled() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-        LoadAlert loadAlert = new LoadAlert();
-        loadAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        loadAlert.setScalingPolicy(scalingPolicy);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(false);
-
-        Set<LoadAlert> loadAlerts = Set.of(loadAlert);
-        cluster.setLoadAlerts(loadAlerts);
-        cluster.setStopStartScalingEnabled(null);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setStopStartScalingState(cluster.getId(), cluster.isStopStartScalingEnabled(),
-                false, true));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, false);
-    }
-
-    @Test
-    public void testSetStopStartScalingStateWithTimeAlerts() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(true);
-        TimeAlert timeAlert = new TimeAlert();
-        timeAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        timeAlert.setScalingPolicy(scalingPolicy);
-
-        Set<TimeAlert> timeAlerts = Set.of(timeAlert);
-        cluster.setTimeAlerts(timeAlerts);
-        cluster.setStopStartScalingEnabled(null);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setStopStartScalingState(cluster.getId(), cluster.isStopStartScalingEnabled(),
-                true, false));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, false);
-    }
-
-    @Test
-    public void testSetStopStartScalingStateWithTimeAlertsWithStopStartAsTrue() {
-        Cluster cluster = getACluster().get();
-        cluster.setAutoscalingEnabled(true);
-        when(clusterService.findById(cluster.getId())).thenReturn(cluster);
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, cluster.getCloudPlatform())).thenReturn(true);
-        TimeAlert timeAlert = new TimeAlert();
-        timeAlert.setCluster(cluster);
-        ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup("compute");
-        timeAlert.setScalingPolicy(scalingPolicy);
-
-        Set<TimeAlert> timeAlerts = Set.of(timeAlert);
-        cluster.setTimeAlerts(timeAlerts);
-        cluster.setStopStartScalingEnabled(true);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.setStopStartScalingState(cluster.getId(), cluster.isStopStartScalingEnabled(),
-                true, false));
-
-        verify(clusterService, times(1)).setStopStartScalingState(cluster, false);
     }
 
     private Optional<Cluster> getACluster() {

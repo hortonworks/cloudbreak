@@ -190,12 +190,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
 
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setCrn(TEST_USER_CRN).setEmail("dummyuser@cloudera.com").setUserId(TEST_USER_ID.toString()).build();
-        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_AUTOSCALING").build())
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AWS_STOP_START_SCALING").build())
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_STOP_START_SCALING").build())
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_STOP_START_SCALING").build())
-                .build();
+        UserManagementProto.Account account = UserManagementProto.Account.newBuilder().build();
 
         when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN))).thenReturn(user);
         when(grpcUmsClient.getAccountDetails(eq(TEST_ACCOUNT_ID))).thenReturn(account);
@@ -209,9 +204,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         Cluster cluster2 = createTestCluster(TEST_CLUSTER_CRN_2, TEST_CLUSTER_NAME_2, TEST_ACCOUNT_ID_2, TEST_WORKSPACE_ID_2,
                 TEST_USER_ID_2.toString(), TEST_USER_CRN_2, "cluster2");
 
-        UserManagementProto.Account account2 = UserManagementProto.Account.newBuilder()
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_AUTOSCALING").build())
-                .build();
+        UserManagementProto.Account account2 = UserManagementProto.Account.newBuilder().build();
         when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN_2))).thenReturn(user2);
         when(grpcUmsClient.getAccountDetails(eq(TEST_ACCOUNT_ID_2))).thenReturn(account2);
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid3:cluster:mockuser3@cloudera.com"), any(), any());
@@ -667,30 +660,6 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, autoscaleRequest);
         assertFalse(xAutoscaleClusterResponse.isStopStartScalingEnabled(), "StopStart scaling should be disabled");
-    }
-
-    @Test
-    void testDefaultForStopStartEntitlementDisabledLoadPolicy() {
-        // Load policy. stop start not configured. Entitlement disabled.
-        DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
-        autoscaleRequest.setEnableAutoscaling(true);
-        List<LoadAlertRequest> loadAlertRequests = getLoadAlertRequests(1, List.of("compute"));
-        autoscaleRequest.setLoadAlertRequests(loadAlertRequests);
-        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint2
-                .updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME_2, autoscaleRequest);
-        assertFalse(xAutoscaleClusterResponse.isStopStartScalingEnabled(), "StopStart scaling should be disabled");
-    }
-
-    @Test
-    void testDefaultForStopStartEnabledEntitlementDisabledLoadPolicy() {
-        // Load policy. stop start set to true. Entitlement disabled.
-        DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
-        autoscaleRequest.setEnableAutoscaling(true);
-        autoscaleRequest.setUseStopStartMechanism(true);
-        List<LoadAlertRequest> loadAlertRequests = getLoadAlertRequests(1, List.of("compute"));
-        autoscaleRequest.setLoadAlertRequests(loadAlertRequests);
-        assertThrows(BadRequestException.class,
-                () -> distroXAutoScaleClusterV1Endpoint2.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME_2, autoscaleRequest));
     }
 
     @Test

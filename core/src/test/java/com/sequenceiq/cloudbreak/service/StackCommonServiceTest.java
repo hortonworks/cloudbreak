@@ -363,7 +363,6 @@ class StackCommonServiceTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
 
         Set<String> instances = new LinkedHashSet<>();
         instances.add("i-09855f4f334550bce");
@@ -381,7 +380,6 @@ class StackCommonServiceTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
         when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
 
         Set<String> instances = new LinkedHashSet<>();
         instances.add("i-09855f4f334550bce");
@@ -574,7 +572,6 @@ class StackCommonServiceTest {
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(cloudbreakUser.getUserCrn()).thenReturn("crn:cdp:" + Crn.Service.AUTOSCALE.getName() + ":us-west-1:altus:user:__internal__actor__");
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
 
         UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
         updateStackV4Request.setWithClusterEvent(true);

@@ -2,18 +2,12 @@ package com.sequenceiq.periscope.controller.validation;
 
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_CLUSTER_NOT_AVAILABLE;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_CLUSTER_LIMIT_EXCEEDED;
-import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
-import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
 import static com.sequenceiq.periscope.common.MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -31,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
@@ -49,7 +42,6 @@ import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.DateService;
-import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,9 +55,6 @@ class AlertValidatorTest {
 
     @InjectMocks
     private AlertValidator underTest;
-
-    @Mock
-    private EntitlementValidationService entitlementValidationService;
 
     @Mock
     private AutoscaleRecommendationService recommendationService;
@@ -87,48 +76,6 @@ class AlertValidatorTest {
     void setup() {
         underTest.setDateService(dateService);
         aCluster = getACluster();
-        lenient().when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString())).thenReturn(true);
-    }
-
-    @Test
-    void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledForPlatform() {
-        aCluster.setCloudPlatform("Yarn");
-        aCluster.setAutoscalingEnabled(false);
-
-        when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "Yarn")).thenReturn(false);
-        when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
-                List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
-
-        assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster)),
-                "account.not.entitled.for.platform");
-
-        verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
-    }
-
-    @Test
-    void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledThenDisableAutoscaling() {
-        aCluster.setCloudPlatform("AWS");
-
-        when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(false);
-        when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
-                List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
-
-        assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster)),
-                "account.not.entitled.for.platform");
-
-        verify(asClusterCommonService, times(1)).setAutoscaleState(aCluster.getId(), false);
-    }
-
-    @Test
-    void testValidateEntitlementAndDisableIfNotEntitledWhenAccountEntitledThenValidationSuccess() {
-        aCluster.setCloudPlatform("AWS");
-
-        when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
-
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
-        verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
     }
 
     @Test
@@ -147,29 +94,6 @@ class AlertValidatorTest {
         aCluster.setState(ClusterState.RUNNING);
 
         assertDoesNotThrow(() -> underTest.validateIfStackIsAvailable(aCluster));
-    }
-
-    @Test
-    void testValidateStopStartEntitlementNotEnabledForAccount() {
-        aCluster.setCloudPlatform("AWS");
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(false);
-        when(messagesService.getMessage(AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED,
-                List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled");
-
-        assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster)),
-                "account.not.entitled");
-    }
-
-    @Test
-    void testValidateStopStartEntitlementEnabledForAccount() {
-        aCluster.setCloudPlatform("AWS");
-
-        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
-
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
-        verify(asClusterCommonService, never()).setStopStartScalingState(aCluster.getId(), false, false, true);
     }
 
     @Test

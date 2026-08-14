@@ -193,9 +193,6 @@ public class StackCommonService {
             ScalingStrategy scalingStrategy) {
         LOGGER.info("Received putStack: {}, with scalingStrategy: {}, updateRequest: {}", nameOrCrn, scalingStrategy, updateRequest);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        if (!stackUtil.stopStartScalingEntitlementEnabled(stack.getStack())) {
-            throw new BadRequestException("The entitlement for scaling via stop/start is not enabled");
-        }
         MDCBuilder.buildMdcContext(stack);
         return putStartInstances(stack, updateRequest, scalingStrategy);
     }
@@ -269,9 +266,6 @@ public class StackCommonService {
 
     public FlowIdentifier stopMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, String accountId, Set<String> instanceIds, boolean forced) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        if (!stackUtil.stopStartScalingEntitlementEnabled(stack.getStack())) {
-            throw new BadRequestException("The entitlement for scaling via stop/start is not enabled");
-        }
         validateStackIsNotDataLake(stack.getStack(), instanceIds);
         return stackOperationService.stopInstances(stack, instanceIds, forced);
     }

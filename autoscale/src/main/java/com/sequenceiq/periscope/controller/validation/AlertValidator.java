@@ -12,7 +12,6 @@ import jakarta.ws.rs.BadRequestException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
@@ -24,18 +23,13 @@ import com.sequenceiq.periscope.api.model.LoadAlertRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyBase;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.common.MessageCode;
-import com.sequenceiq.periscope.controller.AutoScaleClusterCommonService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.DateService;
-import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 
 @Component
 public class AlertValidator {
-
-    @Inject
-    private EntitlementValidationService entitlementValidationService;
 
     @Inject
     private AutoscaleRecommendationService recommendationService;
@@ -47,32 +41,12 @@ public class AlertValidator {
     private CloudbreakMessagesService messagesService;
 
     @Inject
-    private AutoScaleClusterCommonService asClusterCommonService;
-
-    @Inject
     private LimitsConfigurationService limitsConfigurationService;
-
-    public void validateEntitlementAndDisableIfNotEntitled(Cluster cluster) {
-        if (!entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform())) {
-            if (cluster.getAutoscalingEnabled()) {
-                asClusterCommonService.setAutoscaleState(cluster.getId(), false);
-            }
-            throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
-                    List.of(cluster.getCloudPlatform(), cluster.getStackName())));
-        }
-    }
 
     public void validateIfStackIsAvailable(Cluster cluster) {
         if (cluster.getState() == ClusterState.SUSPENDED || cluster.getState() == ClusterState.DELETED) {
             throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALE_CLUSTER_NOT_AVAILABLE,
                     List.of(cluster.getStackName())));
-        }
-    }
-
-    public void validateStopStartEntitlementAndDisableIfNotEntitled(Cluster cluster) {
-        if (!entitlementValidationService.stopStartAutoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform())) {
-            throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED,
-                    List.of(cluster.getCloudPlatform(), cluster.getStackName())));
         }
     }
 

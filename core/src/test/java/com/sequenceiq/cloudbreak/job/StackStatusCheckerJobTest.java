@@ -458,7 +458,6 @@ public class StackStatusCheckerJobTest {
         lenient().when(instanceMetaData.getInstanceGroupName()).thenReturn(instanceHgName);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
         Set<String> computeGroups = new HashSet<>();
         computeGroups.add("compute");
         when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);

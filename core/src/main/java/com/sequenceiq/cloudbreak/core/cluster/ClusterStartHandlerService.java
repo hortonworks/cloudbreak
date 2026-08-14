@@ -102,27 +102,25 @@ public class ClusterStartHandlerService {
     }
 
     public void handleStopStartScalingFeature(Stack stack, CmTemplateProcessor blueprintProcessor) {
-        if (stackUtil.stopStartScalingEntitlementEnabled(stack)) {
-            Set<String> computeGroups = getComputeHostGroups(blueprintProcessor);
-            if (computeGroups.isEmpty()) {
-                return;
-            }
-            List<String> decommissionedHostsFromCM = apiConnectors.getConnector(stack).clusterStatusService().getDecommissionedHostsFromCM();
-            if (decommissionedHostsFromCM.isEmpty()) {
-                return;
-            }
-            Set<String> decommissionedComputeHosts = new HashSet<>();
-            for (String group : computeGroups) {
-                String groupWithPrefix = '-' + group;
-                for (String hostName : decommissionedHostsFromCM) {
-                    if (hostName.contains(groupWithPrefix)) {
-                        decommissionedComputeHosts.add(hostName);
-                    }
+        Set<String> computeGroups = getComputeHostGroups(blueprintProcessor);
+        if (computeGroups.isEmpty()) {
+            return;
+        }
+        List<String> decommissionedHostsFromCM = apiConnectors.getConnector(stack).clusterStatusService().getDecommissionedHostsFromCM();
+        if (decommissionedHostsFromCM.isEmpty()) {
+            return;
+        }
+        Set<String> decommissionedComputeHosts = new HashSet<>();
+        for (String group : computeGroups) {
+            String groupWithPrefix = '-' + group;
+            for (String hostName : decommissionedHostsFromCM) {
+                if (hostName.contains(groupWithPrefix)) {
+                    decommissionedComputeHosts.add(hostName);
                 }
             }
-            if (!decommissionedComputeHosts.isEmpty()) {
-                apiConnectors.getConnector(stack).clusterCommissionService().recommissionHosts(new ArrayList<>(decommissionedComputeHosts));
-            }
+        }
+        if (!decommissionedComputeHosts.isEmpty()) {
+            apiConnectors.getConnector(stack).clusterCommissionService().recommissionHosts(new ArrayList<>(decommissionedComputeHosts));
         }
     }
 

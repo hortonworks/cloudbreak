@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +53,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -60,6 +63,7 @@ import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -94,6 +98,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -199,6 +204,9 @@ class StackStatusIntegrationTest {
     @MockBean
     private MeteringService meteringService;
 
+    @Mock
+    private CmTemplateProcessor cmTemplateProcessor;
+
     @BeforeEach
     void setUp() {
         setUpRunningInstances();
@@ -226,6 +234,9 @@ class StackStatusIntegrationTest {
 
         stack = new Stack();
         stack.setId(STACK_ID);
+
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(getBlueprintText("input/cdp-data-engineering.bp"));
         Cluster cluster = new Cluster();
         cluster.setVariant("AWS");
         cluster.setClusterManagerIp("192.168.0.1");
@@ -239,11 +250,22 @@ class StackStatusIntegrationTest {
         workspace.setId(564L);
         stack.setWorkspace(workspace);
 
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+        Set<String> computeGroups = new HashSet<>();
+        computeGroups.add("compute");
+        computeGroups.add("computing");
+        lenient().when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
         when(stackDto.getId()).thenReturn(STACK_ID);
         when(stackDto.getStack()).thenReturn(stack);
         when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.getBlueprint()).thenReturn(blueprint);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances);
+    }
+
+    private String getBlueprintText(String path) {
+        return FileReaderUtils.readFileFromClasspathQuietly(path);
     }
 
     private void setUpClusterApi() {
@@ -314,7 +336,7 @@ class StackStatusIntegrationTest {
         assertInstancesSavedWithStatuses(Map.of(INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
 
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(DetailedStackStatus.class));
-        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(), any());
+        verify(stackUpdater, never()).updateStackStatus(anyLong(), any(), any());
         verify(meteringService, times(1)).scheduleSyncIfNotScheduled(eq(STACK_ID));
     }
 

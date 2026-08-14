@@ -88,7 +88,6 @@ class ClusterStartHandlerServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setEnvironmentCrn("env");
         stack.setType(StackType.WORKLOAD);
-        lenient().when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
         lenient().when(apiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
         lenient().when(connector.clusterStatusService()).thenReturn(clusterStatusService);
         lenient().when(connector.clusterCommissionService()).thenReturn(clusterCommissionService);
