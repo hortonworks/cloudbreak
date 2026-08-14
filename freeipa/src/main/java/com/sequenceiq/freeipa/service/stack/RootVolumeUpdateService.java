@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -46,12 +47,14 @@ public class RootVolumeUpdateService {
 
     private static final Map<String, ResourceType> PLATFORM_VOLUME_RESOURCE_TYPE_MAP = ImmutableMap.of(
             CloudPlatform.AWS.name(), ResourceType.AWS_ROOT_DISK,
-            CloudPlatform.AZURE.name(), ResourceType.AZURE_DISK);
+            CloudPlatform.AZURE.name(), ResourceType.AZURE_DISK,
+            CloudPlatform.GCP.name(), ResourceType.GCP_DISK);
 
     private static final Map<String, List<String>> PLATFORM_DISK_TYPE_MAP = ImmutableMap.of(CloudPlatform.AWS.name(), List.of(
                     AwsDiskType.Gp2.value(), AwsDiskType.Gp3.value(), AwsDiskType.Standard.value()),
             CloudPlatform.AZURE.name(), List.of(AzureDiskType.STANDARD_SSD_LRS.value(), AzureDiskType.LOCALLY_REDUNDANT.value(),
-                    AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.value()));
+                    AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.value()),
+            CloudPlatform.GCP.name(), List.of(GcpDiskType.SSD.value(), GcpDiskType.BALANCED.value(), GcpDiskType.HDD.value()));
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
@@ -84,7 +87,7 @@ public class RootVolumeUpdateService {
             updateRootVolumeResponse.setFlowIdentifier(triggerRootVolumeUpdate(stack, accountId, instanceIds));
             return updateRootVolumeResponse;
         }
-        throw new BadRequestException("Root Volume Update for type '" + request.getVolumeType() + "'is not supported for cloud platform: "
+        throw new BadRequestException("Root Volume Update for type '" + request.getVolumeType() + "' is not supported for cloud platform: "
                 + stack.getCloudPlatform());
     }
 

@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STALE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DB_DISK_AUTO_RESIZE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
@@ -13,6 +15,7 @@ import static java.lang.Math.abs;
 import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +59,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordSta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -113,6 +118,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.KraftMigrationStatusResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -126,6 +132,11 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 public class StackOperationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperationService.class);
+
+    private static final Map<String, List<String>> PLATFORM_DISK_TYPE_MAP = Map.of(
+            AWS.name(), Arrays.stream(AwsDiskType.values()).map(AwsDiskType::value).toList(),
+            AZURE.name(), Arrays.stream(AzureDiskType.values()).map(AzureDiskType::value).toList(),
+            GCP.name(), Arrays.stream(GcpDiskType.values()).map(GcpDiskType::value).toList());
 
     @Inject
     private ReactorFlowManager flowManager;
@@ -604,14 +615,22 @@ public class StackOperationService {
         validateDiskUpdate(updateRequest, accountId);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         boolean diskTypeChangeRequested = isDiskTypeChangeRequested(stack, updateRequest);
-        validatePlatformAndRequest(diskTypeChangeRequested, stack.getCloudPlatform());
+        validatePlatformAndRequest(diskTypeChangeRequested, updateRequest.getVolumeType(), stack.getCloudPlatform());
         return flowManager.triggerStackUpdateDisks(stack, updateRequest, diskTypeChangeRequested);
     }
 
-    private void validatePlatformAndRequest(boolean diskTypeChangeRequested, String cloudPlatform) {
-        if ((CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform) || AZURE.name().equalsIgnoreCase(cloudPlatform))
-            && diskTypeChangeRequested) {
-            throw new BadRequestException("Changing Volume Type is not supported for " + cloudPlatform + ".");
+    private void validatePlatformAndRequest(boolean diskTypeChangeRequested, String volumeType, String cloudPlatform) {
+        if (diskTypeChangeRequested) {
+            // The disk update flow is not enabled for GCP/Azure yet, so keep blocking the actual type change there.
+            if (GCP.name().equalsIgnoreCase(cloudPlatform) || AZURE.name().equalsIgnoreCase(cloudPlatform)) {
+                throw new BadRequestException("Changing Volume Type is not supported for " + cloudPlatform + ".");
+            }
+            // Value validation is defined for all providers so it is ready when the flow is enabled for the others.
+            List<String> allowedVolumeTypes = PLATFORM_DISK_TYPE_MAP.get(cloudPlatform);
+            if (allowedVolumeTypes == null || !allowedVolumeTypes.contains(volumeType)) {
+                throw new BadRequestException("Volume type '" + volumeType + "' is not supported for " + cloudPlatform
+                        + ". Supported types: " + allowedVolumeTypes + ".");
+            }
         }
     }
 

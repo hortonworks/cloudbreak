@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -644,6 +645,7 @@ class StackOperationServiceTest {
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         mockCurrentVolumeType(stack, "TEST", "gp2");
+        when(stack.getCloudPlatform()).thenReturn("AWS");
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
@@ -672,6 +674,7 @@ class StackOperationServiceTest {
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         mockCurrentVolumeTypes(stack, "TEST", "gp2", "gp3");
+        when(stack.getCloudPlatform()).thenReturn("AWS");
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
@@ -693,6 +696,51 @@ class StackOperationServiceTest {
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
         verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
+    }
+
+    @Test
+    void testStackUpdateDisksThrowsWhenVolumeTypeNotSupportedForAws() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeType(stack, "TEST", "gp2");
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("foobar");
+
+        assertThrows(BadRequestException.class, () -> underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST"));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testStackUpdateDisksThrowsWhenVolumeTypeChangeRequestedForGcp() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeType(stack, "TEST", "pd-ssd");
+        when(stack.getCloudPlatform()).thenReturn("GCP");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("pd-balanced");
+
+        assertThrows(BadRequestException.class, () -> underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST"));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testStackUpdateDisksThrowsWhenVolumeTypeChangeRequestedForAzure() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeType(stack, "TEST", "StandardSSD_LRS");
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("Premium_LRS");
+
+        assertThrows(BadRequestException.class, () -> underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST"));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 
     private void mockCurrentVolumeType(StackDto stack, String group, String volumeType) {

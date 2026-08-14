@@ -161,14 +161,46 @@ class RootVolumeUpdateServiceTest {
     @Test
     void testRootVolumeDiskUpdatePlatformNotSupported() {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID2, ACCOUNT_ID)).thenReturn(stack2);
-        stack2.setCloudPlatform("GCP");
+        stack2.setCloudPlatform("YARN");
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
         diskUpdateRequest.setSize(100);
         diskUpdateRequest.setVolumeType("gp3");
         BadRequestException exception =  assertThrows(BadRequestException.class,
                 () -> underTest.updateRootVolume(ENVIRONMENT_ID2, diskUpdateRequest, ACCOUNT_ID));
 
-        assertEquals(exception.getMessage(), "Root Volume Update for type 'gp3'is not supported for cloud platform: GCP");
+        assertEquals(exception.getMessage(), "Root Volume Update for type 'gp3' is not supported for cloud platform: YARN");
+    }
+
+    @Test
+    void testRootVolumeDiskUpdateForGcp() throws Exception {
+        mockFields();
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID2, ACCOUNT_ID)).thenReturn(stack2);
+        stack2.setCloudPlatform("GCP");
+        when(defaultRootVolumeSizeProvider.getForPlatform(anyString())).thenReturn(100);
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setSize(120);
+        diskUpdateRequest.setVolumeType("pd-ssd");
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.MODIFY_ROOT_VOLUME, Set.of(ENVIRONMENT_ID2),
+                Collections.emptySet())).thenReturn(createOperation());
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "1");
+        when(flowManager.notify(anyString(), any(RootVolumeUpdateEvent.class))).thenReturn(flowIdentifier);
+        UpdateRootVolumeResponse response = underTest.updateRootVolume(ENVIRONMENT_ID2, diskUpdateRequest, ACCOUNT_ID);
+
+        assertEquals(FlowType.FLOW_CHAIN, response.getFlowIdentifier().getType());
+        assertEquals("1", response.getFlowIdentifier().getPollableId());
+    }
+
+    @Test
+    void testRootVolumeDiskUpdateForGcpWithInvalidTypeThrows() {
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID2, ACCOUNT_ID)).thenReturn(stack2);
+        stack2.setCloudPlatform("GCP");
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setSize(120);
+        diskUpdateRequest.setVolumeType("gp2");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.updateRootVolume(ENVIRONMENT_ID2, diskUpdateRequest, ACCOUNT_ID));
+
+        assertEquals(exception.getMessage(), "Root Volume Update for type 'gp2' is not supported for cloud platform: GCP");
     }
 
     private void mockFields() {

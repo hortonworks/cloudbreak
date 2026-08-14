@@ -5,7 +5,6 @@ import java.util.StringJoiner;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.util.OneOfEnum;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class DiskUpdateRequest implements JsonEntity {
 
     @Schema(description = "Volume Type of disks")
-    @OneOfEnum(enumClass = SupportedVolumeType.class, message = "Value must be one of the followings %s", fieldName = "volumeType")
     private String volumeType;
 
     @Schema(description = "Size of disks in GB")

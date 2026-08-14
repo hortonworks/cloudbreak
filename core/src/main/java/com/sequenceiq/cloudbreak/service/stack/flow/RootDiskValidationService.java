@@ -3,10 +3,15 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.STANDARD_SSD_LRS;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.BALANCED;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.HDD;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.SSD;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_ROOT_DISK;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_DISK;
 import static com.sequenceiq.common.model.AwsDiskType.Gp2;
 import static com.sequenceiq.common.model.AwsDiskType.Gp3;
 import static com.sequenceiq.common.model.AwsDiskType.Standard;
@@ -43,7 +48,8 @@ public class RootDiskValidationService {
     private static final Map<String, ResourceType> PLATFORM_RESOURCE_TYPE_MAP =
             ImmutableMap.of(
                 AWS.name(), AWS_ROOT_DISK,
-                AZURE.name(), AZURE_DISK
+                AZURE.name(), AZURE_DISK,
+                GCP.name(), GCP_DISK
             );
 
     private static final Map<String, List<String>> PLATFORM_DISK_TYPE_MAP =
@@ -59,6 +65,12 @@ public class RootDiskValidationService {
                                 STANDARD_SSD_LRS.value(),
                                 LOCALLY_REDUNDANT.value(),
                                 PREMIUM_LOCALLY_REDUNDANT.value()
+                        ),
+                    GCP.name(),
+                        List.of(
+                                SSD.value(),
+                                BALANCED.value(),
+                                HDD.value()
                         )
             );
 
