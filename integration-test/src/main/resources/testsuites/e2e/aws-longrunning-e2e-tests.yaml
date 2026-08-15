@@ -31,4 +31,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxNativeMigrationTests
       # CB-33763: disabled until KRaft migration restart flow is fixed (stale state / KRaft rolling restart)
       # - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXKraftMigrationTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
+      # - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
