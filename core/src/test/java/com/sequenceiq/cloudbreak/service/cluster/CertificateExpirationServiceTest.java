@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
-import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.type.CertExpirationState;
@@ -195,7 +194,7 @@ class CertificateExpirationServiceTest {
     }
 
     @Test
-    void validateCertificateFullyExpiredShouldThrowWhenUnhealthyButSaltSaysCertsNotExpired() throws CloudbreakOrchestratorFailedException {
+    void validateCertificateFullyExpiredShouldReturnFalseWhenUnhealthyButSaltSaysCertsNotExpired() throws CloudbreakOrchestratorFailedException {
         Node node = new Node("10.0.0.1", null, null, null, "host1.example.com", null);
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(stackDto.getAllFunctioningNodes()).thenReturn(Set.of(node));
@@ -208,6 +207,6 @@ class CertificateExpirationServiceTest {
         when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(true);
         doNothing().when(saltService).executeSaltState(eq(stackDto), eq(Set.of("host1.example.com")), any());
 
-        assertThrows(SecretRotationException.class, () -> underTest.validateCertificateFullyExpired(stackDto));
+        assertFalse(underTest.validateCertificateFullyExpired(stackDto));
     }
 }

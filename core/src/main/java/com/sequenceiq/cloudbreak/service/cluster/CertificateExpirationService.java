@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
-import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.type.CertExpirationState;
@@ -81,8 +80,8 @@ public class CertificateExpirationService {
                 LOGGER.info("Cluster {} has unhealthy hosts with expired certificates",  stackDto.getName());
                 return true;
             } else {
-                LOGGER.warn("Cluster {} has unhealthy hosts but host certificates are not expired, skip the rotation",  stackDto.getName());
-                throw new SecretRotationException("Cert rotation is not possible if there are unhealthy hosts and the certs are not expired");
+                LOGGER.warn("Cluster {} has unhealthy hosts but host certificates are not expired, trying to rotate certs via CM API",  stackDto.getName());
+                return false;
             }
         } else {
             return false;
