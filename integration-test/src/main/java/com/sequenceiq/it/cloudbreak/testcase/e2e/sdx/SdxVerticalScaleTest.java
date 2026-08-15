@@ -88,16 +88,21 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
             .await(SdxClusterStatusResponse.RUNNING)
             .when(sdxTestClient.describeInternalWithResources())
             .awaitForHealthyInstances()
-            .useAlternativeServiceEndpointIfConfigured()
-            // Negative: once the cluster is stopped, resizing to a different CPU architecture must be rejected pre-flight, before any flow starts.
-            .given(crossArchScaleKey, VerticalScalingTestDto.class)
-            .withGroup(targetInstanceGroup)
-            .withInstanceType(testContext.getCloudProvider().getDefaultInstanceType(Architecture.ARM64))
-            .given(SdxInternalTestDto.class)
-            .when(sdxTestClient.stopInternal())
-            .await(SdxClusterStatusResponse.STOPPED)
-            .whenException(sdxTestClient.verticalScale(crossArchScaleKey), BadRequestException.class,
-                    expectedMessage(ARCHITECTURE_CHANGE_REJECTED_MESSAGE))
+            .useAlternativeServiceEndpointIfConfigured();
+        if (CloudPlatform.AWS.equals(cloudPlatform)) {
+            testContext
+                    // Negative: once the cluster is stopped, resizing to a different CPU architecture must be rejected
+                    // pre-flight, before any flow starts. ARM only supported on AWS
+                    .given(crossArchScaleKey, VerticalScalingTestDto.class)
+                    .withGroup(targetInstanceGroup)
+                    .withInstanceType(testContext.getCloudProvider().getDefaultInstanceType(Architecture.ARM64))
+                    .given(SdxInternalTestDto.class)
+                    .when(sdxTestClient.stopInternal())
+                    .await(SdxClusterStatusResponse.STOPPED)
+                    .whenException(sdxTestClient.verticalScale(crossArchScaleKey), BadRequestException.class,
+                            expectedMessage(ARCHITECTURE_CHANGE_REJECTED_MESSAGE));
+        }
+        testContext
             .given(SdxInternalTestDto.class)
             .when(sdxTestClient.startInternal())
             .await(SdxClusterStatusResponse.RUNNING)
