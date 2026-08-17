@@ -86,16 +86,8 @@ export SECRET_ENCRYPTION_KEY_SOURCE="${secretEncryptionKeySource}"
 <#if saltbootHttpsOnly!false>
 export SALTBOOT_HTTPS_ONLY=true
 </#if>
-<#if saltbootMinTlsVersion?? && saltbootMinTlsVersion?has_content>
-export SALTBOOT_MIN_TLS_VERSION=${saltbootMinTlsVersion}
-</#if>
-<#if saltbootMaxTlsVersion?? && saltbootMaxTlsVersion?has_content>
-export SALTBOOT_MAX_TLS_VERSION=${saltbootMaxTlsVersion}
-</#if>
-<#if saltbootCipherSuites?? && saltbootCipherSuites?has_content>
-export SALTBOOT_CIPHER_SUITES="${saltbootCipherSuites}"
-</#if>
-<#if saltbootFipsOnly!false>
+<#if saltbootTlsHardening!false>
+export SALTBOOT_MIN_TLS_VERSION=1.3
 export SALTBOOT_FIPS_ONLY=true
 </#if>
 

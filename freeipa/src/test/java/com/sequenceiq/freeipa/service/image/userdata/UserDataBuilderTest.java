@@ -2,17 +2,13 @@ package com.sequenceiq.freeipa.service.image.userdata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
@@ -48,16 +43,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
-import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -79,15 +71,6 @@ class UserDataBuilderTest {
 
     @Mock
     private StackEncryptionService stackEncryptionService;
-
-    @Mock
-    private CachedEncryptionProfileClientService encryptionProfileClientService;
-
-    @Mock
-    private EntitlementService entitlementService;
-
-    @Spy
-    private CipherSuiteProvider cipherSuiteProvider;
 
     @InjectMocks
     private UserDataBuilder underTest;
@@ -251,218 +234,29 @@ class UserDataBuilderTest {
     }
 
     @Test
-    void testSaltbootTlsVersionNotSetWhenNoEncryptionProfileCrn() throws IOException {
-        ReflectionTestUtils.setField(underTest, "saltbootHttpsOnly", true);
+    void testSaltbootTlsHardeningEmitsStrictFloorWhenEnabled() throws IOException {
+        ReflectionTestUtils.setField(underTest, "saltbootTlsHardening", true);
+        PlatformParameters platformParameters = mockPlatformParameters();
+
+        String userData = underTest.buildUserData(stack, environment, Platform.platform("AWS"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
+
+        assertTrue(userData.contains("export SALTBOOT_MIN_TLS_VERSION=1.3"));
+        assertTrue(userData.contains("export SALTBOOT_FIPS_ONLY=true"));
+        assertFalse(userData.contains("SALTBOOT_MAX_TLS_VERSION"));
+        assertFalse(userData.contains("SALTBOOT_CIPHER_SUITES"));
+    }
+
+    @Test
+    void testSaltbootTlsHardeningNotEmittedWhenDisabled() throws IOException {
+        ReflectionTestUtils.setField(underTest, "saltbootTlsHardening", false);
         PlatformParameters platformParameters = mockPlatformParameters();
 
         String userData = underTest.buildUserData(stack, environment, Platform.platform("AWS"), "priv-key".getBytes(),
                 "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
 
         assertFalse(userData.contains("SALTBOOT_MIN_TLS_VERSION"));
-        assertFalse(userData.contains("SALTBOOT_MAX_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootTlsVersionNotSetWhenEntitlementDisabled() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(false);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertFalse(userData.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootMinTlsVersionSetWhenProfileAllowsOnlyTls13() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default_tls13_fips_140_3");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertTrue(userData.contains("SALTBOOT_MIN_TLS_VERSION=1.3"));
-        assertFalse(userData.contains("SALTBOOT_MAX_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootTlsVersionNotSetWhenProfileAllowsBothVersions() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default");
-        profile.setTlsVersions(Set.of("TLSv1.2", "TLSv1.3"));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertFalse(userData.contains("SALTBOOT_MIN_TLS_VERSION"));
-        assertFalse(userData.contains("SALTBOOT_MAX_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootMaxTlsVersionSetWhenProfileAllowsOnlyTls12() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_tls12_only");
-        profile.setTlsVersions(Set.of("TLSv1.2"));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertTrue(userData.contains("SALTBOOT_MAX_TLS_VERSION=1.2"));
-        assertFalse(userData.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootFipsModeEnabledWhenProfileHasOnlyFipsApprovedCiphers() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default_tls13_fips_140_3");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256")));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertTrue(userData.contains("SALTBOOT_FIPS_ONLY=true"));
-        assertFalse(userData.contains("SALTBOOT_CIPHER_SUITES="));
-    }
-
-    @Test
-    void testSaltbootFipsModeEnabledWhenProfileHasSubsetOfFipsApprovedCiphers() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default_tls13_fips_140_3");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384")));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertTrue(userData.contains("SALTBOOT_FIPS_ONLY=true"));
-        assertFalse(userData.contains("SALTBOOT_CIPHER_SUITES="));
-    }
-
-    @Test
-    void testSaltbootFipsModeNotEnabledWhenCiphersIncludeNonFips() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_custom");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256", "TLS_CHACHA20_POLY1305_SHA256")));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
         assertFalse(userData.contains("SALTBOOT_FIPS_ONLY"));
-    }
-
-    @Test
-    void testSaltbootCipherSuitesSetForTls12() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_custom");
-        profile.setTlsVersions(Set.of("TLSv1.2", "TLSv1.3"));
-        profile.setCipherSuites(Map.of("TLSv1.2", List.of("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertTrue(userData.contains("SALTBOOT_CIPHER_SUITES=\"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\""));
-    }
-
-    @Test
-    void testSaltbootCipherSuitesNotSetWhenNoCipherSuitesInProfile() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default");
-        profile.setTlsVersions(Set.of("TLSv1.2", "TLSv1.3"));
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString())).thenReturn(profile);
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        String userData = underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
-
-        assertFalse(userData.contains("SALTBOOT_CIPHER_SUITES"));
-        assertFalse(userData.contains("SALTBOOT_FIPS_ONLY"));
-    }
-
-    @Test
-    void testBuildUserDataThrowsWhenProfileServiceFails() {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId(ACCOUNT_ID)
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(ACCOUNT_ID)).thenReturn(true);
-        when(encryptionProfileClientService.getByCrnOrDefaultIfEmpty(anyString()))
-                .thenThrow(new RuntimeException("Profile not found"));
-        PlatformParameters platformParameters = mockPlatformParameters();
-
-        assertThrows(RuntimeException.class, () ->
-                underTest.buildUserData(stack, env, Platform.platform("AWS"), "priv-key".getBytes(),
-                        "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null));
     }
 
     private PlatformParameters mockPlatformParameters() {

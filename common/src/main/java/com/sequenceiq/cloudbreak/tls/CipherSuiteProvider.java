@@ -187,10 +187,4 @@ public class CipherSuiteProvider {
                 TLS_AES_128_GCM_SHA256,
                 TLS_AES_256_GCM_SHA384);
     }
-
-    public List<CipherSuite> getFips1403ApprovedTls13CipherSuites() {
-        return List.of(
-                TLS_AES_128_GCM_SHA256,
-                TLS_AES_256_GCM_SHA384);
-    }
 }

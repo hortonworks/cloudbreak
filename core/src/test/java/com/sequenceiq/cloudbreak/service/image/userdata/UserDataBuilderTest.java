@@ -3,9 +3,7 @@ package com.sequenceiq.cloudbreak.service.image.userdata;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -14,7 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
@@ -53,18 +49,14 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
-import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 import freemarker.template.Configuration;
@@ -80,15 +72,6 @@ class UserDataBuilderTest {
 
     @Mock
     private StackEncryptionService stackEncryptionService;
-
-    @Mock
-    private EncryptionProfileService encryptionProfileService;
-
-    @Mock
-    private EntitlementService entitlementService;
-
-    @Spy
-    private CipherSuiteProvider cipherSuiteProvider;
 
     private DetailedEnvironmentResponse environment;
 
@@ -238,236 +221,28 @@ class UserDataBuilderTest {
     }
 
     @Test
-    void testSaltbootTlsVersionNotSetWhenNoEncryptionProfileCrn() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .build();
+    void testSaltbootTlsHardeningEmitsStrictFloorWhenEnabled() throws IOException {
+        ReflectionTestUtils.setField(underTest, "saltbootTlsHardening", true);
 
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, environment, STACK_ID);
 
         String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertFalse(gwScript.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootTlsVersionNotSetWhenEntitlementDisabled() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(false);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertFalse(gwScript.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootTlsVersionSetWhenProfileAllowsOnlyTls13() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default_tls13_fips_140_3");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertTrue(gwScript.contains("SALTBOOT_MIN_TLS_VERSION=1.3"));
-    }
-
-    @Test
-    void testSaltbootTlsVersionNotSetWhenProfileAllowsBothTlsVersions() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default");
-        profile.setTlsVersions(Set.of("TLSv1.2", "TLSv1.3"));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertFalse(gwScript.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootTlsVersionNotSetWhenTlsVersionsEmpty() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default");
-        profile.setTlsVersions(Set.of());
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertFalse(gwScript.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootMaxTlsVersionSetWhenProfileAllowsOnlyTls12() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_tls12_only");
-        profile.setTlsVersions(Set.of("TLSv1.2"));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertTrue(gwScript.contains("SALTBOOT_MAX_TLS_VERSION=1.2"));
-        assertFalse(gwScript.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testSaltbootMaxTlsVersionNotSetWhenProfileAllowsBothVersions() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default");
-        profile.setTlsVersions(Set.of("TLSv1.2", "TLSv1.3"));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
+        assertTrue(gwScript.contains("export SALTBOOT_MIN_TLS_VERSION=1.3"));
+        assertTrue(gwScript.contains("export SALTBOOT_FIPS_ONLY=true"));
         assertFalse(gwScript.contains("SALTBOOT_MAX_TLS_VERSION"));
-        assertFalse(gwScript.contains("SALTBOOT_MIN_TLS_VERSION"));
-    }
-
-    @Test
-    void testBuildUserDataThrowsWhenProfileServiceFails() {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString()))
-                .thenThrow(new CloudbreakServiceException("Profile not found"));
-
-        assertThrows(CloudbreakServiceException.class, () ->
-                underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                        "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID));
-    }
-
-    @Test
-    void testSaltbootFipsModeEnabledWhenProfileHasOnlyFipsApprovedCiphers() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default_tls13_fips_140_3");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256")));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertTrue(gwScript.contains("SALTBOOT_FIPS_ONLY=true"));
-        assertFalse(gwScript.contains("SALTBOOT_CIPHER_SUITES="));
-    }
-
-    @Test
-    void testSaltbootFipsModeEnabledWhenProfileHasSubsetOfFipsApprovedCiphers() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default_tls13_fips_140_3");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384")));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertTrue(gwScript.contains("SALTBOOT_FIPS_ONLY=true"));
-        assertFalse(gwScript.contains("SALTBOOT_CIPHER_SUITES="));
-    }
-
-    @Test
-    void testSaltbootCipherSuitesAndFipsModeNotSetWhenProfileHasNoCipherSuites() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_default");
-        profile.setTlsVersions(Set.of("TLSv1.2", "TLSv1.3"));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
-
-        String gwScript = userdata.get(InstanceGroupType.GATEWAY);
-        assertFalse(gwScript.contains("SALTBOOT_FIPS_ONLY"));
         assertFalse(gwScript.contains("SALTBOOT_CIPHER_SUITES"));
     }
 
     @Test
-    void testSaltbootFipsModeNotEnabledWhenCiphersIncludeNonFips() throws IOException {
-        DetailedEnvironmentResponse env = DetailedEnvironmentResponse.builder()
-                .withCrn("environment:crn")
-                .withAccountId("account-id")
-                .withEncryptionProfileCrn("crn:cdp:environments:us-west-1:account:encryptionProfile:profile-id")
-                .build();
-        when(entitlementService.isConfigureEncryptionProfileEnabled("account-id")).thenReturn(true);
-        EncryptionProfileResponse profile = new EncryptionProfileResponse();
-        profile.setName("cdp_custom");
-        profile.setTlsVersions(Set.of("TLSv1.3"));
-        profile.setCipherSuites(Map.of("TLSv1.3", List.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256", "TLS_CHACHA20_POLY1305_SHA256")));
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(anyString())).thenReturn(profile);
+    void testSaltbootTlsHardeningNotEmittedWhenDisabled() throws IOException {
+        ReflectionTestUtils.setField(underTest, "saltbootTlsHardening", false);
 
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, env, STACK_ID);
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, environment, STACK_ID);
 
         String gwScript = userdata.get(InstanceGroupType.GATEWAY);
+        assertFalse(gwScript.contains("SALTBOOT_MIN_TLS_VERSION"));
         assertFalse(gwScript.contains("SALTBOOT_FIPS_ONLY"));
     }
 
