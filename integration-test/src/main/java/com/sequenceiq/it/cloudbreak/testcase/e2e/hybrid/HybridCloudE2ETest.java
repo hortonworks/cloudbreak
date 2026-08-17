@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerS
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.AbsolutTimeBasedTimeoutChecker;
 import com.sequenceiq.common.model.OsType;
+import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -128,6 +129,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext
                 .given(EnvironmentTestDto.class)
+                    .withSecurityAccess(new SecurityAccessRequest())
                     .withDefaultSecurityGroup(hybridCloudSecurityGroupID)
                     .withFreeIpaOs(yarnCloudProvider.getOsType().getOs());
         createEnvironmentWithFreeIpa(testContext);
