@@ -1,0 +1,20 @@
+plugins {
+    id "java"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":common")
+
+    implementation     group: 'io.swagger.core.v3',     name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
+    implementation     group: "jakarta.validation",     name: "jakarta.validation-api", version: jakartaValidationVersion
+    implementation     group: 'jakarta.ws.rs',         name: 'jakarta.ws.rs-api',     version: '4.0.0'
+    implementation     group: 'org.apache.commons',    name: 'commons-lang3',         version: apacheCommonsLangVersion
+
+    testImplementation group: "org.assertj",            name: "assertj-core",           version: assertjVersion
+    testImplementation group: "org.hibernate.validator", name: "hibernate-validator",    version: hibernateValidatorVersion
+    testImplementation group: 'org.reflections',        name: 'reflections',            version: '0.10.2'
+}

@@ -33,6 +33,7 @@ environment-api/                                                                
 environment-common/                                                                 @cloudbreak/cloudbreak-wolf-backend
 environment-remote/                                                                 @cloudbreak/cloudbreak-wolf-backend @cloudbreak/cloudbreak-duck
 environment-remote-api/                                                             @cloudbreak/cloudbreak-wolf-backend @cloudbreak/cloudbreak-duck
+maintenance-api/                                                                    @cloudbreak/cloudbreak-bear
 maintenance/                                                                        @cloudbreak/cloudbreak-bear
 
 # Wolf team should review template modules
