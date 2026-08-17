@@ -85,6 +85,7 @@ allprojects {
   ext['quartz.version'] = quartzVersion
   ext['opentelemetry.version'] = openTelemetryVersion
   ext['httpclient5.version'] = httpClientVersion
+  ext['httpcore5.version'] = httpCoreVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
