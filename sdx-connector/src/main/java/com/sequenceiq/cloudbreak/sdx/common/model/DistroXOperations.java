@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 public enum DistroXOperations {
     CREATE,
+    SCALE,
     START;
 
     private static final Set<DistroXOperations> DISTROX_OPERATIONS = Arrays.stream(values())

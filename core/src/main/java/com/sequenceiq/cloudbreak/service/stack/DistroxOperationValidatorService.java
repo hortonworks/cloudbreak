@@ -35,7 +35,17 @@ public class DistroxOperationValidatorService {
     @Inject
     private DatahubOperationConfig datahubOperationConfig;
 
+    public DistroXOperationValidationView validateDistroXScaleOperation(String environmentCrn, DistroXOperations distroXOperation,
+            List<SdxClusterResponse> sdxClusterResponses, List<InstanceMetadataView> instanceMetadataViews) {
+        return validateDistroXStartOrScaleOperation(environmentCrn, distroXOperation, sdxClusterResponses, instanceMetadataViews);
+    }
+
     public DistroXOperationValidationView validateDistroXStartOperation(String environmentCrn, DistroXOperations distroXOperation,
+            List<SdxClusterResponse> sdxClusterResponses, List<InstanceMetadataView> instanceMetadataViews) {
+        return validateDistroXStartOrScaleOperation(environmentCrn, distroXOperation, sdxClusterResponses, instanceMetadataViews);
+    }
+
+    public DistroXOperationValidationView validateDistroXStartOrScaleOperation(String environmentCrn, DistroXOperations distroXOperation,
             List<SdxClusterResponse> sdxClusterResponses, List<InstanceMetadataView> instanceMetadataViews) {
         DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
         distroXOperationValidationView.setOperation(distroXOperation);
@@ -50,7 +60,7 @@ public class DistroxOperationValidatorService {
         if (entitlementService.isValidateDistroxOperationsBySdxHealthEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
                 (sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE) ||
                         sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE))) {
-            LOGGER.info("Validating Start of datahub based on primary gateway health of datalake");
+            LOGGER.info(String.format("Validating %s of data hub based on primary gateway health of datalake", distroXOperation.name()));
             boolean primaryGatewayHealthy = isPrimaryGatewayHealthy(instanceMetadataViews);
             distroXOperationValidationView.setAllowed(primaryGatewayHealthy);
             if (!primaryGatewayHealthy) {

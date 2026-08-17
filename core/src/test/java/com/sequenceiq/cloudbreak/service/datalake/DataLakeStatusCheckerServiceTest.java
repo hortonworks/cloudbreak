@@ -63,6 +63,46 @@ class DataLakeStatusCheckerServiceTest {
     }
 
     @Test
+    void testValidateScaleOperationBasedOnDatalakeShouldNotThrowException() {
+        Stack stack = createStack();
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(true);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        DistroXOperationValidationView distroXOperationValidationView2 = new DistroXOperationValidationView();
+        distroXOperationValidationView2.setOperation(DistroXOperations.SCALE);
+        distroXOperationValidationView2.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1, distroXOperationValidationView2));
+
+        underTest.validateScaleOperationBasedOnDatalake(stack.getType(), stack.getEnvironmentCrn(), true);
+    }
+
+    @Test
+    void testValidateAvailableStateShouldThrowExceptionWhenScaleIsNotAvailable() {
+        Stack stack = createStack();
+        DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
+        distroXOperationValidationView.setAllowed(true);
+        distroXOperationValidationView.setOperation(DistroXOperations.START);
+        DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
+        distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
+        distroXOperationValidationView1.setAllowed(true);
+        DistroXOperationValidationView distroXOperationValidationView2 = new DistroXOperationValidationView();
+        distroXOperationValidationView2.setOperation(DistroXOperations.SCALE);
+        distroXOperationValidationView2.setAllowed(false);
+        distroXOperationValidationView2.setReason("Instance health check failed for SDX cluster");
+        when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1, distroXOperationValidationView2));
+
+        BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateScaleOperationBasedOnDatalake(stack.getType(),
+                stack.getEnvironmentCrn(), true));
+        assertEquals("Data Hub scaling is not allowed due to Data Lake being unavailable. Reason: " +
+                "'Instance health check failed for SDX cluster'.", e.getMessage());
+    }
+
+        @Test
     void testValidateStartOperationBasedOnDatalakeShouldNotThrowException() {
         Stack stack = createStack();
         DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
@@ -71,8 +111,11 @@ class DataLakeStatusCheckerServiceTest {
         DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
         distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
         distroXOperationValidationView1.setAllowed(true);
+        DistroXOperationValidationView distroXOperationValidationView2 = new DistroXOperationValidationView();
+        distroXOperationValidationView2.setOperation(DistroXOperations.SCALE);
+        distroXOperationValidationView2.setAllowed(true);
         when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
-                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1, distroXOperationValidationView2));
 
         underTest.validateStartOperationBasedOnDatalake(stack);
     }
@@ -86,8 +129,11 @@ class DataLakeStatusCheckerServiceTest {
         DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
         distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
         distroXOperationValidationView1.setAllowed(false);
+        DistroXOperationValidationView distroXOperationValidationView2 = new DistroXOperationValidationView();
+        distroXOperationValidationView2.setOperation(DistroXOperations.SCALE);
+        distroXOperationValidationView2.setAllowed(true);
         when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
-                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1, distroXOperationValidationView2));
 
         underTest.validateStartOperationBasedOnDatalake(stack);
     }
@@ -102,8 +148,11 @@ class DataLakeStatusCheckerServiceTest {
         DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
         distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
         distroXOperationValidationView1.setAllowed(true);
+        DistroXOperationValidationView distroXOperationValidationView2 = new DistroXOperationValidationView();
+        distroXOperationValidationView2.setOperation(DistroXOperations.SCALE);
+        distroXOperationValidationView2.setAllowed(true);
         when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
-                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1, distroXOperationValidationView2));
 
         BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateStartOperationBasedOnDatalake(stack));
         assertEquals("Data Hub start is not allowed due to Data Lake being unavailable. Reason: " +
@@ -119,8 +168,11 @@ class DataLakeStatusCheckerServiceTest {
         DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
         distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
         distroXOperationValidationView1.setAllowed(true);
+        DistroXOperationValidationView distroXOperationValidationView2 = new DistroXOperationValidationView();
+        distroXOperationValidationView2.setOperation(DistroXOperations.SCALE);
+        distroXOperationValidationView2.setAllowed(true);
         when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
-                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1));
+                .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1, distroXOperationValidationView2));
 
         BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateStartOperationBasedOnDatalake(stack));
         assertEquals("Data Hub start is not allowed due to Data Lake being unavailable. Reason: ''.", e.getMessage());

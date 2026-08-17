@@ -47,7 +47,7 @@ class DistroxOperationValidatorServiceTest {
     private DistroxOperationValidatorService underTest;
 
     @Test
-    void testValidateDistroXStartOperationPGHealthy() {
+    void testValidateDistroXStartOrScaleOperationPGHealthy() {
         InstanceMetaData instanceMetadataView1 = new InstanceMetaData();
         instanceMetadataView1.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         instanceMetadataView1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
@@ -67,11 +67,15 @@ class DistroxOperationValidatorServiceTest {
             DistroXOperationValidationView distroXOperationValidationView = underTest.validateDistroXStartOperation("env_crn",
                     DistroXOperations.START, sdxClusterResponseList, instanceMetadataViewList);
             assertTrue(distroXOperationValidationView.isAllowed());
+
+            distroXOperationValidationView = underTest.validateDistroXScaleOperation("env_crn",
+                    DistroXOperations.SCALE, sdxClusterResponseList, instanceMetadataViewList);
+            assertTrue(distroXOperationValidationView.isAllowed());
         });
     }
 
     @Test
-    void testValidateDistroXStartOperationPGUnhealthy() {
+    void testValidateDistroXStartOrScaleOperationPGUnhealthy() {
         InstanceMetaData instanceMetadataView1 = new InstanceMetaData();
         instanceMetadataView1.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         instanceMetadataView1.setInstanceStatus(InstanceStatus.SERVICES_UNHEALTHY);
@@ -91,11 +95,15 @@ class DistroxOperationValidatorServiceTest {
             DistroXOperationValidationView distroXOperationValidationView = underTest.validateDistroXStartOperation("env_crn",
                     DistroXOperations.START, sdxClusterResponseList, instanceMetadataViewList);
             assertFalse(distroXOperationValidationView.isAllowed());
+
+            distroXOperationValidationView = underTest.validateDistroXScaleOperation("env_crn",
+                    DistroXOperations.SCALE, sdxClusterResponseList, instanceMetadataViewList);
+            assertFalse(distroXOperationValidationView.isAllowed());
         });
     }
 
     @Test
-    void testValidateDistroXStartOperationByStackHealth() {
+    void testValidateDistroXStartOrScaleOperationByStackHealth() {
         InstanceMetaData instanceMetadataView1 = new InstanceMetaData();
         instanceMetadataView1.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         instanceMetadataView1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
@@ -116,14 +124,22 @@ class DistroxOperationValidatorServiceTest {
             DistroXOperationValidationView distroXOperationValidationView = underTest.validateDistroXStartOperation("env_crn",
                     DistroXOperations.START, sdxClusterResponseList, instanceMetadataViewList);
             assertFalse(distroXOperationValidationView.isAllowed());
+
+            distroXOperationValidationView = underTest.validateDistroXScaleOperation("env_crn",
+                    DistroXOperations.SCALE, sdxClusterResponseList, instanceMetadataViewList);
+            assertFalse(distroXOperationValidationView.isAllowed());
         });
     }
 
     @Test
-    void testValidateDistroXStartOperationNoSdxPresent() {
+    void testValidateDistroXStartOrScaleOperationNoSdxPresent() {
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             DistroXOperationValidationView distroXOperationValidationView = underTest.validateDistroXStartOperation("env_crn",
                     DistroXOperations.START, Collections.emptyList(), Collections.emptyList());
+            assertFalse(distroXOperationValidationView.isAllowed());
+
+            distroXOperationValidationView = underTest.validateDistroXScaleOperation("env_crn",
+                    DistroXOperations.SCALE, Collections.emptyList(), Collections.emptyList());
             assertFalse(distroXOperationValidationView.isAllowed());
         });
     }

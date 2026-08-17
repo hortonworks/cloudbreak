@@ -424,6 +424,9 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
             } else if (DistroXOperations.START.equals(distroXOperation)) {
                 distroXOperationValidationViews.add(distroxOperationValidatorService.
                         validateDistroXStartOperation(environmentCrn, distroXOperation, sdxClusterResponses, stackDto.getAllNotTerminatedInstanceMetaData()));
+            } else if (DistroXOperations.SCALE.equals(distroXOperation)) {
+                distroXOperationValidationViews.add(distroxOperationValidatorService.
+                        validateDistroXScaleOperation(environmentCrn, distroXOperation, sdxClusterResponses, stackDto.getAllNotTerminatedInstanceMetaData()));
             }
         }
         return distroXOperationValidationViews;

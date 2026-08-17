@@ -32,6 +32,22 @@ public class DataLakeStatusCheckerService {
         }
     }
 
+    public void validateScaleOperationBasedOnDatalake(StackType stackType, String environmentCrn, boolean upscale) {
+        if (StackType.WORKLOAD.equals(stackType) && upscale) {
+            List<DistroXOperationValidationView> distroXOperationValidationView =
+                    platformAwareSdxConnector.validateDistroxOperations(environmentCrn);
+            DistroXOperationValidationView distroXOperationValidationViewResponse = distroXOperationValidationView.stream()
+                    .filter(i -> DistroXOperations.SCALE.equals(i.getOperation()))
+                    .findFirst()
+                    .orElseThrow(() -> new BadRequestException(String.format("Validation result for operation '%s' was not found.",
+                            DistroXOperations.SCALE.name())));
+            if (!distroXOperationValidationViewResponse.isAllowed()) {
+                throw new BadRequestException(String.format("Data Hub scaling is not allowed due to Data Lake being unavailable. Reason: '%s'.",
+                        Objects.toString(distroXOperationValidationViewResponse.getReason(), "")));
+            }
+        }
+    }
+
     public void validateState(SdxClusterResponse sdxCluster, SdxClusterStatusResponse expectedStatus) {
         if (!expectedStatus.equals(sdxCluster.getStatus())) {
             throw new BadRequestException("This action requires the Data Lake to be available, but the status is " + sdxCluster.getStatusReason());

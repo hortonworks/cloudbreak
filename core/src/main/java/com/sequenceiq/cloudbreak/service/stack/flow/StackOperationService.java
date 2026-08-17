@@ -454,6 +454,7 @@ public class StackOperationService {
         try {
             return transactionService.required(() -> {
                 boolean upscale = instanceGroupAdjustmentJson.getScalingAdjustment() > 0;
+                dataLakeStatusCheckerService.validateScaleOperationBasedOnDatalake(stack.getType(), stack.getEnvironmentCrn(), upscale);
                 updateNodeCountValidator.validateServiceRoles(stackDto, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateStackStatus(stack, upscale);
                 updateNodeCountValidator.validateInstanceGroup(stackDto, instanceGroupAdjustmentJson.getInstanceGroup());
@@ -471,6 +472,7 @@ public class StackOperationService {
                     }
                 }
                 if (upscale) {
+
                     stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
                             String.format("Requested node count for upscaling: %s, instance group: %s",
                                     instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup()));
