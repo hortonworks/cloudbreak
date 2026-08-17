@@ -11,7 +11,6 @@ buildscript {
   }
 
   repositories {
-    maven { url = "$repoMirrorUrl" }
     maven {
       url = "$repoUrl"
       allowInsecureProtocol = true
@@ -49,11 +48,6 @@ ext['junit-jupiter.version'] = "$junitJupiterVersion"
 allprojects {
 
   repositories {
-    maven { url = "$repoMirrorUrl"
-      content {
-        includeGroupByRegex "com.cloudera.cdp.*"
-      }
-    }
     maven {
       url = "$repoUrl"
       allowInsecureProtocol = true
@@ -300,7 +294,6 @@ subprojects {
       allowInsecureProtocol = true
     }
     mavenCentral()
-    maven { url = "$repoMirrorUrl" }
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
     maven { url "https://repo.spring.io/release" }
     maven { url "https://plugins.gradle.org/m2/" }
