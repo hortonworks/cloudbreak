@@ -159,4 +159,35 @@ class GatewayServiceTest {
         verify(gatewayRepository, times(1)).save(input);
     }
 
+    @Test
+    void testMigrateWrongTokenCertClusterCopiesTokenCertWhenDeprecatedColumnHasData() {
+        ReflectionTestUtils.setField(underTest, "httpsPort", "666");
+        Gateway input = new Gateway();
+        input.setId(GATEWAY_ID);
+        // tokenCertSecret has no raw value; deprecated tokenCert column carries the plain-text value
+        input.setTokenCertDeprecated("legacy-token-cert");
+        when(gatewayRepository.findById(GATEWAY_ID)).thenReturn(Optional.of(input));
+        when(gatewayRepository.save(input)).thenReturn(input);
+
+        Gateway result = underTest.migrateWrongTokenCertCluster(input);
+
+        assertEquals("legacy-token-cert", result.getTokenCertSecret().getRaw());
+        verify(gatewayRepository, times(1)).save(input);
+    }
+
+    @Test
+    void testMigrateWrongTokenCertClusterSkipsCopyWhenTokenCertIsNull() {
+        ReflectionTestUtils.setField(underTest, "httpsPort", "666");
+        Gateway input = new Gateway();
+        input.setId(GATEWAY_ID);
+        // Both tokenCertSecret (Secret.EMPTY) and deprecated tokenCert are null → getTokenCert() returns null
+        when(gatewayRepository.findById(GATEWAY_ID)).thenReturn(Optional.of(input));
+        when(gatewayRepository.save(input)).thenReturn(input);
+
+        Gateway result = underTest.migrateWrongTokenCertCluster(input);
+
+        assertNull(result.getTokenCertSecret().getRaw());
+        verify(gatewayRepository, times(1)).save(input);
+    }
+
 }
