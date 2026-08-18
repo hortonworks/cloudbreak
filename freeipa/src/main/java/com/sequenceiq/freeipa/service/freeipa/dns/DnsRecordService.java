@@ -217,8 +217,12 @@ public class DnsRecordService {
 
     private void handleExistingCname(FreeIpaClient freeIpaClient, String accountId, AddDnsCnameRecordRequest request, DnsRecord dnsRecord, String targetFqdn,
             String zone) throws FreeIpaClientException {
-        if (request.isForce() && !dnsRecord.getCnamerecord().contains(targetFqdn)) {
-            LOGGER.info("Record already exists and the target doesn't match. CNAME {}, FQDN: {}. Deleting record", dnsRecord.getCnamerecord(), targetFqdn);
+        boolean cnameTargetAlreadySet = dnsRecord.isCnameRecord() && dnsRecord.getCnamerecord().contains(targetFqdn);
+        if (cnameTargetAlreadySet) {
+            LOGGER.info("CNAME record [{}] already exists and matches the requested target [{}]. Nothing to do", request.getCname(), targetFqdn);
+        } else if (request.isForce()) {
+            LOGGER.info("Existing record for name [{}] does not match the requested CNAME target [{}]. Existing record: {}. "
+                    + "Force is set, so deleting it and recreating as CNAME.", request.getCname(), targetFqdn, dnsRecord);
             deleteDnsRecord(accountId, request.getEnvironmentCrn(), null, request.getCname());
             createDnsCnameRecord(freeIpaClient, zone, request.getCname(), targetFqdn);
         } else {

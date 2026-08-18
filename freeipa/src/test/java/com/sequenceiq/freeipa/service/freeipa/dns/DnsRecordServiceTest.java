@@ -673,6 +673,54 @@ public class DnsRecordServiceTest {
     }
 
     @Test
+    public void testCnameRecordExistsAsARecordWithForceIsTrue() throws FreeIpaClientException {
+        AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
+        request.setEnvironmentCrn(ENV_CRN);
+        request.setCname("cloudera-gateway");
+        request.setTargetFqdn(TARGET_FQDN);
+        request.setForce(true);
+        Stack stack = createStack();
+        FreeIpa freeIpa = createFreeIpa();
+        DnsRecord dnsRecord = new DnsRecord();
+        dnsRecord.setArecord(List.of("1.1.1.1"));
+        dnsRecord.setIdnsname(request.getCname());
+
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(freeIpaClient.showDnsRecord(DOMAIN, request.getCname())).thenReturn(dnsRecord);
+
+        underTest.addDnsCnameRecord(ACCOUNT_ID, request);
+
+        verify(freeIpaClient).deleteDnsRecord(eq(request.getCname()), anyString());
+        verify(freeIpaClient).addDnsCnameRecord(DOMAIN, request.getCname(), request.getTargetFqdn());
+    }
+
+    @Test
+    public void testCnameRecordExistsAsARecordWithForceIsFalse() throws FreeIpaClientException {
+        AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
+        request.setEnvironmentCrn(ENV_CRN);
+        request.setCname("cloudera-gateway");
+        request.setTargetFqdn(TARGET_FQDN);
+        request.setForce(false);
+        Stack stack = createStack();
+        FreeIpa freeIpa = createFreeIpa();
+        DnsRecord dnsRecord = new DnsRecord();
+        dnsRecord.setArecord(List.of("1.1.1.1"));
+        dnsRecord.setIdnsname(request.getCname());
+
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(freeIpaClient.showDnsRecord(DOMAIN, request.getCname())).thenReturn(dnsRecord);
+
+        assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsCnameRecord(ACCOUNT_ID, request));
+
+        verify(freeIpaClient, times(0)).deleteDnsRecord(anyString(), anyString());
+        verify(freeIpaClient, times(0)).addDnsCnameRecord(DOMAIN, request.getCname(), request.getTargetFqdn());
+    }
+
+    @Test
     public void testDelete() throws FreeIpaClientException {
         Stack stack = createStack();
         when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
