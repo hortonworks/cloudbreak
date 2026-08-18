@@ -7,9 +7,12 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_S
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -31,6 +34,7 @@ import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleNameList;
+import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiRolesToInclude;
 import com.cloudera.api.swagger.model.ApiRollingRestartArgs;
 import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
@@ -53,6 +57,8 @@ public class ClouderaManagerRestartService {
     private static final String RESTART_COMMAND_NAME = "Restart";
 
     private static final String ROLLING_RESTART_COMMAND_NAME = "RollingRestart";
+
+    private static final Set<ApiRoleState> ACTIVE_ROLE_STATES = EnumSet.of(ApiRoleState.STARTED, ApiRoleState.STARTING, ApiRoleState.BUSY);
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -119,8 +125,12 @@ public class ClouderaManagerRestartService {
         }
     }
 
-    public void rollingRestartServiceRoleByType(StackDtoDelegate stack, ApiClient apiClient, String serviceType, String roleType,
+    public void rollingRestartServiceRolesByType(StackDtoDelegate stack, ApiClient apiClient, String serviceType, List<String> roleTypes,
             boolean staleConfigsOnly) {
+        if (roleTypes.isEmpty()) {
+            LOGGER.debug("No Kafka role types to rolling restart for service type {}.", serviceType);
+            return;
+        }
         try {
             String serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType)
                     .orElseThrow(() -> new ClouderaManagerOperationFailedException(String.format("Cannot find CM service by role '%s' in cluster '%s'.",
@@ -132,12 +142,42 @@ public class ClouderaManagerRestartService {
                 eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
                 waitForRestartExecution(apiClient, stack, optionalActiveRollingRestartCommand.get());
             } else {
-                ApiCommand apiCommand = executeRollingRestartCommandByRoleType(apiClient, stack, serviceName, roleType, staleConfigsOnly);
+                ApiCommand apiCommand = executeRollingRestartCommandByRoleTypes(apiClient, stack, serviceName, roleTypes, staleConfigsOnly);
                 eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
                 waitForRestartExecution(apiClient, stack, apiCommand);
             }
         } catch (ApiException | CloudbreakException e) {
-            LOGGER.info("Could not rolling restart {} role type for {} service type.", roleType, serviceType, e);
+            LOGGER.info("Could not rolling restart {} role types for {} service type.", roleTypes, serviceType, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public List<String> getActiveServiceRoleTypes(StackDtoDelegate stack, ApiClient apiClient, String serviceType, List<String> roleTypes) {
+        if (roleTypes.isEmpty()) {
+            return List.of();
+        }
+        try {
+            Optional<String> serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType);
+            if (serviceName.isEmpty()) {
+                return List.of();
+            }
+            RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(apiClient);
+            ApiRoleList apiRoleList = rolesResourceApi.readRoles(stack.getName(), serviceName.get(), "", SUMMARY.name());
+            if (apiRoleList.getItems() == null || apiRoleList.getItems().isEmpty()) {
+                return List.of();
+            }
+            Set<String> requestedRoleTypes = Set.copyOf(roleTypes);
+            Map<String, List<ApiRole>> rolesByType = apiRoleList.getItems().stream()
+                    .filter(apiRole -> requestedRoleTypes.contains(apiRole.getType()))
+                    .collect(Collectors.groupingBy(ApiRole::getType));
+            return roleTypes.stream()
+                    .filter(rolesByType::containsKey)
+                    .filter(roleType -> rolesByType.get(roleType).stream()
+                            .map(ApiRole::getRoleState)
+                            .anyMatch(ACTIVE_ROLE_STATES::contains))
+                    .toList();
+        } catch (ApiException e) {
+            LOGGER.info("Could not read active role types for {} service type.", serviceType, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
@@ -175,11 +215,11 @@ public class ClouderaManagerRestartService {
         return clustersResourceApi.rollingRestart(stack.getName(), rollingRestartClusterArgs);
     }
 
-    private ApiCommand executeRollingRestartCommandByRoleType(ApiClient apiClient, StackDtoDelegate stack, String serviceName, String roleType,
+    private ApiCommand executeRollingRestartCommandByRoleTypes(ApiClient apiClient, StackDtoDelegate stack, String serviceName, List<String> roleTypes,
             boolean staleConfigsOnly) throws ApiException {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         ApiRollingRestartArgs apiRollingRestartArgs = new ApiRollingRestartArgs();
-        apiRollingRestartArgs.setRestartRoleTypes(List.of(roleType));
+        apiRollingRestartArgs.setRestartRoleTypes(roleTypes);
         apiRollingRestartArgs.setStaleConfigsOnly(staleConfigsOnly);
 
         return servicesResourceApi.rollingRestart(stack.getName(), serviceName, apiRollingRestartArgs);

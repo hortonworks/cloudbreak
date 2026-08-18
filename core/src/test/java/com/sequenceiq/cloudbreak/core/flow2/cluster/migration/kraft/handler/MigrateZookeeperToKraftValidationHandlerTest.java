@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_KRAFT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_ROLES_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -55,7 +55,7 @@ class MigrateZookeeperToKraftValidationHandlerTest {
     @Test
     void testDoAcceptSuccess() {
         StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, false);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, false, false);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.ZOOKEEPER_INSTALLED;
@@ -65,13 +65,13 @@ class MigrateZookeeperToKraftValidationHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
-        assertEquals(START_RESTART_KAFKA_KRAFT_NODES_EVENT.name(), result.getSelector());
+        assertEquals(START_RESTART_KAFKA_ROLES_EVENT.name(), result.getSelector());
     }
 
     @Test
     void testDoAcceptSuccessWhenKraftMigrationAlreadyDone() {
         StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, false);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, false, false);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.BROKERS_IN_KRAFT;
@@ -88,7 +88,7 @@ class MigrateZookeeperToKraftValidationHandlerTest {
     @Test
     void testDoAcceptSuccessWhenKraftMigrationFinalizationAlreadyDone() {
         StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, false);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, false, false);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.KRAFT_INSTALLED;
@@ -105,7 +105,7 @@ class MigrateZookeeperToKraftValidationHandlerTest {
     @Test
     void testDoAcceptSuccessWhenStaleConfigsOnlyRestartNeeded() {
         StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, true);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID, true, true);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.ZOOKEEPER_INSTALLED;
@@ -115,13 +115,13 @@ class MigrateZookeeperToKraftValidationHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
-        assertEquals(START_RESTART_KAFKA_KRAFT_NODES_EVENT.name(), result.getSelector());
+        assertEquals(START_RESTART_KAFKA_ROLES_EVENT.name(), result.getSelector());
     }
 
     @Test
     void testDoAcceptFailure() {
         StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.selector(), STACK_ID, false);
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.selector(), STACK_ID, false, false);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.ZOOKEEPER_INSTALLED;

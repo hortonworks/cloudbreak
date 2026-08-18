@@ -64,7 +64,7 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
         assertEquals(3, queue.size());
         checkEventIsKraftConfiguration(queue.poll());
         checkEventIsStackAndClusterUpscale(queue.poll());
-        checkEventIsKraftMigration(queue.poll(), false);
+        checkEventIsKraftMigration(queue.poll(), false, true);
         flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
 
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "ZOOKEEPER_TO_KRAFT_MIGRATION");
@@ -88,7 +88,7 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(2, queue.size());
         checkEventIsKraftConfiguration(queue.poll());
-        checkEventIsKraftMigration(queue.poll(), true);
+        checkEventIsKraftMigration(queue.poll(), true, true);
         flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
 
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "ZOOKEEPER_TO_KRAFT_MIGRATION");
@@ -109,7 +109,7 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
         Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
         assertEquals(2, queue.size());
         checkEventIsKraftConfiguration(queue.poll());
-        checkEventIsKraftMigration(queue.poll(), false);
+        checkEventIsKraftMigration(queue.poll(), false, false);
     }
 
     private void checkEventIsKraftConfiguration(Selectable event) {
@@ -126,10 +126,11 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
         assertEquals(Map.of("kraft", 3), (upscaleEvent.getHostGroupsWithAdjustment()));
     }
 
-    private void checkEventIsKraftMigration(Selectable event, boolean staleConfigsOnly) {
+    private void checkEventIsKraftMigration(Selectable event, boolean staleConfigsOnly, boolean kraftHostGroupPresent) {
         assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), event.selector());
         assertInstanceOf(MigrateZookeeperToKraftTriggerEvent.class, event);
         assertEquals(0L, event.getResourceId());
         assertEquals(staleConfigsOnly, ((MigrateZookeeperToKraftTriggerEvent) event).isStaleConfigsOnly());
+        assertEquals(kraftHostGroupPresent, ((MigrateZookeeperToKraftTriggerEvent) event).isKraftHostGroupPresent());
     }
 }

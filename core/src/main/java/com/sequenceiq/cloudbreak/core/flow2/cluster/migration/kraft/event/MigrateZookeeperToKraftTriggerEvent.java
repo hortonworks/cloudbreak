@@ -14,23 +14,32 @@ public class MigrateZookeeperToKraftTriggerEvent extends StackEvent {
 
     private final boolean staleConfigsOnly;
 
+    private final boolean kraftHostGroupPresent;
+
     @JsonCreator
     public MigrateZookeeperToKraftTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("staleConfigsOnly") boolean staleConfigsOnly,
+            @JsonProperty("kraftHostGroupPresent") boolean kraftHostGroupPresent,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.event(), resourceId, accepted);
         this.staleConfigsOnly = staleConfigsOnly;
+        this.kraftHostGroupPresent = kraftHostGroupPresent;
     }
 
     @Override
     public String toString() {
         return "MigrateZookeeperToKraftTriggerEvent{" +
                 "staleConfigsOnly=" + staleConfigsOnly +
+                ", kraftHostGroupPresent=" + kraftHostGroupPresent +
                 "} " + super.toString();
     }
 
     public boolean isStaleConfigsOnly() {
         return staleConfigsOnly;
+    }
+
+    public boolean isKraftHostGroupPresent() {
+        return kraftHostGroupPresent;
     }
 }
