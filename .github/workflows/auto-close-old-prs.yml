@@ -13,24 +13,50 @@ jobs:
       - name: Close PRs created more than 30 days ago
         env:
           GH_TOKEN: ${{ github.token }}
+          API_URL: ${{ github.api_url }}
           REPO: ${{ github.repository }}
         run: |
+          set -uo pipefail
           cutoff=$(date -u -d "30 days ago" +"%Y-%m-%dT%H:%M:%SZ")
-          gh label create "auto-closed" \
-            --repo "$REPO" \
-            --color "ededed" \
-            --description "Closed automatically by the auto-close-old-prs workflow." \
-            2>/dev/null || true
-          gh pr list \
-            --repo "$REPO" \
-            --state open \
-            --limit 1000 \
-            --json number,title,createdAt,isDraft \
-            --jq ".[] | select(.createdAt < \"$cutoff\") | .number" |
-          while read pr; do
+          echo "Closing open PRs created before: $cutoff"
+
+          api() {
+            # usage: api METHOD PATH [extra curl args...]; prints response body
+            local method="$1" path="$2"; shift 2
+            curl -fsSL \
+              -X "$method" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "$@" \
+              "$API_URL/$path"
+          }
+
+          # 1. Ensure the label exists (POST 422s if it already does - ignore).
+          api POST "repos/$REPO/labels" \
+            -d '{"name":"auto-closed","color":"ededed","description":"Closed automatically by the auto-close-old-prs workflow."}' \
+            >/dev/null || true
+
+          # 2. Page through open PRs; collect numbers created before the cutoff.
+          stale=""
+          page=1
+          while :; do
+            batch=$(api GET "repos/$REPO/pulls?state=open&per_page=100&page=$page")
+            n=$(printf '%s' "$batch" | jq 'length')
+            [ "$n" -eq 0 ] && break
+            nums=$(printf '%s' "$batch" | jq -r --arg cutoff "$cutoff" \
+              '.[] | select(.created_at < $cutoff) | .number')
+            stale="$stale $nums"
+            page=$((page + 1))
+          done
+
+          # 3. Comment, label, then close each stale PR.
+          for pr in $stale; do
             echo "Closing PR #$pr"
-            gh pr comment "$pr" --repo "$REPO" --body \
-              "Automatically closing this PR because it was created more than 30 days ago."
-            gh pr edit "$pr" --repo "$REPO" --add-label "auto-closed"
-            gh pr close "$pr" --repo "$REPO"
+            api POST "repos/$REPO/issues/$pr/comments" \
+              -d '{"body":"Automatically closing this PR because it was created more than 30 days ago."}' >/dev/null
+            api POST "repos/$REPO/issues/$pr/labels" \
+              -d '{"labels":["auto-closed"]}' >/dev/null
+            api PATCH "repos/$REPO/pulls/$pr" \
+              -d '{"state":"closed"}' >/dev/null
           done
