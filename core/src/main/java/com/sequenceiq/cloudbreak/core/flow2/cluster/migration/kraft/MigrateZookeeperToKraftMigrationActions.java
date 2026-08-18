@@ -8,9 +8,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_BROKER_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_CONNECT_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_KRAFT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_ROLES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT;
@@ -55,7 +53,8 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftTriggerEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isStaleConfigsOnly());
+                return MigrateZookeeperToKraftContext.fromMigration(flowParameters, payload, payload.isStaleConfigsOnly(),
+                        payload.isKraftHostGroupPresent());
             }
 
             @Override
@@ -63,7 +62,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 LOGGER.debug("Migrate Zookeeper to KRaft validation state started {}", payload);
                 Long stackId = payload.getResourceId();
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isStaleConfigsOnly()));
+                sendEvent(context, nextEvent, migrationEvent(nextEvent, stackId, context));
             }
 
             @Override
@@ -74,76 +73,25 @@ public class MigrateZookeeperToKraftMigrationActions {
         };
     }
 
-    @Bean(name = "RESTART_KAFKA_KRAFT_NODES_STATE")
-    public Action<?, ?> restartKafkaKraftNodesAction() {
+    @Bean(name = "RESTART_KAFKA_ROLES_STATE")
+    public Action<?, ?> restartKafkaRolesAction() {
         return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftEvent.class) {
 
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isStaleConfigsOnly());
+                return MigrateZookeeperToKraftContext.fromMigration(flowParameters, payload, payload.isStaleConfigsOnly(),
+                        payload.isKraftHostGroupPresent());
             }
 
             @Override
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka KRaft nodes state started {}", payload);
+                LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka roles state started {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
-                String nextEvent = RESTART_KAFKA_KRAFT_NODES_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isStaleConfigsOnly()));
-            }
-
-            @Override
-            protected Object getFailurePayload(MigrateZookeeperToKraftEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
-                    Exception ex) {
-                return new MigrateZookeeperToKraftFailureEvent(payload.getResourceId(), ex);
-            }
-        };
-    }
-
-    @Bean(name = "RESTART_KAFKA_BROKER_NODES_STATE")
-    public Action<?, ?> restartKafkaBrokerNodesAction() {
-        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftEvent.class) {
-
-            @Override
-            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isStaleConfigsOnly());
-            }
-
-            @Override
-            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka broker nodes state started {}", payload);
-                Long stackId = payload.getResourceId();
-                String nextEvent = RESTART_KAFKA_BROKER_NODES_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isStaleConfigsOnly()));
-            }
-
-            @Override
-            protected Object getFailurePayload(MigrateZookeeperToKraftEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
-                    Exception ex) {
-                return new MigrateZookeeperToKraftFailureEvent(payload.getResourceId(), ex);
-            }
-        };
-    }
-
-    @Bean(name = "RESTART_KAFKA_CONNECT_NODES_STATE")
-    public Action<?, ?> restartKafkaConnectNodesAction() {
-        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftEvent.class) {
-
-            @Override
-            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isStaleConfigsOnly());
-            }
-
-            @Override
-            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka connect nodes state started {}", payload);
-                Long stackId = payload.getResourceId();
-                String nextEvent = RESTART_KAFKA_CONNECT_NODES_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isStaleConfigsOnly()));
+                String nextEvent = RESTART_KAFKA_ROLES_EVENT.event();
+                sendEvent(context, nextEvent, migrationEvent(nextEvent, stackId, context));
             }
 
             @Override
@@ -161,7 +109,8 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isStaleConfigsOnly());
+                return MigrateZookeeperToKraftContext.fromMigration(flowParameters, payload, payload.isStaleConfigsOnly(),
+                        payload.isKraftHostGroupPresent());
             }
 
             @Override
@@ -169,7 +118,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 LOGGER.debug("Migrate Zookeeper to KRaft state started {}", payload);
                 Long stackId = payload.getResourceId();
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId, context.isStaleConfigsOnly()));
+                sendEvent(context, nextEvent, migrationEvent(nextEvent, stackId, context));
             }
 
             @Override
@@ -187,7 +136,8 @@ public class MigrateZookeeperToKraftMigrationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload, false, payload.isStaleConfigsOnly());
+                return MigrateZookeeperToKraftContext.fromMigration(flowParameters, payload, payload.isStaleConfigsOnly(),
+                        payload.isKraftHostGroupPresent());
             }
 
             @Override
@@ -197,7 +147,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE);
                 flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_FINISHED_EVENT);
                 String nextEventSelector = FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event();
-                sendEvent(context, nextEventSelector, new MigrateZookeeperToKraftEvent(nextEventSelector, stackId, context.isStaleConfigsOnly()));
+                sendEvent(context, nextEventSelector, migrationEvent(nextEventSelector, stackId, context));
             }
 
             @Override
@@ -232,5 +182,9 @@ public class MigrateZookeeperToKraftMigrationActions {
                 return new MigrateZookeeperToKraftFailureEvent(payload.getResourceId(), ex);
             }
         };
+    }
+
+    private static MigrateZookeeperToKraftEvent migrationEvent(String selector, Long stackId, MigrateZookeeperToKraftContext context) {
+        return new MigrateZookeeperToKraftEvent(selector, stackId, context.isStaleConfigsOnly(), context.isKraftHostGroupPresent());
     }
 }

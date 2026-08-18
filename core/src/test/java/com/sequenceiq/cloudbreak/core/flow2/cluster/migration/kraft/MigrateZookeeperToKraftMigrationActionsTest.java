@@ -8,16 +8,12 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_BROKER_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_CONNECT_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_KRAFT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_ROLES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_CONNECT_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_KRAFT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_ROLES_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINISHED_EVENT;
@@ -87,7 +83,7 @@ class MigrateZookeeperToKraftMigrationActionsTest {
 
     @Test
     void testMigrateZookeeperToKraftValidationAction() throws Exception {
-        MigrateZookeeperToKraftTriggerEvent event = new MigrateZookeeperToKraftTriggerEvent(STACK_ID, false, new Promise<>());
+        MigrateZookeeperToKraftTriggerEvent event = new MigrateZookeeperToKraftTriggerEvent(STACK_ID, false, false, new Promise<>());
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftTriggerEvent> action =
@@ -103,12 +99,12 @@ class MigrateZookeeperToKraftMigrationActionsTest {
     }
 
     @Test
-    void testRestartKafkaKraftNodesAction() throws Exception {
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_KRAFT_NODES_EVENT.name(), STACK_ID, false);
+    void testRestartKafkaRolesAction() throws Exception {
+        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_ROLES_EVENT.name(), STACK_ID, false, false);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.restartKafkaKraftNodesAction();
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.restartKafkaRolesAction();
         initActionPrivateFields(action);
         context = new MigrateZookeeperToKraftContext(flowParameters, event);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
@@ -117,47 +113,13 @@ class MigrateZookeeperToKraftMigrationActionsTest {
         verify(stackUpdater).updateStackStatus(event.getResourceId(), ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
         verify(flowMessageService).fireEventAndLog(event.getResourceId(), UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        assertEquals(RESTART_KAFKA_KRAFT_NODES_EVENT.event(), captor.getValue());
-        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
-    }
-
-    @Test
-    void testRestartKafkaBrokerNodesAction() throws Exception {
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_BROKER_NODES_EVENT.name(), STACK_ID, false);
-        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
-
-        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.restartKafkaBrokerNodesAction();
-        initActionPrivateFields(action);
-        context = new MigrateZookeeperToKraftContext(flowParameters, event);
-        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
-
-        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        assertEquals(RESTART_KAFKA_BROKER_NODES_EVENT.event(), captor.getValue());
-        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
-    }
-
-    @Test
-    void testRestartKafkaConnectNodesAction() throws Exception {
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_CONNECT_NODES_EVENT.name(), STACK_ID, false);
-        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
-
-        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.restartKafkaConnectNodesAction();
-        initActionPrivateFields(action);
-        context = new MigrateZookeeperToKraftContext(flowParameters, event);
-        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
-
-        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        assertEquals(RESTART_KAFKA_CONNECT_NODES_EVENT.event(), captor.getValue());
+        assertEquals(RESTART_KAFKA_ROLES_EVENT.event(), captor.getValue());
         assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
     void testMigrateZookeeperToKraftAction() throws Exception {
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), STACK_ID, false);
+        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), STACK_ID, false, false);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
@@ -174,7 +136,7 @@ class MigrateZookeeperToKraftMigrationActionsTest {
 
     @Test
     void testMigrateZookeeperToKraftFinished() throws Exception {
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), STACK_ID, false);
+        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), STACK_ID, false, false);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =

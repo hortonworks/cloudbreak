@@ -6,18 +6,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.RESTART_KAFKA_BROKER_NODES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.RESTART_KAFKA_CONNECT_NODES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.RESTART_KAFKA_KRAFT_NODES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.RESTART_KAFKA_ROLES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_CONNECT_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_KRAFT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_ROLES_EVENT;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -48,21 +44,12 @@ class MigrateZookeeperToKraftMigrationFlowConfigTest {
                         MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE,
                         START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT),
                 new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE,
-                        RESTART_KAFKA_KRAFT_NODES_STATE,
-                        START_RESTART_KAFKA_KRAFT_NODES_EVENT),
-                new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE,
-                        MIGRATE_ZOOKEEPER_TO_KRAFT_STATE,
-                        START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT),
+                        RESTART_KAFKA_ROLES_STATE,
+                        START_RESTART_KAFKA_ROLES_EVENT),
                 new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE,
                         MIGRATE_ZOOKEEPER_TO_KRAFT_FINISHED_STATE,
                         FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT),
-                new FlowTransition(RESTART_KAFKA_KRAFT_NODES_STATE,
-                        RESTART_KAFKA_BROKER_NODES_STATE,
-                        START_RESTART_KAFKA_BROKER_NODES_EVENT),
-                new FlowTransition(RESTART_KAFKA_BROKER_NODES_STATE,
-                        RESTART_KAFKA_CONNECT_NODES_STATE,
-                        START_RESTART_KAFKA_CONNECT_NODES_EVENT),
-                new FlowTransition(RESTART_KAFKA_CONNECT_NODES_STATE,
+                new FlowTransition(RESTART_KAFKA_ROLES_STATE,
                         MIGRATE_ZOOKEEPER_TO_KRAFT_STATE,
                         START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT),
                 new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_STATE,

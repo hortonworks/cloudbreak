@@ -55,7 +55,7 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
             }
         }
         boolean staleConfigsOnly = !kraftUpscaleNeeded && !kraftInstallNeeded;
-        flowEventChain.add(getKraftMigrationTriggerEvent(event, staleConfigsOnly));
+        flowEventChain.add(getKraftMigrationTriggerEvent(event, staleConfigsOnly, kraftHostGroupPresent));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
@@ -94,8 +94,9 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
                 variant.getVariant().value(), false);
     }
 
-    private Selectable getKraftMigrationTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event, boolean staleConfigsOnly) {
+    private Selectable getKraftMigrationTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event, boolean staleConfigsOnly,
+            boolean kraftHostGroupPresent) {
         Long stackId = event.getResourceId();
-        return new MigrateZookeeperToKraftTriggerEvent(stackId, staleConfigsOnly, event.accepted());
+        return new MigrateZookeeperToKraftTriggerEvent(stackId, staleConfigsOnly, kraftHostGroupPresent, event.accepted());
     }
 }

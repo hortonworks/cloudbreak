@@ -10,12 +10,15 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
 
     private final boolean staleConfigsOnly;
 
+    private final boolean kraftHostGroupPresent;
+
     private Long stackId;
 
     public MigrateZookeeperToKraftContext(FlowParameters flowParameters, StackEvent event) {
         super(flowParameters);
         kraftInstallNeeded = false;
         staleConfigsOnly = false;
+        kraftHostGroupPresent = false;
         stackId = event.getResourceId();
     }
 
@@ -24,14 +27,16 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
         stackId = event.getResourceId();
         this.kraftInstallNeeded = kraftInstallNeeded;
         this.staleConfigsOnly = false;
+        this.kraftHostGroupPresent = false;
     }
 
-    public MigrateZookeeperToKraftContext(FlowParameters flowParameters, StackEvent event, boolean kraftInstallNeeded,
-            boolean staleConfigsOnly) {
+    private MigrateZookeeperToKraftContext(FlowParameters flowParameters, StackEvent event, boolean staleConfigsOnly,
+            boolean kraftHostGroupPresent) {
         super(flowParameters);
         stackId = event.getResourceId();
-        this.kraftInstallNeeded = kraftInstallNeeded;
+        this.kraftInstallNeeded = false;
         this.staleConfigsOnly = staleConfigsOnly;
+        this.kraftHostGroupPresent = kraftHostGroupPresent;
     }
 
     public static MigrateZookeeperToKraftContext from(FlowParameters flowParameters, StackEvent event) {
@@ -42,9 +47,9 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
         return new MigrateZookeeperToKraftContext(flowParameters, event, kraftInstallNeeded);
     }
 
-    public static MigrateZookeeperToKraftContext from(FlowParameters flowParameters, StackEvent event, boolean kraftInstallNeeded,
-            boolean staleConfigsOnly) {
-        return new MigrateZookeeperToKraftContext(flowParameters, event, kraftInstallNeeded, staleConfigsOnly);
+    public static MigrateZookeeperToKraftContext fromMigration(FlowParameters flowParameters, StackEvent event, boolean staleConfigsOnly,
+            boolean kraftHostGroupPresent) {
+        return new MigrateZookeeperToKraftContext(flowParameters, event, staleConfigsOnly, kraftHostGroupPresent);
     }
 
     public Long getStackId() {
@@ -61,6 +66,10 @@ public class MigrateZookeeperToKraftContext extends CommonContext {
 
     public boolean isStaleConfigsOnly() {
         return staleConfigsOnly;
+    }
+
+    public boolean isKraftHostGroupPresent() {
+        return kraftHostGroupPresent;
     }
 
 }
