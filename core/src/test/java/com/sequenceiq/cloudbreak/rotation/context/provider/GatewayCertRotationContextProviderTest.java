@@ -164,6 +164,24 @@ class GatewayCertRotationContextProviderTest {
         assertTrue(CloudbreakSecretType.GATEWAY_CERT.getSteps().stream().allMatch(contexts::containsKey));
     }
 
+    @Test
+    void testGetContextsCallsMigrateTokenCertWhenTokenCertSecretIsBlank() {
+        Gateway gatewayWithBlankTokenCert = getGateway("Old");
+        Secret blankTokenCert = mock(Secret.class);
+        lenient().when(blankTokenCert.getRaw()).thenReturn(null);
+        lenient().when(blankTokenCert.getSecret()).thenReturn("tokenCert");
+        when(gatewayWithBlankTokenCert.getTokenCertSecret()).thenReturn(blankTokenCert);
+
+        when(gatewayService.getByClusterId(any())).thenReturn(Optional.of(gatewayWithBlankTokenCert));
+        Gateway migratedGateway = getGateway("Migrated");
+        when(gatewayService.migrateWrongTokenCertCluster(any())).thenReturn(migratedGateway);
+
+        Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
+
+        assertEquals(4, contexts.size());
+        assertTrue(CloudbreakSecretType.GATEWAY_CERT.getSteps().stream().allMatch(contexts::containsKey));
+    }
+
     private Gateway getGateway(String suffix) {
         Gateway result = mock(Gateway.class);
         lenient().when(result.getKnoxMaster()).thenReturn(String.format("masterSecret%s", suffix));
