@@ -13,6 +13,8 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
+import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
+import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.domain.converter.DayOfWeekConverter;
 import com.sequenceiq.maintenance.domain.converter.MaintenanceRecurrenceKindConverter;
 import com.sequenceiq.maintenance.domain.converter.MaintenanceScopeTypeConverter;

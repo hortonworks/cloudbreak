@@ -3,6 +3,9 @@ package com.sequenceiq.maintenance.domain;
 import java.time.DayOfWeek;
 import java.util.Locale;
 
+import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
+import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
+
 /**
  * Converts API string values to maintenance enums after {@code @OneOfEnum} validation.
  */

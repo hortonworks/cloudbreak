@@ -1,6 +1,7 @@
 package com.sequenceiq.maintenance.api.v1.schedule.model.request;
 
 import static com.sequenceiq.maintenance.api.validation.ValidationTestUtil.validator;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,6 +35,8 @@ class MaintenanceWindowScheduleListParamsTest {
         params.setScopeId("acc-1");
         Set<ConstraintViolation<MaintenanceWindowScheduleListParams>> violations = validator.validate(params);
         assertFalse(violations.isEmpty());
+        assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("scopeType and scopeId must both be provided or both omitted");
     }
 
     @Test
@@ -42,5 +45,7 @@ class MaintenanceWindowScheduleListParamsTest {
         params.setScopeType("TENANT");
         Set<ConstraintViolation<MaintenanceWindowScheduleListParams>> violations = validator.validate(params);
         assertFalse(violations.isEmpty());
+        assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("scopeType and scopeId must both be provided or both omitted");
     }
 }

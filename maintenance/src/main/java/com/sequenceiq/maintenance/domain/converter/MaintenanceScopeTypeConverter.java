@@ -1,7 +1,7 @@
 package com.sequenceiq.maintenance.domain.converter;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
-import com.sequenceiq.maintenance.domain.MaintenanceScopeType;
+import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 
 public class MaintenanceScopeTypeConverter extends DefaultEnumConverter<MaintenanceScopeType> {
 

@@ -1,7 +1,7 @@
 package com.sequenceiq.maintenance.domain.converter;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
-import com.sequenceiq.maintenance.domain.MaintenanceRecurrenceKind;
+import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
 
 public class MaintenanceRecurrenceKindConverter extends DefaultEnumConverter<MaintenanceRecurrenceKind> {
 

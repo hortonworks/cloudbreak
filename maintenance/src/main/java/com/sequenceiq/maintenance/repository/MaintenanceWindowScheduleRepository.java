@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.sequenceiq.maintenance.domain.MaintenanceScopeType;
+import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 
 @Transactional(TxType.REQUIRED)
