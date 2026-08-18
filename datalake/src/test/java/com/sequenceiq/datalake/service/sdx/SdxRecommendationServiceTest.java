@@ -89,20 +89,20 @@ class SdxRecommendationServiceTest {
     private SdxRecommendationService underTest;
 
     @Test
-    public void testGetDefaultTemplateWhenMissingRequiredParameters() {
+    void testGetDefaultTemplateWhenMissingRequiredParameters() {
         assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(null, "7.2.14", "AWS", null));
         assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, null, "AWS", null));
         assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", null, null));
     }
 
     @Test
-    public void testGetDefaultTemplateWhenMissingTemplateForParameters() {
+    void testGetDefaultTemplateWhenMissingTemplateForParameters() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(null);
         assertThrows(NotFoundException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", "AWS", null));
     }
 
     @Test
-    public void testGetDefaultTemplate() {
+    void testGetDefaultTemplate() {
         StackV4Request defaultTemplate = createStackRequest();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
 
@@ -111,7 +111,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendation() {
+    void testGetRecommendation() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -136,7 +136,49 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendationFailedWithBadRequestException() {
+    void testGetRecommendationIncludesDeprecatedVmTypes() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponseWithDeprecated());
+
+        SdxRecommendationResponse recommendation = underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null, null);
+
+        Map<String, List<com.sequenceiq.sdx.api.model.VmTypeResponse>> deprecatedVmTypesByInstanceGroup =
+                recommendation.getDeprecatedVmTypesByInstanceGroup();
+        assertThat(deprecatedVmTypesByInstanceGroup).containsOnlyKeys("master", "idbroker");
+        assertThat(deprecatedVmTypesByInstanceGroup.get("master")).extracting(vmType -> vmType.getValue())
+                .containsExactly("deprecated-large");
+        assertThat(deprecatedVmTypesByInstanceGroup.get("idbroker")).extracting(vmType -> vmType.getValue())
+                .containsExactly("deprecated-large");
+    }
+
+    @Test
+    void testGetRecommendationUseSameAzForAvailableAndDeprecatedVmTypes() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        Map<String, VirtualMachinesResponse> vmTypes = new HashMap<>();
+        VirtualMachinesResponse az1Response = new VirtualMachinesResponse();
+        az1Response.setVirtualMachines(Set.of(
+                new VmTypeResponse("large", createVmTypeMetaJson(10, 1000.0F)),
+                new VmTypeResponse("medium", createVmTypeMetaJson(8, 800.0F))));
+        az1Response.setDeprecatedVirtualMachines(Set.of(new VmTypeResponse("deprecated-large", createVmTypeMetaJson(10, 1000.0F))));
+        VirtualMachinesResponse az2Response = new VirtualMachinesResponse();
+        az2Response.setVirtualMachines(Set.of(new VmTypeResponse("other-az-type", createVmTypeMetaJson(8, 800.0F))));
+        az2Response.setDeprecatedVirtualMachines(Set.of(new VmTypeResponse("deprecated-other-az", createVmTypeMetaJson(10, 1000.0F))));
+        vmTypes.put("eu-central-1a", az1Response);
+        vmTypes.put("eu-central-1b", az2Response);
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(new PlatformVmtypesResponse(vmTypes));
+
+        SdxRecommendationResponse recommendation = underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", "eu-central-1a", null);
+
+        assertThat(recommendation.getAvailableVmTypesByInstanceGroup().get("master")).extracting(vmType -> vmType.getValue())
+                .containsExactlyInAnyOrder("large");
+        assertThat(recommendation.getDeprecatedVmTypesByInstanceGroup().get("master")).extracting(vmType -> vmType.getValue())
+                .containsExactly("deprecated-large");
+    }
+
+    @Test
+    void testGetRecommendationFailedWithBadRequestException() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenThrow(new jakarta.ws.rs.BadRequestException("bad request"));
@@ -148,7 +190,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendationFailedWithProvidedClientSecretKeysError() {
+    void testGetRecommendationFailedWithProvidedClientSecretKeysError() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenThrow(new jakarta.ws.rs.BadRequestException("The provided client secret keys for app 1234."));
@@ -160,7 +202,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenInstanceGroupIsMissingFromDefaultTemplate() {
+    void validateVmTypeOverrideWhenInstanceGroupIsMissingFromDefaultTemplate() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -174,7 +216,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenArchitectureIsSpecified() {
+    void validateVmTypeOverrideWhenArchitectureIsSpecified() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -188,7 +230,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenArchitectureIsNotSpecifiedAndArmInstancesAreSelected() {
+    void validateVmTypeOverrideWhenArchitectureIsNotSpecifiedAndArmInstancesAreSelected() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse(Architecture.ARM64));
@@ -202,7 +244,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenDefaultVmTypeIsMissingFromAvailableVmTypes() {
+    void validateVmTypeOverrideWhenDefaultVmTypeIsMissingFromAvailableVmTypes() {
         StackV4Request defaultTemplate = createStackRequest();
         defaultTemplate.getInstanceGroups().get(0).getTemplate().setInstanceType("unknown");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
@@ -215,7 +257,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideSkippedForYCoud() {
+    void validateVmTypeOverrideSkippedForYCoud() {
         assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("YARN"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
 
         verify(cdpConfigService, never()).getConfigForKey(any());
@@ -223,7 +265,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenNewVmTypeIsSmaller() {
+    void validateVmTypeOverrideWhenNewVmTypeIsSmaller() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -238,7 +280,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndFallbackTypeIsAvailable() {
+    void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndFallbackTypeIsAvailable() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -257,7 +299,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenFallbackEntitlementDisabledAndFallbackTypeIsAvailable() {
+    void validateVmTypeOverrideWhenFallbackEntitlementDisabledAndFallbackTypeIsAvailable() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -279,7 +321,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledButFallbackTypesAreNull() {
+    void validateVmTypeOverrideWhenFallbackEntitlementEnabledButFallbackTypesAreNull() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -301,7 +343,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledButNoFallbackTypeIsAvailable() {
+    void validateVmTypeOverrideWhenFallbackEntitlementEnabledButNoFallbackTypeIsAvailable() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -323,7 +365,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndSecondFallbackTypeIsAvailable() {
+    void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndSecondFallbackTypeIsAvailable() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -342,7 +384,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndFallbackTypeIsEmptyList() {
+    void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndFallbackTypeIsEmptyList() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -364,7 +406,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenOverrideIsValid() {
+    void validateVmTypeOverrideWhenOverrideIsValid() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
@@ -372,7 +414,7 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void validateVmTypeOverrideWhenSdxClusterShapeIsCustom() {
+    void validateVmTypeOverrideWhenSdxClusterShapeIsCustom() {
         assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), CUSTOM)));
         verify(cdpConfigService, never()).getConfigForKey(any());
         verify(environmentClientService, never()).getVmTypesByCredential(anyString(), anyString(), anyString(), any(), anyString(), any());
@@ -412,6 +454,21 @@ class SdxRecommendationServiceTest {
         virtualMachines.add(new VmTypeResponse("mediumv2", createVmTypeMetaJson(8, 1000.0F, architecture)));
         virtualMachines.add(new VmTypeResponse("small", createVmTypeMetaJson(2, 200.0F, Architecture.ARM64)));
         virtualMachinesResponse.setVirtualMachines(virtualMachines);
+        vmTypes.put("eu-central-1", virtualMachinesResponse);
+        return new PlatformVmtypesResponse(vmTypes);
+    }
+
+    private PlatformVmtypesResponse createPlatformVmtypesResponseWithDeprecated() {
+        Map<String, VirtualMachinesResponse> vmTypes = new HashMap<>();
+        VirtualMachinesResponse virtualMachinesResponse = new VirtualMachinesResponse();
+        Set<VmTypeResponse> virtualMachines = new HashSet<>();
+        virtualMachines.add(new VmTypeResponse("large", createVmTypeMetaJson(10, 1000.0F)));
+        virtualMachines.add(new VmTypeResponse("medium", createVmTypeMetaJson(8, 800.0F)));
+        virtualMachines.add(new VmTypeResponse("mediumv2", createVmTypeMetaJson(8, 1000.0F)));
+        Set<VmTypeResponse> deprecatedVirtualMachines = new HashSet<>();
+        deprecatedVirtualMachines.add(new VmTypeResponse("deprecated-large", createVmTypeMetaJson(10, 1000.0F)));
+        virtualMachinesResponse.setVirtualMachines(virtualMachines);
+        virtualMachinesResponse.setDeprecatedVirtualMachines(deprecatedVirtualMachines);
         vmTypes.put("eu-central-1", virtualMachinesResponse);
         return new PlatformVmtypesResponse(vmTypes);
     }

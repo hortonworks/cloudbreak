@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
@@ -122,7 +121,7 @@ public class AzurePlatformResources implements PlatformResources {
             Pattern.compile("Standard_L\\d+s_v2", Pattern.CASE_INSENSITIVE)
     );
 
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AZURE_ENABLED_TYPES_LIST.stream()
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST.stream()
             .filter(it -> !it.isEmpty())
             .anyMatch(di -> vmt.value().equals(di));
 
@@ -390,25 +389,18 @@ public class AzurePlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
-        Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
-        Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
+        Predicate<VmType> filter = vm -> minimalHardwareFilter.suitableAsMinimumHardware(vm.getMetaData().getCPU(), vm.getMetaData().getMemoryInGb());
         if (restrictInstanceTypes) {
-            for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
-                returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
-                        .filter(e -> minimalHardwareFilter
-                                .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
-                        .filter(enabledDistroxInstanceTypeFilter)
-                        .collect(Collectors.toSet()));
-            }
-        } else {
-            for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
-                returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
-                        .filter(e -> minimalHardwareFilter
-                                .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
-                        .collect(Collectors.toSet()));
-            }
+            filter = filter.and(enabledDistroxInstanceTypeFilter);
         }
-        return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
+        Map<String, Set<VmType>> filteredVmTypes = filterVmTypes(cloudVmTypes.getCloudVmResponses(), filter);
+        Map<String, Set<VmType>> filteredDeprecatedVmTypes = filterVmTypes(cloudVmTypes.getDeprecatedCloudVmResponses(), filter);
+        return new CloudVmTypes(filteredVmTypes, filteredDeprecatedVmTypes, cloudVmTypes.getDefaultCloudVmResponses());
+    }
+
+    private Map<String, Set<VmType>> filterVmTypes(Map<String, Set<VmType>> vmsByRegion, Predicate<VmType> filter) {
+        return vmsByRegion.entrySet().stream()
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().stream().filter(filter).collect(Collectors.toSet())));
     }
 
     @Override

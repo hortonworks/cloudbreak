@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,6 +8,8 @@ public class PlatformRecommendation {
     private Map<String, VmType> recommendations;
 
     private Set<VmType> virtualMachines;
+
+    private Set<VmType> deprecatedVirtualMachines;
 
     private DiskTypes diskTypes;
 
@@ -23,6 +24,7 @@ public class PlatformRecommendation {
     public PlatformRecommendation(
             Map<String, VmType> recommendations,
             Set<VmType> virtualMachines,
+            Set<VmType> deprecatedVirtualMachines,
             DiskTypes diskTypes,
             Map<String, InstanceCount> instanceCounts,
             GatewayRecommendation gatewayRecommendation,
@@ -31,6 +33,7 @@ public class PlatformRecommendation {
     ) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
+        this.deprecatedVirtualMachines = deprecatedVirtualMachines;
         this.diskTypes = diskTypes;
         this.instanceCounts = instanceCounts;
         this.gatewayRecommendation = gatewayRecommendation;
@@ -46,12 +49,20 @@ public class PlatformRecommendation {
         this.recommendations = recommendations;
     }
 
-    public Collection<VmType> getVirtualMachines() {
+    public Set<VmType> getVirtualMachines() {
         return virtualMachines;
     }
 
     public void setVirtualMachines(Set<VmType> virtualMachines) {
         this.virtualMachines = virtualMachines;
+    }
+
+    public Set<VmType> getDeprecatedVirtualMachines() {
+        return deprecatedVirtualMachines;
+    }
+
+    public void setDeprecatedVirtualMachines(Set<VmType> deprecatedVirtualMachines) {
+        this.deprecatedVirtualMachines = deprecatedVirtualMachines;
     }
 
     public DiskTypes getDiskTypes() {
@@ -66,15 +77,45 @@ public class PlatformRecommendation {
         return instanceCounts;
     }
 
+    public void setInstanceCounts(Map<String, InstanceCount> instanceCounts) {
+        this.instanceCounts = instanceCounts;
+    }
+
     public GatewayRecommendation getGatewayRecommendation() {
         return gatewayRecommendation;
+    }
+
+    public void setGatewayRecommendation(GatewayRecommendation gatewayRecommendation) {
+        this.gatewayRecommendation = gatewayRecommendation;
     }
 
     public AutoscaleRecommendation getAutoscaleRecommendation() {
         return autoscaleRecommendation;
     }
 
+    public void setAutoscaleRecommendation(AutoscaleRecommendation autoscaleRecommendation) {
+        this.autoscaleRecommendation = autoscaleRecommendation;
+    }
+
     public ResizeRecommendation getResizeRecommendation() {
         return resizeRecommendation;
+    }
+
+    public void setResizeRecommendation(ResizeRecommendation resizeRecommendation) {
+        this.resizeRecommendation = resizeRecommendation;
+    }
+
+    @Override
+    public String toString() {
+        return "PlatformRecommendation{" +
+                "recommendations=" + recommendations +
+                ", virtualMachines=" + virtualMachines +
+                ", deprecatedVirtualMachines=" + deprecatedVirtualMachines +
+                ", diskTypes=" + diskTypes +
+                ", instanceCounts=" + instanceCounts +
+                ", gatewayRecommendation=" + gatewayRecommendation +
+                ", autoscaleRecommendation=" + autoscaleRecommendation +
+                ", resizeRecommendation=" + resizeRecommendation +
+                '}';
     }
 }

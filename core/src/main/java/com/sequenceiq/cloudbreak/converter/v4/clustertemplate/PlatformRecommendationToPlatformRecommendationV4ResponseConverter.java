@@ -37,8 +37,10 @@ public class PlatformRecommendationToPlatformRecommendationV4ResponseConverter {
                 hostGroupName,
                 vmTypeToVmTypeV4ResponseConverter.convert(vm)));
 
-        Set<VmTypeV4Response> vmTypes = source.getVirtualMachines()
-                .stream().map(vmType -> vmTypeToVmTypeV4ResponseConverter.convert(vmType)).collect(Collectors.toSet());
+        Set<VmTypeV4Response> vmTypes = source.getVirtualMachines().stream()
+                .map(vmTypeToVmTypeV4ResponseConverter::convert).collect(Collectors.toSet());
+        Set<VmTypeV4Response> deprecatedVmTypes = source.getDeprecatedVirtualMachines().stream()
+                .map(vmTypeToVmTypeV4ResponseConverter::convert).collect(Collectors.toSet());
 
         Set<DiskV4Response> diskResponses = new HashSet<>();
         for (Entry<DiskType, DisplayName> diskTypeDisplayName : source.getDiskTypes().displayNames().entrySet()) {
@@ -69,6 +71,15 @@ public class PlatformRecommendationToPlatformRecommendationV4ResponseConverter {
         ResizeRecommendationV4Response resizeRecommendation = new ResizeRecommendationV4Response(source.getResizeRecommendation().getScaleUpHostGroups(),
                 source.getResizeRecommendation().getScaleDownHostGroups());
 
-        return new RecommendationV4Response(result, vmTypes, diskResponses, instanceCounts, gateway, autoscaleRecommendation, resizeRecommendation);
+        return new RecommendationV4Response(
+                result,
+                vmTypes,
+                deprecatedVmTypes,
+                diskResponses,
+                instanceCounts,
+                gateway,
+                autoscaleRecommendation,
+                resizeRecommendation
+        );
     }
 }

@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.constant.AzureConstants;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,6 +104,9 @@ class AzurePlatformResourcesTest {
 
     @Mock
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
+
+    @Mock
+    private MinimalHardwareFilter minimalHardwareFilter;
 
     @InjectMocks
     private AzurePlatformResources underTest;
@@ -623,6 +627,61 @@ class AzurePlatformResourcesTest {
         Predicate<VirtualMachineSize> filter = ReflectionTestUtils.invokeMethod(underTest, "filterOutGen1UnsupportedVms", Map.of());
 
         assertThat(filter.test(mockVmSize("Standard_D4s_v5"))).isTrue();
+    }
+
+    @Test
+    void testVirtualMachinesForDistroXWithRestrictedInstanceTypesFiltersToAllowList() {
+        ReflectionTestUtils.setField(underTest, "restrictInstanceTypes", true);
+        // Standard_D8s_v5 is in the DistrоX allow-list; Standard_A2_v2 is not
+        setupVirtualMachinesForDistroX("Standard_D8s_v5", "Standard_A2_v2");
+
+        CloudVmTypes result = underTest.virtualMachinesForDistroX(cloudCredential, region(REGION), Map.of());
+
+        assertThat(result.getCloudVmResponses().get(REGION))
+                .extracting(VmType::value)
+                .containsExactly("Standard_D8s_v5");
+    }
+
+    @Test
+    void testVirtualMachinesForDistroXWithoutRestrictedInstanceTypesSkipsAllowListFilter() {
+        ReflectionTestUtils.setField(underTest, "restrictInstanceTypes", false);
+        setupVirtualMachinesForDistroX("Standard_D8s_v5", "Standard_A2_v2");
+
+        CloudVmTypes result = underTest.virtualMachinesForDistroX(cloudCredential, region(REGION), Map.of());
+
+        assertThat(result.getCloudVmResponses().get(REGION))
+                .extracting(VmType::value)
+                .containsExactlyInAnyOrder("Standard_D8s_v5", "Standard_A2_v2");
+    }
+
+    @Test
+    void testVirtualMachinesForDistroXAlsoFiltersDeprecatedMap() {
+        ReflectionTestUtils.setField(underTest, "restrictInstanceTypes", true);
+        ReflectionTestUtils.setField(underTest, "armVmDefault", ARM_VM_DEFAULT);
+        VirtualMachineSize d8sv5 = mockVmSize("Standard_D8s_v5");
+        VirtualMachineSize d2v2 = mockVmSize("Standard_D2_v2");
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(Set.of(d8sv5, d2v2)));
+        when(azureClient.getAvailabilityZones(REGION)).thenReturn(Map.of());
+        when(azureClient.getHostCapabilities(REGION)).thenReturn(Map.of());
+        when(minimalHardwareFilter.suitableAsMinimumHardware(any(), any())).thenReturn(true);
+
+        CloudVmTypes result = underTest.virtualMachinesForDistroX(cloudCredential, region(REGION), Map.of());
+
+        assertThat(result.getDeprecatedCloudVmResponses().get(REGION)).isEmpty();
+        assertThat(result.getCloudVmResponses().get(REGION))
+                .extracting(VmType::value)
+                .containsExactly("Standard_D8s_v5");
+    }
+
+    private void setupVirtualMachinesForDistroX(String... vmNames) {
+        ReflectionTestUtils.setField(underTest, "armVmDefault", ARM_VM_DEFAULT);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        Set<VirtualMachineSize> sizes = Arrays.stream(vmNames).map(this::mockVmSize).collect(Collectors.toSet());
+        when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(sizes));
+        when(azureClient.getAvailabilityZones(REGION)).thenReturn(Map.of());
+        when(azureClient.getHostCapabilities(REGION)).thenReturn(Map.of());
+        when(minimalHardwareFilter.suitableAsMinimumHardware(any(), any())).thenReturn(true);
     }
 
     private AzureVmCapabilities gen1SupportedCapabilities() {

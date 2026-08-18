@@ -21,12 +21,18 @@ public class SdxRecommendationResponse {
     @Schema(description = ModelDescriptions.AVAILABLE_VM_TYPES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, List<VmTypeResponse>> availableVmTypesByInstanceGroup = new HashMap<>();
 
+    @Schema(description = ModelDescriptions.DEPRECATED_VM_TYPES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, List<VmTypeResponse>> deprecatedVmTypesByInstanceGroup = new HashMap<>();
+
     public SdxRecommendationResponse() {
     }
 
-    public SdxRecommendationResponse(StackV4Request template, Map<String, List<VmTypeResponse>> availableVmTypesByInstanceGroup) {
+    public SdxRecommendationResponse(StackV4Request template,
+            Map<String, List<VmTypeResponse>> availableVmTypesByInstanceGroup,
+            Map<String, List<VmTypeResponse>> deprecatedVmTypesByInstanceGroup) {
         this.template = template;
         this.availableVmTypesByInstanceGroup = availableVmTypesByInstanceGroup;
+        this.deprecatedVmTypesByInstanceGroup = deprecatedVmTypesByInstanceGroup;
     }
 
     public StackV4Request getTemplate() {
@@ -45,8 +51,20 @@ public class SdxRecommendationResponse {
         this.availableVmTypesByInstanceGroup = availableVmTypesByInstanceGroup;
     }
 
+    public Map<String, List<VmTypeResponse>> getDeprecatedVmTypesByInstanceGroup() {
+        return deprecatedVmTypesByInstanceGroup;
+    }
+
+    public void setDeprecatedVmTypesByInstanceGroup(Map<String, List<VmTypeResponse>> deprecatedVmTypesByInstanceGroup) {
+        this.deprecatedVmTypesByInstanceGroup = deprecatedVmTypesByInstanceGroup;
+    }
+
     @Override
     public String toString() {
-        return "SdxRecommendationResponse{" + "template=" + template + ", availableVmTypesByInstanceGroup=" + availableVmTypesByInstanceGroup + '}';
+        return "SdxRecommendationResponse{" +
+                "template=" + template +
+                ", availableVmTypesByInstanceGroup=" + availableVmTypesByInstanceGroup +
+                ", deprecatedVmTypesByInstanceGroup=" + deprecatedVmTypesByInstanceGroup +
+                '}';
     }
 }

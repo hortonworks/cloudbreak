@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -28,8 +29,10 @@ import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -46,7 +49,7 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
-public class CloudResourceAdvisorTest {
+class CloudResourceAdvisorTest {
 
     private static final String VERSION_7_2_1 = "7.2.1";
 
@@ -102,7 +105,7 @@ public class CloudResourceAdvisorTest {
     private ExtendedCloudCredential extendedCloudCredential;
 
     @Test
-    public void testRecommendAutoscaleWhenCloudManagerVersionLessThanEqualTo720() {
+    void testRecommendAutoscaleWhenCloudManagerVersionLessThanEqualTo720() {
         when(blueprintTextProcessor.getVersion()).thenReturn(java.util.Optional.of(VERSION_7_2_0));
         Blueprint blueprint = createBlueprint();
         when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
@@ -113,7 +116,7 @@ public class CloudResourceAdvisorTest {
     }
 
     @Test
-    public void testRecommendAutoscaleWhenCloudManagerVersionGreaterThanEqualTo721() {
+    void testRecommendAutoscaleWhenCloudManagerVersionGreaterThanEqualTo721() {
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(VERSION_7_2_1));
         when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
         Blueprint blueprint = createBlueprint();
@@ -125,7 +128,7 @@ public class CloudResourceAdvisorTest {
     }
 
     @Test
-    public void testRecommendAutoscaleWhenComputeHasBlackListedRole() {
+    void testRecommendAutoscaleWhenComputeHasBlackListedRole() {
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(VERSION_7_2_1));
         when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
         Blueprint blueprint = createBlueprint();
@@ -137,7 +140,7 @@ public class CloudResourceAdvisorTest {
     }
 
     @Test
-    public void testReturnEmptyScaleRecommendationForBlueprintWhenCloudManagerVersionLessThanEqualTo720() {
+    void testReturnEmptyScaleRecommendationForBlueprintWhenCloudManagerVersionLessThanEqualTo720() {
         when(blueprintTextProcessor.getVersion()).thenReturn(java.util.Optional.of(VERSION_7_2_0));
         when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
         Blueprint blueprint = createBlueprint();
@@ -150,7 +153,7 @@ public class CloudResourceAdvisorTest {
     }
 
     @Test
-    public void testReturnScaleRecommendationForBlueprintWhenCloudManagerVersionGreaterThanEqualTo721() {
+    void testReturnScaleRecommendationForBlueprintWhenCloudManagerVersionGreaterThanEqualTo721() {
         when(blueprintTextProcessor.getVersion()).thenReturn(java.util.Optional.of(VERSION_7_2_1));
         when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
         Blueprint blueprint = createBlueprint();
@@ -164,7 +167,7 @@ public class CloudResourceAdvisorTest {
     }
 
     @Test
-    public void testGetPlatformRecommendationForBluePrint() throws TransactionService.TransactionExecutionException {
+    void testGetPlatformRecommendationForBluePrint() throws TransactionService.TransactionExecutionException {
         when(credentialClientService.getByName(anyString())).thenReturn(credential);
         Blueprint blueprint = createBlueprint();
         when(blueprintService.getByNameForWorkspaceId(any(), any())).thenReturn(blueprint);
@@ -178,6 +181,109 @@ public class CloudResourceAdvisorTest {
                 "region", "platformVariant", "az1", CdpResourceType.DATAHUB);
 
         verify(vmAdvisor).recommendVmTypes(any(), any(), any(), any(), any(), eq(Architecture.ARM64));
+    }
+
+    @Test
+    void testGetPlatformRecommendationForBluePrintUsesDeprecatedVmTypesForAvailabilityZone() throws TransactionService.TransactionExecutionException {
+        when(credentialClientService.getByName(anyString())).thenReturn(credential);
+        when(credential.cloudPlatform()).thenReturn("AWS");
+        when(credential.getAccount()).thenReturn("acc");
+        when(entitlementService.getEntitlements("acc")).thenReturn(Collections.emptyList());
+        Blueprint blueprint = createBlueprint();
+        when(blueprintService.getByNameForWorkspaceId(any(), any())).thenReturn(blueprint);
+        when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(Map.of("master", Set.of("CM_SERVER")));
+        when(blueprintTextProcessor.getCardinalityByHostGroup()).thenReturn(Map.of("master", com.sequenceiq.cloudbreak.cloud.model.InstanceCount.EXACTLY_ONE));
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(VERSION_7_2_0));
+        when(blueprintTextProcessor.recommendResize(anyList(), any())).thenReturn(new ResizeRecommendation(Set.of(), Set.of()));
+        when(cloudParameterService.getDiskTypes()).thenReturn(new PlatformDisks(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>()));
+        when(transactionService.required(any(Supplier.class))).thenReturn(Map.of("gatewayGroup", "master", "architecture", "arm64"));
+
+        Set<VmType> availableVmTypes = Set.of(VmType.vmType("m5.xlarge"));
+        Set<VmType> deprecatedVmTypes = Set.of(VmType.vmType("m4.xlarge"));
+        CloudVmTypes cloudVmTypes = new CloudVmTypes(
+                Map.of("az1", availableVmTypes),
+                Map.of("az1", deprecatedVmTypes),
+                new HashMap<>());
+        when(vmAdvisor.recommendVmTypes(any(), any(), any(), any(), any(), any())).thenReturn(cloudVmTypes);
+
+        PlatformRecommendation recommendation = underTest.createForBlueprint(workspace.getId(), "definitionName", TEST_BLUEPRINT_NAME, "credName",
+                "region", "platformVariant", "az1", CdpResourceType.DATAHUB);
+
+        assertEquals(availableVmTypes, recommendation.getVirtualMachines());
+        assertEquals(deprecatedVmTypes, recommendation.getDeprecatedVirtualMachines());
+    }
+
+    @Test
+    void testGetPlatformRecommendationForBluePrintReturnsEmptyDeprecatedWhenDeprecatedCloudVmResponsesIsNull()
+            throws TransactionService.TransactionExecutionException {
+        when(credentialClientService.getByName(anyString())).thenReturn(credential);
+        when(credential.cloudPlatform()).thenReturn("AWS");
+        when(credential.getAccount()).thenReturn("acc");
+        when(entitlementService.getEntitlements("acc")).thenReturn(Collections.emptyList());
+        Blueprint blueprint = createBlueprint();
+        when(blueprintService.getByNameForWorkspaceId(any(), any())).thenReturn(blueprint);
+        when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(Map.of("master", Set.of("CM_SERVER")));
+        when(blueprintTextProcessor.getCardinalityByHostGroup()).thenReturn(Map.of("master", com.sequenceiq.cloudbreak.cloud.model.InstanceCount.EXACTLY_ONE));
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(VERSION_7_2_0));
+        when(blueprintTextProcessor.recommendResize(anyList(), any())).thenReturn(new ResizeRecommendation(Set.of(), Set.of()));
+        when(cloudParameterService.getDiskTypes()).thenReturn(new PlatformDisks(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>()));
+        when(transactionService.required(any(Supplier.class))).thenReturn(Map.of("gatewayGroup", "master", "architecture", "arm64"));
+
+        Set<VmType> expectedAvailableVmTypes = Set.of(VmType.vmType("m5.2xlarge"));
+        Map<String, Set<VmType>> cloudVmResponses = new LinkedHashMap<>();
+        cloudVmResponses.put("az2", expectedAvailableVmTypes);
+        cloudVmResponses.put("az1", Set.of(VmType.vmType("m5.xlarge")));
+        CloudVmTypes cloudVmTypes = new CloudVmTypes(cloudVmResponses, new HashMap<>());
+        cloudVmTypes.setDeprecatedCloudVmResponses(null);
+        when(vmAdvisor.recommendVmTypes(any(), any(), any(), any(), any(), any())).thenReturn(cloudVmTypes);
+
+        PlatformRecommendation recommendation = underTest.createForBlueprint(workspace.getId(), "definitionName", TEST_BLUEPRINT_NAME, "credName",
+                "region", "platformVariant", null, CdpResourceType.DATAHUB);
+
+        assertEquals(expectedAvailableVmTypes, recommendation.getVirtualMachines());
+        assertEquals(Collections.emptySet(), recommendation.getDeprecatedVirtualMachines());
+    }
+
+    @Test
+    void testGetPlatformRecommendationForBluePrintUsesSameFallbackAzForVirtualAndDeprecatedVmTypes()
+            throws TransactionService.TransactionExecutionException {
+        when(credentialClientService.getByName(anyString())).thenReturn(credential);
+        when(credential.cloudPlatform()).thenReturn("AWS");
+        when(credential.getAccount()).thenReturn("acc");
+        when(entitlementService.getEntitlements("acc")).thenReturn(Collections.emptyList());
+        Blueprint blueprint = createBlueprint();
+        when(blueprintService.getByNameForWorkspaceId(any(), any())).thenReturn(blueprint);
+        when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(Map.of("master", Set.of("CM_SERVER")));
+        when(blueprintTextProcessor.getCardinalityByHostGroup())
+                .thenReturn(Map.of("master", com.sequenceiq.cloudbreak.cloud.model.InstanceCount.EXACTLY_ONE));
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(VERSION_7_2_0));
+        when(blueprintTextProcessor.recommendResize(anyList(), any())).thenReturn(new ResizeRecommendation(Set.of(), Set.of()));
+        when(cloudParameterService.getDiskTypes()).thenReturn(new PlatformDisks(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>()));
+        when(transactionService.required(any(Supplier.class))).thenReturn(Map.of("gatewayGroup", "master", "architecture", "arm64"));
+
+        Set<VmType> az2Available = Set.of(VmType.vmType("m5.2xlarge"));
+        Set<VmType> az1Available = Set.of(VmType.vmType("m5.xlarge"));
+        Map<String, Set<VmType>> cloudVmResponses = new LinkedHashMap<>();
+        cloudVmResponses.put("az2", az2Available);
+        cloudVmResponses.put("az1", az1Available);
+
+        Set<VmType> az2Deprecated = Set.of(VmType.vmType("m4.2xlarge"));
+        Set<VmType> az1Deprecated = Set.of(VmType.vmType("m4.xlarge"));
+        Map<String, Set<VmType>> deprecatedCloudVmResponses = new LinkedHashMap<>();
+        deprecatedCloudVmResponses.put("az1", az1Deprecated);
+        deprecatedCloudVmResponses.put("az2", az2Deprecated);
+
+        CloudVmTypes cloudVmTypes = new CloudVmTypes(cloudVmResponses, deprecatedCloudVmResponses, new HashMap<>());
+        when(vmAdvisor.recommendVmTypes(any(), any(), any(), any(), any(), any())).thenReturn(cloudVmTypes);
+
+        PlatformRecommendation recommendation = underTest.createForBlueprint(workspace.getId(), "definitionName", TEST_BLUEPRINT_NAME, "credName",
+                "region", "platformVariant", null, CdpResourceType.DATAHUB);
+
+        assertEquals(az2Available, recommendation.getVirtualMachines());
+        assertEquals(az2Deprecated, recommendation.getDeprecatedVirtualMachines());
     }
 
     private Blueprint createBlueprint() {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static java.util.function.Predicate.not;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -160,17 +161,14 @@ public class CloudResourceAdvisor {
         if (defaultVmType != null) {
             componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));
         }
-        VmRecommendations recommendations = cloudParameterService.getRecommendation(cloudPlatform);
 
-        Set<VmType> availableVmTypes = null;
-        if (StringUtils.isNotBlank(availabilityZone)) {
-            availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
-        } else if (vmTypes.getCloudVmResponses() != null && !vmTypes.getCloudVmResponses().isEmpty()) {
-            availableVmTypes = vmTypes.getCloudVmResponses().values().iterator().next();
-        }
-        if (availableVmTypes == null) {
-            availableVmTypes = Collections.emptySet();
-        }
+        Map<String, Set<VmType>> cloudVmResponses = vmTypes.getCloudVmResponses();
+        Map<String, Set<VmType>> deprecatedCloudVmResponses = vmTypes.getDeprecatedCloudVmResponses();
+        Optional<String> selectedAvailabilityZone = resolveAvailabilityZone(availabilityZone, cloudVmResponses, deprecatedCloudVmResponses);
+        Set<VmType> availableVmTypes = selectVmTypes(cloudVmResponses, selectedAvailabilityZone);
+        Set<VmType> deprecatedVmTypes = selectVmTypes(deprecatedCloudVmResponses, selectedAvailabilityZone);
+
+        VmRecommendations recommendations = cloudParameterService.getRecommendation(cloudPlatform);
         if (recommendations != null) {
             Map<String, VmType> masterVmTypes = getVmTypesForComponentType(
                     true,
@@ -201,7 +199,7 @@ public class CloudResourceAdvisor {
 
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
 
-        return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes, instanceCounts, gateway, autoscale, resize);
+        return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, deprecatedVmTypes, diskTypes, instanceCounts, gateway, autoscale, resize);
     }
 
     public ScaleRecommendation createForBlueprint(Long workspaceId, String blueprintName) {
@@ -445,6 +443,27 @@ public class CloudResourceAdvisor {
 
     private Optional<VmType> getVmTypeByFlavor(String flavor, Collection<VmType> availableVmTypes) {
         return availableVmTypes.stream().filter(vm -> vm.value().equals(flavor)).findFirst();
+    }
+
+    private Optional<String> resolveAvailabilityZone(String availabilityZone, Map<String, Set<VmType>> cloudVmResponses,
+            Map<String, Set<VmType>> deprecatedCloudVmResponses) {
+        return Optional.ofNullable(availabilityZone)
+                .filter(StringUtils::isNotBlank)
+                .or(() -> firstKeyOf(cloudVmResponses))
+                .or(() -> firstKeyOf(deprecatedCloudVmResponses));
+    }
+
+    private Optional<String> firstKeyOf(Map<String, Set<VmType>> map) {
+        return Optional.ofNullable(map)
+                .filter(not(Map::isEmpty))
+                .map(m -> m.keySet().iterator().next());
+    }
+
+    private Set<VmType> selectVmTypes(Map<String, Set<VmType>> vmTypesByZone, Optional<String> availabilityZone) {
+        if (vmTypesByZone == null || availabilityZone.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return vmTypesByZone.getOrDefault(availabilityZone.get(), Collections.emptySet());
     }
 
     private void decorateWithRecommendation(VmType vmType, VmRecommendation recommendation, String cloudPlatform, DiskTypes diskTypes,

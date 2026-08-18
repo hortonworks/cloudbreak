@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,6 +50,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.VirtualMachinesResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
@@ -111,14 +111,22 @@ public class SdxRecommendationService {
             availabilityZone = getAvailabilityZoneBasedOnProvider(cloudPlatform, availabilityZone);
             StackV4Request defaultTemplate = getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform,
                     Optional.ofNullable(architecture).map(Architecture::fromStringWithValidation).orElse(Architecture.X86_64));
-            List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(credentialCrn, cloudPlatform, region, availabilityZone, architecture);
+            PlatformVmtypesResponse platformVmtypesResponse = environmentClientService.getVmTypesByCredential(
+                    credentialCrn, region, cloudPlatform, CdpResourceType.DATALAKE, availabilityZone, architecture);
+            Optional<VirtualMachinesResponse> zoneResponse = resolveZoneResponse(platformVmtypesResponse, availabilityZone);
+            List<VmTypeResponse> availableVmTypes = zoneResponse.map(r -> vmTypeConverter.convert(r.getVirtualMachines()))
+                    .orElse(Collections.emptyList());
+            List<VmTypeResponse> deprecatedVmTypes = zoneResponse.map(r -> vmTypeConverter.convert(r.getDeprecatedVirtualMachines()))
+                    .orElse(Collections.emptyList());
             Map<String, VmTypeResponse> defaultVmTypesByInstanceGroup = getDefaultVmTypesByInstanceGroup(availableVmTypes, defaultTemplate);
             Map<String, List<VmTypeResponse>> availableVmTypesByInstanceGroup = filterAvailableVmTypesBasedOnDefault(
                     availableVmTypes, defaultVmTypesByInstanceGroup);
+            Map<String, List<VmTypeResponse>> deprecatedVmTypesByInstanceGroup = filterAvailableVmTypesBasedOnDefault(
+                    deprecatedVmTypes, defaultVmTypesByInstanceGroup);
             LOGGER.debug("Return default template and available vm types for clusterShape: {}, " +
                             "runtimeVersion: {}, cloudPlatform: {}, region: {}, availabilityZone: {}",
                     clusterShape, runtimeVersion, cloudPlatform, region, availabilityZone);
-            return new SdxRecommendationResponse(defaultTemplate, availableVmTypesByInstanceGroup);
+            return new SdxRecommendationResponse(defaultTemplate, availableVmTypesByInstanceGroup, deprecatedVmTypesByInstanceGroup);
         } catch (NotFoundException | BadRequestException | jakarta.ws.rs.BadRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -184,14 +192,18 @@ public class SdxRecommendationService {
     public List<VmTypeResponse> getAvailableVmTypes(String credentialCrn, String cloudPlatform, String region, String availabilityZone, String architecture) {
         PlatformVmtypesResponse platformVmtypesResponse = environmentClientService.getVmTypesByCredential(credentialCrn, region, cloudPlatform,
                 CdpResourceType.DATALAKE, availabilityZone, architecture);
+        return resolveZoneResponse(platformVmtypesResponse, availabilityZone)
+                .map(r -> vmTypeConverter.convert(r.getVirtualMachines()))
+                .orElse(Collections.emptyList());
+    }
 
-        Set<com.sequenceiq.environment.api.v1.platformresource.model.VmTypeResponse> vmTypes = Collections.emptySet();
-        if (platformVmtypesResponse.getVmTypes() != null && StringUtils.isNotBlank(availabilityZone)) {
-            vmTypes = platformVmtypesResponse.getVmTypes().get(availabilityZone).getVirtualMachines();
-        } else if (platformVmtypesResponse.getVmTypes() != null && !platformVmtypesResponse.getVmTypes().isEmpty()) {
-            vmTypes = platformVmtypesResponse.getVmTypes().values().iterator().next().getVirtualMachines();
+    private Optional<VirtualMachinesResponse> resolveZoneResponse(PlatformVmtypesResponse platformVmtypesResponse, String availabilityZone) {
+        Map<String, VirtualMachinesResponse> vmTypes = platformVmtypesResponse.getVmTypes();
+        if (vmTypes == null || vmTypes.isEmpty()) {
+            return Optional.empty();
         }
-        return vmTypeConverter.convert(vmTypes);
+        String selectedAz = StringUtils.isNotBlank(availabilityZone) ? availabilityZone : vmTypes.keySet().iterator().next();
+        return Optional.ofNullable(vmTypes.get(selectedAz));
     }
 
     private void validateInstanceTypeArchitecture(SdxCluster sdxCluster, InstanceGroupV4Request instanceGroup, List<VmTypeResponse> availableVmTypes) {
@@ -221,7 +233,7 @@ public class SdxRecommendationService {
     }
 
     private boolean isProvidedInstanceTypeIsAvailable(String accountId, Map<String, List<String>> availableVmTypesByInstanceGroup,
-        InstanceGroupV4Request instanceGroup) {
+            InstanceGroupV4Request instanceGroup) {
         List<String> instanceTypes = availableVmTypesByInstanceGroup.get(instanceGroup.getName());
         return availableVmTypesByInstanceGroup.containsKey(instanceGroup.getName())
                 && (hasInstanceType(instanceGroup, instanceTypes) || hasInstanceTypeForFallback(accountId, instanceGroup, instanceTypes));
@@ -269,7 +281,7 @@ public class SdxRecommendationService {
         Map<String, List<String>> defaultInstanceTypesByInstanceGroup = defaultTemplate.getInstanceGroups().stream()
                 .filter(instanceGroup ->
                         ObjectUtils.allNotNull(instanceGroup.getName(), instanceGroup.getTemplate(), instanceGroup.getTemplate().getInstanceType()))
-                .collect(Collectors.toMap(InstanceGroupV4Request::getName, instanceGroup ->  {
+                .collect(Collectors.toMap(InstanceGroupV4Request::getName, instanceGroup -> {
                     List<String> result = new ArrayList<>();
                     String instanceType = instanceGroup.getTemplate().getInstanceType();
                     List<String> fallbackInstanceTypes = instanceGroup.getTemplate().getFallbackInstanceTypes();

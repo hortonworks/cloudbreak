@@ -66,7 +66,7 @@ class FreeIpaRecommendationServiceTest {
     private FreeIpaRecommendationService underTest;
 
     @Test
-    public void testGetRecommendation() {
+    void testGetRecommendation() {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
                 eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(initCloudVmTypes());
@@ -81,7 +81,7 @@ class FreeIpaRecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendationWithArm() {
+    void testGetRecommendationWithArm() {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
                 eq(Map.of("architecture", Architecture.ARM64.getName())))).thenReturn(initCloudVmTypes());
@@ -96,7 +96,7 @@ class FreeIpaRecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendationWithDefaultX86Architecture() {
+    void testGetRecommendationWithDefaultX86Architecture() {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
                 eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(initCloudVmTypes());
@@ -111,7 +111,45 @@ class FreeIpaRecommendationServiceTest {
     }
 
     @Test
-    public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsSmaller() {
+    void testGetRecommendationIncludesDeprecatedVmTypes() {
+        when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
+                eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(initCloudVmTypesWithDeprecated());
+        when(defaultInstanceTypeProvider.getForPlatform(eq("cred"), eq(platform("AWS")), eq(region("eu-central-1")), eq(Architecture.X86_64)))
+                .thenReturn(List.of("medium"));
+
+        FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, Architecture.X86_64.getName());
+        assertThat(recommendation.getVmTypes().stream().map(VmTypeResponse::getValue).collect(Collectors.toSet()))
+                .containsExactlyInAnyOrder("large", "medium");
+        assertThat(recommendation.getDeprecatedVmTypes().stream().map(VmTypeResponse::getValue).collect(Collectors.toSet()))
+                .containsExactly("deprecated-large");
+    }
+
+    @Test
+    void testGetRecommendationUseSameAzForAvailableAndDeprecatedVmTypes() {
+        when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
+        Map<String, Set<VmType>> cloudVmResponses = Map.of(
+                "eu-central-1a", Set.of(VmType.vmTypeWithMeta("large", vmTypeMeta(10, 1000.0F), false),
+                        VmType.vmTypeWithMeta("medium", vmTypeMeta(8, 800.0F), false)),
+                "eu-central-1b", Set.of(VmType.vmTypeWithMeta("other-az-type", vmTypeMeta(8, 800.0F), false)));
+        Map<String, Set<VmType>> deprecatedCloudVmResponses = Map.of(
+                "eu-central-1a", Set.of(VmType.vmTypeWithMeta("deprecated-large", vmTypeMeta(10, 1000.0F), true)),
+                "eu-central-1b", Set.of(VmType.vmTypeWithMeta("deprecated-other-az", vmTypeMeta(10, 1000.0F), true)));
+        CloudVmTypes cloudVmTypes = new CloudVmTypes(cloudVmResponses, deprecatedCloudVmResponses, Map.of());
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
+                eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(cloudVmTypes);
+        when(defaultInstanceTypeProvider.getForPlatform(eq("cred"), eq(platform("AWS")), eq(region("eu-central-1")), eq(Architecture.X86_64)))
+                .thenReturn(List.of("medium"));
+
+        FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", "eu-central-1a", Architecture.X86_64.getName());
+        assertThat(recommendation.getVmTypes().stream().map(VmTypeResponse::getValue).collect(Collectors.toSet()))
+                .containsExactlyInAnyOrder("large", "medium");
+        assertThat(recommendation.getDeprecatedVmTypes().stream().map(VmTypeResponse::getValue).collect(Collectors.toSet()))
+                .containsExactly("deprecated-large");
+    }
+
+    @Test
+    void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsSmaller() {
         when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
                 .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
@@ -123,7 +161,7 @@ class FreeIpaRecommendationServiceTest {
     }
 
     @Test
-    public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsLarger() {
+    void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsLarger() {
         when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
                 .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
@@ -132,7 +170,7 @@ class FreeIpaRecommendationServiceTest {
     }
 
     @Test
-    public void testValidateCustomInstanceTypeWhenArm64IsExpected() {
+    void testValidateCustomInstanceTypeWhenArm64IsExpected() {
         when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
                 .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
@@ -146,7 +184,7 @@ class FreeIpaRecommendationServiceTest {
     }
 
     @Test
-    public void testValidateCustomInstanceTypeWhenX86IsExpected() {
+    void testValidateCustomInstanceTypeWhenX86IsExpected() {
         when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
                 .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any()))
@@ -184,6 +222,16 @@ class FreeIpaRecommendationServiceTest {
                         VmType.vmTypeWithMeta("medium", vmTypeMeta(8, 800.0F, architecture), false),
                         VmType.vmTypeWithMeta("small", vmTypeMeta(1, 1.0F, architecture), false)));
         return new CloudVmTypes(cloudVmResponses, Map.of());
+    }
+
+    private CloudVmTypes initCloudVmTypesWithDeprecated() {
+        Map<String, Set<VmType>> cloudVmResponses = Map.of("eu-central-1a",
+                Set.of(VmType.vmTypeWithMeta("large", vmTypeMeta(10, 1000.0F), false),
+                        VmType.vmTypeWithMeta("medium", vmTypeMeta(8, 800.0F), false),
+                        VmType.vmTypeWithMeta("small", vmTypeMeta(1, 1.0F), false)));
+        Map<String, Set<VmType>> deprecatedCloudVmResponses = Map.of("eu-central-1a",
+                Set.of(VmType.vmTypeWithMeta("deprecated-large", vmTypeMeta(10, 1000.0F), true)));
+        return new CloudVmTypes(cloudVmResponses, deprecatedCloudVmResponses, Map.of());
     }
 
     private VmTypeMeta vmTypeMeta(int cpu, float memory) {

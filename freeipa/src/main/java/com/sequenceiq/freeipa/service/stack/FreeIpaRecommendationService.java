@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+import static java.util.function.Predicate.not;
 
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,10 @@ public class FreeIpaRecommendationService {
                 region(region),
                 architectureEnum
         );
-        Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(region, availabilityZone, credential, architectureEnum.getName());
+        CloudVmTypes cloudVmTypes = getCloudVmTypes(region, availabilityZone, credential, architectureEnum.getName());
+        Optional<String> selectedAz = resolveAvailabilityZone(availabilityZone, cloudVmTypes);
+        Set<VmType> availableAllVmTypes = selectVmTypes(cloudVmTypes.getCloudVmResponses(), selectedAz);
+        Set<VmType> deprecatedAllVmTypes = selectVmTypes(cloudVmTypes.getDeprecatedCloudVmResponses(), selectedAz);
 
         Optional<VmType> defaultVmType = availableAllVmTypes.stream()
                 .filter(vmType -> defaultInstanceTypesProviderForPlatform.getFirst().equals(vmType.value()))
@@ -74,26 +78,41 @@ public class FreeIpaRecommendationService {
                 .filter(vmType -> filterVmTypeLargerThanDefault(vmType, defaultVmType))
                 .map(vmType -> vmTypeConverter.convert(vmType))
                 .collect(Collectors.toSet());
+        Set<VmTypeResponse> deprecatedVmTypes = deprecatedAllVmTypes.stream()
+                .filter(vmType -> filterVmTypeLargerThanDefault(vmType, defaultVmType))
+                .map(vmType -> vmTypeConverter.convert(vmType))
+                .collect(Collectors.toSet());
 
-        return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceTypesProviderForPlatform.getFirst());
+        return new FreeIpaRecommendationResponse(availableVmTypes, deprecatedVmTypes, defaultInstanceTypesProviderForPlatform.getFirst());
     }
 
-    private Set<VmType> getAvailableAllVmTypes(String region, String availabilityZone, Credential credential, String architecture) {
-        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
+    private CloudVmTypes getCloudVmTypes(String region, String availabilityZone, Credential credential, String architecture) {
+        return cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
                 region,
                 credential.getCloudPlatform(),
                 CdpResourceType.DEFAULT,
                 Map.of(ARCHITECTURE, Optional.ofNullable(architecture).orElse(Architecture.X86_64.getName())));
+    }
 
-        Set<VmType> availableVmTypes = Collections.emptySet();
-        if (vmTypes.getCloudVmResponses() != null && StringUtils.isNotBlank(availabilityZone)
-                && vmTypes.getDefaultCloudVmResponses().containsKey(availabilityZone)) {
-            availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
-        } else if (vmTypes.getCloudVmResponses() != null && !vmTypes.getCloudVmResponses().isEmpty()) {
-            availableVmTypes = vmTypes.getCloudVmResponses().values().iterator().next();
+    private Optional<String> resolveAvailabilityZone(String availabilityZone, CloudVmTypes cloudVmTypes) {
+        return Optional.ofNullable(availabilityZone)
+                .filter(StringUtils::isNotBlank)
+                .or(() -> firstKeyOf(cloudVmTypes.getCloudVmResponses()))
+                .or(() -> firstKeyOf(cloudVmTypes.getDeprecatedCloudVmResponses()));
+    }
+
+    private Optional<String> firstKeyOf(Map<String, Set<VmType>> map) {
+        return Optional.ofNullable(map)
+                .filter(not(Map::isEmpty))
+                .map(m -> m.keySet().iterator().next());
+    }
+
+    private Set<VmType> selectVmTypes(Map<String, Set<VmType>> vmTypesByZone, Optional<String> availabilityZone) {
+        if (vmTypesByZone == null || vmTypesByZone.isEmpty() || availabilityZone.isEmpty()) {
+            return Collections.emptySet();
         }
-        return availableVmTypes;
+        return vmTypesByZone.getOrDefault(availabilityZone.get(), Collections.emptySet());
     }
 
     private Set<VmTypeResponse> filterVmTypeLargerThanDefault(String defaultInstanceType, Set<VmType> availableVmTypes) {
@@ -128,11 +147,9 @@ public class FreeIpaRecommendationService {
         );
         Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceTypesProviderForPlatform.getFirst());
         if (!customInstanceTypes.isEmpty()) {
-            Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(
-                    stack.getRegion(),
-                    stack.getAvailabilityZone(),
-                    credential,
-                    Architecture.ALL_ARCHITECTURE);
+            CloudVmTypes cloudVmTypes = getCloudVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, Architecture.ALL_ARCHITECTURE);
+            Optional<String> selectedAz = resolveAvailabilityZone(stack.getAvailabilityZone(), cloudVmTypes);
+            Set<VmType> availableAllVmTypes = selectVmTypes(cloudVmTypes.getCloudVmResponses(), selectedAz);
             Set<VmTypeResponse> availableMinimumRequiredVmTypes = filterVmTypeLargerThanDefault(
                     defaultInstanceTypesProviderForPlatform.getFirst(),
                     availableAllVmTypes);

@@ -29,6 +29,9 @@ public class RecommendationV4Response implements JsonEntity {
     private Set<VmTypeV4Response> virtualMachines = new HashSet<>();
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<VmTypeV4Response> deprecatedVirtualMachines = new HashSet<>();
+
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<DiskV4Response> diskResponses = new HashSet<>();
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -46,6 +49,7 @@ public class RecommendationV4Response implements JsonEntity {
     public RecommendationV4Response(
             Map<String, VmTypeV4Response> recommendations,
             Set<VmTypeV4Response> virtualMachines,
+            Set<VmTypeV4Response> deprecatedVirtualMachines,
             Set<DiskV4Response> diskResponses,
             Map<String, InstanceCountV4Response> instanceCounts,
             GatewayRecommendationV4Response gatewayRecommendation,
@@ -54,6 +58,7 @@ public class RecommendationV4Response implements JsonEntity {
     ) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
+        this.deprecatedVirtualMachines = deprecatedVirtualMachines;
         this.diskResponses = diskResponses;
         this.instanceCounts = instanceCounts;
         this.gatewayRecommendation = gatewayRecommendation;
@@ -77,6 +82,14 @@ public class RecommendationV4Response implements JsonEntity {
         this.virtualMachines = virtualMachines;
     }
 
+    public Set<VmTypeV4Response> getDeprecatedVirtualMachines() {
+        return deprecatedVirtualMachines;
+    }
+
+    public void setDeprecatedVirtualMachines(Set<VmTypeV4Response> deprecatedVirtualMachines) {
+        this.deprecatedVirtualMachines = deprecatedVirtualMachines;
+    }
+
     public Set<DiskV4Response> getDiskResponses() {
         return diskResponses;
     }
@@ -89,15 +102,45 @@ public class RecommendationV4Response implements JsonEntity {
         return instanceCounts;
     }
 
+    public void setInstanceCounts(Map<String, InstanceCountV4Response> instanceCounts) {
+        this.instanceCounts = instanceCounts;
+    }
+
     public GatewayRecommendationV4Response getGatewayRecommendation() {
         return gatewayRecommendation;
+    }
+
+    public void setGatewayRecommendation(GatewayRecommendationV4Response gatewayRecommendation) {
+        this.gatewayRecommendation = gatewayRecommendation;
     }
 
     public AutoscaleRecommendationV4Response getAutoscaleRecommendation() {
         return autoscaleRecommendation;
     }
 
+    public void setAutoscaleRecommendation(AutoscaleRecommendationV4Response autoscaleRecommendation) {
+        this.autoscaleRecommendation = autoscaleRecommendation;
+    }
+
     public ResizeRecommendationV4Response getResizeRecommendation() {
         return resizeRecommendation;
+    }
+
+    public void setResizeRecommendation(ResizeRecommendationV4Response resizeRecommendation) {
+        this.resizeRecommendation = resizeRecommendation;
+    }
+
+    @Override
+    public String toString() {
+        return "RecommendationV4Response{" +
+                "recommendations=" + recommendations +
+                ", virtualMachines=" + virtualMachines +
+                ", deprecatedVirtualMachines=" + deprecatedVirtualMachines +
+                ", diskResponses=" + diskResponses +
+                ", instanceCounts=" + instanceCounts +
+                ", gatewayRecommendation=" + gatewayRecommendation +
+                ", autoscaleRecommendation=" + autoscaleRecommendation +
+                ", resizeRecommendation=" + resizeRecommendation +
+                '}';
     }
 }

@@ -218,6 +218,8 @@ public class ModelDescriptions {
 
     public static final String AVAILABLE_VM_TYPES = "Collection of available vm types";
 
+    public static final String DEPRECATED_VM_TYPES = "Collection of deprecated vm types";
+
     public static final String VM_TYPE_CONFIGS = "Virtual machine type configurations";
 
     public static final String VM_TYPE_PROPERTIES = "Virtual machine type properties";
