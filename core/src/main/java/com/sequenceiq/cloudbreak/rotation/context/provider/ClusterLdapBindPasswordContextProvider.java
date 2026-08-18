@@ -35,7 +35,7 @@ import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 @Component
 public class ClusterLdapBindPasswordContextProvider implements RotationContextProvider {
 
-    private static final Integer SALT_STATE_MAX_RETRY = 3;
+    private static final Integer SALT_STATE_MAX_RETRY = 20;
 
     @Inject
     private StackDtoService stackDtoService;
