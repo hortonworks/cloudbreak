@@ -37,4 +37,8 @@ public enum SdxClusterShape {
     public boolean isHA() {
         return MEDIUM_DUTY_HA.equals(this) || ENTERPRISE.equals(this) || ENTERPRISE_WITHOUT_HBASE.equals(this);
     }
+
+    public boolean isWithoutHbase() {
+        return LIGHT_DUTY_WITHOUT_HBASE.equals(this) || ENTERPRISE_WITHOUT_HBASE.equals(this);
+    }
 }

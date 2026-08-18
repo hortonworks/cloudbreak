@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -672,6 +673,54 @@ class SdxResizeServiceTest {
                         underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
         assertEquals("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ",
                 badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeValidatesShapeTransitionWithoutMultiAz() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(ENTERPRISE);
+        sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        sdxClusterResizeRequest.setEnableMultiAz(false);
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setEnableMultiAz(false);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
+        doThrow(new BadRequestException("transition not allowed")).when(sdxResizeValidator)
+                .validateResizeShapeTransition(any(), any(), anyBoolean());
+
+        assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+
+        verify(sdxResizeValidator).validateResizeShapeTransition(LIGHT_DUTY, ENTERPRISE, false);
+    }
+
+    @Test
+    void testSdxResizeValidatesShapeTransitionForSameShapeSingleToMultiAz() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE);
+        sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        sdxClusterResizeRequest.setEnableMultiAz(true);
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE);
+        sdxCluster.setEnableMultiAz(false);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
+        doThrow(new BadRequestException("short-circuit after transition validation")).when(sdxResizeValidator)
+                .validateResizeShapeTransition(any(), any(), anyBoolean());
+
+        assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+
+        verify(sdxResizeValidator).validateResizeShapeTransition(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true);
     }
 
     @Test

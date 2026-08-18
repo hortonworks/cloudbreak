@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.database.AzureDatabaseAttributesService;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,6 +69,42 @@ class SdxResizeValidatorTest {
                 Arguments.of(CloudPlatform.AZURE, SdxDatabaseAvailabilityType.HA, false, AzureDatabaseType.FLEXIBLE_SERVER),
                 Arguments.of(CloudPlatform.AZURE, SdxDatabaseAvailabilityType.HA, true, AzureDatabaseType.FLEXIBLE_SERVER),
                 Arguments.of(CloudPlatform.AZURE, SdxDatabaseAvailabilityType.HA, true, null)
+        );
+    }
+
+    @ParameterizedTest(name = "[{index}] current: {0}, target: {1}, singleToMultiAz: {2}")
+    @MethodSource("provideInvalidShapeTransitions")
+    void testValidateResizeShapeTransitionShouldThrowException(SdxClusterShape currentShape, SdxClusterShape targetShape, boolean singleToMultiAzTransition) {
+        assertThrows(BadRequestException.class, () -> underTest.validateResizeShapeTransition(currentShape, targetShape, singleToMultiAzTransition));
+    }
+
+    @ParameterizedTest(name = "[{index}] current: {0}, target: {1}, singleToMultiAz: {2}")
+    @MethodSource("provideValidShapeTransitions")
+    void testValidateResizeShapeTransitionShouldNotThrowException(SdxClusterShape currentShape, SdxClusterShape targetShape, boolean singleToMultiAzTransition) {
+        underTest.validateResizeShapeTransition(currentShape, targetShape, singleToMultiAzTransition);
+    }
+
+    private static Stream<Arguments> provideInvalidShapeTransitions() {
+        return Stream.of(
+                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
+                Arguments.of(SdxClusterShape.MEDIUM_DUTY_HA, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, true)
+        );
+    }
+
+    private static Stream<Arguments> provideValidShapeTransitions() {
+        return Stream.of(
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.ENTERPRISE, false),
+                Arguments.of(SdxClusterShape.MEDIUM_DUTY_HA, SdxClusterShape.ENTERPRISE, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.MEDIUM_DUTY_HA, false)
         );
     }
 

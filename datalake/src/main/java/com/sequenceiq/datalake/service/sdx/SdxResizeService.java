@@ -236,6 +236,9 @@ public class SdxResizeService {
             throw new BadRequestException("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ");
         }
 
+        boolean singleToMultiAzTransition = enableMultiAz && !sdxCluster.isEnableMultiAz();
+        sdxResizeValidator.validateResizeShapeTransition(sdxCluster.getClusterShape(), shape, singleToMultiAzTransition);
+
         sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(accountId, sdxCluster.getEnvCrn())
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());

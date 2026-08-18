@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.database.AzureDatabaseAttributesService;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Component
@@ -30,6 +31,27 @@ public class SdxResizeValidator {
             String message = "Resizing a DataLake cluster is not possible when using Azure Single Server database type. "
                     + "To proceed with the resizing operation, you will first need to upgrade your cluster’s database type to Azure Flexible Server. "
                     + "Once this change is made, you can retry the resize operation.";
+            LOGGER.warn(message);
+            throw new BadRequestException(message);
+        }
+    }
+
+    public void validateResizeShapeTransition(SdxClusterShape currentShape, SdxClusterShape targetShape, boolean singleToMultiAzTransition) {
+        if (SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE.equals(targetShape)) {
+            String message = String.format("Resizing to %s shape is not supported.", SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE);
+            LOGGER.warn(message);
+            throw new BadRequestException(message);
+        }
+        boolean multiAzResizeOnSameShape = currentShape.equals(targetShape) && singleToMultiAzTransition;
+        if (SdxClusterShape.ENTERPRISE_WITHOUT_HBASE.equals(targetShape) && !SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE.equals(currentShape)
+                && !multiAzResizeOnSameShape) {
+            String message = String.format("Resizing to %s shape is only supported from %s shape, but the current shape is %s.",
+                    SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, currentShape);
+            LOGGER.warn(message);
+            throw new BadRequestException(message);
+        }
+        if (SdxClusterShape.ENTERPRISE.equals(targetShape) && currentShape.isWithoutHbase()) {
+            String message = String.format("Resizing to %s shape is not supported from %s shape.", SdxClusterShape.ENTERPRISE, currentShape);
             LOGGER.warn(message);
             throw new BadRequestException(message);
         }
