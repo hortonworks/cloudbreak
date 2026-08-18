@@ -149,6 +149,70 @@ public class VaultRotationExecutorTest {
     }
 
     @Test
+    public void testPostValidationIfRotationIsNull() {
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(null);
+
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withNewSecretMap(Map.of(new Sample(), Map.of(SecretMarker.DP_CLUSTER_MANAGER_USER, "new")))
+                .build();
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
+
+        verify(uncachedSecretServiceForRotation).getRotation(any());
+    }
+
+    @Test
+    public void testVaultRotationIfRotationIsNull() throws Exception {
+        when(uncachedSecretServiceForRotation.putRotation(anyString(), anyString())).thenReturn("anything");
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(null);
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withNewSecretMap(Map.of(new Sample(), Map.of(SecretMarker.DP_CLUSTER_MANAGER_USER, "new")))
+                .build();
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
+            SampleRepo sampleRepo = mock(SampleRepo.class);
+            when(sampleRepo.getEntityClass()).thenReturn(Sample.class);
+            appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(sampleRepo));
+
+            underTest.executeRotate(rotationContext, RotationMetadataTestUtil.metadataForRotation("resource", null));
+
+            verify(uncachedSecretServiceForRotation, times(1)).putRotation(eq("secretPath"), eq("new"));
+        }
+    }
+
+    @Test
+    public void testVaultRotationFinalizationIfRotationIsNull() throws Exception {
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(null);
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withNewSecretMap(Map.of(new Sample(), Map.of(SecretMarker.DP_CLUSTER_MANAGER_USER, "new")))
+                .build();
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
+            SampleRepo sampleRepo = mock(SampleRepo.class);
+            when(sampleRepo.getEntityClass()).thenReturn(Sample.class);
+            appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(sampleRepo));
+
+            underTest.executeFinalize(rotationContext, RotationMetadataTestUtil.metadataForFinalize("resource", null));
+
+            verify(uncachedSecretServiceForRotation, times(0)).update(anyString(), anyString());
+        }
+    }
+
+    @Test
+    public void testVaultRotationRollbackIfRotationIsNull() throws Exception {
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(null);
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withNewSecretMap(Map.of(new Sample(), Map.of(SecretMarker.DP_CLUSTER_MANAGER_USER, "new")))
+                .build();
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
+            SampleRepo sampleRepo = mock(SampleRepo.class);
+            when(sampleRepo.getEntityClass()).thenReturn(Sample.class);
+            appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(sampleRepo));
+
+            underTest.executeRollback(rotationContext, RotationMetadataTestUtil.metadataForRollback("resource", null));
+
+            verify(uncachedSecretServiceForRotation, times(0)).update(anyString(), anyString());
+        }
+    }
+
+    @Test
     public void testVaultRotationFailure() throws Exception {
         when(uncachedSecretServiceForRotation.putRotation(anyString(), anyString())).thenThrow(new CloudbreakServiceException("anything"));
         when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(new RotationSecret("new", null));

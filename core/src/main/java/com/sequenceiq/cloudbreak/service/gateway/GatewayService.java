@@ -107,6 +107,20 @@ public class GatewayService {
         return saved;
     }
 
+    public Gateway migrateWrongTokenCertCluster(GatewayView gatewayView) {
+        LOGGER.warn("Migrating gateway tokencert {} by copying token cert value into token cert secret fields because " +
+                        "it must be migrated.", gatewayView.getId());
+        Gateway gateway = repository.findById(gatewayView.getId()).orElseThrow(NotFoundException.notFound("Gateway should exist"));
+        if (gateway.getTokenCert() != null) {
+            gateway.setTokenCertSecret(gateway.getTokenCert());
+        } else {
+            LOGGER.warn("Cannot migrate gateway {}: token cert secret is empty, skipping token cert copy.", gateway.getId());
+        }
+        Gateway saved = save(gateway);
+        LOGGER.info("Migration token cert done for gateway {}.", gateway.getId());
+        return saved;
+    }
+
     public void setLegacyFieldsForServiceRollback(GatewayView gatewayView) {
         Gateway gateway = repository.findById(gatewayView.getId()).orElseThrow(NotFoundException.notFound("Gateway should exist"));
         gateway.setSignCertDeprecated(gatewayView.getSignCert());

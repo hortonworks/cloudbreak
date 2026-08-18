@@ -36,7 +36,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
         rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
             performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
                 RotationSecret rotation = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
-                if (!rotation.isRotation()) {
+                if (rotation == null || !rotation.isRotation()) {
                     LOGGER.info("Adding new secret to vault path {}", vaultSecretJson);
                 } else {
                     LOGGER.info("Secret is already in rotation state for vault path {}. It can be a consequnce of a recent failure. " +
@@ -54,7 +54,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
         rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
             performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
                 RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
-                if (rotationSecret.isRotation()) {
+                if (rotationSecret != null && rotationSecret.isRotation()) {
                     LOGGER.info("Removing new secret from vault path {}", vaultSecretJson);
                     String rolledBackVaultSecretJson = uncachedSecretServiceForRotation.update(vaultSecretJson, rotationSecret.getBackupSecret());
                     setNewSecret(entity, marker, new SecretProxy(rolledBackVaultSecretJson));
@@ -69,7 +69,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
         rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
             performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
                 RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
-                if (rotationSecret.isRotation()) {
+                if (rotationSecret != null && rotationSecret.isRotation()) {
                     LOGGER.info("Removing old secret from vault path {}", vaultSecretJson);
                     String finalizedVaultSecretJson = uncachedSecretServiceForRotation.update(vaultSecretJson, rotationSecret.getSecret());
                     setNewSecret(entity, marker, new SecretProxy(finalizedVaultSecretJson));
@@ -94,7 +94,8 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     protected void postValidate(VaultRotationContext rotationContext) throws Exception {
         rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
             performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
-                if (!uncachedSecretServiceForRotation.getRotation(vaultSecretJson).isRotation()) {
+                RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
+                if (rotationSecret == null || !rotationSecret.isRotation()) {
                     String message = String.format("%s vault path is not in rotation state, thus something went wrong during rotation!", vaultSecretJson);
                     throw new SecretRotationException(message);
                 }
