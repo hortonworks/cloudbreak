@@ -181,6 +181,36 @@ class ImageServiceTest {
     }
 
     @Test
+    void testGetImageGivenMajorOsUpgradeWithoutAllowMajorOsUpgradeNotFoundShouldContainHint() {
+        FreeIpaImageFilterSettings imageSettings = new FreeIpaImageFilterSettings(FAKE_ID, IMAGE_CATALOG, OsType.RHEL8.getOs(), OsType.RHEL9.getOs(),
+                REGION, DEFAULT_PLATFORM, false, Architecture.X86_64);
+
+        when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
+        when(imageProvider.getImage(imageSettings)).thenReturn(Optional.empty());
+
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> underTest.getImage(imageSettings));
+
+        assertThat(exception.getMessage())
+                .isEqualTo("Could not find any image with id: 'fake-ami-0a6931aea1415eb0e' in region 'eu-west-1' with OS 'redhat9'. "
+                        + "The request targets a major OS upgrade from 'redhat8' to 'redhat9'. "
+                        + "To proceed, set allowMajorOsUpgrade to true (use '--allow-major-os-upgrade' with the CDP CLI) and retry.");
+    }
+
+    @Test
+    void testGetImageGivenMajorOsUpgradeWithAllowMajorOsUpgradeNotFoundShouldNotContainHint() {
+        FreeIpaImageFilterSettings imageSettings = new FreeIpaImageFilterSettings(FAKE_ID, IMAGE_CATALOG, OsType.RHEL8.getOs(), OsType.RHEL9.getOs(),
+                REGION, DEFAULT_PLATFORM, true, Architecture.X86_64);
+
+        when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
+        when(imageProvider.getImage(imageSettings)).thenReturn(Optional.empty());
+
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> underTest.getImage(imageSettings));
+
+        assertThat(exception.getMessage())
+                .isEqualTo("Could not find any image with id: 'fake-ami-0a6931aea1415eb0e' in region 'eu-west-1' with OS 'redhat9'.");
+    }
+
+    @Test
     void testImageChange() {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);

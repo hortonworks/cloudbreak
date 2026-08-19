@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -39,6 +40,8 @@ public class ImageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
 
     private static final String DEFAULT_REGION = "default";
+
+    private static final String ALLOW_MAJOR_OS_UPGRADE_CLI_OPTION = "--allow-major-os-upgrade";
 
     @Inject
     private ImageToImageEntityConverter imageConverter;
@@ -190,8 +193,7 @@ public class ImageService {
     public ImageWrapper getImage(FreeIpaImageFilterSettings imageFilterParams) {
         return imageProviderFactory.getImageProvider(imageFilterParams.catalog())
                 .getImage(imageFilterParams)
-                .orElseThrow(() -> throwImageNotFoundException(imageFilterParams.region(), imageFilterParams.currentImageId(),
-                        Optional.ofNullable(imageFilterParams.targetOs()).orElse(defaultOs)));
+                .orElseThrow(() -> throwImageNotFoundException(imageFilterParams));
     }
 
     private List<ImageWrapper> getImages(FreeIpaImageFilterSettings imageFilterParams) {
@@ -274,10 +276,29 @@ public class ImageService {
                 .findFirst();
     }
 
-    private ImageNotFoundException throwImageNotFoundException(String region, String imageId, String imageOs) {
-        LOGGER.warn("Image not found in refreshed image catalog, by parameters: imageid: {}, region: {}, imageOs: {}", imageId, region, imageOs);
-        String message = String.format("Could not find any image with id: '%s' in region '%s' with OS '%s'.", imageId, region, imageOs);
+    private ImageNotFoundException throwImageNotFoundException(FreeIpaImageFilterSettings imageFilterParams) {
+        String imageOs = Optional.ofNullable(imageFilterParams.targetOs()).orElse(defaultOs);
+        LOGGER.warn("Image not found in refreshed image catalog, by parameters: imageid: {}, region: {}, imageOs: {}, currentOs: {}, "
+                        + "allowMajorOsUpgrade: {}",
+                imageFilterParams.currentImageId(), imageFilterParams.region(), imageOs, imageFilterParams.currentOs(),
+                imageFilterParams.allowMajorOsUpgrade());
+        String message = String.format("Could not find any image with id: '%s' in region '%s' with OS '%s'.",
+                imageFilterParams.currentImageId(), imageFilterParams.region(), imageOs);
+        if (isMajorOsUpgradeNotAllowed(imageFilterParams.currentOs(), imageOs, imageFilterParams.allowMajorOsUpgrade())) {
+            message = message + String.format(" The request targets a major OS upgrade from '%s' to '%s'. "
+                            + "To proceed, set allowMajorOsUpgrade to true (use '%s' with the CDP CLI) and retry.",
+                    imageFilterParams.currentOs(), imageOs, ALLOW_MAJOR_OS_UPGRADE_CLI_OPTION);
+        }
         return new ImageNotFoundException(message);
+    }
+
+    private boolean isMajorOsUpgradeNotAllowed(String currentOs, String targetOs, boolean allowMajorOsUpgrade) {
+        Optional<OsType> currentOsType = OsType.getByOsOptional(currentOs);
+        Optional<OsType> targetOsType = OsType.getByOsOptional(targetOs);
+        return !allowMajorOsUpgrade
+                && currentOsType.isPresent()
+                && targetOsType.isPresent()
+                && currentOsType.get().getMajorOsTargets().contains(targetOsType.get());
     }
 
     public ImageCatalog generateImageCatalogForStack(Stack stack) {
