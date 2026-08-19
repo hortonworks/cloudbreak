@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.BlackListedDeleteVolumesRole;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesValidationRequest;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -45,6 +47,9 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
 
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
+    @Inject
+    private DeleteVolumesService deleteVolumesService;
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DeleteVolumesValidationRequest> event) {
@@ -86,9 +91,13 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
                     new BadRequestException(statusReason),
                     stack.getId());
         } else {
-            List<CloudResource> cloudResourcesToBeDeleted = stack.getResources()
+            List<Resource> resourcesToBeDeleted = stack.getResources()
                     .stream()
                     .filter(getVolumeset(requestGroup))
+                    .toList();
+            deleteVolumesService.removeVolumesFromResourceAttributes(resourcesToBeDeleted, DeleteVolumesService.LOCAL_SSD_VOLUME);
+            List<CloudResource> cloudResourcesToBeDeleted = resourcesToBeDeleted
+                    .stream()
                     .map(s -> cloudResourceConverter.convert(s))
                     .collect(toList());
             long numVolumesToDelete = cloudResourcesToBeDeleted.stream()
@@ -116,7 +125,7 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
         return resource ->
                 null != resource.getInstanceGroup()
                         && resource.getInstanceGroup().equals(requestGroup)
-                        && resource.getResourceType().name().contains("VOLUMESET");
+                        && ResourceType.isVolumeSet(resource.getResourceType());
     }
 
     private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {

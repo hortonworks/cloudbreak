@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_HANDLER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesValidationRequest;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -57,12 +60,19 @@ public class DeleteVolumesValidationHandlerTest {
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
     @Mock
+    private DeleteVolumesService deleteVolumesService;
+
+    @Mock
     private CloudResource cloudResource;
 
     @InjectMocks
     private DeleteVolumesValidationHandler underTest;
 
     private void setUpMocks(boolean volumesPresent, Set<String> componentsInGroup) {
+        setUpMocks(volumesPresent, componentsInGroup, ResourceType.AZURE_VOLUMESET);
+    }
+
+    private void setUpMocks(boolean volumesPresent, Set<String> componentsInGroup, ResourceType resourceType) {
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         Volume volume = mock(Volume.class);
         doReturn(volumesPresent ? List.of(volume) : List.of()).when(volumeSetAttributes).getVolumes();
@@ -70,7 +80,7 @@ public class DeleteVolumesValidationHandlerTest {
         Resource resource = mock(Resource.class);
         doReturn(COMPUTE).when(stackDeleteVolumesRequest).getGroup();
         doReturn(COMPUTE).when(resource).getInstanceGroup();
-        doReturn(ResourceType.AZURE_VOLUMESET).when(resource).getResourceType();
+        doReturn(resourceType).when(resource).getResourceType();
         StackDto stackDto = mock(StackDto.class);
         doReturn(Set.of(resource)).when(stackDto).getResources();
         doReturn(cloudResource).when(cloudResourceConverter).convert(resource);
@@ -94,6 +104,18 @@ public class DeleteVolumesValidationHandlerTest {
         assertEquals(stackDeleteVolumesRequest, deleteVolumesRequest.getStackDeleteVolumesRequest());
         assertEquals(List.of(cloudResource), deleteVolumesRequest.getResourcesToBeDeleted());
         assertEquals(Set.of(), deleteVolumesRequest.getHostTemplateServiceComponents());
+    }
+
+    @Test
+    public void testDeleteVolumesValidationActionForGcpDiskset() {
+        setUpMocks(true, Set.of("COMPUTE"), ResourceType.GCP_ATTACHED_DISKSET);
+
+        Selectable result = underTest.doAccept(createEvent());
+
+        assertInstanceOf(DeleteVolumesRequest.class, result);
+        DeleteVolumesRequest deleteVolumesRequest = (DeleteVolumesRequest) result;
+        assertEquals(List.of(cloudResource), deleteVolumesRequest.getResourcesToBeDeleted());
+        verify(deleteVolumesService).removeVolumesFromResourceAttributes(anyList(), eq(DeleteVolumesService.LOCAL_SSD_VOLUME));
     }
 
     @Test

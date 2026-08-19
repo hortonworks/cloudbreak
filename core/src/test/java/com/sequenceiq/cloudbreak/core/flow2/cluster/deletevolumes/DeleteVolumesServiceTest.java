@@ -8,12 +8,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -180,9 +184,40 @@ class DeleteVolumesServiceTest {
         stackDeleteVolumesRequest.setStackId(1L);
         stackDeleteVolumesRequest.setGroup("COMPUTE");
         DeleteVolumesHandlerRequest deleteVolumesRequest = new DeleteVolumesHandlerRequest(List.of(cloudResource), stackDeleteVolumesRequest,
-                "MOCK", Set.of());
-        doReturn(new HashSet<>()).when(stackDto).getResources();
+                "AWS", Set.of());
+        Resource resource = mock(Resource.class);
+        doReturn(Set.of(resource)).when(stackDto).getResources();
+        doReturn("COMPUTE").when(resource).getInstanceGroup();
+        doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
+        doReturn("AWS").when(stackDto).getCloudPlatform();
+
         underTest.deleteVolumeResources(stackDto, deleteVolumesRequest);
+
+        verify(resourceService, times(1)).deleteAll(List.of(resource));
+        verify(resourceService, never()).saveAll(anyList());
+    }
+
+    @Test
+    void updateCbdbResourcesForGcpKeepsLocalSsd() throws Exception {
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+        DeleteVolumesHandlerRequest deleteVolumesRequest = new DeleteVolumesHandlerRequest(List.of(cloudResource), stackDeleteVolumesRequest,
+                "GCP", Set.of());
+        Resource resource = mock(Resource.class);
+        doReturn(Set.of(resource)).when(stackDto).getResources();
+        doReturn("COMPUTE").when(resource).getInstanceGroup();
+        doReturn(ResourceType.GCP_ATTACHED_DISKSET).when(resource).getResourceType();
+        doReturn("GCP").when(stackDto).getCloudPlatform();
+        VolumeSetAttributes volumeSetAttributes = volumeSetWith("pd-ssd", "local-ssd");
+        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(resource, VolumeSetAttributes.class);
+
+        underTest.deleteVolumeResources(stackDto, deleteVolumesRequest);
+
+        verify(resourceService, times(1)).saveAll(List.of(resource));
+        verify(resourceService, never()).deleteAll(anyList());
+        assertEquals(1, volumeSetAttributes.getVolumes().size());
+        assertEquals("local-ssd", volumeSetAttributes.getVolumes().get(0).getType());
     }
 
     @Test
@@ -191,15 +226,60 @@ class DeleteVolumesServiceTest {
         stackDeleteVolumesRequest.setStackId(1L);
         stackDeleteVolumesRequest.setGroup("COMPUTE");
         DeleteVolumesHandlerRequest deleteVolumesRequest = new DeleteVolumesHandlerRequest(List.of(cloudResource), stackDeleteVolumesRequest,
-                "MOCK", Set.of());
+                "AWS", Set.of());
         Resource resource = mock(Resource.class);
         doReturn(Set.of(resource)).when(stackDto).getResources();
         doReturn("COMPUTE").when(resource).getInstanceGroup();
         doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
+        doReturn("AWS").when(stackDto).getCloudPlatform();
         doThrow(new RuntimeException("TEST")).when(resourceService).deleteAll(anyList());
         Exception exception = assertThrows(Exception.class, () -> underTest.deleteVolumeResources(stackDto, deleteVolumesRequest));
         assertEquals("TEST", exception.getMessage());
         assertEquals(exception.getClass(), RuntimeException.class);
+    }
+
+    @Test
+    void removeVolumesFromResourceAttributesRemovesLocalSsd() {
+        Resource resource = mock(Resource.class);
+        VolumeSetAttributes volumeSetAttributes = volumeSetWith("pd-ssd", "local-ssd");
+        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(resource, VolumeSetAttributes.class);
+
+        underTest.removeVolumesFromResourceAttributes(List.of(resource), DeleteVolumesService.LOCAL_SSD_VOLUME);
+
+        assertEquals(1, volumeSetAttributes.getVolumes().size());
+        assertEquals("pd-ssd", volumeSetAttributes.getVolumes().get(0).getType());
+    }
+
+    @Test
+    void removeVolumesFromResourceAttributesKeepsLocalSsdWhenNegated() {
+        Resource resource = mock(Resource.class);
+        VolumeSetAttributes volumeSetAttributes = volumeSetWith("pd-ssd", "local-ssd");
+        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(resource, VolumeSetAttributes.class);
+
+        underTest.removeVolumesFromResourceAttributes(List.of(resource), DeleteVolumesService.LOCAL_SSD_VOLUME.negate());
+
+        assertEquals(1, volumeSetAttributes.getVolumes().size());
+        assertEquals("local-ssd", volumeSetAttributes.getVolumes().get(0).getType());
+    }
+
+    @Test
+    void removeVolumesFromResourceAttributesHandlesNullVolumes() {
+        Resource resource = mock(Resource.class);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", Boolean.TRUE, "fstab", "uuids", null, "fqdn");
+        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(resource, VolumeSetAttributes.class);
+
+        underTest.removeVolumesFromResourceAttributes(List.of(resource), DeleteVolumesService.LOCAL_SSD_VOLUME);
+
+        assertEquals(0, volumeSetAttributes.getVolumes().size());
+        verify(resourceAttributeUtil, times(1)).setTypedAttributes(resource, volumeSetAttributes);
+    }
+
+    private VolumeSetAttributes volumeSetWith(String... volumeTypes) {
+        List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        for (String type : volumeTypes) {
+            volumes.add(new VolumeSetAttributes.Volume("id-" + type, "/dev/" + type, 100, type, null));
+        }
+        return new VolumeSetAttributes("az", Boolean.TRUE, "fstab", "uuids", volumes, "fqdn");
     }
 
     @Test

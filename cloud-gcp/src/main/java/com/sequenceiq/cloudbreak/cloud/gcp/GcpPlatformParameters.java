@@ -113,7 +113,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     public SpecialParameters specialParameters() {
         SpecialParameters specialParameters = PlatformParameters.super.specialParameters();
-        specialParameters.getSpecialParameters().put(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED, Boolean.FALSE);
+        specialParameters.getSpecialParameters().put(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED, Boolean.TRUE);
         // Enables the GCP disk resize path: DistroXDiskUpdateValidationHandler gates every disk update on this flag.
         // GCP disk *type* changes are still rejected by StackOperationService.validatePlatformAndRequest, so this does
         // not enable full type-change support.

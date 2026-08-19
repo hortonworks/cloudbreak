@@ -5,11 +5,13 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -31,9 +33,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -58,18 +63,19 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
+import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class DeleteVolumesService {
 
+    public static final Predicate<VolumeSetAttributes.Volume> LOCAL_SSD_VOLUME =
+            EphemeralVolumeUtil::volumeIsEphemeralWhichMustBeProvisioned;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteVolumesService.class);
-
-    private static final long SLEEP_INTERVAL = 15L;
-
-    private static final long TIMEOUT_DURATION = 3L;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -113,6 +119,9 @@ public class DeleteVolumesService {
     @Inject
     private ClusterHostServiceRunner clusterHostServiceRunner;
 
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
     public void detachResources(List<CloudResource> cloudResourcesToBeDetached, CloudPlatformVariant cloudPlatformVariant, AuthenticatedContext ac)
             throws Exception {
         LOGGER.debug("Detaching volumes {}", cloudResourcesToBeDetached);
@@ -130,13 +139,32 @@ public class DeleteVolumesService {
     public void deleteVolumeResources(StackDto stackDto, DeleteVolumesHandlerRequest payload) throws Exception {
         StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
         List<Resource> resourcesToBeDeleted = stackDto.getResources().stream().filter(resource -> null != resource.getInstanceGroup()
-                && resource.getInstanceGroup().equals(stackDeleteVolumesRequest.getGroup()) && resource.getResourceType().toString()
-                .contains("VOLUMESET")).collect(Collectors.toList());
+                && resource.getInstanceGroup().equals(stackDeleteVolumesRequest.getGroup())
+                && ResourceType.isVolumeSet(resource.getResourceType())).collect(Collectors.toList());
         LOGGER.debug("Deleting volumeset attributes of resources from CBDB. Updated resources: {}", resourcesToBeDeleted);
-        if (!resourcesToBeDeleted.isEmpty()) {
+        if (resourcesToBeDeleted.isEmpty()) {
+            updateTemplate(stackDto.getId(), stackDeleteVolumesRequest.getGroup());
+            return;
+        }
+        if (CloudPlatform.GCP.name().equals(stackDto.getCloudPlatform())) {
+            removeVolumesFromResourceAttributes(resourcesToBeDeleted, LOCAL_SSD_VOLUME.negate());
+            resourceService.saveAll(resourcesToBeDeleted);
+        } else {
             resourceService.deleteAll(resourcesToBeDeleted);
         }
         updateTemplate(stackDto.getId(), stackDeleteVolumesRequest.getGroup());
+    }
+
+    public void removeVolumesFromResourceAttributes(List<Resource> resources, Predicate<VolumeSetAttributes.Volume> volumesToRemove) {
+        resources.forEach(res -> resourceAttributeUtil.getTypedAttributes(res, VolumeSetAttributes.class)
+                .ifPresent(volumeSet -> {
+                    List<VolumeSetAttributes.Volume> volumes = Optional.ofNullable(volumeSet.getVolumes()).orElseGet(ArrayList::new);
+                    List<VolumeSetAttributes.Volume> retainedVolumes = volumes.stream().filter(volumesToRemove.negate()).collect(Collectors.toList());
+                    LOGGER.info("Updating volume set attributes of resource {}: retaining {} of {} volume(s), pruning {}.",
+                            res.getResourceName(), retainedVolumes.size(), volumes.size(), volumes.size() - retainedVolumes.size());
+                    volumeSet.setVolumes(retainedVolumes);
+                    resourceAttributeUtil.setTypedAttributes(res, volumeSet);
+                }));
     }
 
     public void stopClouderaManagerService(StackDto stackDto, Set<ServiceComponent> hostTemplateServiceComponents) throws Exception {
@@ -176,7 +204,9 @@ public class DeleteVolumesService {
             Template template = templateService.get(instanceGroup.getTemplate().getId());
             template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
             for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
-                volumeTemplateInTheDatabase.setVolumeCount(0);
+                if (!EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplateInTheDatabase)) {
+                    volumeTemplateInTheDatabase.setVolumeCount(0);
+                }
             }
             templateService.savePure(template);
         }

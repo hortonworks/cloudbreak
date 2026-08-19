@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureAvailabilityZoneConnector;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -157,6 +159,28 @@ public class VerticalScalingValidatorServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateInstanceTypeForDeletingDisks(stack, stackDeleteVolumesRequest));
         assertEquals("Deleting disks is only supported on instances with instance storage", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testRequestValidateInstanceTypeForDeleteVolumesSuccessWithLocalSsd() {
+        String instanceGroupNameInStack = "master1";
+        String instanceGroupNameInRequest = "master1";
+        String instanceTypeNameInStack = "e2-standard-4";
+        String instanceTypeNameInRequest = "e2-standard-4";
+
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        VolumeTemplate localSsdVolumeTemplate = new VolumeTemplate();
+        localSsdVolumeTemplate.setVolumeType(GcpDiskType.LOCAL_SSD.value());
+        template.setVolumeTemplates(Set.of(localSsdVolumeTemplate));
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack, template)));
+
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup(instanceGroupNameInRequest);
+
+        assertDoesNotThrow(() -> underTest.validateInstanceTypeForDeletingDisks(stack, stackDeleteVolumesRequest));
     }
 
     @Test

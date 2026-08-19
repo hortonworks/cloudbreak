@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValida
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
@@ -299,7 +300,11 @@ public class VerticalScalingValidatorService {
                 .findFirst();
         if (instanceGroupOptional.isPresent()) {
             Template template = instanceGroupOptional.get().getTemplate();
-            if (null == template.getInstanceStorageCount() || template.getInstanceStorageCount() == 0) {
+            Set<VolumeTemplate> volumeTemplates = template.getVolumeTemplates();
+            boolean hasLocalSsdVolume = volumeTemplates != null && volumeTemplates.stream()
+                    .anyMatch(EphemeralVolumeUtil::volumeIsEphemeralWhichMustBeProvisioned);
+            boolean hasInstanceStorage = template.getInstanceStorageCount() != null && template.getInstanceStorageCount() > 0;
+            if (!hasLocalSsdVolume && !hasInstanceStorage) {
                 throw new BadRequestException("Deleting disks is only supported on instances with instance storage");
             }
         } else {
