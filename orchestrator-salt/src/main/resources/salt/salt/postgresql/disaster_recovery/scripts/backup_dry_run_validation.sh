@@ -163,7 +163,7 @@ execute_run() {
   ATLAS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*atlas-ATLAS_SERVER*" | head -n 1)
   HDFS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*hdfs*" | head -n 1)
 
-  if [[ $RAZ_ENABLED ]]; then
+  if [[ "$RAZ_ENABLED" == "true" ]]; then
     kinit_as atlas "$ATLAS_KEYTAB"
     doLog "INFO Try moveFromLocal via HDFS"
     make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Ranger Raz Role"
