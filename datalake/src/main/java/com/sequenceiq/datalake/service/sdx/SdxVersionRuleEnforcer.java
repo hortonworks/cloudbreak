@@ -29,7 +29,7 @@ public class SdxVersionRuleEnforcer {
 
     public static final String ENTERPRISE_DATALAKE_REQUIRED_VERSION = "7.2.17";
 
-    public static final String SHAPES_WITHOUT_HBASE_REQUIRED_VERSION = "7.3.2";
+    public static final String SHAPES_WITHOUT_HBASE_REQUIRED_VERSION = "7.3.2.10000";
 
     public static final String CCMV2_JUMPGATE_REQUIRED_VERSION = "7.2.6";
 

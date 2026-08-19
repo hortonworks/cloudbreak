@@ -59,6 +59,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.converter.NetworkV4ResponseToNetworkV4RequestConverter;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterInitUtil;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
+import com.sequenceiq.datalake.service.sdx.util.SdxRuntimeVersionProvider;
 import com.sequenceiq.datalake.service.validation.resize.SdxResizeValidator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -173,7 +174,7 @@ public class SdxResizeService {
         sdxResizeValidator.validateDatabaseTypeForResize(sdxCluster.getSdxDatabase(), cloudPlatform);
 
         SdxCluster newSdxCluster = validateAndCreateNewSdxClusterForResize(sdxCluster, shape, sdxCluster.isEnableMultiAz()
-                || sdxClusterResizeRequest.isEnableMultiAz(), clusterName, userCrn, environment);
+                || sdxClusterResizeRequest.isEnableMultiAz(), clusterName, userCrn, environment, stackV4Response);
         newSdxCluster.setTags(sdxCluster.getTags());
         newSdxCluster.setCrn(sdxCluster.getCrn());
         newSdxCluster.setArchitecture(sdxCluster.getArchitecture());
@@ -273,8 +274,9 @@ public class SdxResizeService {
     }
 
     private SdxCluster validateAndCreateNewSdxClusterForResize(SdxCluster sdxCluster, SdxClusterShape shape, boolean enableMultiAz,
-            String clusterName, String userCrn, DetailedEnvironmentResponse environmentResponse) {
-        shapeValidator.validateShape(shape, sdxCluster.getRuntime(), environmentResponse);
+            String clusterName, String userCrn, DetailedEnvironmentResponse environmentResponse, StackV4Response stackV4Response) {
+        String servicePackQualifiedRuntime = SdxRuntimeVersionProvider.getServicePackQualifiedRuntimeVersion(stackV4Response, sdxCluster.getRuntime());
+        shapeValidator.validateShape(shape, sdxCluster.getRuntime(), servicePackQualifiedRuntime, environmentResponse);
         rangerRazService.validateRazEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), environmentResponse);
         rangerRmsService.validateRmsEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());

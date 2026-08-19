@@ -149,10 +149,25 @@ class ShapeValidatorTest {
 
         when(entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(any())).thenReturn(true);
 
-        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.2.17", detailedEnvironmentResponse));
-        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.3.0", detailedEnvironmentResponse));
-        assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.2", detailedEnvironmentResponse));
-        assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.3", detailedEnvironmentResponse));
+        // WITHOUT_HBASE checks the build-qualified runtime against the 7.3.2.10000 service-pack floor
+        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.3.2", "7.3.2", detailedEnvironmentResponse));
+        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.3.2", "7.3.2.100", detailedEnvironmentResponse));
+        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.3.1", "7.3.1", detailedEnvironmentResponse));
+        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.3.1", "7.3.1.20000", detailedEnvironmentResponse));
+        assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.2", "7.3.2.10000", detailedEnvironmentResponse));
+        assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.3", "7.3.3.0", detailedEnvironmentResponse));
+    }
+
+    @ParameterizedTest(name = "with shape {0}")
+    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_WITHOUT_HBASE", "ENTERPRISE_WITHOUT_HBASE"})
+    void testValidateShapesWithoutHBaseSkippedForInternalCallWhenRuntimeEmpty(SdxClusterShape shape) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setCreator("crn:cdp:iam:us-west-1:hortonworks:user:test@test.com");
+
+        when(entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.validateShape(shape, "", "", detailedEnvironmentResponse));
     }
 
     @Test

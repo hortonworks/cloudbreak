@@ -12,7 +12,6 @@ import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CD
 import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.USER_AGENT_HEADER;
 import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -54,8 +53,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Azu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -104,6 +101,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.sdx.util.SdxRuntimeVersionProvider;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -402,7 +400,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
-        String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
+        String runtimeVersion = SdxRuntimeVersionProvider.getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response,
+                cdpConfigService.getDefaultRuntime());
         encryptionProfileService.validateEncryptionProfile(sdxClusterRequest, environment, runtimeVersion);
         validateJavaVersion(runtimeVersion, sdxClusterRequest.getJavaVersion());
         String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
@@ -413,7 +412,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         ccmService.validateCcmV2Requirement(environment.getTunnel(), runtimeVersion);
 
-        SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
+        String qualifiedRuntimeVersion = SdxRuntimeVersionProvider.getServicePackQualifiedRuntimeVersion(imageV4Response, internalStackV4Request,
+                runtimeVersion);
+        SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, qualifiedRuntimeVersion, name, userCrn, environment);
         setArchitecture(internalStackV4Request, sdxCluster, architecture);
         setNotificationState(internalStackV4Request, sdxCluster, getNotificationState(sdxClusterRequest));
         setTagsSafe(sdxClusterRequest, sdxCluster);
@@ -585,9 +586,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private SdxCluster validateAndCreateNewSdxCluster(SdxClusterRequest cluster, String version, String clusterName, String userCrn,
-            DetailedEnvironmentResponse environmentResponse) {
-        shapeValidator.validateShape(cluster.getClusterShape(), version, environmentResponse);
+    private SdxCluster validateAndCreateNewSdxCluster(SdxClusterRequest cluster, String version, String servicePackQualifiedRuntimeVersion, String clusterName,
+            String userCrn, DetailedEnvironmentResponse environmentResponse) {
+        shapeValidator.validateShape(cluster.getClusterShape(), version, servicePackQualifiedRuntimeVersion, environmentResponse);
         rangerRazService.validateRazEnablement(version, cluster.isEnableRangerRaz(), environmentResponse);
         rangerRmsService.validateRmsEnablement(version, cluster.isEnableRangerRaz(), cluster.isEnableRangerRms(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
@@ -607,25 +608,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setEnableMultiAz(cluster.isEnableMultiAz());
         newSdxCluster.setCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND));
         return newSdxCluster;
-    }
-
-    private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, ImageV4Response imageV4Response) {
-        return Optional.ofNullable(getIfNotNull(imageV4Response, ImageV4Response::getVersion))
-                .or(() -> Optional.ofNullable(sdxClusterRequest.getRuntime()))
-                .or(() -> extractRuntimeFromCdhProductVersion(stackV4Request))
-                .orElse(cdpConfigService.getDefaultRuntime());
-    }
-
-    private Optional<String> extractRuntimeFromCdhProductVersion(StackV4Request stackV4Request) {
-        return Optional.ofNullable(stackV4Request)
-                .map(StackV4Request::getCluster)
-                .map(ClusterV4Request::getCm)
-                .map(ClouderaManagerV4Request::getProducts)
-                .stream()
-                .flatMap(List::stream)
-                .filter(product -> "CDH".equalsIgnoreCase(product.getName()))
-                .map(product -> StringUtils.substringBefore(product.getVersion(), "-"))
-                .findFirst();
     }
 
     private String getOs(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request, ImageV4Response imageV4Response) {

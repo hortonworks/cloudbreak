@@ -49,6 +49,15 @@ public class ShapeValidator {
     private EntitlementService entitlementService;
 
     public void validateShape(SdxClusterShape shape, String runtime, DetailedEnvironmentResponse environment) {
+        validateShape(shape, runtime, runtime, environment);
+    }
+
+    /**
+     * @param runtime the runtime line (e.g. {@code 7.3.2}) used by the shape-specific minimum/maximum checks
+     * @param servicePackQualifiedRuntime the runtime (e.g. {@code 7.3.2.10000}) used by the WITHOUT_HBASE check,
+     *                              which needs service-pack build granularity; callers fall back to {@code runtime} when the build cannot be resolved
+     */
+    public void validateShape(SdxClusterShape shape, String runtime, String servicePackQualifiedRuntime, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (SdxClusterShape.MICRO_DUTY.equals(shape)) {
             validateMicroDutyShape(runtime, environment, validationBuilder);
@@ -57,7 +66,7 @@ public class ShapeValidator {
         } else if (SdxClusterShape.ENTERPRISE.equals(shape)) {
             validateEnterpriseShape(runtime, validationBuilder);
         } else if (SHAPES_WITHOUT_HBASE_AND_HDFS.contains(shape)) {
-            validateShapesWithoutHBaseAndHDFS(runtime, validationBuilder, shape, environment.getAccountId());
+            validateShapesWithoutHBaseAndHDFS(validationBuilder, shape, environment.getAccountId(), servicePackQualifiedRuntime);
         }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
@@ -129,15 +138,15 @@ public class ShapeValidator {
         }
     }
 
-    private void validateShapesWithoutHBaseAndHDFS(String runtime, ValidationResultBuilder validationBuilder, SdxClusterShape shape, String accountId) {
-        if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, SHAPES_WITHOUT_HBASE_REQUIRED_VERSION)) {
-            String message = String.format("Provisioning an %s SDX shape is only valid for runtime version greater than or equal to %s and not %s",
-                    shape.name(), SHAPES_WITHOUT_HBASE_REQUIRED_VERSION, runtime);
-            validationBuilder.error(message);
-        }
+    private void validateShapesWithoutHBaseAndHDFS(ValidationResultBuilder validationBuilder, SdxClusterShape shape, String accountId, String runtime) {
         if (!entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(accountId)) {
             String message = String.format("Your account is not entitled to provision SDX with '%s' shape. " +
                     "Contact Cloudera support to enable CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS entitlement for the account.", shape.name());
+            validationBuilder.error(message);
+        }
+        if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, SHAPES_WITHOUT_HBASE_REQUIRED_VERSION)) {
+            String message = String.format("Provisioning an %s SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+                    shape.name(), SHAPES_WITHOUT_HBASE_REQUIRED_VERSION, runtime);
             validationBuilder.error(message);
         }
     }
