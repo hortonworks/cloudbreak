@@ -419,6 +419,32 @@ class MultiAzCalculatorServiceTest {
     }
 
     @Test
+    void testPopulateAvailabilityZonesForInstancesWithScopedInstancesLeavesOtherLegacyNullAzInstancesUntouched() {
+        Stack stack = new Stack();
+        stack.setMultiAz(true);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(null)).thenReturn(ENVIRONMENT_ZONES);
+        instanceGroup.setTemplate(new Template());
+        instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+        // Legacy instances that have not been replaced yet by the migration flow: no real AZ (e.g. Azure availability sets).
+        InstanceMetaData legacyInstance1 = createInstanceMetadata(null, "instance-legacy-1");
+        InstanceMetaData legacyInstance2 = createInstanceMetadata(null, "instance-legacy-2");
+        InstanceMetaData newInstance = createInstanceMetadata(null, "instance-new");
+        Set<InstanceMetaData> instances = new HashSet<>();
+        instances.add(legacyInstance1);
+        instances.add(legacyInstance2);
+        instances.add(newInstance);
+        instanceGroup.setInstanceMetaData(instances);
+
+        underTest.populateAvailabilityZonesForInstances(stack, instanceGroup, Map.of(), Set.of(), Set.of(newInstance));
+
+        assertEquals(true, ENVIRONMENT_ZONES.contains(newInstance.getAvailabilityZone()));
+        assertNull(legacyInstance1.getAvailabilityZone());
+        assertNull(legacyInstance2.getAvailabilityZone());
+    }
+
+    @Test
     void testPopulateAvailabilityZonesForInstancesDerivesZoneFromSubnetWhenSubnetAzMapProvided() {
         Stack stack = new Stack();
         stack.setMultiAz(true);

@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -43,6 +44,8 @@ class MultiAzMigrationValidationServiceTest {
     private static final String AWS_NATIVE_VARIANT = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
 
     private static final String AWS_NATIVE_GOV_VARIANT = AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value();
+
+    private static final String AZURE_VARIANT = AzureConstants.VARIANT.value();
 
     @Mock
     private EntitlementService entitlementService;
@@ -154,7 +157,7 @@ class MultiAzMigrationValidationServiceTest {
                 {"AWS_VARIANT supported", AWS_VARIANT, false, Optional.empty()},
                 {"AWS_NATIVE_VARIANT supported", AWS_NATIVE_VARIANT, false, Optional.empty()},
                 {"AWS_NATIVE_GOV_VARIANT supported", AWS_NATIVE_GOV_VARIANT, false, Optional.empty()},
-                {"unsupported variant", "AZURE", true, Optional.of("Multi-AZ migration is not supported for platform variant")},
+                {"AZURE_VARIANT supported", AZURE_VARIANT, false, Optional.empty()},
                 {"unsupported variant", "GCP", true, Optional.of("Multi-AZ migration is not supported for platform variant")},
         };
     }
@@ -162,6 +165,10 @@ class MultiAzMigrationValidationServiceTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("variantSupportScenarios")
     void testValidateVariantSupported(String name, String variant, boolean expectError, Optional<String> errorFragment) {
+        if (AZURE_VARIANT.equals(variant)) {
+            DetailedEnvironmentResponse azureEnvironment = mockEnvironment("AZURE", Set.of("1", "2", "3"));
+            lenient().when(cachedEnvironmentClientService.getByCrn(ENV_CRN)).thenReturn(azureEnvironment);
+        }
         Stack stack = createStack(variant, false, true, Set.of(availableInstance("i-001")), imageWithOsType(OsType.RHEL8.getOsType()));
 
         ValidationResult result = underTest.validateMultiAzMigrationRequest(ENV_CRN, ACCOUNT_ID, stack);
@@ -218,7 +225,10 @@ class MultiAzMigrationValidationServiceTest {
                 {"AWS environment with 1 AZ", "AWS", 1, false, false, true, Optional.of("less than 2 distinct availability zones")},
                 {"AWS environment with 2 AZs", "AWS", 2, false, false, false, Optional.empty()},
                 {"AWS environment with 3 AZs", "AWS", 3, false, false, false, Optional.empty()},
-                {"Azure environment with 1 AZ - no AWS restriction applies", "AZURE", 1, false, false, false, Optional.empty()},
+                {"Azure environment with 0 AZs", "AZURE", 0, false, false, true, Optional.of("less than 2 distinct availability zones")},
+                {"Azure environment with 1 AZ", "AZURE", 1, false, false, true, Optional.of("less than 2 distinct availability zones")},
+                {"Azure environment with 2 AZs", "AZURE", 2, false, false, false, Optional.empty()},
+                {"Azure environment with 3 AZs", "AZURE", 3, false, false, false, Optional.empty()},
         };
     }
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.chain;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -8,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -21,7 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.flow.core.FlowEventContext;
 import com.sequenceiq.flow.core.FlowState;
@@ -31,6 +36,7 @@ import com.sequenceiq.flow.core.chain.init.config.FlowChainInitState;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
@@ -40,6 +46,7 @@ import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeSta
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -79,6 +86,9 @@ class MultiAzMigrationFlowEventChainFactoryTest {
     private StackUpdater stackUpdater;
 
     @Mock
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
+    @Mock
     private OperationService operationService;
 
     @InjectMocks
@@ -86,57 +96,90 @@ class MultiAzMigrationFlowEventChainFactoryTest {
 
     static Stream<Arguments> testCreateFlowTriggerEventQueueArguments() {
         return Stream.of(
-                Arguments.of(true, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2)),
-                Arguments.of(true, Set.of(PRIMARY_GW, NON_PGW_1)),
-                Arguments.of(true, Set.of(PRIMARY_GW)),
-                Arguments.of(false, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2)),
-                Arguments.of(false, Set.of(PRIMARY_GW, NON_PGW_1)),
-                Arguments.of(false, Set.of(PRIMARY_GW))
+                Arguments.of(AWS_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(AWS_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1), false),
+                Arguments.of(AWS_VARIANT.variant(), Set.of(PRIMARY_GW), false),
+
+                Arguments.of(AWS_NATIVE_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(AWS_NATIVE_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1), false),
+                Arguments.of(AWS_NATIVE_VARIANT.variant(), Set.of(PRIMARY_GW), false),
+
+                Arguments.of(AWS_NATIVE_GOV_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(AWS_NATIVE_GOV_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1), false),
+                Arguments.of(AWS_NATIVE_GOV_VARIANT.variant(), Set.of(PRIMARY_GW), false),
+
+                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), false),
+                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW), false),
+
+                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), true),
+                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), true),
+                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW), true)
         );
     }
 
     @MethodSource("testCreateFlowTriggerEventQueueArguments")
     @ParameterizedTest
-    void testCreateFlowTriggerEventQueueWhenVariantMigrationNeeded(boolean variantMigrationNeeded, Set<String> instanceIds) {
+    void testCreateFlowTriggerEventQueueWhenVariantMigrationNeeded(Variant sourceVariant, Set<String> instanceIds, boolean hasLoadBalancer) {
+        Variant targetVariant = AWS_VARIANT.variant().equals(sourceVariant) ? AWS_NATIVE_VARIANT.variant() : sourceVariant;
         when(instanceGroupService.findGroupNamesByStackId(STACK_ID)).thenReturn(Set.of("master"));
+        if (hasLoadBalancer) {
+            LoadBalancer loadBalancer = mock();
+            when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer));
+        }
         MultiAzMigrationEvent event = new MultiAzMigrationEvent(
                 FlowChainTriggers.MULTI_AZ_MIGRATION_TRIGGER_EVENT,
                 STACK_ID,
                 OPERATION_ID,
-                variantMigrationNeeded ? AwsConstants.AwsVariant.AWS_VARIANT.variant() : AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(),
-                AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(),
+                sourceVariant,
+                targetVariant,
                 new HashSet<>(instanceIds),
                 PRIMARY_GW);
 
         FlowTriggerEventQueue queue = underTest.createFlowTriggerEventQueue(event);
 
-        assertThat(queue.getQueue()).hasSize(getExpectedFlowCount(variantMigrationNeeded, instanceIds));
+        verify(freeIpaLoadBalancerService).findByStackId(STACK_ID);
+        assertThat(queue.getQueue()).hasSize(getExpectedFlowCount(instanceIds, sourceVariant, hasLoadBalancer));
 
         List<UpscaleEvent> upscaleEvents = queue.getQueue().stream()
                 .filter(UpscaleEvent.class::isInstance)
                 .map(UpscaleEvent.class::cast)
                 .toList();
-        assertThat(upscaleEvents).hasSize(variantMigrationNeeded ? instanceIds.size() : instanceIds.size() - 1);
+        assertThat(upscaleEvents).hasSize(event.shouldRecreatePrimaryGw() ? instanceIds.size() : instanceIds.size() - 1);
         assertThat(upscaleEvents).extracting(UpscaleEvent::getInstanceIdsBeingReplaced).allMatch(ids -> ids.size() == 1);
         assertThat(upscaleEvents).flatExtracting(UpscaleEvent::getInstanceIdsBeingReplaced)
-                .containsExactlyInAnyOrderElementsOf(INSTANCE_IDS.subList(variantMigrationNeeded ? 0 : 1, instanceIds.size()));
+                .containsExactlyInAnyOrderElementsOf(INSTANCE_IDS.subList(event.shouldRecreatePrimaryGw() ? 0 : 1, instanceIds.size()));
 
         List<DownscaleEvent> downscaleEvents = queue.getQueue().stream()
                 .filter(DownscaleEvent.class::isInstance)
                 .map(DownscaleEvent.class::cast)
                 .toList();
-        assertThat(downscaleEvents).hasSize(variantMigrationNeeded ? instanceIds.size() : instanceIds.size() - 1);
+        assertThat(downscaleEvents).hasSize(event.shouldRecreatePrimaryGw() ? instanceIds.size() : instanceIds.size() - 1);
         assertThat(downscaleEvents).extracting(DownscaleEvent::getInstanceIds).allMatch(ids -> ids.size() == 1);
         assertThat(downscaleEvents).flatExtracting(DownscaleEvent::getInstanceIds)
-                .containsExactlyInAnyOrderElementsOf(INSTANCE_IDS.subList(variantMigrationNeeded ? 0 : 1, instanceIds.size()));
+                .containsExactlyInAnyOrderElementsOf(INSTANCE_IDS.subList(event.shouldRecreatePrimaryGw() ? 0 : 1, instanceIds.size()));
     }
 
-    private static int getExpectedFlowCount(boolean variantMigrationNeeded, Set<String> instanceIds) {
-        return switch (instanceIds.size()) {
-            case 1 -> variantMigrationNeeded ? 9 : 4;
-            case 2 -> variantMigrationNeeded ? 13 : 6;
-            case 3 -> variantMigrationNeeded ? 15 : 8;
-            default -> 0;
+    private static int getExpectedFlowCount(Set<String> instanceIds, Variant sourceVariant, boolean hasLoadBalancer) {
+        return switch (sourceVariant.value()) {
+            case "AWS" -> switch (instanceIds.size()) {
+                case 1 -> 9;
+                case 2 -> 13;
+                case 3 -> 15;
+                default -> 0;
+            };
+            case "AWS_NATIVE", "AWS_NATIVE_GOV" -> switch (instanceIds.size()) {
+                case 1 -> 4;
+                case 2 -> 6;
+                case 3 -> 8;
+                default -> 0;
+            };
+            default -> switch (instanceIds.size()) {
+                case 1 -> hasLoadBalancer ? 9 : 7;
+                case 2 -> hasLoadBalancer ? 11 : 9;
+                case 3 -> hasLoadBalancer ? 13 : 11;
+                default -> 0;
+            };
         };
     }
 

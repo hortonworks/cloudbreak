@@ -1,11 +1,13 @@
 package com.sequenceiq.freeipa.flow.freeipa.migration;
 
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_CLEANUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeState.INIT_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeState.MULTI_AZ_MIGRATION_CLEANUP_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeState.MULTI_AZ_MIGRATION_FINALIZE_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeState.MULTI_AZ_MIGRATION_FINALIZE_STATE;
 
@@ -24,8 +26,13 @@ public class MultiAzMigrationFinalizeFlowConfig
                     .defaultFailureEvent(MULTI_AZ_MIGRATION_FINALIZE_FAILURE_EVENT)
 
                     .from(INIT_STATE)
-                    .to(MULTI_AZ_MIGRATION_FINALIZE_STATE)
+                    .to(MULTI_AZ_MIGRATION_CLEANUP_STATE)
                     .event(MULTI_AZ_MIGRATION_FINALIZE_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(MULTI_AZ_MIGRATION_CLEANUP_STATE)
+                    .to(MULTI_AZ_MIGRATION_FINALIZE_STATE)
+                    .event(MULTI_AZ_MIGRATION_CLEANUP_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(MULTI_AZ_MIGRATION_FINALIZE_STATE)

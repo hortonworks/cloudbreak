@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
@@ -62,6 +63,11 @@ public class MultiAzMigrationEvent extends StackEvent {
     }
 
     @JsonIgnore
+    public boolean isAzure() {
+        return AzureConstants.VARIANT.equals(sourceVariant);
+    }
+
+    @JsonIgnore
     public boolean variantMigrationNeeded() {
         return Objects.nonNull(sourceVariant)
                 && Objects.nonNull(targetVariant)
@@ -70,7 +76,7 @@ public class MultiAzMigrationEvent extends StackEvent {
 
     @JsonIgnore
     public boolean shouldRecreatePrimaryGw() {
-        return variantMigrationNeeded();
+        return variantMigrationNeeded() || AzureConstants.VARIANT.equals(sourceVariant);
     }
 
     @JsonIgnore

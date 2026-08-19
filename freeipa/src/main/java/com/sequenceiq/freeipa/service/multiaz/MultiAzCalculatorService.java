@@ -292,15 +292,29 @@ public class MultiAzCalculatorService {
     }
 
     public void populateAvailabilityZonesForInstances(Stack stack, InstanceGroup instanceGroup, Map<String, String> subnetAzPairs) {
+        populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzPairs, Set.of());
+    }
+
+    public void populateAvailabilityZonesForInstances(Stack stack, InstanceGroup instanceGroup, Map<String, String> subnetAzPairs,
+            Set<String> excludeInstanceIds) {
+        populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzPairs, excludeInstanceIds, instanceGroup.getNotDeletedInstanceMetaDataSet());
+    }
+
+    /**
+     * Only assigns an availability zone to instances in {@code instancesToPopulate}, while occupancy counting still
+     * considers every not-deleted instance in the group. This avoids stamping a fabricated AZ onto legacy instances
+     * that have no real AZ yet (e.g. pre-multi-AZ Azure instances placed via availability sets) before they are
+     * actually replaced.
+     */
+    public void populateAvailabilityZonesForInstances(Stack stack, InstanceGroup instanceGroup, Map<String, String> subnetAzPairs,
+            Set<String> excludeInstanceIds, Set<InstanceMetaData> instancesToPopulate) {
         if (stack.isMultiAz()) {
             Set<String> availabilityZones = instanceGroup.getInstanceGroupNetwork() != null ? availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(
                     instanceGroup.getInstanceGroupNetwork().getAttributes()) : Collections.emptySet();
             if (!CollectionUtils.isEmpty(availabilityZones)) {
-                Set<InstanceMetaData> instanceMetaDataSets = instanceGroup.getNotDeletedInstanceMetaDataSet();
-                Map<String, Long> zoneToNodeCountMap = availabilityZones.stream().collect(Collectors.toMap(Function.identity(),
-                        availabilityZone -> countInstancesForAvailabilityZone(instanceMetaDataSets, availabilityZone)));
+                Map<String, Long> zoneToNodeCountMap = collectZoneToNodeCountMap(instanceGroup, availabilityZones, excludeInstanceIds);
                 LOGGER.debug("Initialized zoneToNodeCountMap {}", zoneToNodeCountMap);
-                for (InstanceMetaData instance : instanceMetaDataSets) {
+                for (InstanceMetaData instance : instancesToPopulate) {
                     if (instance.getAvailabilityZone() == null) {
                         String availabilityZone = resolveAvailabilityZoneForInstance(instance, subnetAzPairs, availabilityZones, zoneToNodeCountMap);
                         if (availabilityZone != null) {
@@ -345,8 +359,16 @@ public class MultiAzCalculatorService {
                 .convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
     }
 
-    private long countInstancesForAvailabilityZone(Set<InstanceMetaData> instanceMetaDataSets, String availabilityZone) {
-        return instanceMetaDataSets.stream().filter(instance -> availabilityZone.equals(instance.getAvailabilityZone())).count();
+    private Map<String, Long> collectZoneToNodeCountMap(InstanceGroup instanceGroup, Set<String> availabilityZones, Set<String> excludeInstanceIds) {
+        Set<InstanceMetaData> notExcludedInstanceMetaDataSets = instanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                .filter(instance -> shouldNotBeExcluded(instance, excludeInstanceIds))
+                .collect(Collectors.toSet());
+        return availabilityZones.stream()
+                .collect(Collectors.toMap(Function.identity(), availabilityZone ->
+                        notExcludedInstanceMetaDataSets.stream()
+                                .filter(instance -> availabilityZone.equals(instance.getAvailabilityZone()))
+                                .count())
+                );
     }
 
     private Set<String> validateAndGetEnvironmentZones(DetailedEnvironmentResponse detailedEnvironmentResponse, Stack stack) {

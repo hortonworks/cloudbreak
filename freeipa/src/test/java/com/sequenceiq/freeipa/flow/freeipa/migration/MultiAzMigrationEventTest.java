@@ -30,7 +30,7 @@ class MultiAzMigrationEventTest {
 
     private static final String NON_PGW_2 = "i-non-pgw-2";
 
-    static Stream<Arguments> variantArguments() {
+    static Stream<Arguments> variantMigrationNeededArguments() {
         return Stream.of(
                 Arguments.of(null, null, false),
                 Arguments.of(null, AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(), false),
@@ -42,14 +42,26 @@ class MultiAzMigrationEventTest {
         );
     }
 
-    @MethodSource("variantArguments")
+    static Stream<Arguments> shouldRecreatePrimaryGwArguments() {
+        return Stream.of(
+                Arguments.of(null, null, false),
+                Arguments.of(null, AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(), false),
+                Arguments.of(AwsConstants.AwsVariant.AWS_VARIANT.variant(), null, false),
+                Arguments.of(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(), AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(), false),
+                Arguments.of(AwsConstants.AwsVariant.AWS_VARIANT.variant(), AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(), true),
+                Arguments.of(AzureConstants.VARIANT, AzureConstants.VARIANT, true),
+                Arguments.of(GcpConstants.GCP_VARIANT, GcpConstants.GCP_VARIANT, false)
+        );
+    }
+
+    @MethodSource("variantMigrationNeededArguments")
     @ParameterizedTest
     void testVariantMigrationNeeded(Variant sourceVariant, Variant targetVariant, boolean expected) {
         MultiAzMigrationEvent underTest = getMultiAzMigrationEvent(sourceVariant, targetVariant);
         assertEquals(expected, underTest.variantMigrationNeeded());
     }
 
-    @MethodSource("variantArguments")
+    @MethodSource("shouldRecreatePrimaryGwArguments")
     @ParameterizedTest
     void testShouldRecreatePrimaryGw(Variant sourceVariant, Variant targetVariant, boolean expected) {
         MultiAzMigrationEvent underTest = getMultiAzMigrationEvent(sourceVariant, targetVariant);

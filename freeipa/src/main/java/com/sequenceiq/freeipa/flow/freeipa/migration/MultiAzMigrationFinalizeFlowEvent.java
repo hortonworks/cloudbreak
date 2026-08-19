@@ -7,6 +7,7 @@ import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationFinal
 public enum MultiAzMigrationFinalizeFlowEvent implements FlowEvent {
 
     MULTI_AZ_MIGRATION_FINALIZE_EVENT,
+    MULTI_AZ_MIGRATION_CLEANUP_FINISHED_EVENT,
     MULTI_AZ_MIGRATION_FINALIZE_FINISHED_EVENT,
     MULTI_AZ_MIGRATION_FINALIZE_FAILURE_EVENT(EventSelectorUtil.selector(MultiAzMigrationFinalizeFailedEvent.class)),
     MULTI_AZ_MIGRATION_FINALIZE_FAIL_HANDLED_EVENT;

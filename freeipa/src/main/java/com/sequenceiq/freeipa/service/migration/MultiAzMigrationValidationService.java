@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -31,7 +32,8 @@ public class MultiAzMigrationValidationService {
     private static final Set<Variant> SUPPORTED_VARIANTS_FOR_MULTI_AZ_MIGRATION = Set.of(
             AwsConstants.AwsVariant.AWS_VARIANT.variant(),
             AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(),
-            AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant()
+            AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant(),
+            AzureConstants.VARIANT
     );
 
     @Inject
@@ -61,8 +63,7 @@ public class MultiAzMigrationValidationService {
     }
 
     private ValidationResult validateVariantMigrationEntitlementIfNeeded(String accountId, Stack stack) {
-        if (AwsConstants.AwsVariant.AWS_VARIANT.variant().equals(Variant.variant(stack.getPlatformvariant()))
-                && !entitlementService.awsVariantMigrationEnabled(accountId)) {
+        if (isCloudFormationAwsVariant(stack) && !entitlementService.awsVariantMigrationEnabled(accountId)) {
             return ValidationResult.ofError("The account is not entitled to use AWS variant migration, " +
                     "which is required for the multi-AZ migration of FreeIPA using AWS CloudFormation.");
         }
@@ -70,7 +71,7 @@ public class MultiAzMigrationValidationService {
     }
 
     private ValidationResult validateVariantMigrationSupportedByOsIfNeeded(Stack stack) {
-        if (AwsConstants.AwsVariant.AWS_VARIANT.variant().equals(Variant.variant(stack.getPlatformvariant()))) {
+        if (isCloudFormationAwsVariant(stack)) {
             Optional<Boolean> osSupportsAwsVariantMigration = Optional.ofNullable(stack.getImage())
                     .map(ImageEntity::getOsType)
                     .map(OsType::isRhel);
@@ -85,6 +86,10 @@ public class MultiAzMigrationValidationService {
             }
         }
         return ValidationResult.empty();
+    }
+
+    private static boolean isCloudFormationAwsVariant(Stack stack) {
+        return AwsConstants.AwsVariant.AWS_VARIANT.variant().equals(Variant.variant(stack.getPlatformvariant()));
     }
 
     private ValidationResult validateStackMultiAzFlag(Stack stack) {
@@ -145,14 +150,14 @@ public class MultiAzMigrationValidationService {
                     .map(network -> network.getAvailabilityZones(CloudPlatform.fromName(environment.getCloudPlatform())));
             if (environmentZones.isEmpty()) {
                 return ValidationResult.ofError("Could not determine availability zones available for the environment.");
-            }
-            if (AwsConstants.AWS_PLATFORM.value().equals(environment.getCloudPlatform()) && environmentZones.get().size() < 2) {
-                return ValidationResult.ofError("The environment has less than 2 distinct availability zones. " +
-                        "For multi-AZ migration on AWS, there needs to be at least 2 subnets in different AZs available.");
+            } else {
+                return environmentZones.get().size() >= 2
+                        ? ValidationResult.empty()
+                        : ValidationResult.ofError(String.format("The environment has less than 2 distinct availability zones. " +
+                        "For multi-AZ migration on %s, there need to be at least 2 availability zones available.", environment.getCloudPlatform()));
             }
         } catch (WebApplicationException e) {
             return ValidationResult.ofError("Could not retrieve environment for validation: " + e.getMessage());
         }
-        return ValidationResult.empty();
     }
 }

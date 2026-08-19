@@ -53,6 +53,7 @@ import com.sequenceiq.freeipa.flow.freeipa.migration.action.MultiAzMigrationFina
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationFinalizeFailedEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationFinalizeTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -161,7 +162,7 @@ class MultiAzMigrationFinalizeActionsTest {
         when(stack.getOwner()).thenReturn("owner");
 
         AbstractMultiAzMigrationFinalizeAction<MultiAzMigrationFinalizeTriggerEvent> action =
-                (AbstractMultiAzMigrationFinalizeAction<MultiAzMigrationFinalizeTriggerEvent>) underTest.multiAzMigrationFinalizeAction();
+                (AbstractMultiAzMigrationFinalizeAction<MultiAzMigrationFinalizeTriggerEvent>) underTest.multiAzMigrationCleanupAction();
         initActionPrivateFields(action);
 
         StackContext result = new AbstractActionTestSupport<>(action).createFlowContext(flowParameters, stateContext, payload);
@@ -183,24 +184,22 @@ class MultiAzMigrationFinalizeActionsTest {
 
     @Test
     void testMultiAzMigrationFinalizeAction() throws Exception {
-        MultiAzMigrationFinalizeTriggerEvent payload =
-                new MultiAzMigrationFinalizeTriggerEvent(MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_EVENT.event(),
-                        STACK_ID, OPERATION_ID);
-        Map<Object, Object> variables = mock();
+        StackEvent payload = new StackEvent(MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_CLEANUP_FINISHED_EVENT.event(), STACK_ID);
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put(OperationAwareAction.OPERATION_ID, OPERATION_ID);
         ArgumentCaptor<Set<SuccessDetails>> successDetailsSetCaptor = ArgumentCaptor.forClass(Set.class);
-        Event<MultiAzMigrationFinalizeTriggerEvent> event = mock();
-        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationFinalizeTriggerEvent.class))).thenReturn(event);
+        Event<StackEvent> event = mock();
+        when(reactorEventFactory.createEvent(any(), any(StackEvent.class))).thenReturn(event);
 
-        AbstractMultiAzMigrationFinalizeAction<MultiAzMigrationFinalizeTriggerEvent> action =
-                (AbstractMultiAzMigrationFinalizeAction<MultiAzMigrationFinalizeTriggerEvent>) underTest.multiAzMigrationFinalizeAction();
+        AbstractMultiAzMigrationFinalizeAction<StackEvent> action =
+                (AbstractMultiAzMigrationFinalizeAction<StackEvent>) underTest.multiAzMigrationFinalizeAction();
         initActionPrivateFields(action);
 
-        AbstractActionTestSupport<MultiAzMigrationFinalizeState, MultiAzMigrationFinalizeFlowEvent, StackContext, MultiAzMigrationFinalizeTriggerEvent>
+        AbstractActionTestSupport<MultiAzMigrationFinalizeState, MultiAzMigrationFinalizeFlowEvent, StackContext, StackEvent>
                 abstractActionTestSupport = new AbstractActionTestSupport<>(action);
         abstractActionTestSupport.prepareExecution(payload, variables);
         abstractActionTestSupport.doExecute(context, payload, variables);
 
-        verify(variables).put(OperationAwareAction.OPERATION_ID, OPERATION_ID);
         verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPDATE_COMPLETE, "FreeIPA multi-AZ migration completed successfully.");
         verify(operationService).completeOperation(eq(ACCOUNT_ID), eq(OPERATION_ID), successDetailsSetCaptor.capture(), eq(Set.of()));
         Set<SuccessDetails> successDetails = successDetailsSetCaptor.getValue();

@@ -29,6 +29,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
@@ -63,11 +65,13 @@ import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaValidationProperties;
 import com.sequenceiq.freeipa.flow.freeipa.migration.action.MultiAzMigrationFinalizeActions;
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationFinalizeTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.migration.handler.MultiAzMigrationCleanupHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.AutoSyncConfig;
@@ -127,10 +131,10 @@ class MultiAzMigrationFinalizeFlowIntegrationTest {
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
     @MockitoBean
-    private CloudPlatformConnectors cloudPlatformConnectors;
+    private ImageService imageService;
 
     @MockitoBean
-    private ImageService imageService;
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @MockitoBean
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -141,10 +145,19 @@ class MultiAzMigrationFinalizeFlowIntegrationTest {
     @MockitoBean
     private StackToCloudStackConverter stackToCloudStackConverter;
 
+    @MockitoBean
+    private ResourceService resourceService;
+
+    @MockitoBean
+    private AzureUtils azureUtils;
+
+    @MockitoBean
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
     private Stack stack;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws Exception {
         stack = new Stack();
         stack.setId(STACK_ID);
         stack.setAccountId("test-account");
@@ -166,6 +179,7 @@ class MultiAzMigrationFinalizeFlowIntegrationTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
         doNothing().when(nodeValidator).checkForRecentHeartbeat();
+        when(resourceService.findAllByResourceStatusAndResourceTypeAndStackId(any(), any(), eq(STACK_ID))).thenReturn(List.of());
     }
 
     @Test
@@ -225,6 +239,7 @@ class MultiAzMigrationFinalizeFlowIntegrationTest {
     @Import({
             MultiAzMigrationFinalizeFlowConfig.class,
             MultiAzMigrationFinalizeActions.class,
+            MultiAzMigrationCleanupHandler.class,
             FlowIntegrationTestConfig.class,
             FlowEventListenerAdapter.class,
             ImageConverter.class,

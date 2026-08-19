@@ -145,6 +145,7 @@ public class InstanceMetaDataService {
             if (instanceGroup != null) {
                 Map<String, String> subnetAzMap = multiAzCalculatorService.prepareSubnetAzMap(environment);
                 Map<String, Integer> currentSubnetUsage = multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup, excludeInstanceIds);
+                Set<InstanceMetaData> newlyAddedInstanceMetaData = new HashSet<>();
                 for (CloudInstance cloudInstance : instancesPerGroupEntry.getValue()) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     Long privateId = cloudInstance.getTemplate().getPrivateId();
@@ -155,11 +156,16 @@ public class InstanceMetaDataService {
                     instanceMetaData.setImage(image);
                     if (instanceIdsToRemoveIterator.hasNext()) {
                         InstanceMetaData nextInstanceMetadata = instanceIdsToRemoveIterator.next();
-                        instanceMetaData.setAvailabilityZone(nextInstanceMetadata.getAvailabilityZone());
-                        instanceMetaData.setSubnetId(nextInstanceMetadata.getSubnetId());
-                        LOGGER.debug("Instance metadata found with id: {}, the subnet and AZ are set to {}/{} for the new instance metadata with private id: {}",
-                                nextInstanceMetadata.getInstanceId(), nextInstanceMetadata.getAvailabilityZone(), nextInstanceMetadata.getSubnetId(),
-                                privateId);
+                        if (!excludeInstanceIds.contains(nextInstanceMetadata.getInstanceId())) {
+                            LOGGER.debug("Instance metadata found with id: {}, the subnet and AZ are set to {}/{} for the new instance metadata with " +
+                                    "private id: {}", nextInstanceMetadata.getInstanceId(), nextInstanceMetadata.getAvailabilityZone(),
+                                    nextInstanceMetadata.getSubnetId(), privateId);
+                            instanceMetaData.setAvailabilityZone(nextInstanceMetadata.getAvailabilityZone());
+                            instanceMetaData.setSubnetId(nextInstanceMetadata.getSubnetId());
+                        } else {
+                            LOGGER.debug("Instance metadata found with id: {} is excluded, skipping AZ/subnet inheritance for the new instance metadata " +
+                                    "with private id: {}", nextInstanceMetadata.getInstanceId(), privateId);
+                        }
                     }
                     if (StringUtils.isBlank(instanceMetaData.getSubnetId()) && !subnetAzMap.isEmpty()) {
                         LOGGER.debug("Calculate new subnet and AZ for private id: {}", privateId);
@@ -174,7 +180,11 @@ public class InstanceMetaDataService {
                         LOGGER.debug("Subnet and AZ calculation skipped, because the subnetAzMap is empty");
                     }
                     instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
-                    multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
+                    newlyAddedInstanceMetaData.add(instanceMetaData);
+                }
+                multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap, excludeInstanceIds,
+                        newlyAddedInstanceMetaData);
+                for (InstanceMetaData instanceMetaData : newlyAddedInstanceMetaData) {
                     instanceMetaDataRepository.save(instanceMetaData);
                     LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);
                 }

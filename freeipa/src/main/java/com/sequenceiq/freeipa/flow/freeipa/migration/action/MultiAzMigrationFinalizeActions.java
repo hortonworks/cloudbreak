@@ -16,9 +16,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationCleanupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationFinalizeFailedEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationFinalizeTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -33,8 +35,8 @@ public class MultiAzMigrationFinalizeActions {
     @Inject
     private OperationService operationService;
 
-    @Bean(name = "MULTI_AZ_MIGRATION_FINALIZE_STATE")
-    public Action<?, ?> multiAzMigrationFinalizeAction() {
+    @Bean(name = "MULTI_AZ_MIGRATION_CLEANUP_STATE")
+    public Action<?, ?> multiAzMigrationCleanupAction() {
         return new AbstractMultiAzMigrationFinalizeAction<>(MultiAzMigrationFinalizeTriggerEvent.class) {
 
             @Override
@@ -45,10 +47,25 @@ public class MultiAzMigrationFinalizeActions {
             @Override
             protected void doExecute(StackContext context, MultiAzMigrationFinalizeTriggerEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
+                LOGGER.info("Cleaning up no longer needed cloud resources for stack: {}", stack.getName());
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPDATE_IN_PROGRESS, "Cleaning up cloud resources after multi-AZ migration.");
+                sendEvent(context, new MultiAzMigrationCleanupRequest(stack.getId(), context.getCloudContext(), context.getCloudCredential(),
+                        context.getCloudStack()));
+            }
+        };
+    }
+
+    @Bean(name = "MULTI_AZ_MIGRATION_FINALIZE_STATE")
+    public Action<?, ?> multiAzMigrationFinalizeAction() {
+        return new AbstractMultiAzMigrationFinalizeAction<>(StackEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
                 LOGGER.info("Finalizing multi-AZ migration for stack: {}", stack.getName());
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPDATE_COMPLETE, "FreeIPA multi-AZ migration completed successfully.");
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
-                operationService.completeOperation(stack.getAccountId(), payload.getOperationId(), Set.of(successDetails), Set.of());
+                operationService.completeOperation(stack.getAccountId(), getOperationId(variables), Set.of(successDetails), Set.of());
                 getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), ResourceEvent.FREEIPA_MULTI_AZ_MIGRATION_FINISHED);
                 enableStatusChecker(stack, "Multi-AZ migration completed successfully.");
                 sendEvent(context, MultiAzMigrationFinalizeFlowEvent.MULTI_AZ_MIGRATION_FINALIZE_FINISHED_EVENT.event(), payload);

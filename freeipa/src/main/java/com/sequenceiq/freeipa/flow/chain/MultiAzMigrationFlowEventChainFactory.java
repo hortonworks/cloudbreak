@@ -37,6 +37,11 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerDeletionEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerDeletionTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerProvisioningMode;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeState;
@@ -50,6 +55,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -77,6 +83,9 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
     private StackUpdater stackUpdater;
 
     @Inject
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
+    @Inject
     private OperationService operationService;
 
     @Override
@@ -86,12 +95,15 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(MultiAzMigrationEvent event) {
+        boolean hasLoadBalancer = freeIpaLoadBalancerService.findByStackId(event.getResourceId()).isPresent();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
         flowEventChain.addAll(createInitFlow(event));
         flowEventChain.addAll(createMigrationInitFlow(event));
+        flowEventChain.addAll(createLoadBalancerDeletionFlowIfNeeded(event, hasLoadBalancer));
         flowEventChain.addAll(createScaleEventsAndChangePrimaryGatewayFlowIfNeeded(event));
         flowEventChain.addAll(createScaleEventsForNonPrimaryGatewayFlowIfNeeded(event));
+        flowEventChain.addAll(createLoadBalancerReprovisionFlowIfNeeded(event, hasLoadBalancer));
         flowEventChain.addAll(createMigrationFinalizeFlow(event));
         flowEventChain.addAll(createFinalizeFlow(event));
 
@@ -115,6 +127,16 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
                         event.getResourceId(),
                         event.getOperationId())
         );
+    }
+
+    private List<Selectable> createLoadBalancerDeletionFlowIfNeeded(MultiAzMigrationEvent event, boolean hasLoadBalancer) {
+        if (event.isAzure() && hasLoadBalancer) {
+            LOGGER.debug("Adding load balancer deletion flow for Azure multi-AZ migration, stack {}", event.getResourceId());
+            return List.of(new LoadBalancerDeletionTriggerEvent(
+                    FreeIpaLoadBalancerDeletionEvent.LOAD_BALANCER_DELETION_EVENT.event(),
+                    event.getResourceId()));
+        }
+        return List.of();
     }
 
     private List<Selectable> createScaleEventsAndChangePrimaryGatewayFlowIfNeeded(MultiAzMigrationEvent event) {
@@ -175,6 +197,18 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
         }
     }
 
+    private List<Selectable> createLoadBalancerReprovisionFlowIfNeeded(MultiAzMigrationEvent event, boolean hasLoadBalancer) {
+        if (event.isAzure() && hasLoadBalancer) {
+            LOGGER.debug("Adding load balancer reprovision flow for Azure multi-AZ migration, stack {}", event.getResourceId());
+            return List.of(new LoadBalancerCreationTriggerEvent(
+                    FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(),
+                    event.getResourceId(),
+                    LoadBalancerProvisioningMode.UPGRADE,
+                    event.getOperationId()));
+        }
+        return List.of();
+    }
+
     private List<Selectable> createMigrationFinalizeFlow(MultiAzMigrationEvent event) {
         return List.of(
                 new MultiAzMigrationFinalizeTriggerEvent(
@@ -225,7 +259,6 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
      * The upscale flow treats an empty instanceIds list as the signal to recalculate AZ distribution from
      * scratch. Each call returns a fresh mutable list because the consuming flow may mutate it.
      */
-    @SuppressWarnings("IllegalType")
     private static ArrayList<String> forceAzRecalculation() {
         return new ArrayList<>();
     }
@@ -253,8 +286,7 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
     @Override
     public UsageProto.CDPFreeIPAStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
         return switch (flowState) {
-            case FlowChainInitState s when s == FlowChainInitState.INIT_STATE ->
-                    UsageProto.CDPFreeIPAStatus.Value.MULTI_AZ_MIGRATION_STARTED;
+            case FlowChainInitState s when s == FlowChainInitState.INIT_STATE -> UsageProto.CDPFreeIPAStatus.Value.MULTI_AZ_MIGRATION_STARTED;
             case FlowChainFinalizeState s when s == FlowChainFinalizeState.FLOWCHAIN_FINALIZE_FINISHED_STATE ->
                     UsageProto.CDPFreeIPAStatus.Value.MULTI_AZ_MIGRATION_FINISHED;
             case MultiAzMigrationInitState s when s == MultiAzMigrationInitState.MULTI_AZ_MIGRATION_INIT_FAILED_STATE ->

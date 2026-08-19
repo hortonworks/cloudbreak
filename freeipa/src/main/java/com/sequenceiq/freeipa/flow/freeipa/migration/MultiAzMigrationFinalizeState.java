@@ -7,6 +7,7 @@ import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 public enum MultiAzMigrationFinalizeState implements FlowState {
 
     INIT_STATE,
+    MULTI_AZ_MIGRATION_CLEANUP_STATE,
     MULTI_AZ_MIGRATION_FINALIZE_STATE,
     MULTI_AZ_MIGRATION_FINALIZE_FAILED_STATE,
     FINAL_STATE;

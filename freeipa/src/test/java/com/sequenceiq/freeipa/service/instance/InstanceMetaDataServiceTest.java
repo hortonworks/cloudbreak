@@ -44,7 +44,7 @@ import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
-public class InstanceMetaDataServiceTest {
+class InstanceMetaDataServiceTest {
 
     private static final String ENVIRONMENT_ID = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:12345-6789";
 
@@ -95,7 +95,7 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testUpdateStatusSuccess() {
+    void testUpdateStatusSuccess() {
         Stack stack = initializeStackWithInstanceGroup();
         when(instanceMetaDataRepository.findAllInStack(STACK_ID)).thenReturn(getInstancesFromStack());
 
@@ -105,7 +105,7 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testUpdateMultipleStatusSuccess() {
+    void testUpdateMultipleStatusSuccess() {
         Stack stack = initializeStackWithInstanceGroup();
         when(instanceMetaDataRepository.findAllInStack(STACK_ID)).thenReturn(getInstancesFromStack());
 
@@ -115,7 +115,7 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testUpdateStatusInvalidId() {
+    void testUpdateStatusInvalidId() {
         Stack stack = initializeStackWithInstanceGroup();
         when(instanceMetaDataRepository.findAllInStack(STACK_ID)).thenReturn(getInstancesFromStack());
 
@@ -125,7 +125,7 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testSaveInstanceAndGetUpdatedStackWhenAvailabilityZoneDataIsAvailable() {
+    void testSaveInstanceAndGetUpdatedStackWhenAvailabilityZoneDataIsAvailable() {
         Stack stack = initializeStackWithInstanceGroup();
         InstanceGroup instanceGroup = stack.getInstanceGroups().stream().findFirst().get();
         FreeIpa freeIpa = new FreeIpa();
@@ -155,11 +155,11 @@ public class InstanceMetaDataServiceTest {
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
         verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, Set.of());
         verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup, stack);
-        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
+        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap, Set.of(), Set.of(instanceMetaData));
     }
 
     @Test
-    public void testSaveInstanceAndGetUpdatedStackForwardsExcludeInstanceIdsToMultiAzCalculator() {
+    void testSaveInstanceAndGetUpdatedStackForwardsExcludeInstanceIdsToMultiAzCalculator() {
         Stack stack = initializeStackWithInstanceGroup();
         InstanceGroup instanceGroup = stack.getInstanceGroups().stream().findFirst().get();
         FreeIpa freeIpa = new FreeIpa();
@@ -182,14 +182,21 @@ public class InstanceMetaDataServiceTest {
         Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, Collections.emptyList(), excludeInstanceIds);
 
         InstanceGroup actualInstanceGroup = actualStack.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
+        InstanceMetaData newInstanceMetaData = actualInstanceGroup.getInstanceMetaData().stream()
+                .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
+                .findFirst().get();
         verify(multiAzCalculatorService).calculateCurrentSubnetUsage(subnetAzMap, actualInstanceGroup, excludeInstanceIds);
         verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, excludeInstanceIds);
+        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap, excludeInstanceIds,
+                Set.of(newInstanceMetaData));
         verify(multiAzCalculatorService, never()).calculateCurrentSubnetUsage(subnetAzMap, actualInstanceGroup, Set.of());
         verify(multiAzCalculatorService, never()).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, Set.of());
+        verify(multiAzCalculatorService, never()).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap, Set.of(),
+                Set.of(newInstanceMetaData));
     }
 
     @Test
-    public void testSaveInstanceAndGetUpdatedStackWhenNoAvailabilityZoneDataAvailable() {
+    void testSaveInstanceAndGetUpdatedStackWhenNoAvailabilityZoneDataAvailable() {
         Stack stack = initializeStackWithInstanceGroup();
         InstanceGroup instanceGroup = stack.getInstanceGroups().stream().findFirst().get();
         FreeIpa freeIpa = new FreeIpa();
@@ -223,11 +230,11 @@ public class InstanceMetaDataServiceTest {
         verify(multiAzCalculatorService, times(0)).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, Set.of());
         verify(multiAzCalculatorService, times(0)).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData,
                 actualInstanceGroup, null);
-        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
+        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap, Set.of(), Set.of(instanceMetaData));
     }
 
     @Test
-    public void testSaveInstanceAndGetUpdatedStackWhenAvailabilityZoneDataIsInheritedFromInstances() {
+    void testSaveInstanceAndGetUpdatedStackWhenAvailabilityZoneDataIsInheritedFromInstances() {
         InstanceMetaData im1 = new InstanceMetaData();
         im1.setAvailabilityZone("old-az1");
         im1.setSubnetId("old-s1");
@@ -265,12 +272,51 @@ public class InstanceMetaDataServiceTest {
                         validateAzAndSubnet(im2, im);
                     }
                 });
+        InstanceGroup actualInstanceGroup = actualStack.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
         verify(multiAzCalculatorService, never()).filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap, Set.of());
-        verify(multiAzCalculatorService, times(2)).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap);
+        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzMap, Set.of(),
+                actualInstanceGroup.getInstanceMetaData());
     }
 
     @Test
-    public void testGetNonPrimaryGwInstances() {
+    void testSaveInstanceAndGetUpdatedStackWhenRemovedInstanceIsExcludedAzInheritanceIsSkipped() {
+        InstanceMetaData im1 = new InstanceMetaData();
+        im1.setInstanceId(INSTANCE_ID_1);
+        im1.setAvailabilityZone("old-az1");
+        im1.setSubnetId("old-s1");
+
+        Stack stack = initializeStackWithInstanceGroupAndWithoutInstance();
+        InstanceGroup instanceGroup = stack.getInstanceGroups().stream().findFirst().get();
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setHostname("ipa");
+        freeIpa.setDomain("dom");
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        InstanceTemplate template = mock(InstanceTemplate.class);
+        when(template.getGroupName()).thenReturn(GROUP_NAME);
+        when(template.getPrivateId()).thenReturn(INSTANCE_PRIVATE_ID_3);
+        List<CloudInstance> cloudInstances = List.of(new CloudInstance(INSTANCE_ID_3, template, null, "subnet-1", "az1"));
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_ID)).thenReturn(environmentResponse);
+        Map<String, String> subnetAzMap = Map.of("aSubnetId", "anAvailabilityZoneId");
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
+        Set<String> excludeInstanceIds = Set.of(INSTANCE_ID_1);
+        Map<String, Integer> subnetUsage = Map.of();
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup, excludeInstanceIds)).thenReturn(subnetUsage);
+        when(multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap, excludeInstanceIds)).thenReturn(subnetAzMap);
+
+        Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, List.of(im1), excludeInstanceIds);
+
+        InstanceGroup actualInstanceGroup = actualStack.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
+        InstanceMetaData newInstanceMetaData = actualInstanceGroup.getInstanceMetaData().stream()
+                .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
+                .findFirst().get();
+        verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap, excludeInstanceIds);
+        verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, newInstanceMetaData,
+                actualInstanceGroup, stack);
+    }
+
+    @Test
+    void testGetNonPrimaryGwInstances() {
         Set<InstanceMetaData> nonPrimaryGwInstances = underTest.getNonPrimaryGwInstances(createValidImSet());
         assertEquals(2, nonPrimaryGwInstances.size());
         assertTrue(nonPrimaryGwInstances.stream().anyMatch(im -> im.getInstanceId().equals("im2")));
@@ -279,14 +325,14 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testGetPrimaryGwInstance() {
+    void testGetPrimaryGwInstance() {
         InstanceMetaData primaryGwInstance = underTest.getPrimaryGwInstance(createValidImSet());
         assertEquals("pgw", primaryGwInstance.getInstanceId());
         assertEquals(InstanceMetadataType.GATEWAY_PRIMARY, primaryGwInstance.getInstanceMetadataType());
     }
 
     @Test
-    public void testUpdateInstanceStatusOnUpscaleFailureShouldSetInstanceStatusToTerminated() {
+    void testUpdateInstanceStatusOnUpscaleFailureShouldSetInstanceStatusToTerminated() {
         underTest.updateInstanceStatusOnUpscaleFailure(Set.of(new InstanceMetaData()));
 
         verify(clock).getCurrentTimeMillis();
@@ -296,7 +342,7 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testUpdateInstanceStatusOnUpscaleFailureShouldSetInstanceStatusToFailed() {
+    void testUpdateInstanceStatusOnUpscaleFailureShouldSetInstanceStatusToFailed() {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId(INSTANCE_ID_1);
         underTest.updateInstanceStatusOnUpscaleFailure(Set.of(instanceMetaData));
@@ -309,7 +355,7 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testUpdateInstanceStatusOnUpscaleFailureShouldNotModifyInstance() {
+    void testUpdateInstanceStatusOnUpscaleFailureShouldNotModifyInstance() {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId(INSTANCE_ID_1);
         instanceMetaData.setPrivateIp("private-ip");
