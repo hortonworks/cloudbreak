@@ -5,7 +5,7 @@
 #  - check the db connectivty with a psql version check command
 
 LOGFILE={{salt['pillar.get']('upgrade:checkconnection:logfile')}}
-[ -z "LOGFILE" ] && echo "LOGFILE variable is not defined, check the pillar values!" && exit 1
+[ -z "$LOGFILE" ] && echo "LOGFILE variable is not defined, check the pillar values!" && exit 1
 echo "Logs at ${LOGFILE}"
 
 source /opt/salt/scripts/common_utils.sh

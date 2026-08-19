@@ -8,7 +8,7 @@
 #     - backs up service data in a parallel manner with `pg_dump` to the temp directory
 
 LOGFILE={{salt['pillar.get']('upgrade:backup:logfile')}}
-[ -z "LOGFILE" ] && echo "LOGFILE variable is not defined, check the pillar values!" && exit 1
+[ -z "$LOGFILE" ] && echo "LOGFILE variable is not defined, check the pillar values!" && exit 1
 echo "Logs at ${LOGFILE}"
 
 source /opt/salt/scripts/common_utils.sh

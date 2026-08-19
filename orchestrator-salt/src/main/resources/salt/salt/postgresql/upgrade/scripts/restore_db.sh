@@ -12,7 +12,7 @@
 #  - if all is successful, then it removes the backup
 
 LOGFILE={{salt['pillar.get']('upgrade:restore:logfile')}}
-[ -z "LOGFILE" ] && echo "LOGFILE variable is not defined, check the pillar values!" && exit 1
+[ -z "$LOGFILE" ] && echo "LOGFILE variable is not defined, check the pillar values!" && exit 1
 echo "Logs at ${LOGFILE}"
 
 source /opt/salt/scripts/common_utils.sh
