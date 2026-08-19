@@ -28,7 +28,7 @@ public class SdxRuntimeVersionProvider {
     private SdxRuntimeVersionProvider() {
     }
 
-    public static String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, ImageV4Response imageV4Response,
+    public static String getRuntime(ImageV4Response imageV4Response, SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
             String defaultRuntimeVersion) {
         return Optional.ofNullable(getIfNotNull(imageV4Response, ImageV4Response::getVersion))
                 .or(() -> Optional.ofNullable(sdxClusterRequest.getRuntime()))
@@ -77,7 +77,7 @@ public class SdxRuntimeVersionProvider {
 
     private static Optional<String> extractCdhProductVersion(StackV4Request stackV4Request) {
         return getClouderaManagerProductV4RequestStream(stackV4Request)
-                .map(product -> product.getVersion())
+                .map(ClouderaManagerProductV4Request::getVersion)
                 .filter(StringUtils::isNotBlank)
                 .findFirst();
     }

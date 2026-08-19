@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE_WITHOUT_HBASE;
 
 import java.util.List;
 import java.util.Locale;
@@ -39,11 +40,14 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class SdxHorizontalScalingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxHorizontalScalingService.class);
+
+    private static final List<SdxClusterShape> SCALE_ENABLED_SDX_SHAPES = List.of(ENTERPRISE, ENTERPRISE_WITHOUT_HBASE);
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -101,9 +105,9 @@ public class SdxHorizontalScalingService {
     }
 
     public void validateHorizontalScaleRequest(SdxCluster sdxCluster, DatalakeHorizontalScaleRequest request) {
-        if (ENTERPRISE != sdxCluster.getClusterShape()) {
-            throw new BadRequestException(String.format("Horizontal scaling not supported on: %s. Please use ENTERPRISE Data lake shape",
-                    sdxCluster.getClusterShape().name()));
+        if (!SCALE_ENABLED_SDX_SHAPES.contains(sdxCluster.getClusterShape())) {
+            throw new BadRequestException(String.format("Horizontal scaling not supported on: %s. Supported Data lake shapes: %s",
+                    sdxCluster.getClusterShape().name(), String.join(", ", SCALE_ENABLED_SDX_SHAPES.stream().map(SdxClusterShape::name).toList())));
         }
         String hostGroup = request.getGroup();
         if (!DatalakeInstanceGroupScalingDetails.valueOf(hostGroup.toUpperCase(Locale.ROOT)).isScalable()) {

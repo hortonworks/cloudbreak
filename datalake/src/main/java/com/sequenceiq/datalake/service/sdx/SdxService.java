@@ -400,7 +400,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
-        String runtimeVersion = SdxRuntimeVersionProvider.getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response,
+        String runtimeVersion = SdxRuntimeVersionProvider.getRuntime(imageV4Response, sdxClusterRequest, internalStackV4Request,
                 cdpConfigService.getDefaultRuntime());
         encryptionProfileService.validateEncryptionProfile(sdxClusterRequest, environment, runtimeVersion);
         validateJavaVersion(runtimeVersion, sdxClusterRequest.getJavaVersion());

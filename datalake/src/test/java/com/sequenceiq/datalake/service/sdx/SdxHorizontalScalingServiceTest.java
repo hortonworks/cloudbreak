@@ -18,6 +18,8 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,6 +46,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Sdx horizontal scaling service tests")
@@ -246,6 +249,32 @@ public class SdxHorizontalScalingServiceTest {
         StackV4Response stackV4Response = getStackV4Response();
         when(stackV4Endpoint.getByCrn(any(), any(), any())).thenReturn(stackV4Response);
         assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+    }
+
+    @ParameterizedTest(name = "testDatalakeHorizontalScaleValidationForInvalidShapes {0}")
+    @EnumSource(value = SdxClusterShape.class, names = {"CUSTOM", "CONTAINERIZED", "LIGHT_DUTY", "LIGHT_DUTY_WITHOUT_HBASE", "MICRO_DUTY", "MEDIUM_DUTY_HA"})
+    void testDatalakeHorizontalScaleForInvalidShapes(SdxClusterShape shape) {
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(shape);
+
+        DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+    }
+
+    @ParameterizedTest(name = "testDatalakeHorizontalScaleValidationForValidShapes {0}")
+    @EnumSource(value = SdxClusterShape.class, names = {"ENTERPRISE", "ENTERPRISE_WITHOUT_HBASE"})
+    void testDatalakeHorizontalScaleForValidShapes(SdxClusterShape shape) {
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(shape);
+        when(stackV4Endpoint.putScaling(any(), anyString(), any(), anyString())).thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
+        StackScaleV4Request scaleRequest = new StackScaleV4Request();
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.SOLR_SCALE_OUT.getName());
+        scaleRequest.setDesiredCount(1);
+
+        String flowId = underTest.triggerScalingFlow(sdxCluster, scaleRequest);
+
+        assertEquals("flowId", flowId);
+        verify(stackV4Endpoint, times(1)).putScaling(eq(0L), eq(sdxCluster.getName()), any(), eq(sdxCluster.getAccountId()));
     }
 
     private DetailedEnvironmentResponse getEnvironmentDetailedResponse() {

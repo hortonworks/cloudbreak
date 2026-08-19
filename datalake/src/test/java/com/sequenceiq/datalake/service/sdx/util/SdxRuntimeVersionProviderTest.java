@@ -43,7 +43,7 @@ class SdxRuntimeVersionProviderTest {
         SdxClusterRequest request = new SdxClusterRequest();
         request.setRuntime("7.2.17");
 
-        String result = SdxRuntimeVersionProvider.getRuntime(request, stackRequestWithCdhProduct("7.2.16-x"), image, DEFAULT_RUNTIME);
+        String result = SdxRuntimeVersionProvider.getRuntime(image, request, stackRequestWithCdhProduct("7.2.16-x"), DEFAULT_RUNTIME);
 
         assertEquals("7.3.1", result);
     }
@@ -53,7 +53,7 @@ class SdxRuntimeVersionProviderTest {
         SdxClusterRequest request = new SdxClusterRequest();
         request.setRuntime("7.2.17");
 
-        String result = SdxRuntimeVersionProvider.getRuntime(request, stackRequestWithCdhProduct("7.2.16-x"), null, DEFAULT_RUNTIME);
+        String result = SdxRuntimeVersionProvider.getRuntime(null, request, stackRequestWithCdhProduct("7.2.16-x"), DEFAULT_RUNTIME);
 
         assertEquals("7.2.17", result);
     }
@@ -62,14 +62,14 @@ class SdxRuntimeVersionProviderTest {
     void getRuntimeFallsBackToCdhProductVersionLineWhenImageAndRequestMissing() {
         SdxClusterRequest request = new SdxClusterRequest();
 
-        String result = SdxRuntimeVersionProvider.getRuntime(request, stackRequestWithCdhProduct(CDH_PRODUCT_VERSION), null, DEFAULT_RUNTIME);
+        String result = SdxRuntimeVersionProvider.getRuntime(null, request, stackRequestWithCdhProduct(CDH_PRODUCT_VERSION), DEFAULT_RUNTIME);
 
         assertEquals("7.3.2", result);
     }
 
     @Test
     void getRuntimeFallsBackToDefaultWhenNoSourceAvailable() {
-        String result = SdxRuntimeVersionProvider.getRuntime(new SdxClusterRequest(), new StackV4Request(), null, DEFAULT_RUNTIME);
+        String result = SdxRuntimeVersionProvider.getRuntime(null, new SdxClusterRequest(), new StackV4Request(), DEFAULT_RUNTIME);
 
         assertEquals(DEFAULT_RUNTIME, result);
     }
@@ -123,14 +123,14 @@ class SdxRuntimeVersionProviderTest {
         SdxClusterRequest request = new SdxClusterRequest();
         request.setRuntime("7.2.17");
 
-        String result = SdxRuntimeVersionProvider.getRuntime(request, new StackV4Request(), new ImageV4Response(), DEFAULT_RUNTIME);
+        String result = SdxRuntimeVersionProvider.getRuntime(new ImageV4Response(), request, new StackV4Request(), DEFAULT_RUNTIME);
 
         assertEquals("7.2.17", result);
     }
 
     @Test
     void getRuntimeFallsBackToDefaultWhenStackRequestIsNull() {
-        String result = SdxRuntimeVersionProvider.getRuntime(new SdxClusterRequest(), null, null, DEFAULT_RUNTIME);
+        String result = SdxRuntimeVersionProvider.getRuntime(null, new SdxClusterRequest(), null, DEFAULT_RUNTIME);
 
         assertEquals(DEFAULT_RUNTIME, result);
     }
