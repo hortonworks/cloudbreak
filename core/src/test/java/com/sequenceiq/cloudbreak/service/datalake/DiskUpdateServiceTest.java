@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.datalake;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.DiskResizeEvent.DISK_RESIZE_TRIGGER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,7 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -35,13 +33,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -55,8 +51,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -104,9 +98,6 @@ class DiskUpdateServiceTest {
 
     @Mock
     private ResourceService resourceService;
-
-    @Mock
-    private ReactorNotifier reactorNotifier;
 
     @Mock
     private TemplateService templateService;
@@ -204,21 +195,6 @@ class DiskUpdateServiceTest {
     }
 
     @Test
-    void testBasicResizeDisks() throws Exception {
-        Stack stack = mock(Stack.class);
-        doReturn(stack).when(stackService).getByIdWithListsInTransaction(STACK_ID);
-        List<Volume> volumeListToUpdate = List.of(mock(Volume.class));
-        underTest.resizeDisks(STACK_ID, "test", "gp2", 100, volumeListToUpdate);
-
-        ArgumentCaptor<DiskResizeRequest> captor = ArgumentCaptor.forClass(DiskResizeRequest.class);
-        verify(reactorNotifier).notify(any(), any(), captor.capture());
-        assertEquals("test", captor.getValue().getInstanceGroup());
-        assertEquals(DISK_RESIZE_TRIGGER_EVENT.selector(), captor.getValue().getSelector());
-        assertEquals(STACK_ID, captor.getValue().getResourceId());
-        assertEquals(volumeListToUpdate, captor.getValue().getVolumesToUpdate());
-    }
-
-    @Test
     void testUpdateDiskTypeAndSize() throws Exception {
         String instanceGroup = "master";
         Long stackId = 1L;
@@ -226,16 +202,6 @@ class DiskUpdateServiceTest {
         doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
         AwsResourceVolumeConnector awsResourceVolumeConnector = mock(AwsResourceVolumeConnector.class);
         doReturn(awsResourceVolumeConnector).when(cloudConnector).volumeConnector();
-        DiskTypes diskTypes = mock(DiskTypes.class);
-        when(diskTypes.diskMapping()).thenReturn(
-                Map.of(
-                        "ephemeral", VolumeParameterType.EPHEMERAL,
-                        "st1", VolumeParameterType.ST1
-                )
-        );
-        PlatformParameters platformParameters = mock(PlatformParameters.class);
-        when(platformParameters.diskTypes()).thenReturn(diskTypes);
-        when(cloudConnector.parameters()).thenReturn(platformParameters);
         StackDto stack = mock(StackDto.class);
         doReturn("AWS").when(stack).getPlatformVariant();
         doReturn("AWS").when(stack).getCloudPlatform();
@@ -332,9 +298,6 @@ class DiskUpdateServiceTest {
         doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
         ResourceVolumeConnector gcpResourceVolumeConnector = mock(ResourceVolumeConnector.class);
         doReturn(gcpResourceVolumeConnector).when(cloudConnector).volumeConnector();
-        PlatformParameters platformParameters = mock(PlatformParameters.class);
-        when(platformParameters.diskTypes()).thenReturn(mock(DiskTypes.class));
-        when(cloudConnector.parameters()).thenReturn(platformParameters);
         StackDto stack = mock(StackDto.class);
         doReturn("AWS").when(stack).getPlatformVariant();
         doReturn("AWS").when(stack).getCloudPlatform();
@@ -425,19 +388,6 @@ class DiskUpdateServiceTest {
     }
 
     @Test
-    void testUpdateDiskTypeAndSizeVolumeTypeSpecifiedForGcp() throws Exception {
-        Long stackId = 1L;
-        StackDto stack = mock(StackDto.class);
-        doReturn("GCP").when(stack).getCloudPlatform();
-        doReturn(stack).when(stackDtoService).getById(stackId);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.updateDiskTypeAndSize("master", "pd-ssd", 200, List.of(), stackId));
-        assertEquals("Changing disk type is not available for GCP", badRequestException.getMessage());
-        verify(resourceToCloudResourceConverter, never()).convert(any());
-    }
-
-    @Test
     void testUpdateDiskTypeAndSizeMissingSizeForGcp() throws Exception {
         Long stackId = 1L;
         StackDto stack = mock(StackDto.class);
@@ -457,9 +407,6 @@ class DiskUpdateServiceTest {
         doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
         ResourceVolumeConnector gcpResourceVolumeConnector = mock(ResourceVolumeConnector.class);
         doReturn(gcpResourceVolumeConnector).when(cloudConnector).volumeConnector();
-        PlatformParameters platformParameters = mock(PlatformParameters.class);
-        when(platformParameters.diskTypes()).thenReturn(mock(DiskTypes.class));
-        when(cloudConnector.parameters()).thenReturn(platformParameters);
         StackDto stack = mock(StackDto.class);
         doReturn("GCP").when(stack).getPlatformVariant();
         doReturn("GCP").when(stack).getCloudPlatform();
@@ -482,16 +429,6 @@ class DiskUpdateServiceTest {
         String instanceGroup = "master";
         Long stackId = 1L;
         CloudConnector cloudConnector = mock(CloudConnector.class);
-        DiskTypes diskTypes = mock(DiskTypes.class);
-        when(diskTypes.diskMapping()).thenReturn(
-                Map.of(
-                        "ephemeral", VolumeParameterType.EPHEMERAL,
-                        "st1", VolumeParameterType.ST1
-                )
-        );
-        PlatformParameters platformParameters = mock(PlatformParameters.class);
-        when(platformParameters.diskTypes()).thenReturn(diskTypes);
-        when(cloudConnector.parameters()).thenReturn(platformParameters);
         doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
         doReturn(awsResourceVolumeConnector).when(cloudConnector).volumeConnector();
         // AWS modifies volumes in place, so the connector reports no renames back to the caller.

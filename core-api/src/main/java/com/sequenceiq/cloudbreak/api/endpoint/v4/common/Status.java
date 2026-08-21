@@ -20,7 +20,6 @@ public enum Status {
     DATAHUB_DISK_UPDATE_VALIDATION_IN_PROGRESS(StatusKind.PROGRESS),
     DATAHUB_DISK_UPDATE_VALIDATION_FAILED(StatusKind.FINAL),
     DATAHUB_DISK_UPDATE_FAILED(StatusKind.FINAL, NotificationType.STACK_RESIZE, NotificationSeverity.ERROR),
-    DATAHUB_DISK_UPDATE_RESIZE_FAILED(StatusKind.FINAL, NotificationType.STACK_RESIZE, NotificationSeverity.ERROR),
     UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     UPDATE_REQUESTED(StatusKind.PROGRESS),
     UPDATE_FAILED(StatusKind.FINAL, NotificationType.STACK_RESIZE, NotificationSeverity.ERROR),

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import java.util.List;
-
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
@@ -10,9 +8,8 @@ import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
@@ -21,6 +18,9 @@ public class DiskUpdateController implements DiskUpdateEndpoint {
 
     @Inject
     private DiskUpdateService diskUpdateService;
+
+    @Inject
+    private StackOperationService stackOperationService;
 
     @Override
     @AccountIdNotNeeded
@@ -31,15 +31,7 @@ public class DiskUpdateController implements DiskUpdateEndpoint {
     @Override
     @AccountIdNotNeeded
     public FlowIdentifier updateDiskTypeAndSize(DiskModificationRequest diskModificationRequest) throws Exception {
-        DiskUpdateRequest diskUpdateRequest = diskModificationRequest.getDiskUpdateRequest();
-        List<Volume> volumesToUpdate = diskModificationRequest.getVolumesToUpdate();
-        return diskUpdateService.resizeDisks(
-                diskModificationRequest.getStackId(),
-                diskUpdateRequest.getGroup(),
-                diskUpdateRequest.getVolumeType(),
-                diskUpdateRequest.getSize(),
-                volumesToUpdate
-        );
+        return stackOperationService.datalakeUpdateDisks(diskModificationRequest);
     }
 
     @Override

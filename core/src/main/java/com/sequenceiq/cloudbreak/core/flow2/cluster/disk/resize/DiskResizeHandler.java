@@ -1,12 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.DiskResizeEvent.FAILURE_EVENT;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -18,19 +12,12 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeFailedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeHandlerRequest;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -43,18 +30,6 @@ public class DiskResizeHandler extends ExceptionCatcherEventHandler<DiskResizeHa
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private StackUtil stackUtil;
-
-    @Inject
-    private HostOrchestrator hostOrchestrator;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private DiskUpdateService diskUpdateService;
@@ -76,29 +51,17 @@ public class DiskResizeHandler extends ExceptionCatcherEventHandler<DiskResizeHa
         Long stackId = payload.getResourceId();
         String instanceGroup = payload.getInstanceGroup();
         try {
-            diskUpdateService.updateDiskTypeAndSize(
-                    payload.getInstanceGroup(),
-                    payload.getVolumeType(),
-                    payload.getSize(),
-                    payload.getVolumesToUpdate(),
-                    stackId);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             ResourceType diskResourceType = stack.getDiskResourceType();
-            if (diskResourceType != null && diskResourceType.toString().contains("VOLUMESET")) {
+            if (ResourceType.isVolumeSet(diskResourceType)) {
                 LOGGER.debug("Collecting resources based on stack id {} and resource type {} filtered by instance group {}.", stackId, diskResourceType,
                         instanceGroup);
-                List<Resource> resourceList = resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(stackId, instanceGroup,
-                                List.of(diskResourceType)).stream().filter(res -> null != res.getInstanceId()).toList();
-                stack.setResources(new HashSet<>(resourceList));
-                Set<Node> allNodesInTargetGroup = stackUtil.collectNodes(stack).stream().filter(node -> node.getHostGroup().equals(instanceGroup))
-                        .collect(Collectors.toSet());
-                Cluster cluster = stack.getCluster();
                 InMemoryStateStore.putStack(stackId, PollGroup.POLLABLE);
-                hostOrchestrator.resizeDisksOnNodes(
-                        gatewayConfigService.getAllGatewayConfigs(stack),
-                        allNodesInTargetGroup,
-                        clusterDeletionBasedModel(stack.getId(), cluster.getId()));
-                InMemoryStateStore.deleteStack(stackId);
+                try {
+                    diskUpdateService.resizeDisks(stack, instanceGroup);
+                } finally {
+                    InMemoryStateStore.deleteStack(stackId);
+                }
                 return new DiskResizeFinishedEvent(stackId);
             } else {
                 LOGGER.warn("Failed to resize disks - No disks to resize");

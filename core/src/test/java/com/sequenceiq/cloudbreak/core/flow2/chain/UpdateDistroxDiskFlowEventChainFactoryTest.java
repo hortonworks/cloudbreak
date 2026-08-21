@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.FULL_START_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.FULL_STOP_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.DiskResizeEvent.DISK_RESIZE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.STACK_START_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
@@ -17,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXDiskUpdateTriggerEvent;
@@ -63,10 +65,11 @@ class UpdateDistroxDiskFlowEventChainFactoryTest {
         assertEquals(triggerEvent, flowTriggerEventQueue.getTriggerEvent());
 
         Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
-        assertEquals(4, queue.size());
+        assertEquals(5, queue.size());
         assertInstanceOf(FlowChainInitPayload.class, queue.remove());
         assertSaltUpdateEvent(queue.remove());
         assertDistroXDiskUpdateEvent(queue.remove());
+        assertDiskResizeEvent(queue.remove());
         assertInstanceOf(FlowChainFinalizePayload.class, queue.remove());
     }
 
@@ -78,12 +81,13 @@ class UpdateDistroxDiskFlowEventChainFactoryTest {
         assertEquals(triggerEvent, flowTriggerEventQueue.getTriggerEvent());
 
         Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
-        assertEquals(6, queue.size());
+        assertEquals(7, queue.size());
         assertInstanceOf(FlowChainInitPayload.class, queue.remove());
         assertSaltUpdateEvent(queue.remove());
-        assertStackEvent(queue.remove(), STACK_STOP_EVENT.event());
+        assertStackEvent(queue.remove(), FULL_STOP_TRIGGER_EVENT);
         assertDistroXDiskUpdateEvent(queue.remove());
-        assertStackEvent(queue.remove(), STACK_START_EVENT.event());
+        assertStackEvent(queue.remove(), FULL_START_TRIGGER_EVENT);
+        assertDiskResizeEvent(queue.remove());
         assertInstanceOf(FlowChainFinalizePayload.class, queue.remove());
     }
 
@@ -94,10 +98,11 @@ class UpdateDistroxDiskFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
 
         Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
-        assertEquals(4, queue.size());
+        assertEquals(5, queue.size());
         assertInstanceOf(FlowChainInitPayload.class, queue.remove());
         assertSaltUpdateEvent(queue.remove());
         assertDistroXDiskUpdateEvent(queue.remove());
+        assertDiskResizeEvent(queue.remove());
         assertInstanceOf(FlowChainFinalizePayload.class, queue.remove());
     }
 
@@ -127,6 +132,14 @@ class UpdateDistroxDiskFlowEventChainFactoryTest {
         assertEquals(selector, event.selector());
         assertInstanceOf(StackEvent.class, event);
         assertEquals(STACK_ID, event.getResourceId());
+    }
+
+    private void assertDiskResizeEvent(Selectable event) {
+        assertEquals(DISK_RESIZE_TRIGGER_EVENT.event(), event.selector());
+        assertInstanceOf(DiskResizeRequest.class, event);
+        DiskResizeRequest diskResizeRequest = (DiskResizeRequest) event;
+        assertEquals(STACK_ID, diskResizeRequest.getResourceId());
+        assertEquals(GROUP, diskResizeRequest.getInstanceGroup());
     }
 
     private void assertDistroXDiskUpdateEvent(Selectable event) {

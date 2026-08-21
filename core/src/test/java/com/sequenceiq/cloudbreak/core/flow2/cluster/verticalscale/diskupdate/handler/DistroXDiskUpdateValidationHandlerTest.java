@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -103,14 +101,6 @@ class DistroXDiskUpdateValidationHandlerTest {
         doReturn("compute").when(resource).getInstanceGroup();
         doReturn(json).when(resource).getAttributes();
         doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
-        DiskTypes diskTypes = mock(DiskTypes.class);
-        when(diskTypes.diskMapping()).thenReturn(
-                Map.of(
-                        "ephemeral", VolumeParameterType.EPHEMERAL,
-                        "st1", VolumeParameterType.ST1
-                )
-        );
-        when(diskUpdateService.getDiskTypes(any(StackDto.class))).thenReturn(diskTypes);
         Resource resource2 = mock(Resource.class);
         doReturn("B1234").when(resource2).getInstanceId();
         doReturn(Set.of(resource, resource2)).when(stackDto).getResources();
@@ -197,14 +187,6 @@ class DistroXDiskUpdateValidationHandlerTest {
         doReturn(dbJson).when(resource).getAttributes();
         doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
 
-        DiskTypes diskTypes = mock(DiskTypes.class);
-        when(diskTypes.diskMapping()).thenReturn(
-                Map.of(
-                        "ephemeral", VolumeParameterType.EPHEMERAL,
-                        "st1", VolumeParameterType.ST1
-                )
-        );
-        when(diskUpdateService.getDiskTypes(any(StackDto.class))).thenReturn(diskTypes);
         doReturn(Set.of(resource)).when(stackDto).getResources();
         doReturn(CloudPlatform.AWS.toString()).when(stackDto).getCloudPlatform();
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);

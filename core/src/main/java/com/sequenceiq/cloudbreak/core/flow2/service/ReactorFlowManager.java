@@ -565,7 +565,7 @@ public class ReactorFlowManager {
                 .withGroup(updateRequest.getGroup())
                 .withVolumeType(updateRequest.getVolumeType())
                 .withSize(updateRequest.getSize())
-                .withDiskType(updateRequest.getDiskType().name())
+                .withDiskType(updateRequest.getDiskType() == null ? null : updateRequest.getDiskType().name())
                 .withDiskTypeChangeRequested(diskTypeChangeRequested)
                 .withCloudPlatform(stack.getCloudPlatform())
                 .withClusterName(stack.getCluster().getResourceName())
@@ -621,7 +621,7 @@ public class ReactorFlowManager {
                         updateRequest.getVolumeType(),
                         updateRequest.getSize(),
                         updateRequest.getGroup(),
-                        updateRequest.getDiskType().name()
+                        updateRequest.getDiskType() == null ? null : updateRequest.getDiskType().name()
                 )
         );
     }

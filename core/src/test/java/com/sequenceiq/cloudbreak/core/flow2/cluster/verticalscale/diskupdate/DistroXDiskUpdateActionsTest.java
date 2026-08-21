@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateHandlerSelectors.DATAHUB_DISK_RESIZE_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateHandlerSelectors.DATAHUB_DISK_UPDATE_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateHandlerSelectors.DATAHUB_DISK_UPDATE_VALIDATION_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_FINALIZE_EVENT;
@@ -30,7 +29,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskResizeFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -120,25 +118,11 @@ class DistroXDiskUpdateActionsTest {
     }
 
     @Test
-    void testDiskResizeInDatahubAction() throws Exception {
+    void testFinishedAction() throws Exception {
         DistroXDiskUpdateEvent event = mock(DistroXDiskUpdateEvent.class);
         doReturn(1L).when(event).getResourceId();
         AbstractClusterAction<DistroXDiskUpdateEvent> action =
-                (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.diskResizeInDatahubAction();
-        initActionPrivateFields(action);
-        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
-        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any(), any());
-        assertEquals(Status.UPDATE_IN_PROGRESS.name(), captor.getValue());
-        verify(eventBus, times(1)).notify(selectorCaptor.capture(), any());
-        assertEquals(DATAHUB_DISK_RESIZE_HANDLER_EVENT.event(), selectorCaptor.getValue());
-    }
-
-    @Test
-    void testFinishedAction() throws Exception {
-        DistroXDiskResizeFinishedEvent event = mock(DistroXDiskResizeFinishedEvent.class);
-        doReturn(1L).when(event).getResourceId();
-        AbstractClusterAction<DistroXDiskResizeFinishedEvent> action =
-                (AbstractClusterAction<DistroXDiskResizeFinishedEvent>) underTest.finishedAction();
+                (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.finishedAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any());

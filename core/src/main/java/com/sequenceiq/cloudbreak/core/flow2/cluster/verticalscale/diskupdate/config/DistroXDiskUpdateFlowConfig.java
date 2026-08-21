@@ -10,10 +10,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.DATAHUB_DISK_UPDATE_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.DATAHUB_DISK_UPDATE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.DATAHUB_DISK_UPDATE_VALIDATION_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.DISK_RESIZE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.INIT_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_RESIZE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_FINALIZE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_FINISH_EVENT;
@@ -52,13 +50,8 @@ public class DistroXDiskUpdateFlowConfig extends StackStatusFinalizerAbstractFlo
                     .defaultFailureEvent()
 
                     .from(DATAHUB_DISK_UPDATE_STATE)
-                    .to(DISK_RESIZE_STATE)
-                    .event(DATAHUB_DISK_UPDATE_FINISH_EVENT)
-                    .defaultFailureEvent()
-
-                    .from(DISK_RESIZE_STATE)
                     .to(DATAHUB_DISK_UPDATE_FINISHED_STATE)
-                    .event(DATAHUB_DISK_RESIZE_FINISHED_EVENT)
+                    .event(DATAHUB_DISK_UPDATE_FINISH_EVENT)
                     .defaultFailureEvent()
 
                     .from(DATAHUB_DISK_UPDATE_FINISHED_STATE)

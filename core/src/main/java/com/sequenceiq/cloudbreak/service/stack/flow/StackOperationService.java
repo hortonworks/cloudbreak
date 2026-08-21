@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResourceUpdateRequest;
@@ -614,16 +615,33 @@ public class StackOperationService {
         convertInputGroupToLowerCase(updateRequest);
         validateDiskUpdate(updateRequest, accountId);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        return updateDisks(updateRequest, stack);
+    }
+
+    private FlowIdentifier updateDisks(DiskUpdateRequest updateRequest, StackDto stack) {
         boolean diskTypeChangeRequested = isDiskTypeChangeRequested(stack, updateRequest);
-        validatePlatformAndRequest(diskTypeChangeRequested, updateRequest.getVolumeType(), stack.getCloudPlatform());
+        validatePlatformAndRequest(diskTypeChangeRequested, updateRequest.getVolumeType(), updateRequest.getSize(), stack.getCloudPlatform());
         return flowManager.triggerStackUpdateDisks(stack, updateRequest, diskTypeChangeRequested);
     }
 
-    private void validatePlatformAndRequest(boolean diskTypeChangeRequested, String volumeType, String cloudPlatform) {
+    public FlowIdentifier datalakeUpdateDisks(DiskModificationRequest diskModificationRequest) {
+        DiskUpdateRequest updateRequest = diskModificationRequest.getDiskUpdateRequest();
+        convertInputGroupToLowerCase(updateRequest);
+        StackDto stack = stackDtoService.getById(diskModificationRequest.getStackId());
+        validateDiskUpdate(updateRequest, stack.getAccountId());
+        return updateDisks(updateRequest, stack);
+    }
+
+    private void validatePlatformAndRequest(boolean diskTypeChangeRequested, String volumeType, int size, String cloudPlatform) {
         if (diskTypeChangeRequested) {
-            // The disk update flow is not enabled for GCP/Azure yet, so keep blocking the actual type change there.
-            if (GCP.name().equalsIgnoreCase(cloudPlatform) || AZURE.name().equalsIgnoreCase(cloudPlatform)) {
+            // The disk update flow is not enabled for Azure yet, so keep blocking the actual type change there.
+            if (AZURE.name().equalsIgnoreCase(cloudPlatform)) {
                 throw new BadRequestException("Changing Volume Type is not supported for " + cloudPlatform + ".");
+            }
+            // A GCP type change stops the cluster to recreate the disks, so reject a missing size up front - before any
+            // stop - instead of failing later inside the flow (which would leave the cluster stopped).
+            if (GCP.name().equalsIgnoreCase(cloudPlatform) && size <= 0) {
+                throw new BadRequestException("Disk Size must be specified for GCP disk type change.");
             }
             // Value validation is defined for all providers so it is ready when the flow is enabled for the others.
             List<String> allowedVolumeTypes = PLATFORM_DISK_TYPE_MAP.get(cloudPlatform);

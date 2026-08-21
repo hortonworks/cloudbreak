@@ -18,9 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -34,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.VerticalScalingValidatorService;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -71,14 +70,12 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
         DistroXDiskUpdateEvent payload = distroXDiskUpdateEvent.getData();
         try {
             StackDto stackDto = stackDtoService.getById(payload.getResourceId());
-            DiskTypes cloudPlatformDiskTypes = diskUpdateService.getDiskTypes(stackDto);
             List<VolumeSetAttributes.Volume> attachedVolumes = getAttachedVolumesList(
                     stackDto,
                     payload.getGroup(),
                     payload.getSize(),
                     payload.getVolumeType(),
-                    payload.getDiskType(),
-                    cloudPlatformDiskTypes
+                    payload.getDiskType()
             );
             boolean requestedSizeGreaterThanAvailable = attachedVolumes.size() > 0;
             String cloudPlatform = stackDto.getCloudPlatform();
@@ -88,7 +85,7 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
                         cloudPlatform) : String.format("Requested disk size for %s group is less than current size", payload.getGroup());
                 throw new CloudbreakException("Validation Failed: " + exceptionMessage);
             } else {
-                List<Volume> volumesToBeUpdated = convertVolumeSetAttributesVolumesToVolumes(attachedVolumes, cloudPlatformDiskTypes);
+                List<Volume> volumesToBeUpdated = convertVolumeSetAttributesVolumesToVolumes(attachedVolumes);
                 ValidationResult validationResult = verticalScalingValidatorService.validateAddVolumesRequest(
                         stackService.getByIdWithLists(payload.getResourceId()),
                         volumesToBeUpdated,
@@ -117,11 +114,10 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
         }
     }
 
-    private List<Volume> convertVolumeSetAttributesVolumesToVolumes(List<VolumeSetAttributes.Volume> attachedVolumes, DiskTypes diskTypes) {
+    private List<Volume> convertVolumeSetAttributesVolumesToVolumes(List<VolumeSetAttributes.Volume> attachedVolumes) {
         return attachedVolumes
                 .stream()
-                .filter(e -> !isEphemeral(diskTypes, e))
-                .filter(e -> !isLocalSsd(diskTypes, e))
+                .filter(e -> !EphemeralVolumeUtil.volumeIsEphemeral(e.getType()))
                 .map(this::convertToVolume)
                 .toList();
     }
@@ -137,8 +133,7 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
             String group,
             int size,
             String volumeType,
-            String diskType,
-            DiskTypes cloudPlatformDiskTypes) throws IOException {
+            String diskType) throws IOException {
         List<Resource> resources = stack.getResources().stream()
                 .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(group)
                         && isVolumeSetResourceForPlatform(stack.getCloudPlatform(), res.getResourceType())
@@ -150,18 +145,18 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
             attachedVolumes.addAll(
                     volumeSetAttributes.getVolumes()
                             .stream()
-                            .filter(getVolumePredicate(size, volumeType, diskType, cloudPlatformDiskTypes))
+                            .filter(getVolumePredicate(size, volumeType, diskType))
                             .toList()
             );
         }
         return attachedVolumes;
     }
 
-    private Predicate<VolumeSetAttributes.Volume> getVolumePredicate(int size, String volumeType, String diskType, DiskTypes cloudPlatformDiskTypes) {
+    private Predicate<VolumeSetAttributes.Volume> getVolumePredicate(int size, String volumeType, String diskType) {
         return volume ->
                 (isDataBaseDisk(diskType) && volume.getCloudVolumeUsageType().equals(CloudVolumeUsageType.DATABASE) && volume.getSize() < size)
                 || (!isDataBaseDisk(diskType) && (volume.getSize() < size
-                    || isEphemeral(cloudPlatformDiskTypes, volume)
+                    || EphemeralVolumeUtil.volumeIsEphemeral(volume.getType())
                     || modificationNotRequired(volumeType, volume)));
     }
 
@@ -172,13 +167,5 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
     private boolean modificationNotRequired(String volumeType, VolumeSetAttributes.Volume volume) {
         return null != volumeType
                 && !volumeType.equalsIgnoreCase(volume.getType());
-    }
-
-    private boolean isEphemeral(DiskTypes diskTypes, VolumeSetAttributes.Volume volume) {
-        return VolumeParameterType.EPHEMERAL.equals(diskTypes.diskMapping().get(volume.getType()));
-    }
-
-    private boolean isLocalSsd(DiskTypes diskTypes, VolumeSetAttributes.Volume volume) {
-        return VolumeParameterType.LOCAL_SSD.equals(diskTypes.diskMapping().get(volume.getType()));
     }
 }

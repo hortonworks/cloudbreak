@@ -5,8 +5,9 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.STACK_START_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.FULL_START_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.FULL_STOP_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.DiskResizeEvent.DISK_RESIZE_TRIGGER_EVENT;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState;
@@ -64,12 +66,13 @@ public class UpdateDistroxDiskFlowEventChainFactory implements FlowEventChainFac
         flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
         flowEventChain.add(getSaltUpdateTriggerEvent(event));
         if (gcpDiskTypeChange) {
-            flowEventChain.add(new StackEvent(STACK_STOP_EVENT.event(), event.getResourceId()));
+            flowEventChain.add(new StackEvent(FULL_STOP_TRIGGER_EVENT, event.getResourceId()));
         }
         flowEventChain.add(getDistroXDiskUpdateEvent(event));
         if (gcpDiskTypeChange) {
-            flowEventChain.add(new StackEvent(STACK_START_EVENT.event(), event.getResourceId()));
+            flowEventChain.add(new StackEvent(FULL_START_TRIGGER_EVENT, event.getResourceId()));
         }
+        flowEventChain.add(getResizeDiskUpdateEvent(event));
         flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
 
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
@@ -100,5 +103,9 @@ public class UpdateDistroxDiskFlowEventChainFactory implements FlowEventChainFac
                 .withSelector(DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.selector())
                 .withAccepted(event.accepted())
                 .build();
+    }
+
+    private DiskResizeRequest getResizeDiskUpdateEvent(DistroXDiskUpdateTriggerEvent event) {
+        return new DiskResizeRequest(DISK_RESIZE_TRIGGER_EVENT.event(), event.getResourceId(), event.getGroup());
     }
 }

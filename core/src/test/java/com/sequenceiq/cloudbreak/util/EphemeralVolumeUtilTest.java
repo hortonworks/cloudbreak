@@ -41,6 +41,21 @@ public class EphemeralVolumeUtilTest {
     }
 
     @Test
+    public void testVolumeIsEphemeralWithStringWhenGp2MustFalse() {
+        assertFalse(EphemeralVolumeUtil.volumeIsEphemeral(AwsDiskType.Gp2.value()));
+    }
+
+    @Test
+    public void testVolumeIsEphemeralWithStringWhenEphemeralMustTrue() {
+        assertTrue(EphemeralVolumeUtil.volumeIsEphemeral(AwsDiskType.Ephemeral.value()));
+    }
+
+    @Test
+    public void testVolumeIsEphemeralWithStringWhenLocalSsdMustTrue() {
+        assertTrue(EphemeralVolumeUtil.volumeIsEphemeral(GcpDiskType.LOCAL_SSD.value()));
+    }
+
+    @Test
     public void testVolumeIsEphemeralWhichMustBeProvisionedWithVolumeTemplateWhenGp2MustFalse() {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeType(AwsDiskType.Gp2.value());

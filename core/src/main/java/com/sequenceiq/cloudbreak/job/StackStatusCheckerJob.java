@@ -107,7 +107,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Status.UPGRADE_CCM_IN_PROGRESS,
             Status.DATAHUB_DISK_UPDATE_VALIDATION_FAILED,
             Status.DATAHUB_DISK_UPDATE_FAILED,
-            Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED,
             Status.LOAD_BALANCER_UPDATE_FINISHED,
             Status.LOAD_BALANCER_UPDATE_FAILED
     );
@@ -145,8 +144,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Status.UPDATE_FAILED,
             Status.ENABLE_SECURITY_FAILED,
             Status.DATAHUB_DISK_UPDATE_VALIDATION_FAILED,
-            Status.DATAHUB_DISK_UPDATE_FAILED,
-            Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED);
+            Status.DATAHUB_DISK_UPDATE_FAILED);
 
     private static final EnumSet<InstanceStatus> STATES_FROM_HEALTHY_ALLOWED = EnumSet.of(
             SERVICES_UNHEALTHY,

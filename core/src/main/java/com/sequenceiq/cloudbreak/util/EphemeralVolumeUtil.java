@@ -38,9 +38,13 @@ public class EphemeralVolumeUtil {
     }
 
     public static boolean volumeIsEphemeral(VolumeTemplate volumeTemplate) {
+        return volumeIsEphemeral(volumeTemplate.getVolumeType());
+    }
+
+    public static boolean volumeIsEphemeral(String volumeType) {
         return getEphemeralVolumeValues()
                 .stream()
-                .anyMatch(e -> e.equalsIgnoreCase(volumeTemplate.getVolumeType()));
+                .anyMatch(e -> e.equalsIgnoreCase(volumeType));
     }
 
     public static boolean volumeIsEphemeralWhichMustBeProvisioned(VolumeSetAttributes.Volume volume) {

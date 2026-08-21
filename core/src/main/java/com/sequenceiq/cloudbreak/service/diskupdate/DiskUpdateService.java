@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.constant.CloudbreakConstants.isVolumeSetResourceForPlatform;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.DiskResizeEvent.DISK_RESIZE_TRIGGER_EVENT;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,12 +31,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeUpdateResult;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
@@ -48,15 +45,12 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -66,12 +60,11 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class DiskUpdateService {
@@ -94,16 +87,10 @@ public class DiskUpdateService {
     private CloudParameterCache cloudParameterCache;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private ResourceService resourceService;
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
-
-    @Inject
-    private ReactorNotifier reactorNotifier;
 
     @Inject
     private TemplateService templateService;
@@ -211,23 +198,6 @@ public class DiskUpdateService {
         clusterApi.clusterModificationService().startCluster();
     }
 
-    public FlowIdentifier resizeDisks(long stackId, String instanceGroup, String volumeType, int size, List<Volume> volumesToUpdate) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Stack Resize Flow triggered for stack {}", stack.getName());
-        DiskResizeRequest diskResizeRequest = DiskResizeRequest.Builder.builder()
-                .withSelector(DISK_RESIZE_TRIGGER_EVENT.selector())
-                .withStackId(stackId)
-                .withInstanceGroup(instanceGroup)
-                .withSize(size)
-                .withVolumeType(volumeType)
-                .withVolumesToUpdate(volumesToUpdate)
-                .build();
-        FlowIdentifier flowIdentifier = reactorNotifier.notify(stackId, diskResizeRequest.selector(), diskResizeRequest);
-        LOGGER.info("DiskResizeRequest event is triggered for stack {}", stack.getName());
-        return flowIdentifier;
-    }
-
     private AuthenticatedContext getAuthenticatedContext(CloudConnector cloudConnector, StackDto stack) {
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -249,11 +219,10 @@ public class DiskUpdateService {
         Optional<InstanceGroupView> optionalGroup = instanceGroupService
                 .findInstanceGroupViewByStackIdAndGroupName(stackId, group);
 
-        DiskTypes diskTypes = getDiskTypes(stackDtoService.getById(stackId));
         if (optionalGroup.isPresent()) {
             InstanceGroupView instanceGroup = optionalGroup.get();
             Template template = instanceGroup.getTemplate();
-            for (VolumeTemplate volumeTemplateInTheDatabase : notEphemeralVolumes(template, diskTypes)) {
+            for (VolumeTemplate volumeTemplateInTheDatabase : notEphemeralVolumes(template)) {
                 if (null != group && StringUtils.isNotBlank(volumeType)) {
                     volumeTemplateInTheDatabase.setVolumeType(volumeType);
                 }
@@ -265,10 +234,10 @@ public class DiskUpdateService {
         }
     }
 
-    private List<VolumeTemplate> notEphemeralVolumes(Template template, DiskTypes diskTypes) {
+    private List<VolumeTemplate> notEphemeralVolumes(Template template) {
         return template.getVolumeTemplates()
                 .stream()
-                .filter(e -> !isEphemeral(e, diskTypes))
+                .filter(e -> !EphemeralVolumeUtil.volumeIsEphemeral(e))
                 .toList();
     }
 
@@ -331,26 +300,9 @@ public class DiskUpdateService {
             if (StringUtils.isEmpty(volumeType) && size == 0) {
                 throw new BadRequestException("Volume Type or Disk Size must be specified for AWS disk modification.");
             }
-        } else if (cloudPlatform == CloudPlatform.GCP) {
-            if (StringUtils.isNotEmpty(volumeType)) {
-                throw new BadRequestException("Changing disk type is not available for GCP");
-            } else if (size <= 0) {
-                throw new BadRequestException("Disk Size must be specified for GCP disk resize.");
-            }
+        } else if (cloudPlatform == CloudPlatform.GCP && size <= 0) {
+            throw new BadRequestException("Disk Size must be specified for GCP disk resize.");
         }
-    }
-
-    public DiskTypes getDiskTypes(StackDto stackDto) {
-        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
-                Platform.platform(stackDto.getCloudPlatform()),
-                Variant.variant(stackDto.getPlatformVariant())
-        );
-        CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
-        return cloudConnector.parameters().diskTypes();
-    }
-
-    private boolean isEphemeral(VolumeTemplate volumeTemplate, DiskTypes diskTypes) {
-        return VolumeParameterType.EPHEMERAL.equals(diskTypes.diskMapping().get(volumeTemplate.getVolumeType()));
     }
 
 }

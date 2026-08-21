@@ -44,7 +44,6 @@ class StackNotificationTypePreparationServiceTest {
     @Test
     void notificationType() {
         assertEquals(NotificationType.STACK_RESIZE, underTest.notificationType(Status.DATAHUB_DISK_UPDATE_FAILED));
-        assertEquals(NotificationType.STACK_RESIZE, underTest.notificationType(Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED));
         assertEquals(NotificationType.STACK_RESIZE, underTest.notificationType(Status.UPDATE_FAILED));
         assertEquals(NotificationType.STACK_HEALTH, underTest.notificationType(Status.BACKUP_FAILED));
         assertEquals(NotificationType.STACK_HEALTH, underTest.notificationType(Status.RESTORE_FAILED));
@@ -111,7 +110,6 @@ class StackNotificationTypePreparationServiceTest {
         Map<Status, Boolean> result = new HashMap<>();
 
         result.put(Status.DATAHUB_DISK_UPDATE_FAILED,                   true);
-        result.put(Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED,            true);
         result.put(Status.UPDATE_FAILED,                                true);
         result.put(Status.BACKUP_FAILED,                                true);
         result.put(Status.RESTORE_FAILED,                               true);

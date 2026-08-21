@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -714,21 +715,6 @@ class StackOperationServiceTest {
     }
 
     @Test
-    void testStackUpdateDisksThrowsWhenVolumeTypeChangeRequestedForGcp() {
-        StackDto stack = mock(StackDto.class);
-        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
-        mockCurrentVolumeType(stack, "TEST", "pd-ssd");
-        when(stack.getCloudPlatform()).thenReturn("GCP");
-        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
-        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
-        updateRequest.setGroup("TEST");
-        updateRequest.setVolumeType("pd-balanced");
-
-        assertThrows(BadRequestException.class, () -> underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST"));
-        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
-    }
-
-    @Test
     void testStackUpdateDisksThrowsWhenVolumeTypeChangeRequestedForAzure() {
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
@@ -741,6 +727,54 @@ class StackOperationServiceTest {
 
         assertThrows(BadRequestException.class, () -> underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST"));
         verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testStackUpdateDisksAllowsVolumeTypeChangeForGcp() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeType(stack, "TEST", "pd-standard");
+        when(stack.getCloudPlatform()).thenReturn("GCP");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("pd-ssd");
+        updateRequest.setSize(100);
+
+        underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
+
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(true));
+    }
+
+    @Test
+    void testStackUpdateDisksThrowsWhenGcpVolumeTypeChangeRequestedWithoutSize() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        mockCurrentVolumeType(stack, "TEST", "pd-standard");
+        when(stack.getCloudPlatform()).thenReturn("GCP");
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setVolumeType("pd-ssd");
+
+        assertThrows(BadRequestException.class, () -> underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST"));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testDatalakeUpdateDisksTriggersFlow() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        DiskModificationRequest diskModificationRequest = new DiskModificationRequest();
+        diskModificationRequest.setStackId(1L);
+        diskModificationRequest.setDiskUpdateRequest(updateRequest);
+
+        underTest.datalakeUpdateDisks(diskModificationRequest);
+
+        verify(stackDtoService).getById(1L);
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
     }
 
     private void mockCurrentVolumeType(StackDto stack, String group, String volumeType) {
