@@ -38,7 +38,8 @@ import freemarker.template.TemplateException;
 @ComponentScan(basePackages = {
         "com.sequenceiq.cloudbreak.cloud.aws",
         "com.sequenceiq.cloudbreak.cloud.template",
-        "com.sequenceiq.cloudbreak.polling"})
+        "com.sequenceiq.cloudbreak.polling",
+        "com.sequenceiq.cloudbreak.tls"})
 @Import(ComponentTestUtil.class)
 @TestPropertySource(properties = {
         "cb.max.aws.resource.name.length=200",

@@ -461,6 +461,12 @@ public class EncryptionProfileProviderTest {
         assertThat(assertValue).isEmpty();
     }
 
+    @Test
+    public void testGetTls13RecommendedCipherSuites() {
+        String ciphers = underTest.getTls13RecommendedCipherSuites(true);
+        assertThat(ciphers).isEqualTo("TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384");
+    }
+
     private Map<String, List<String>> createLegacyCipherSuitesMap(CipherSuitesLimitType cipherSuitesLimitType) {
         return Map.of(TlsVersion.TLS_1_2.getVersion(),
                 EncryptionProfileConverter.toListString(cipherSuiteProvider.getLegacyCipherSuitesByLimitType(cipherSuitesLimitType)));

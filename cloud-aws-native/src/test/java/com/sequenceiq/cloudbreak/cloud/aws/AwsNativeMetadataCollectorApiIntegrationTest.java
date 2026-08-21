@@ -61,6 +61,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.retry.RetryService;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -186,7 +188,9 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
             AwsPageCollector.class,
             AwsRegionEndpointProvider.class,
             AwsServiceEndpointProvider.class,
-            AwsInstanceCommonService.class
+            AwsInstanceCommonService.class,
+            EncryptionProfileProvider.class,
+            CipherSuiteProvider.class
     })
     static class AwsNativeMetadataCollectorTestConfig {
 

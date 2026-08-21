@@ -42,6 +42,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.retry.RetryService;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 
 @ExtendWith(SpringExtension.class)
 class AwsAuthenticatorTest {
@@ -156,7 +158,9 @@ class AwsAuthenticatorTest {
             AwsEnvironmentVariableChecker.class,
             RetryService.class,
             AwsRegionEndpointProvider.class,
-            AwsServiceEndpointProvider.class
+            AwsServiceEndpointProvider.class,
+            EncryptionProfileProvider.class,
+            CipherSuiteProvider.class
     })
     static class Config {
     }

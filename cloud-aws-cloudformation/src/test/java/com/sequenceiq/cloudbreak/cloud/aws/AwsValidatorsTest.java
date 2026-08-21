@@ -66,6 +66,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.retry.RetryService;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -253,6 +255,8 @@ class AwsValidatorsTest {
             SubnetSelectorService.class,
             AwsRegionEndpointProvider.class,
             AwsServiceEndpointProvider.class,
+            EncryptionProfileProvider.class,
+            CipherSuiteProvider.class,
     })
     static class Config {
 

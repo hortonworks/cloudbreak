@@ -74,6 +74,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.retry.RetryService;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.model.AwsDiskType;
 
 @ExtendWith(SpringExtension.class)
@@ -252,7 +254,9 @@ public class AwsStorageValidatorsTest {
             SubnetSelectorService.class,
             AwsPageCollector.class,
             AwsRegionEndpointProvider.class,
-            AwsServiceEndpointProvider.class
+            AwsServiceEndpointProvider.class,
+            EncryptionProfileProvider.class,
+            CipherSuiteProvider.class
     })
     static class Config {
 

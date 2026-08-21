@@ -69,6 +69,10 @@ public class EncryptionProfileProvider {
         );
     }
 
+    public String getTls13RecommendedCipherSuites(boolean useIanaName) {
+        return EncryptionProfileConverter.toString(cipherSuiteProvider.getRecommendedTls13CipherSuites(), useIanaName, COLON_SEPARATOR);
+    }
+
     public String getIanaCipherSuites(Map<String, List<String>> userEncryptionProfileMap, CipherSuitesLimitType cipherSuitesLimitType,
             boolean legacyEncryptionProfile) {
         return getCipherSuites(userEncryptionProfileMap, new CipherSuiteOptions(cipherSuitesLimitType, legacyEncryptionProfile, true, true));
