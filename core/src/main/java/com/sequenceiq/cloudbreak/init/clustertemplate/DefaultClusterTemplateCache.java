@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
+import com.sequenceiq.cloudbreak.init.clustertemplate.overlay.RuntimeClusterTemplateOverlayLoader;
 import com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -62,6 +63,12 @@ public class DefaultClusterTemplateCache {
 
     @Value("#{'${cb.clustertemplate.defaults:}'.split(',')}")
     private List<String> clusterTemplates;
+
+    @Value("${cb.runtimes.overlay.enabled:false}")
+    private boolean runtimeOverlayEnabled;
+
+    @Value("#{'${cb.runtimes.patched:}'.split(',')}")
+    private List<String> patchedRuntimes = List.of();
 
     private String defaultTemplateDir = "defaults/clustertemplates";
 
@@ -95,6 +102,9 @@ public class DefaultClusterTemplateCache {
     @Inject
     private CrnGeneratorService crnGeneratorService;
 
+    @Inject
+    private RuntimeClusterTemplateOverlayLoader runtimeClusterTemplateOverlayLoader;
+
     @PostConstruct
     public void loadClusterTemplatesFromFile() {
         if (clusterTemplates.stream().anyMatch(StringUtils::isNotEmpty)) {
@@ -103,6 +113,39 @@ public class DefaultClusterTemplateCache {
         } else {
             loadByResourceDir();
         }
+        loadOverlayClusterTemplates();
+    }
+
+    /**
+     * Reconstructs the cluster templates for the patched runtime versions ({@code cb.runtimes.patched}) that
+     * ship as sparse overlays on top of the frozen base version, and merges them into the cache. A real
+     * on-disk template of the same {@code /name} always wins: overlays are applied with putIfAbsent
+     * semantics, so this must run <em>after</em> the disk scan above.
+     */
+    private void loadOverlayClusterTemplates() {
+        if (!runtimeOverlayEnabled) {
+            return;
+        }
+        Set<String> patchedVersions = patchedRuntimes.stream()
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .collect(Collectors.toSet());
+        if (patchedVersions.isEmpty()) {
+            return;
+        }
+        Map<String, String> overlayTemplates = runtimeClusterTemplateOverlayLoader.materializeOverlayClusterTemplates(patchedVersions);
+        if (overlayTemplates.isEmpty()) {
+            return;
+        }
+        Set<String> enabledPlatforms = preferencesService.enabledPlatforms();
+        Set<String> enabledGovPlatforms = preferencesService.enabledGovPlatforms();
+        overlayTemplates.forEach((templateName, templateAsString) -> {
+            if (defaultClusterTemplateRequests.containsKey(templateName)) {
+                LOGGER.debug("An on-disk cluster template already provides [{}]; keeping it over the overlay.", templateName);
+            } else {
+                registerClusterTemplate(templateName, templateAsString, enabledPlatforms, enabledGovPlatforms);
+            }
+        });
     }
 
     private void loadByResourceDir() {
@@ -136,31 +179,7 @@ public class DefaultClusterTemplateCache {
                 .forEach(clusterTemplateName -> {
                     try {
                         String templateAsString = readFileFromClasspath(clusterTemplateName);
-                        DefaultClusterTemplateV4Request defaultClusterTemplateV4Request = addClusterTemplateToDefaultClusterTemplates(
-                                clusterTemplateName,
-                                templateAsString,
-                                enabledPlatforms,
-                                enabledGovPlatforms);
-                        if (defaultClusterTemplateV4Request != null) {
-                            ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(
-                                    defaultClusterTemplateV4Request);
-                            String resourceCrn = getGlobalDefaultClusterDefinitionCrn(defaultClusterTemplateV4Request.getName());
-                            if (defaultClusterTemplates.containsKey(resourceCrn)) {
-                                throw new RuntimeException(String.format(
-                                        "%s global default cluster template crn was already generated from another template name.", resourceCrn));
-                            }
-                            clusterTemplate.setResourceCrn(resourceCrn);
-                            String blueprintName = defaultClusterTemplateV4Request.getDistroXTemplate().getCluster().getBlueprintName();
-                            Optional<BlueprintFile> blueprint = defaultBlueprintCache.getDefaultByName(blueprintName);
-                            if (blueprint.isPresent()) {
-                                clusterTemplate.setClouderaRuntimeVersion(blueprint.get().getStackVersion());
-                                defaultClusterTemplates.put(resourceCrn, clusterTemplate);
-                                LOGGER.debug("Default clustertemplate is loaded into cache by resource file: {}", clusterTemplateName);
-                            } else {
-                                LOGGER.warn("Couldn't find blueprint [{}] by name in blueprint cache, " +
-                                                "skip to add cluster template [{}] to cluster template cache.", blueprintName, clusterTemplateName);
-                            }
-                        }
+                        registerClusterTemplate(clusterTemplateName, templateAsString, enabledPlatforms, enabledGovPlatforms);
                     } catch (IOException e) {
                         String msg = "Could not load cluster template: " + clusterTemplateName;
                         if (!clusterTemplateName.endsWith(".json")) {
@@ -169,6 +188,39 @@ public class DefaultClusterTemplateCache {
                         LOGGER.warn(msg, e);
                     }
                 });
+    }
+
+    private void registerClusterTemplate(String clusterTemplateName, String templateAsString, Set<String> enabledPlatforms,
+            Set<String> enabledGovPlatforms) {
+        try {
+            DefaultClusterTemplateV4Request defaultClusterTemplateV4Request = addClusterTemplateToDefaultClusterTemplates(
+                    clusterTemplateName,
+                    templateAsString,
+                    enabledPlatforms,
+                    enabledGovPlatforms);
+            if (defaultClusterTemplateV4Request != null) {
+                ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(
+                        defaultClusterTemplateV4Request);
+                String resourceCrn = getGlobalDefaultClusterDefinitionCrn(defaultClusterTemplateV4Request.getName());
+                if (defaultClusterTemplates.containsKey(resourceCrn)) {
+                    throw new RuntimeException(String.format(
+                            "%s global default cluster template crn was already generated from another template name.", resourceCrn));
+                }
+                clusterTemplate.setResourceCrn(resourceCrn);
+                String blueprintName = defaultClusterTemplateV4Request.getDistroXTemplate().getCluster().getBlueprintName();
+                Optional<BlueprintFile> blueprint = defaultBlueprintCache.getDefaultByName(blueprintName);
+                if (blueprint.isPresent()) {
+                    clusterTemplate.setClouderaRuntimeVersion(blueprint.get().getStackVersion());
+                    defaultClusterTemplates.put(resourceCrn, clusterTemplate);
+                    LOGGER.debug("Default clustertemplate is loaded into cache by resource file: {}", clusterTemplateName);
+                } else {
+                    LOGGER.warn("Couldn't find blueprint [{}] by name in blueprint cache, " +
+                                    "skip to add cluster template [{}] to cluster template cache.", blueprintName, clusterTemplateName);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Could not parse cluster template: {}", clusterTemplateName, e);
+        }
     }
 
     private String getGlobalDefaultClusterDefinitionCrn(String name) {
@@ -343,6 +395,14 @@ public class DefaultClusterTemplateCache {
 
     protected void setDefaultTemplateDir(String defaultTemplateDir) {
         this.defaultTemplateDir = defaultTemplateDir;
+    }
+
+    protected void setPatchedRuntimes(List<String> patchedRuntimes) {
+        this.patchedRuntimes = patchedRuntimes;
+    }
+
+    protected void setRuntimeOverlayEnabled(boolean runtimeOverlayEnabled) {
+        this.runtimeOverlayEnabled = runtimeOverlayEnabled;
     }
 
     public String getByName(String name) {

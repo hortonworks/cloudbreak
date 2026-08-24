@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -29,6 +31,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemp
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
+import com.sequenceiq.cloudbreak.init.clustertemplate.overlay.RuntimeClusterTemplateOverlayLoader;
 import com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +65,9 @@ class DefaultClusterTemplateCacheTest {
     @Mock
     private DefaultBlueprintCache defaultBlueprintCache;
 
+    @Mock
+    private RuntimeClusterTemplateOverlayLoader runtimeClusterTemplateOverlayLoader;
+
     @BeforeEach
     void setUp() throws Exception {
         underTest.setDefaultTemplateDir("test/defaults/clustertemplates/");
@@ -71,6 +78,7 @@ class DefaultClusterTemplateCacheTest {
             when(blueprintFile.getStackVersion()).thenReturn("x.y.z");
             return Optional.of(blueprintFile);
         }).when(defaultBlueprintCache).getDefaultByName(anyString());
+        underTest.setRuntimeOverlayEnabled(true);
     }
 
     @Test
@@ -298,6 +306,71 @@ class DefaultClusterTemplateCacheTest {
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
         assertEquals(0, actual.size());
+    }
+
+    @Test
+    void testLoadOverlayClusterTemplatesRegistersOverlayWhenNoOnDiskTemplateOfThatName() {
+        when(defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(any(DefaultClusterTemplateV4Request.class)))
+                .thenReturn(new ClusterTemplate());
+        when(runtimeClusterTemplateOverlayLoader.materializeOverlayClusterTemplates(any()))
+                .thenReturn(Map.of("7.3.4 - overlay template", overlayTemplateJson("7.3.4 - overlay template")));
+
+        underTest.setClusterTemplates(Collections.emptyList());
+        underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
+        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        underTest.loadClusterTemplatesFromFile();
+
+        Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
+        assertEquals(1, actual.size());
+        assertNotNull(actual.get("7.3.4 - overlay template"));
+    }
+
+    @Test
+    void testLoadOverlayClusterTemplatesKeepsOnDiskTemplateOverOverlayWithSameName() {
+        when(defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(any(DefaultClusterTemplateV4Request.class)))
+                .thenReturn(new ClusterTemplate());
+        // The overlay is keyed by a name that a real on-disk template already provides - putIfAbsent must keep the on-disk one.
+        when(runtimeClusterTemplateOverlayLoader.materializeOverlayClusterTemplates(any()))
+                .thenReturn(Map.of("cluster-template2", overlayTemplateJson("cluster-template2")));
+
+        underTest.setClusterTemplates(Collections.emptyList());
+        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        underTest.loadClusterTemplatesFromFile();
+
+        // The retained raw JSON is the on-disk AZURE template, not the overlay body (which carries a different blueprintName):
+        // putIfAbsent keyed on the shared name kept the on-disk one, which is the whole point of the collision guard.
+        String retained = Base64Util.decode(underTest.getByName("cluster-template2"));
+        assertFalse(retained.contains("overlay-blueprint"), "the on-disk template must win over the overlay of the same name");
+    }
+
+    @Test
+    void testLoadOverlayClusterTemplatesDoesNothingWhenLoaderReturnsEmpty() {
+        when(runtimeClusterTemplateOverlayLoader.materializeOverlayClusterTemplates(any())).thenReturn(Map.of());
+
+        underTest.setClusterTemplates(Collections.emptyList());
+        underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
+        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        underTest.loadClusterTemplatesFromFile();
+
+        Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
+        assertEquals(0, actual.size(), "a loader that materializes nothing must add no templates");
+    }
+
+    @Test
+    void testLoadOverlayClusterTemplatesDoesNothingWhenKillSwitchIsOff() {
+        underTest.setRuntimeOverlayEnabled(false);
+        underTest.setClusterTemplates(Collections.emptyList());
+        underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
+        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        underTest.loadClusterTemplatesFromFile();
+
+        assertEquals(0, underTest.defaultClusterTemplates().size(), "with the overlay kill-switch off no overlay must be materialized");
+        verify(runtimeClusterTemplateOverlayLoader, never()).materializeOverlayClusterTemplates(any());
+    }
+
+    private static String overlayTemplateJson(String name) {
+        return "{\"name\":\"" + name + "\",\"cloudPlatform\":\"AZURE\","
+                + "\"distroXTemplate\":{\"cluster\":{\"blueprintName\":\"overlay-blueprint\"}}}";
     }
 
     private List<String> getFiles() throws IOException {

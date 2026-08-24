@@ -16,8 +16,10 @@ import com.sequenceiq.cloudbreak.common.json.patch.JsonPatchApplier;
  *
  * <p>For every base file (unless tombstoned): apply the version's RFC 6902 patch (if any), then inject the
  * target version into the caller-supplied set of version-carrying fields. Injection is deliberately
- * field-targeted — it rewrites the pointed-at leaf only when it carries the base version as a leading
- * {@code "<baseVersion> "} prefix (for example {@code "7.3.3 - Data Engineering"}) or is exactly the bare
+ * field-targeted — it rewrites the pointed-at leaf only when it either contains the
+ * {@link RuntimeOverlayConstants#RUNTIME_VERSION_PLACEHOLDER} (the form an overlay addition authors, for example
+ * {@code "__RUNTIME_VERSION__ - Streaming Analytics"}), carries the base version as a leading
+ * {@code "<baseVersion> "} prefix (for example {@code "7.3.3 - Data Engineering"}), or is exactly the bare
  * base version (for example a {@code cdhVersion} of {@code "7.3.3"}), never a blind string replacement that
  * could corrupt unrelated values such as parcel URLs or embedded component versions.</p>
  *
@@ -35,11 +37,12 @@ public final class RuntimeOverlayMaterializer {
      * Reconstructs the full template set for {@code targetVersion} from the {@code baseVersion} templates.
      *
      * @param baseVersion              the frozen base runtime version (for example {@code 7.3.3})
-     * @param targetVersion            the runtime version being materialized (for example {@code 7.3.4})
+     * @param targetVersion            the runtime version being materialized (a version newer than the base)
      * @param baseTemplates            base templates keyed by version-relative path (for example {@code aws/light_duty.json})
      * @param patches                  RFC 6902 patch documents keyed by the same relative path; only genuinely changed files appear
      * @param tombstones               relative paths present in the base but dropped for this version
-     * @param versionInjectionPointers JSON Pointers whose leaf value carries the {@code "<version> - "} prefix to rewrite
+     * @param versionInjectionPointers JSON Pointers whose leaf value carries the version to rewrite (either the
+     *                                 {@code __RUNTIME_VERSION__} placeholder or a {@code "<version> - "} prefix)
      * @return materialized templates keyed by relative path
      */
     public static Map<String, JsonNode> materialize(
@@ -75,10 +78,18 @@ public final class RuntimeOverlayMaterializer {
                 continue;
             }
             String value = node.asText();
-            // Rewrite either a "<baseVersion> ..." prefix (e.g. a name/description) or a leaf that is exactly the
-            // bare base version (e.g. cdhVersion "7.3.3"). Anything else - parcel URLs, component versions that merely
-            // contain the base version - is left untouched.
-            if (!value.startsWith(basePrefix) && !value.equals(baseVersion)) {
+            String rewritten;
+            if (value.contains(RuntimeOverlayConstants.RUNTIME_VERSION_PLACEHOLDER)) {
+                // An overlay addition (a version newer than the base) authors its version-carrying fields with the
+                // placeholder rather than a concrete version, so the file reads as belonging to the version it was
+                // added for; swap every occurrence for the target version.
+                rewritten = value.replace(RuntimeOverlayConstants.RUNTIME_VERSION_PLACEHOLDER, targetVersion);
+            } else if (value.startsWith(basePrefix) || value.equals(baseVersion)) {
+                // A frozen base file carries the literal base version: rewrite either a "<baseVersion> ..." prefix
+                // (e.g. a name/description) or a leaf that is exactly the bare base version (e.g. cdhVersion "7.3.3").
+                // Anything else - parcel URLs, component versions that merely contain the base version - is left alone.
+                rewritten = targetVersion + value.substring(baseVersion.length());
+            } else {
                 continue;
             }
             int lastSlash = pointer.lastIndexOf('/');
@@ -89,7 +100,7 @@ public final class RuntimeOverlayMaterializer {
             String leaf = decode(pointer.substring(lastSlash + 1));
             JsonNode parent = parentPointer.isEmpty() ? template : template.at(parentPointer);
             if (parent instanceof ObjectNode objectParent) {
-                objectParent.put(leaf, targetVersion + value.substring(baseVersion.length()));
+                objectParent.put(leaf, rewritten);
             }
         }
     }

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.datalake.configuration.overlay.RuntimeDutyOverlayLoader;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
@@ -83,6 +84,10 @@ public class CDPConfigService {
     @Value("${datalake.runtimes.supported}")
     private Set<String> supportedRuntimes;
 
+    // Kill-switch for the runtime base+overlay model: when false, only full on-disk duty dirs are loaded
+    @Value("${cb.runtimes.overlay.enabled:false}")
+    private boolean runtimeOverlayEnabled;
+
     private final Map<CDPConfigKey, String> cdpStackRequests = new HashMap<>();
 
     @Inject
@@ -93,6 +98,9 @@ public class CDPConfigService {
 
     @Inject
     private CommonGovService commonGovService;
+
+    @Inject
+    private RuntimeDutyOverlayLoader runtimeDutyOverlayLoader;
 
     @PostConstruct
     public void initCdpStackRequests() {
@@ -119,6 +127,12 @@ public class CDPConfigService {
                         }
                     }
                 }
+            }
+            // Runtime versions that ship as sparse overlays on the frozen base (no full on-disk dir) are
+            // reconstructed here and merged in. On-disk full copies, if present, win over an overlay.
+            if (runtimeOverlayEnabled) {
+                runtimeDutyOverlayLoader.materializeOverlayDuties(supportedRuntimes)
+                        .forEach(cdpStackRequests::putIfAbsent);
             }
             LOGGER.info("Cdp configs for datalakes: {}", cdpStackRequests);
         } catch (IOException e) {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.init.clustertemplate.overlay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -149,12 +150,24 @@ class RuntimeClusterTemplateOverlayLoaderTest {
     void newTemplateAddedByAnOverlayIsMaterializedUnderItsInjectedName() throws IOException {
         Map<String, String> materialized = underTest.materializeOverlayClusterTemplates(PATCHED_WITH_736);
 
-        // aws/streaming-analytics has no 7.3.3 base counterpart; it is added whole at 7.3.6 and keyed by its injected /name.
+        // aws/streaming-analytics has no 7.3.3 base counterpart; it is added whole at 7.3.6 with a __RUNTIME_VERSION__
+        // placeholder in /name and blueprintName, and keyed by its injected /name.
         String raw = materialized.get("7.3.6 - Streaming Analytics for AWS");
         assertNotNull(raw, "a brand-new cluster template added by an overlay must be materialized under its injected name");
         assertEquals("7.3.6 - Streaming Analytics", MAPPER.readTree(raw).at(BLUEPRINT_NAME_POINTER).asText(),
                 "the addition's blueprintName must be version-injected too");
         assertFalse(materialized.containsKey("7.3.4 - Streaming Analytics for AWS"), "an addition anchored at 7.3.6 must not appear in earlier versions");
+    }
+
+    @Test
+    void setConfiguredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoTemplatesOnDisk() {
+        // cb.runtimes.base is injected via the setter; re-pointing it to a version with no on-disk template dir must
+        // reach the resolver and fail loud, proving the configured base is actually consulted (not hard-wired).
+        underTest.setConfiguredBaseVersion("9.9.9");
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> underTest.materializeOverlayClusterTemplates(Set.of("9.9.10")));
+        assertTrue(thrown.getMessage().contains("9.9.9"), "the failure must name the re-pointed base version, got: " + thrown.getMessage());
     }
 
     private String masterInstanceType(Map<String, String> materialized, String version) throws IOException {

@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,6 +61,9 @@ public class RuntimeClusterTemplateOverlayLoader {
     // lower-case letters, digits, hyphens and underscores (e.g. azure/lakehouse_optimizer_ha.json).
     private static final Pattern TEMPLATE_RELATIVE_PATTERN = Pattern.compile("^(aws|azure|gcp|yarn)/[a-z0-9_-]+\\.json$");
 
+    @Value("${cb.runtimes.base:}")
+    private String configuredBaseVersion;
+
     /**
      * Materializes the cluster templates for every patched runtime version that is an overlay (newer than
      * the base and without an on-disk full cluster-template directory).
@@ -69,7 +74,7 @@ public class RuntimeClusterTemplateOverlayLoader {
      */
     public Map<String, String> materializeOverlayClusterTemplates(Set<String> patchedVersions) {
         Map<String, Map<String, JsonNode>> overlaysByVersion = RuntimeOverlayResolver.resolveOverlays(
-                RuntimeOverlayConstants.BASE_VERSION,
+                baseVersion(),
                 BASE_SUBTREE,
                 OVERLAY_SUBTREE,
                 patchedVersions,
@@ -86,6 +91,14 @@ public class RuntimeClusterTemplateOverlayLoader {
         }
         LOGGER.info("Materialized {} overlay cluster template(s) for runtime versions {}.", result.size(), overlaysByVersion.keySet());
         return result;
+    }
+
+    private String baseVersion() {
+        return StringUtils.isNotBlank(configuredBaseVersion) ? configuredBaseVersion.trim() : RuntimeOverlayConstants.BASE_VERSION;
+    }
+
+    protected void setConfiguredBaseVersion(String configuredBaseVersion) {
+        this.configuredBaseVersion = configuredBaseVersion;
     }
 
     private void registerMaterialized(Map<String, String> result, Map<String, JsonNode> materialized) throws IOException {

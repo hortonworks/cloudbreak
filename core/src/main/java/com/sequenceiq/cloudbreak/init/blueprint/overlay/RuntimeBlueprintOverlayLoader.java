@@ -15,6 +15,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
@@ -37,18 +38,21 @@ import com.sequenceiq.cloudbreak.init.blueprint.BlueprintEntities;
  * <p>An overlay's genuine deltas live under {@code classpath:runtime-overlays/<version>/blueprints/} as RFC 6902
  * {@code <stem>.patch.json} files, whole-file {@code <stem>.tombstone} markers, and whole-file {@code <stem>.bp}
  * additions for a blueprint the base never had. Because a blueprint's display name is external to the {@code .bp}
- * file, an addition must ship a companion {@code <stem>.name} sidecar holding the base-version-prefixed display name;
- * this loader reads those sidecars alongside the base YAML block, so a new blueprint is named the same way an
- * existing one is (prefix-swap only).</p>
+ * file, an addition must ship a companion {@code <stem>.name} sidecar holding the display name with the
+ * {@code __RUNTIME_VERSION__} placeholder in place of a version (for example
+ * {@code "__RUNTIME_VERSION__ - Brand New: Foo"}); this loader reads those sidecars alongside the base YAML block and
+ * substitutes the target version, so a new blueprint gets a correctly-versioned name without the author hand-writing
+ * the base version.</p>
  *
  * <p>This is a thin, blueprint-specific adapter over the version-agnostic {@link RuntimeOverlayResolver} in
  * {@code common}. Blueprints differ from cluster templates in one important way: the DB identity (the blueprint
  * display name) is <em>not</em> a field inside the {@code .bp} file - it is the left-hand side of the
  * {@code displayName=fileStem} entry in the {@code cb.blueprint.cm.defaults.<version>} YAML block. So this loader
  * reads the base version's YAML block to recover the {@code fileStem -> displayName} mapping, then derives each
- * overlay version's name by swapping only the {@code "<baseVersion> "} prefix of the base display name (never a
- * blind rewrite). The version fields inside the file itself ({@code /description} and {@code /blueprint/cdhVersion})
- * are injected by the shared resolver.</p>
+ * overlay version's name from the base display name (swapping only the {@code "<baseVersion> "} prefix) or, for an
+ * addition, from its sidecar name (swapping the {@code __RUNTIME_VERSION__} placeholder) - never a blind rewrite. The
+ * version fields inside the file itself ({@code /description} and {@code /blueprint/cdhVersion}) are injected by the
+ * shared resolver.</p>
  */
 @Component
 public class RuntimeBlueprintOverlayLoader {
@@ -68,6 +72,9 @@ public class RuntimeBlueprintOverlayLoader {
     // A flat <stem>.bp file; stems use lower-case letters, digits and hyphens (e.g. cdp-data-engineering-spark3.bp).
     private static final Pattern BLUEPRINT_RELATIVE_PATTERN = Pattern.compile("^[a-z0-9-]+\\.bp$");
 
+    @Value("${cb.runtimes.base:}")
+    private String configuredBaseVersion;
+
     @Inject
     private BlueprintEntities blueprintEntities;
 
@@ -84,18 +91,19 @@ public class RuntimeBlueprintOverlayLoader {
     public List<MaterializedBlueprint> materializeOverlayBlueprints(Set<String> patchedVersions) {
         // A stem's display name comes from the base YAML block for a blueprint that already exists in the base, or from
         // a <stem>.name sidecar for a brand-new blueprint an overlay adds (a stem the base block never registered). The
-        // base block wins on a conflict; both values are base-version-prefixed, so the same prefix-swap serves either.
+        // base block wins on a conflict; a base name is base-version-prefixed and a sidecar name uses the placeholder,
+        // and registerMaterialized() handles either form.
         Map<String, String> stemToName = new LinkedHashMap<>();
         stemToName.putAll(sidecarStemToNameMapping());
         stemToName.putAll(baseStemToNameMapping());
         if (stemToName.isEmpty()) {
             LOGGER.warn("No base blueprint registration or overlay name sidecar found for version {}; skipping blueprint overlay materialization.",
-                    RuntimeOverlayConstants.BASE_VERSION);
+                    baseVersion());
             return List.of();
         }
 
         Map<String, Map<String, JsonNode>> overlaysByVersion = RuntimeOverlayResolver.resolveOverlays(
-                RuntimeOverlayConstants.BASE_VERSION,
+                baseVersion(),
                 BASE_SUBTREE,
                 OVERLAY_SUBTREE,
                 patchedVersions,
@@ -111,9 +119,17 @@ public class RuntimeBlueprintOverlayLoader {
         return result;
     }
 
+    private String baseVersion() {
+        return StringUtils.isNotBlank(configuredBaseVersion) ? configuredBaseVersion.trim() : RuntimeOverlayConstants.BASE_VERSION;
+    }
+
+    protected void setConfiguredBaseVersion(String configuredBaseVersion) {
+        this.configuredBaseVersion = configuredBaseVersion;
+    }
+
     private void registerMaterialized(List<MaterializedBlueprint> result, String version, Map<String, JsonNode> materialized,
             Map<String, String> stemToName) {
-        String basePrefix = RuntimeOverlayConstants.BASE_VERSION + " ";
+        String basePrefix = baseVersion() + " ";
         for (Map.Entry<String, JsonNode> entry : materialized.entrySet()) {
             String stem = stripSuffix(entry.getKey());
             String baseName = stemToName.get(stem);
@@ -124,12 +140,19 @@ public class RuntimeBlueprintOverlayLoader {
                 LOGGER.debug("Skipping overlay blueprint file '{}' for version {}: no base registration or name sidecar.", entry.getKey(), version);
                 continue;
             }
-            if (!baseName.startsWith(basePrefix)) {
-                LOGGER.warn("Base blueprint name '{}' does not start with the base version prefix; skipping overlay for version {}.",
-                        baseName, version);
+            String overlayName;
+            if (baseName.contains(RuntimeOverlayConstants.RUNTIME_VERSION_PLACEHOLDER)) {
+                // A brand-new blueprint's sidecar names it with the placeholder (so it reads as the version it was
+                // added for); swap every occurrence for the target version.
+                overlayName = baseName.replace(RuntimeOverlayConstants.RUNTIME_VERSION_PLACEHOLDER, version);
+            } else if (baseName.startsWith(basePrefix)) {
+                // An existing base blueprint's name carries the literal base version; swap only the leading prefix.
+                overlayName = version + baseName.substring(baseVersion().length());
+            } else {
+                LOGGER.warn("Blueprint name '{}' neither starts with the base version prefix nor contains the runtime "
+                        + "version placeholder; skipping overlay for version {}.", baseName, version);
                 continue;
             }
-            String overlayName = version + baseName.substring(RuntimeOverlayConstants.BASE_VERSION.length());
             result.add(new MaterializedBlueprint(overlayName, stem, entry.getValue()));
         }
     }
@@ -139,7 +162,7 @@ public class RuntimeBlueprintOverlayLoader {
      * {@code cb.blueprint.cm.defaults.<baseVersion>} YAML block (each entry is {@code displayName=fileStem}).
      */
     private Map<String, String> baseStemToNameMapping() {
-        String baseBlock = blueprintEntities.getDefaults().get(RuntimeOverlayConstants.BASE_VERSION);
+        String baseBlock = blueprintEntities.getDefaults().get(baseVersion());
         Map<String, String> stemToName = new LinkedHashMap<>();
         if (StringUtils.isBlank(baseBlock)) {
             return stemToName;
@@ -160,9 +183,10 @@ public class RuntimeBlueprintOverlayLoader {
     /**
      * Recovers the {@code fileStem -> displayName} mapping for brand-new blueprints an overlay adds, from
      * {@code <stem>.name} sidecar files under {@code runtime-overlays/<version>/blueprints/}. The name is version-
-     * independent (authored once, base-version-prefixed, at the version that introduces the blueprint) because the
-     * {@code .bp} addition forward-propagates and the prefix is swapped to the target version at registration; a stem
-     * defined by more than one sidecar takes the last-read value, which is harmless since names must stay stable.
+     * independent (authored once, with the {@code __RUNTIME_VERSION__} placeholder, at the version that introduces the
+     * blueprint) because the {@code .bp} addition forward-propagates and the placeholder is swapped for the target
+     * version at registration; a stem defined by more than one sidecar takes the last-read value, which is harmless
+     * since names must stay stable.
      */
     private Map<String, String> sidecarStemToNameMapping() {
         Map<String, String> stemToName = new LinkedHashMap<>();

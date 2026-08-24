@@ -37,7 +37,8 @@ import com.sequenceiq.cloudbreak.util.VersionComparator;
  * relative paths onto their own keys.</p>
  *
  * <p>Resolution for a target version {@code V}: start from the base templates, apply every overlay anchored
- * at {@code <= V} in ascending version order (so a change introduced at 7.3.4 forward-propagates into 7.3.5),
+ * at {@code <= V} in ascending version order (so a change introduced at one overlay version forward-propagates
+ * into every newer version),
  * concatenating same-file patch op arrays (highest-anchor-wins on a conflicting path), then inject the {@code V}
  * version fields. Overlay deltas live under {@code classpath*:runtime-overlays/<version>/<subtree>/} in three
  * kinds: RFC 6902 {@code <path>.patch.json} files that modify a base file, whole-file {@code <path>.tombstone}
@@ -108,8 +109,10 @@ public final class RuntimeOverlayResolver {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             Map<String, JsonNode> baseTemplates = loadBaseTemplates(resolver, baseSubtree, baseVersion, baseFileFilter, baseFileSuffix);
             if (baseTemplates.isEmpty()) {
-                LOGGER.warn("No base {} templates found for base version {}; skipping overlay materialization.", baseSubtree, baseVersion);
-                return Map.of();
+                // Overlays were requested (supportedVersions is non-empty) but the frozen base has no on-disk templates:
+                // the configured base version is wrong. Fail loud rather than silently disabling every overlay.
+                throw new IllegalStateException("No base " + baseSubtree + " templates found for base version " + baseVersion
+                        + "; the configured runtime base has no on-disk directory, so no overlay can be materialized.");
             }
             List<String> overlayVersions = supportedVersions.stream()
                     .filter(version -> VERSION_COMPARATOR.compare(versioned(version), versioned(baseVersion)) > 0)

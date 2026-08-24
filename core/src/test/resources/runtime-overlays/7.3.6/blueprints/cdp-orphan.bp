@@ -1,7 +1,7 @@
 {
-  "description": "7.3.3 - Orphan: No Sidecar",
+  "description": "__RUNTIME_VERSION__ - Orphan: No Sidecar",
   "blueprint": {
-    "cdhVersion": "7.3.3",
+    "cdhVersion": "__RUNTIME_VERSION__",
     "blueprintName": "orphan",
     "services": []
   }

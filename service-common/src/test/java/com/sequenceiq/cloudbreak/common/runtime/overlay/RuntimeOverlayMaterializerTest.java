@@ -47,6 +47,45 @@ class RuntimeOverlayMaterializerTest {
     }
 
     @Test
+    void placeholderIsReplacedWithTargetVersionAtWhitelistedPointers() throws JsonProcessingException {
+        // An overlay addition (a version newer than the base) authors its version-carrying fields with the
+        // __RUNTIME_VERSION__ placeholder rather than the base version, so the file reads as belonging to the version
+        // it was added for. Every whitelisted pointer holding the placeholder must be rewritten to the target version.
+        JsonNode base = MAPPER.readTree("""
+                {
+                    "name": "__RUNTIME_VERSION__ - Streaming Analytics for AWS",
+                    "distroXTemplate": { "cluster": { "blueprintName": "__RUNTIME_VERSION__ - Streaming Analytics" } }
+                }""");
+
+        Map<String, JsonNode> materialized = RuntimeOverlayMaterializer.materialize(
+                "7.3.3", "7.3.6", Map.of("aws/streaming.json", base), Map.of(), Set.of(), POINTERS);
+
+        JsonNode result = materialized.get("aws/streaming.json");
+        assertEquals("7.3.6 - Streaming Analytics for AWS", result.at("/name").asText());
+        assertEquals("7.3.6 - Streaming Analytics", result.at("/distroXTemplate/cluster/blueprintName").asText());
+    }
+
+    @Test
+    void placeholderAtANonWhitelistedPointerIsLeftUntouched() throws JsonProcessingException {
+        // Placeholder replacement is field-targeted exactly like the base-prefix swap: a placeholder outside the
+        // whitelisted pointers must survive verbatim rather than being blindly replaced.
+        JsonNode base = MAPPER.readTree("""
+                {
+                    "name": "__RUNTIME_VERSION__ - DE for AWS",
+                    "description": "__RUNTIME_VERSION__ pinned by design",
+                    "distroXTemplate": { "cluster": { "blueprintName": "x" } }
+                }""");
+
+        Map<String, JsonNode> materialized = RuntimeOverlayMaterializer.materialize(
+                "7.3.3", "7.3.6", Map.of("aws/de.json", base), Map.of(), Set.of(), POINTERS);
+
+        JsonNode result = materialized.get("aws/de.json");
+        assertEquals("7.3.6 - DE for AWS", result.at("/name").asText());
+        assertEquals("__RUNTIME_VERSION__ pinned by design", result.at("/description").asText(),
+                "a placeholder at a non-whitelisted pointer must not change");
+    }
+
+    @Test
     void versionInjectionRewritesOnlyThePrefixNotEveryOccurrence() throws JsonProcessingException {
         JsonNode base = MAPPER.readTree("""
                 {"name": "7.3.3 - built on 7.3.3", "distroXTemplate": {"cluster": {"blueprintName": "x"}}}""");

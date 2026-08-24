@@ -55,12 +55,12 @@ overlay: list it and nothing else.
 
 Deltas live under `classpath*:runtime-overlays/<version>/<overlaySubtree>/`:
 
-| file                       | effect                                                                |
-|----------------------------|-----------------------------------------------------------------------|
-| `<path>.patch.json`        | RFC 6902 patch modifying a base file                                  |
-| `<path>.tombstone`         | empty marker; drops that base file for this version                   |
-| `<path><baseFileSuffix>`   | **addition** — a whole new file the base never had                    |
-| *(nothing)*                | zero-delta: identical to base modulo the injected version string      |
+| file                     | effect                                                                                        |
+|--------------------------|-----------------------------------------------------------------------------------------------|
+| `<path>.patch.json`      | RFC 6902 patch modifying a base file                                                          |
+| `<path>.tombstone`       | empty marker; drops that base file for this version                                           |
+| `<path><baseFileSuffix>` | **addition** — a whole new file the base never had (version fields use `__RUNTIME_VERSION__`) |
+| *(nothing)*              | zero-delta: identical to base modulo the injected version string                              |
 
 Additions forward-propagate (last anchor wins) and compose with patches and tombstones exactly like
 base files — a patch can target an added file, a tombstone can drop one.
@@ -68,12 +68,21 @@ base files — a patch can target an added file, a tombstone can drop one.
 ## Version injection
 
 Injection is deliberately field-targeted, never a blind string replace. For each `injectionPointer`,
-the leaf is rewritten **only** when it starts with `"<baseVersion> "` (e.g. a display name or
-description) or equals the bare base version (e.g. a plain version field). Anything that merely
-*contains* the base number — parcel URLs, embedded component versions — is left untouched.
+the leaf is rewritten **only** when it either:
 
-So callers never hand-author version strings in overlay files; they name the pointers and the engine
-rewrites them per version.
+- contains the `__RUNTIME_VERSION__` placeholder (`RuntimeOverlayConstants.RUNTIME_VERSION_PLACEHOLDER`) —
+  the form an **addition** authors, e.g. `"__RUNTIME_VERSION__ - Streaming Analytics"` → every occurrence
+  is swapped for the target version; or
+- starts with `"<baseVersion> "` (e.g. a display name or description) or equals the bare base version
+  (e.g. a plain version field) — the form a **base** file carries, e.g. `"7.3.3 - Data Engineering"` →
+  only the leading prefix / bare leaf is swapped.
+
+Anything else — a value that merely *contains* the base number, such as a parcel URL or an embedded
+component version — is left untouched.
+
+So a base file keeps its literal base version (swapped forward per version), and an addition (a version
+newer than the base) writes the placeholder instead of a misleading concrete version. Either way the
+caller names the pointers and the engine produces the correctly-versioned value.
 
 ## Tests
 

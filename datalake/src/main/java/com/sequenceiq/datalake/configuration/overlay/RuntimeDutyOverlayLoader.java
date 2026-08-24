@@ -9,8 +9,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -61,6 +63,9 @@ public class RuntimeDutyOverlayLoader {
     // does not load today either.
     private static final Pattern DUTY_RELATIVE_PATTERN = Pattern.compile("^(aws|azure|gcp|yarn|mock|openstack)/([a-z0-9_-]+)\\.json$");
 
+    @Value("${cb.runtimes.base:}")
+    private String configuredBaseVersion;
+
     /**
      * Materializes the duty templates for every supported runtime version that is an overlay (newer than
      * the base and without an on-disk full duty directory).
@@ -71,7 +76,7 @@ public class RuntimeDutyOverlayLoader {
      */
     public Map<CDPConfigKey, String> materializeOverlayDuties(Set<String> supportedRuntimes) {
         Map<String, Map<String, JsonNode>> overlaysByVersion = RuntimeOverlayResolver.resolveOverlays(
-                RuntimeOverlayConstants.BASE_VERSION,
+                baseVersion(),
                 DUTIES_SUBTREE,
                 DUTIES_SUBTREE,
                 supportedRuntimes,
@@ -98,6 +103,14 @@ public class RuntimeDutyOverlayLoader {
                 result.put(key, JsonUtil.writeValueAsString(entry.getValue()));
             }
         }
+    }
+
+    private String baseVersion() {
+        return StringUtils.isNotBlank(configuredBaseVersion) ? configuredBaseVersion.trim() : RuntimeOverlayConstants.BASE_VERSION;
+    }
+
+    protected void setConfiguredBaseVersion(String configuredBaseVersion) {
+        this.configuredBaseVersion = configuredBaseVersion;
     }
 
     private CDPConfigKey toConfigKey(String relativePath, String version) {

@@ -1,6 +1,6 @@
 {
-  "name": "7.0.0 - Gamma AWS",
-  "cluster": { "blueprintName": "7.0.0 - Gamma" },
+  "name": "__RUNTIME_VERSION__ - Gamma AWS",
+  "cluster": { "blueprintName": "__RUNTIME_VERSION__ - Gamma" },
   "instanceGroups": [
     { "name": "master", "template": { "instanceType": "m5.xlarge" } },
     { "name": "worker", "template": { "instanceType": "r5.large" } }

@@ -1,6 +1,6 @@
 {
   "cluster": {
-    "blueprintName": "7.3.3 - SDX Containerized: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "blueprintName": "__RUNTIME_VERSION__ - SDX Containerized: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
   },
   "customDomain": {

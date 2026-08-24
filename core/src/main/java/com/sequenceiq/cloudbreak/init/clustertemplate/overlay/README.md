@@ -31,9 +31,15 @@ what `DefaultClusterTemplateCache` reads from disk — the cache merges the two 
 Driven by `cb.runtimes.patched` in `core/src/main/resources/application.yml` (shared with the
 blueprint overlay loader). A listed version newer than the base with no on-disk
 `defaults/clustertemplates/<version>/` directory is an overlay; everything else is served from disk.
+The whole model is gated by `cb.runtimes.overlay.enabled` (default `false`): when off,
+`DefaultClusterTemplateCache` skips overlay materialization entirely. The frozen base is
+`RuntimeOverlayConstants.BASE_VERSION` (7.3.3), overridable with `cb.runtimes.base` — but only to a
+version whose full on-disk `defaults/clustertemplates/<base>/` dir already ships.
 
-> Do not hand-author `/name` or `/distroXTemplate/cluster/blueprintName` in overlay files — the engine
-> injects the version into both. See the module workflow in the `cb-new-runtime` skill.
+> Do not hand-author a concrete version in `/name` or `/distroXTemplate/cluster/blueprintName` in
+> overlay additions — write `__RUNTIME_VERSION__` in both and the engine injects the target version.
+> (A base file keeps its literal base version, swapped forward per version.) See the module workflow
+> in the `cb-new-runtime` skill.
 
 Tests: `RuntimeClusterTemplateOverlayLoaderTest` (real base + `runtime-overlays/7.3.6` fixture) and
 `DefaultClusterTemplateCacheTest` (the merge branches).

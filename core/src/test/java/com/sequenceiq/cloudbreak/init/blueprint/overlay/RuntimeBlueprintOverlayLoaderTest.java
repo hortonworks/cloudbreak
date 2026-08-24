@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.init.blueprint.overlay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -171,9 +172,9 @@ class RuntimeBlueprintOverlayLoaderTest {
         Map<String, MaterializedBlueprint> byName = byName(underTest.materializeOverlayBlueprints(PATCHED_WITH_736));
 
         // cdp-brand-new has no base .bp and no base-block entry; it is added whole at 7.3.6 with a <stem>.name sidecar
-        // holding the base-prefixed display name, which the loader prefix-swaps to the overlay version.
+        // holding the display name with a __RUNTIME_VERSION__ placeholder, which the loader swaps to the overlay version.
         MaterializedBlueprint added = byName.get("7.3.6 - Brand New: Test Service");
-        assertNotNull(added, "a brand-new blueprint added by an overlay must register under its sidecar name, prefix-swapped");
+        assertNotNull(added, "a brand-new blueprint added by an overlay must register under its sidecar name, version-injected");
         assertEquals("cdp-brand-new", added.fileStem(), "the addition keeps its file stem for the gov-cloud filter");
         assertEquals("7.3.6", added.fileJson().at(CDH_VERSION_POINTER).asText(), "the addition's in-file version fields are injected too");
         assertFalse(byName.containsKey("7.3.4 - Brand New: Test Service"), "an addition anchored at 7.3.6 must not appear in earlier versions");
@@ -192,6 +193,21 @@ class RuntimeBlueprintOverlayLoaderTest {
     @Test
     void emptyPatchedSetYieldsNoOverlays() {
         assertTrue(underTest.materializeOverlayBlueprints(Set.of()).isEmpty(), "an empty patched set enumerates no overlay versions");
+    }
+
+    @Test
+    void setConfiguredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoBlueprintsOnDisk() {
+        // Register the base block under the re-pointed version so stemToName is non-empty and the resolver is actually
+        // reached; cb.runtimes.base is injected via the setter, so re-pointing it to a version with no on-disk blueprint
+        // dir must fail loud - proving the configured base is consulted (not hard-wired to the constant).
+        BlueprintEntities entities = new BlueprintEntities();
+        entities.getDefaults().put("9.9.9", DE_SPARK3_NAME + "=" + DE_SPARK3_STEM);
+        ReflectionTestUtils.setField(underTest, "blueprintEntities", entities);
+        underTest.setConfiguredBaseVersion("9.9.9");
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> underTest.materializeOverlayBlueprints(Set.of("9.9.10")));
+        assertTrue(thrown.getMessage().contains("9.9.9"), "the failure must name the re-pointed base version, got: " + thrown.getMessage());
     }
 
     private String fsTrashInterval(JsonNode blueprint) {

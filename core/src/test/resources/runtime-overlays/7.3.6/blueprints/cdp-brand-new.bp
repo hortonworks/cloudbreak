@@ -1,7 +1,7 @@
 {
-  "description": "7.3.3 - Brand New: Test Service",
+  "description": "__RUNTIME_VERSION__ - Brand New: Test Service",
   "blueprint": {
-    "cdhVersion": "7.3.3",
+    "cdhVersion": "__RUNTIME_VERSION__",
     "blueprintName": "brand-new",
     "services": []
   }

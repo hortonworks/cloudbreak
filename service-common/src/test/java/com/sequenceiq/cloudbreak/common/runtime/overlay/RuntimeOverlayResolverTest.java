@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.common.runtime.overlay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -133,6 +134,15 @@ class RuntimeOverlayResolverTest {
     void emptySupportedSetYieldsNoOverlays() {
         assertTrue(RuntimeOverlayResolver.resolveOverlays(BASE, SUBTREE, SUBTREE, Set.of(), path -> true, POINTERS).isEmpty(),
                 "an empty supported set enumerates no overlay versions");
+    }
+
+    @Test
+    void failsLoudWhenTheConfiguredBaseHasNoOnDiskTemplates() {
+        // Overlays are requested but the configured base version has no on-disk directory: a mis-set base must
+        // fail loud at resolution time rather than silently disabling every overlay.
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> RuntimeOverlayResolver.resolveOverlays("6.0.0", SUBTREE, SUBTREE, Set.of("6.0.1"), path -> true, POINTERS));
+        assertTrue(thrown.getMessage().contains("6.0.0"), "the failure must name the mis-configured base version, got: " + thrown.getMessage());
     }
 
     @Test

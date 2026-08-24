@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.configuration.overlay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -99,6 +100,16 @@ class RuntimeDutyOverlayLoaderTest {
     @Test
     void emptySupportedSetYieldsNoOverlays() {
         assertTrue(underTest.materializeOverlayDuties(Set.of()).isEmpty(), "an empty supported set enumerates no overlay versions");
+    }
+
+    @Test
+    void setConfiguredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoDutiesOnDisk() {
+        // cb.runtimes.base is injected via the setter; re-pointing it to a version with no on-disk duty dir must
+        // reach the resolver and fail loud, proving the configured base is actually consulted (not hard-wired).
+        underTest.setConfiguredBaseVersion("9.9.9");
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> underTest.materializeOverlayDuties(Set.of("9.9.10")));
+        assertTrue(thrown.getMessage().contains("9.9.9"), "the failure must name the re-pointed base version, got: " + thrown.getMessage());
     }
 
     @Test

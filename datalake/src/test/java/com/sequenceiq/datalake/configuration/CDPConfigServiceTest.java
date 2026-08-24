@@ -1,9 +1,12 @@
 package com.sequenceiq.datalake.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +28,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
@@ -31,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.datalake.configuration.overlay.RuntimeDutyOverlayLoader;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
@@ -85,10 +91,54 @@ class CDPConfigServiceTest {
     @Mock
     private CommonGovService commonGovService;
 
+    @Mock
+    private RuntimeDutyOverlayLoader runtimeDutyOverlayLoader;
+
     @BeforeEach
     public void setupAll() {
         lenient().when(entitlementService.isEntitledFor(anyString(), eq(Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER))).thenReturn(Boolean.TRUE);
+        lenient().when(runtimeDutyOverlayLoader.materializeOverlayDuties(any())).thenReturn(Map.of());
         ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_710);
+    }
+
+    @Test
+    void overlayRuntimesAreMergedAndSurfaced() {
+        ReflectionTestUtils.setField(cdpConfigService, "runtimeOverlayEnabled", true);
+        CDPConfigKey overlayKey = new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, "7.3.4");
+        // A realistic materialized duty (the raw JSON CDPConfigService stores for on-disk versions), not a bare "{}":
+        // this proves the loader's output round-trips into a StackV4Request exactly as an on-disk template does.
+        when(runtimeDutyOverlayLoader.materializeOverlayDuties(any()))
+                .thenReturn(Map.of(overlayKey, "{\"cluster\":{\"blueprintName\":\"7.3.4 - Overlay Medium Duty HA\"}}"));
+        when(supportedRuntimes.isEmpty()).thenReturn(true);
+        when(advertisedRuntimes.isEmpty()).thenReturn(true);
+
+        cdpConfigService.initCdpStackRequests();
+
+        StackV4Request materialized = cdpConfigService.getConfigForKey(overlayKey);
+        assertNotNull(materialized, "an overlay-materialized runtime must be looked up like any on-disk one");
+        assertEquals("7.3.4 - Overlay Medium Duty HA", materialized.getCluster().getBlueprintName(),
+                "the overlay's raw JSON must round-trip into the StackV4Request body, not just resolve to a non-null shell");
+        assertTrue(cdpConfigService.getAdvertisedRuntimes(null, null, false).stream()
+                        .anyMatch(runtime -> "7.3.4".equals(runtime.getRuntimeVersion())),
+                "the overlay runtime version must be advertised");
+    }
+
+    @Test
+    void onDiskDutyWinsOverAnOverlayOfTheSameKey() {
+        ReflectionTestUtils.setField(cdpConfigService, "runtimeOverlayEnabled", true);
+        // The overlay is keyed at a runtime/shape that already has a full on-disk duty (AWS LIGHT_DUTY 7.2.12).
+        // The merge uses putIfAbsent, so the on-disk template must win and the overlay body must be discarded.
+        CDPConfigKey collidingKey = new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212);
+        when(runtimeDutyOverlayLoader.materializeOverlayDuties(any()))
+                .thenReturn(Map.of(collidingKey, "{\"cluster\":{\"blueprintName\":\"OVERLAY-SHOULD-NOT-WIN\"}}"));
+        when(supportedRuntimes.isEmpty()).thenReturn(true);
+
+        cdpConfigService.initCdpStackRequests();
+
+        StackV4Request retained = cdpConfigService.getConfigForKey(collidingKey);
+        assertNotNull(retained, "the on-disk AWS LIGHT_DUTY 7.2.12 duty must still be present");
+        assertNotEquals("OVERLAY-SHOULD-NOT-WIN", retained.getCluster().getBlueprintName(),
+                "the on-disk duty must win over an overlay materialized under the same key");
     }
 
     @Test

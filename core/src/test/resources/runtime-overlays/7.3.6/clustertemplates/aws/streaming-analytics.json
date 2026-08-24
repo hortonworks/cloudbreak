@@ -1,12 +1,12 @@
 {
-  "name": "7.3.3 - Streaming Analytics for AWS",
+  "name": "__RUNTIME_VERSION__ - Streaming Analytics for AWS",
   "description": "",
   "type": "DATAENGINEERING",
   "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.3.3 - Streaming Analytics"
+      "blueprintName": "__RUNTIME_VERSION__ - Streaming Analytics"
     },
     "instanceGroups": [
       {

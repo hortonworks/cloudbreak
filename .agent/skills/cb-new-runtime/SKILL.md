@@ -1,91 +1,180 @@
 ---
 name: cb-new-runtime
-description: Introduce a new Cloudera Runtime (CR) version in Cloudbreak and later make it the default — Data Lake + Data Hub blueprints, cluster templates, application.yml runtime properties, upgrade matrix, and the tests that must be bumped. Use when Release Engineering asks to add a new CR (e.g. 7.3.3) or to promote it to default.
+description: Introduce a new Cloudera Runtime (CR) version in Cloudbreak and later make it the default — Data Lake + Data Hub blueprints, cluster templates, application.yml runtime properties, upgrade matrix, and the tests that must be bumped. Use when Release Engineering asks to add a new CR (e.g. 7.3.6) or to promote it to default.
 ---
 
 # Introduce a new Cloudera Runtime version in Cloudbreak
 
-Adding a CR is a **manual, copy-heavy checklist** — there is no generator. The safe pattern for every step is *copy the former CR's files/entries, then rewrite the version string inside them*. Work is split into two phases that happen at different times:
+Cloudbreak uses a **base + overlay** model for runtime templates. One runtime — **7.3.3**
+(`RuntimeOverlayConstants.BASE_VERSION`) — is frozen as full files on disk. Every runtime **newer
+than the base ships as a sparse overlay**: the full blueprint / cluster-template / duty set is
+reconstructed at startup from the base + any deltas + automatic version-string injection. Nothing is
+copied per CR and nothing is generated to disk.
 
-- **Phase 1 — Introduce the new runtime** (this can land as soon as RE raises the Jira). Sections 1.1 + 1.2 below.
-- **Phase 2 — Make it the default** (only after a prewarmed image with the new CR exists in the **prod** image catalog and the CR is stable — otherwise e2e tests go red). Section 2 below.
+So adding a CR is usually **a few config-line edits, not a directory copy.** In the common case where
+the new CR is identical to the base except for the version strings, you author **zero** template
+files.
 
-Out of scope: image-burning and catalog-promotion (test/stage/prod) are **not** a Cloudbreak-repo concern — ignore them here. The CDP CLI/API runtime enum lives in the external `thunderhead` repo, not this one, so it's out of scope for this skill too.
+- **Phase 1 — Introduce the runtime** (land as soon as RE raises the Jira). Section 1.
+- **Phase 2 — Make it the default** (only after a prewarmed prod image exists and the CR is stable,
+  else e2e goes red). Section 2.
 
-## Version placeholders & current state
+Out of scope: image-burning / catalog promotion (not a CB-repo concern); the CDP CLI/API runtime
+enum (external `thunderhead` repo); versions **≤ 7.3.3**, which stay frozen full dirs — never touch
+or convert them. Promoting a *newer* version to be the frozen base is a rare, separate operation, not
+this skill.
 
-Throughout, `<NEW_CR>` = the version being added, `<PREV_CR>` = the highest existing version to copy from. Find `<PREV_CR>` (do not hard-code — it moves every release):
+> Underlying mechanics: the base+overlay engine (resolver, four flavors, version injection) is
+> documented in `service-common/.../common/runtime/overlay/README.md`; the RFC 6902 patch rules and
+> the `name=value` selector in `common/.../common/json/patch/README.md`. Each module's adapter has its
+> own README next to the loader (`core/.../init/{blueprint,clustertemplate}/overlay/`,
+> `datalake/.../configuration/overlay/`).
+
+## Placeholders
+
+`<NEW_CR>` = the version being added (must be **> 7.3.3**). `<BASE>` = `7.3.3`. Confirm the base and
+current top before editing (do not hard-code — they move):
 
 ```bash
-ls core/src/main/resources/defaults/blueprints/ | grep -E '^7\.' | sort -V | tail -3
-grep -n 'latest:' core/src/main/resources/application.yml            # cb.runtimes.latest — the current top CR
+grep -n 'BASE_VERSION' common/src/main/java/com/sequenceiq/cloudbreak/common/runtime/overlay/RuntimeOverlayConstants.java
+grep -n 'latest:\|patched:' core/src/main/resources/application.yml       # cb.runtimes.latest / patched
+grep -n 'supported:\|advertised:' datalake/src/main/resources/application.yml
 ```
 
-As of this writing the latest CR is **7.3.2**; use whatever the commands above report. Version dirs are **not** globally consistent (e.g. `7.2.13` was skipped) — always copy from the actual highest dir, never assume `N-1`.
+---
+
+## Phase 1 — Introduce the new runtime
+
+### 1.1 Register `<NEW_CR>` as an overlay version (always required)
+
+The whole overlay model ships behind a kill-switch that is **off by default**: set
+`cb.runtimes.overlay.enabled: true` in **both** `core` and `datalake` `application.yml` — otherwise the
+loaders never run and `<NEW_CR>` will not materialize regardless of the lists below. (The switch exists so
+the model can be disabled in production without a code rollback; leave it off only when reverting.)
+
+Two modules own two different property sets — **both** must list `<NEW_CR>`:
+
+1. **`core/src/main/resources/application.yml`** under `cb.runtimes:`
+   - Append `<NEW_CR>` to `patched` (e.g. `patched: "<NEW_CR>"`, comma-separated if the list is non-empty). This drives the
+     **blueprint** and **cluster-template** overlays (`DefaultBlueprintCache` /
+     `DefaultClusterTemplateCache`).
+   - Set `latest: "<NEW_CR>"` to the newest advertised version. **This is mandatory** — see the
+     gotcha below; skip it and the runtime materializes but is invisible in the UI.
+2. **`datalake/src/main/resources/application.yml`** under `datalake.runtimes:`
+   - Append `<NEW_CR>` to **`supported`** (drives the **duty** overlays) **and** to **`advertised`**
+     (makes it selectable in the UI).
+   - Do **not** touch `datalake.runtimes.default` — that is Phase 2.
+
+The frozen base version is `RuntimeOverlayConstants.BASE_VERSION` (7.3.3). It can be overridden with
+`cb.runtimes.base` (all overlay loaders read it), but only re-point it at a version whose **full** on-disk
+template dirs already ship (`defaults/blueprints/<base>/`, `defaults/clustertemplates/<base>/`,
+`duties/<base>/`) — a base with no on-disk dir fails every cache at startup. Promoting the base is a rare,
+deliberate step, separate from adding `<NEW_CR>`.
+
+If `<NEW_CR>` is identical to the base modulo version strings (the common case), **you are done with
+templates** — skip 1.2. The three loaders reconstruct the full set from the base + version injection.
+
+### 1.2 Author overlay deltas (only if `<NEW_CR>` genuinely differs from base)
+
+Drop delta files under `runtime-overlays/<NEW_CR>/<subtree>/` in the owning module's
+`src/main/resources`:
+
+| subtree           | module      | path within subtree                | example                                   |
+|-------------------|-------------|------------------------------------|-------------------------------------------|
+| `blueprints`      | **core**    | flat `<stem>`                      | `blueprints/cdp-data-engineering-spark3.*`|
+| `clustertemplates`| **core**    | `<provider>/<template>` (aws/azure/gcp/yarn) | `clustertemplates/aws/dataengineering-spark3.*` |
+| `duties`          | **datalake**| `<platform>/<shape>`               | `duties/aws/medium_duty_ha.*`             |
+
+There are **four** delta kinds (see the README for the resolver rules):
+
+- **Patch** `<path>.patch.json` — an RFC 6902 array modifying a base file. **Every `replace`/`remove`
+  must be immediately preceded by a `test` op on the same path** (enforced — base drift fails loud).
+  Address array elements by `name=<value>`, not index:
+  ```json
+  [
+    { "op": "test",    "path": "/instanceGroups/name=core/template/instanceType", "value": "m5.2xlarge" },
+    { "op": "replace", "path": "/instanceGroups/name=core/template/instanceType", "value": "m5.8xlarge" }
+  ]
+  ```
+- **Tombstone** `<path>.tombstone` — an empty file; drops that base file for this version.
+- **Addition** — a whole new template the base never had: drop the plain `<path>.json` (cluster
+  template / duty) or `<path>.bp` (blueprint). In its version-carrying fields write the placeholder
+  `__RUNTIME_VERSION__` instead of a concrete version, e.g. `"__RUNTIME_VERSION__ - Brand New: Foo"`;
+  the loader swaps it for the actual runtime version. **For a new blueprint also add a `<stem>.name`
+  sidecar** containing the display name with the same placeholder, e.g.
+  `__RUNTIME_VERSION__ - Brand New: Foo`.
+- **Nothing** — zero-patch; handled entirely by 1.1.
+
+**Never hand-author a concrete version** in `name`, `description`, `cdhVersion` or `blueprintName`:
+for base files the engine swaps the base-version prefix; for additions write the `__RUNTIME_VERSION__`
+placeholder and the engine substitutes the target version. A file must never carry a hard-coded
+`7.3.x` in these fields. A patch anchored at `<NEW_CR>` forward-propagates into every higher version
+(highest anchor ≤ V wins); a one-off fix for a single later version is a counter-patch anchored there.
+
+### 1.3 Upgrade matrix (independent of the overlay model)
+
+1. Add the `<NEW_CR>` entry to `core/src/main/resources/definitions/upgrade-matrix-definition.json`.
+   The allowed *source* versions are a **product decision — ask RE / the upgrade owners**, don't guess.
+2. Bump the expected size in `RuntimeUpgradeMatrixDefinitionProviderTest` (currently
+   `assertEquals(10, ...)`) — `core/src/test/java/com/sequenceiq/cloudbreak/service/upgrade/matrix/RuntimeUpgradeMatrixDefinitionProviderTest.java`.
+
+### 1.4 Fix the count oracle
+
+`ClusterTemplateTest.validateDefaultCount` asserts the total default cluster-template count
+(currently `905`) — `integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase/mock/ClusterTemplateTest.java`.
+A new zero-patch version contributes the base's full count (**+110** at the base's current shape),
+minus any tombstones you added and templates whose blueprint is gov-only. Run the test and let it
+report the exact number rather than eyeballing it.
 
 ---
 
-## Phase 1.1 — Data Lake runtime
+## Phase 2 — Make the new CR the default (later, separate PR)
 
-1. **Blueprints.** `cp -r core/src/main/resources/defaults/blueprints/<PREV_CR>/cdp-sdx*.bp` into a new `core/src/main/resources/defaults/blueprints/<NEW_CR>/` dir. In each copied `.bp`, update the `"description"` (line ~5, e.g. `"7.3.2 - SDX template ..."`) and `"cdhVersion"` (e.g. `"cdhVersion": "7.3.2"`) to `<NEW_CR>`.
-2. **Register blueprints in core.** Add a `<NEW_CR>:` entry under `cb.blueprint.cm.defaults:` in `core/src/main/resources/application.yml` (around the `cm: defaults:` block). Copy the `<PREV_CR>` block and rewrite every version-prefixed template label + the `<NEW_CR>` key. Each line maps a human-readable name → blueprint file id, e.g. `7.3.2 - SDX Light Duty: ...=cdp-sdx;`.
-3. **Data Lake supported / advertised.** In `datalake/src/main/resources/application.yml`, append `<NEW_CR>` to **both**:
-   - `datalake.runtimes.supported`
-   - `datalake.runtimes.advertised` (this is what makes it selectable in the UI)
-   Do **not** touch `datalake.runtimes.default` yet — that is Phase 2.
-4. **Duties templates.** `cp -r datalake/src/main/resources/duties/<PREV_CR> datalake/src/main/resources/duties/<NEW_CR>`. In **every** copied JSON, update the `"blueprintName"` fields so their version prefix is `<NEW_CR>` (they must match the blueprint names registered in step 2). Copy all subdirs (`aws`, `azure`, `gcp`, `yarn`, `openstack`, …).
-5. **Upgrade matrix.** Add the new version to `core/src/main/resources/definitions/upgrade-matrix-definition.json`. The set of supported *base* versions for a new runtime is a product decision — **ask RE / the upgrade owners**, don't guess the allowed source versions.
-6. **Fix the matrix test.** Adding a matrix entry changes its size, so bump the expected count in `RuntimeUpgradeMatrixDefinitionProviderTest.testGetUpgradeMatrixShouldReadTheUpgradeMatrixFromJson` — `core/src/test/java/com/sequenceiq/cloudbreak/service/upgrade/matrix/RuntimeUpgradeMatrixDefinitionProviderTest.java` (currently `assertEquals(9, actual.getRuntimeUpgradeMatrix().size())`).
+**Precondition:** a prewarmed image with `<NEW_CR>` exists in the **prod** image catalog and the CR
+is stable. Earlier makes e2e extremely flaky.
 
----
-
-## Phase 1.2 — Data Hub runtime
-
-Data Hubs must run the **exact same** CR version as the Data Lake, so introduce the same `<NEW_CR>` here too.
-
-1. **Blueprints.** Copy the Data Hub `cdp-*.bp` files (everything except the `cdp-sdx*` ones) from `core/src/main/resources/defaults/blueprints/<PREV_CR>/` into `core/src/main/resources/defaults/blueprints/<NEW_CR>/`. Update `"description"` and `"cdhVersion"` in each.
-2. **Register blueprints in core.** Same `cb.blueprint.cm.defaults.<NEW_CR>` block in `core/src/main/resources/application.yml` as 1.1 step 2 — the Data Hub blueprint lines live in the same block (one block per CR covers both DL and DH names).
-3. **Bump `cb.runtimes.latest`.** Set `cb.runtimes.latest: "<NEW_CR>"` in `core/src/main/resources/application.yml` (currently `7.3.2`).
-4. **Cluster templates (per cloud provider).** `cp -r core/src/main/resources/defaults/clustertemplates/<PREV_CR> core/src/main/resources/defaults/clustertemplates/<NEW_CR>` — this covers `aws`, `azure`, `gcp`, `yarn`. (Note the path is `defaults/clustertemplates/`, not a bare `clustertemplates/`.)
-5. **Update every copied cluster template.** In each JSON under the new dir, rewrite the version prefix in `"name"` (e.g. `"7.3.2 - Data Engineering Spark3 for AWS"`) and `"blueprintName"` (must match a name registered in step 2).
-6. **Service definitions (CDH).** Older docs reference a versioned `template-manager-cmtemplate/.../cloudera-manager-template/cdh/<version>/` layout, but that dir no longer exists in this repo (only `service-definitions-minimal.json` remains). Before assuming there's nothing to do, search for a per-version service-definition file and copy/bump the CDH `version` if one exists for `<PREV_CR>`:
-   ```bash
-   find template-manager-cmtemplate/src/main/resources -type f | xargs grep -l "<PREV_CR>" 2>/dev/null
-   ```
-   If nothing version-specific turns up, this step is a no-op for the current layout — note that in the PR rather than fabricating files.
-7. **Fix the mock integration test.** Adding cluster templates raises the default-template count, so bump `expectedCount` in `ClusterTemplateTest.validateDefaultCount` — `integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase/mock/ClusterTemplateTest.java` (currently `long expectedCount = 783;`). Run the test to get the exact new number rather than eyeballing it.
-
----
-
-## Phase 2 — Make the new CR the default (later PR)
-
-**Precondition:** a prewarmed image with `<NEW_CR>` is available in the **prod** image catalog and the runtime is stable. Doing this earlier makes e2e tests extremely flaky. This is a separate PR from Phase 1.
-
-1. **Data Lake default.** Set `datalake.runtimes.default: "<NEW_CR>"` in `datalake/src/main/resources/application.yml`.
-2. **Integration-test defaults.** In `integration-test/src/main/resources/application.yml` set all three to `<NEW_CR>`:
+1. Set `datalake.runtimes.default: "<NEW_CR>"` in `datalake/src/main/resources/application.yml`.
+2. In `integration-test/src/main/resources/application.yml` set the **target/default** ones to `<NEW_CR>`:
    - `integrationtest.runtimeVersion`
    - `integrationtest.upgrade.targetRuntimeVersion`
    - `integrationtest.upgrade.distroXUpgradeTargetVersion`
-   (`integrationtest.upgrade.currentRuntimeVersion` / source-side values stay on the older CR — only bump the *target*/*default* ones.)
+   (`integrationtest.upgrade.currentRuntimeVersion` / source-side values stay on the older CR.)
 
-The image-burn-trigger removal that pairs with this promotion is not a CB-repo change — ignore it here.
+The image-burn-trigger removal that pairs with promotion is not a CB-repo change — ignore it here.
 
 ---
 
 ## Verify
 
 ```bash
-# YAML sanity + the two tests that assert on counts you changed
-./gradlew :core:test --tests '*RuntimeUpgradeMatrixDefinitionProviderTest*'
-# ClusterTemplateTest is an integration-test mock case — run per your usual integration-test invocation to read the real default count
+# Overlay engine + adapters (unit)
+./gradlew :common:test --tests '*RuntimeOverlay*' --tests '*JsonPatch*'
+./gradlew :core:test   --tests '*RuntimeBlueprintOverlayLoaderTest' --tests '*RuntimeClusterTemplateOverlayLoaderTest' \
+                       --tests '*RuntimeUpgradeMatrixDefinitionProviderTest'
+./gradlew :datalake:test --tests '*RuntimeDutyOverlayLoaderTest' --tests '*CDPConfigServiceTest'
+# ClusterTemplateTest is an integration-test mock case — run per your usual integration-test invocation
+# to read the real default count.
 ```
 
-Also load **cb-testing** before opening the PR (coverage gates, authorization-compliance test) and **cb-jira** to link the CR ticket.
+Then load **cb-testing** (coverage gates + authorization-compliance) and **cb-jira** to link the ticket.
 
 ## Gotchas
 
-- **`advertised` vs `default` vs `supported`** are three distinct datalake properties. Phase 1 touches `supported`+`advertised`; `default` is Phase 2 only.
-- **Copy from the real highest dir**, not `N-1` — versions get skipped.
-- **`blueprintName` must match exactly** between duties/cluster-template JSON and the labels registered in `cb.blueprint.cm.defaults.<NEW_CR>`; a typo silently yields zero default templates and fails `validateDefaultCount`.
-- **Two count-assertions will fail by design** until you bump them: the upgrade-matrix size and `ClusterTemplateTest` default count. Let the failing test tell you the correct number.
-- The whole flow is copy-paste heavy — after copying a dir, `grep -rn '<PREV_CR>'` inside the new dir to catch every version string you still need to rewrite.
+- **UI-invisibility (the big one):** a patched runtime materializes, caches, and persists correctly
+  but the DataHub blueprint **list API returns 0** for it unless `cb.runtimes.latest` is bumped to the
+  newest advertised version. `SupportedRuntimes.isSupported` filters out anything newer than `latest`.
+  Bumping `cb.runtimes.latest` in `core` `application.yml` is **not optional**.
+- **Kill-switch off by default:** `cb.runtimes.overlay.enabled` defaults to `false`, so the loaders are
+  dormant until you flip it to `true` (in **both** `core` and `datalake`). List a version but leave the
+  switch off and nothing materializes — no error, just an empty overlay.
+- **Two modules, two property sets:** core `cb.runtimes.patched` (blueprints + cluster templates) vs
+  datalake `runtimes.supported` + `advertised` (duties + UI). List the new version in **both** or you
+  get a half-populated runtime.
+- **Base drift fails loud:** editing a base 7.3.3 file that an overlay patches makes that patch's
+  guarding `test` op throw at startup. That's the safety net working — re-anchor the patch.
+- **Don't author version strings** in overlay files — injection owns `name` / `description` /
+  `cdhVersion` / `blueprintName`. A typo'd `blueprintName` in a hand-copied file silently yields zero
+  templates.
+- **Count assertions fail by design** until bumped (upgrade-matrix size, `validateDefaultCount`). Let
+  the failing test tell you the number.
+- **Versions ≤ 7.3.3 are frozen full dirs** — leave them; the overlay model is forward-only.
