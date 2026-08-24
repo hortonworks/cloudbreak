@@ -105,14 +105,14 @@ class SdxUpgradeValidatorTest {
 
     private static Stream<Arguments> provideShapesWithoutHBaseAndHDFSParameters() {
         return Stream.of(
-                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false, false, true),
-                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false, true,  false),
-                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true,  false, false),
-                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true,  true,  false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_PRO, false, false, true),
+                Arguments.of(SdxClusterShape.ENTERPRISE_PRO, false, true,  false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_PRO, true,  false, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_PRO, true,  true,  false),
 
-                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false, false, true),
-                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false, true,  true),
-                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, true,  true,  true)
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, false, false, true),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, false, true,  true),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, true,  true,  true)
         );
     }
 
@@ -122,7 +122,7 @@ class SdxUpgradeValidatorTest {
         request.setRollingUpgradeEnabled(false);
 
         assertDoesNotThrow(() -> doAs(USER_CRN,
-                () -> underTest.validateRollingUpgradeByClusterShape(request, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, USER_CRN)));
+                () -> underTest.validateRollingUpgradeByClusterShape(request, SdxClusterShape.ENTERPRISE_PRO, USER_CRN)));
         verifyNoInteractions(entitlementService);
     }
 

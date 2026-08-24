@@ -1,6 +1,6 @@
 {
   "cluster": {
-    "blueprintName": "7.3.3 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE",
+    "blueprintName": "7.3.3 - SDX Light Duty Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
     "validateBlueprint": false
   },
   "customDomain": {

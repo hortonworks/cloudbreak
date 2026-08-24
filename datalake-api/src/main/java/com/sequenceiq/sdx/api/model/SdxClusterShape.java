@@ -1,12 +1,16 @@
 package com.sequenceiq.sdx.api.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public enum SdxClusterShape {
     CUSTOM(Boolean.FALSE, "-cus", Boolean.TRUE),
     LIGHT_DUTY(Boolean.FALSE, "-ld", Boolean.TRUE),
-    LIGHT_DUTY_WITHOUT_HBASE(Boolean.FALSE, "-ldl", Boolean.TRUE),
+    @JsonAlias("LIGHT_DUTY_WITHOUT_HBASE")
+    LIGHT_DUTY_PRO(Boolean.FALSE, "-ldl", Boolean.TRUE),
     MEDIUM_DUTY_HA(Boolean.TRUE, "-md", Boolean.TRUE),
     ENTERPRISE(Boolean.TRUE, "-ent", Boolean.TRUE),
-    ENTERPRISE_WITHOUT_HBASE(Boolean.TRUE, "-enl", Boolean.TRUE),
+    @JsonAlias("ENTERPRISE_WITHOUT_HBASE")
+    ENTERPRISE_PRO(Boolean.TRUE, "-enl", Boolean.TRUE),
     MICRO_DUTY(Boolean.FALSE, "-mic", Boolean.TRUE),
     CONTAINERIZED(Boolean.FALSE, "-con", Boolean.FALSE);
 
@@ -35,10 +39,10 @@ public enum SdxClusterShape {
     }
 
     public boolean isHA() {
-        return MEDIUM_DUTY_HA.equals(this) || ENTERPRISE.equals(this) || ENTERPRISE_WITHOUT_HBASE.equals(this);
+        return MEDIUM_DUTY_HA.equals(this) || ENTERPRISE.equals(this) || ENTERPRISE_PRO.equals(this);
     }
 
     public boolean isWithoutHbase() {
-        return LIGHT_DUTY_WITHOUT_HBASE.equals(this) || ENTERPRISE_WITHOUT_HBASE.equals(this);
+        return LIGHT_DUTY_PRO.equals(this) || ENTERPRISE_PRO.equals(this);
     }
 }

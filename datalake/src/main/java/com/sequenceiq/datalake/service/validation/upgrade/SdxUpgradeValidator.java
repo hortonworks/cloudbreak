@@ -51,7 +51,7 @@ public class SdxUpgradeValidator {
         String accountId = Crn.safeFromString(userCrn).getAccountId();
         return SdxClusterShape.ENTERPRISE.equals(clusterShape)
                 || (skipRollingUpgradeValidationEnabled() && (clusterShape.isHA() || SdxClusterShape.CUSTOM.equals(clusterShape)))
-                || (entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(accountId) && SdxClusterShape.ENTERPRISE_WITHOUT_HBASE.equals(clusterShape));
+                || (entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(accountId) && SdxClusterShape.ENTERPRISE_PRO.equals(clusterShape));
     }
 
     private boolean skipRollingUpgradeValidationEnabled() {

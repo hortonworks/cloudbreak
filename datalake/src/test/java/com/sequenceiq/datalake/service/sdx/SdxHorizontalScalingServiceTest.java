@@ -252,7 +252,7 @@ public class SdxHorizontalScalingServiceTest {
     }
 
     @ParameterizedTest(name = "testDatalakeHorizontalScaleValidationForInvalidShapes {0}")
-    @EnumSource(value = SdxClusterShape.class, names = {"CUSTOM", "CONTAINERIZED", "LIGHT_DUTY", "LIGHT_DUTY_WITHOUT_HBASE", "MICRO_DUTY", "MEDIUM_DUTY_HA"})
+    @EnumSource(value = SdxClusterShape.class, names = {"CUSTOM", "CONTAINERIZED", "LIGHT_DUTY", "LIGHT_DUTY_PRO", "MICRO_DUTY", "MEDIUM_DUTY_HA"})
     void testDatalakeHorizontalScaleForInvalidShapes(SdxClusterShape shape) {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(shape);
@@ -262,7 +262,7 @@ public class SdxHorizontalScalingServiceTest {
     }
 
     @ParameterizedTest(name = "testDatalakeHorizontalScaleValidationForValidShapes {0}")
-    @EnumSource(value = SdxClusterShape.class, names = {"ENTERPRISE", "ENTERPRISE_WITHOUT_HBASE"})
+    @EnumSource(value = SdxClusterShape.class, names = {"ENTERPRISE", "ENTERPRISE_PRO"})
     void testDatalakeHorizontalScaleForValidShapes(SdxClusterShape shape) {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(shape);

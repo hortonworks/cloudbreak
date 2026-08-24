@@ -36,14 +36,14 @@ public class ShapeValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShapeValidator.class);
 
-    private static final Set<SdxClusterShape> SHAPES_WITHOUT_HBASE_AND_HDFS = Set.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE,
-            SdxClusterShape.ENTERPRISE_WITHOUT_HBASE);
+    private static final Set<SdxClusterShape> SHAPES_WITHOUT_HBASE_AND_HDFS = Set.of(SdxClusterShape.LIGHT_DUTY_PRO,
+            SdxClusterShape.ENTERPRISE_PRO);
 
     // Host group that carries the volume-pinned services (ZooKeeper+KRaft, Kafka, Solr) and the minimum
     // number of attached volumes it must have so the blueprint's fs1/fs2/fs3 data-dir mounts exist.
     private static final Map<SdxClusterShape, Map.Entry<String, Integer>> MIN_VOLUMES_PER_SHAPE = Map.of(
-            SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, Map.entry("core", 3),
-            SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, Map.entry("master", 3));
+            SdxClusterShape.ENTERPRISE_PRO, Map.entry("core", 3),
+            SdxClusterShape.LIGHT_DUTY_PRO, Map.entry("master", 3));
 
     @Inject
     private EntitlementService entitlementService;

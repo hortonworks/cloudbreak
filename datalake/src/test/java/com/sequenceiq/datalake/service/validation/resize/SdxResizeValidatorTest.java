@@ -86,22 +86,22 @@ class SdxResizeValidatorTest {
 
     private static Stream<Arguments> provideInvalidShapeTransitions() {
         return Stream.of(
-                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
-                Arguments.of(SdxClusterShape.MEDIUM_DUTY_HA, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
-                Arguments.of(SdxClusterShape.ENTERPRISE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
-                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
-                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE, false),
-                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE, false),
-                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false),
-                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, false),
-                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, true)
+                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.ENTERPRISE_PRO, false),
+                Arguments.of(SdxClusterShape.MEDIUM_DUTY_HA, SdxClusterShape.ENTERPRISE_PRO, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE, SdxClusterShape.ENTERPRISE_PRO, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_PRO, SdxClusterShape.ENTERPRISE_PRO, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, SdxClusterShape.ENTERPRISE, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_PRO, SdxClusterShape.ENTERPRISE, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.LIGHT_DUTY_PRO, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, SdxClusterShape.LIGHT_DUTY_PRO, false),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, SdxClusterShape.LIGHT_DUTY_PRO, true)
         );
     }
 
     private static Stream<Arguments> provideValidShapeTransitions() {
         return Stream.of(
-                Arguments.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, false),
-                Arguments.of(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true),
+                Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, SdxClusterShape.ENTERPRISE_PRO, false),
+                Arguments.of(SdxClusterShape.ENTERPRISE_PRO, SdxClusterShape.ENTERPRISE_PRO, true),
                 Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.ENTERPRISE, false),
                 Arguments.of(SdxClusterShape.MEDIUM_DUTY_HA, SdxClusterShape.ENTERPRISE, false),
                 Arguments.of(SdxClusterShape.LIGHT_DUTY, SdxClusterShape.MEDIUM_DUTY_HA, false)

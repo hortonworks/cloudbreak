@@ -44,7 +44,7 @@ public class OrderedOSUpgradeRequestProvider {
     private AbstractOrderedOSUpgrade getOrderedOSUpgradeByShape(SdxClusterShape clusterShape) {
         if (SdxClusterShape.ENTERPRISE.equals(clusterShape)) {
             return enterpriseOrderedOSUpgrade;
-        } else if (SdxClusterShape.ENTERPRISE_WITHOUT_HBASE.equals(clusterShape)) {
+        } else if (SdxClusterShape.ENTERPRISE_PRO.equals(clusterShape)) {
             return enterpriseWithoutHdfsHbaseOrderedOSUpgrade;
         } else {
             return defaultOrderedOSUpgrade;

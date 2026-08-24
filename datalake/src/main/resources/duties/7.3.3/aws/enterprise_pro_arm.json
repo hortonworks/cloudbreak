@@ -1,66 +1,40 @@
 {
   "cluster": {
-    "blueprintName": "7.3.2 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
+    "blueprintName": "7.3.3 - Enterprise SDX Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
     "validateBlueprint": false
   },
   "customDomain": {
     "domainName": "cloudera.site",
     "hostgroupNameAsHostname": true
   },
+  "architecture": "ARM64",
   "instanceGroups": [
-    {
-      "name": "gateway",
-      "template": {
-        "instanceType": "r1.xlarge",
-        "attachedVolumes": [
-          {
-            "count": 1,
-            "size": 128,
-            "type": "PURE-ISCSI"
-          }
-        ]
-      },
-      "nodeCount": 2,
-      "type": "GATEWAY",
-      "recoveryMode": "MANUAL",
-      "recipeNames": []
-    },
     {
       "name": "core",
       "template": {
-        "instanceType": "r1.xlarge",
+        "instanceType": "m7g.2xlarge",
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 128,
-            "type": "PURE-ISCSI"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "PURE-ISCSI"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "PURE-ISCSI"
+            "size": 512,
+            "type": "gp3"
           }
         ]
       },
       "nodeCount": 3,
-      "type": "CORE",
+      "type": "GATEWAY",
       "recoveryMode": "MANUAL",
       "recipeNames": []
     },
     {
       "name": "auxiliary",
       "template": {
-        "instanceType": "r1.large",
+        "instanceType": "m7g.xlarge",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
-            "type": "PURE-ISCSI"
+            "type": "gp3"
           }
         ]
       },
@@ -72,12 +46,12 @@
     {
       "name": "solr_scale_out",
       "template": {
-        "instanceType": "r1.large",
+        "instanceType": "m7g.xlarge",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 256,
-            "type": "PURE-ISCSI"
+            "type": "gp3"
           }
         ]
       },
@@ -89,12 +63,12 @@
     {
       "name": "kafka_scale_out",
       "template": {
-        "instanceType": "m1.medium",
+        "instanceType": "c7g.large",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
-            "type": "PURE-ISCSI"
+            "type": "gp3"
           }
         ]
       },
@@ -106,12 +80,12 @@
     {
       "name": "raz_scale_out",
       "template": {
-        "instanceType": "m1.large",
+        "instanceType": "c7g.xlarge",
         "attachedVolumes": [
           {
             "count": 0,
             "size": 0,
-            "type": "PURE-ISCSI"
+            "type": "gp3"
           }
         ]
       },
@@ -123,12 +97,12 @@
     {
       "name": "atlas_scale_out",
       "template": {
-        "instanceType": "r1.large",
+        "instanceType": "m7g.xlarge",
         "attachedVolumes": [
           {
             "count": 0,
             "size": 0,
-            "type": "PURE-ISCSI"
+            "type": "gp3"
           }
         ]
       },
@@ -140,12 +114,12 @@
     {
       "name": "hms_scale_out",
       "template": {
-        "instanceType": "r1.large",
+        "instanceType": "m7g.xlarge",
         "attachedVolumes": [
           {
             "count": 0,
             "size": 0,
-            "type": "PURE-ISCSI"
+            "type": "gp3"
           }
         ]
       },
@@ -157,11 +131,11 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "m1.medium",
+        "instanceType": "c7g.large",
         "attachedVolumes": [
           {
             "count": 0,
-            "type": "PURE-ISCSI"
+            "type": "gp3"
           }
         ]
       },

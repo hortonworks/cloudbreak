@@ -59,7 +59,7 @@ public class DistroxOperationValidatorService {
 
         if (entitlementService.isValidateDistroxOperationsBySdxHealthEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
                 (sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE) ||
-                        sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE))) {
+                        sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_PRO))) {
             LOGGER.info(String.format("Validating %s of data hub based on primary gateway health of datalake", distroXOperation.name()));
             boolean primaryGatewayHealthy = isPrimaryGatewayHealthy(instanceMetadataViews);
             distroXOperationValidationView.setAllowed(primaryGatewayHealthy);
@@ -95,7 +95,7 @@ public class DistroxOperationValidatorService {
         }
         if (entitlementService.isValidateDistroxOperationsBySdxHealthEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
                 (sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE) ||
-                        sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE))) {
+                        sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_PRO))) {
 
             LOGGER.info("Validating Creation of datahub based on datalake instance health");
             String sdxClusterName = sdxClusterResponses.getFirst().getName();

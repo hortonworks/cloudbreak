@@ -1,6 +1,6 @@
 {
   "cluster": {
-    "blueprintName": "7.3.3 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE",
+    "blueprintName": "7.3.3 - SDX Light Duty Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
     "validateBlueprint": false
   },
   "customDomain": {
@@ -11,11 +11,11 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "m1.medium",
+        "instanceType": "e2-standard-2",
         "attachedVolumes": [
           {
             "count": 0,
-            "type": "PURE-ISCSI"
+            "type": "pd-balanced"
           }
         ]
       },
@@ -27,12 +27,12 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "r2.xlarge",
+        "instanceType": "e2-highmem-8",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 512,
-            "type": "PURE-ISCSI"
+            "type": "pd-ssd"
           }
         ]
       },

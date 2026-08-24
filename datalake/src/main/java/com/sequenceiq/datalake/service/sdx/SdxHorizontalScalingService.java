@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE_WITHOUT_HBASE;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE_PRO;
 
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +47,7 @@ public class SdxHorizontalScalingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxHorizontalScalingService.class);
 
-    private static final List<SdxClusterShape> SCALE_ENABLED_SDX_SHAPES = List.of(ENTERPRISE, ENTERPRISE_WITHOUT_HBASE);
+    private static final List<SdxClusterShape> SCALE_ENABLED_SDX_SHAPES = List.of(ENTERPRISE, ENTERPRISE_PRO);
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;

@@ -1,5 +1,5 @@
 {
-  "description": "7.3.3 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
+  "description": "7.3.3 - Enterprise SDX Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
   "blueprint": {
     "blueprintUpgradeOption": "ROLLING_UPGRADE_ENABLED",
     "cdhVersion": "7.3.3",

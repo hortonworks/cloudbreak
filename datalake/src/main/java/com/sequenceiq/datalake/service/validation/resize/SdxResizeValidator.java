@@ -37,16 +37,16 @@ public class SdxResizeValidator {
     }
 
     public void validateResizeShapeTransition(SdxClusterShape currentShape, SdxClusterShape targetShape, boolean singleToMultiAzTransition) {
-        if (SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE.equals(targetShape)) {
-            String message = String.format("Resizing to %s shape is not supported.", SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE);
+        if (SdxClusterShape.LIGHT_DUTY_PRO.equals(targetShape)) {
+            String message = String.format("Resizing to %s shape is not supported.", SdxClusterShape.LIGHT_DUTY_PRO);
             LOGGER.warn(message);
             throw new BadRequestException(message);
         }
         boolean multiAzResizeOnSameShape = currentShape.equals(targetShape) && singleToMultiAzTransition;
-        if (SdxClusterShape.ENTERPRISE_WITHOUT_HBASE.equals(targetShape) && !SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE.equals(currentShape)
+        if (SdxClusterShape.ENTERPRISE_PRO.equals(targetShape) && !SdxClusterShape.LIGHT_DUTY_PRO.equals(currentShape)
                 && !multiAzResizeOnSameShape) {
             String message = String.format("Resizing to %s shape is only supported from %s shape, but the current shape is %s.",
-                    SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE, currentShape);
+                    SdxClusterShape.ENTERPRISE_PRO, SdxClusterShape.LIGHT_DUTY_PRO, currentShape);
             LOGGER.warn(message);
             throw new BadRequestException(message);
         }

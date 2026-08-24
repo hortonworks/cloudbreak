@@ -702,13 +702,13 @@ class SdxResizeServiceTest {
     @Test
     void testSdxResizeValidatesShapeTransitionForSameShapeSingleToMultiAz() {
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
-        sdxClusterResizeRequest.setClusterShape(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE);
+        sdxClusterResizeRequest.setClusterShape(SdxClusterShape.ENTERPRISE_PRO);
         sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
         sdxClusterResizeRequest.setEnableMultiAz(true);
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setId(SDX_ID);
-        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE);
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE_PRO);
         sdxCluster.setEnableMultiAz(false);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
@@ -720,7 +720,7 @@ class SdxResizeServiceTest {
         assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
 
-        verify(sdxResizeValidator).validateResizeShapeTransition(SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, SdxClusterShape.ENTERPRISE_WITHOUT_HBASE, true);
+        verify(sdxResizeValidator).validateResizeShapeTransition(SdxClusterShape.ENTERPRISE_PRO, SdxClusterShape.ENTERPRISE_PRO, true);
     }
 
     @Test

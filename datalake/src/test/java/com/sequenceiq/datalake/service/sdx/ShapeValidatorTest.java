@@ -4,9 +4,9 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE_WITHOUT_HBASE;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE_PRO;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY_PRO;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -125,7 +125,7 @@ class ShapeValidatorTest {
     }
 
     @ParameterizedTest(name = "with shape {0}")
-    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_WITHOUT_HBASE", "ENTERPRISE_WITHOUT_HBASE"})
+    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_PRO", "ENTERPRISE_PRO"})
     void testValidateShapesWithoutHBaseNotEntitled(SdxClusterShape shape) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setCloudPlatform(AWS.name());
@@ -141,7 +141,7 @@ class ShapeValidatorTest {
     }
 
     @ParameterizedTest(name = "with shape {0}")
-    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_WITHOUT_HBASE", "ENTERPRISE_WITHOUT_HBASE"})
+    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_PRO", "ENTERPRISE_PRO"})
     void testValidateShapesWithoutHBaseWhenEntitled(SdxClusterShape shape) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setCloudPlatform(AWS.name());
@@ -159,7 +159,7 @@ class ShapeValidatorTest {
     }
 
     @ParameterizedTest(name = "with shape {0}")
-    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_WITHOUT_HBASE", "ENTERPRISE_WITHOUT_HBASE"})
+    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_PRO", "ENTERPRISE_PRO"})
     void testValidateShapesWithoutHBaseSkippedForInternalCallWhenRuntimeEmpty(SdxClusterShape shape) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setCloudPlatform(AWS.name());
@@ -172,22 +172,22 @@ class ShapeValidatorTest {
 
     @Test
     void validateVolumeCountPassesWhenEnterpriseWithoutHbaseCoreHasThreeVolumes() {
-        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, stackWithGroup("core", 3)));
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroup("core", 3)));
     }
 
     @Test
     void validateVolumeCountFailsWhenEnterpriseWithoutHbaseCoreHasTwoVolumes() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, stackWithGroup("core", 2)));
+                () -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroup("core", 2)));
         assertTrue(exception.getMessage().contains("core"));
         assertTrue(exception.getMessage().contains("at least 3"));
     }
 
     @Test
     void validateVolumeCountChecksMasterGroupForLightDutyWithoutHbase() {
-        assertDoesNotThrow(() -> underTest.validateVolumeCount(LIGHT_DUTY_WITHOUT_HBASE, stackWithGroup("master", 3)));
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(LIGHT_DUTY_PRO, stackWithGroup("master", 3)));
         assertThrows(BadRequestException.class,
-                () -> underTest.validateVolumeCount(LIGHT_DUTY_WITHOUT_HBASE, stackWithGroup("master", 2)));
+                () -> underTest.validateVolumeCount(LIGHT_DUTY_PRO, stackWithGroup("master", 2)));
     }
 
     @Test
@@ -198,12 +198,12 @@ class ShapeValidatorTest {
 
     @Test
     void validateVolumeCountIgnoresNullStackRequest() {
-        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, null));
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_PRO, null));
     }
 
     @Test
     void validateVolumeCountIgnoresWhenTargetGroupIsAbsent() {
-        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_WITHOUT_HBASE, stackWithGroup("gateway", 1)));
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroup("gateway", 1)));
     }
 
     private StackV4Request stackWithGroup(String groupName, int volumeCount) {

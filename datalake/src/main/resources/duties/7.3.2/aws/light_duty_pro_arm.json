@@ -1,21 +1,22 @@
 {
   "cluster": {
-    "blueprintName": "7.3.2 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE",
+    "blueprintName": "7.3.2 - SDX Light Duty Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
     "validateBlueprint": false
   },
   "customDomain": {
     "domainName": "cloudera.site",
     "hostgroupNameAsHostname": true
   },
+  "architecture": "ARM64",
   "instanceGroups": [
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "Standard_D2s_v5",
+        "instanceType": "c7g.large",
         "attachedVolumes": [
           {
             "count": 0,
-            "type": "StandardSSD_LRS"
+            "type": "standard"
           }
         ]
       },
@@ -27,12 +28,12 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "Standard_E8s_v5",
+        "instanceType": "r7g.2xlarge",
         "attachedVolumes": [
           {
             "count": 3,
             "size": 128,
-            "type": "StandardSSD_LRS"
+            "type": "gp3"
           }
         ]
       },
