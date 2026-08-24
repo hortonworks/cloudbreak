@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,6 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -65,6 +63,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapper;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerApiExceptionUtil;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
@@ -317,7 +316,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             }
             importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
         } catch (ApiException e) {
-            String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
+            String msg = "Installation of CDP with Cloudera Manager has failed: " + ClouderaManagerApiExceptionUtil.extractMessage(e);
             throw new ClouderaManagerOperationFailedException(msg, e);
         } catch (Exception e) {
             throw mapException(e);
@@ -382,7 +381,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             mgmtApi.autoConfigure();
         } catch (ApiException e) {
-            String msg = "Error happened when CM autoconfigure was called: " + extractMessage(e);
+            String msg = "Error happened when CM autoconfigure was called: " + ClouderaManagerApiExceptionUtil.extractMessage(e);
             LOGGER.error(msg, e);
             throw new ClouderaManagerOperationFailedException(msg, e);
         }
@@ -576,8 +575,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private ClouderaManagerOperationFailedException mapApiException(ApiException e) {
         LOGGER.info("Error while building the cluster. Message: {}; Response: {}", e.getMessage(), e.getResponseBody(), e);
-        String msg = extractMessage(e);
-        return new ClouderaManagerOperationFailedException(msg, e);
+        return new ClouderaManagerOperationFailedException(e);
     }
 
     private ClouderaManagerOperationFailedException mapException(Exception e) {
@@ -723,22 +721,4 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         return clusterComponentProvider.getClouderaManagerRepoDetails(clusterId).getPredefined();
     }
 
-    private String extractMessage(ApiException apiException) {
-        if (StringUtils.isEmpty(apiException.getResponseBody())) {
-            return apiException.getMessage();
-        }
-        try {
-            JsonNode tree = JsonUtil.readTree(apiException.getResponseBody());
-            JsonNode message = tree.get("message");
-            if (message != null && message.isTextual()) {
-                String text = message.asText();
-                if (StringUtils.isNotEmpty(text)) {
-                    return text;
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.debug("Failed to parse API response body as JSON", e);
-        }
-        return apiException.getResponseBody();
-    }
 }

@@ -551,6 +551,8 @@ class ClouderaManagerSetupServiceTest {
                 any(KerberosConfig.class)
         );
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
+        assertEquals("error", actual.getMessage());
+        assertEquals(error, actual.getCause());
     }
 
     @Test

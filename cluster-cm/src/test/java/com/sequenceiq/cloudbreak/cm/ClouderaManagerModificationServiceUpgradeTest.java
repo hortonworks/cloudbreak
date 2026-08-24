@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.util.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
@@ -361,5 +364,37 @@ class ClouderaManagerModificationServiceUpgradeTest extends ClouderaManagerModif
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(nonCdhProduct, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(servicesResourceApi).readServices(stack.getName(), "SUMMARY");
         inOrder.verify(clouderaManagerCommonCommandService).getApiCommand(any(), any(), any(), any());
+    }
+
+    @Test
+    void testUpgradeClusterRuntimeSurfacesClouderaManagerResponseBodyMessageWhenUpgradeCommandThrowsApiException() throws CloudbreakException, ApiException {
+        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
+        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
+        when(clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client)).thenReturn(success);
+        when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
+
+        // Cloudera Manager version below 7.6.0 so host tagging is skipped, keeping the setup minimal.
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
+
+        Long apiCommandId = 200L;
+        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList().items(new ArrayList<>()));
+        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
+
+        // Cloudera Manager reports the real cause in the response body; getMessage() would only be the opaque "Bad Request".
+        String clouderaManagerMessage = "A previous unfinished upgrade command was found. To continue upgrading: perform a 'Retry' on the original command.";
+        ApiException apiException = new ApiException("Bad Request", 400, null, "{\"message\":\"" + clouderaManagerMessage + "\"}");
+        doThrow(apiException).when(clouderaManagerUpgradeService).callUpgradeCdhCommand(any(), any(), any(), any(), anyBoolean());
+
+        Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
+
+        ClouderaManagerOperationFailedException thrown = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.upgradeClusterRuntime(products, false, Optional.empty(), false));
+
+        assertEquals(clouderaManagerMessage, thrown.getMessage());
+        assertEquals(apiException, thrown.getCause());
     }
 }

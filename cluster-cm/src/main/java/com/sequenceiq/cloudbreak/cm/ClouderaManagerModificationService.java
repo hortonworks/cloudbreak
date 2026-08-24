@@ -396,8 +396,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             enableKnoxAutoRestart();
             LOGGER.info("Cluster runtime upgrade finished");
         } catch (ApiException e) {
-            LOGGER.error("Could not upgrade Cloudera Runtime services", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            LOGGER.error("Could not upgrade Cloudera Runtime services. Response body: {}", e.getResponseBody(), e);
+            throw new ClouderaManagerOperationFailedException(e);
         }
     }
 
