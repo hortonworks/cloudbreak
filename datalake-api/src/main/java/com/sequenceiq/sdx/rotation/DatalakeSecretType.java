@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.FREEIPA_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
@@ -34,8 +35,8 @@ public enum DatalakeSecretType implements SecretType {
     PRIVATE_HOST_CERTS(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(ROLLBACK_NOT_SUPPORTED)),
     LDAP_BIND_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING)),
     SSSD_IPA_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
-    STACK_ENCRYPTION_KEYS(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
-    LUKS_VOLUME_PASSPHRASE(List.of(CLOUDBREAK_ROTATE_POLLING)),
+    STACK_ENCRYPTION_KEYS(List.of(CUSTOM_JOB, CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
+    LUKS_VOLUME_PASSPHRASE(List.of(CUSTOM_JOB, CLOUDBREAK_ROTATE_POLLING)),
     SALT_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
     NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY(List.of(CLOUDBREAK_ROTATE_POLLING)),
     COMPUTE_MONITORING_CREDENTIALS(List.of(CLOUDBREAK_ROTATE_POLLING)),

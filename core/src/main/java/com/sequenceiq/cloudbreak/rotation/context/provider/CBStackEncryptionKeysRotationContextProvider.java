@@ -58,7 +58,7 @@ public class CBStackEncryptionKeysRotationContextProvider extends CloudbreakCond
     private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
 
     @Inject
-    private EnvironmentService environmentClientService;
+    private EnvironmentService environmentService;
 
     @Inject
     private ResourceRetriever resourceRetriever;
@@ -79,7 +79,7 @@ public class CBStackEncryptionKeysRotationContextProvider extends CloudbreakCond
         CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
                 .withPreValidateJob(() -> {
-                    DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+                    DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
                     if (!environment.isEnableSecretEncryption()) {
                         throw new SecretRotationException("Stack encryption key rotation is only available on environments with secret encryption enabled.");
                     }

@@ -1,25 +1,38 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
+import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Component
 public class DatalakeStackEncryptionKeysRotationContextProvider extends DatalakeConditionalRotationContextProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeStackEncryptionKeysRotationContextProvider.class);
+    @Inject
+    private SdxService sdxService;
+
+    @Inject
+    private EnvironmentService environmentService;
 
     @Override
     public SecretType getSecret() {
@@ -32,14 +45,29 @@ public class DatalakeStackEncryptionKeysRotationContextProvider extends Datalake
     }
 
     @Override
+    public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
+        Map<SecretRotationStep, RotationContext> context = new HashMap<>();
+        context.put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn));
+        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.CLOUDBREAK)));
+        return context;
+    }
+
+    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn) {
+        return CustomJobRotationContext.builder()
+                .withResourceCrn(resourceCrn)
+                .withPreValidateJob(() -> {
+                    String environmentCrn = sdxService.getEnvironmentCrnByResourceCrn(resourceCrn)
+                            .orElseThrow(() -> new SecretRotationException("Could not find environment crn for resourceCrn: " + resourceCrn));
+                    DetailedEnvironmentResponse environment = environmentService.getByCrn(environmentCrn);
+                    if (!environment.isEnableSecretEncryption()) {
+                        throw new SecretRotationException("Stack encryption key rotation is only available on environments with secret encryption enabled.");
+                    }
+                })
+                .build();
+    }
+
+    @Override
     protected Function<SdxCluster, Boolean> getConditionalRotationFunction() {
-        return sdxCluster -> {
-            try {
-                return StringUtils.equals(JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class).getVariant(), "AWS_NATIVE_GOV");
-            } catch (Exception e) {
-                LOGGER.warn("Couldn't decide if compute monitoring credentials' rotation is applicable, thus allowing it.");
-                return true;
-            }
-        };
+        return sdxCluster -> true;
     }
 }

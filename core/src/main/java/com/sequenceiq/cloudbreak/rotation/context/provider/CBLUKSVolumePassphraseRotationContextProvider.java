@@ -45,7 +45,7 @@ public class CBLUKSVolumePassphraseRotationContextProvider extends CloudbreakCon
     private StackDtoService stackDtoService;
 
     @Inject
-    private EnvironmentService environmentClientService;
+    private EnvironmentService environmentService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -80,7 +80,7 @@ public class CBLUKSVolumePassphraseRotationContextProvider extends CloudbreakCon
         return CustomJobRotationContext.builder()
                 .withResourceCrn(stack.getResourceCrn())
                 .withPreValidateJob(() -> {
-                    DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+                    DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
                     if (!environment.isEnableSecretEncryption()) {
                         throw new SecretRotationException("LUKS passphrase rotation is only available on environments with secret encryption enabled.");
                     }
