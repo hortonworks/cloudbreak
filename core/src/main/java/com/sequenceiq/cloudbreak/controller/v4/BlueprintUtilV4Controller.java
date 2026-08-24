@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -18,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintSe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.GeneratedCmTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVersionsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ScaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
@@ -159,8 +163,11 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public BlueprintServicesV4Response getServicesByBlueprint(Long workspaceId, @ResourceName String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, threadLocalService.getRequestedWorkspaceId());
-        return supportedServicesToBlueprintServicesV4ResponseConverter
-                .convert(clusterTemplateGeneratorService.getServicesByBlueprintWithOnlySso(blueprint.getBlueprintJsonText()));
+        BlueprintServicesV4Response blueprintServicesV4Response = supportedServicesToBlueprintServicesV4ResponseConverter
+                .convert(clusterTemplateGeneratorService.getServicesByBlueprintWithSsoAndNonSso(blueprint.getBlueprintJsonText()));
+        blueprintServicesV4Response.setServices(blueprintServicesV4Response.getServices().stream()
+                .collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SupportedServiceV4Response::getName)))));
+        return blueprintServicesV4Response;
     }
 
     @Override
