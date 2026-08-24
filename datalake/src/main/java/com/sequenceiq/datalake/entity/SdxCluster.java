@@ -415,7 +415,7 @@ public class SdxCluster implements AccountAwareResource {
 
     @JsonIgnore
     public String getDatabaseCrn() {
-        return sdxDatabase.getDatabaseCrn();
+        return sdxDatabase == null ? null : sdxDatabase.getDatabaseCrn();
     }
 
     @JsonIgnore

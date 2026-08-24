@@ -18,6 +18,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationProgressFallback;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus;
@@ -37,6 +39,8 @@ import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationServic
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 
 @Service
 public class StackRotationService {
@@ -64,6 +68,12 @@ public class StackRotationService {
     @Inject
     private Map<SecretType, ConditionalRotationContextProvider> conditionalRotationContextProviderMap;
 
+    @Inject
+    private FreeIpaRotationV1Endpoint freeIpaRotationV1Endpoint;
+
+    @Inject
+    private DatabaseServerV4Endpoint databaseServerV4Endpoint;
+
     public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
             Map<String, String> additionalProperties) {
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
@@ -89,7 +99,54 @@ public class StackRotationService {
     public StepProgressResponse getProgressResponse(String crn, String secret) {
         SecretType secretType = SecretTypeConverter.mapSecretType(secret,
                 Arrays.stream(CloudbreakSecretType.values()).map(SecretType::getClass).collect(Collectors.toSet()));
-        return stepProgressService.getProgressResponse(crn, secretType);
+        try {
+            return stepProgressService.getProgressResponse(crn, secretType);
+        } catch (NotFoundException e) {
+            LOGGER.debug("Local progress not found for '{}' / '{}', falling back to polling types.", crn, secret);
+            return getProgressFromPollingTypes(crn, secretType)
+                    .orElseThrow(() -> e);
+        }
+    }
+
+    private Optional<StepProgressResponse> getProgressFromPollingTypes(String crn, SecretType secretType) {
+        return resolvePollingFanOut(crn, secretType)
+                .flatMap(pollingFanOut -> SecretRotationProgressFallback.findFirstProgress(pollingFanOut.pollingTypes(),
+                        (source, perSourceType) -> {
+                            String targetCrn = resolveTargetCrn(source, crn, pollingFanOut.stack());
+                            return targetCrn == null ? null : getProgressFromSource(source, targetCrn, perSourceType);
+                        }));
+    }
+
+    private Optional<PollingFanOut> resolvePollingFanOut(String crn, SecretType secretType) {
+        if (Collections.disjoint(secretType.getSteps(), Set.of(FREEIPA_ROTATE_POLLING, REDBEAMS_ROTATE_POLLING)) ||
+                !rotationContextProviderMap.containsKey(secretType)) {
+            return Optional.empty();
+        }
+        try {
+            StackDto stack = stackDtoService.getByCrn(crn);
+            return Optional.of(new PollingFanOut(stack, rotationContextProviderMap.get(secretType).getPollingTypes()));
+        } catch (NotFoundException nfe) {
+            LOGGER.info("Stack by crn {} does not exists.", crn);
+            return Optional.empty();
+        }
+    }
+
+    private String resolveTargetCrn(RotationSource source, String crn, StackDto stack) {
+        return switch (source) {
+            case FREEIPA -> stack.getEnvironmentCrn();
+            case REDBEAMS -> stack.getCluster().getDatabaseServerCrn();
+            case DATALAKE, CLOUDBREAK -> crn;
+        };
+    }
+
+    private StepProgressResponse getProgressFromSource(RotationSource source, String targetCrn, SecretType secretType) {
+        return switch (source) {
+            case FREEIPA -> ThreadBasedUserCrnProvider.doAsInternalActor(
+                    initiatorUserCrn -> freeIpaRotationV1Endpoint.getProgress(secretType.value(), targetCrn));
+            case REDBEAMS -> ThreadBasedUserCrnProvider.doAsInternalActor(
+                    initiatorUserCrn -> databaseServerV4Endpoint.getSecretRotationProgress(secretType.value(), targetCrn));
+            case DATALAKE, CLOUDBREAK -> null;
+        };
     }
 
     public List<StepProgressCleanupDescriptor> cleanupProgress(String crn, String secret) {
@@ -101,25 +158,16 @@ public class StackRotationService {
     }
 
     public List<StepProgressCleanupDescriptor> collectUnderlyingSecretsForProgressCleanup(String crn, SecretType secretType) {
-        try {
-            if (!Collections.disjoint(secretType.getSteps(), Set.of(FREEIPA_ROTATE_POLLING, REDBEAMS_ROTATE_POLLING)) &&
-                    rotationContextProviderMap.containsKey(secretType)) {
-                Map<RotationSource, SecretType> pollingTypes = rotationContextProviderMap.get(secretType).getPollingTypes();
-                StackDto stack = stackDtoService.getByCrn(crn);
-                return pollingTypes.entrySet().stream().map(entry -> {
-                    String targetCrn = switch (entry.getKey()) {
-                        case FREEIPA -> stack.getEnvironmentCrn();
-                        case REDBEAMS -> stack.getCluster().getDatabaseServerCrn();
-                        case DATALAKE, CLOUDBREAK -> crn;
-                    };
-                    return StepProgressCleanupDescriptor.of(entry.getKey(), StepProgressCleanupStatus.PENDING, targetCrn,
-                            SecretRotationEnumSerializationUtil.serialize(entry.getValue()));
-                }).filter(descriptor -> descriptor.crn() != null).toList();
-            }
-        } catch (NotFoundException nfe) {
-            LOGGER.info("Stack by crn {} does not exists.", crn);
-        }
-        return List.of();
+        return resolvePollingFanOut(crn, secretType)
+                .map(pollingFanOut -> pollingFanOut.pollingTypes().entrySet().stream()
+                        .map(entry -> StepProgressCleanupDescriptor.of(entry.getKey(), StepProgressCleanupStatus.PENDING,
+                                resolveTargetCrn(entry.getKey(), crn, pollingFanOut.stack()),
+                                SecretRotationEnumSerializationUtil.serialize(entry.getValue())))
+                        .filter(descriptor -> descriptor.crn() != null)
+                        .toList())
+                .orElseGet(List::of);
     }
 
+    private record PollingFanOut(StackDto stack, Map<RotationSource, SecretType> pollingTypes) {
+    }
 }

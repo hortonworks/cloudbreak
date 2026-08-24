@@ -14,6 +14,7 @@ import static com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStat
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EMBEDDED_DB_SSL_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvi
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -416,5 +418,103 @@ class SdxRotationServiceTest {
         when(cloudbreakFlowService.getLastFlowId(eq(RESOURCE_CRN))).thenReturn(lastFlow);
         underTest.preValidateCloudbreakRotation(RESOURCE_CRN);
         verify(cloudbreakFlowService, times(1)).getLastFlowId(eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void getProgressResponseReturnsLocalProgressWhenFound() {
+        StepProgressResponse expected = new StepProgressResponse();
+        when(stepProgressService.getProgressResponse(eq(RESOURCE_CRN), eq(EXTERNAL_DATABASE_ROOT_PASSWORD))).thenReturn(expected);
+
+        StepProgressResponse result = underTest.getProgressResponse(RESOURCE_CRN, EXTERNAL_DATABASE_ROOT_PASSWORD.value());
+
+        assertEquals(expected, result);
+        verify(stackV4Endpoint, never()).getSecretRotationProgress(anyLong(), anyString(), anyString());
+    }
+
+    @Test
+    void getProgressResponseFallsBackToCloudbreakWhenLocalNotFound() {
+        when(stepProgressService.getProgressResponse(eq(RESOURCE_CRN), eq(EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .thenThrow(new NotFoundException("not found"));
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvCrn(ENV_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(DATABASE_CRN);
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        StepProgressResponse expected = new StepProgressResponse();
+        when(stackV4Endpoint.getSecretRotationProgress(eq(0L), eq(RESOURCE_CRN), eq("TEST"))).thenReturn(expected);
+
+        StepProgressResponse result = underTest.getProgressResponse(RESOURCE_CRN, EXTERNAL_DATABASE_ROOT_PASSWORD.value());
+
+        assertNotNull(result);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getProgressResponseThrowsNotFoundWhenNeitherLocalNorPollingTypesHaveProgress() {
+        when(stepProgressService.getProgressResponse(eq(RESOURCE_CRN), eq(EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .thenThrow(new NotFoundException("not found"));
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> underTest.getProgressResponse(RESOURCE_CRN, EXTERNAL_DATABASE_ROOT_PASSWORD.value()));
+    }
+
+    @Test
+    void getProgressResponseFallsBackToFreeIpaWhenLocalNotFound() {
+        when(stepProgressService.getProgressResponse(eq(RESOURCE_CRN), eq(EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .thenThrow(new NotFoundException("not found"));
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvCrn(ENV_CRN);
+        sdxCluster.setSdxDatabase(new SdxDatabase());
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        StepProgressResponse expected = new StepProgressResponse();
+        when(freeIpaRotationV1Endpoint.getProgress(eq("TEST_3"), eq(ENV_CRN))).thenReturn(expected);
+
+        StepProgressResponse result = underTest.getProgressResponse(RESOURCE_CRN, EXTERNAL_DATABASE_ROOT_PASSWORD.value());
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getProgressResponseFallsBackToRedbeamsWhenLocalNotFound() {
+        when(stepProgressService.getProgressResponse(eq(RESOURCE_CRN), eq(EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .thenThrow(new NotFoundException("not found"));
+        SdxCluster sdxCluster = new SdxCluster();
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(DATABASE_CRN);
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        StepProgressResponse expected = new StepProgressResponse();
+        when(databaseServerV4Endpoint.getSecretRotationProgress(eq("TEST_2"), eq(DATABASE_CRN))).thenReturn(expected);
+
+        StepProgressResponse result = underTest.getProgressResponse(RESOURCE_CRN, EXTERNAL_DATABASE_ROOT_PASSWORD.value());
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getProgressResponseSkipsFailingPollingSourceAndThrowsNotFoundWhenNoneRespond() {
+        when(stepProgressService.getProgressResponse(eq(RESOURCE_CRN), eq(EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .thenThrow(new NotFoundException("not found"));
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setSdxDatabase(new SdxDatabase());
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        when(stackV4Endpoint.getSecretRotationProgress(eq(0L), eq(RESOURCE_CRN), eq("TEST")))
+                .thenThrow(new RuntimeException("cloudbreak unavailable"));
+
+        assertThrows(NotFoundException.class,
+                () -> underTest.getProgressResponse(RESOURCE_CRN, EXTERNAL_DATABASE_ROOT_PASSWORD.value()));
+    }
+
+    @Test
+    void getProgressResponseThrowsNotFoundWhenSecretTypeHasNoRotationContextProvider() {
+        when(stepProgressService.getProgressResponse(eq(RESOURCE_CRN), eq(DatalakeSecretType.CM_DB_PASSWORD)))
+                .thenThrow(new NotFoundException("not found"));
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(new SdxCluster()));
+
+        assertThrows(NotFoundException.class,
+                () -> underTest.getProgressResponse(RESOURCE_CRN, DatalakeSecretType.CM_DB_PASSWORD.value()));
+        verify(stackV4Endpoint, never()).getSecretRotationProgress(anyLong(), anyString(), anyString());
     }
 }

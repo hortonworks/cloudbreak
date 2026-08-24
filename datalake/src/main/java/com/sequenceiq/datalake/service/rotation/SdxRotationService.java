@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.ListUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +31,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationProgressFallback;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus;
@@ -65,6 +69,8 @@ import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Service
 public class SdxRotationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxRotationService.class);
 
     @Value("${sdx.stack.rotate.sleeptime_sec:20}")
     private int sleepTimeInSec;
@@ -216,7 +222,53 @@ public class SdxRotationService {
     public StepProgressResponse getProgressResponse(String crn, String secret) {
         SecretType secretType = SecretTypeConverter.mapSecretType(secret,
                 Arrays.stream(DatalakeSecretType.values()).map(SecretType::getClass).collect(Collectors.toSet()));
-        return stepProgressService.getProgressResponse(crn, secretType);
+        try {
+            return stepProgressService.getProgressResponse(crn, secretType);
+        } catch (NotFoundException e) {
+            LOGGER.debug("Local progress not found for '{}' / '{}', falling back to polling types.", crn, secret);
+            return getProgressFromPollingTypes(crn, secretType)
+                    .orElseThrow(() -> e);
+        }
+    }
+
+    private Optional<StepProgressResponse> getProgressFromPollingTypes(String crn, SecretType secretType) {
+        return resolvePollingFanOut(crn, secretType)
+                .flatMap(pollingFanOut -> SecretRotationProgressFallback.findFirstProgress(pollingFanOut.pollingTypes(),
+                        (source, perSourceType) -> {
+                            String targetCrn = resolveTargetCrn(source, crn, pollingFanOut.sdxCluster());
+                            return targetCrn == null ? null : getProgressFromSource(source, targetCrn, perSourceType);
+                        }));
+    }
+
+    private Optional<PollingFanOut> resolvePollingFanOut(String crn, SecretType secretType) {
+        if (Collections.disjoint(secretType.getSteps(), Set.of(FREEIPA_ROTATE_POLLING, REDBEAMS_ROTATE_POLLING, CLOUDBREAK_ROTATE_POLLING))) {
+            return Optional.empty();
+        }
+        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(crn);
+        if (sdxCluster.isEmpty() || !rotationContextProviderMap.containsKey(secretType)) {
+            return Optional.empty();
+        }
+        return Optional.of(new PollingFanOut(sdxCluster.get(), rotationContextProviderMap.get(secretType).getPollingTypes()));
+    }
+
+    private String resolveTargetCrn(RotationSource source, String crn, SdxCluster sdxCluster) {
+        return switch (source) {
+            case FREEIPA -> sdxCluster.getEnvCrn();
+            case REDBEAMS -> sdxCluster.getDatabaseCrn();
+            case DATALAKE, CLOUDBREAK -> crn;
+        };
+    }
+
+    private StepProgressResponse getProgressFromSource(RotationSource source, String targetCrn, SecretType secretType) {
+        return switch (source) {
+            case CLOUDBREAK -> ThreadBasedUserCrnProvider.doAsInternalActor(
+                    initiatorUserCrn -> stackV4Endpoint.getSecretRotationProgress(0L, targetCrn, secretType.value()));
+            case FREEIPA -> ThreadBasedUserCrnProvider.doAsInternalActor(
+                    initiatorUserCrn -> freeIpaRotationV1Endpoint.getProgress(secretType.value(), targetCrn));
+            case REDBEAMS -> ThreadBasedUserCrnProvider.doAsInternalActor(
+                    initiatorUserCrn -> databaseServerV4Endpoint.getSecretRotationProgress(secretType.value(), targetCrn));
+            case DATALAKE -> null;
+        };
     }
 
     public List<StepProgressCleanupDescriptor> cleanupProgress(String crn, String secret) {
@@ -228,22 +280,14 @@ public class SdxRotationService {
     }
 
     public List<StepProgressCleanupDescriptor> collectUnderlyingSecretsForProgressCleanup(String crn, SecretType secretType) {
-        if (!Collections.disjoint(secretType.getSteps(), Set.of(FREEIPA_ROTATE_POLLING, REDBEAMS_ROTATE_POLLING, CLOUDBREAK_ROTATE_POLLING))) {
-            Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(crn);
-            if (sdxCluster.isPresent() && rotationContextProviderMap.containsKey(secretType)) {
-                Map<RotationSource, SecretType> pollingTypes = rotationContextProviderMap.get(secretType).getPollingTypes();
-                return pollingTypes.entrySet().stream().map(entry -> {
-                    String targetCrn = switch (entry.getKey()) {
-                        case FREEIPA -> sdxCluster.get().getEnvCrn();
-                        case REDBEAMS -> sdxCluster.get().getDatabaseCrn();
-                        case DATALAKE, CLOUDBREAK -> crn;
-                    };
-                    return StepProgressCleanupDescriptor.of(entry.getKey(), StepProgressCleanupStatus.PENDING, targetCrn,
-                            SecretRotationEnumSerializationUtil.serialize(entry.getValue()));
-                }).filter(descriptor -> descriptor.crn() != null).toList();
-            }
-        }
-        return List.of();
+        return resolvePollingFanOut(crn, secretType)
+                .map(pollingFanOut -> pollingFanOut.pollingTypes().entrySet().stream()
+                        .map(entry -> StepProgressCleanupDescriptor.of(entry.getKey(), StepProgressCleanupStatus.PENDING,
+                                resolveTargetCrn(entry.getKey(), crn, pollingFanOut.sdxCluster()),
+                                SecretRotationEnumSerializationUtil.serialize(entry.getValue())))
+                        .filter(descriptor -> descriptor.crn() != null)
+                        .toList())
+                .orElseGet(List::of);
     }
 
     private Set<String> getSdxCrnsByEnvironmentCrn(String parentCrn) {
@@ -280,5 +324,8 @@ public class SdxRotationService {
             String message = String.format("Polling in Freeipa is not possible since last known state of flow for FMS is %s", lastFlow.getCurrentState());
             throw new SecretRotationException(message, null);
         }
+    }
+
+    private record PollingFanOut(SdxCluster sdxCluster, Map<RotationSource, SecretType> pollingTypes) {
     }
 }
