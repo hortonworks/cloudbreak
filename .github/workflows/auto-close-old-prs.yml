@@ -10,7 +10,7 @@ jobs:
   close-old-prs:
     runs-on: [cb-ubuntu22]
     steps:
-      - name: Close PRs created more than 30 days ago
+      - name: Close PRs Updated more than 30 days ago
         env:
           GH_TOKEN: ${{ github.token }}
           API_URL: ${{ github.api_url }}
@@ -18,7 +18,7 @@ jobs:
         run: |
           set -uo pipefail
           cutoff=$(date -u -d "30 days ago" +"%Y-%m-%dT%H:%M:%SZ")
-          echo "Closing open PRs created before: $cutoff"
+          echo "Closing open PRs updated before: $cutoff"
 
           api() {
             # usage: api METHOD PATH [extra curl args...]; prints response body
@@ -37,7 +37,7 @@ jobs:
             -d '{"name":"auto-closed","color":"ededed","description":"Closed automatically by the auto-close-old-prs workflow."}' \
             >/dev/null || true
 
-          # 2. Page through open PRs; collect numbers created before the cutoff.
+          # 2. Page through open PRs; collect numbers updated before the cutoff.
           stale=""
           page=1
           while :; do
@@ -45,7 +45,7 @@ jobs:
             n=$(printf '%s' "$batch" | jq 'length')
             [ "$n" -eq 0 ] && break
             nums=$(printf '%s' "$batch" | jq -r --arg cutoff "$cutoff" \
-              '.[] | select(.created_at < $cutoff) | .number')
+              '.[] | select(.updated_at < $cutoff) | .number')
             stale="$stale $nums"
             page=$((page + 1))
           done
@@ -54,7 +54,7 @@ jobs:
           for pr in $stale; do
             echo "Closing PR #$pr"
             api POST "repos/$REPO/issues/$pr/comments" \
-              -d '{"body":"Automatically closing this PR because it was created more than 30 days ago."}' >/dev/null
+              -d '{"body":"Automatically closing this PR because it was updated more than 30 days ago."}' >/dev/null
             api POST "repos/$REPO/issues/$pr/labels" \
               -d '{"labels":["auto-closed"]}' >/dev/null
             api PATCH "repos/$REPO/pulls/$pr" \
