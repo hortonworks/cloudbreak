@@ -80,7 +80,7 @@ public class ClusterUpgradeAvailabilityService {
         boolean replaceVms = determineReplaceVmsParameter(stack, replaceVmsFromRequest, lockComponents, true);
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, replaceVms, internalUpgradeSettings, getAllImages, targetImageId);
         upgradeOptions.setReplaceVms(replaceVms);
-        addReasonIfNecessary(stack, lockComponents, replaceVms, upgradeOptions);
+        addReasonIfNecessary(stack, lockComponents, replaceVms, upgradeOptions, internalUpgradeSettings);
         return upgradeOptions;
     }
 
@@ -141,9 +141,10 @@ public class ClusterUpgradeAvailabilityService {
         return lockedComponentService.isComponentsLocked(stack, targetImage.getImageId());
     }
 
-    private void addReasonIfNecessary(Stack stack, boolean lockComponents, Boolean replaceVms, UpgradeV4Response upgradeOptions) {
+    private void addReasonIfNecessary(Stack stack, boolean lockComponents, Boolean replaceVms, UpgradeV4Response upgradeOptions,
+            InternalUpgradeSettings internalUpgradeSettings) {
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
-            if (!stack.getStatus().isAvailable()) {
+            if (!stack.getStatus().isAvailable() && !internalUpgradeSettings.isUpgradeReinitiation()) {
                 upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
                 LOGGER.warn(upgradeOptions.getReason());
             } else if (stack.isDatalake() && instanceMetaDataService.anyInstanceStopped(stack.getId())) {

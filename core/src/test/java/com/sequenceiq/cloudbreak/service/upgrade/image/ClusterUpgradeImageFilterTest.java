@@ -166,7 +166,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return new ImageFilterParams(null, currentImage,
-                null, false, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID, new InternalUpgradeSettings(false, true, true),
+                null, false, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
+                InternalUpgradeSettings.builder().withUpgradePreparation(true).withRollingUpgradeEnabled(true).build(),
                 imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false);
     }
 

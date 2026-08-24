@@ -71,7 +71,7 @@ public class BlueprintUpgradeOptionValidatorTest {
 
     private ImageFilterParams createImageFilterParams(Blueprint blueprint, boolean skipValidations) {
         return new ImageFilterParams(null, null, null, false, false, null, null, blueprint, null,
-                new InternalUpgradeSettings(skipValidations, false), null, null, null, false);
+                InternalUpgradeSettings.builder().withSkipValidations(skipValidations).build(), null, null, null, false);
     }
 
 }

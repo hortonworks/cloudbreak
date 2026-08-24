@@ -172,7 +172,7 @@ class DistroXUpgradeServiceTest {
         lenient().when(stackView.getResourceCrn()).thenReturn(RESOURCE_CRN);
         lenient().when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
         lenient().when(upgradeConverter.convert(any(UpgradeV4Response.class))).thenCallRealMethod();
-        lenient().when(upgradeConverter.convert(any(DistroXUpgradeV1Request.class), anyBoolean())).thenCallRealMethod();
+        lenient().when(upgradeConverter.convert(any(DistroXUpgradeV1Request.class), anyBoolean(), anyBoolean())).thenCallRealMethod();
     }
 
     @Test
@@ -518,6 +518,7 @@ class DistroXUpgradeServiceTest {
 
     @Test
     void testReinitiateClusterUpgradeWhenReinitiable() {
+        ArgumentCaptor<UpgradeV4Request> upgradeRequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackService.getIdByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(STACK_ID);
         when(upgradeReinitiateService.checkClusterUpgradeReinitiable(STACK_ID)).thenReturn(getUpgradeReinitiableV4Response(
                 UpgradeReinitiateStatus.REINITIABLE,
@@ -538,12 +539,18 @@ class DistroXUpgradeServiceTest {
 
         DistroXUpgradeV1Response result = doAs(USER_CRN, () -> underTest.reinitiateClusterUpgrade(CLUSTER, WS_ID));
 
+        verify(upgradeAvailabilityService).checkForUpgrade(eq(CLUSTER),  eq(WS_ID), upgradeRequestCaptor.capture(), eq(USER_CRN));
+        assertTrue(upgradeRequestCaptor.getValue().getInternalUpgradeSettings().isUpgradeReinitiation());
         verify(reactorFlowManager).triggerDistroXUpgrade(any(), any(ImageChangeDto.class), anyBoolean(), anyBoolean(), any(), anyBoolean(), any());
     }
 
     private UpgradeV4Request createRequest(boolean osUpgradeEnabled, boolean rollingUpgradeEnabled) {
         UpgradeV4Request request = new UpgradeV4Request();
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(true, osUpgradeEnabled, rollingUpgradeEnabled));
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder()
+                .withSkipValidations(true)
+                .withUpgradePreparation(osUpgradeEnabled)
+                .withRollingUpgradeEnabled(rollingUpgradeEnabled)
+                .build());
         return request;
     }
 

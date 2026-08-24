@@ -126,7 +126,8 @@ class CmAndStackVersionUpgradeImageFilterTest {
                 .withOsType("redhat7")
                 .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), BUILD_NUMBER)).build();
         return new ImageFilterParams(null, currentImage1, null, lockComponents, false, activatedParcels, StackType.DATALAKE, null, 1L,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform("AWS"), null, null, false);
+                InternalUpgradeSettings.builder().withUpgradePreparation(true).withRollingUpgradeEnabled(true).build(),
+                imageCatalogPlatform("AWS"), null, null, false);
     }
 
     private void assertLockedCommon(ImageFilterResult actual) {

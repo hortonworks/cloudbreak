@@ -114,7 +114,7 @@ public class DistroXUpgradeService {
     private ImageChangeDto determineImageChangeDto(NameOrCrn nameOrCrn, String imageId, Stack stack) {
         boolean getAllImages = imageId != null;
         UpgradeV4Response upgradeOptions = clusterUpgradeAvailabilityService.checkForUpgrades(stack, true, true,
-                new InternalUpgradeSettings(false), getAllImages, imageId);
+                InternalUpgradeSettings.builder().build(), getAllImages, imageId);
         if (upgradeOptions.getUpgradeCandidates().isEmpty()) {
             throw new BadRequestException("There is no available image for upgrade.");
         }
@@ -229,6 +229,12 @@ public class DistroXUpgradeService {
         return upgradeCluster(request, nameOrCrn, upgradePreparation, workspaceId);
     }
 
+    public DistroXUpgradeV1Response upgradeCluster(DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn,
+            boolean upgradePreparation, boolean upgradeReinitiation, Long workspaceId) {
+        UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, false, upgradeReinitiation);
+        return upgradeCluster(request, nameOrCrn, upgradePreparation, workspaceId);
+    }
+
     public DistroXUpgradeV1Response upgradeCluster(UpgradeV4Request request, NameOrCrn nameOrCrn, boolean upgradePreparation, Long workspaceId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
@@ -271,7 +277,7 @@ public class DistroXUpgradeService {
         return upgradeReinitiateService.tryRetrieveLastDistroxUpgradeV1Request(stackId)
                 .map(distroXUpgradeV1Request -> {
                     LOGGER.info("Reinitiating cluster upgrade for cluster [{}] with the following parameters: {}", nameOrCrn, distroXUpgradeV1Request);
-                    return upgradeCluster(distroXUpgradeV1Request, nameOrCrn, false, workspaceId);
+                    return upgradeCluster(distroXUpgradeV1Request, nameOrCrn, false, true, workspaceId);
                 }).orElseThrow(() -> new BadRequestException("Reinitiate the upgrade by manually providing the same parameters as the last failed upgrade."));
     }
 

@@ -18,12 +18,20 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Respo
 public class UpgradeConverter {
 
     public UpgradeV4Request convert(DistroXUpgradeV1Request source, boolean skipValidations) {
+        return convert(source, skipValidations, false);
+    }
+
+    public UpgradeV4Request convert(DistroXUpgradeV1Request source, boolean skipValidations, boolean upgradeReinitiation) {
         UpgradeV4Request request = new UpgradeV4Request();
         request.setImageId(source.getImageId());
         request.setRuntime(source.getRuntime());
         request.setDryRun(source.getDryRun());
         request.setLockComponents(source.getLockComponents());
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(skipValidations, Boolean.TRUE.equals(source.getRollingUpgradeEnabled())));
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder()
+                .withSkipValidations(skipValidations)
+                .withRollingUpgradeEnabled(Boolean.TRUE.equals(source.getRollingUpgradeEnabled()))
+                .withUpgradeReinitiation(upgradeReinitiation)
+                .build());
         Optional.ofNullable(source.getShowAvailableImages())
                 .ifPresent(value -> request.setShowAvailableImages(UpgradeShowAvailableImages.valueOf(value.name())));
         request.setReplaceVms(convertReplaceVms(source));

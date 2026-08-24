@@ -36,21 +36,21 @@ class BlueprintUpgradeOptionConditionTest {
     private EntitlementService entitlementService;
 
     private static Object[][] testScenariosProvider() {
-        return new Object[][] {
-                { ENABLED, false, false, false, false, true, null},
-                { ENABLED, false, true, false, false, true, null},
-                { ENABLED, true, false, false, false, true, null },
-                { ENABLED, true, true, false, false, true, null },
-                { OS_UPGRADE_DISABLED, true, false, false, false, false, OS_UPGRADE_ERROR_MESSAGE },
-                { OS_UPGRADE_DISABLED, true, true, false, false, false, OS_UPGRADE_ERROR_MESSAGE },
-                { ENABLED, false, false, false, false, true, null},
-                { ENABLED, false, true, false, false, true, null},
-                { ENABLED, false, false, true, true, true, null },
-                { ENABLED, false, true, true, true, true, null },
-                { ENABLED, false, false, true, false, false, ROLLING_UPGRADE_ERROR_MESSAGE },
-                { ENABLED, false, true, true, false, false, ROLLING_UPGRADE_ERROR_MESSAGE },
-                { ROLLING_UPGRADE_ENABLED, false, false, true, false, true, null },
-                { ROLLING_UPGRADE_ENABLED, false, true, true, false, true, null },
+        return new Object[][]{
+                {ENABLED, false, false, false, false, true, null},
+                {ENABLED, false, true, false, false, true, null},
+                {ENABLED, true, false, false, false, true, null},
+                {ENABLED, true, true, false, false, true, null},
+                {OS_UPGRADE_DISABLED, true, false, false, false, false, OS_UPGRADE_ERROR_MESSAGE},
+                {OS_UPGRADE_DISABLED, true, true, false, false, false, OS_UPGRADE_ERROR_MESSAGE},
+                {ENABLED, false, false, false, false, true, null},
+                {ENABLED, false, true, false, false, true, null},
+                {ENABLED, false, false, true, true, true, null},
+                {ENABLED, false, true, true, true, true, null},
+                {ENABLED, false, false, true, false, false, ROLLING_UPGRADE_ERROR_MESSAGE},
+                {ENABLED, false, true, true, false, false, ROLLING_UPGRADE_ERROR_MESSAGE},
+                {ROLLING_UPGRADE_ENABLED, false, false, true, false, true, null},
+                {ROLLING_UPGRADE_ENABLED, false, true, true, false, true, null},
         };
     }
 
@@ -69,7 +69,7 @@ class BlueprintUpgradeOptionConditionTest {
 
     private ImageFilterParams createImageFilterParams(boolean osUpgrade, boolean forceOsUpgrade, boolean rollingUpgrade) {
         return new ImageFilterParams(null, null, null, osUpgrade, forceOsUpgrade, null, null, null, null,
-                new InternalUpgradeSettings(false, false, rollingUpgrade), null, null, null, false);
+                InternalUpgradeSettings.builder().withRollingUpgradeEnabled(rollingUpgrade).build(), null, null, null, false);
     }
 
 }

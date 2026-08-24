@@ -32,7 +32,8 @@ class CsdLocationFilterTest {
     @Test
     void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
         assertTrue(underTest.filterImage(null, new ImageFilterParams(null, null, null, false, false, null, StackType.DATALAKE, null, STACK_ID,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false)));
+                InternalUpgradeSettings.builder().withUpgradePreparation(true).withRollingUpgradeEnabled(true).build(),
+                imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false)));
     }
 
     @Test
@@ -124,7 +125,8 @@ class CsdLocationFilterTest {
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {
         return new ImageFilterParams(null, null, null, false, false, stackRelatedParcels, StackType.WORKLOAD, null, STACK_ID,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false);
+                InternalUpgradeSettings.builder().withUpgradePreparation(true).withRollingUpgradeEnabled(true).build(),
+                imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false);
     }
 
 }

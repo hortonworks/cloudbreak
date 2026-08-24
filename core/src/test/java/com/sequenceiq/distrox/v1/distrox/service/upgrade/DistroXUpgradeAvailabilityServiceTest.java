@@ -143,7 +143,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Request request = new UpgradeV4Request();
         request.setShowAvailableImages(showAvailableImages);
         request.setDryRun(dryRun);
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEntitled, false));
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder().withUpgradePreparation(dataHubRuntimeUpgradeEntitled).build());
         return request;
     }
 

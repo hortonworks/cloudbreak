@@ -93,7 +93,10 @@ class ClusterUpgradeAvailabilityServiceTest {
 
     private static final String BUILD_NUMBER = "64507825";
 
-    private static final InternalUpgradeSettings INTERNAL_UPGRADE_SETTINGS = new InternalUpgradeSettings(false, true, true);
+    private static final InternalUpgradeSettings INTERNAL_UPGRADE_SETTINGS = InternalUpgradeSettings.builder()
+            .withUpgradePreparation(true)
+            .withRollingUpgradeEnabled(true)
+            .build();
 
     private static final String BASE_IMAGE_ERROR = "Cannot upgrade cluster with a base image.";
 
@@ -271,6 +274,37 @@ class ClusterUpgradeAvailabilityServiceTest {
         assertNull(actual.getCurrent());
         assertEquals(1, actual.getUpgradeCandidates().size());
         assertEquals("Cannot upgrade cluster because it is in CREATE_FAILED state.", actual.getReason());
+    }
+
+    @Test
+    void testGetImagesToUpgradeShouldNotSetUnavailableReasonWhenRequestIsUpgradeReinitiation() throws CloudbreakImageNotFoundException {
+        InternalUpgradeSettings reinitiationSettings = InternalUpgradeSettings.builder().withUpgradeReinitiation(true).build();
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
+        Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1L);
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo));
+        Stack stack = createStack(createStackStatus(Status.UPDATE_FAILED), StackType.WORKLOAD);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, CATALOG_NAME, lockComponents, true, activatedParcels,
+                stack.getType(), null, STACK_ID, reinitiationSettings, imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false);
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairResult = mock(Result.class);
+
+        when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
+        when(imageFilterParamsFactory.create(null, currentImage, lockComponents, true, stack, reinitiationSettings, false)).thenReturn(imageFilterParams);
+        ImageFilterResult filteredImages = createFilteredImages(properImage);
+        when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack, currentImage.getImageCatalogName())).thenReturn(response);
+        when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(repairResult);
+        when(repairResult.isError()).thenReturn(false);
+
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, reinitiationSettings, false, null);
+
+        assertNull(actual.getCurrent());
+        assertEquals(1, actual.getUpgradeCandidates().size());
+        assertNull(actual.getReason());
     }
 
     @Test

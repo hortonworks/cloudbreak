@@ -218,7 +218,7 @@ class StackUpgradeOperationsTest {
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsDataLakeAndReplaceVmEnabledAndPrepare() {
         Stack stack = createStack(StackType.DATALAKE);
         UpgradeV4Request request = createUpgradeRequest(null, null);
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, true, false));
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder().withUpgradePreparation(true).build());
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(clusterUpgradeAvailabilityService
@@ -409,7 +409,7 @@ class StackUpgradeOperationsTest {
         UpgradeV4Request upgradeRequest = new UpgradeV4Request();
         upgradeRequest.setReplaceVms(replaceVm);
         upgradeRequest.setSkipDataHubValidation(skipDataHubValidation);
-        upgradeRequest.setInternalUpgradeSettings(new InternalUpgradeSettings(true));
+        upgradeRequest.setInternalUpgradeSettings(InternalUpgradeSettings.builder().withSkipValidations(true).build());
         return upgradeRequest;
     }
 

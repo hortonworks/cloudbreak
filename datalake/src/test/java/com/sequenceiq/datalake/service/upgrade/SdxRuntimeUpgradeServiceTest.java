@@ -812,6 +812,7 @@ class SdxRuntimeUpgradeServiceTest {
 
     @Test
     void testReinitiateClusterUpgrade() {
+        ArgumentCaptor<UpgradeV4Request> upgradeRequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(0L, STACK_NAME, USER_CRN)).thenReturn(
                 getUpgradeReinitiableV4Response(
                         UpgradeReinitiateStatus.REINITIABLE,
@@ -844,6 +845,8 @@ class SdxRuntimeUpgradeServiceTest {
 
         assertEquals(flowIdentifier, result.getFlowIdentifier());
         assertEquals("message", result.getReason());
+        verify(stackV4Endpoint).checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeRequestCaptor.capture(), eq(ACCOUNT_ID));
+        assertTrue(upgradeRequestCaptor.getValue().getInternalUpgradeSettings().isUpgradeReinitiation());
     }
 
     @Test

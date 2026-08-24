@@ -15,25 +15,21 @@ public class InternalUpgradeSettings {
 
     private final boolean rollingUpgradeEnabled;
 
-    public InternalUpgradeSettings(boolean skipValidations) {
-        this.skipValidations = skipValidations;
-        this.rollingUpgradeEnabled = false;
-        this.upgradePreparation = false;
-    }
-
-    public InternalUpgradeSettings(boolean skipValidations, boolean rollingUpgradeEnabled) {
-        this.skipValidations = skipValidations;
-        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
-        this.upgradePreparation = false;
-    }
+    private final boolean upgradeReinitiation;
 
     @JsonCreator
     public InternalUpgradeSettings(@JsonProperty("skipValidations") boolean skipValidations,
             @JsonProperty("upgradePreparation") boolean upgradePreparation,
-            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
+            @JsonProperty("upgradeReinitiation") boolean upgradeReinitiation) {
         this.skipValidations = skipValidations;
         this.upgradePreparation = upgradePreparation;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
+        this.upgradeReinitiation = upgradeReinitiation;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public boolean isSkipValidations() {
@@ -48,6 +44,10 @@ public class InternalUpgradeSettings {
         return rollingUpgradeEnabled;
     }
 
+    public boolean isUpgradeReinitiation() {
+        return upgradeReinitiation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -58,12 +58,14 @@ public class InternalUpgradeSettings {
         }
         InternalUpgradeSettings that = (InternalUpgradeSettings) o;
         return skipValidations == that.skipValidations
-                && upgradePreparation == that.upgradePreparation;
+                && upgradePreparation == that.upgradePreparation
+                && rollingUpgradeEnabled == that.rollingUpgradeEnabled
+                && upgradeReinitiation == that.upgradeReinitiation;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skipValidations, upgradePreparation);
+        return Objects.hash(skipValidations, upgradePreparation, rollingUpgradeEnabled, upgradeReinitiation);
     }
 
     @Override
@@ -71,6 +73,46 @@ public class InternalUpgradeSettings {
         return "InternalUpgradeSettings{" +
                 "skipValidations=" + skipValidations +
                 ", upgradePreparation=" + upgradePreparation +
+                ", rollingUpgradeEnabled=" + rollingUpgradeEnabled +
+                ", upgradeReinitiation=" + upgradeReinitiation +
                 '}';
+    }
+
+    public static final class Builder {
+
+        private boolean skipValidations;
+
+        private boolean upgradePreparation;
+
+        private boolean rollingUpgradeEnabled;
+
+        private boolean upgradeReinitiation;
+
+        private Builder() {
+        }
+
+        public Builder withSkipValidations(boolean skipValidations) {
+            this.skipValidations = skipValidations;
+            return this;
+        }
+
+        public Builder withUpgradePreparation(boolean upgradePreparation) {
+            this.upgradePreparation = upgradePreparation;
+            return this;
+        }
+
+        public Builder withRollingUpgradeEnabled(boolean rollingUpgradeEnabled) {
+            this.rollingUpgradeEnabled = rollingUpgradeEnabled;
+            return this;
+        }
+
+        public Builder withUpgradeReinitiation(boolean upgradeReinitiation) {
+            this.upgradeReinitiation = upgradeReinitiation;
+            return this;
+        }
+
+        public InternalUpgradeSettings build() {
+            return new InternalUpgradeSettings(skipValidations, upgradePreparation, rollingUpgradeEnabled, upgradeReinitiation);
+        }
     }
 }

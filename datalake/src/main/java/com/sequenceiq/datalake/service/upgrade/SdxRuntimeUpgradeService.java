@@ -83,22 +83,22 @@ public class SdxRuntimeUpgradeService {
 
     public SdxUpgradeResponse checkForUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
-        return checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation);
+        return checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation, false);
     }
 
     public SdxUpgradeResponse checkForUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
-        return checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation);
+        return checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation, false);
     }
 
     public SdxUpgradeResponse triggerUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
-        return triggerUpgrade(userCrn, cluster, upgradeRequest, upgradePreparation);
+        return triggerUpgrade(userCrn, cluster, upgradeRequest, upgradePreparation, false);
     }
 
     public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
-        return triggerUpgrade(userCrn, cluster, upgradeRequest, upgradePreparation);
+        return triggerUpgrade(userCrn, cluster, upgradeRequest, upgradePreparation, false);
     }
 
     public SdxUpgradeReinitiableResponse checkClusterUpgradeReinitiable(NameOrCrn nameOrCrn) {
@@ -121,7 +121,7 @@ public class SdxRuntimeUpgradeService {
         return tryRetrieveLastSdxUpgradeRequest(sdxCluster.getId())
                 .map(sdxUpgradeRequest -> {
                     LOGGER.info("Reinitiating cluster upgrade for cluster [{}] with the following parameters: {}", sdxCluster.getCrn(), sdxUpgradeRequest);
-                    return triggerUpgrade(userCrn, sdxCluster, sdxUpgradeRequest, false);
+                    return triggerUpgrade(userCrn, sdxCluster, sdxUpgradeRequest, false, true);
                 }).orElseThrow(() -> new BadRequestException("Reinitiate the upgrade by manually providing the same parameters as the last failed upgrade."));
     }
 
@@ -153,18 +153,20 @@ public class SdxRuntimeUpgradeService {
         }
     }
 
-    private SdxUpgradeResponse triggerUpgrade(String userCrn, SdxCluster cluster, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
+    private SdxUpgradeResponse triggerUpgrade(String userCrn, SdxCluster cluster, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation,
+            boolean upgradeReinitiation) {
         boolean skipBackup = upgradeRequest != null && Boolean.TRUE.equals(upgradeRequest.getSkipBackup());
         MDCBuilder.buildMdcContext(cluster);
-        SdxUpgradeResponse sdxUpgradeResponse = checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation);
+        SdxUpgradeResponse sdxUpgradeResponse = checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation, upgradeReinitiation);
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
         sdxUpgradeValidator.verifyPaywallAccess(userCrn, upgradeRequest);
         return upgradePreparation ? initSdxUpgradePreparation(sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
                 : initSdxUpgrade(sdxUpgradeResponse, upgradeRequest, cluster, userCrn);
     }
 
-    private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeRequest, SdxCluster cluster, String userCrn, boolean upgradePreparation) {
-        UpgradeV4Request request = createUpgradeV4Request(upgradeRequest, upgradePreparation);
+    private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeRequest, SdxCluster cluster, String userCrn, boolean upgradePreparation,
+            boolean upgradeReinitiation) {
+        UpgradeV4Request request = createUpgradeV4Request(upgradeRequest, upgradePreparation, upgradeReinitiation);
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
                 .doAsInternalActor(
                         () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, cluster.getClusterName(), request,
@@ -174,11 +176,13 @@ public class SdxRuntimeUpgradeService {
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);
     }
 
-    private UpgradeV4Request createUpgradeV4Request(SdxUpgradeRequest upgradeSdxClusterRequest, boolean upgradePreparation) {
+    private UpgradeV4Request createUpgradeV4Request(SdxUpgradeRequest upgradeSdxClusterRequest, boolean upgradePreparation, boolean upgradeReinitiation) {
         UpgradeV4Request request = sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest);
-        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, upgradePreparation,
-                Boolean.TRUE.equals(upgradeSdxClusterRequest.getRollingUpgradeEnabled()));
-        request.setInternalUpgradeSettings(internalUpgradeSettings);
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder()
+                .withUpgradePreparation(upgradePreparation)
+                .withRollingUpgradeEnabled(Boolean.TRUE.equals(upgradeSdxClusterRequest.getRollingUpgradeEnabled()))
+                .withUpgradeReinitiation(upgradeReinitiation)
+                .build());
         return request;
     }
 
