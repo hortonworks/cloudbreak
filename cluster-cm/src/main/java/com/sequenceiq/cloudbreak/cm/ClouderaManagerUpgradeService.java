@@ -96,9 +96,9 @@ class ClouderaManagerUpgradeService {
         if (optionalUpgradeCommand.isPresent()) {
             upgradeCommandId = optionalUpgradeCommand.get();
             ApiCommand upgradeCommand = clouderaManagerCommandsService.getApiCommand(apiClient, upgradeCommandId);
-            Boolean commandActive = upgradeCommand.isActive();
-            Boolean commandSuccess = upgradeCommand.isSuccess();
-            Boolean commandCanRetry = upgradeCommand.isCanRetry();
+            boolean commandActive = Boolean.TRUE.equals(upgradeCommand.isActive());
+            boolean commandSuccess = Boolean.TRUE.equals(upgradeCommand.isSuccess());
+            boolean commandCanRetry = Boolean.TRUE.equals(upgradeCommand.isCanRetry());
             if (commandActive) {
                 LOGGER.debug("Upgrade of CDP Runtime is already running with id: [{}]", upgradeCommandId);
             } else {

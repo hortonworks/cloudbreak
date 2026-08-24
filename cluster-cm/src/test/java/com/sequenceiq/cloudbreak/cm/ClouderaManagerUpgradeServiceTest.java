@@ -328,6 +328,50 @@ class ClouderaManagerUpgradeServiceTest {
         verify(clustersResourceApi, times(1)).postClouderaRuntimeUpgrade(CLUSTER_NAME);
     }
 
+    @Test
+    void testCallUpgradeCdhCommandShouldResubmitWithoutNpeWhenTheUpgradeCommandIsPresentAndCmReturnsNullFlags()
+            throws CloudbreakException, ApiException {
+        Stack stack = createStack();
+        boolean rollingUpgradeEnabled = false;
+        // Cloudera Manager may omit active/success/canRetry from the command response, leaving them null (see CB-34231).
+        ApiCommand apiCommandWithNullFlags = createApiCommand();
+        ApiCommand freshCommand = createApiCommand();
+
+        when(syncApiCommandRetriever.getCommandId(COMMAND_NAME, clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
+        when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommandWithNullFlags);
+        when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), any())).thenReturn(freshCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
+
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
+
+        verify(clouderaManagerCommandsService).getApiCommand(apiClient, COMMAND_ID);
+        verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
+        verify(clustersResourceApi).upgradeCdhCommand(eq(CLUSTER_NAME), any());
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
+    }
+
+    @Test
+    void testCallPostRuntimeUpgradeCommandShouldResubmitWithoutNpeWhenTheCommandIsPresentAndCmReturnsNullFlags()
+            throws ApiException, CloudbreakException {
+        Stack stack = createStack();
+        // Cloudera Manager may omit active/success/canRetry from the command response, leaving them null (see CB-34231).
+        ApiCommand apiCommandWithNullFlags = createApiCommand();
+        ApiCommand freshCommand = createApiCommand();
+
+        when(syncApiCommandRetriever.getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
+        when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommandWithNullFlags);
+        when(clustersResourceApi.postClouderaRuntimeUpgrade(eq(CLUSTER_NAME))).thenReturn(freshCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, false))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
+
+        underTest.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
+
+        verify(clouderaManagerCommandsService).getApiCommand(apiClient, COMMAND_ID);
+        verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
+        verify(clustersResourceApi, times(1)).postClouderaRuntimeUpgrade(CLUSTER_NAME);
+    }
+
     private ApiCommand createApiCommand() {
         ApiCommand apiCommand = new ApiCommand();
         apiCommand.setId(COMMAND_ID);
