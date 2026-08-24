@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.clo;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2_10000;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2_20000;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getRdsViewOfType;
@@ -73,7 +73,7 @@ public class CLOServiceConfigProvider implements CmTemplateComponentConfigProvid
 
         String cmVersion = ConfigUtils.getCmVersion(source);
         if (StringUtils.isNotEmpty(cmVersion)
-                && isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_10000)) {
+                && isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_20000)) {
             RdsView lakehouseOptimizerRds = getRdsView(source);
             if (lakehouseOptimizerRds != null) {
                 cloConfigs.add(config(CLO_DB_TYPE, "postgresql"));

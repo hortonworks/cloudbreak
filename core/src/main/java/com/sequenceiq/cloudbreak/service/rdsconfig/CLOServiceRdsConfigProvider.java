@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2_10000;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2_20000;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import jakarta.inject.Inject;
@@ -67,6 +67,6 @@ public class CLOServiceRdsConfigProvider extends AbstractRdsConfigProvider {
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stackDtoDelegate.getCluster().getId());
         return clouderaManagerRepoDetails != null
                 && blueprintProcessor.isServiceTypePresent("LAKEHOUSE_OPTIMIZER")
-                && isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_13_2_10000);
+                && isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_13_2_20000);
     }
 }

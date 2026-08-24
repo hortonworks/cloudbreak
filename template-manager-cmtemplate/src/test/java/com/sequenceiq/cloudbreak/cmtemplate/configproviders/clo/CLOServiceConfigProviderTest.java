@@ -123,7 +123,7 @@ class CLOServiceConfigProviderTest {
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of(accountId));
         when(generalClusterConfigs.getEnvironmentCrn()).thenReturn(environmentCrn);
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
-        when(cmRepo.getVersion()).thenReturn("7.13.2.10000");
+        when(cmRepo.getVersion()).thenReturn("7.13.2.20000");
 
         RdsView lakehouseOptimizerRds = new RdsView();
         lakehouseOptimizerRds.setConnectionURL(jdbcUrl);
@@ -161,7 +161,7 @@ class CLOServiceConfigProviderTest {
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of("acct"));
         when(generalClusterConfigs.getEnvironmentCrn()).thenReturn("env");
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
-        when(cmRepo.getVersion()).thenReturn("7.13.2.10000");
+        when(cmRepo.getVersion()).thenReturn("7.13.2.20000");
 
         String sslJdbcUrl = "jdbc:postgresql://host:5432/clo?sslmode=verify-full&sslrootcert=/tmp/rds-ca.pem";
         RdsView lakehouseOptimizerRds = new RdsView();
@@ -188,7 +188,7 @@ class CLOServiceConfigProviderTest {
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of("acct"));
         when(generalClusterConfigs.getEnvironmentCrn()).thenReturn("env");
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
-        when(cmRepo.getVersion()).thenReturn("7.13.2.10000");
+        when(cmRepo.getVersion()).thenReturn("7.13.2.20000");
 
         RdsView lakehouseOptimizerRds = new RdsView();
         lakehouseOptimizerRds.setConnectionURL("jdbc:postgresql://host/clo");
@@ -214,7 +214,7 @@ class CLOServiceConfigProviderTest {
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of("acct"));
         when(generalClusterConfigs.getEnvironmentCrn()).thenReturn("env");
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
-        when(cmRepo.getVersion()).thenReturn("7.13.2.10000");
+        when(cmRepo.getVersion()).thenReturn("7.13.2.20000");
         when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(Map.of(
                 "master", Set.of(CLOServiceRoles.CLO_SERVER, "HDFS_NAMENODE"),
                 "clostandby", Set.of(CLOServiceRoles.CLO_SERVER)

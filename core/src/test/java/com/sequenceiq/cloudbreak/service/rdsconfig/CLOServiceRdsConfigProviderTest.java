@@ -58,7 +58,7 @@ class CLOServiceRdsConfigProviderTest {
 
     @Test
     void testIsRdsConfigNeededWhenCloInBlueprintAndVersionSupported() {
-        StackDtoDelegate stackDto = createStackDto(BLUEPRINT_WITH_CLO, "7.13.2.10000");
+        StackDtoDelegate stackDto = createStackDto(BLUEPRINT_WITH_CLO, "7.13.2.20000");
 
         assertThat(underTest.isRdsConfigNeeded(stackDto)).isTrue();
     }
