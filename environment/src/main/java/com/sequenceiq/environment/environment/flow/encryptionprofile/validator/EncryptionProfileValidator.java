@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.encryptionprofile.validator;
 import static java.util.function.Predicate.not;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,12 +17,15 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.common.CommonExperienceService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class EncryptionProfileValidator {
@@ -37,11 +41,19 @@ public class EncryptionProfileValidator {
     private EnvironmentService environmentService;
 
     @Inject
+    private FreeIpaService freeIpaService;
+
+    @Inject
     private CommonExperienceService commonExperienceService;
 
     public void validate(String environmentCrn) {
         if (!entitlementService.isConfigureEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             throw new CloudbreakServiceException("Account not entitled for encryption profile. Please contact your CDP administrator to enable it.");
+        }
+
+        Optional<DescribeFreeIpaResponse> freeIpaResponseOpt = freeIpaService.describe(environmentCrn);
+        if (freeIpaUsingCentos7(freeIpaResponseOpt)) {
+            throw new CloudbreakServiceException("FreeIPA running on CentOS 7 which does not support to apply encryption profile.");
         }
 
         List<StackViewV4Response> stackViewV4Responses = stackService.getAllNotDeletedClustersByEnvironmentCrn(environmentCrn);
@@ -79,5 +91,11 @@ public class EncryptionProfileValidator {
                             .sorted()
                             .collect(Collectors.joining(","))));
         }
+    }
+
+    private boolean freeIpaUsingCentos7(Optional<DescribeFreeIpaResponse> freeIpaResponseOpt) {
+        return freeIpaResponseOpt.isPresent()
+                && freeIpaResponseOpt.get().getImage() != null
+                && freeIpaResponseOpt.get().getImage().getOs().equals(OsType.CENTOS7.getOs());
     }
 }

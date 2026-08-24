@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.encryptionprofile.validator;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -23,9 +25,12 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.common.CommonExperienceService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(MockitoExtension.class)
 class EncryptionProfileValidatorTest {
@@ -42,6 +47,9 @@ class EncryptionProfileValidatorTest {
 
     @Mock
     private EnvironmentService environmentService;
+
+    @Mock
+    private FreeIpaService freeIpaService;
 
     @Mock
     private CommonExperienceService commonExperienceService;
@@ -138,5 +146,50 @@ class EncryptionProfileValidatorTest {
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
 
         assertEquals("Environment env1 contains experience(s) [anotherExperience,liftie]. Experiences do not support encryption profile yet", ex.getMessage());
+    }
+
+    @Test
+    void testFreeIpaOnCentos7ThrowsException() {
+        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
+        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
+        ImageSettingsResponse imageSettings = new ImageSettingsResponse();
+        imageSettings.setOs("centos7");
+        freeIpaResponse.setImage(imageSettings);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.of(freeIpaResponse));
+
+        CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
+
+        assertEquals("FreeIPA running on CentOS 7 which does not support to apply encryption profile.", ex.getMessage());
+    }
+
+    @Test
+    void testFreeIpaOnRedhat8DoesNotThrow() {
+        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
+        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
+        ImageSettingsResponse imageSettings = new ImageSettingsResponse();
+        imageSettings.setOs("redhat8");
+        freeIpaResponse.setImage(imageSettings);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.of(freeIpaResponse));
+        when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of());
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setName("env1");
+        when(environmentService.getByCrnAndAccountId(eq(ENVIRONMENT_CRN), any())).thenReturn(environmentDto);
+        when(commonExperienceService.getConnectedClustersForEnvironment(any())).thenReturn(Set.of());
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
+    }
+
+    @Test
+    void testFreeIpaNotFoundDoesNotThrow() {
+        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of());
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setName("env1");
+        when(environmentService.getByCrnAndAccountId(eq(ENVIRONMENT_CRN), any())).thenReturn(environmentDto);
+        when(commonExperienceService.getConnectedClustersForEnvironment(any())).thenReturn(Set.of());
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
     }
 }
