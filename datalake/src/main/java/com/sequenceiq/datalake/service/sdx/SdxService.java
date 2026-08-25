@@ -100,6 +100,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseInstanceTypeRequestValidator;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.sdx.util.SdxRuntimeVersionProvider;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -129,6 +130,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private SdxExternalDatabaseConfigurer externalDatabaseConfigurer;
+
+    @Inject
+    private DatabaseInstanceTypeRequestValidator databaseInstanceTypeRequestValidator;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -435,6 +439,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
 
         DatabaseRequest internalDatabaseRequest = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getExternalDatabase).orElse(null);
+        databaseInstanceTypeRequestValidator.validateIfPresent(
+                sdxClusterRequest.getExternalDatabase(), internalDatabaseRequest, environment, architecture, userCrn);
         sdxCluster.setSdxDatabase(externalDatabaseConfigurer.configure(environment, os, internalDatabaseRequest,
                 sdxClusterRequest.getExternalDatabase(), sdxCluster));
 

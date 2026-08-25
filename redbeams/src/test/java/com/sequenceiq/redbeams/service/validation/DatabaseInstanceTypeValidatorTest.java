@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -23,10 +26,13 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeCapabilityValidator;
+import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
@@ -52,6 +58,9 @@ class DatabaseInstanceTypeValidatorTest {
     private CredentialToExtendedCloudCredentialConverter extendedCredentialConverter;
 
     @Mock
+    private DatabaseInstanceTypeCapabilityValidator capabilityValidator;
+
+    @Mock
     private CloudConnector cloudConnector;
 
     @Mock
@@ -74,15 +83,39 @@ class DatabaseInstanceTypeValidatorTest {
     }
 
     @Test
-    void emptyFallbackListPassesWithoutValidation() {
-        Optional<String> result = underTest.validate(PRIMARY_TYPE, Collections.emptyList(), ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
+    void emptyFallbackListWithBlankPrimaryPassesWithoutValidation() {
+        Optional<String> result = underTest.validate("", Collections.emptyList(), ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
         assertThat(result).isEmpty();
+        verify(capabilityValidator, never()).validate(any());
     }
 
     @Test
-    void nullFallbackListPassesWithoutValidation() {
+    void nullFallbackListWithBlankPrimaryPassesWithoutValidation() {
+        Optional<String> result = underTest.validate(null, null, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
+        assertThat(result).isEmpty();
+        verify(capabilityValidator, never()).validate(any());
+    }
+
+    @Test
+    void primaryOnlyWithNoFallbacksStillValidatesViaCapabilities() {
+        setupCloudMocks();
+        setupAvailableTypes(Set.of(PRIMARY_TYPE, "db.m6i.large"));
+
         Optional<String> result = underTest.validate(PRIMARY_TYPE, null, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
         assertThat(result).isEmpty();
+        verify(capabilityValidator).validate(any(DatabaseInstanceTypeValidationInput.class));
+    }
+
+    @Test
+    void primaryOnlyNotAvailableInRegionThrows() {
+        setupCloudMocks();
+        setupAvailableTypes(Set.of("db.m6i.large", "db.r5.large"));
+        doThrow(new BadRequestException("Database instance type 'db.m5.large' is not available in region 'us-east-1'."))
+                .when(capabilityValidator).validate(any());
+
+        assertThatThrownBy(() -> underTest.validate(PRIMARY_TYPE, null, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("not available in region");
     }
 
     @Test
@@ -144,37 +177,13 @@ class DatabaseInstanceTypeValidatorTest {
     }
 
     @Test
-    void allTypesAvailableInRegionPasses() {
+    void allTypesAvailableInRegionWithFallbacksPasses() {
         setupCloudMocks();
         List<String> fallbacks = List.of("db.m6i.large", "db.m7i.large");
         setupAvailableTypes(Set.of(PRIMARY_TYPE, "db.m6i.large", "db.m7i.large", "db.r5.large"));
 
         Optional<String> result = underTest.validate(PRIMARY_TYPE, fallbacks, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
         assertThat(result).isEmpty();
-    }
-
-    @Test
-    void fallbackTypeNotAvailableInRegionThrows() {
-        setupCloudMocks();
-        List<String> fallbacks = List.of("db.m6i.large", "db.m7i.large");
-        setupAvailableTypes(Set.of(PRIMARY_TYPE, "db.m6i.large", "db.r5.large"));
-
-        assertThatThrownBy(() -> underTest.validate(PRIMARY_TYPE, fallbacks, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("db.m7i.large")
-                .hasMessageContaining("not available in region");
-    }
-
-    @Test
-    void primaryTypeNotAvailableInRegionThrows() {
-        setupCloudMocks();
-        List<String> fallbacks = List.of("db.m6i.large");
-        setupAvailableTypes(Set.of("db.m6i.large", "db.r5.large"));
-
-        assertThatThrownBy(() -> underTest.validate(PRIMARY_TYPE, fallbacks, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining(PRIMARY_TYPE)
-                .hasMessageContaining("not available in region");
     }
 
     @Test
@@ -191,14 +200,12 @@ class DatabaseInstanceTypeValidatorTest {
     }
 
     @Test
-    void unsupportedOperationExceptionReturnsWarning() {
+    void unsupportedOperationExceptionReturnsEmpty() {
         setupCloudMocks();
-        List<String> fallbacks = List.of("db.m6i.large");
         when(platformResources.databaseCapabilities(any(), any(), anyMap())).thenThrow(new UnsupportedOperationException("not supported"));
 
-        Optional<String> result = underTest.validate(PRIMARY_TYPE, fallbacks, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
-        assertThat(result).isPresent();
-        assertThat(result.get()).contains("Could not validate database instance type availability");
+        Optional<String> result = underTest.validate(PRIMARY_TYPE, null, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -216,10 +223,11 @@ class DatabaseInstanceTypeValidatorTest {
         Region region = Region.region(REGION);
         Set<DatabaseVmType> vmTypes = new java.util.HashSet<>();
         for (String type : types) {
-            vmTypes.add(DatabaseVmType.databaseVmType(type, null));
+            DatabaseVmTypeMeta meta = DatabaseVmTypeMeta.DatabaseVmTypeMetaBuilder.builder().create();
+            vmTypes.add(DatabaseVmType.databaseVmType(type, meta));
         }
         PlatformDatabaseCapabilities capabilities = new PlatformDatabaseCapabilities(
-                Map.of(), Map.of(), Map.of(), null, Map.of(region, vmTypes));
+                Map.of(), Map.of(region, PRIMARY_TYPE), Map.of(), null, Map.of(region, vmTypes));
         when(platformResources.databaseCapabilities(any(), any(), anyMap())).thenReturn(capabilities);
     }
 }

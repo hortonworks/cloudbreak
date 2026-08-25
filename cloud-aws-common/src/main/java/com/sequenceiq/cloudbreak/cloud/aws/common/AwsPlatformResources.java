@@ -37,6 +37,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -961,6 +962,15 @@ public class AwsPlatformResources implements PlatformResources {
                     .engineVersion(postgres.get().engineVersion())
                     .build();
             DescribeOrderableDBInstanceOptionsIterable paginator = rdsClient.describeOrderableDbInstanceOptionsResponse(request);
+            List<String> dbInstanceClasses = paginator.orderableDBInstanceOptions().stream()
+                    .filter(e -> filterArmInstance(e.dbInstanceClass(), getTargetArchitecture(architecture)))
+                    .map(option -> option.dbInstanceClass())
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            Map<String, InstanceTypeInfo> ec2SpecsByDbClass = lookupEc2SpecsForDbInstanceClasses(awsCredentialView, region, dbInstanceClasses);
+
+            paginator = rdsClient.describeOrderableDbInstanceOptionsResponse(request);
             paginator.orderableDBInstanceOptions().stream()
                     .filter(e -> filterArmInstance(e.dbInstanceClass(), getTargetArchitecture(architecture)))
                     .forEach(option -> {
@@ -971,10 +981,46 @@ public class AwsPlatformResources implements PlatformResources {
                                         .stream()
                                         .map(e -> e.name())
                                         .collect(Collectors.toList()));
+                        InstanceTypeInfo ec2Info = ec2SpecsByDbClass.get(option.dbInstanceClass());
+                        if (ec2Info != null) {
+                            databaseVmTypeMetaBuilder.withCpuAndMemory(
+                                    ec2Info.vCpuInfo().defaultVCpus(),
+                                    getMemory(ec2Info));
+                        }
                         instanceTypes.add(databaseVmType(option.dbInstanceClass(), databaseVmTypeMetaBuilder.create()));
                     });
         }
         return instanceTypes;
+    }
+
+    private Map<String, InstanceTypeInfo> lookupEc2SpecsForDbInstanceClasses(AwsCredentialView awsCredentialView, Region region,
+            List<String> dbInstanceClasses) {
+        Map<String, InstanceTypeInfo> result = new HashMap<>();
+        try {
+            AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredentialView, region.getRegionName());
+            Map<String, String> dbClassToEc2Name = dbInstanceClasses.stream()
+                    .collect(Collectors.toMap(Function.identity(), dbClass -> dbClass.replaceFirst("^db\\.", ""), (a, b) -> a));
+            List<String> ec2TypeNames = dbClassToEc2Name.values().stream().distinct().collect(Collectors.toList());
+            Map<String, InstanceTypeInfo> ec2InfoByName = new HashMap<>();
+            for (int i = 0; i < ec2TypeNames.size(); i += SEGMENT) {
+                DescribeInstanceTypesRequest describeRequest = DescribeInstanceTypesRequest.builder()
+                        .instanceTypesWithStrings(getInstanceTypes(ec2TypeNames, i))
+                        .build();
+                DescribeInstanceTypesResponse response = ec2Client.describeInstanceTypes(describeRequest);
+                for (InstanceTypeInfo info : response.instanceTypes()) {
+                    ec2InfoByName.put(info.instanceTypeAsString(), info);
+                }
+            }
+            for (String dbClass : dbInstanceClasses) {
+                InstanceTypeInfo info = ec2InfoByName.get(dbClassToEc2Name.get(dbClass));
+                if (info != null) {
+                    result.put(dbClass, info);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to look up EC2 instance type specs for database instance classes, CPU/memory will not be available for validation", e);
+        }
+        return result;
     }
 
     private Architecture getTargetArchitecture(String architecture) {

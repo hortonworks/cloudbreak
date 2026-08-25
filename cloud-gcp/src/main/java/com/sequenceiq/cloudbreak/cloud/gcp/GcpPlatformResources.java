@@ -93,6 +93,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmTypeMeta.DatabaseVmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
@@ -111,6 +112,7 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.Architecture;
 
 @Service
 public class GcpPlatformResources implements PlatformResources {
@@ -129,6 +131,10 @@ public class GcpPlatformResources implements PlatformResources {
     private static final int DEFAULT_CPU = 2;
 
     private static final float DEFAULT_MEMORY = 14;
+
+    private static final Pattern DB_CUSTOM_TIER_PATTERN = Pattern.compile("db-custom-(\\d+)-(\\d+)");
+
+    private static final Pattern DB_STANDARD_TIER_PATTERN = Pattern.compile("db-n1-(?:standard|highmem|highcpu)-(\\d+)");
 
     private final VersionComparator versionComparator = new VersionComparator();
 
@@ -540,9 +546,7 @@ public class GcpPlatformResources implements PlatformResources {
                     .stream()
                     .map(tier -> databaseVmType(
                             tier.getTier(),
-                            DatabaseVmTypeMetaBuilder.builder()
-                                    .withMemory(tier.getRAM().floatValue() / (THOUSAND * THOUSAND * THOUSAND))
-                                    .create())
+                            buildDatabaseVmTypeMeta(tier.getTier(), tier.getRAM()))
                     )
                     .collect(Collectors.toSet());
             instanceTypes.add(
@@ -550,6 +554,7 @@ public class GcpPlatformResources implements PlatformResources {
                         gcpDatabaseVmDefault,
                         DatabaseVmTypeMetaBuilder.builder()
                                 .withCpuAndMemory(DEFAULT_CPU, DEFAULT_MEMORY)
+                                .withArchitecture(Architecture.X86_64)
                                 .create()
                     )
             );
@@ -558,6 +563,31 @@ public class GcpPlatformResources implements PlatformResources {
             LOGGER.warn("Could not get available database instance types for GCP", e);
             return Set.of();
         }
+    }
+
+    private DatabaseVmTypeMeta buildDatabaseVmTypeMeta(String tierName, Long ramBytes) {
+        float memoryInGb = ramBytes.floatValue() / (THOUSAND * THOUSAND * THOUSAND);
+        Matcher customMatcher = DB_CUSTOM_TIER_PATTERN.matcher(tierName);
+        if (customMatcher.matches()) {
+            int cpu = Integer.parseInt(customMatcher.group(1));
+            float memoryFromName = Integer.parseInt(customMatcher.group(2)) / THOUSAND;
+            return DatabaseVmTypeMetaBuilder.builder()
+                    .withCpuAndMemory(cpu, memoryFromName)
+                    .withArchitecture(Architecture.X86_64)
+                    .create();
+        }
+        Matcher standardMatcher = DB_STANDARD_TIER_PATTERN.matcher(tierName);
+        if (standardMatcher.matches()) {
+            int cpu = Integer.parseInt(standardMatcher.group(1));
+            return DatabaseVmTypeMetaBuilder.builder()
+                    .withCpuAndMemory(cpu, memoryInGb)
+                    .withArchitecture(Architecture.X86_64)
+                    .create();
+        }
+        return DatabaseVmTypeMetaBuilder.builder()
+                .withMemory(memoryInGb)
+                .withArchitecture(Architecture.X86_64)
+                .create();
     }
 
     @Override

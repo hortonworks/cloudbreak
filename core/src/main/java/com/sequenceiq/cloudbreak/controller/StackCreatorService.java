@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -92,6 +93,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseInstanceTypeRequestValidator;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -219,6 +221,9 @@ public class StackCreatorService {
     @Inject
     private StackParametersService stackParametersService;
 
+    @Inject
+    private DatabaseInstanceTypeRequestValidator databaseInstanceTypeRequestValidator;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         long start = System.currentTimeMillis();
@@ -242,6 +247,8 @@ public class StackCreatorService {
         Optional<String> runtimeVersion = getRuntimeVersionFromBlueprint(stackRequest, workspace.getId());
         validateArchitecture(stackRequest, runtimeVersion);
         validateSeLinuxEntitlement(stackRequest);
+        measure(() -> validateDatabaseInstanceTypeIfPresent(stackRequest, environment),
+                LOGGER, "Database instance type validation took {} ms for stack {}", stackName);
         updateImageOsIfRequired(stackRequest, runtimeVersion, accountId);
 
         Stack stackStub = measure(
@@ -460,6 +467,15 @@ public class StackCreatorService {
                 .map(SeLinux::fromStringWithFallback)
                 .orElse(SeLinux.PERMISSIVE);
         seLinuxValidationService.validateSeLinuxEntitlementGranted(seLinuxModeFromRequest);
+    }
+
+    private void validateDatabaseInstanceTypeIfPresent(StackV4Request stackRequest, DetailedEnvironmentResponse environment) {
+        DatabaseRequest dbRequest = stackRequest.getExternalDatabase();
+        if (dbRequest == null || StringUtils.isBlank(dbRequest.getDatabaseInstanceType())) {
+            return;
+        }
+        databaseInstanceTypeRequestValidator.validateIfPresent(
+                dbRequest.getDatabaseInstanceType(), dbRequest, environment, stackRequest.getArchitectureEnum());
     }
 
     private boolean isCodRequest(StackV4Request stackRequest) {
