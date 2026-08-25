@@ -32,3 +32,9 @@ tests:
         excludedMethods:
           - testKraftMigrationFailAtUpscale
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
+      # The testDistroXVolumesModification for GCP is excluded here because the additional volume
+      # modification is in itself a very long-running flow involving stop -> snapshot -> create (new) -> attach -> delete (old)
+      # -> start of the disks. It will be covered as a separate method and under CB-33383
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesAddAndModificationTest
+        excludedMethods:
+          - testDistroXVolumesModification

@@ -33,6 +33,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEnc
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
@@ -47,6 +48,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIp
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
@@ -647,5 +649,13 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String defaultEncryptionProfile() {
         return getGovCloud() ? DEFAULT_GOV_ENCRYPTION_PROFILE_NAME : super.defaultEncryptionProfile();
+    }
+
+    @Override
+    public Set<VolumeV1Request> getStorageOptimizedVolumes() {
+        return Set.of(CloudProvider.volume(
+                awsProperties.getStorageOptimizedInstance().getVolumeCount(),
+                awsProperties.getStorageOptimizedInstance().getVolumeSize(),
+                awsProperties.getStorageOptimizedInstance().getVolumeType()));
     }
 }

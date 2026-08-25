@@ -31,6 +31,7 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
@@ -42,6 +43,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties.Network;
 import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -665,5 +667,13 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public EncryptionProfileTestDto encryptionProfile(EncryptionProfileTestDto encryptionProfile) {
         return encryptionProfile;
+    }
+
+    @Override
+    public Set<VolumeV1Request> getStorageOptimizedVolumes() {
+        return Set.of(CloudProvider.volume(
+                azureProperties.getStorageOptimizedInstance().getVolumeCount(),
+                azureProperties.getStorageOptimizedInstance().getVolumeSize(),
+                azureProperties.getStorageOptimizedInstance().getVolumeType()));
     }
 }

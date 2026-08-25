@@ -38,10 +38,10 @@ public class DistroXInstanceGroupsBuilder {
     public DistroXInstanceGroupsBuilder verticalScaleHostGroup() {
         distroXInstanceGroupTestDtoList = withHostGroup(testContext, MASTER, COORDINATOR, EXECUTOR);
         VolumeV4TestDto attachedVolumes = testContext.init(VolumeV4TestDto.class, testContext.getCloudPlatform());
-        VolumeV1Request volumes = new VolumeV1Request();
-        volumes.setCount(attachedVolumes.getRequest().getCount());
-        volumes.setSize(attachedVolumes.getRequest().getSize());
-        volumes.setType(attachedVolumes.getRequest().getType());
+        VolumeV1Request volumes = CloudProvider.volume(
+                attachedVolumes.getRequest().getCount(),
+                attachedVolumes.getRequest().getSize(),
+                attachedVolumes.getRequest().getType());
         getInstanceTemplates().forEach(template -> template.setAttachedVolumes(Set.of(volumes)));
         return this;
     }
@@ -65,6 +65,12 @@ public class DistroXInstanceGroupsBuilder {
     public DistroXInstanceGroupsBuilder withStorageOptimizedInstancetype() {
         CloudProvider cloudProvider = testContext.getCloudProvider();
         getInstanceTemplates().forEach(template -> template.setInstanceType(cloudProvider.getStorageOptimizedInstanceType()));
+        return this;
+    }
+
+    public DistroXInstanceGroupsBuilder withStorageOptimizedVolumeType() {
+        CloudProvider cloudProvider = testContext.getCloudProvider();
+        getInstanceTemplates().forEach(template -> template.setAttachedVolumes(cloudProvider.getStorageOptimizedVolumes()));
         return this;
     }
 

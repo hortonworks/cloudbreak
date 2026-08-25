@@ -375,6 +375,7 @@ integrationtest:
     region: us-west2
     location: us-west2
     verticalScale:
+      volumeType: pd-ssd
       supported: true
       datalake:
         group: master

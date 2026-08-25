@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -20,6 +21,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -487,6 +489,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getStorageOptimizedInstanceType() {
         return delegate.getStorageOptimizedInstanceType();
+    }
+
+    @Override
+    public Set<VolumeV1Request> getStorageOptimizedVolumes() {
+        return delegate.getStorageOptimizedVolumes();
     }
 
     @Override

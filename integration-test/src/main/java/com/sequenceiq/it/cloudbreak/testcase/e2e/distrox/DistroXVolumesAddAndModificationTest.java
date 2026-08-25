@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.DatabaseVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -67,6 +68,8 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
 
     private static final String DB_VOLUMES = "dbVolumes";
 
+    private static final String GCP_LOCAL_SSD_DEVICE_PREFIX = "local-";
+
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -87,7 +90,6 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
 
     @Override
     protected void setupClass(TestContext testContext) {
-        assertNotSupportedCloudPlatform(CloudPlatform.GCP);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
@@ -119,6 +121,7 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .verticalScaleHostGroup()
                         .withStorageOptimizedInstancetype()
+                        .withStorageOptimizedVolumeType()
                         .build())
                 .addTags(DX_TAGS)
                 .when(distroXTestClient.create(), RunningParameter.key("dx"))
@@ -259,7 +262,9 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     }
 
     private void validateDeletedDisk(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client) {
-        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ADDITIONAL_VOLUMES);
+        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ADDITIONAL_VOLUMES).stream()
+                .filter(volumeId -> !volumeId.startsWith(GCP_LOCAL_SSD_DEVICE_PREFIX))
+                .toList();
         if (!CollectionUtils.isEmpty(attachedVolumes)) {
             throw new TestFailException(String.format("Disk Delete did not complete successfully for instances in group %s. " +
                             "volumes %s are still attached on cloud provider",
@@ -278,7 +283,9 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     private void validateAddedDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform) {
         String expectedVolumeType = tc.getCloudProvider().getAddDiskVolumeType();
 
-        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ADDITIONAL_VOLUMES);
+        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ADDITIONAL_VOLUMES).stream()
+                .filter(volumeId -> !volumeId.startsWith(GCP_LOCAL_SSD_DEVICE_PREFIX))
+                .toList();
         if (attachedVolumes.size() != NUM_DISK_TO_ADD) {
             throw new TestFailException(String.format("Add Disk did not complete successfully on cloud provider for instances in group %s. " +
                     "Attached Volumes %s on cloud provider does not match with expected number of Volumes", TEST_INSTANCE_GROUP, attachedVolumes));
@@ -341,7 +348,9 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
         InstanceGroupV4Response instanceGroup = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals(TEST_INSTANCE_GROUP))
                 .findFirst().orElseThrow();
         Set<VolumeV4Response> attachedVolumesWithGroup = instanceGroup.getTemplate().getAttachedVolumes().stream()
-                .filter(volumeV4Response -> volumeV4Response.getCount() > 0).collect(Collectors.toSet());
+                .filter(volumeV4Response -> volumeV4Response.getCount() > 0)
+                .filter(volumeV4Response -> !GcpDiskType.LOCAL_SSD.value().equalsIgnoreCase(volumeV4Response.getType()))
+                .collect(Collectors.toSet());
         return attachedVolumesWithGroup;
     }
 

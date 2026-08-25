@@ -26,6 +26,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonParameters;
@@ -38,6 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpFreeIp
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
@@ -349,6 +351,21 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getStorageOptimizedInstanceType() {
         return gcpProperties.getStorageOptimizedInstance().getType();
+    }
+
+    @Override
+    public Set<VolumeV1Request> getStorageOptimizedVolumes() {
+        VolumeV1Request storageOptimizedVolume = CloudProvider.volume(
+                gcpProperties.getStorageOptimizedInstance().getVolumeCount(),
+                gcpProperties.getStorageOptimizedInstance().getVolumeSize(),
+                gcpProperties.getStorageOptimizedInstance().getVolumeType());
+        // GCP requires both instance storage and additional volumes to be populated in additional volumes. That is the need
+        // for adding the first and second volume block separately
+        VolumeV1Request additionalVolume = CloudProvider.volume(
+                gcpProperties.getInstance().getVolumeCount(),
+                gcpProperties.getInstance().getVolumeSize(),
+                gcpProperties.getInstance().getVolumeType());
+        return Set.of(storageOptimizedVolume, additionalVolume);
     }
 
     @Override
