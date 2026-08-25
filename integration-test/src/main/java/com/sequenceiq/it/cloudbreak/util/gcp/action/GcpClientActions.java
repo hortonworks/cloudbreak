@@ -92,7 +92,7 @@ public class GcpClientActions extends GcpClient {
         }).collect(Collectors.toList());
     }
 
-    private Map<String, Set<String>> listInstancesDiskNames(List<String> instanceIds) {
+    private Map<String, Set<String>> listInstancesDiskNames(List<String> instanceIds, boolean rootVolume) {
         LOGGER.info("Collect disk names for instance ids: '{}'", String.join(", ", instanceIds));
         Map<String, Set<String>> instanceIdDiskNamesMap = new HashMap<>();
         Compute compute = buildCompute();
@@ -105,7 +105,7 @@ public class GcpClientActions extends GcpClient {
                 Set<String> attachedDiskNames = instance
                         .getDisks()
                         .stream()
-                        .filter(ad -> !ad.getBoot())
+                        .filter(ad -> rootVolume == Boolean.TRUE.equals(ad.getBoot()))
                         .map(AttachedDisk::getDeviceName)
                         .collect(Collectors.toSet());
                 instanceIdDiskNamesMap.put(instanceId, attachedDiskNames);
@@ -118,8 +118,8 @@ public class GcpClientActions extends GcpClient {
         return instanceIdDiskNamesMap;
     }
 
-    public List<String> getSelectedInstancesDiskNames(List<String> instanceIds) {
-        Map<String, Set<String>> instanceIdDiskNamesMap = listInstancesDiskNames(instanceIds);
+    public List<String> getSelectedInstancesDiskNames(List<String> instanceIds, boolean rootVolume) {
+        Map<String, Set<String>> instanceIdDiskNamesMap = listInstancesDiskNames(instanceIds, rootVolume);
         return instanceIdDiskNamesMap
                 .values()
                 .stream()
@@ -128,7 +128,7 @@ public class GcpClientActions extends GcpClient {
     }
 
     public Map<String, Set<String>> getInstanceDiskNames(String instanceId) {
-        return listInstancesDiskNames(List.of(instanceId));
+        return listInstancesDiskNames(List.of(instanceId), false);
     }
 
     public List<String> listVolumeEncryptionKey(List<String> instanceIds) {

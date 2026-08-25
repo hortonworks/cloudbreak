@@ -133,10 +133,10 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
             given = "there is an available environment with a running datahub",
-            when = "root disk modification is done first, then additional disk resize is called first",
-            then = "attached EBS volumes on datahubs must be modified to the new type and size"
+            when = "root disk modification is done",
+            then = "root volume on datahubs must be modified to the new type and size"
     )
-    public void testDistroXVolumesModification(TestContext testContext) {
+    public void testDistroXRootVolumeModification(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
 
         createAndWaitDataHub(testContext);
@@ -154,6 +154,22 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                 })
                 .awaitForHealthyInstances()
                 .useAlternativeServiceEndpointIfConfigured()
+                .validate();
+    }
+
+    // Splitting up Root Volume modification and additional volumes modification, because in GCP additional volume modification requires start and stop of
+    // entire cluster and is a long-running process in itself. Adding that to root volume modification will create time-out errors.
+    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
+    @Description(
+            given = "there is an available environment with a running datahub",
+            when = "additional disk modification is called, followed by database disk modification",
+            then = "attached data volumes and the database volume on the datahub must be modified to the new type and size"
+    )
+    public void testDistroXAdditionalVolumesModification(TestContext testContext) {
+        CloudPlatform cloudPlatform = testContext.getCloudPlatform();
+
+        createAndWaitDataHub(testContext);
+        testContext
                 .given("dx", DistroXTestDto.class)
                 .when(distroXTestClient.updateDisks(UPDATE_SIZE, testContext.getCloudProvider().getModifyDiskVolumeType(),
                         TEST_INSTANCE_GROUP, DiskType.ADDITIONAL_DISK), RunningParameter.key("dx"))

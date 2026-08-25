@@ -30,11 +30,15 @@ public class GcpUtil {
     }
 
     public List<String> listInstancesDiskNames(List<String> instanceIds) {
-        return gcpClientActions.getSelectedInstancesDiskNames(instanceIds);
+        return gcpClientActions.getSelectedInstancesDiskNames(instanceIds, false);
     }
 
     public Map<String, Set<String>> listInstanceVolumeIds(String instanceId) {
         return gcpClientActions.getInstanceDiskNames(instanceId);
+    }
+
+    public List<String> getSelectedInstancesRootVolumeIds(List<String> instanceIds) {
+        return gcpClientActions.getSelectedInstancesDiskNames(instanceIds, true);
     }
 
     public List<String> listInstanceTypes(List<String> instanceIds) {

@@ -64,6 +64,11 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
+    public List<String> listInstancesRootVolumeIds(String clusterName, List<String> instanceIds) {
+        return gcpUtil.getSelectedInstancesRootVolumeIds(instanceIds);
+    }
+
+    @Override
     public Map<String, String> getInstanceSubnetMap(List<String> instanceIds) {
         LOGGER.warn("getInstanceSubnetMap ::: Not implemented for GCP!");
         Log.log(LOGGER, " getInstanceSubnetMap ::: Not implemented for GCP! ");
