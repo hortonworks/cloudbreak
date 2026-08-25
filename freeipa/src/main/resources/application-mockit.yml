@@ -1,0 +1,4 @@
+# Mock integration-test profile (activated with -Dspring.profiles.active=mockit).
+# Shortens the mock scale delay so the mock provider is not throttled by the
+# production-tuned wait. NEVER active in prod.
+freeipa.delayed.scale-sec: 1

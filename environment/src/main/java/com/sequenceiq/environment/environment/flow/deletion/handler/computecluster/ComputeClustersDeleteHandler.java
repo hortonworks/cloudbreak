@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -25,9 +26,10 @@ public class ComputeClustersDeleteHandler extends ExceptionCatcherEventHandler<E
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputeClustersDeleteHandler.class);
 
-    private static final int SLEEP_TIME = 10;
-
     private static final int TIMEOUT = 90;
+
+    @Value("${env.delete.compute.sleeptime_sec:10}")
+    private int sleepTimeInSec;
 
     private final ExternalizedComputeService externalizedComputeService;
 
@@ -66,7 +68,7 @@ public class ComputeClustersDeleteHandler extends ExceptionCatcherEventHandler<E
     private PollingConfig getPollingConfig() {
         return PollingConfig.builder()
                 .withStopPollingIfExceptionOccured(true)
-                .withSleepTime(SLEEP_TIME)
+                .withSleepTime(sleepTimeInSec)
                 .withSleepTimeUnit(TimeUnit.SECONDS)
                 .withTimeout(TIMEOUT)
                 .withTimeoutTimeUnit(TimeUnit.MINUTES)

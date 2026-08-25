@@ -1,0 +1,13 @@
+# Mock integration-test profile (activated with -Dspring.profiles.active=mockit).
+# Tightens environment delete-cascade and freeipa operation poll waits so the mock
+# provider - which completes work almost instantly - is not throttled by
+# production-tuned intervals. NEVER active in prod.
+env.delete.datahub.sleeptime_sec: 2
+env.delete.datalake.sleeptime_sec: 2
+env.delete.compute.sleeptime_sec: 2
+env.upgradeccm.freeipa.polling.sleeptime: 2
+env.modifyproxy.freeipa.polling.sleeptime: 2
+env.verticalscale.freeipa.polling.sleeptime: 2
+env.modifyuserdefinedtags.freeipa.polling.sleeptime: 2
+env.update.freeipa.polling.sleeptime: 2
+env.crossrealm.freeipa.polling.sleeptime: 2

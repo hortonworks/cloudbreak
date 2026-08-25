@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -24,9 +25,10 @@ public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<Envir
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataHubClusterDeletionHandler.class);
 
-    private static final int SLEEP_TIME = 10;
-
     private static final int TIMEOUT = 1;
+
+    @Value("${env.delete.datahub.sleeptime_sec:10}")
+    private int sleepTimeInSec;
 
     private final EnvironmentService environmentService;
 
@@ -71,7 +73,7 @@ public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<Envir
     private PollingConfig getPollingConfig() {
         return PollingConfig.builder()
                 .withStopPollingIfExceptionOccured(true)
-                .withSleepTime(SLEEP_TIME)
+                .withSleepTime(sleepTimeInSec)
                 .withSleepTimeUnit(TimeUnit.SECONDS)
                 .withTimeout(TIMEOUT)
                 .withTimeoutTimeUnit(TimeUnit.HOURS)

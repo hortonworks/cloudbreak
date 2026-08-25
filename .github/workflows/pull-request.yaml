@@ -199,7 +199,7 @@ jobs:
   integration-test:
     permissions: write-all
     name: Integration Test
-    runs-on: [cb-ubuntu22-large]
+    runs-on: [cb-ubuntu22-8xlarge]
     timeout-minutes: 90
     steps:
       - name: checkout

@@ -61,6 +61,13 @@ cbd_services_sanity_check() {
 
 less Profile
 ./cbd regenerate
+
+# mock-infrastructure -- the cloud backend EVERY test's operations funnel through -- was the
+# suite-wide throughput ceiling: docker stats showed it pinned flat at ~1 core (its deployer-default
+# cgroup cap) while every other service burst to many cores, serialising the whole suite. Its cap is
+# lifted via the CPUS_FOR_MOCK_INFRASTRUCTURE / MEMORY_FOR_MOCK_INFRASTRUCTURE Profile vars (appended
+# for this 8xlarge job in integration-test-steps_integration_test.sh), which cbd feeds into the compose
+# template so the container is simply born with the right cgroup -- no compose override, no live mutation.
 ./cbd start-wait traefik dev-gateway core-gateway envoy commondb vault cloudbreak environment remote-environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cadence jumpgate-interop jumpgate-admin jumpgate-proxy thunderhead-mock
 RESULT=$?
 cbd_services_sanity_check
@@ -151,7 +158,15 @@ elif [[ "$AWS" == true ]]; then
   export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
 else
   export INTEGRATIONTEST_PARALLEL=methods
-  export INTEGRATIONTEST_THREADCOUNT=16
+  # 24 parallel methods. DO NOT raise this without fixing the shared bottleneck first: raising it to
+  # 40 caused CONGESTION COLLAPSE, not speedup. Measured from testng-results.xml, the SAME 226 tests
+  # took +91% cumulative time at 40 threads vs 24 (e.g. testScaleDownAndUp 546s->1397s; 93 of 103
+  # heavy tests >15% slower), pushing the phase 25.6min->30.4min and failures 1->17 (flow poll
+  # timeouts from congestion). The shared bottleneck was mock-infrastructure, capped at 1 CPU core by
+  # the deployer default; that cap is now lifted via the CPUS_FOR_MOCK_INFRASTRUCTURE Profile var (see
+  # the start-wait section above), which dropped per-test durations enough for 24 to be stable. Threads
+  # could go higher now, but only until a shared resource starts saturating again -- verify first.
+  export INTEGRATIONTEST_THREADCOUNT=24
   export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
 fi
 
@@ -179,10 +194,36 @@ date
 echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
 echo $INTEGRATIONTEST_SUITEFILES
 
+# --- Start background per-container resource sampler (CB-33589 IT perf diagnostics) ---
+# Grafana's Kubernetes pod view only sees the `runner`/`dind` containers, NOT the docker-compose
+# services nested inside dind, so it cannot show whether cloudbreak is CPU-starved. Sample
+# `docker stats` here -- inside the job, where the nested containers ARE visible -- throughout the
+# whole test run to capture PEAK per-container CPU/memory. The teardown snapshot alone is idle.
+DOCKER_STATS_SAMPLER_PID=""
+if [[ "$AWS" != true ]] && [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]]; then
+  mkdir -p ./test-output/docker_stats
+  echo "timestamp,name,cpu_perc,mem_usage,mem_perc,net_io,block_io" > ./test-output/docker_stats/docker_stats_timeseries.csv
+  ( while true; do
+      ts="$(date -u +%FT%TZ)"
+      docker stats --no-stream --format "{{.Name}},{{.CPUPerc}},{{.MemUsage}},{{.MemPerc}},{{.NetIO}},{{.BlockIO}}" 2>/dev/null \
+        | sed "s#^#${ts},#"
+      sleep 15
+    done ) >> ./test-output/docker_stats/docker_stats_timeseries.csv 2>&1 &
+  DOCKER_STATS_SAMPLER_PID=$!
+  echo "Started docker stats sampler (pid=${DOCKER_STATS_SAMPLER_PID}, interval=15s) -> test-output/docker_stats/docker_stats_timeseries.csv"
+fi
+
 set -o pipefail ; docker compose up --remove-orphans --exit-code-from test test > test.out 2>&1
 echo -e "\n\033[1;96m--- Test output would be too long, stored in the \033[1;93mtest.out\033[1;96m file \033[0m\n"
 
 echo -e "\n\033[1;96m--- Test finished\033[0m\n"
+
+# Stop the background resource sampler started before the test run.
+if [[ -n "${DOCKER_STATS_SAMPLER_PID}" ]]; then
+  kill "${DOCKER_STATS_SAMPLER_PID}" 2>/dev/null || true
+  wait "${DOCKER_STATS_SAMPLER_PID}" 2>/dev/null || true
+  echo "Stopped docker stats sampler (pid=${DOCKER_STATS_SAMPLER_PID})"
+fi
 
 echo "--- Post-test cbreak container status ---"
 docker ps -a -f "name=cbreak" \
@@ -195,7 +236,7 @@ if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
   sudo mkdir -p ./test-output
   sudo chmod -R a+rwx ./test-output
   sudo chmod -R a+rwx ./integcb/logs
-  mkdir ./test-output/docker_stats
+  mkdir -p ./test-output/docker_stats
   docker stats --no-stream --format "{{ .NetIO }}" cbreak_commondb_1 > ./test-output/docker_stats/pg_stat_network_io.result;
 
   docker stats --no-stream --format "table {{ .Name }}\t{{ .Container }}\t{{ .MemUsage }}\t{{ .MemPerc }}\t{{ .CPUPerc }}\t{{ .NetIO }}\t{{ .BlockIO }}" > ./test-output/docker_stats/docker_stat.html

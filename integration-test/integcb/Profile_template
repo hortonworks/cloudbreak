@@ -34,10 +34,18 @@ export CLUSTERDNS_HOST=thunderhead-mock
 export DATALAKE_DR_ENDPOINT=thunderhead-mock:8981
 export MOCK_INFRASTRUCTURE_HOST=mock-infrastructure
 
+# Container resource ceilings (docker-compose `cpus:`/`memory:` limits, NOT reservations),
+# shared by every IT-family job (mock IT, FedRAMP, Schema-Compat, Real-UMS, AWS). Keep these at
+# the baseline the smaller `cb-ubuntu22-large` runners can handle. The larger `cb-ubuntu22-8xlarge`
+# mock-IT job raises these via appends in integration-test-steps_integration_test.sh, so per-runner
+# tuning stays in the per-job script, not here.
+# NOTE: the service memory var read by the compose templates is MEMORY_FOR_OTHER_SERVICES
+# (deployer default 2048M). The previously-used MEMORY_FOR_SERVICES was a no-op (unread), so its
+# "doubling" never took effect -- the correct name is set here at the status-quo value.
 export CPUS_FOR_CLOUDBREAK=4.0
 export CPUS_FOR_SERVICES=4.0
 export MEMORY_FOR_CLOUDBREAK=4096M
-export MEMORY_FOR_SERVICES=2048M
+export MEMORY_FOR_OTHER_SERVICES=2048M
 
 export LIFTIE_GRPC_HOST=mock-infrastructure
 export LIFTIE_GRPC_PORT=8987
@@ -46,10 +54,10 @@ export ENVOY_AUTH_ENABLED=true
 
 # hibernate.session.circuitbreak.* is intended to catch inefficient queries in IT time
 # We can add 400 instances at once. It can cause a false N+1 error.
-export CB_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Drest.debug=true -Dcb.limit.nodecountlimits.experimental.upgrade=800 -Dcb.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=25 -Dhibernate.session.circuitbreak.max.count=400 -Dcb.limit.primaryGatewayRecommendations.0.nodeCount=50 -Dcb.limit.primaryGatewayRecommendations.0.minCpu=32 -Dcb.limit.primaryGatewayRecommendations.0.minMemory=128 -Dcb.limit.primaryGatewayRecommendations.0.recommendedInstance.MOCK=large -Dgateway.cert.generation.enabled=true -Dgateway.cert.generation.enabled-for-mock=true -Dcb.blueprint.global.migration.enabled=true -Daltus.ums.account.cache.seconds.ttl=3"
+export CB_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Drest.debug=true -Dcb.limit.nodecountlimits.experimental.upgrade=800 -Dcb.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=25 -Dhibernate.session.circuitbreak.max.count=400 -Dcb.limit.primaryGatewayRecommendations.0.nodeCount=50 -Dcb.limit.primaryGatewayRecommendations.0.minCpu=32 -Dcb.limit.primaryGatewayRecommendations.0.minMemory=128 -Dcb.limit.primaryGatewayRecommendations.0.recommendedInstance.MOCK=large -Dgateway.cert.generation.enabled=true -Dgateway.cert.generation.enabled-for-mock=true -Dcb.blueprint.global.migration.enabled=true -Daltus.ums.account.cache.seconds.ttl=3 -Dspring.profiles.active=dev,mockit -Xlog:gc::utctime,level,tags"
 export PERISCOPE_JAVA_OPTS="-Dperiscope.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
-export FREEIPA_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Dfreeipa.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=25 -Dhibernate.session.circuitbreak.max.count=50 -Dfreeipa.delayed.scale-sec=1"
+export FREEIPA_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Dfreeipa.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=25 -Dhibernate.session.circuitbreak.max.count=50 -Dspring.profiles.active=dev,mockit -Xlog:gc::utctime,level,tags"
 export REDBEAMS_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Dredbeams.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
-export DATALAKE_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Ddatalake.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
-export ENVIRONMENT_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Denvironment.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=200 -Denvironment.tunnel.default=CLUSTER_PROXY"
+export DATALAKE_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Ddatalake.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25 -Dspring.profiles.active=dev,mockit -Xlog:gc::utctime,level,tags"
+export ENVIRONMENT_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Denvironment.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=200 -Denvironment.tunnel.default=CLUSTER_PROXY -Dspring.profiles.active=dev,mockit -Xlog:gc::utctime,level,tags"
 export REMOTE_ENVIRONMENT_JAVA_OPTS="-Denvironment-remote.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=55 -Denvironment.tunnel.default=CLUSTER_PROXY"

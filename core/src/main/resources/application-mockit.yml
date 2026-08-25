@@ -1,0 +1,5 @@
+# Mock integration-test profile (activated with -Dspring.profiles.active=mockit).
+# Tightens create/poll intervals so the mock provider - which completes work almost
+# instantly - is not throttled by production-tuned poll waits. NEVER active in prod.
+cb.cm.poll.interval.ms: 1000
+cb.freeipa.binduser.poll.interval: 500

@@ -1,0 +1,25 @@
+# Mock integration-test profile (activated with -Dspring.profiles.active=mockit).
+# Tightens SDX stack create/operation/delete poll waits so the mock provider - which
+# completes work almost instantly - is not throttled by production-tuned intervals.
+# NEVER active in prod.
+sdx.stack.provision.sleeptime_sec: 2
+sdx.stack.deletion.sleeptime_sec: 2
+sdx.stack.stop.sleeptime_sec: 2
+sdx.stack.start.sleeptime_sec: 2
+sdx.stack.rotate.sleeptime_sec: 2
+sdx.rotate.certificate.sleeptime_sec: 2
+sdx.stack.cert.renewal.sleeptime_sec: 2
+sdx.stack.cert.rotation.sleeptime_sec: 2
+sdx.stack.backup.status.sleeptime_sec: 2
+sdx.stack.restore.status.sleeptime_sec: 2
+sdx.stack.restore.validation.status.sleeptime_sec: 2
+sdx.stack.upgrade.sleeptime_sec: 2
+sdx.stack.change.image.sleeptime_sec: 2
+sdx.vm.replace.sleeptime_sec: 2
+sdx.upgrade.ccm.sleeptime_sec: 2
+sdx.stack.verticalscale.sleeptime_sec: 2
+sdx.datalake.scale.sleeptime-sec: 2
+sdx.db.operation.sleeptime_sec: 2
+sdx.environment.sleeptime_sec: 2
+sdx.datahub.refresh.sleeptime_sec: 2
+dl.dh.polling.sleep.time: 2

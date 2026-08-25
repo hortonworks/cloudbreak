@@ -40,18 +40,18 @@ public class GrainAppendSaltResponse implements SaltResponse {
             String encoded = args.get(1);
             String value = URLDecoder.decode(encoded, Charset.defaultCharset());
             for (String target : targets) {
-                if (!grains.containsKey(target)) {
-                    Multimap<String, String> grainsForTarget = ArrayListMultimap.create();
-                    grainsForTarget.put(key, value);
-                    grains.put(target, grainsForTarget);
-                } else {
-                    Multimap<String, String> grainsForTarget = grains.get(target);
-                    grainsForTarget.put(key, value);
-                }
+                appendGrainValueIfAbsent(grains, target, key, value);
                 hostMap.put(target, objectMapper.valueToTree(grains.get(target).values()));
             }
         }
         return createGrainsModificationResponse(hostMap);
+    }
+
+    private void appendGrainValueIfAbsent(Map<String, Multimap<String, String>> grains, String target, String key, String value) {
+        Multimap<String, String> grainsForTarget = grains.computeIfAbsent(target, t -> ArrayListMultimap.create());
+        if (!grainsForTarget.containsEntry(key, value)) {
+            grainsForTarget.put(key, value);
+        }
     }
 
     private Object createGrainsModificationResponse(Map<String, JsonNode> hostMap) {

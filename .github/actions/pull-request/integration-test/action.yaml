@@ -4,6 +4,22 @@ description: 'Run integration tests'
 runs:
   using: "composite"
   steps:
+    - name: runner_capacity_diagnostics
+      shell: bash
+      run: |-
+        echo "===== RUNNER CAPACITY ====="
+        echo "visible CPUs (nproc): $(nproc)"
+        echo "/proc/cpuinfo processors: $(grep -c ^processor /proc/cpuinfo)"
+        echo "--- cgroup CPU quota (quota/period = allotted vCPU; 'max' = unlimited) ---"
+        cat /sys/fs/cgroup/cpu.max 2>/dev/null \
+          || { echo "cfs_quota_us=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us 2>/dev/null) cfs_period_us=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us 2>/dev/null)"; }
+        echo "--- cgroup memory limit ---"
+        cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null
+        echo "--- host memory ---"
+        free -h
+        echo "--- load average ---"
+        cat /proc/loadavg
+        echo "=========================="
     - name: integration_test
       shell: bash
       run: |-
@@ -14,7 +30,6 @@ runs:
         export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
         export INTEGRATIONTEST_CDL_PORT=8982
         export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock
-        export INTEGRATIONTEST_THREADCOUNT=4
         export USE_FEDRAMP_CONTAINERS=false
 
         make integration-test-steps_integration_test

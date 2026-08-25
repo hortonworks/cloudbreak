@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.HostsResourceApi;
@@ -64,8 +65,6 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerPollingServiceProvider.class);
 
-    private static final int POLL_INTERVAL = 5000;
-
     private static final int INFINITE_ATTEMPT = -1;
 
     private static final long POLL_FOR_5_MINUTES = TimeUnit.MINUTES.toSeconds(5);
@@ -77,6 +76,9 @@ public class ClouderaManagerPollingServiceProvider {
     private static final int DEFAULT_BACKOFF_NODECOUNT_LIMIT = 50;
 
     private static final int BACKOFF_NODE_COUNT_MULTIPLIER = 25;
+
+    @Value("${cb.cm.poll.interval.ms:5000}")
+    private int pollIntervalMs;
 
     @Inject
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
@@ -432,12 +434,12 @@ public class ClouderaManagerPollingServiceProvider {
             ApiHostList apiHostList = hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name());
             int instanceCount = apiHostList.getItems().size();
             if (instanceCount < DEFAULT_BACKOFF_NODECOUNT_LIMIT) {
-                return POLL_INTERVAL;
+                return pollIntervalMs;
             }
-            return POLL_INTERVAL + (instanceCount * BACKOFF_NODE_COUNT_MULTIPLIER);
+            return pollIntervalMs + (instanceCount * BACKOFF_NODE_COUNT_MULTIPLIER);
         } catch (ApiException e) {
             LOGGER.warn("Could not fetch hosts from Cloudera Manager, go with default poll interval", e);
         }
-        return POLL_INTERVAL;
+        return pollIntervalMs;
     }
 }
