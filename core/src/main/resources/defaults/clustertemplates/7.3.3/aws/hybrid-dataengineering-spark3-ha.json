@@ -21,6 +21,7 @@
         "template": {
           "aws": {},
           "instanceType": "r5d.4xlarge",
+          "fallbackInstanceTypes": ["r6id.4xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -41,6 +42,7 @@
         "template": {
           "aws": {},
           "instanceType": "m5.4xlarge",
+          "fallbackInstanceTypes": ["m6i.4xlarge", "m7i.4xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -65,6 +67,7 @@
             }
           },
           "instanceType": "r5d.4xlarge",
+          "fallbackInstanceTypes": ["r6id.4xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -90,6 +93,7 @@
             }
           },
           "instanceType": "m5.4xlarge",
+          "fallbackInstanceTypes": ["m6i.4xlarge", "m7i.4xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -115,6 +119,7 @@
             }
           },
           "instanceType": "m5.4xlarge",
+          "fallbackInstanceTypes": ["m6i.4xlarge", "m7i.4xlarge"],
           "rootVolume": {
             "size": 150
           },

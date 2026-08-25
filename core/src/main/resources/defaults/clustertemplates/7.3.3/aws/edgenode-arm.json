@@ -27,7 +27,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "type": "GATEWAY"
       }

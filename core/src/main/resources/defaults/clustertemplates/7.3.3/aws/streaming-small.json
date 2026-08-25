@@ -16,6 +16,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "r5.2xlarge",
+          "fallbackInstanceTypes": ["r6i.2xlarge", "r7i.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -33,6 +34,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -50,6 +52,7 @@
         "name": "broker",
         "template": {
           "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -78,7 +81,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "fallbackInstanceTypes": ["m6i.2xlarge", "m7i.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",

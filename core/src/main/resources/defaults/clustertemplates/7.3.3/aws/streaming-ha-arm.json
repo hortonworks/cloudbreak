@@ -29,7 +29,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 2,
         "type": "GATEWAY",
@@ -40,6 +41,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -57,6 +59,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -76,6 +79,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -94,6 +98,7 @@
         "name": "broker",
         "template": {
           "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -122,7 +127,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -143,7 +149,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -164,7 +171,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",

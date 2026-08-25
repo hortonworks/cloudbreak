@@ -25,7 +25,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -46,7 +47,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -67,7 +69,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -88,7 +91,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge"
+          "instanceType": "r7gd.2xlarge",
+          "fallbackInstanceTypes": ["r8gd.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",
