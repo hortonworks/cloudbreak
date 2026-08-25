@@ -1,5 +1,6 @@
 package com.sequenceiq.maintenance.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,15 +11,37 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.maintenance.domain.MaintenanceTaskKind;
 import com.sequenceiq.maintenance.domain.MaintenanceTaskStatus;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowTask;
 
 @Transactional(TxType.REQUIRED)
 public interface MaintenanceWindowTaskRepository extends JpaRepository<MaintenanceWindowTask, Long> {
 
+    Optional<MaintenanceWindowTask> findByIdAndAccountId(Long id, String accountId);
+
+    List<MaintenanceWindowTask> findByAccountIdAndIdIn(String accountId, Collection<Long> ids);
+
     List<MaintenanceWindowTask> findByStatusOrderByPriorityDescCreatedAtAsc(MaintenanceTaskStatus status);
 
-    List<MaintenanceWindowTask> findByResourceCrn(String resourceCrn);
+    @Query("""
+            SELECT t FROM MaintenanceWindowTask t
+            WHERE t.accountId = :accountId
+                AND (:resourceCrn IS NULL OR t.resourceCrn = :resourceCrn)
+                AND (:environmentCrn IS NULL OR t.environmentCrn = :environmentCrn)
+                AND (:taskType IS NULL OR t.taskType = :taskType)
+                AND (:workItemId IS NULL OR t.workItemId = :workItemId)
+                AND (:taskKind IS NULL OR t.taskKind = :taskKind)
+                AND (:status IS NULL OR t.status = :status)
+            """)
+    List<MaintenanceWindowTask> findByAccountIdAndFilters(
+            @Param("accountId") String accountId,
+            @Param("resourceCrn") String resourceCrn,
+            @Param("environmentCrn") String environmentCrn,
+            @Param("taskType") String taskType,
+            @Param("workItemId") String workItemId,
+            @Param("taskKind") MaintenanceTaskKind taskKind,
+            @Param("status") MaintenanceTaskStatus status);
 
     @Query("""
             SELECT t FROM MaintenanceWindowTask t
@@ -33,7 +56,4 @@ public interface MaintenanceWindowTaskRepository extends JpaRepository<Maintenan
             @Param("resourceCrn") String resourceCrn,
             @Param("taskType") String taskType,
             @Param("workItemId") String workItemId);
-
-    List<MaintenanceWindowTask> findAllByAccountIdAndResourceCrnAndTaskTypeAndWorkItemIdAndStatus(
-            String accountId, String resourceCrn, String taskType, String workItemId, MaintenanceTaskStatus status);
 }

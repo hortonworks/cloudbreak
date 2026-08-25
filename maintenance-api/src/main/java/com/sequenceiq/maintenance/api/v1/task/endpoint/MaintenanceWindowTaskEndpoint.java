@@ -82,7 +82,7 @@ public interface MaintenanceWindowTaskEndpoint {
             @ApiResponse(responseCode = "200", description = "Task updated", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
             @ApiResponse(responseCode = "404", description = "Task not found"),
-            @ApiResponse(responseCode = "409", description = "Version mismatch or concurrent modification")
+            @ApiResponse(responseCode = "409", description = "Concurrent modification")
     })
     MaintenanceWindowTaskResponse update(
             @QueryParam("accountId") @NotEmpty String accountId,

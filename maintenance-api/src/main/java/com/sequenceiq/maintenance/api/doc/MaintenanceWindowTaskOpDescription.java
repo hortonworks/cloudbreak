@@ -24,8 +24,7 @@ public final class MaintenanceWindowTaskOpDescription {
 
     public static final String UPDATE = "Update a maintenance window task";
 
-    public static final String UPDATE_NOTES = NOTES + " Partial update: only non-null fields in the request body are applied. "
-            + "version is required and must match the current task version.";
+    public static final String UPDATE_NOTES = NOTES + " Partial update: only non-null fields in the request body are applied.";
 
     public static final String DELETE = "Delete a maintenance window task";
 

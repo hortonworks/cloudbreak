@@ -121,6 +121,7 @@ dependencies {
   }
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')
+  testImplementation group: 'com.h2database', name: 'h2'
 }
 
 bootRun {

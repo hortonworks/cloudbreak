@@ -22,6 +22,14 @@ public final class MaintenanceEnumValues {
         return value == null ? null : MaintenanceRecurrenceKind.valueOf(value.toUpperCase(Locale.ROOT));
     }
 
+    public static MaintenanceTaskKind toTaskKind(String value) {
+        return value == null ? null : MaintenanceTaskKind.valueOf(value.toUpperCase(Locale.ROOT));
+    }
+
+    public static MaintenanceTaskStatus toTaskStatus(String value) {
+        return value == null ? null : MaintenanceTaskStatus.valueOf(value.toUpperCase(Locale.ROOT));
+    }
+
     public static DayOfWeek toDayOfWeek(String value) {
         return value == null ? null : DayOfWeek.valueOf(value.toUpperCase(Locale.ROOT));
     }

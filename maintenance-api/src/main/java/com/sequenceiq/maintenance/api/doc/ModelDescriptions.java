@@ -221,8 +221,6 @@ public final class ModelDescriptions {
 
         public static final String REQUEST = "Partial update of a maintenance window task";
 
-        public static final String VERSION = TaskResponse.VERSION;
-
         public static final String STATUS = "Task status; set DISABLED to remove from the dispatcher set without deleting";
 
         public static final String PRIORITY = TaskRequest.PRIORITY;

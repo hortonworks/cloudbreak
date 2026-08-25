@@ -2,8 +2,9 @@ package com.sequenceiq.maintenance.controller;
 
 import static com.sequenceiq.maintenance.domain.MaintenanceEnumValues.toScopeType;
 
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 import org.springframework.stereotype.Controller;
 
@@ -27,6 +28,9 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     private final MaintenanceWindowScheduleService scheduleService;
 
     private final MaintenanceWindowSkipService skipService;
+
+    @Context
+    private UriInfo uriInfo;
 
     public MaintenanceWindowScheduleController(MaintenanceWindowScheduleService scheduleService, MaintenanceWindowSkipService skipService) {
         this.scheduleService = scheduleService;
@@ -56,8 +60,12 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
                 ThreadBasedUserCrnProvider.getAccountId(),
                 ThreadBasedUserCrnProvider.getUserCrn());
         return Response.status(Response.Status.CREATED)
-                .location(UriBuilder.fromPath("scope/{scopeType}/scopeId/{scopeId}")
-                        .build(response.getScopeType(), response.getScopeId()))
+                .location(uriInfo.getAbsolutePathBuilder()
+                        .path("scope")
+                        .path(response.getScopeType())
+                        .path("scopeId")
+                        .path(response.getScopeId())
+                        .build())
                 .entity(response)
                 .build();
     }

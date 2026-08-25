@@ -5,7 +5,6 @@ import java.util.Map;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.util.OneOfEnum;
 import com.sequenceiq.maintenance.api.doc.ModelDescriptions;
@@ -15,10 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = ModelDescriptions.TaskUpdateRequest.REQUEST)
 public class UpdateMaintenanceWindowTaskRequest {
-
-    @NotNull
-    @Schema(description = ModelDescriptions.TaskUpdateRequest.VERSION)
-    private Integer version;
 
     @OneOfEnum(enumClass = MaintenanceTaskStatus.class, message = "Value must be one of the followings %s", fieldName = "status")
     @Schema(description = ModelDescriptions.TaskUpdateRequest.STATUS)
@@ -50,14 +45,6 @@ public class UpdateMaintenanceWindowTaskRequest {
     private Map<String, Object> executionRef;
 
     public UpdateMaintenanceWindowTaskRequest() {
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
     }
 
     public String getStatus() {
