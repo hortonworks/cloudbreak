@@ -1,1 +1,13 @@
 # Deliberate, reviewed breaking changes for the datalake API — one full oasdiff message per line.
+in API POST /internal/sdx/{name} removed the enum value 'ENTERPRISE_WITHOUT_HBASE' of the request property 'clusterShape'
+in API POST /internal/sdx/{name} removed the enum value 'LIGHT_DUTY_WITHOUT_HBASE' of the request property 'clusterShape'
+in API GET /sdx/default_template removed the enum value 'ENTERPRISE_WITHOUT_HBASE' from the 'query' request parameter 'clusterShape'
+in API GET /sdx/default_template removed the enum value 'LIGHT_DUTY_WITHOUT_HBASE' from the 'query' request parameter 'clusterShape'
+in API GET /sdx/instance_group_names removed the enum value 'ENTERPRISE_WITHOUT_HBASE' from the 'query' request parameter 'clusterShape'
+in API GET /sdx/instance_group_names removed the enum value 'LIGHT_DUTY_WITHOUT_HBASE' from the 'query' request parameter 'clusterShape'
+in API GET /sdx/recommendation removed the enum value 'ENTERPRISE_WITHOUT_HBASE' from the 'query' request parameter 'clusterShape'
+in API GET /sdx/recommendation removed the enum value 'LIGHT_DUTY_WITHOUT_HBASE' from the 'query' request parameter 'clusterShape'
+in API POST /sdx/{name} removed the enum value 'ENTERPRISE_WITHOUT_HBASE' of the request property 'clusterShape'
+in API POST /sdx/{name} removed the enum value 'LIGHT_DUTY_WITHOUT_HBASE' of the request property 'clusterShape'
+in API POST /sdx/{name}/resize removed the enum value 'ENTERPRISE_WITHOUT_HBASE' of the request property 'clusterShape'
+in API POST /sdx/{name}/resize removed the enum value 'LIGHT_DUTY_WITHOUT_HBASE' of the request property 'clusterShape'
