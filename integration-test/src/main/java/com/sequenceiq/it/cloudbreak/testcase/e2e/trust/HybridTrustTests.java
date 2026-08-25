@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RemoteEnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -124,12 +125,12 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .awaitForHealthyInstances()
                 .then(hybridTrustAssertions.validateTrustOnDistroX())
                 .given(FreeIpaTrustCommandsDto.class)
-                .when(freeIpaTestClient.trustCleanupCommands())
+                .when(freeIpaTestClient.trustCleanupCommands(), RunningParameter.force())
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.delete())
+                .when(environmentTestClient.delete(), RunningParameter.force())
                 .await(EnvironmentStatus.ARCHIVED)
                 .given(FreeIpaTrustCommandsDto.class)
-                .then(cleanUpActiveDirectory(false))
+                .then(cleanUpActiveDirectory(false), RunningParameter.force())
                 .validate();
     }
 
