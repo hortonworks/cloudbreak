@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.maintenance.api.MaintenanceApi;
 import com.sequenceiq.maintenance.controller.MaintenanceWindowScheduleController;
+import com.sequenceiq.maintenance.controller.MaintenanceWindowTaskInternalController;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -29,6 +30,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(
             MaintenanceWindowScheduleController.class,
+            MaintenanceWindowTaskInternalController.class,
             AuthorizationInfoController.class,
             AuthorizationUtilEndpoint.class,
             OpenApiController.class
@@ -58,7 +60,7 @@ public class EndpointConfig extends ResourceConfig {
     private void registerSwagger() {
         OpenAPI openAPI = openApiProvider.getOpenAPI(
                 "Maintenance API",
-                "API for maintenance window schedules and skip rules",
+                "API for maintenance window schedules, task registration, and skip rules",
                 applicationVersion,
                 "https://localhost" + contextPath + MaintenanceApi.API_ROOT_CONTEXT
         );

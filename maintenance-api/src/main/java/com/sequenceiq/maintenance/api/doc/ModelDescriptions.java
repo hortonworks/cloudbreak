@@ -182,4 +182,164 @@ public final class ModelDescriptions {
         private Occurrence() {
         }
     }
+
+    public static final class TaskRequest {
+
+        public static final String REQUEST = "Request to register a maintenance window task for gated dispatch";
+
+        public static final String RESOURCE_CRN = "Target resource CRN (Data Hub, Data Lake, or FreeIPA)";
+
+        public static final String ENVIRONMENT_CRN = "Environment CRN for schedule scope resolution";
+
+        public static final String TASK_TYPE = "Submitter-defined task type (for example secret-rotation)";
+
+        public static final String WORK_ITEM_ID = "Submitter-defined work item id (for example secret id or runtime version)";
+
+        public static final String TASK_KIND = "EVERY_WINDOW runs on each matching window; ONE_SHOT completes after first dispatch";
+
+        public static final String SUBMITTER_SERVICE = "Calling service name";
+
+        public static final String TASK_PAYLOAD = "Optional opaque payload passed to the executor";
+
+        public static final String EXECUTION_REF = "Executor reference (HTTP callback, Quartz job descriptor, etc.)";
+
+        public static final String PRIORITY = "Dispatcher priority (higher runs first; default 100)";
+
+        public static final String DEPENDS_ON = "Optional ACTIVE task that must complete for the same window occurrence before dispatch";
+
+        public static final String RETRY_WITHIN_OCCURRENCE = "Whether failed runs may retry within the same window";
+
+        public static final String MAX_ATTEMPTS_PER_OCCURRENCE = "Maximum attempts per window occurrence (platform-capped)";
+
+        public static final String RETRY_COOLDOWN_MINUTES = "Minimum minutes between retries within the same occurrence";
+
+        private TaskRequest() {
+        }
+    }
+
+    public static final class TaskUpdateRequest {
+
+        public static final String REQUEST = "Partial update of a maintenance window task";
+
+        public static final String VERSION = TaskResponse.VERSION;
+
+        public static final String STATUS = "Task status; set DISABLED to remove from the dispatcher set without deleting";
+
+        public static final String PRIORITY = TaskRequest.PRIORITY;
+
+        public static final String DEPENDS_ON = TaskRequest.DEPENDS_ON;
+
+        public static final String RETRY_WITHIN_OCCURRENCE = TaskRequest.RETRY_WITHIN_OCCURRENCE;
+
+        public static final String MAX_ATTEMPTS_PER_OCCURRENCE = TaskRequest.MAX_ATTEMPTS_PER_OCCURRENCE;
+
+        public static final String RETRY_COOLDOWN_MINUTES = TaskRequest.RETRY_COOLDOWN_MINUTES;
+
+        public static final String TASK_PAYLOAD = TaskRequest.TASK_PAYLOAD;
+
+        public static final String EXECUTION_REF = TaskRequest.EXECUTION_REF;
+
+        private TaskUpdateRequest() {
+        }
+    }
+
+    public static final class TaskListParams {
+
+        public static final String PARAMS = "Optional filters for listing maintenance window tasks";
+
+        public static final String RESOURCE_CRN = "Filter by resource CRN";
+
+        public static final String ENVIRONMENT_CRN = "Filter by environment CRN";
+
+        public static final String TASK_TYPE = "Filter by task type; requires resourceCrn when set";
+
+        public static final String WORK_ITEM_ID = "Filter by work item id; requires resourceCrn and taskType when set";
+
+        public static final String TASK_KIND = "Filter by task kind (EVERY_WINDOW or ONE_SHOT)";
+
+        public static final String STATUS = "Filter by task status";
+
+        private TaskListParams() {
+        }
+    }
+
+    public static final class TaskResponse {
+
+        public static final String RESPONSE = "Registered maintenance window task";
+
+        public static final String ID = "Task id";
+
+        public static final String ACCOUNT_ID = "Account id";
+
+        public static final String RESOURCE_CRN = TaskRequest.RESOURCE_CRN;
+
+        public static final String ENVIRONMENT_CRN = TaskRequest.ENVIRONMENT_CRN;
+
+        public static final String TASK_TYPE = TaskRequest.TASK_TYPE;
+
+        public static final String WORK_ITEM_ID = TaskRequest.WORK_ITEM_ID;
+
+        public static final String TASK_KIND = TaskRequest.TASK_KIND;
+
+        public static final String STATUS = "Task status";
+
+        public static final String SUBMITTER_SERVICE = TaskRequest.SUBMITTER_SERVICE;
+
+        public static final String TASK_PAYLOAD = TaskRequest.TASK_PAYLOAD;
+
+        public static final String EXECUTION_REF = TaskRequest.EXECUTION_REF;
+
+        public static final String PRIORITY = TaskRequest.PRIORITY;
+
+        public static final String DEPENDS_ON = TaskRequest.DEPENDS_ON;
+
+        public static final String RETRY_WITHIN_OCCURRENCE = TaskRequest.RETRY_WITHIN_OCCURRENCE;
+
+        public static final String MAX_ATTEMPTS_PER_OCCURRENCE = TaskRequest.MAX_ATTEMPTS_PER_OCCURRENCE;
+
+        public static final String RETRY_COOLDOWN_MINUTES = TaskRequest.RETRY_COOLDOWN_MINUTES;
+
+        public static final String CREATED_AT = EPOCH_MS;
+
+        public static final String UPDATED_AT = EPOCH_MS;
+
+        public static final String CREATED_BY = "Creator identity";
+
+        public static final String UPDATED_BY = "Last updater identity";
+
+        public static final String DISABLED_AT = "When the task was disabled (" + EPOCH_MS + ")";
+
+        public static final String COMPLETED_AT = "When the task completed (" + EPOCH_MS + ")";
+
+        public static final String VERSION = "Optimistic lock version";
+
+        private TaskResponse() {
+        }
+    }
+
+    public static final class TaskListResponse {
+
+        public static final String RESPONSE = "List of maintenance window tasks";
+
+        public static final String TASKS = "Matching tasks for the authenticated account";
+
+        private TaskListResponse() {
+        }
+    }
+
+    public static final class TaskDependency {
+
+        public static final String REQUEST = "Reference to another registered task by its natural key";
+
+        public static final String RESPONSE = "Registered task referenced as a dependency";
+
+        public static final String RESOURCE_CRN = "Dependency task resource CRN";
+
+        public static final String TASK_TYPE = "Dependency task type";
+
+        public static final String WORK_ITEM_ID = "Dependency work item id";
+
+        private TaskDependency() {
+        }
+    }
 }
