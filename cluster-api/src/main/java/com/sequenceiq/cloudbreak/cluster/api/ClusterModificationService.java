@@ -83,6 +83,8 @@ public interface ClusterModificationService {
 
     boolean isServicePresent(String clusterName, String serviceType);
 
+    boolean isServicePresentOrFail(String clusterName, String serviceType) throws CloudbreakException;
+
     default void stopComponents(Map<String, String> components, String hostname) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
