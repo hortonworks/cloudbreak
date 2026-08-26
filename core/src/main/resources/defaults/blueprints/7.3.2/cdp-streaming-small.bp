@@ -47,6 +47,37 @@
             "base": true
           },
           {
+            "refName": "kafka-KAFKA_BROKER-broker",
+            "roleType": "KAFKA_BROKER",
+            "base": false,
+            "configs": [
+              {
+                "name": "ssl_enabled",
+                "value": "true"
+              },
+              {
+                "name": "ssl_server_keystore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_keypassword",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              }
+            ]
+          },
+          {
             "refName": "kafka-KAFKA_CONNECT-BASE",
             "roleType": "KAFKA_CONNECT",
             "base": true
@@ -144,7 +175,7 @@
         "roleConfigGroupsRefNames": [
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
           "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE",
+          "kafka-KAFKA_BROKER-broker",
           "kafka-KAFKA_CONNECT-BASE"
         ]
       },
