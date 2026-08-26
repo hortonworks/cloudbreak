@@ -185,18 +185,54 @@ fi
 
 {%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 8 %}
 echo "Verifying FreeIPA replication health after replica install"
+
+# True when the peer's replication agreement to THIS replica is stuck in the
+# terminal "startReplication decoding error" state. In FIPS mode the domain-suffix
+# agreement can be poisoned during ipa-replica-install: the peer's first incremental
+# races this replica's dirsrv NSS/FIPS init, so this replica answers the
+# startReplication extended op with an empty bvdata field. The peer's decoder fails
+# and marks the agreement "requires administrator action" (nsds5replicaLastUpdateStatus
+# code (4), "Replication is aborting" / "decoding error"). That state is terminal --
+# neither re-verification nor an ipactl restart clears it; only a re-initialization does.
+# Queried on the peer over GSSAPI as admin (same read path the health gate uses); the
+# nsDS5ReplicaHost filter scopes the match to the peer->this-replica agreement, and the
+# code-(4) grep ignores the healthy o=ipaca agreement (which is created later, in
+# --setup-ca after TLS is up, and is not affected).
+peer_agmt_has_decoding_error() {
+  echo "$FPW" | kinit "$ADMIN_USER" >/dev/null 2>&1 || return 1
+  ldapsearch -o ldif-wrap=no -LLL -Y GSSAPI -Q -H "ldap://$FREEIPA_TO_REPLICATE" \
+    -b "cn=mapping tree,cn=config" \
+    "(&(objectclass=nsds5replicationagreement)(nsDS5ReplicaHost=$FQDN))" \
+    nsds5replicaLastUpdateStatus 2>/dev/null \
+  | grep -qiE 'nsds5replicaLastUpdateStatus:.*(error \(4\)|replication is aborting|decoding error)'
+}
+
 if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
   if ! /opt/salt/scripts/freeipa_verify_replica_health.sh; then
-    echo "Replication health gate failed; breaking stale dirsrv ccache latch and restarting the IPA stack"
-    # A plain 'ipactl restart' re-reads the poisoned external ccache. Stop the
-    # whole stack, delete the stale ccache while dirsrv is down (forcing it to
-    # rebuild from its keytab), then start everything back in dependency order
-    # so the KDC/CA come up clean before dirsrv attempts GSSAPI replication.
-    ipactl stop || true
-    rm -f /tmp/krb5cc_389
-    ipactl start || true
+    if peer_agmt_has_decoding_error; then
+      # Terminal startReplication decoding error (FIPS): re-initialize this replica's
+      # domain suffix from the peer. By now this replica's dirsrv NSS/TLS is fully up,
+      # so the re-init's startReplication handshake succeeds and resets the agreement
+      # out of "requires administrator action". ipa-replica-manage re-initialize is
+      # synchronous (blocks until the total re-init completes) and re-inits only the
+      # domain suffix -- exactly the poisoned agreement; -p uses the Directory Manager
+      # password (freeipa:password). Non-fatal on its own: the final health gate below
+      # is the single authority on whether the replica may proceed.
+      echo "Replication health gate failed with a startReplication decoding error on the peer->${FQDN} agreement; re-initializing the domain suffix from $FREEIPA_TO_REPLICATE"
+      ipa-replica-manage re-initialize --from "$FREEIPA_TO_REPLICATE" -p "$FPW" \
+        || echo "ipa-replica-manage re-initialize returned non-zero; re-verifying replication health before deciding"
+    else
+      echo "Replication health gate failed; breaking stale dirsrv ccache latch and restarting the IPA stack"
+      # A plain 'ipactl restart' re-reads the poisoned external ccache. Stop the
+      # whole stack, delete the stale ccache while dirsrv is down (forcing it to
+      # rebuild from its keytab), then start everything back in dependency order
+      # so the KDC/CA come up clean before dirsrv attempts GSSAPI replication.
+      ipactl stop || true
+      rm -f /tmp/krb5cc_389
+      ipactl start || true
+    fi
     if ! /opt/salt/scripts/freeipa_verify_replica_health.sh; then
-      echo "Replication still unhealthy after ccache latch break and ipactl restart — replica install cannot proceed"
+      echo "Replication still unhealthy after recovery — replica install cannot proceed"
       exit 1
     fi
   fi
