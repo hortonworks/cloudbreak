@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractFlowIntegrationTest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -76,18 +77,16 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
-import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
-class UpdateUserDataFlowIntegrationTest {
+class UpdateUserDataFlowIntegrationTest extends AbstractFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -98,12 +97,6 @@ class UpdateUserDataFlowIntegrationTest {
     private static final int ALL_CALLED_ONCE = 3;
 
     private static final String USER_DATA = "IS_CCM_V2_JUMPGATE_ENABLED=false";
-
-    @Inject
-    private FlowRegister flowRegister;
-
-    @Inject
-    private FlowLogRepository flowLogRepository;
 
     @Inject
     private ReactorNotifier reactorNotifier;
@@ -252,7 +245,8 @@ class UpdateUserDataFlowIntegrationTest {
         verify(resourcesApi, times(expected[2])).updateUserData(any(), any(), any(), any());
     }
 
-    private void flowFinishedSuccessfully() {
+    @Override
+    protected void flowFinishedSuccessfully() {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
         assertTrue(flowLog.getAllValues().stream().anyMatch(f -> f.getFinalized()), "flow has not finalized");
@@ -269,17 +263,6 @@ class UpdateUserDataFlowIntegrationTest {
                                 .withOldTunnel(Tunnel.CCM)
                                 .withModifyProxyConfig(true)
                                 .build()));
-    }
-
-    private void letItFlow(FlowIdentifier flowIdentifier) {
-        int i = 0;
-        do {
-            i++;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 10);
     }
 
     @Profile("integration-test")

@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractFlowIntegrationTest;
 import com.sequenceiq.cloudbreak.core.flow2.CloudbreakFlowInformation;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
@@ -87,7 +88,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
-import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
@@ -104,7 +104,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
-class UpdateTrustedRealmFlowIntegrationTest {
+class UpdateTrustedRealmFlowIntegrationTest extends AbstractFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -120,12 +120,6 @@ class UpdateTrustedRealmFlowIntegrationTest {
 
     @Inject
     private ReactorNotifier reactorNotifier;
-
-    @Inject
-    private FlowRegister flowRegister;
-
-    @Inject
-    private FlowLogRepository flowLogRepository;
 
     @MockBean(reset = MockReset.NONE)
     private StackService stackService;
@@ -370,18 +364,6 @@ class UpdateTrustedRealmFlowIntegrationTest {
                 USER_CRN,
                 () -> reactorNotifier.notify(STACK_ID, selector,
                         new UpdateTrustedRealmTriggerEvent(selector, STACK_ID, STACK_CRN, ENV_CRN, REALM, remove, null)));
-    }
-
-    private void letItFlow(FlowIdentifier flowIdentifier) {
-        int i = 0;
-        do {
-            i++;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 10);
     }
 
     private Stack mockStack() {

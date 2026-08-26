@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.TargetMajorVersionToUpgradeTargetVersionConverter;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractFlowIntegrationTest;
 import com.sequenceiq.cloudbreak.core.flow2.CloudbreakFlowInformation;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
@@ -83,7 +84,6 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
-import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -98,7 +98,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
-class UpgradeRdsFlowIntegrationTest {
+class UpgradeRdsFlowIntegrationTest extends AbstractFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -110,9 +110,6 @@ class UpgradeRdsFlowIntegrationTest {
 
     @Inject
     private ReactorNotifier reactorNotifier;
-
-    @Inject
-    private FlowRegister flowRegister;
 
     @MockBean
     private StackDtoService stackDtoService;
@@ -199,17 +196,6 @@ class UpgradeRdsFlowIntegrationTest {
                 USER_CRN,
                 () -> reactorNotifier.notify(STACK_ID, selector,
                         new UpgradeRdsTriggerRequest(selector, STACK_ID, TARGET_MAJOR_VERSION, null, null)));
-    }
-
-    private void letItFlow(FlowIdentifier flowIdentifier) {
-        int i = 0;
-        do {
-            i++;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 20);
     }
 
     @Profile("integration-test")

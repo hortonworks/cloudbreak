@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -23,7 +22,6 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -38,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractFlowIntegrationTest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.config.DistroXDiskUpdateFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.handler.DistroXDiskUpdateHandler;
@@ -62,11 +61,8 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListenerAdapter;
-import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
-import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -80,7 +76,7 @@ import io.micrometer.core.instrument.MeterRegistry;
  */
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
-class DistroXDiskUpdateFlowIntegrationTest {
+class DistroXDiskUpdateFlowIntegrationTest extends AbstractFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -99,12 +95,6 @@ class DistroXDiskUpdateFlowIntegrationTest {
     private static final String CURRENT_TYPE = "gp2";
 
     private static final String REQUESTED_TYPE = "gp3";
-
-    @Inject
-    private FlowRegister flowRegister;
-
-    @Inject
-    private FlowLogRepository flowLogRepository;
 
     @Inject
     private ReactorNotifier reactorNotifier;
@@ -209,24 +199,6 @@ class DistroXDiskUpdateFlowIntegrationTest {
                 .withAccepted(new Promise<>())
                 .build();
         return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> reactorNotifier.notify(STACK_ID, selector, triggerEvent));
-    }
-
-    private void letItFlow(FlowIdentifier flowIdentifier) {
-        int i = 0;
-        do {
-            i++;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 50);
-    }
-
-    private void flowFinishedSuccessfully() {
-        ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
-        verify(flowLogRepository, atLeastOnce()).save(flowLog.capture());
-        assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
     }
 
     private StackDto mockStackDto() {
