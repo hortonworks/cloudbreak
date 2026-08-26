@@ -216,6 +216,11 @@ jobs:
     name: FedRAMP Integration Test
     runs-on: [cb-ubuntu22-large]
     timeout-minutes: 90
+    # Opt-in: only run when the PR carries the `fedramp-it` label. Without it the job's
+    # own script is a no-op ("no need for build"), so skipping the whole job avoids the
+    # runner spin-up. A job-level skip reports "skipped" (counts as passing for branch
+    # protection), unlike a workflow/path skip which would stay pending and block merge.
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'fedramp-it') }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -231,6 +236,10 @@ jobs:
     name: Real UMS Test
     runs-on: [cb-ubuntu22-large]
     timeout-minutes: 90
+    # Opt-in: only run when the PR carries the `real_ums_test` label. Without it the job's
+    # own script is a no-op ("no need for build"), so skipping the whole job avoids the
+    # runner spin-up. A job-level skip counts as passing for branch protection.
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'real_ums_test') }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -246,6 +255,17 @@ jobs:
     name: Aws Test
     runs-on: [cb-ubuntu22-large]
     timeout-minutes: 120
+    # Opt-in: only run the real-AWS smoke suite when the PR carries one of the smoke labels.
+    # Each label selects a suite in aws-test-steps_aws_test.sh (datahub > datalake >
+    # environment). This is the expensive job (real infra, up to 120 min) that serializes
+    # after the whole mock/static wave, so gating it saves the most PR time when unneeded.
+    if: >-
+      ${{ contains(github.event.pull_request.labels.*.name, 'aws-smoke-datahub-test')
+          || contains(github.event.pull_request.labels.*.name, 'aws-smoke-datalake-test')
+          || contains(github.event.pull_request.labels.*.name, 'aws-smoke-environment-test') }}
+    # fedramp-integration-test and real-ums-test are intentionally NOT in `needs`: they are
+    # now label-gated too, and a skipped `needs` dependency cascades (default success()
+    # semantics) — keeping them here would skip aws-test even when a smoke label is present.
     needs:
       - unit-test
       - bootstrap-cert-filter-test
@@ -258,8 +278,6 @@ jobs:
       - config-change-integration-test
       - schema-compatibility-test
       - integration-test
-      - fedramp-integration-test
-      - real-ums-test
     steps:
       - name: checkout
         uses: actions/checkout@v3
