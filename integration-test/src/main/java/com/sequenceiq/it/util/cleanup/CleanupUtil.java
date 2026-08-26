@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -184,7 +185,8 @@ public class CleanupUtil extends CleanupClientUtil {
         Map<String, String> parentEnvironments = environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                 .filter(response -> response.getParentEnvironmentName() == null)
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
-        parentEnvironments.forEach((crn, name) -> LOG.info("Found deletable environment CRN: {} and NAME: {}", crn, name));
+        parentEnvironments.forEach((crn, name) ->
+                LOG.info("Found live parent environment via API CRN: {} and NAME: {}", crn, name));
         return parentEnvironments;
     }
 
@@ -192,7 +194,8 @@ public class CleanupUtil extends CleanupClientUtil {
         Map<String, String> childEnvironments = environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                 .filter(response -> response.getParentEnvironmentName() != null)
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
-        childEnvironments.forEach((crn, name) -> LOG.info("Found deletable child environment CRN: {} and NAME: {}", crn, name));
+        childEnvironments.forEach((crn, name) ->
+                LOG.info("Found live child environment via API CRN: {} and NAME: {}", crn, name));
         return childEnvironments;
     }
 
@@ -370,24 +373,52 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     private void deleteEnvironments(EnvironmentClient environmentClient, List<String> environmentNames, CleanupReport report) {
+        environmentNames.forEach(environmentName -> LOG.info("Environment with name: {} will be deleted!", environmentName));
+        Map<String, String> deleteFailures = new LinkedHashMap<>();
         try {
-            environmentNames.forEach(environmentName -> LOG.info("Environment with name: {} will be deleted!", environmentName));
             environmentClient.environmentV1Endpoint().deleteMultipleByNames(new HashSet<>(environmentNames), true, false);
-            environmentNames.forEach(environmentName -> {
+        } catch (Exception e) {
+            // The batch API call itself failed — none of the deletes were even accepted. Record every env as
+            // a delete error so the summary reflects the whole batch instead of pretending nothing happened.
+            LOG.error("deleteMultipleByNames failed for environments '{}', recording every env as delete error: {}",
+                    environmentNames, e.getMessage(), e);
+            environmentNames.forEach(name -> deleteFailures.put(name, e.getMessage()));
+            report.recordDeleteErrors(TYPE_ENVIRONMENT, deleteFailures);
+            List<String> stillPresent = findLeftoverResources(TYPE_ENVIRONMENT, environmentNames);
+            report.recordLeftovers(TYPE_ENVIRONMENT, stillPresent);
+            validateE2ECleanup(TYPE_ENVIRONMENT, environmentNames, deleteFailures, stillPresent);
+            return;
+        }
+
+        // Wait for every env individually — one FAILED/TIMEOUT must NOT short-circuit the rest, otherwise
+        // the report never learns about envs #N+1..end and the final summary silently under-counts.
+        for (String environmentName : environmentNames) {
+            try {
                 WaitResult waitResult = waitUtil.waitForEnvironmentCleanup(environmentClient, environmentName);
                 if (waitResult == WaitResult.FAILED) {
-                    throw new RuntimeException(String.format("Failed: Deleting %s environment has been failed!", environmentName));
+                    deleteFailures.put(environmentName,
+                            String.format("Failed: Deleting %s environment has been failed!", environmentName));
+                } else if (waitResult == WaitResult.TIMEOUT) {
+                    deleteFailures.put(environmentName,
+                            String.format("Timeout: Deleting %s environment has been timed out!", environmentName));
                 }
-                if (waitResult == WaitResult.TIMEOUT) {
-                    throw new RuntimeException(String.format("Timeout: Deleting %s environment has been timed out!", environmentName));
-                }
-                // Record per-environment success as the wait for that env clears.
-                report.recordDeleted(TYPE_ENVIRONMENT, environmentName);
-            });
-        } catch (Exception e) {
-            LOG.error("One or more environment cannot be deleted, because of: {}", e.getMessage(), e);
-            throw new RuntimeException(String.format("One or more environment cannot be deleted, because of: %s", e.getMessage()));
+            } catch (RuntimeException ex) {
+                LOG.error("Waiting for {} environment cleanup threw, continuing with the rest: {}",
+                        environmentName, ex.getMessage(), ex);
+                deleteFailures.put(environmentName, ex.getMessage());
+            }
         }
+
+        List<String> leftoverResources = findLeftoverResources(TYPE_ENVIRONMENT, environmentNames);
+        List<String> successfullyDeleted = environmentNames.stream()
+                .filter(name -> !deleteFailures.containsKey(name))
+                .filter(name -> !leftoverResources.contains(name))
+                .collect(Collectors.toList());
+        report.recordDeleted(TYPE_ENVIRONMENT, successfullyDeleted);
+        report.recordLeftovers(TYPE_ENVIRONMENT, leftoverResources);
+        report.recordDeleteErrors(TYPE_ENVIRONMENT, deleteFailures);
+
+        validateE2ECleanup(TYPE_ENVIRONMENT, environmentNames, deleteFailures, leftoverResources);
     }
 
     private void deleteEnvironment(EnvironmentClient environmentClient, String environmentName) {
@@ -431,7 +462,7 @@ public class CleanupUtil extends CleanupClientUtil {
         report.recordLeftovers(TYPE_CREDENTIAL, stillPresent);
         if (!stillPresent.isEmpty()) {
             LOG.error("End To End cleanup failed: credential(s) '{}' still present after deleteMultiple.", stillPresent);
-            throw new RuntimeException(String.format(
+            throw new CleanupSummaryException(String.format(
                     "End To End cleanup failed for resource type '%s': %d credential(s) still present after delete.",
                     TYPE_CREDENTIAL, stillPresent.size()));
         }
@@ -508,10 +539,14 @@ public class CleanupUtil extends CleanupClientUtil {
             LOG.error("End To End cleanup failed: resource '{}' with name(s) '{}' still present after delete!",
                     resourceNameType, leftoverResources);
         }
-        int problemCount = deleteFailures.size() + leftoverResources.size();
-        throw new RuntimeException(String.format(
+        // Count the UNION of the two buckets, not the sum: a genuine DELETE_FAILED lands in both
+        // (wait returned FAILED → delete error; re-list still shows it → leftover) and would otherwise
+        // be double-counted, giving nonsense like "18 resource(s)" for 9 unique stuck envs.
+        Set<String> uniqueProblems = new HashSet<>(deleteFailures.keySet());
+        uniqueProblems.addAll(leftoverResources);
+        throw new CleanupSummaryException(String.format(
                 "End To End cleanup failed for resource type '%s': %d resource(s) could not be cleaned up (delete errors: %d, still present: %d).",
-                resourceNameType, problemCount, deleteFailures.size(), leftoverResources.size()));
+                resourceNameType, uniqueProblems.size(), deleteFailures.size(), leftoverResources.size()));
     }
 
     /**
@@ -573,5 +608,17 @@ public class CleanupUtil extends CleanupClientUtil {
             LOG.info("Cannot find resource file at path: '{}'.", Paths.get(outputDirectory).toAbsolutePath().normalize());
         }
         return result;
+    }
+
+    /**
+     * Terminal exception for cleanup runs. Carries no stack trace because the summary block logged
+     * immediately before the throw already tells the operator everything actionable — the frames
+     * from Spring's runner through CleanupUtil add pages of noise without adding information.
+     * Suppression is done via the 4-arg Throwable constructor (writableStackTrace = false).
+     */
+    static final class CleanupSummaryException extends RuntimeException {
+        CleanupSummaryException(String message) {
+            super(message, null, false, false);
+        }
     }
 }

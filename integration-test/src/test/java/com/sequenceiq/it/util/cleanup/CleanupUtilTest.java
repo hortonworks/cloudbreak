@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.client.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
@@ -320,6 +322,146 @@ public class CleanupUtilTest {
         assertThat(errors.get("distroxName")).containsKey("distroA");
     }
 
+    /**
+     * Regression for the "Deleted: 2 | Still present: 0 | Delete errors: 0" bug seen in job #58530: when the
+     * middle env in a batch delete goes into DELETE_FAILED, the old code threw at that point and never waited
+     * for the envs after it, so the summary only reported the two successes before it. The fix must record the
+     * FAILED one as a delete error, keep waiting for the rest, mark those still-listed as leftovers, and
+     * aggregate everything into a single RuntimeException.
+     */
+    @Test
+    void deleteEnvironmentsMidBatchFailedIsRecordedAndDoesNotShortCircuit() throws Exception {
+        List<String> envNames = List.of("envA", "envB", "envC");
+        SimpleEnvironmentResponses deleteResponse = new SimpleEnvironmentResponses();
+        deleteResponse.setResponses(Collections.emptyList());
+        when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
+
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envC")).thenReturn(WaitResult.SUCCESSFUL);
+        // Re-list post-delete: nothing left — envB just failed the wait but was archived from the list.
+        when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
+
+        CleanupReport report = new CleanupReport();
+        assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, report))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("delete errors: 1")
+                .hasMessageContaining("still present: 0");
+
+        // envC must have been waited on despite envB's FAILED — that is the regression.
+        verify(waitUtil).waitForEnvironmentCleanup(environmentClient, "envC");
+        assertThat(report.getDeletedByType()).containsEntry("environmentName", List.of("envA", "envC"));
+        assertThat(report.getDeleteErrorsByType()).containsKey("environmentName");
+        assertThat(report.getDeleteErrorsByType().get("environmentName")).containsKey("envB");
+        assertThat(report.getLeftoversByType()).doesNotContainKey("environmentName");
+    }
+
+    /**
+     * If the wait for one env fails AND the post-delete re-list still shows a different env, both must land in
+     * the report — one as a delete error, one as a leftover — so the summary is truthful.
+     */
+    @Test
+    void deleteEnvironmentsFailedAndLeftoverBothRecorded() throws Exception {
+        List<String> envNames = List.of("envA", "envB");
+        SimpleEnvironmentResponses deleteResponse = new SimpleEnvironmentResponses();
+        deleteResponse.setResponses(Collections.emptyList());
+        when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
+
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.SUCCESSFUL);
+
+        // Re-list still returns envB — an actual leftover.
+        SimpleEnvironmentResponses relist = new SimpleEnvironmentResponses();
+        relist.setResponses(List.of(environmentResponse("envB")));
+        when(environmentEndpoint.list(null)).thenReturn(relist);
+
+        CleanupReport report = new CleanupReport();
+        assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, report))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("delete errors: 1")
+                .hasMessageContaining("still present: 1");
+
+        assertThat(report.getDeleteErrorsByType().get("environmentName")).containsKey("envA");
+        assertThat(report.getLeftoversByType()).containsEntry("environmentName", List.of("envB"));
+        // envA failed the wait AND envB is still present → neither counts as successfully deleted.
+        assertThat(report.getDeletedByType()).doesNotContainKey("environmentName");
+    }
+
+    /**
+     * Regression for the "18 resource(s) could not be cleaned up" nonsense in job #58530: when the same env
+     * lands in BOTH buckets (wait returned FAILED → delete error; re-list still shows it → leftover), the
+     * problem count must be the UNION size, not the sum. 9 stuck envs must read as "9 resource(s)", not 18.
+     * Also asserts the CleanupSummaryException carries no stack — the summary block above the throw is
+     * already the full story.
+     */
+    @Test
+    void deleteEnvironmentsSameNameInBothBucketsCountedOnce() throws Exception {
+        List<String> envNames = List.of("envA", "envB", "envC");
+        SimpleEnvironmentResponses deleteResponse = new SimpleEnvironmentResponses();
+        deleteResponse.setResponses(Collections.emptyList());
+        when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
+
+        // Every env's wait fails, AND the re-list still shows all three — the exact bug shape.
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envC")).thenReturn(WaitResult.FAILED);
+        SimpleEnvironmentResponses relist = new SimpleEnvironmentResponses();
+        relist.setResponses(List.of(environmentResponse("envA"), environmentResponse("envB"), environmentResponse("envC")));
+        when(environmentEndpoint.list(null)).thenReturn(relist);
+
+        assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, new CleanupReport()))
+                .isInstanceOf(RuntimeException.class)
+                // Union = 3, NOT sum = 6.
+                .hasMessageContaining("3 resource(s) could not be cleaned up")
+                .hasMessageContaining("delete errors: 3")
+                .hasMessageContaining("still present: 3")
+                // Terminal exception must not carry a stack — the summary block is the story.
+                .satisfies(t -> assertThat(t.getStackTrace()).isEmpty());
+    }
+
+    /**
+     * If the batch API call itself blows up, every env must be recorded as a delete error rather than being
+     * silently forgotten. The single aggregated throw must surface all N failures.
+     */
+    @Test
+    void deleteEnvironmentsBatchApiCallFailsRecordsEveryEnvAsError() throws Exception {
+        List<String> envNames = List.of("envA", "envB");
+        when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false))
+                .thenThrow(new RuntimeException("network is down"));
+        when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
+
+        CleanupReport report = new CleanupReport();
+        assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, report))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("delete errors: 2");
+
+        assertThat(report.getDeleteErrorsByType().get("environmentName")).containsKeys("envA", "envB");
+        // Waits must NOT have been attempted after the batch API call blew up.
+        verify(waitUtil, never()).waitForEnvironmentCleanup(any(), any());
+    }
+
+    /**
+     * Full happy path for deleteEnvironments: every wait succeeds, re-list is empty. No exception, all envs
+     * recorded as deleted.
+     */
+    @Test
+    void deleteEnvironmentsHappyPathAllRecordedAsDeleted() throws Exception {
+        List<String> envNames = List.of("envA", "envB");
+        SimpleEnvironmentResponses deleteResponse = new SimpleEnvironmentResponses();
+        deleteResponse.setResponses(Collections.emptyList());
+        when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.SUCCESSFUL);
+        when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
+
+        CleanupReport report = new CleanupReport();
+        assertThatCode(() -> invokeDeleteEnvironments(envNames, report)).doesNotThrowAnyException();
+
+        assertThat(report.getDeletedByType()).containsEntry("environmentName", envNames);
+        assertThat(report.getDeleteErrorsByType()).doesNotContainKey("environmentName");
+        assertThat(report.getLeftoversByType()).doesNotContainKey("environmentName");
+    }
+
     // ---------- helpers ----------
 
     private Path writeResourceFile(String name, String content) throws IOException {
@@ -346,11 +488,30 @@ public class CleanupUtilTest {
         return r;
     }
 
+    private static SimpleEnvironmentResponse environmentResponse(String name) {
+        SimpleEnvironmentResponse r = new SimpleEnvironmentResponse();
+        r.setName(name);
+        return r;
+    }
+
     private void invokeDeleteResources(List<String> found, String type, CleanupReport report) throws Exception {
         Method m = CleanupUtil.class.getDeclaredMethod("deleteResources", List.class, String.class, CleanupReport.class);
         m.setAccessible(true);
         try {
             m.invoke(underTest, found, type, report);
+        } catch (InvocationTargetException ite) {
+            if (ite.getCause() instanceof RuntimeException re) {
+                throw re;
+            }
+            throw ite;
+        }
+    }
+
+    private void invokeDeleteEnvironments(List<String> environmentNames, CleanupReport report) throws Exception {
+        Method m = CleanupUtil.class.getDeclaredMethod("deleteEnvironments", EnvironmentClient.class, List.class, CleanupReport.class);
+        m.setAccessible(true);
+        try {
+            m.invoke(underTest, environmentClient, environmentNames, report);
         } catch (InvocationTargetException ite) {
             if (ite.getCause() instanceof RuntimeException re) {
                 throw re;
