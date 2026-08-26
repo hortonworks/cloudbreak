@@ -31,6 +31,8 @@ class AzureResourceTagUpdaterServiceTest {
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
+    private static final Set<String> TAG_KEYS = Set.of("custom");
+
     @Mock
     private AuthenticatedContext authenticatedContext;
 
@@ -94,6 +96,53 @@ class AzureResourceTagUpdaterServiceTest {
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
+    }
+
+    @Test
+    void testDeleteTagsAzureInstance() throws IOException {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_INSTANCE, INSTANCE_ID, null);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verify(instanceStrategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verifyNoMoreInteractions(diskStrategy);
+    }
+
+    @Test
+    void testDeleteTagsAzureDisk() throws IOException {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_DISK, null, RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verify(diskStrategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verifyNoMoreInteractions(instanceStrategy);
+    }
+
+    @Test
+    void testDeleteTagsUnsupportedType() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_SUBNET, null, RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verifyNoMoreInteractions(instanceStrategy, diskStrategy);
+    }
+
+    @Test
+    void testDeleteTagsNotTaggableResourceType() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY, null, RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verifyNoMoreInteractions(instanceStrategy, diskStrategy);
+    }
+
+    @Test
+    void testDeleteTagsWhenRuntimeExceptionOccurs() throws IOException {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_INSTANCE, INSTANCE_ID, null);
+        doThrow(new RuntimeException("Azure error")).when(instanceStrategy)
+                .deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+
+        assertThrows(RuntimeException.class, () -> underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS));
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

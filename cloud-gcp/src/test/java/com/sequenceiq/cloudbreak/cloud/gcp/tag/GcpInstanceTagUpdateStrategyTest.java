@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,11 +41,18 @@ class GcpInstanceTagUpdateStrategyTest {
 
     private static final String FINGERPRINT = "abc123fingerprint";
 
-    private static final Map<String, String> EXISTING_LABELS = Map.of("existingKey", "existingValue");
+    private static final Map<String, String> EXISTING_LABELS = Map.of(
+            "existingKey", "existingValue",
+            "survivorKey", "survivorValue");
+
+    private static final Map<String, String> LABELS_AFTER_DELETE = Map.of("survivorKey", "survivorValue");
 
     private static final Map<String, String> NEW_LABELS = Map.of("newKey", "newValue");
 
-    private static final Map<String, String> MERGED_LABELS = Map.of("existingKey", "existingValue", "newKey", "newValue");
+    private static final Map<String, String> MERGED_LABELS = Map.of(
+            "existingKey", "existingValue",
+            "survivorKey", "survivorValue",
+            "newKey", "newValue");
 
     @Mock
     private GcpContext gcpContext;
@@ -85,6 +93,43 @@ class GcpInstanceTagUpdateStrategyTest {
         when(gcpContext.getProjectId()).thenReturn(PROJECT_ID);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
+    }
+
+    @Test
+    void testDeleteTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_INSTANCE);
+        Instance instance = new Instance()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.instances()).thenReturn(instances);
+        when(instances.get(PROJECT_ID, ZONE, RESOURCE_NAME)).thenReturn(instancesGet);
+        when(instancesGet.execute()).thenReturn(instance);
+        when(instances.setLabels(eq(PROJECT_ID), eq(ZONE), eq(RESOURCE_NAME), any(InstancesSetLabelsRequest.class)))
+                .thenReturn(instancesSetLabels);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(instances).setLabels(eq(PROJECT_ID), eq(ZONE), eq(RESOURCE_NAME),
+                argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
+                        && LABELS_AFTER_DELETE.equals(req.getLabels())));
+        verify(instancesSetLabels).execute();
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_INSTANCE);
+        Instance instance = new Instance()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(Map.of("otherKey", "otherValue"));
+
+        when(compute.instances()).thenReturn(instances);
+        when(instances.get(PROJECT_ID, ZONE, RESOURCE_NAME)).thenReturn(instancesGet);
+        when(instancesGet.execute()).thenReturn(instance);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(instancesSetLabels, times(0)).execute();
     }
 
     @Test

@@ -33,6 +33,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTarget
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RemoveTagsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RemoveTagsResponse;
 
 public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
@@ -104,5 +106,9 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
     public AddTagsResponse addTags(AddTagsRequest addTagsRequest) {
         return client.addTags(addTagsRequest);
+    }
+
+    public RemoveTagsResponse removeTags(RemoveTagsRequest removeTagsRequest) {
+        return client.removeTags(removeTagsRequest);
     }
 }

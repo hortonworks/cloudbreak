@@ -25,6 +25,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretRequest;
 import software.amazon.awssdk.services.secretsmanager.model.Tag;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
+import software.amazon.awssdk.services.secretsmanager.model.UntagResourceRequest;
 
 @Service
 public class AwsSecretsManagerTagUpdateStrategy implements TagUpdateStrategy {
@@ -67,6 +68,35 @@ public class AwsSecretsManagerTagUpdateStrategy implements TagUpdateStrategy {
         secretsManagerClient.tagResource(TagResourceRequest.builder()
                 .secretId(secretId)
                 .tags(secretsManagerTags)
+                .build());
+    }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        AmazonSecretsManagerClient secretsManagerClient = commonAwsClient.createSecretsManagerClient(
+                new AwsCredentialView(authenticatedContext.getCloudCredential()),
+                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+
+        String secretId = cloudResource.getReference();
+
+        Map<String, String> existingTags = secretsManagerClient.describeSecret(
+                        DescribeSecretRequest.builder()
+                                .secretId(secretId)
+                                .build())
+                .tags().stream()
+                .collect(Collectors.toMap(Tag::key, Tag::value));
+
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.info("No tags to delete for Secrets Manager secret {}, skipping.", secretId);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, secretId, tagKeys, existingTags, remainingTags.keySet());
+
+        secretsManagerClient.untagResource(UntagResourceRequest.builder()
+                .secretId(secretId)
+                .tagKeys(tagKeys)
                 .build());
     }
 }

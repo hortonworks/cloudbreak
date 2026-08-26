@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
@@ -114,6 +117,102 @@ class AwsCloudFormationTagUpdateStrategyTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(region);
         when(region.getRegionName()).thenReturn(REGION_NAME);
+    }
+
+    @Test
+    void testDeleteTagsCloudFormationStack() {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName(STACK_NAME)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .build();
+
+        Stack stack = Stack.builder().tags(List.of(
+                Tag.builder().key("existingKey").value("existingValue").build(),
+                Tag.builder().key("survivorKey").value("survivorValue").build()
+        )).build();
+
+        DescribeStacksResponse describeStacksResponse = DescribeStacksResponse.builder().stacks(stack).build();
+
+        when(awsCloudFormationClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
+        when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(describeStacksResponse);
+        when(awsTaggingService.prepareCloudformationTags(authenticatedContext, Map.of("survivorKey", "survivorValue")))
+                .thenReturn(List.of(Tag.builder().key("survivorKey").value("survivorValue").build()));
+        when(cloudFormationClient.describeStackResources(any(DescribeStackResourcesRequest.class)))
+                .thenReturn(DescribeStackResourcesResponse.builder().stackResources(List.of()).build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(cloudFormationClient).updateStack(argThat(req ->
+                req.stackName().equals(STACK_NAME)
+                        && req.usePreviousTemplate()
+                        && req.tags().size() == 1
+                        && req.tags().get(0).key().equals("survivorKey")
+                        && req.tags().get(0).value().equals("survivorValue")
+        ));
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName(STACK_NAME)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .build();
+
+        Stack stack = Stack.builder().tags(List.of(Tag.builder()
+                .key("otherKey")
+                .value("otherValue")
+                .build())).build();
+
+        DescribeStacksResponse describeStacksResponse = DescribeStacksResponse.builder().stacks(stack).build();
+
+        when(awsCloudFormationClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
+        when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(describeStacksResponse);
+        when(cloudFormationClient.describeStackResources(any(DescribeStackResourcesRequest.class)))
+                .thenReturn(DescribeStackResourcesResponse.builder().stackResources(List.of()).build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(cloudFormationClient, times(0)).updateStack(any(UpdateStackRequest.class));
+    }
+
+    @Test
+    void testUpdateTagsSkipWhenStackDoesNotExist() {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName(STACK_NAME)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .build();
+
+        when(awsCloudFormationClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
+        when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class)))
+                .thenThrow(AwsServiceException.builder()
+                        .awsErrorDetails(AwsErrorDetails.builder()
+                                .errorMessage(STACK_NAME + " does not exist")
+                                .build())
+                        .build());
+
+        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+
+        verify(cloudFormationClient, times(0)).updateStack(any(UpdateStackRequest.class));
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenStackDoesNotExist() {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName(STACK_NAME)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .build();
+
+        when(awsCloudFormationClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
+        when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class)))
+                .thenThrow(AwsServiceException.builder()
+                        .awsErrorDetails(AwsErrorDetails.builder()
+                                .errorMessage(STACK_NAME + " does not exist")
+                                .build())
+                        .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(cloudFormationClient, times(0)).updateStack(any(UpdateStackRequest.class));
     }
 
     @Test

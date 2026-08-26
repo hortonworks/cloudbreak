@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
 import software.amazon.awssdk.services.kms.model.Tag;
 import software.amazon.awssdk.services.kms.model.TagResourceRequest;
+import software.amazon.awssdk.services.kms.model.UntagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AwsKmsTagUpdateStrategyTest {
@@ -85,6 +87,41 @@ class AwsKmsTagUpdateStrategyTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(region);
         when(region.getRegionName()).thenReturn(REGION_NAME);
+    }
+
+    @Test
+    void testDeleteTagsForAwsKmsKey() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
+        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
+                .tags(Tag.builder()
+                        .tagKey(EXISTING_TAG_KEY)
+                        .tagValue(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(kmsClient).untagResource(UntagResourceRequest.builder()
+                .keyId(RESOURCE_REFERENCE)
+                .tagKeys(Set.of(EXISTING_TAG_KEY))
+                .build());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
+        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
+                .tags(Tag.builder()
+                        .tagKey("otherKey")
+                        .tagValue("otherValue")
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(kmsClient, times(0)).untagResource(any(UntagResourceRequest.class));
     }
 
     @Test

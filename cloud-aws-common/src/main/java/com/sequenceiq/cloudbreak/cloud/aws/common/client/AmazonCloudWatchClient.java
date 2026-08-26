@@ -13,6 +13,8 @@ import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmRequest;
 import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmResponse;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceResponse;
+import software.amazon.awssdk.services.cloudwatch.model.UntagResourceRequest;
+import software.amazon.awssdk.services.cloudwatch.model.UntagResourceResponse;
 
 public class AmazonCloudWatchClient extends AmazonClient {
 
@@ -44,5 +46,9 @@ public class AmazonCloudWatchClient extends AmazonClient {
 
     public TagResourceResponse tagResource(TagResourceRequest tagResourceRequest) {
         return client.tagResource(tagResourceRequest);
+    }
+
+    public UntagResourceResponse untagResource(UntagResourceRequest untagResourceRequest) {
+        return client.untagResource(untagResourceRequest);
     }
 }

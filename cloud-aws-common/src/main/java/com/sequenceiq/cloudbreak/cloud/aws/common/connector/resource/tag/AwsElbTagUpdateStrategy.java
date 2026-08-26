@@ -26,6 +26,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.AddTagsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RemoveTagsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 
 @Service
@@ -73,6 +74,39 @@ public class AwsElbTagUpdateStrategy implements TagUpdateStrategy {
         elbClient.addTags(AddTagsRequest.builder()
                 .resourceArns(resourceArn)
                 .tags(elbTags)
+                .build());
+    }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        AmazonElasticLoadBalancingClient elbClient = commonAwsClient.createElasticLoadBalancingClient(
+                new AwsCredentialView(authenticatedContext.getCloudCredential()),
+                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+
+        String resourceArn = cloudResource.getReference();
+
+        Map<String, String> existingTags = elbClient.describeTags(
+                        DescribeTagsRequest.builder()
+                                .resourceArns(resourceArn)
+                                .build())
+                .tagDescriptions().stream()
+                .filter(td -> td.resourceArn().equals(resourceArn))
+                .findFirst()
+                .map(td -> td.tags().stream()
+                        .collect(Collectors.toMap(Tag::key, Tag::value)))
+                .orElse(Map.of());
+
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.info("No tags to delete for ELB resource {}, skipping.", resourceArn);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, resourceArn, tagKeys, existingTags, remainingTags.keySet());
+
+        elbClient.removeTags(RemoveTagsRequest.builder()
+                .resourceArns(resourceArn)
+                .tagKeys(tagKeys)
                 .build());
     }
 }

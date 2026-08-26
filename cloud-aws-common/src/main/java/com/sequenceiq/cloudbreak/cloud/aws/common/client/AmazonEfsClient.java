@@ -17,6 +17,8 @@ import software.amazon.awssdk.services.efs.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.efs.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.efs.model.TagResourceRequest;
 import software.amazon.awssdk.services.efs.model.TagResourceResponse;
+import software.amazon.awssdk.services.efs.model.UntagResourceRequest;
+import software.amazon.awssdk.services.efs.model.UntagResourceResponse;
 
 public class AmazonEfsClient extends AmazonClient {
     private final EfsClient client;
@@ -54,5 +56,9 @@ public class AmazonEfsClient extends AmazonClient {
 
     public TagResourceResponse tagResource(TagResourceRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.tagResource(request));
+    }
+
+    public UntagResourceResponse untagResource(UntagResourceRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.untagResource(request));
     }
 }

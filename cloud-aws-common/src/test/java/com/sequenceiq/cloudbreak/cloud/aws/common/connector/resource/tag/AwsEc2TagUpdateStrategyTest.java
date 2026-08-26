@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeTagsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
@@ -63,6 +65,63 @@ class AwsEc2TagUpdateStrategyTest {
 
     @InjectMocks
     private AwsEc2TagUpdateStrategy underTest;
+
+    @Test
+    void testDeleteTagsForAwsInstance() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tags(TagDescription.builder()
+                        .resourceId(INSTANCE_ID)
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client).deleteTags(DeleteTagsRequest.builder()
+                .resources(List.of(INSTANCE_ID))
+                .tags(List.of(Tag.builder().key(EXISTING_TAG_KEY).build()))
+                .build());
+    }
+
+    @Test
+    void testDeleteTagsForAwsRootDisk() {
+        String volumeId = "volumeId";
+        CloudResource cloudResource = buildResource(ResourceType.AWS_ROOT_DISK, INSTANCE_ID, null);
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeVolumes(any(DescribeVolumesRequest.class))).thenReturn(DescribeVolumesResponse.builder()
+                .volumes(Volume.builder()
+                        .volumeId(volumeId)
+                        .tags(Tag.builder().key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build())
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client).deleteTags(DeleteTagsRequest.builder()
+                .resources(List.of(volumeId))
+                .tags(List.of(Tag.builder().key(EXISTING_TAG_KEY).build()))
+                .build());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tags(TagDescription.builder()
+                        .resourceId(INSTANCE_ID)
+                        .key("otherKey")
+                        .value("otherValue")
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client, times(0)).deleteTags(any(DeleteTagsRequest.class));
+    }
 
     @Test
     void testUpdateTagsForAwsInstance() {

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,6 +89,43 @@ class GcpAddressTagUpdateStrategyTest {
         when(gcpContext.getCompute()).thenReturn(compute);
         when(gcpContext.getProjectId()).thenReturn(PROJECT_ID);
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
+    }
+
+    @Test
+    void testDeleteTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_RESERVED_IP);
+        Address address = new Address()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.addresses()).thenReturn(addresses);
+        when(addresses.get(PROJECT_ID, REGION, RESOURCE_NAME)).thenReturn(addressesGet);
+        when(addressesGet.execute()).thenReturn(address);
+        when(addresses.setLabels(eq(PROJECT_ID), eq(REGION), eq(RESOURCE_NAME), any(RegionSetLabelsRequest.class)))
+                .thenReturn(addressesSetLabels);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(addresses).setLabels(eq(PROJECT_ID), eq(REGION), eq(RESOURCE_NAME),
+                argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
+                        && Map.of().equals(req.getLabels())));
+        verify(addressesSetLabels).execute();
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_RESERVED_IP);
+        Address address = new Address()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(Map.of("otherKey", "otherValue"));
+
+        when(compute.addresses()).thenReturn(addresses);
+        when(addresses.get(PROJECT_ID, REGION, RESOURCE_NAME)).thenReturn(addressesGet);
+        when(addressesGet.execute()).thenReturn(address);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(addressesSetLabels, times(0)).execute();
     }
 
     @Test

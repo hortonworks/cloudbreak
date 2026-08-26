@@ -29,6 +29,7 @@ import software.amazon.awssdk.services.cloudwatch.model.ListTagsForResourceReque
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.cloudwatch.model.Tag;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
+import software.amazon.awssdk.services.cloudwatch.model.UntagResourceRequest;
 
 @Service
 public class AwsCloudWatchTagUpdateStrategy implements TagUpdateStrategy {
@@ -79,6 +80,41 @@ public class AwsCloudWatchTagUpdateStrategy implements TagUpdateStrategy {
                 );
             } catch (Exception e) {
                 LOGGER.warn("Failed to update tags for Cloudwatch alarm {}: {}", alarm.alarmArn(), e.getMessage(), e);
+            }
+        });
+    }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
+        CloudCredential cloudCredential = authenticatedContext.getCloudCredential();
+        AmazonCloudWatchClient cloudWatchClient = commonAwsClient.createCloudWatchClient(new AwsCredentialView(cloudCredential), regionName);
+
+        List<MetricAlarm> alarms = awsNativeCloudWatchService.getMetricAlarmsForInstances(regionName,
+                new AwsCredentialView(cloudCredential), List.of(cloudResource.getInstanceId()));
+
+        alarms.forEach(alarm -> {
+            Map<String, String> existingTags = cloudWatchClient.listTagsForResource(
+                            ListTagsForResourceRequest.builder()
+                                    .resourceARN(alarm.alarmArn())
+                                    .build())
+                    .tags().stream()
+                    .collect(Collectors.toMap(Tag::key, Tag::value));
+            if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+                LOGGER.info("No tags to delete for CloudWatch alarm {}, skipping.", alarm.alarmArn());
+                return;
+            }
+            Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+            logTagDeletion(LOGGER, alarm.alarmArn(), tagKeys, existingTags, remainingTags.keySet());
+            try {
+                cloudWatchClient.untagResource(
+                        UntagResourceRequest.builder()
+                                .resourceARN(alarm.alarmArn())
+                                .tagKeys(tagKeys)
+                                .build()
+                );
+            } catch (Exception e) {
+                LOGGER.warn("Failed to delete tags for Cloudwatch alarm {}: {}", alarm.alarmArn(), e.getMessage(), e);
             }
         });
     }

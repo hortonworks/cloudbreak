@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -66,7 +67,48 @@ public abstract class AbstractResourceTagUpdaterService {
         return tags;
     }
 
+    // EC2 batch delete to come in CB-34250
+    public void deleteTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        List<CloudResource> taggableResources = cloudResources.stream()
+                .filter(r -> r.getType().isTaggable())
+                .toList();
+
+        Map<Boolean, List<CloudResource>> strategyExistenceMap = taggableResources.stream()
+                .collect(Collectors.partitioningBy(r -> tagUpdateStrategyMap.containsKey(r.getType())));
+
+        strategyExistenceMap.getOrDefault(false, List.of())
+                .forEach(r -> LOGGER.warn("Resource type {} is taggable but no tag update strategy is implemented.", r.getType()));
+
+        Map<TagUpdateStrategy, List<CloudResource>> resourcesByStrategy = strategyExistenceMap.getOrDefault(true, List.of()).stream()
+                .collect(Collectors.groupingBy(
+                        r -> tagUpdateStrategyMap.get(r.getType()),
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+
+        Set<String> preparedTagKeys = prepareTagKeys(tagKeys);
+
+        resourcesByStrategy.forEach((strategy, resources) -> {
+            try {
+                for (CloudResource cloudResource : resources) {
+                    LOGGER.info("Requested tag key deletion for cloud resource: {} with type: {} with tag keys: {}",
+                            cloudResource.getName(), cloudResource.getType(), preparedTagKeys);
+                    strategy.deleteTags(authenticatedContext, cloudResource, preparedTagKeys);
+                }
+            } catch (Exception e) {
+                throw handleDeleteFailure(strategy, e);
+            }
+        });
+    }
+
+    protected Set<String> prepareTagKeys(Set<String> tagKeys) {
+        return tagKeys;
+    }
+
     protected RuntimeException handleFailure(TagUpdateStrategy strategy, Exception e) {
         return new CloudConnectorException(String.format("Failed to update tags for strategy: %s", strategy.getClass().getSimpleName()), e);
+    }
+
+    protected RuntimeException handleDeleteFailure(TagUpdateStrategy strategy, Exception e) {
+        return new CloudConnectorException(String.format("Failed to delete tags for strategy: %s", strategy.getClass().getSimpleName()), e);
     }
 }

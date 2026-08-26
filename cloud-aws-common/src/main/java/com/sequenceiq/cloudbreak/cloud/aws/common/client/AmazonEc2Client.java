@@ -43,6 +43,8 @@ import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteKeyPairResponse;
 import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupResponse;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsResponse;
 import software.amazon.awssdk.services.ec2.model.DeleteVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteVolumeResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeAddressesRequest;
@@ -287,6 +289,10 @@ public class AmazonEc2Client extends AmazonClient {
 
     public CreateTagsResponse createTags(CreateTagsRequest createTagsRequest) {
         return client.createTags(createTagsRequest);
+    }
+
+    public DeleteTagsResponse deleteTags(DeleteTagsRequest deleteTagsRequest) {
+        return client.deleteTags(deleteTagsRequest);
     }
 
     public DescribeTagsResponse describeTags(DescribeTagsRequest describeTagsRequest) {

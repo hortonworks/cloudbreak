@@ -32,6 +32,8 @@ class AwsNativeResourceTagUpdaterServiceTest {
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
+    private static final Set<String> TAG_KEYS = Set.of("custom");
+
     @Mock
     private AuthenticatedContext authenticatedContext;
 
@@ -87,6 +89,44 @@ class AwsNativeResourceTagUpdaterServiceTest {
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
+    }
+
+    @Test
+    void testDeleteTagsAwsInstance() throws IOException {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verify(ec2Strategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verifyNoMoreInteractions(elbStrategy);
+    }
+
+    @Test
+    void testDeleteTagsAwsLoadBalancer() throws IOException {
+        CloudResource cloudResource = buildResource(ResourceType.ELASTIC_LOAD_BALANCER, null, RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verify(elbStrategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verifyNoMoreInteractions(ec2Strategy);
+    }
+
+    @Test
+    void testDeleteTagsUnsupportedType() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verifyNoMoreInteractions(ec2Strategy, elbStrategy);
+    }
+
+    @Test
+    void testDeleteTagsWhenRuntimeExceptionOccurs() throws IOException {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+        doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
+                .deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+
+        assertThrows(RuntimeException.class, () -> underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS));
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

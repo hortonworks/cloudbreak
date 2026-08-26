@@ -50,4 +50,25 @@ public class AzureNetworkSecurityGroupTagUpdateStrategy implements TagUpdateStra
 
         azureClient.updateNetworkSecurityGroupTags(reference, mergeTags(existingTags, tags));
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        String reference = cloudResource.getReference();
+        if (StringUtils.isBlank(reference)) {
+            LOGGER.warn("Skipping tag deletion for {} (AZURE_SECURITY_GROUP): resource reference is null.",
+                    cloudResource.getName());
+            return;
+        }
+        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
+
+        Map<String, String> existingTags = azureClient.getNetworkSecurityGroupTags(reference);
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.debug("No tags to delete for network security group {}, skipping.", reference);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, reference, tagKeys, existingTags, remainingTags.keySet());
+        azureClient.updateNetworkSecurityGroupTags(reference, remainingTags);
+    }
 }

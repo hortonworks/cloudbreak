@@ -57,4 +57,30 @@ public class GcpAddressTagUpdateStrategy implements TagUpdateStrategy {
 
         compute.addresses().setLabels(project, region, addressName, setLabelsRequest).execute();
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        Compute compute = gcpContext.getCompute();
+        String project = gcpContext.getProjectId();
+        String region = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
+        String addressName = cloudResource.getName();
+
+        Address address = compute.addresses().get(project, region, addressName).execute();
+
+        Map<String, String> existingLabels = address.getLabels();
+        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
+            LOGGER.debug("No tags to delete for reserved IP {}, skipping.", cloudResource.getName());
+            return;
+        }
+
+        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
+        logTagDeletion(LOGGER, addressName, tagKeys, existingLabels, remainingLabels.keySet());
+
+        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest();
+        setLabelsRequest.setLabelFingerprint(address.getLabelFingerprint());
+        setLabelsRequest.setLabels(remainingLabels);
+
+        compute.addresses().setLabels(project, region, addressName, setLabelsRequest).execute();
+    }
 }

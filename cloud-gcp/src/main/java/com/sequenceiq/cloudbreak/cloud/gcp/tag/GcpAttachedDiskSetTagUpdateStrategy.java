@@ -56,6 +56,26 @@ public class GcpAttachedDiskSetTagUpdateStrategy implements TagUpdateStrategy {
         }
     }
 
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+
+        if (volumeSetAttributes == null || volumeSetAttributes.getVolumes() == null
+                || volumeSetAttributes.getVolumes().isEmpty()) {
+            LOGGER.warn("No volumes found in attributes for GCP_ATTACHED_DISKSET: {}", cloudResource.getName());
+            return;
+        }
+
+        Compute compute = gcpContext.getCompute();
+        String project = gcpContext.getProjectId();
+        String zone = cloudResource.getAvailabilityZone();
+
+        for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
+            deleteDiskLabels(compute, project, zone, volume, tagKeys);
+        }
+    }
+
     private void updateDiskLabels(Compute compute, String project, String zone,
             VolumeSetAttributes.Volume volume, Map<String, String> newLabels) throws IOException {
 
@@ -76,5 +96,28 @@ public class GcpAttachedDiskSetTagUpdateStrategy implements TagUpdateStrategy {
         compute.disks().setLabels(project, zone, diskName, labelsRequest).execute();
 
         LOGGER.debug("Updated labels for GCP disk: {}", diskName);
+    }
+
+    private void deleteDiskLabels(Compute compute, String project, String zone,
+            VolumeSetAttributes.Volume volume, Set<String> tagKeys) throws IOException {
+
+        String diskName = volume.getId();
+
+        Disk disk = compute.disks().get(project, zone, diskName).execute();
+
+        Map<String, String> existingLabels = disk.getLabels();
+        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
+            LOGGER.debug("No tags to delete for disk {}, skipping.", diskName);
+            return;
+        }
+
+        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
+        logTagDeletion(LOGGER, diskName, tagKeys, existingLabels, remainingLabels.keySet());
+
+        ZoneSetLabelsRequest labelsRequest = new ZoneSetLabelsRequest()
+                .setLabelFingerprint(disk.getLabelFingerprint())
+                .setLabels(remainingLabels);
+
+        compute.disks().setLabels(project, zone, diskName, labelsRequest).execute();
     }
 }

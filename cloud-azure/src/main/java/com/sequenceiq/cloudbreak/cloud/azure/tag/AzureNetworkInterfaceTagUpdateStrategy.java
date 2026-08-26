@@ -50,4 +50,25 @@ public class AzureNetworkInterfaceTagUpdateStrategy implements TagUpdateStrategy
 
         azureClient.updateNetworkInterfaceTags(reference, mergeTags(existingTags, tags));
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        String reference = cloudResource.getReference();
+        if (StringUtils.isBlank(reference)) {
+            LOGGER.warn("Skipping tag deletion for {} (AZURE_NETWORK_INTERFACE): resource reference is null.",
+                    cloudResource.getName());
+            return;
+        }
+        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
+
+        Map<String, String> existingTags = azureClient.getNetworkInterfaceTags(reference);
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.debug("No tags to delete for network interface {}, skipping.", reference);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, reference, tagKeys, existingTags, remainingTags.keySet());
+        azureClient.updateNetworkInterfaceTags(reference, remainingTags);
+    }
 }

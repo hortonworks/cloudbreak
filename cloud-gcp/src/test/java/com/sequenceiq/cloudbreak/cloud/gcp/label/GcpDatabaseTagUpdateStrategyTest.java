@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.cloud.gcp.label;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,6 +90,57 @@ class GcpDatabaseTagUpdateStrategyTest {
         when(gcpContext.getProjectId()).thenReturn(PROJECT_ID);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
+    }
+
+    @Test
+    void testDeleteDatabaseLabels() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_DATABASE);
+
+        Settings existingSettings = new Settings()
+                .setUserLabels(EXISTING_LABELS)
+                .setSettingsVersion(SETTINGS_VERSION);
+        DatabaseInstance databaseInstance = new DatabaseInstance()
+                .setSettings(existingSettings);
+
+        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        when(cloudCredential.getName()).thenReturn(CLOUD_CREDENTIAL_NAME);
+        when(gcpSQLAdminFactory.buildSQLAdmin(cloudCredential, CLOUD_CREDENTIAL_NAME)).thenReturn(sqlAdmin);
+        when(sqlAdmin.instances()).thenReturn(sqlAdminInstances);
+        when(sqlAdminInstances.get(PROJECT_ID, RESOURCE_NAME)).thenReturn(sqlAdminInstancesGet);
+        when(sqlAdminInstancesGet.execute()).thenReturn(databaseInstance);
+        when(sqlAdminInstances.patch(eq(PROJECT_ID), eq(RESOURCE_NAME), any())).thenReturn(sqlAdminInstancesPatch);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        ArgumentCaptor<DatabaseInstance> patchCaptor = ArgumentCaptor.forClass(DatabaseInstance.class);
+        verify(sqlAdminInstances).patch(eq(PROJECT_ID), eq(RESOURCE_NAME), patchCaptor.capture());
+        verify(sqlAdminInstancesPatch).execute();
+
+        DatabaseInstance capturedPatch = patchCaptor.getValue();
+        assertEquals(Map.of(), capturedPatch.getSettings().getUserLabels());
+        assertEquals(SETTINGS_VERSION, capturedPatch.getSettings().getSettingsVersion());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_DATABASE);
+
+        Settings existingSettings = new Settings()
+                .setUserLabels(Map.of("otherKey", "otherValue"))
+                .setSettingsVersion(SETTINGS_VERSION);
+        DatabaseInstance databaseInstance = new DatabaseInstance()
+                .setSettings(existingSettings);
+
+        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        when(cloudCredential.getName()).thenReturn(CLOUD_CREDENTIAL_NAME);
+        when(gcpSQLAdminFactory.buildSQLAdmin(cloudCredential, CLOUD_CREDENTIAL_NAME)).thenReturn(sqlAdmin);
+        when(sqlAdmin.instances()).thenReturn(sqlAdminInstances);
+        when(sqlAdminInstances.get(PROJECT_ID, RESOURCE_NAME)).thenReturn(sqlAdminInstancesGet);
+        when(sqlAdminInstancesGet.execute()).thenReturn(databaseInstance);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(sqlAdminInstancesPatch, times(0)).execute();
     }
 
     @Test

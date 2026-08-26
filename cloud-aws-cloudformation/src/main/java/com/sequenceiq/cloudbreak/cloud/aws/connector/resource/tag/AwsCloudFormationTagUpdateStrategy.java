@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
@@ -40,6 +41,7 @@ import software.amazon.awssdk.services.cloudformation.model.StackResource;
 import software.amazon.awssdk.services.cloudformation.model.Tag;
 import software.amazon.awssdk.services.cloudformation.model.UpdateStackRequest;
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 
 @Service
 public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
@@ -71,16 +73,10 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
                 new AwsCredentialView(authenticatedContext.getCloudCredential()), regionName);
         String stackName = cloudResource.getName();
 
-        DescribeStacksResponse describeStacksResponse = cloudFormationClient.describeStacks(DescribeStacksRequest.builder()
-                .stackName(stackName)
-                .build());
-
-        if (describeStacksResponse.stacks().isEmpty()) {
-            LOGGER.warn("CloudFormation stack {} not found, skipping tag update", stackName);
+        Stack stack = describeStackOrNull(cloudFormationClient, stackName, "update");
+        if (stack == null) {
             return;
         }
-
-        Stack stack = describeStacksResponse.stacks().getFirst();
 
         Map<String, String> existingTags = stack.tags().stream()
                 .collect(Collectors.toMap(Tag::key, Tag::value));
@@ -110,6 +106,69 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
 
         updateLaunchTemplateAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tags);
         updateAutoScalingGroupAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tags);
+    }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
+        AmazonCloudFormationClient cloudFormationClient = awsCloudFormationClient.createCloudFormationClient(
+                new AwsCredentialView(authenticatedContext.getCloudCredential()), regionName);
+        String stackName = cloudResource.getName();
+
+        Stack stack = describeStackOrNull(cloudFormationClient, stackName, "deletion");
+        if (stack == null) {
+            return;
+        }
+
+        Map<String, String> existingTags = stack.tags().stream()
+                .collect(Collectors.toMap(Tag::key, Tag::value));
+
+        if (hasTagKeysToDelete(existingTags, tagKeys)) {
+            Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+            Collection<Tag> cloudFormationTags = awsTaggingService.prepareCloudformationTags(authenticatedContext, remainingTags);
+
+            logTagDeletion(LOGGER, stackName, tagKeys, existingTags, remainingTags.keySet());
+
+            cloudFormationClient.updateStack(
+                    UpdateStackRequest.builder()
+                            .stackName(stackName)
+                            .usePreviousTemplate(true)
+                            .parameters(stack.parameters()
+                                    .stream()
+                                    .map(p -> Parameter.builder()
+                                            .parameterKey(p.parameterKey())
+                                            .usePreviousValue(true)
+                                            .build())
+                                    .toList())
+                            .tags(cloudFormationTags)
+                            .capabilities(stack.capabilities())
+                            .build()
+            );
+        } else {
+            LOGGER.info("No tags to delete for CloudFormation stack {}, skipping stack tag update.", stackName);
+        }
+
+        deleteLaunchTemplateAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tagKeys);
+        deleteAutoScalingGroupAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tagKeys);
+    }
+
+    private Stack describeStackOrNull(AmazonCloudFormationClient cloudFormationClient, String stackName, String operation) {
+        try {
+            DescribeStacksResponse describeStacksResponse = cloudFormationClient.describeStacks(DescribeStacksRequest.builder()
+                    .stackName(stackName)
+                    .build());
+            if (describeStacksResponse.stacks().isEmpty()) {
+                LOGGER.warn("CloudFormation stack {} not found, skipping tag {}", stackName, operation);
+                return null;
+            }
+            return describeStacksResponse.stacks().getFirst();
+        } catch (AwsServiceException e) {
+            if (e.awsErrorDetails().errorMessage().contains(stackName + " does not exist")) {
+                LOGGER.warn("CloudFormation stack {} not found, skipping tag {}", stackName, operation);
+                return null;
+            }
+            throw e;
+        }
     }
 
     private void updateLaunchTemplateAndInstanceTags(AuthenticatedContext authenticatedContext,
@@ -197,5 +256,69 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
                 .resources(instanceIds)
                 .tags(ec2Tags)
                 .build());
+    }
+
+    private void deleteLaunchTemplateAndInstanceTags(AuthenticatedContext authenticatedContext,
+            AmazonCloudFormationClient cloudFormationClient, String stackName, Set<String> tagKeys) {
+        List<String> launchTemplateIds = resolveLaunchTemplateIds(cloudFormationClient, stackName);
+
+        if (launchTemplateIds.isEmpty()) {
+            LOGGER.debug("No launch templates found for stack {}, skipping launch template tag deletion.", stackName);
+            return;
+        }
+
+        AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
+        Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = tagKeys.stream()
+                .map(key -> software.amazon.awssdk.services.ec2.model.Tag.builder().key(key).build())
+                .toList();
+
+        logTagKeyDeletion(LOGGER, String.format("launch templates %s of stack %s", launchTemplateIds, stackName), tagKeys);
+
+        ec2Client.deleteTags(DeleteTagsRequest.builder()
+                .resources(launchTemplateIds)
+                .tags(ec2Tags)
+                .build());
+        LOGGER.debug("Deleted tags for {} launch templates of stack {}", launchTemplateIds.size(), stackName);
+    }
+
+    private void deleteAutoScalingGroupAndInstanceTags(AuthenticatedContext authenticatedContext,
+            AmazonCloudFormationClient cloudFormationClient, String stackName, Set<String> tagKeys) {
+        List<String> asgNames = resolveAutoScalingGroupNames(cloudFormationClient, stackName);
+        if (asgNames.isEmpty()) {
+            LOGGER.debug("No Auto Scaling Groups found for stack {}, skipping ASG tag deletion.", stackName);
+            return;
+        }
+
+        String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
+        AmazonAutoScalingClient asgClient = awsCloudFormationClient.createAutoScalingClient(
+                new AwsCredentialView(authenticatedContext.getCloudCredential()), regionName);
+        AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
+        Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = tagKeys.stream()
+                .map(key -> software.amazon.awssdk.services.ec2.model.Tag.builder().key(key).build())
+                .toList();
+
+        DescribeAutoScalingGroupsResponse describeResponse = asgClient.describeAutoScalingGroups(
+                DescribeAutoScalingGroupsRequest.builder()
+                        .autoScalingGroupNames(asgNames)
+                        .build());
+
+        List<String> allInstanceIds = new ArrayList<>();
+
+        for (AutoScalingGroup asg : describeResponse.autoScalingGroups()) {
+            List<String> instanceIds = asg.instances().stream()
+                    .map(software.amazon.awssdk.services.autoscaling.model.Instance::instanceId)
+                    .toList();
+            allInstanceIds.addAll(instanceIds);
+        }
+
+        if (!allInstanceIds.isEmpty()) {
+            logTagKeyDeletion(LOGGER, String.format("instances %s of stack %s", allInstanceIds, stackName), tagKeys);
+            ec2Client.deleteTags(DeleteTagsRequest.builder()
+                    .resources(allInstanceIds)
+                    .tags(ec2Tags)
+                    .build());
+            LOGGER.debug("Deleted tags for {} existing instances across {} Auto Scaling Groups",
+                    allInstanceIds.size(), asgNames.size());
+        }
     }
 }

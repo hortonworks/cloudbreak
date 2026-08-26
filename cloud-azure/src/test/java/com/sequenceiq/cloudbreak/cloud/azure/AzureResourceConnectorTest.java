@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -439,10 +440,65 @@ public class AzureResourceConnectorTest {
         verifyNoInteractions(azureResourceTagUpdaterService);
     }
 
+    @Test
+    void testDeleteTags() {
+        CloudResource azureInstance = CloudResource.builder()
+                .withType(AZURE_INSTANCE)
+                .withName("azureInstance")
+                .build();
+
+        CloudResource azureDisk = CloudResource.builder()
+                .withType(AZURE_DISK)
+                .withName("azureDisk")
+                .build();
+
+        CloudResource azureLoadBalancer = CloudResource.builder()
+                .withType(AZURE_LOAD_BALANCER)
+                .withName("azureLoadBalancer")
+                .build();
+
+        List<CloudResource> cloudResources = List.of(azureInstance, azureDisk, azureLoadBalancer);
+        Set<String> tagKeys = Set.of("custom");
+
+        underTest.deleteTags(ac, cloudResources, tagKeys);
+
+        verify(azureResourceTagUpdaterService).deleteTags(ac, cloudResources, tagKeys);
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyAndNullTagKeys")
+    void testDeleteTagsWhenTagKeysIsEmpty(Set<String> tagKeys) {
+        CloudResource azureInstance = CloudResource.builder()
+                .withType(AZURE_INSTANCE)
+                .withName("azureInstance")
+                .build();
+
+        CloudResource azureDisk = CloudResource.builder()
+                .withType(AZURE_DISK)
+                .withName("azureDisk")
+                .build();
+
+        CloudResource azureLoadBalancer = CloudResource.builder()
+                .withType(AZURE_LOAD_BALANCER)
+                .withName("azureLoadBalancer")
+                .build();
+
+        underTest.deleteTags(ac, List.of(azureInstance, azureDisk, azureLoadBalancer), tagKeys);
+
+        verifyNoInteractions(azureResourceTagUpdaterService);
+    }
+
     private static Stream<Arguments> emptyAndNullUserDefinedTags() {
         return Stream.of(
                 Arguments.of((Object) null),
                 Arguments.of(Collections.emptyMap())
+        );
+    }
+
+    private static Stream<Arguments> emptyAndNullTagKeys() {
+        return Stream.of(
+                Arguments.of((Object) null),
+                Arguments.of(Collections.emptySet())
         );
     }
 }

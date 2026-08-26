@@ -23,6 +23,8 @@ import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionRequest;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionResponse;
 import software.amazon.awssdk.services.kms.model.TagResourceRequest;
 import software.amazon.awssdk.services.kms.model.TagResourceResponse;
+import software.amazon.awssdk.services.kms.model.UntagResourceRequest;
+import software.amazon.awssdk.services.kms.model.UntagResourceResponse;
 
 public class AmazonKmsClient extends AmazonClient {
 
@@ -74,5 +76,9 @@ public class AmazonKmsClient extends AmazonClient {
 
     public TagResourceResponse tagResource(TagResourceRequest tagResourceRequest) {
         return client.tagResource(tagResourceRequest);
+    }
+
+    public UntagResourceResponse untagResource(UntagResourceRequest untagResourceRequest) {
+        return client.untagResource(untagResourceRequest);
     }
 }

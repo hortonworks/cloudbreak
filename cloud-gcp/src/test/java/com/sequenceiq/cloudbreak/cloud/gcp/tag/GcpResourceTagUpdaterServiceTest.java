@@ -6,7 +6,9 @@ import static com.sequenceiq.common.api.type.ResourceType.GCP_DISK;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_SUBNET;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -37,6 +39,14 @@ class GcpResourceTagUpdaterServiceTest {
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
+    private static final Set<String> TAG_KEYS = Set.of("custom");
+
+    private static final String USER_TAG_KEY = "Owner Name";
+
+    private static final String NORMALIZED_TAG_KEY = "owner_name";
+
+    private static final Set<String> USER_TAG_KEYS = Set.of(USER_TAG_KEY);
+
     @Mock
     private AuthenticatedContext authenticatedContext;
 
@@ -55,6 +65,7 @@ class GcpResourceTagUpdaterServiceTest {
     void setUp() {
         when(instanceStrategy.supportedTypes()).thenReturn(Set.of(GCP_INSTANCE));
         when(diskStrategy.supportedTypes()).thenReturn(Set.of(GCP_DISK, GCP_ATTACHED_DISK, GCP_ATTACHED_DISKSET));
+        lenient().when(gcpLabelUtil.transformLabelKeyOrValue(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
         underTest = new GcpResourceTagUpdaterService(List.of(instanceStrategy, diskStrategy), gcpLabelUtil);
     }
 
@@ -98,6 +109,55 @@ class GcpResourceTagUpdaterServiceTest {
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
+    }
+
+    @Test
+    void testDeleteTagsGcpInstance() throws IOException {
+        CloudResource cloudResource = buildResource(GCP_INSTANCE, INSTANCE_ID, null);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verify(instanceStrategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verifyNoMoreInteractions(diskStrategy);
+    }
+
+    @Test
+    void testDeleteTagsNormalizesTagKeys() throws IOException {
+        CloudResource cloudResource = buildResource(GCP_INSTANCE, INSTANCE_ID, null);
+        when(gcpLabelUtil.transformLabelKeyOrValue(USER_TAG_KEY)).thenReturn(NORMALIZED_TAG_KEY);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), USER_TAG_KEYS);
+
+        verify(instanceStrategy).deleteTags(authenticatedContext, cloudResource, Set.of(NORMALIZED_TAG_KEY));
+        verifyNoMoreInteractions(diskStrategy);
+    }
+
+    @Test
+    void testDeleteTagsGcpDisk() throws IOException {
+        CloudResource cloudResource = buildResource(GCP_DISK, null, RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verify(diskStrategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verifyNoMoreInteractions(instanceStrategy);
+    }
+
+    @Test
+    void testDeleteTagsUnsupportedType() throws IOException {
+        CloudResource cloudResource = buildResource(GCP_SUBNET, null, RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
+
+        verifyNoMoreInteractions(instanceStrategy, diskStrategy);
+    }
+
+    @Test
+    void testDeleteTagsWhenRuntimeExceptionOccurs() throws IOException {
+        CloudResource cloudResource = buildResource(GCP_INSTANCE, INSTANCE_ID, null);
+        doThrow(new RuntimeException("GCP error")).when(instanceStrategy)
+                .deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+
+        assertThrows(RuntimeException.class, () -> underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS));
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

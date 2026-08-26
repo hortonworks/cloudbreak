@@ -27,6 +27,8 @@ import software.amazon.awssdk.services.secretsmanager.model.PutResourcePolicyRes
 import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceResponse;
+import software.amazon.awssdk.services.secretsmanager.model.UntagResourceRequest;
+import software.amazon.awssdk.services.secretsmanager.model.UntagResourceResponse;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretRequest;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretResponse;
 
@@ -122,6 +124,16 @@ public class AmazonSecretsManagerClient extends AmazonClient {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 return secretsManagerClient.tagResource(tagResourceRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
+    }
+
+    public UntagResourceResponse untagResource(UntagResourceRequest untagResourceRequest) {
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.untagResource(untagResourceRequest);
             } catch (AwsServiceException ex) {
                 throw createActionFailedExceptionIfRetriableError(ex);
             }

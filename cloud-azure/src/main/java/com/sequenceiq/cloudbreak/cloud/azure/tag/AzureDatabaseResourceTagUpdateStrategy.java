@@ -57,6 +57,26 @@ public class AzureDatabaseResourceTagUpdateStrategy implements TagUpdateStrategy
         }
     }
 
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        String resourceId = cloudResource.getReference();
+        if (StringUtils.isBlank(resourceId)) {
+            LOGGER.warn("Skipping tag deletion for {} (AZURE_DATABASE): resource reference is null.",
+                    cloudResource.getName());
+            return;
+        }
+        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
+        String resourceType = ResourceUtils.resourceTypeFromResourceId(resourceId);
+
+        if (FLEXIBLE_SERVER_RESOURCE_TYPE.equalsIgnoreCase(resourceType)) {
+            deleteFlexibleServerTags(azureClient, resourceId, tagKeys);
+        } else if (SINGLE_SERVER_RESOURCE_TYPE.equalsIgnoreCase(resourceType)) {
+            deleteSingleServerTags(azureClient, resourceId, tagKeys);
+        } else {
+            LOGGER.debug("Azure database with resourceId {} has not supported DB type", resourceId);
+        }
+    }
+
     private void updateFlexibleServerTags(AzureClient azureClient, String resourceId, Map<String, String> tags) {
         Map<String, String> existingTags = azureClient.getFlexibleServerTags(resourceId);
 
@@ -81,5 +101,31 @@ public class AzureDatabaseResourceTagUpdateStrategy implements TagUpdateStrategy
         Map<String, String> mergedTags = mergeTags(existingTags, tags);
         LOGGER.debug("Updating single server tags for {} with tags {}", resourceId, mergedTags);
         azureClient.updateSingleServerTags(resourceId, mergedTags);
+    }
+
+    private void deleteFlexibleServerTags(AzureClient azureClient, String resourceId, Set<String> tagKeys) {
+        Map<String, String> existingTags = azureClient.getFlexibleServerTags(resourceId);
+
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.debug("No tags to delete for Azure flexible server {}, skipping.", resourceId);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, resourceId, tagKeys, existingTags, remainingTags.keySet());
+        azureClient.updateFlexibleServerTags(resourceId, remainingTags);
+    }
+
+    private void deleteSingleServerTags(AzureClient azureClient, String resourceId, Set<String> tagKeys) {
+        Map<String, String> existingTags = azureClient.getSingleServerTags(resourceId);
+
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.debug("No tags to delete for Azure single server {}, skipping.", resourceId);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, resourceId, tagKeys, existingTags, remainingTags.keySet());
+        azureClient.updateSingleServerTags(resourceId, remainingTags);
     }
 }

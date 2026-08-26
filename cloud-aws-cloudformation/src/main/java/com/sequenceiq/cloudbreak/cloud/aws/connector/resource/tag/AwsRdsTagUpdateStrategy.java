@@ -36,4 +36,10 @@ public class AwsRdsTagUpdateStrategy implements TagUpdateStrategy {
         LOGGER.debug("Cloud resource {} with type {} is taggable but tag update is already handled by the AwsCloudFormationTagUpdateStrategy.",
                 cloudResource.getName(), cloudResource.getType());
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        LOGGER.debug("Cloud resource {} with type {} is taggable but tag deletion is already handled by the AwsCloudFormationTagUpdateStrategy.",
+                cloudResource.getName(), cloudResource.getType());
+    }
 }

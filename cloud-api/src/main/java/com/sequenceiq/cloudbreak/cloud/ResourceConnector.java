@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -499,6 +500,34 @@ public interface ResourceConnector {
      * @param tags the tags to apply
      */
     default void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Deletes the specified tag keys from the given cloud resources.
+     * Deleting a non-existent key on a resource is a no-op.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param cloudResources the list of cloud resources whose tags are being deleted
+     * @param tagKeys the tag keys to remove
+     */
+    default void deleteTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        if (tagKeys == null || tagKeys.isEmpty()) {
+            LOGGER.debug("Skip deleting user defined tags on cloud resources because tag keys are empty.");
+            return;
+        }
+        deleteCloudResourcesTags(authenticatedContext, cloudResources, tagKeys);
+    }
+
+    /**
+     * Deletes tag keys from cloud resources.
+     * Providers override this method to call their specific tag updater service.
+     *
+     * @param authenticatedContext the authenticated context
+     * @param cloudResources cloud resources to update
+     * @param tagKeys the tag keys to remove
+     */
+    default void deleteCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

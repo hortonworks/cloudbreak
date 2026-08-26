@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -628,6 +629,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Override
     public void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         azureResourceTagUpdaterService.updateTags(authenticatedContext, cloudResources, tags);
+    }
+
+    @Override
+    public void deleteCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        azureResourceTagUpdaterService.deleteTags(authenticatedContext, cloudResources, tagKeys);
     }
 
     @Override

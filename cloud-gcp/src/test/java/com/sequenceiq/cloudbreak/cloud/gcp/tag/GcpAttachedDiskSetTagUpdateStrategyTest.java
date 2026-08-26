@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,6 +90,49 @@ class GcpAttachedDiskSetTagUpdateStrategyTest {
         when(gcpContext.getProjectId()).thenReturn(PROJECT_ID);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
+    }
+
+    @Test
+    void testDeleteTags() throws Exception {
+        CloudResource cloudResource = buildCloudResourceWithVolumes(
+                List.of(
+                        buildVolume(DISK_ID_1)
+                )
+        );
+
+        Disk disk1 = new Disk().setLabelFingerprint(FINGERPRINT_1).setLabels(EXISTING_LABELS);
+
+        when(compute.disks()).thenReturn(disks);
+        when(disks.get(PROJECT_ID, ZONE, DISK_ID_1)).thenReturn(disksGet1);
+        when(disksGet1.execute()).thenReturn(disk1);
+        when(disks.setLabels(eq(PROJECT_ID), eq(ZONE), eq(DISK_ID_1), any(ZoneSetLabelsRequest.class)))
+                .thenReturn(disksSetLabels1);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(disks).setLabels(eq(PROJECT_ID), eq(ZONE), eq(DISK_ID_1),
+                argThat(req -> FINGERPRINT_1.equals(req.getLabelFingerprint())
+                        && Map.of().equals(req.getLabels())));
+        verify(disksSetLabels1).execute();
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() throws Exception {
+        CloudResource cloudResource = buildCloudResourceWithVolumes(
+                List.of(
+                        buildVolume(DISK_ID_1)
+                )
+        );
+
+        Disk disk1 = new Disk().setLabelFingerprint(FINGERPRINT_1).setLabels(Map.of("otherKey", "otherValue"));
+
+        when(compute.disks()).thenReturn(disks);
+        when(disks.get(PROJECT_ID, ZONE, DISK_ID_1)).thenReturn(disksGet1);
+        when(disksGet1.execute()).thenReturn(disk1);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(disksSetLabels1, times(0)).execute();
     }
 
     @Test

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,8 @@ class AzureResourceGroupTagUpdateStrategyTest {
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
+    private static final Map<String, String> EXISTING_TAGS = Map.of("existingKey", "existingValue");
+
     @Mock
     private AuthenticatedContext authenticatedContext;
 
@@ -54,6 +57,28 @@ class AzureResourceGroupTagUpdateStrategyTest {
     void setUp() {
         lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         lenient().when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+    }
+
+    @Test
+    void testDeleteTagsAzureResourceGroup() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_RESOURCE_GROUP, RESOURCE_NAME, RESOURCE_REFERENCE);
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getResourceGroupTags(RESOURCE_NAME)).thenReturn(EXISTING_TAGS);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient).updateResourceGroupTags(RESOURCE_NAME, Map.of());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_RESOURCE_GROUP, RESOURCE_NAME, RESOURCE_REFERENCE);
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getResourceGroupTags(RESOURCE_NAME)).thenReturn(Map.of("otherKey", "otherValue"));
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient, times(0)).updateResourceGroupTags(RESOURCE_NAME, Map.of());
     }
 
     @Test
@@ -82,6 +107,14 @@ class AzureResourceGroupTagUpdateStrategyTest {
         CloudResource cloudResource = buildResource(ResourceType.AZURE_RESOURCE_GROUP, " ", RESOURCE_REFERENCE);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        verifyNoInteractions(azureClient);
+    }
+
+    @Test
+    void testDeleteTagsAzureResourceGroupSkippedWhenNameIsBlank() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_RESOURCE_GROUP, " ", RESOURCE_REFERENCE);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
 
         verifyNoInteractions(azureClient);
     }

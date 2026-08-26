@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -278,10 +279,43 @@ public class GcpResourceConnectorTest {
         verifyNoInteractions(gcpResourceTagUpdaterService);
     }
 
+    @Test
+    void testDeleteTags() {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudResource cloudResource1 = cloudResource("test-1", GCP_INSTANCE);
+        CloudResource cloudResource2 = cloudResource("test-2", GCP_INSTANCE);
+        List<CloudResource> cloudResources = List.of(cloudResource1, cloudResource2);
+        Set<String> tagKeys = Set.of("custom");
+
+        underTest.deleteTags(authenticatedContext, cloudResources, tagKeys);
+
+        verify(gcpResourceTagUpdaterService).deleteTags(authenticatedContext, cloudResources, tagKeys);
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyAndNullTagKeys")
+    void testDeleteTagsWhenTagKeysIsEmpty(Set<String> tagKeys) {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudResource cloudResource1 = cloudResource("test-1", GCP_INSTANCE);
+        CloudResource cloudResource2 = cloudResource("test-2", GCP_INSTANCE);
+        List<CloudResource> cloudResources = List.of(cloudResource1, cloudResource2);
+
+        underTest.deleteTags(authenticatedContext, cloudResources, tagKeys);
+
+        verifyNoInteractions(gcpResourceTagUpdaterService);
+    }
+
     private static Stream<Arguments> emptyAndNullUserDefinedTags() {
         return Stream.of(
                 Arguments.of((Object) null),
                 Arguments.of(Collections.emptyMap())
+        );
+    }
+
+    private static Stream<Arguments> emptyAndNullTagKeys() {
+        return Stream.of(
+                Arguments.of((Object) null),
+                Arguments.of(Collections.emptySet())
         );
     }
 

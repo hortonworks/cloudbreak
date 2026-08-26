@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ class AzureAvailabilitySetTagUpdateStrategyTest {
     private static final String RESOURCE_REFERENCE = "resourceReference";
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Map<String, String> EXISTING_TAGS = Map.of("existingKey", "existingValue");
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -52,6 +55,28 @@ class AzureAvailabilitySetTagUpdateStrategyTest {
     void setUp() {
         lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         lenient().when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+    }
+
+    @Test
+    void testDeleteTagsAzureAvailabilitySet() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_AVAILABILITY_SET, null, RESOURCE_REFERENCE);
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getAvailabilitySetTags(RESOURCE_REFERENCE)).thenReturn(EXISTING_TAGS);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient).updateAvailabilitySetTags(RESOURCE_REFERENCE, Map.of());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_AVAILABILITY_SET, null, RESOURCE_REFERENCE);
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getAvailabilitySetTags(RESOURCE_REFERENCE)).thenReturn(Map.of("otherKey", "otherValue"));
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient, times(0)).updateAvailabilitySetTags(RESOURCE_REFERENCE, Map.of());
     }
 
     @Test
@@ -80,6 +105,14 @@ class AzureAvailabilitySetTagUpdateStrategyTest {
         CloudResource cloudResource = buildResource(ResourceType.AZURE_AVAILABILITY_SET, null, null);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        verifyNoInteractions(azureClient);
+    }
+
+    @Test
+    void testDeleteTagsAzureAvailabilitySetSkippedWhenReferenceIsNull() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_AVAILABILITY_SET, null, null);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
 
         verifyNoInteractions(azureClient);
     }

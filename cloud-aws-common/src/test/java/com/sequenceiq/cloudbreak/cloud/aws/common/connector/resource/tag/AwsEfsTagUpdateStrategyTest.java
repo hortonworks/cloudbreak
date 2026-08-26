@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import software.amazon.awssdk.services.efs.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.efs.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.efs.model.Tag;
 import software.amazon.awssdk.services.efs.model.TagResourceRequest;
+import software.amazon.awssdk.services.efs.model.UntagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AwsEfsTagUpdateStrategyTest {
@@ -85,6 +87,41 @@ class AwsEfsTagUpdateStrategyTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(region);
         when(region.getRegionName()).thenReturn(REGION_NAME);
+    }
+
+    @Test
+    void testDeleteTagsForAwsEfs() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createElasticFileSystemClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(efsClient);
+        when(efsClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(efsClient).untagResource(UntagResourceRequest.builder()
+                .resourceId(RESOURCE_REFERENCE)
+                .tagKeys(Set.of(EXISTING_TAG_KEY))
+                .build());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createElasticFileSystemClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(efsClient);
+        when(efsClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key("otherKey")
+                        .value("otherValue")
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(efsClient, times(0)).untagResource(any(UntagResourceRequest.class));
     }
 
     @Test

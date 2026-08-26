@@ -25,6 +25,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.Tag;
 import software.amazon.awssdk.services.kms.model.TagResourceRequest;
+import software.amazon.awssdk.services.kms.model.UntagResourceRequest;
 
 @Service
 public class AwsKmsTagUpdateStrategy implements TagUpdateStrategy {
@@ -67,6 +68,35 @@ public class AwsKmsTagUpdateStrategy implements TagUpdateStrategy {
         kmsClient.tagResource(TagResourceRequest.builder()
                 .keyId(keyId)
                 .tags(kmsTags)
+                .build());
+    }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        AmazonKmsClient kmsClient = commonAwsClient.createAWSKMS(
+                new AwsCredentialView(authenticatedContext.getCloudCredential()),
+                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+
+        String keyId = cloudResource.getReference();
+
+        Map<String, String> existingTags = kmsClient.listResourceTags(
+                        ListResourceTagsRequest.builder()
+                                .keyId(keyId)
+                                .build())
+                .tags().stream()
+                .collect(Collectors.toMap(Tag::tagKey, Tag::tagValue));
+
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.info("No tags to delete for KMS key {}, skipping.", keyId);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, keyId, tagKeys, existingTags, remainingTags.keySet());
+
+        kmsClient.untagResource(UntagResourceRequest.builder()
+                .keyId(keyId)
+                .tagKeys(tagKeys)
                 .build());
     }
 }

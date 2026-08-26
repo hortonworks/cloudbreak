@@ -49,4 +49,24 @@ public class AzureResourceGroupTagUpdateStrategy implements TagUpdateStrategy {
 
         azureClient.updateResourceGroupTags(name, mergeTags(existingTags, tags));
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        String name = cloudResource.getName();
+        if (StringUtils.isBlank(name)) {
+            LOGGER.warn("Skipping tag deletion for resource group: resource name is null.");
+            return;
+        }
+        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
+
+        Map<String, String> existingTags = azureClient.getResourceGroupTags(name);
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.debug("No tags to delete for resource group {}, skipping.", name);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, name, tagKeys, existingTags, remainingTags.keySet());
+        azureClient.updateResourceGroupTags(name, remainingTags);
+    }
 }

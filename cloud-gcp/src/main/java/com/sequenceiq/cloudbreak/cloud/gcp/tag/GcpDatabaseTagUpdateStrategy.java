@@ -64,4 +64,32 @@ public class GcpDatabaseTagUpdateStrategy implements TagUpdateStrategy {
                 .patch(project, instanceName, patch)
                 .execute();
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        String project = gcpContext.getProjectId();
+        String instanceName = cloudResource.getName();
+
+        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudCredential().getName());
+        DatabaseInstance databaseInstance = sqlAdmin.instances().get(project, instanceName).execute();
+        Settings existingSettings = databaseInstance.getSettings();
+
+        Map<String, String> existingLabels = existingSettings.getUserLabels();
+        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
+            LOGGER.debug("No tags to delete for database {}, skipping.", cloudResource.getName());
+            return;
+        }
+
+        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
+        logTagDeletion(LOGGER, instanceName, tagKeys, existingLabels, remainingLabels.keySet());
+        DatabaseInstance patch = new DatabaseInstance()
+                .setSettings(new Settings()
+                        .setUserLabels(remainingLabels)
+                        .setSettingsVersion(existingSettings.getSettingsVersion()));
+
+        sqlAdmin.instances()
+                .patch(project, instanceName, patch)
+                .execute();
+    }
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,8 @@ class AzureVolumeSetTagUpdateStrategyTest {
     private static final String RESOURCE_NAME = "resourceName";
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Map<String, String> EXISTING_TAGS = Map.of("existingKey", "existingValue");
 
     private static final String VOLUME_ID_1 = "volumeId1";
 
@@ -59,6 +62,36 @@ class AzureVolumeSetTagUpdateStrategyTest {
     void setUp() {
         lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         lenient().when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+    }
+
+    @Test
+    void testDeleteTagsAzureVolumeSet() {
+        VolumeSetAttributes.Volume volume1 = new VolumeSetAttributes.Volume(VOLUME_ID_1, "ssd", 100, null, null);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-east-1", false, null,
+                List.of(volume1), 100, null);
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_VOLUMESET, RESOURCE_NAME, RESOURCE_REFERENCE, volumeSetAttributes);
+
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getDiskTags(VOLUME_ID_1)).thenReturn(EXISTING_TAGS);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient).updateDiskTags(VOLUME_ID_1, Map.of());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        VolumeSetAttributes.Volume volume1 = new VolumeSetAttributes.Volume(VOLUME_ID_1, "ssd", 100, null, null);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-east-1", false, null,
+                List.of(volume1), 100, null);
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_VOLUMESET, RESOURCE_NAME, RESOURCE_REFERENCE, volumeSetAttributes);
+
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getDiskTags(VOLUME_ID_1)).thenReturn(Map.of("otherKey", "otherValue"));
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient, times(0)).updateDiskTags(VOLUME_ID_1, Map.of());
     }
 
     @Test
@@ -108,6 +141,24 @@ class AzureVolumeSetTagUpdateStrategyTest {
         verify(azureClient).updateDiskTags(VOLUME_ID_1, USER_DEFINED_TAGS);
         verify(azureClient, never()).getDiskTags(null);
         verify(azureClient, never()).updateDiskTags(null, USER_DEFINED_TAGS);
+    }
+
+    @Test
+    void testDeleteTagsAzureVolumeSetSkipsVolumesWithBlankId() {
+        VolumeSetAttributes.Volume volumeWithId = new VolumeSetAttributes.Volume(VOLUME_ID_1, "ssd", 100, null, null);
+        VolumeSetAttributes.Volume volumeWithoutId = new VolumeSetAttributes.Volume(null, "ssd", 100, null, null);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-east-1", false, null,
+                List.of(volumeWithoutId, volumeWithId), 100, null);
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_VOLUMESET, RESOURCE_NAME, RESOURCE_REFERENCE, volumeSetAttributes);
+
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getDiskTags(VOLUME_ID_1)).thenReturn(EXISTING_TAGS);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient).updateDiskTags(VOLUME_ID_1, Map.of());
+        verify(azureClient, never()).getDiskTags(null);
+        verify(azureClient, never()).updateDiskTags(null, Map.of());
     }
 
     private CloudResource buildResource(ResourceType type, String resourceName, String reference, VolumeSetAttributes volumeSetAttributes) {

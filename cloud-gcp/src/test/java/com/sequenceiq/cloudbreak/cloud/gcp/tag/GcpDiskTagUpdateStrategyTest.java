@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -97,6 +98,43 @@ class GcpDiskTagUpdateStrategyTest {
                 Arguments.of(ResourceType.GCP_DISK),
                 Arguments.of(ResourceType.GCP_ATTACHED_DISK)
         );
+    }
+
+    @Test
+    void testDeleteTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_DISK);
+        Disk disk = new Disk()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.disks()).thenReturn(disks);
+        when(disks.get(PROJECT_ID, ZONE, RESOURCE_NAME)).thenReturn(disksGet);
+        when(disksGet.execute()).thenReturn(disk);
+        when(disks.setLabels(eq(PROJECT_ID), eq(ZONE), eq(RESOURCE_NAME), any(ZoneSetLabelsRequest.class)))
+                .thenReturn(disksSetLabels);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(disks).setLabels(eq(PROJECT_ID), eq(ZONE), eq(RESOURCE_NAME),
+                argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
+                        && Map.of().equals(req.getLabels())));
+        verify(disksSetLabels).execute();
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_DISK);
+        Disk disk = new Disk()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(Map.of("otherKey", "otherValue"));
+
+        when(compute.disks()).thenReturn(disks);
+        when(disks.get(PROJECT_ID, ZONE, RESOURCE_NAME)).thenReturn(disksGet);
+        when(disksGet.execute()).thenReturn(disk);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(disksSetLabels, times(0)).execute();
     }
 
     @ParameterizedTest

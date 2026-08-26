@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,8 @@ class AzureInstanceTagUpdateStrategyTest {
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
+    private static final Map<String, String> EXISTING_TAGS = Map.of("existingKey", "existingValue");
+
     @Mock
     private AuthenticatedContext authenticatedContext;
 
@@ -55,6 +58,28 @@ class AzureInstanceTagUpdateStrategyTest {
     void setUp() {
         lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         lenient().when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+    }
+
+    @Test
+    void testDeleteTagsAzureInstance() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_INSTANCE, INSTANCE_ID, RESOURCE_REFERENCE);
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getVirtualMachineTags(RESOURCE_REFERENCE)).thenReturn(EXISTING_TAGS);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient).updateVirtualMachineTags(RESOURCE_REFERENCE, Map.of());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_INSTANCE, INSTANCE_ID, RESOURCE_REFERENCE);
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getVirtualMachineTags(RESOURCE_REFERENCE)).thenReturn(Map.of("otherKey", "otherValue"));
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(azureClient, times(0)).updateVirtualMachineTags(RESOURCE_REFERENCE, Map.of());
     }
 
     @Test
@@ -83,6 +108,14 @@ class AzureInstanceTagUpdateStrategyTest {
         CloudResource cloudResource = buildResource(ResourceType.AZURE_INSTANCE, INSTANCE_ID, null);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        verifyNoInteractions(azureClient);
+    }
+
+    @Test
+    void testDeleteTagsAzureInstanceSkippedWhenReferenceIsNull() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_INSTANCE, null, null);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
 
         verifyNoInteractions(azureClient);
     }

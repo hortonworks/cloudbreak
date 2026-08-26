@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.AddTagsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RemoveTagsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 
@@ -86,6 +88,47 @@ class AwsElbTagUpdateStrategyTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(region);
         when(region.getRegionName()).thenReturn(REGION_NAME);
+    }
+
+    @Test
+    void testDeleteTagsForElasticLoadBalancer() {
+        CloudResource cloudResource = buildResource(ResourceType.ELASTIC_LOAD_BALANCER, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createElasticLoadBalancingClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(elbClient);
+        when(elbClient.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tagDescriptions(TagDescription.builder()
+                        .tags(Tag.builder()
+                                .key(EXISTING_TAG_KEY)
+                                .value(EXISTING_TAG_VALUE)
+                                .build())
+                        .resourceArn(RESOURCE_REFERENCE)
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(elbClient).removeTags(RemoveTagsRequest.builder()
+                .resourceArns(RESOURCE_REFERENCE)
+                .tagKeys(Set.of(EXISTING_TAG_KEY))
+                .build());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.ELASTIC_LOAD_BALANCER, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createElasticLoadBalancingClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(elbClient);
+        when(elbClient.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tagDescriptions(TagDescription.builder()
+                        .tags(Tag.builder()
+                                .key("otherKey")
+                                .value("otherValue")
+                                .build())
+                        .resourceArn(RESOURCE_REFERENCE)
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(elbClient, times(0)).removeTags(any(RemoveTagsRequest.class));
     }
 
     @Test

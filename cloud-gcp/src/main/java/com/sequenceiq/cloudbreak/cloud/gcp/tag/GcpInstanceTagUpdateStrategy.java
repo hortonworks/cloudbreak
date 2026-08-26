@@ -57,4 +57,30 @@ public class GcpInstanceTagUpdateStrategy implements TagUpdateStrategy {
 
         compute.instances().setLabels(project, zone, instanceName, setLabelsRequest).execute();
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        Compute compute = gcpContext.getCompute();
+        String project = gcpContext.getProjectId();
+        String zone = cloudResource.getAvailabilityZone();
+        String instanceName = cloudResource.getName();
+
+        Instance instance = compute.instances().get(project, zone, instanceName).execute();
+
+        Map<String, String> existingLabels = instance.getLabels();
+        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
+            LOGGER.debug("No tags to delete for instance {}, skipping.", cloudResource.getName());
+            return;
+        }
+
+        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
+        logTagDeletion(LOGGER, instanceName, tagKeys, existingLabels, remainingLabels.keySet());
+
+        InstancesSetLabelsRequest setLabelsRequest = new InstancesSetLabelsRequest();
+        setLabelsRequest.setLabelFingerprint(instance.getLabelFingerprint());
+        setLabelsRequest.setLabels(remainingLabels);
+
+        compute.instances().setLabels(project, zone, instanceName, setLabelsRequest).execute();
+    }
 }

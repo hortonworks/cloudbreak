@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,6 +89,43 @@ class GcpForwardingRuleTagUpdateStrategyTest {
         when(gcpContext.getCompute()).thenReturn(compute);
         when(gcpContext.getProjectId()).thenReturn(PROJECT_ID);
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
+    }
+
+    @Test
+    void testDeleteTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_FORWARDING_RULE);
+        ForwardingRule forwardingRule = new ForwardingRule()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.forwardingRules()).thenReturn(forwardingRules);
+        when(forwardingRules.get(PROJECT_ID, REGION, RESOURCE_NAME)).thenReturn(forwardingRulesGet);
+        when(forwardingRulesGet.execute()).thenReturn(forwardingRule);
+        when(forwardingRules.setLabels(eq(PROJECT_ID), eq(REGION), eq(RESOURCE_NAME), any(RegionSetLabelsRequest.class)))
+                .thenReturn(forwardingRulesSetLabels);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(forwardingRules).setLabels(eq(PROJECT_ID), eq(REGION), eq(RESOURCE_NAME),
+                argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
+                        && Map.of().equals(req.getLabels())));
+        verify(forwardingRulesSetLabels).execute();
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_FORWARDING_RULE);
+        ForwardingRule forwardingRule = new ForwardingRule()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(Map.of("otherKey", "otherValue"));
+
+        when(compute.forwardingRules()).thenReturn(forwardingRules);
+        when(forwardingRules.get(PROJECT_ID, REGION, RESOURCE_NAME)).thenReturn(forwardingRulesGet);
+        when(forwardingRulesGet.execute()).thenReturn(forwardingRule);
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("existingKey"));
+
+        verify(forwardingRulesSetLabels, times(0)).execute();
     }
 
     @Test

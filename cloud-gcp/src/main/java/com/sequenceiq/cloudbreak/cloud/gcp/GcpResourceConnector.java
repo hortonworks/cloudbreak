@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -154,6 +155,11 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     @Override
     public void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         gcpResourceTagUpdaterService.updateTags(authenticatedContext, cloudResources, tags);
+    }
+
+    @Override
+    public void deleteCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        gcpResourceTagUpdaterService.deleteTags(authenticatedContext, cloudResources, tagKeys);
     }
 
     @Override

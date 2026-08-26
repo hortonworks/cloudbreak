@@ -59,4 +59,33 @@ public class AzureVolumeSetTagUpdateStrategy implements TagUpdateStrategy {
             azureClient.updateDiskTags(volumeId, mergeTags(existingTags, tags));
         });
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
+        VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+
+        if (volumeSetAttributes == null || volumeSetAttributes.getVolumes() == null || volumeSetAttributes.getVolumes().isEmpty()) {
+            LOGGER.warn("No volumes found in attributes for AZURE_VOLUMESET: {}", cloudResource.getName());
+            return;
+        }
+
+        volumeSetAttributes.getVolumes().forEach(volume -> {
+            String volumeId = volume.getId();
+            if (StringUtils.isBlank(volumeId)) {
+                LOGGER.warn("Skipping tag deletion for a volume in AZURE_VOLUMESET {}: volume ID is null.", cloudResource.getName());
+                return;
+            }
+            Map<String, String> existingTags = azureClient.getDiskTags(volumeId);
+
+            if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+                LOGGER.debug("No tags to delete for disk {}, skipping.", volumeId);
+                return;
+            }
+
+            Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+            logTagDeletion(LOGGER, volumeId, tagKeys, existingTags, remainingTags.keySet());
+            azureClient.updateDiskTags(volumeId, remainingTags);
+        });
+    }
 }

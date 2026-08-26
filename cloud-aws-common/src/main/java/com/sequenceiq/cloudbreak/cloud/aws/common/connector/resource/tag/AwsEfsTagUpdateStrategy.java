@@ -25,6 +25,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import software.amazon.awssdk.services.efs.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.efs.model.Tag;
 import software.amazon.awssdk.services.efs.model.TagResourceRequest;
+import software.amazon.awssdk.services.efs.model.UntagResourceRequest;
 
 @Service
 public class AwsEfsTagUpdateStrategy implements TagUpdateStrategy {
@@ -67,6 +68,35 @@ public class AwsEfsTagUpdateStrategy implements TagUpdateStrategy {
         efsClient.tagResource(TagResourceRequest.builder()
                 .resourceId(resourceId)
                 .tags(efsTags)
+                .build());
+    }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
+        AmazonEfsClient efsClient = commonAwsClient.createElasticFileSystemClient(
+                new AwsCredentialView(authenticatedContext.getCloudCredential()),
+                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+
+        String resourceId = cloudResource.getReference();
+
+        Map<String, String> existingTags = efsClient.listTagsForResource(
+                        ListTagsForResourceRequest.builder()
+                                .resourceId(resourceId)
+                                .build())
+                .tags().stream()
+                .collect(Collectors.toMap(Tag::key, Tag::value));
+
+        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
+            LOGGER.info("No tags to delete for EFS resource {}, skipping.", resourceId);
+            return;
+        }
+
+        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
+        logTagDeletion(LOGGER, resourceId, tagKeys, existingTags, remainingTags.keySet());
+
+        efsClient.untagResource(UntagResourceRequest.builder()
+                .resourceId(resourceId)
+                .tagKeys(tagKeys)
                 .build());
     }
 }

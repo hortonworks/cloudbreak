@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretReques
 import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretResponse;
 import software.amazon.awssdk.services.secretsmanager.model.Tag;
 import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
+import software.amazon.awssdk.services.secretsmanager.model.UntagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AwsSecretsManagerTagUpdateStrategyTest {
@@ -85,6 +87,43 @@ class AwsSecretsManagerTagUpdateStrategyTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(region);
         when(region.getRegionName()).thenReturn(REGION_NAME);
+    }
+
+    @Test
+    void testDeleteTagsForAwsSecretsManagerSecret() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_SECRETSMANAGER_SECRET, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createSecretsManagerClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(secretsManagerClient);
+        when(secretsManagerClient.describeSecret(any(DescribeSecretRequest.class))).thenReturn(DescribeSecretResponse.builder()
+                .arn(RESOURCE_REFERENCE)
+                .tags(Tag.builder()
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(secretsManagerClient).untagResource(UntagResourceRequest.builder()
+                .secretId(RESOURCE_REFERENCE)
+                .tagKeys(Set.of(EXISTING_TAG_KEY))
+                .build());
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_SECRETSMANAGER_SECRET, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createSecretsManagerClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(secretsManagerClient);
+        when(secretsManagerClient.describeSecret(any(DescribeSecretRequest.class))).thenReturn(DescribeSecretResponse.builder()
+                .arn(RESOURCE_REFERENCE)
+                .tags(Tag.builder()
+                        .key("otherKey")
+                        .value("otherValue")
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(secretsManagerClient, times(0)).untagResource(any(UntagResourceRequest.class));
     }
 
     @Test

@@ -58,4 +58,30 @@ public class GcpDiskTagUpdateStrategy implements TagUpdateStrategy {
 
         compute.disks().setLabels(project, zone, diskName, setLabelsRequest).execute();
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        Compute compute = gcpContext.getCompute();
+        String project = gcpContext.getProjectId();
+        String zone = cloudResource.getAvailabilityZone();
+        String diskName = cloudResource.getName();
+
+        Disk disk = compute.disks().get(project, zone, diskName).execute();
+
+        Map<String, String> existingLabels = disk.getLabels();
+        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
+            LOGGER.debug("No tags to delete for disk {}, skipping.", cloudResource.getName());
+            return;
+        }
+
+        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
+        logTagDeletion(LOGGER, diskName, tagKeys, existingLabels, remainingLabels.keySet());
+
+        ZoneSetLabelsRequest setLabelsRequest = new ZoneSetLabelsRequest();
+        setLabelsRequest.setLabelFingerprint(disk.getLabelFingerprint());
+        setLabelsRequest.setLabels(remainingLabels);
+
+        compute.disks().setLabels(project, zone, diskName, setLabelsRequest).execute();
+    }
 }

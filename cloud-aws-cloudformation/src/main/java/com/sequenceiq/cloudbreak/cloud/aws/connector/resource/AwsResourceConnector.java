@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -305,6 +306,11 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         awsResourceTagUpdaterService.updateTags(authenticatedContext, cloudResources, tags);
+    }
+
+    @Override
+    public void deleteCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        awsResourceTagUpdaterService.deleteTags(authenticatedContext, cloudResources, tagKeys);
     }
 
     @Override

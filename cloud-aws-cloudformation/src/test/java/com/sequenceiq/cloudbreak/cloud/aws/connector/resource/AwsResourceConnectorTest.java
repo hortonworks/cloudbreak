@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -164,10 +165,66 @@ class AwsResourceConnectorTest {
         verifyNoInteractions(awsResourceTagUpdaterService);
     }
 
+    @Test
+    void testDeleteTags() {
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudResource cloudFormationStack = CloudResource.builder()
+                .withType(CLOUDFORMATION_STACK)
+                .withName("awsCloudFormationStack")
+                .build();
+
+        CloudResource awsVolumeSet = CloudResource.builder()
+                .withType(AWS_VOLUMESET)
+                .withName("awsVolumeSet")
+                .build();
+
+        CloudResource awsRootDisk = CloudResource.builder()
+                .withType(AWS_ROOT_DISK)
+                .withName("awsRootDisk")
+                .build();
+
+        Set<String> tagKeys = Set.of("custom");
+
+        underTest.deleteTags(ac, List.of(cloudFormationStack, awsVolumeSet, awsRootDisk), tagKeys);
+
+        verify(awsResourceTagUpdaterService).deleteTags(ac, List.of(cloudFormationStack, awsVolumeSet, awsRootDisk), tagKeys);
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyAndNullTagKeys")
+    void testDeleteTagsWhenTagKeysIsEmpty(Set<String> tagKeys) {
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudResource cloudFormationStack = CloudResource.builder()
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName("awsCloudFormationStack")
+                .build();
+
+        CloudResource awsVolumeSet = CloudResource.builder()
+                .withType(AWS_VOLUMESET)
+                .withName("awsVolumeSet")
+                .build();
+
+        CloudResource awsRootDisk = CloudResource.builder()
+                .withType(AWS_ROOT_DISK)
+                .withName("awsRootDisk")
+                .build();
+
+        underTest.deleteTags(ac, List.of(cloudFormationStack, awsVolumeSet, awsRootDisk), tagKeys);
+
+        verifyNoInteractions(awsResourceTagUpdaterService);
+    }
+
     private static Stream<Arguments> emptyAndNullUserDefinedTags() {
         return Stream.of(
                 Arguments.of((Object) null),
                 Arguments.of(Collections.emptyMap())
+        );
+    }
+
+    private static Stream<Arguments> emptyAndNullTagKeys() {
+        return Stream.of(
+                Arguments.of((Object) null),
+                Arguments.of(Collections.emptySet())
         );
     }
 }

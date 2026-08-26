@@ -57,4 +57,30 @@ public class GcpForwardingRuleTagUpdateStrategy implements TagUpdateStrategy {
 
         compute.forwardingRules().setLabels(project, region, forwardingRuleName, setLabelsRequest).execute();
     }
+
+    @Override
+    public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        Compute compute = gcpContext.getCompute();
+        String project = gcpContext.getProjectId();
+        String region = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
+        String forwardingRuleName = cloudResource.getName();
+
+        ForwardingRule forwardingRule = compute.forwardingRules().get(project, region, forwardingRuleName).execute();
+
+        Map<String, String> existingLabels = forwardingRule.getLabels();
+        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
+            LOGGER.debug("No tags to delete for forwarding rule {}, skipping.", cloudResource.getName());
+            return;
+        }
+
+        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
+        logTagDeletion(LOGGER, forwardingRuleName, tagKeys, existingLabels, remainingLabels.keySet());
+
+        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest();
+        setLabelsRequest.setLabelFingerprint(forwardingRule.getLabelFingerprint());
+        setLabelsRequest.setLabels(remainingLabels);
+
+        compute.forwardingRules().setLabels(project, region, forwardingRuleName, setLabelsRequest).execute();
+    }
 }

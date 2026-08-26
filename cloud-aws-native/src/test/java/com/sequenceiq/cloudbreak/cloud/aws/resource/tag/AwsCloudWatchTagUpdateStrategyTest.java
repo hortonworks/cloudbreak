@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import software.amazon.awssdk.services.cloudwatch.model.ListTagsForResourceRespo
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.cloudwatch.model.Tag;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
+import software.amazon.awssdk.services.cloudwatch.model.UntagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AwsCloudWatchTagUpdateStrategyTest {
@@ -105,6 +107,55 @@ class AwsCloudWatchTagUpdateStrategyTest {
                 .withReference(null)
                 .withParameters(Collections.emptyMap())
                 .build();
+    }
+
+    @Test
+    void testDeleteTagsForAwsCloudWatch() {
+        String alarmArn = "alarmArn";
+        MetricAlarm alarm = MetricAlarm.builder()
+                .alarmArn(alarmArn)
+                .build();
+
+        when(commonAwsClient.createCloudWatchClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(cloudWatchClient);
+        when(awsNativeCloudWatchService.getMetricAlarmsForInstances(eq(REGION_NAME), any(AwsCredentialView.class), eq(List.of(INSTANCE_ID))))
+                .thenReturn(List.of(alarm));
+        when(cloudWatchClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(cloudWatchClient).untagResource(
+                UntagResourceRequest.builder()
+                        .resourceARN(alarmArn)
+                        .tagKeys(Set.of(EXISTING_TAG_KEY))
+                        .build()
+        );
+    }
+
+    @Test
+    void testDeleteTagsSkipWhenKeyNotPresent() {
+        String alarmArn = "alarmArn";
+        MetricAlarm alarm = MetricAlarm.builder()
+                .alarmArn(alarmArn)
+                .build();
+
+        when(commonAwsClient.createCloudWatchClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(cloudWatchClient);
+        when(awsNativeCloudWatchService.getMetricAlarmsForInstances(eq(REGION_NAME), any(AwsCredentialView.class), eq(List.of(INSTANCE_ID))))
+                .thenReturn(List.of(alarm));
+        when(cloudWatchClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key("otherKey")
+                        .value("otherValue")
+                        .build())
+                .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        verify(cloudWatchClient, times(0)).untagResource(any(UntagResourceRequest.class));
     }
 
     @Test
