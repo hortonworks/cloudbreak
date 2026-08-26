@@ -170,7 +170,16 @@ public class AzurePremiumInstanceTest {
                 {"Standard_L8s", true},
                 {"Standard_L16s", true},
                 {"Standard_L32s", true},
-                {"Standard_D32s_v5", true}
+                {"Standard_D32s_v5", true},
+                {"Standard_D4ds_v5", true},
+                {"Standard_E4ds_v5", true},
+                {"Standard_E4s_v5", true},
+                {"Standard_E4ads_v5", true},
+                {"Standard_D4as_v5", true},
+                {"Standard_D4_v5", false},
+                {"Standard_E4d_v5", false},
+                {"Standard_E16_v5", false},
+                {"Standard_M64ms_v2", true}
         });
     }
 

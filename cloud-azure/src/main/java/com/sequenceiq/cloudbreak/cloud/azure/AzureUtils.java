@@ -286,8 +286,7 @@ public class AzureUtils {
                 String volumeType = template.getVolumes().getFirst().getType();
                 String flavor = template.getFlavor();
                 AzureDiskType diskType = AzureDiskType.getByValue(volumeType);
-                // TODO: https://cloudera.atlassian.net/browse/CB-34088
-//                validateStorageTypeForGroup(diskType, flavor);
+                validateStorageTypeForGroup(diskType, flavor);
             } else {
                 LOGGER.debug("No volume was attached for instance group {}, skipping storage validation", group.getName());
             }
@@ -297,7 +296,7 @@ public class AzureUtils {
     public void validateStorageTypeForGroup(AzureDiskType diskType, String flavor) {
         if (azurePremiumValidatorService.premiumDiskTypeConfigured(diskType)) {
             if (!azurePremiumValidatorService.validPremiumConfiguration(flavor)) {
-                throw new CloudConnectorException("Only the DS instance types supports the premium storage.");
+                throw new CloudConnectorException("The selected instance type does not support premium storage.");
             }
         }
     }
