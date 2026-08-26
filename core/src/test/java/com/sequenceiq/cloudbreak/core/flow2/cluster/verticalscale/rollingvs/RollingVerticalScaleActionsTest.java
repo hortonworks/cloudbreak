@@ -50,10 +50,12 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleCommissionInstancesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleDecommissionInstancesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleDecommissionInstancesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleStartInstancesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleStartInstancesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleStopInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleStopInstancesResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -152,14 +154,42 @@ public class RollingVerticalScaleActionsTest {
     private Template template;
 
     @Test
-    void testStopInstancesAction() throws Exception {
+    void testDecommissionInstancesAction() throws Exception {
         AbstractRollingVerticalScaleActions<RollingVerticalScaleTriggerEvent> action =
-                (AbstractRollingVerticalScaleActions<RollingVerticalScaleTriggerEvent>) underTest.stopInstancesAction();
+                (AbstractRollingVerticalScaleActions<RollingVerticalScaleTriggerEvent>) underTest.decommissionInstancesAction();
         initActionPrivateFields(action);
 
         RollingVerticalScaleContext context = createContext();
         List<String> instanceIds = createInstanceIds(3);
         RollingVerticalScaleTriggerEvent request = createTriggerEvent(instanceIds);
+
+        List<InstanceMetadataView> instances = generateInstances(instanceIds, INSTANCE_GROUP_NAME);
+
+        mockStackEtc(instances);
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, request, createVariables(instanceIds));
+
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(reactorEventFactory).createEvent(anyMap(), captor.capture());
+        verify(eventBus).notify("ROLLINGVERTICALSCALEDECOMMISSIONINSTANCESREQUEST", event);
+        assertThat(captor.getValue()).isInstanceOf(RollingVerticalScaleDecommissionInstancesRequest.class);
+
+        RollingVerticalScaleDecommissionInstancesRequest req = (RollingVerticalScaleDecommissionInstancesRequest) captor.getValue();
+        assertThat(req.getRollingVerticalScaleResult().getGroup()).isEqualTo(INSTANCE_GROUP_NAME);
+        assertThat(req.getRollingVerticalScaleResult().getInstanceIds()).hasSameElementsAs(instanceIds);
+    }
+
+    @Test
+    void testStopInstancesAction() throws Exception {
+        AbstractRollingVerticalScaleActions<RollingVerticalScaleDecommissionInstancesResult> action =
+                (AbstractRollingVerticalScaleActions<RollingVerticalScaleDecommissionInstancesResult>) underTest.stopInstancesAction();
+        initActionPrivateFields(action);
+
+        RollingVerticalScaleContext context = createContext();
+        List<String> instanceIds = createInstanceIds(3);
+        RollingVerticalScaleResult result = createRollingVerticalScaleResult(instanceIds, RollingVerticalScaleStatus.INIT);
+        RollingVerticalScaleDecommissionInstancesResult request = new RollingVerticalScaleDecommissionInstancesResult(STACK_ID, result);
 
         List<InstanceMetadataView> instances = generateInstances(instanceIds, INSTANCE_GROUP_NAME);
         List<CloudInstance> cloudInstances = convertToCloudInstance(instances);
@@ -260,14 +290,14 @@ public class RollingVerticalScaleActionsTest {
 
     @Test
     void testVerticalScaleFinishedAction() throws Exception {
-        AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult> action =
-                (AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult>) underTest.verticalScaleFinishedAction();
+        AbstractRollingVerticalScaleActions<RollingVerticalScaleCommissionInstancesResult> action =
+                (AbstractRollingVerticalScaleActions<RollingVerticalScaleCommissionInstancesResult>) underTest.verticalScaleFinishedAction();
         initActionPrivateFields(action);
 
         RollingVerticalScaleContext context = createContext();
         List<String> instanceIds = createInstanceIds(3);
         RollingVerticalScaleResult result = createRollingVerticalScaleResult(instanceIds, RollingVerticalScaleStatus.SUCCESS);
-        RollingVerticalScaleStartInstancesResult payload = new RollingVerticalScaleStartInstancesResult(STACK_ID, result);
+        RollingVerticalScaleCommissionInstancesResult payload = new RollingVerticalScaleCommissionInstancesResult(STACK_ID, result);
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
@@ -276,19 +306,19 @@ public class RollingVerticalScaleActionsTest {
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), captor.capture());
         verify(eventBus).notify("ROLLING_VERTICALSCALE_FINALIZED_EVENT", event);
-        assertThat(captor.getValue()).isInstanceOf(RollingVerticalScaleStartInstancesResult.class);
+        assertThat(captor.getValue()).isInstanceOf(RollingVerticalScaleCommissionInstancesResult.class);
     }
 
     @Test
     void testVerticalScaleFinishedActionRestoresStoppedStatusWhenDlWasStopped() throws Exception {
-        AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult> action =
-                (AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult>) underTest.verticalScaleFinishedAction();
+        AbstractRollingVerticalScaleActions<RollingVerticalScaleCommissionInstancesResult> action =
+                (AbstractRollingVerticalScaleActions<RollingVerticalScaleCommissionInstancesResult>) underTest.verticalScaleFinishedAction();
         initActionPrivateFields(action);
 
         RollingVerticalScaleContext context = createContext();
         List<String> instanceIds = createInstanceIds(3);
         RollingVerticalScaleResult result = createRollingVerticalScaleResult(instanceIds, RollingVerticalScaleStatus.SUCCESS);
-        RollingVerticalScaleStartInstancesResult payload = new RollingVerticalScaleStartInstancesResult(STACK_ID, result);
+        RollingVerticalScaleCommissionInstancesResult payload = new RollingVerticalScaleCommissionInstancesResult(STACK_ID, result);
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
@@ -302,14 +332,14 @@ public class RollingVerticalScaleActionsTest {
 
     @Test
     void testVerticalScaleFinishedActionWithFailures() throws Exception {
-        AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult> action =
-                (AbstractRollingVerticalScaleActions<RollingVerticalScaleStartInstancesResult>) underTest.verticalScaleFinishedAction();
+        AbstractRollingVerticalScaleActions<RollingVerticalScaleCommissionInstancesResult> action =
+                (AbstractRollingVerticalScaleActions<RollingVerticalScaleCommissionInstancesResult>) underTest.verticalScaleFinishedAction();
         initActionPrivateFields(action);
 
         RollingVerticalScaleContext context = createContext();
         List<String> instanceIds = createInstanceIds(3);
         RollingVerticalScaleResult result = createRollingVerticalScaleResultWithFailures(instanceIds);
-        RollingVerticalScaleStartInstancesResult payload = new RollingVerticalScaleStartInstancesResult(STACK_ID, result);
+        RollingVerticalScaleCommissionInstancesResult payload = new RollingVerticalScaleCommissionInstancesResult(STACK_ID, result);
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
@@ -375,6 +405,7 @@ public class RollingVerticalScaleActionsTest {
         instanceGroup.setGroupName(instanceGroupName);
         for (String instanceId : instanceIds) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setDiscoveryFQDN(instanceId);
             instanceMetaData.setInstanceId(instanceId);
             instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
             instanceMetaData.setInstanceGroup(instanceGroup);

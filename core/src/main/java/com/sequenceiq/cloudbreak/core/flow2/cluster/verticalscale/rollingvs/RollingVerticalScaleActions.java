@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.converter.CloudInstanceIdToInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -45,6 +47,10 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleCommissionInstancesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleCommissionInstancesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleDecommissionInstancesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleDecommissionInstancesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleStartInstancesRequest;
@@ -93,10 +99,13 @@ public class RollingVerticalScaleActions {
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
     @Inject
+    private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
+
+    @Inject
     private RollingVerticalScaleService rollingVerticalScaleService;
 
-    @Bean(name = "ROLLING_VERTICALSCALE_STOP_INSTANCES_STATE")
-    public Action<?, ?> stopInstancesAction() {
+    @Bean(name = "ROLLING_VERTICALSCALE_HOSTS_DECOMMISSION_STATE")
+    public Action<?, ?> decommissionInstancesAction() {
         return new AbstractRollingVerticalScaleActions<>(RollingVerticalScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(RollingVerticalScaleTriggerEvent payload, Map<Object, Object> variables) {
@@ -121,13 +130,36 @@ public class RollingVerticalScaleActions {
 
             @Override
             protected void doExecute(RollingVerticalScaleContext context, RollingVerticalScaleTriggerEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Stopping instances to vertical scale: count={}, instanceIds=[{}]", context.getInstanceIds().size(), context.getInstanceIds());
-
-                StackDtoDelegate stack = context.getStack();
-                String targetInstanceType = context.getTargetInstanceType();
                 List<String> instanceIds = payload.getInstanceIds();
                 String targetGroup = payload.getStackVerticalScaleV4Request().getGroup();
                 RollingVerticalScaleResult result = new RollingVerticalScaleResult(instanceIds, targetGroup);
+                List<String> instanceIdsToDecommission = payload.getInstanceIds().stream()
+                        .filter(i -> !payload.getStoppedInstanceIds().contains(i)).toList();
+                List<InstanceMetadataView> instancesMetadata = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(
+                                payload.getStackVerticalScaleV4Request().getStackId()).stream()
+                        .filter(instanceMetaData -> instanceIdsToDecommission.contains(instanceMetaData.getInstanceId()))
+                        .toList();
+                Set<String> hostsNames = instancesMetadata.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
+
+                RollingVerticalScaleDecommissionInstancesRequest request =
+                        new RollingVerticalScaleDecommissionInstancesRequest(payload.getResourceId(), targetGroup, hostsNames, result);
+                sendEvent(context, request);
+            }
+        };
+    }
+
+    @Bean(name = "ROLLING_VERTICALSCALE_STOP_INSTANCES_STATE")
+    public Action<?, ?> stopInstancesAction() {
+        return new AbstractRollingVerticalScaleActions<>(RollingVerticalScaleDecommissionInstancesResult.class) {
+
+            @Override
+            protected void doExecute(RollingVerticalScaleContext context, RollingVerticalScaleDecommissionInstancesResult payload,
+                    Map<Object, Object> variables) {
+                LOGGER.info("Stopping instances to vertical scale: count={}, instanceIds=[{}]", payload.getRollingVerticalScaleResult().getInstanceIds().size(),
+                        payload.getRollingVerticalScaleResult().getInstanceIds());
+
+                StackDtoDelegate stack = context.getStack();
+                String targetInstanceType = context.getTargetInstanceType();
 
                 List<InstanceMetadataView> instances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(context.getStack().getId()).stream()
                         .filter(instanceMetaData -> context.getInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
@@ -138,7 +170,8 @@ public class RollingVerticalScaleActions {
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
 
                 RollingVerticalScaleStopInstancesRequest request = new RollingVerticalScaleStopInstancesRequest(payload.getResourceId(),
-                        context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, targetInstanceType, result,
+                        context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, targetInstanceType,
+                        payload.getRollingVerticalScaleResult(),
                         instanceTypeByInstanceId);
                 sendEvent(context, request);
             }
@@ -235,17 +268,46 @@ public class RollingVerticalScaleActions {
         };
     }
 
-    @Bean(name = "ROLLING_VERTICALSCALE_FINISHED_STATE")
-    public Action<?, ?> verticalScaleFinishedAction() {
+    @Bean(name = "ROLLING_VERTICALSCALE_HOSTS_COMMISSION_STATE")
+    public Action<?, ?> commissionInstancesAction() {
         return new AbstractRollingVerticalScaleActions<>(RollingVerticalScaleStartInstancesResult.class) {
+
             @Override
             protected void doExecute(RollingVerticalScaleContext context, RollingVerticalScaleStartInstancesResult payload,
+                    Map<Object, Object> variables) {
+                RollingVerticalScaleResult result = payload.getRollingVerticalScaleResult();
+                Long stackId = payload.getResourceId();
+                Set<String> startedInstanceIds = result.getInstanceIds().stream()
+                        .filter(i -> result.getStatus(i).getStatus().equals(RollingVerticalScaleStatus.STARTED)).collect(Collectors.toSet());
+                LOGGER.info("StartedInstancesCount={}", startedInstanceIds.size());
+
+                List<InstanceMetadataView> allInstanceMetadata = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stackId);
+                List<InstanceMetadataView> startedInstancesMetaData = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
+                        allInstanceMetadata, result.getGroup(), startedInstanceIds);
+
+                LOGGER.info("StartedInstanceMetadataCount={}", startedInstancesMetaData.size());
+                RollingVerticalScaleCommissionInstancesRequest request = new RollingVerticalScaleCommissionInstancesRequest(stackId,
+                        payload.getRollingVerticalScaleResult().getGroup(), startedInstancesMetaData, result);
+                sendEvent(context, request);
+            }
+        };
+    }
+
+    @Bean(name = "ROLLING_VERTICALSCALE_FINISHED_STATE")
+    public Action<?, ?> verticalScaleFinishedAction() {
+        return new AbstractRollingVerticalScaleActions<>(RollingVerticalScaleCommissionInstancesResult.class) {
+            @Override
+            protected void doExecute(RollingVerticalScaleContext context, RollingVerticalScaleCommissionInstancesResult payload,
                     Map<Object, Object> variables) throws Exception {
                 LOGGER.info("ROLLING_VERTICALSCALE_FINISHED_STATE - finishing rolling vertical scale.");
                 RollingVerticalScaleResult result = payload.getRollingVerticalScaleResult();
                 Long stackId = payload.getResourceId();
-                List<String> successfulInstanceIds = result.getInstanceIds().stream()
-                        .filter(i -> result.getStatus(i).getStatus().equals(RollingVerticalScaleStatus.SUCCESS)).toList();
+                List<String> successfulInstanceIds = result.getInstanceIds()
+                        .stream()
+                        .filter(i ->
+                                (result.getStatus(i).getStatus().equals(RollingVerticalScaleStatus.SUCCESS) ||
+                                (result.getStatus(i).getStatus().equals(RollingVerticalScaleStatus.SCALED)
+                                        && context.getStoppedInstanceIds().contains(i)))).toList();
                 Map<String, String> failedInstancesWithErrorMessage = getFailedInstances(result, context.getStoppedInstanceIds());
                 LOGGER.info("Rolling Vertical scale instances. Results: Successfully vertical scaled:[{}]. Failed to vertical scale:[{}]",
                         successfulInstanceIds, failedInstancesWithErrorMessage);

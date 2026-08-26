@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_CLUSTER_MANAGER_COMMISSION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_STOP_INSTANCES_EVENT;
 
 import java.util.StringJoiner;
 
@@ -9,15 +9,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class RollingVerticalScaleStartInstancesResult extends StackEvent {
-
+public class RollingVerticalScaleDecommissionInstancesResult extends StackEvent {
     private final RollingVerticalScaleResult rollingVerticalScaleResult;
 
     @JsonCreator
-    public RollingVerticalScaleStartInstancesResult(
+    public RollingVerticalScaleDecommissionInstancesResult(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("rollingVerticalScaleResult") RollingVerticalScaleResult result) {
-        super(ROLLING_VERTICALSCALE_CLUSTER_MANAGER_COMMISSION_EVENT.event(), resourceId);
+        super(ROLLING_VERTICALSCALE_STOP_INSTANCES_EVENT.event(), resourceId);
         this.rollingVerticalScaleResult = result;
     }
 
@@ -27,7 +26,7 @@ public class RollingVerticalScaleStartInstancesResult extends StackEvent {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", RollingVerticalScaleStartInstancesResult.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", RollingVerticalScaleDecommissionInstancesResult.class.getSimpleName() + "[", "]")
                 .add("rollingVerticalScaleResult=" + rollingVerticalScaleResult)
                 .add(super.toString())
                 .toString();

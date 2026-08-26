@@ -25,8 +25,8 @@ public class DistroXVerticalScaleV1Request implements JsonEntity {
     @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV1Request template;
 
-    @Schema(description = ModelDescriptions.StackVerticalScaleModelDescription.ORCHESTRATOR_TYPE, defaultValue = "ALL_AT_ONCE")
-    private OrchestratorType orchestratorType = OrchestratorType.ALL_AT_ONCE;
+    @Schema(description = ModelDescriptions.StackVerticalScaleModelDescription.ORCHESTRATOR_TYPE, defaultValue = "ONE_BY_ONE")
+    private OrchestratorType orchestratorType = OrchestratorType.ONE_BY_ONE;
 
     public String getGroup() {
         return group;

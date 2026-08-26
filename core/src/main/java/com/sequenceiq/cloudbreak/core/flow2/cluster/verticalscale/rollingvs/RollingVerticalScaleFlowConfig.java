@@ -1,16 +1,20 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_CLUSTER_MANAGER_COMMISSION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_SCALE_INSTANCES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_START_INSTANCES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_STOP_INSTANCES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.ROLLING_VERTICALSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.ROLLING_VERTICALSCALE_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.ROLLING_VERTICALSCALE_HOSTS_COMMISSION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.ROLLING_VERTICALSCALE_HOSTS_DECOMMISSION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.ROLLING_VERTICALSCALE_SCALE_INSTANCES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.ROLLING_VERTICALSCALE_START_INSTANCES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleState.ROLLING_VERTICALSCALE_STOP_INSTANCES_STATE;
@@ -28,8 +32,12 @@ public class RollingVerticalScaleFlowConfig extends StackStatusFinalizerAbstract
             new Transition.Builder<RollingVerticalScaleState, RollingVerticalScaleEvent>()
             .defaultFailureEvent(ROLLING_VERTICALSCALE_FAILURE_EVENT)
             .from(INIT_STATE)
-                    .to(ROLLING_VERTICALSCALE_STOP_INSTANCES_STATE)
+                    .to(ROLLING_VERTICALSCALE_HOSTS_DECOMMISSION_STATE)
                     .event(ROLLING_VERTICALSCALE_TRIGGER_EVENT)
+                    .defaultFailureEvent()
+            .from(ROLLING_VERTICALSCALE_HOSTS_DECOMMISSION_STATE)
+                    .to(ROLLING_VERTICALSCALE_STOP_INSTANCES_STATE)
+                    .event(ROLLING_VERTICALSCALE_STOP_INSTANCES_EVENT)
                     .defaultFailureEvent()
             .from(ROLLING_VERTICALSCALE_STOP_INSTANCES_STATE)
                     .to(ROLLING_VERTICALSCALE_SCALE_INSTANCES_STATE)
@@ -40,6 +48,10 @@ public class RollingVerticalScaleFlowConfig extends StackStatusFinalizerAbstract
                     .event(ROLLING_VERTICALSCALE_START_INSTANCES_EVENT)
                     .defaultFailureEvent()
             .from(ROLLING_VERTICALSCALE_START_INSTANCES_STATE)
+                    .to(ROLLING_VERTICALSCALE_HOSTS_COMMISSION_STATE)
+                    .event(ROLLING_VERTICALSCALE_CLUSTER_MANAGER_COMMISSION_EVENT)
+                    .defaultFailureEvent()
+            .from(ROLLING_VERTICALSCALE_HOSTS_COMMISSION_STATE)
                     .to(ROLLING_VERTICALSCALE_FINISHED_STATE)
                     .event(ROLLING_VERTICALSCALE_FINISHED_EVENT)
                     .defaultFailureEvent()

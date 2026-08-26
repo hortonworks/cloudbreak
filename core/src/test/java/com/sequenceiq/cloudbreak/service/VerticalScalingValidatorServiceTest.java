@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
@@ -796,6 +797,27 @@ public class VerticalScalingValidatorServiceTest {
         verify(entitlementService).isVerticalScaleHaEnabled("default");
         verify(stack, never()).isStopped();
         verify(stack, never()).isAvailable();
+    }
+
+    @Test
+    public void testValidateIfEphemeralVolumesPresent() {
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
+
+        String instanceGroupNameInRequest = "compute";
+        String templateInstanceType = "m3.xlarge";
+
+        Stack stack1 = new Stack();
+        stack1.setDisplayName("stack1");
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
+        stack1.setInstanceGroups(Set.of(instanceGroup));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateIfEphemeralVolumesPresent(stack1, instanceGroupNameInRequest);
+        });
+
+        assertEquals(String.format("We cannot vertical scale stack1 as it has ephemeral volumes present"), badRequestException.getMessage());
     }
 
     @Test

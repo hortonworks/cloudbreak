@@ -7,6 +7,10 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_INSTANCES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_COMMISSION_INSTANCES_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_DECOMMISSIONED_INSTANCES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_DECOMMISSIONING_INSTANCES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_DECOMMISSION_INSTANCES_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTART_INSTANCES_FAILED;
@@ -58,6 +62,14 @@ class RollingVerticalScaleServiceTest {
 
     private static final String INSTANCE_ID_2 = "i-instance-2";
 
+    private static final String HOST_1 = "host1";
+
+    private static final String HOST_2 = "host2";
+
+    private static final Set<String> HOST_NAMES = Set.of(HOST_1, HOST_2);
+
+    private static final List<String> HOST_NAME_LIST = List.of(HOST_2, HOST_1);
+
     private static final List<String> INSTANCE_IDS = List.of(INSTANCE_ID_1, INSTANCE_ID_2);
 
     private static final Set<String> INSTANCE_IDS_SET = Set.of(INSTANCE_ID_1, INSTANCE_ID_2);
@@ -79,10 +91,40 @@ class RollingVerticalScaleServiceTest {
     private RollingVerticalScaleService underTest;
 
     @Test
+    void testDecommissionInstances() {
+        underTest.decommissionInstances(STACK_ID, HOST_NAMES, GROUP);
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_VERTICALSCALE_DECOMMISSIONING_INSTANCES), eq(GROUP), eq(String.join(", ", HOST_NAMES)));
+    }
+
+    @Test
+    void testFinishDecommissionInstances() {
+        underTest.finishDecommissionInstances(STACK_ID, HOST_NAME_LIST, GROUP);
+
+        verify(instanceMetaDataService, times(1)).updateStatus(eq(STACK_ID), eq(HOST_NAME_LIST), eq(InstanceStatus.DECOMMISSIONED));
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_VERTICALSCALE_DECOMMISSIONED_INSTANCES), eq(GROUP), eq(String.join(", ", HOST_NAME_LIST)));
+    }
+
+    @Test
+    void testFailedToDecommissionInstances() {
+        underTest.failedToDecommissionInstances(STACK_ID, HOST_NAMES, GROUP, ERROR_MESSAGE);
+
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_VERTICALSCALE_DECOMMISSION_INSTANCES_FAILED), eq(GROUP), eq(String.join(",", HOST_NAMES)), eq(ERROR_MESSAGE));
+    }
+
+    @Test
+    void testFailedCommissionInstances() {
+        underTest.failedCommissionInstances(STACK_ID, INSTANCE_IDS, GROUP, ERROR_MESSAGE);
+
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_VERTICALSCALE_COMMISSION_INSTANCES_FAILED), eq(GROUP), eq(String.join(", ", INSTANCE_IDS)), eq(ERROR_MESSAGE));
+    }
+
+    @Test
     void testStopInstances() {
         underTest.stopInstances(STACK_ID, INSTANCE_IDS, GROUP);
-
-        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(STACK_ID), eq(DetailedStackStatus.CLUSTER_VERTICALSCALE_IN_PROGRESS));
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(CLUSTER_VERTICALSCALE_STOPPING_INSTANCES), eq(GROUP), eq(String.join(", ", INSTANCE_IDS)));
     }
@@ -362,7 +404,7 @@ class RollingVerticalScaleServiceTest {
         InstanceMetadataView instance2 = mockInstanceMetadataView(INSTANCE_ID_2);
         Set<InstanceMetadataView> instances = new LinkedHashSet<>(List.of(instance1, instance2));
 
-        underTest.updateInstancesToServicesHealthy(STACK_ID, instances);
+        underTest.updateInstancesToServicesHealthy(STACK_ID, instances.stream().map(InstanceMetadataView::getInstanceId).toList());
 
         verify(instanceMetaDataService).updateStatus(eq(STACK_ID), eq(List.of(INSTANCE_ID_1, INSTANCE_ID_2)),
                 eq(InstanceStatus.SERVICES_HEALTHY));
@@ -370,7 +412,7 @@ class RollingVerticalScaleServiceTest {
 
     @Test
     void testUpdateInstancesToServicesHealthySkipsWhenEmpty() {
-        underTest.updateInstancesToServicesHealthy(STACK_ID, Collections.emptySet());
+        underTest.updateInstancesToServicesHealthy(STACK_ID, Collections.emptyList());
 
         verify(instanceMetaDataService, never()).updateStatus(any(), any(), any());
     }

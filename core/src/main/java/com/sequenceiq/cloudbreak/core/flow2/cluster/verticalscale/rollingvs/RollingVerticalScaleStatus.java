@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs;
 public enum RollingVerticalScaleStatus {
     INIT("INIT"),
     STOPPED("STOP"),
+    STARTED("START"),
     SCALED("SCALED"),
     SUCCESS("SUCCESS"),
     STOP_FAILED("STOP"),

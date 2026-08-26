@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES;
+import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES_ONLY;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
@@ -122,6 +125,15 @@ public class VerticalScalingValidatorService {
     public void validateProviderForAddVolumes(Stack stack, String message) {
         if (!cloudParameterCache.isAddVolumesSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
+        }
+    }
+
+    public void validateIfEphemeralVolumesPresent(Stack stack, String hostGroup) {
+        TemporaryStorage storage = stack.getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getGroupName().equals(hostGroup))
+                .map(instanceGroup -> instanceGroup.getTemplate().getTemporaryStorage()).findFirst()
+                .orElseThrow(() -> new BadRequestException(String.format("Define a group which exists in Cluster: %s", hostGroup)));
+        if (EPHEMERAL_VOLUMES.equals(storage) || EPHEMERAL_VOLUMES_ONLY.equals(storage)) {
+            throw new BadRequestException(String.format("We cannot vertical scale %s as it has ephemeral volumes present", stack.getDisplayName()));
         }
     }
 
