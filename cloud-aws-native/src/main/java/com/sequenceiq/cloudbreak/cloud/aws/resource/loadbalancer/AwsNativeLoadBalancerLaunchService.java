@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,11 +64,14 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoad
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.IpAddressType;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ListenerNotFoundException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 
 @Service
@@ -153,12 +157,13 @@ public class AwsNativeLoadBalancerLaunchService {
                 .filter(cloudResource -> cloudResource.getName().contains(loadBalancerSchemePart))
                 .findFirst();
         String loadBalancerArn;
-        if (existingLoadBalancer.isPresent()) {
+        if (existingLoadBalancer.isPresent() && loadBalancerExistsInAws(context, existingLoadBalancer.get().getReference())) {
             loadBalancerResource = existingLoadBalancer.get();
             loadBalancerArn = loadBalancerResource.getReference();
             LOGGER.info("Elastic load balancer resource has already been created for stack, proceeding forward with existing resource '{}'",
                     loadBalancerArn);
         } else {
+            existingLoadBalancer.ifPresent(staleResource -> deleteStaleResource(context, staleResource));
             String loadBalancerName = resourceNameService.loadBalancer(context.getStackName(), scheme.resourceName(), context.cloudContext);
             Set<String> subnetIds = awsLoadBalancer.getSubnetIds();
             LOGGER.info("Creating load balancer with name '{}', subnet ids: '{}' and scheme: '{}'", loadBalancerName, String.join(",", subnetIds), scheme);
@@ -229,13 +234,15 @@ public class AwsNativeLoadBalancerLaunchService {
                 .filter(cloudResource -> cloudResource.getName().contains(targetGroupNameTypeSchemePortPart))
                 .findFirst();
         String targetGroupArn;
-        if (existingTargetGroup.isPresent()) {
-            targetGroupResource = existingTargetGroup.get();
+        if (existingTargetGroup.isPresent() && targetGroupExistsInAws(context, existingTargetGroup.get().getReference())) {
+            targetGroupResource = repointReusedTargetGroupToRecreatedLoadBalancer(context, existingTargetGroup.get());
             targetGroupArn = targetGroupResource.getReference();
             targetGroup.setArn(targetGroupArn);
+            context.setTargetGroupName(targetGroupResource.getName());
             LOGGER.info("Elastic load balancer target group resource has already been created for stack, proceeding forward with existing resource '{}'",
                     targetGroupArn);
         } else {
+            existingTargetGroup.ifPresent(staleResource -> deleteStaleResource(context, staleResource));
             int targetGroupPort = targetGroup.getPort();
             String loadBalancerArn = context.getLoadBalancerArn();
             LOGGER.info("Creating target group for load balancer('{}') with name: '{}' port: '{}'", loadBalancerArn, targetGroupName,
@@ -305,11 +312,12 @@ public class AwsNativeLoadBalancerLaunchService {
         Optional<CloudResource> existingListener = existingListeners.stream()
                 .filter(cloudResource -> cloudResource.getName().contains(targetGroupNameTypeSchemePortPart))
                 .findFirst();
-        if (existingListener.isPresent()) {
+        if (existingListener.isPresent() && listenerExistsInAws(context, existingListener.get().getReference())) {
             listenerResource = existingListener.get();
             LOGGER.info("Elastic load balancer listener resource has already been created for stack, proceeding forward with existing resource '{}'",
                     listenerResource.getReference());
         } else {
+            existingListener.ifPresent(staleResource -> deleteStaleResource(context, staleResource));
             String targetGroupName = context.getTargetGroupName();
             String loadBalancerArn = context.getLoadBalancerArn();
             String targetGroupArn = context.getTargetGroupArn();
@@ -395,6 +403,62 @@ public class AwsNativeLoadBalancerLaunchService {
         LOGGER.info("Registering target group ('{}') of load balancer to instances: '{}'", targetGroup.getArn(),
                 String.join(",", targetGroup.getInstanceIds()));
         loadBalancingClient.registerTargets(registerTargetsRequest);
+    }
+
+    private boolean loadBalancerExistsInAws(ResourceCreationContext context, String loadBalancerArn) {
+        try {
+            DescribeLoadBalancersRequest request = DescribeLoadBalancersRequest.builder()
+                    .loadBalancerArns(loadBalancerArn).build();
+            context.getLoadBalancingClient().describeLoadBalancers(request);
+            return true;
+        } catch (LoadBalancerNotFoundException e) {
+            LOGGER.warn("Load balancer '{}' no longer exists in AWS, stale resource will be cleaned up.", loadBalancerArn);
+            return false;
+        }
+    }
+
+    private boolean targetGroupExistsInAws(ResourceCreationContext context, String targetGroupArn) {
+        try {
+            DescribeTargetGroupsRequest request = DescribeTargetGroupsRequest.builder()
+                    .targetGroupArns(targetGroupArn).build();
+            context.getLoadBalancingClient().describeTargetGroup(request);
+            return true;
+        } catch (TargetGroupNotFoundException e) {
+            LOGGER.warn("Target group '{}' no longer exists in AWS, stale resource will be cleaned up.", targetGroupArn);
+            return false;
+        }
+    }
+
+    private boolean listenerExistsInAws(ResourceCreationContext context, String listenerArn) {
+        try {
+            DescribeListenersRequest request = DescribeListenersRequest.builder()
+                    .listenerArns(listenerArn).build();
+            context.getLoadBalancingClient().describeListeners(request);
+            return true;
+        } catch (ListenerNotFoundException e) {
+            LOGGER.warn("Listener '{}' no longer exists in AWS, stale resource will be cleaned up.", listenerArn);
+            return false;
+        }
+    }
+
+    private void deleteStaleResource(ResourceCreationContext context, CloudResource staleResource) {
+        LOGGER.info("Deleting stale cloud resource '{}' with reference '{}'", staleResource.getName(), staleResource.getReference());
+        context.getPersistenceNotifier().notifyDeletion(staleResource, context.getCloudContext());
+    }
+
+    private CloudResource repointReusedTargetGroupToRecreatedLoadBalancer(ResourceCreationContext context, CloudResource targetGroupResource) {
+        String loadBalancerArn = context.getLoadBalancerArn();
+        if (Objects.equals(targetGroupResource.getInstanceId(), loadBalancerArn)) {
+            return targetGroupResource;
+        }
+        LOGGER.info("Reused target group '{}' still references the deleted load balancer '{}', repointing it to the recreated one '{}'",
+                targetGroupResource.getName(), targetGroupResource.getInstanceId(), loadBalancerArn);
+        CloudResource repointedResource = CloudResource.builder()
+                .cloudResource(targetGroupResource)
+                .withInstanceId(loadBalancerArn)
+                .build();
+        context.getPersistenceNotifier().notifyUpdate(repointedResource, context.getCloudContext());
+        return repointedResource;
     }
 
     private static class ResourceCreationContext {

@@ -77,9 +77,13 @@ public class UpdateServiceConfigHandler extends ExceptionCatcherEventHandler<Upd
             if (StringUtils.isNotEmpty(loadBalancerFqdn)) {
                 proxyhosts.add(loadBalancerFqdn);
             }
-            LOGGER.debug("Hue knox_proxyhosts setting will be updated to {}", proxyhosts);
             ClusterApi clusterApi = clusterApiConnectors.getConnector(stackDto);
-            clusterApi.clusterModificationService().updateServiceConfigAndRestartService(HUE_SERVICE, HUE_KNOX_PROXYHOSTS, String.join(",", proxyhosts));
+            if (clusterApi.isServicePresentOrFail(stackDto.getCluster().getName(), HUE_SERVICE)) {
+                LOGGER.debug("Hue knox_proxyhosts setting will be updated to {}", proxyhosts);
+                clusterApi.clusterModificationService().updateServiceConfigAndRestartService(HUE_SERVICE, HUE_KNOX_PROXYHOSTS, String.join(",", proxyhosts));
+            } else {
+                LOGGER.info("Hue service is not present, skipping knox_proxyhosts update.");
+            }
             LOGGER.debug("Updating CM frontend URL with load balancer DNS");
             clusterHostServiceRunner.updateClusterConfigs(stackDto);
             LOGGER.debug("Service config update was successful");
