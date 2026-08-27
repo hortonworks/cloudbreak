@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -43,6 +44,9 @@ public class RedbeamsClientService {
 
     @Inject
     private SupportV4Endpoint supportV4Endpoint;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public DatabaseServerV4Response getByCrn(String dbCrn) {
         try {
@@ -232,7 +236,13 @@ public class RedbeamsClientService {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> redbeamsServerEndpoint.rotateSecret(request, initiatorUserCrn));
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s. %s.",
+                    request.getSecret(), request.getCrn(), e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException e) {
             String message = String.format("Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s",
                     request.getSecret(), request.getCrn(), e.getMessage());
             LOGGER.error(message, e);

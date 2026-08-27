@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.freeipa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.ws.rs.ProcessingException;
@@ -25,9 +27,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +58,9 @@ class FreeipaClientServiceTest {
 
     @Mock
     private UtilV1Endpoint utilV1Endpoint;
+
+    @Mock
+    private FreeIpaRotationV1Endpoint freeIpaRotationV1Endpoint;
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
@@ -124,6 +133,49 @@ class FreeipaClientServiceTest {
         when(freeIpaV1FlowEndpoint.getLastFlowByResourceCrn(eq(ENV_CRN))).thenThrow(new WebApplicationException("error", Response.Status.NOT_FOUND));
         FlowLogResponse lastFlow = underTest.getLastFlowId(ENV_CRN);
         assertNull(lastFlow);
+    }
+
+    @Test
+    void rotateSecretShouldReturnFlowIdentifier() {
+        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowChainId");
+        when(freeIpaRotationV1Endpoint.rotateSecretsByCrn(ENV_CRN, request)).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.rotateSecret(ENV_CRN, request));
+
+        assertSame(flowIdentifier, result);
+        verify(webApplicationExceptionMessageExtractor, never()).getErrorMessage(any(Exception.class));
+    }
+
+    @Test
+    void rotateSecretShouldThrowCloudbreakServiceExceptionWithRemoteReasonOnWebApplicationException() {
+        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+        request.setSecrets(List.of("SALT_PASSWORD"));
+        WebApplicationException e = new WebApplicationException(ERROR_MSG);
+        when(freeIpaRotationV1Endpoint.rotateSecretsByCrn(ENV_CRN, request)).thenThrow(e);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn(EXTRACTED_ERROR_MSG);
+
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.rotateSecret(ENV_CRN, request)));
+
+        assertThat(cloudbreakServiceException).hasCauseReference(e);
+        assertThat(cloudbreakServiceException).hasMessage(String.format("Failed to rotate FreeIPA secret by environment CRN: %s, due to: %s. %s.",
+                ENV_CRN, ERROR_MSG, EXTRACTED_ERROR_MSG));
+    }
+
+    @Test
+    void rotateSecretShouldThrowCloudbreakServiceExceptionWithoutExtractionOnProcessingException() {
+        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+        ProcessingException e = new ProcessingException(ERROR_MSG);
+        when(freeIpaRotationV1Endpoint.rotateSecretsByCrn(ENV_CRN, request)).thenThrow(e);
+
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.rotateSecret(ENV_CRN, request)));
+
+        assertThat(cloudbreakServiceException).hasCauseReference(e);
+        assertThat(cloudbreakServiceException).hasMessage(String.format("Failed to rotate FreeIPA secret by environment CRN: %s, due to: %s.",
+                ENV_CRN, ERROR_MSG));
+        verify(webApplicationExceptionMessageExtractor, never()).getErrorMessage(any(Exception.class));
     }
 
 }

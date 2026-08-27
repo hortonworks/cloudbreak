@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.ws.rs.WebApplicationException;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +47,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
@@ -89,6 +92,8 @@ class SdxRotationServiceTest {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:envCrn1";
 
+    private static final String REMOTE_REASON = "There is already a failed secret rotation for SALT_PASSWORD secret type in FINALIZE phase.";
+
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
@@ -130,6 +135,9 @@ class SdxRotationServiceTest {
 
     @Mock
     private SecretRotationStepProgressService stepProgressService;
+
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @InjectMocks
     private SdxRotationService underTest;
@@ -234,6 +242,61 @@ class SdxRotationServiceTest {
         verify(freeIpaRotationV1Endpoint, times(1)).rotateSecretsByCrn(any(), any());
         verify(freeipaPoller, times(1))
                 .pollFlowStateByFlowIdentifierUntilComplete(eq("Secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
+    }
+
+    @Test
+    void rotateCloudbreakSecretShouldSurfaceRemoteReasonWhenEndpointReturnsBadRequest() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(SDX_CLUSTER_ID);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        WebApplicationException webApplicationException = new WebApplicationException("HTTP 400 Bad Request");
+        when(stackV4Endpoint.rotateSecrets(eq(1L), any(), any())).thenThrow(webApplicationException);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn(REMOTE_REASON);
+
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.rotateCloudbreakSecret(RESOURCE_CRN, INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
+
+        assertEquals(REMOTE_REASON, secretRotationException.getMessage());
+        verify(cloudbreakPoller, never())
+                .pollFlowStateByFlowIdentifierUntilComplete(anyString(), any(), anyLong(), any());
+    }
+
+    @Test
+    void rotateRedbeamsSecretShouldSurfaceRemoteReasonWhenEndpointReturnsBadRequest() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(SDX_CLUSTER_ID);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(DATABASE_CRN);
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        WebApplicationException webApplicationException = new WebApplicationException("HTTP 400 Bad Request");
+        when(databaseServerV4Endpoint.rotateSecret(any(), any())).thenThrow(webApplicationException);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn(REMOTE_REASON);
+
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
+
+        assertEquals(REMOTE_REASON, secretRotationException.getMessage());
+        verify(redbeamsPoller, never())
+                .pollFlowStateByFlowIdentifierUntilComplete(anyString(), any(), anyLong(), any());
+    }
+
+    @Test
+    void rotateFreeipaSecretShouldSurfaceRemoteReasonWhenEndpointReturnsBadRequest() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(SDX_CLUSTER_ID);
+        sdxCluster.setEnvCrn(ENV_CRN);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        WebApplicationException webApplicationException = new WebApplicationException("HTTP 400 Bad Request");
+        when(freeIpaRotationV1Endpoint.rotateSecretsByCrn(any(), any())).thenThrow(webApplicationException);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn(REMOTE_REASON);
+
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.rotateFreeipaSecret(RESOURCE_CRN, FreeIpaSecretType.FREEIPA_KERBEROS_BIND_USER, ROTATE, null));
+
+        assertEquals(REMOTE_REASON, secretRotationException.getMessage());
+        verify(freeipaPoller, never())
+                .pollFlowStateByFlowIdentifierUntilComplete(anyString(), any(), anyLong(), any());
     }
 
     @Test

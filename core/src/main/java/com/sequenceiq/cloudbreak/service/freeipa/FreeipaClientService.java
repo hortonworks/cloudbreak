@@ -135,8 +135,20 @@ public class FreeipaClientService {
     }
 
     public FlowIdentifier rotateSecret(String envirionmentCrn, FreeIpaSecretRotationRequest request) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> freeIpaRotationV1Endpoint.rotateSecretsByCrn(envirionmentCrn, request));
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> freeIpaRotationV1Endpoint.rotateSecretsByCrn(envirionmentCrn, request));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to rotate FreeIPA secret by environment CRN: %s, due to: %s. %s.", envirionmentCrn, e.getMessage(),
+                    errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
+            String message = String.format("Failed to rotate FreeIPA secret by environment CRN: %s, due to: %s.", envirionmentCrn, e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
     }
 
     public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {

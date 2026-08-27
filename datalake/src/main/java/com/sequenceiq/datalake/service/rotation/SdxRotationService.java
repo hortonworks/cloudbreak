@@ -15,9 +15,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
@@ -32,7 +34,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
@@ -129,6 +133,9 @@ public class SdxRotationService {
     @Inject
     private Map<SecretType, ConditionalRotationContextProvider> conditionalRotationContextProviderMap;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
             Map<String, String> additionalProperties) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
@@ -138,9 +145,8 @@ public class SdxRotationService {
         request.setSecret(secretType.value());
         request.setExecutionType(executionType);
         request.setAdditionalProperties(additionalProperties);
-        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                initiatorUserCrn -> stackV4Endpoint.rotateSecrets(1L, request, initiatorUserCrn)
-        );
+        FlowIdentifier flowIdentifier = triggerRemoteSecretRotation(CLOUDBREAK_ROTATE_POLLING,
+                initiatorUserCrn -> stackV4Endpoint.rotateSecrets(1L, request, initiatorUserCrn));
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
@@ -163,9 +169,8 @@ public class SdxRotationService {
         request.setExecutionType(executionType);
         request.setAdditionalProperties(additionalProperties);
 
-        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                initiatorUserCrn -> databaseServerV4Endpoint.rotateSecret(request, initiatorUserCrn)
-        );
+        FlowIdentifier flowIdentifier = triggerRemoteSecretRotation(REDBEAMS_ROTATE_POLLING,
+                initiatorUserCrn -> databaseServerV4Endpoint.rotateSecret(request, initiatorUserCrn));
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
@@ -305,9 +310,8 @@ public class SdxRotationService {
         request.setExecutionType(executionType);
         request.setAdditionalProperties(additionalProperties);
 
-        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                initiatorUserCrn -> freeIpaRotationV1Endpoint.rotateSecretsByCrn(sdxCluster.getEnvCrn(), request)
-        );
+        FlowIdentifier flowIdentifier = triggerRemoteSecretRotation(FREEIPA_ROTATE_POLLING,
+                initiatorUserCrn -> freeIpaRotationV1Endpoint.rotateSecretsByCrn(sdxCluster.getEnvCrn(), request));
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
@@ -323,6 +327,16 @@ public class SdxRotationService {
         if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
             String message = String.format("Polling in Freeipa is not possible since last known state of flow for FMS is %s", lastFlow.getCurrentState());
             throw new SecretRotationException(message, null);
+        }
+    }
+
+    private FlowIdentifier triggerRemoteSecretRotation(SecretRotationStep step, Function<String, FlowIdentifier> endpointCall) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(endpointCall);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Secret rotation endpoint call failed at {} step, reason: {}", step, errorMessage, e);
+            throw new SecretRotationException(errorMessage, e);
         }
     }
 

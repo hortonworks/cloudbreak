@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -57,6 +58,8 @@ class RedbeamsClientServiceTest {
 
     private static final String SECRET = "secret";
 
+    private static final String REMOTE_REASON = "There is already a failed secret rotation for this database server.";
+
     @Mock
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
 
@@ -65,6 +68,9 @@ class RedbeamsClientServiceTest {
 
     @Mock
     private SupportV4Endpoint supportV4Endpoint;
+
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @InjectMocks
     private RedbeamsClientService underTest;
@@ -147,17 +153,31 @@ class RedbeamsClientServiceTest {
     }
 
     @Test
-    void rotateSecretShouldThrowCloudbreakServiceExceptionWhenClientCallFails() {
+    void rotateSecretShouldThrowCloudbreakServiceExceptionWithRemoteReasonWhenClientCallFails() {
         when(redbeamsServerEndpoint.rotateSecret(any(), any())).thenThrow(new BadRequestException("bad request"));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(REMOTE_REASON);
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
         request.setSecret(SECRET);
         request.setCrn(DATABASE_SERVER_CRN);
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.rotateSecret(request));
         assertEquals(String.format(
-                "Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s", SECRET, DATABASE_SERVER_CRN, "bad request"),
+                "Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s. %s.", SECRET, DATABASE_SERVER_CRN, "bad request", REMOTE_REASON),
                 cloudbreakServiceException.getMessage());
         verify(redbeamsServerEndpoint, times(1)).rotateSecret(eq(request), any());
+    }
+
+    @Test
+    void rotateSecretShouldThrowCloudbreakServiceExceptionWithoutExtractionOnProcessingException() {
+        when(redbeamsServerEndpoint.rotateSecret(any(), any())).thenThrow(new ProcessingException("connection refused"));
+        RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
+        request.setSecret(SECRET);
+        request.setCrn(DATABASE_SERVER_CRN);
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.rotateSecret(request));
+        assertEquals(String.format(
+                "Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s", SECRET, DATABASE_SERVER_CRN, "connection refused"),
+                cloudbreakServiceException.getMessage());
     }
 
     @Test
