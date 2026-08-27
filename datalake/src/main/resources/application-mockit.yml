@@ -23,3 +23,10 @@ sdx.db.operation.sleeptime_sec: 2
 sdx.environment.sleeptime_sec: 2
 sdx.datahub.refresh.sleeptime_sec: 2
 dl.dh.polling.sleep.time: 2
+
+# SDX background instance-sync cadence (SdxClusterStatusCheckerJob uses the same common
+# StatusCheckerConfig as CB, default 180s). The repair/terminate tests wait for one CB sync
+# AND one SDX sync to flip terminated instances to DELETED_ON_PROVIDER_SIDE; poll frequently
+# here too so the mock's instant state changes surface in seconds, not minutes.
+statuschecker.intervalsec: 10
+statuschecker.snoozesec: 5

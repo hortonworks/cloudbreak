@@ -3,3 +3,14 @@
 # instantly - is not throttled by production-tuned poll waits. NEVER active in prod.
 cb.cm.poll.interval.ms: 1000
 cb.freeipa.binduser.poll.interval: 500
+
+# Background instance-sync cadence (StackStatusCheckerJob / common StatusCheckerConfig):
+# production polls every 180s. Against the instant mock that is dead wait - the SDX repair
+# tests spend ~7 min just waiting for terminated instances to be detected as
+# DELETED_ON_PROVIDER_SIDE across the CB + SDX syncs. Poll frequently so detection happens
+# in seconds. The 2 min post-flow skip window (cb.statuschecker.skip.window.minutes) is left
+# at the prod default on purpose: it guards the gap between one flow ending and the next
+# starting, and dropping it lets a fast sync preempt a just-launched flow (e.g. resize
+# rollback), cancelling it.
+statuschecker.intervalsec: 10
+statuschecker.snoozesec: 5
