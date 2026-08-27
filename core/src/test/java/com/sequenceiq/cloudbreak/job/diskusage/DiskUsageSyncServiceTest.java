@@ -105,7 +105,6 @@ class DiskUsageSyncServiceTest {
         lenient().when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
-        lenient().when(entitlementService.isDbDiskAutoResizeEnabled(ACCOUNT_ID)).thenReturn(true);
         lenient().when(stack.getDatabase()).thenReturn(database);
         lenient().when(diskUsageSyncConfig.getDbDiskUsageThresholdPercentage()).thenReturn(DB_DISK_USAGE_THRESHOLD);
         lenient().when(diskUsageSyncConfig.getDiskIncrementSize()).thenReturn(DISK_INCREMENT_SIZE);
@@ -191,17 +190,6 @@ class DiskUsageSyncServiceTest {
         when(hostOrchestrator.getDatabaseDiskUsagePercentage(gatewayConfig, PRIMARY_GW_FQDN)).thenThrow(new CloudbreakOrchestratorFailedException("Error"));
 
         assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
-        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
-    }
-
-    @Test
-    @DisplayName("Test that checkDbDisk doesn't trigger the resize flow when the entitlement is disabled")
-    void testCheckDbDiskEntitlementDisabled() throws CloudbreakOrchestratorFailedException {
-        setupForResize(DB_DISK_USAGE_THRESHOLD + 1, 200);
-        when(entitlementService.isDbDiskAutoResizeEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
-
         verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 
