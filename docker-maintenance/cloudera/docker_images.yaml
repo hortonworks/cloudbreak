@@ -1,0 +1,9 @@
+docker_images:
+  cloudbreak-maintenance:
+    image: hortonworks/cloudbreak-maintenance
+    env:
+      govcloud: exclude
+  cloudbreak-maintenance-govcloud:
+    image: hortonworks/cloudbreak-maintenance-govcloud
+    env:
+      govcloud: exclusive

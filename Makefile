@@ -89,6 +89,9 @@ build-environment-dockerhub:
 build-freeipa-dockerhub:
 	 make -C docker-freeipa dockerhub
 
+build-maintenance-dockerhub:
+	 make -C docker-maintenance dockerhub
+
 enable-gitconfig-local:
 	 git config --local include.path ../.gitconfig
 

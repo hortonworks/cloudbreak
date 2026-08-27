@@ -14,7 +14,7 @@ public class Sync {
 
     private static final List<String> SERVICES = List.of(
         "redbeams", "cloudbreak", "datalake", "freeipa",
-        "environment", "externalized-compute", "environment-remote");
+        "environment", "externalized-compute", "environment-remote", "maintenance");
 
     public static void main(String[] args) throws Exception {
         boolean check = args.length > 0 && args[0].equals("--check");
