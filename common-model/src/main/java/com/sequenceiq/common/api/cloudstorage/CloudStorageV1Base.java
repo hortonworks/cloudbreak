@@ -10,7 +10,6 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.cloudstorage.old.EfsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.validation.ValidCloudStorage;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,10 +21,6 @@ public abstract class CloudStorageV1Base implements Serializable {
     @Valid
     @Schema
     private AdlsCloudStorageV1Parameters adls;
-
-    @Valid
-    @Schema
-    private WasbCloudStorageV1Parameters wasb;
 
     @Valid
     @Schema
@@ -49,14 +44,6 @@ public abstract class CloudStorageV1Base implements Serializable {
 
     public void setAdls(AdlsCloudStorageV1Parameters adls) {
         this.adls = adls;
-    }
-
-    public WasbCloudStorageV1Parameters getWasb() {
-        return wasb;
-    }
-
-    public void setWasb(WasbCloudStorageV1Parameters wasb) {
-        this.wasb = wasb;
     }
 
     public GcsCloudStorageV1Parameters getGcs() {

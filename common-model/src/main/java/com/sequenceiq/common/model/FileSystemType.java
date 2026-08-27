@@ -9,20 +9,10 @@ import com.sequenceiq.common.api.filesystem.EfsFileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.HdfsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
-import com.sequenceiq.common.api.filesystem.WasbFileSystem;
-import com.sequenceiq.common.api.filesystem.WasbIntegratedFileSystem;
 
 public enum FileSystemType {
 
-    /**
-     * @deprecated Wasb integrated is no longer supported
-     */
-    @Deprecated
-    WASB_INTEGRATED(WasbIntegratedFileSystem.class, List.of("wasb"), "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net", ".blob.core.windows.net"),
-
     GCS(GcsFileSystem.class, List.of("gs", "gcs"), "{{{ storageName }}}", ""),
-
-    WASB(WasbFileSystem.class, List.of("wasb"), "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net", ".blob.core.windows.net"),
 
     ADLS(AdlsFileSystem.class, List.of("adl"), "{{{ accountName }}}.azuredatalakestore.net/{{{ storageName }}}", ""),
 
@@ -93,10 +83,6 @@ public enum FileSystemType {
             }
         }
         return null;
-    }
-
-    public boolean isWasb() {
-        return WASB.equals(this);
     }
 
     public boolean isAdlsGen2() {
