@@ -10,7 +10,12 @@
 #this value changed 2026.04.13 from 5.7 to 6.0 (organic growth; traffic at threshold across recent PRs)
 : ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="6.0GB"}
 
-status_code=0
+# Track each check independently so the final banner can name what actually failed
+tests_failed=0
+tests_skipped=0
+no_test_output_dir=0
+no_tests_launched=0
+postgres_failed=0
 
 set -ex
 
@@ -18,17 +23,20 @@ echo -e "\n\033[1;96m--- Check integration test results\033[0m\n"
     date
     if [[ ! -d test-output ]]; then
         echo -e "\033[0;91m--- !!! NO test-output DIRECTORY !!! ---\033[0m\n";
-        status_code=1;
+        no_test_output_dir=1;
     else
         if grep -r '<failure ' test-output; then
           echo -e "\033[0;91m--- !!! INTEGRATION TEST FAILED, CHECK \033[1;93mtest-output\033[0;91m DIR FOR RESULTS !!! ---\033[0m\n";
-          status_code=1;
+          tests_failed=1;
           echo -e "\033[0;91m--- LIST OF FAILED CLASSES/TESTCASES: ---\033[0m\n"
           grep '<class name\|name=\"test \|invocation-numbers' test-output/mock-tests/testng-failed.xml | awk '{print "\033[31m" $0 "\033[0m"}'
         fi
         if grep -r '<skipped' test-output; then
           echo -e "\033[0;91m--- !!! INTEGRATION TEST SKIPPED, CHECK \033[1;93mtest-output\033[0;91m DIR FOR RESULTS !!! ---\033[0m\n";
-          status_code=1;
+          tests_skipped=1;
+        fi
+        if [[ $tests_failed -eq 0 && $tests_skipped -eq 0 ]]; then
+          echo -e "\033[0;92m+++ ALL INTEGRATION TESTS PASSED +++\033[0m\n";
         fi
     fi
 
@@ -38,7 +46,7 @@ echo -e "\033[1;96mLogs of the test run: \033[1;93m/suites_log/*.log\033[0m\n"
 
 if [[ $(find suites_log -maxdepth 1 -name '*.log' | wc -l) -lt 3 ]]; then
   echo -e "\033[0;91m--- !!! NO TEST HAS BEEN LAUNCHED !!! ---\033[0m\n";
-  status_code=1;
+  no_tests_launched=1;
 fi
 
 if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
@@ -53,18 +61,23 @@ if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
     pg_res=$(cat ./test-output/docker_stats/pg_stat_network_io_analysed.result);
     pg_ok="POSTGRES>> OK"
     if [[ "$pg_res" == $pg_ok* ]]; then
-      echo -e "\n\033[0;92m+++ POSTGRES TRAFFIC IS BELOW ${max_pg_network_output} LIMIT. +++\033[0m\n";
+      echo -e "\n\033[0;92m+++ POSTGRES TRAFFIC IS BELOW ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT} LIMIT. +++\033[0m\n";
     else
-      echo -e "\033[0;91m--- !!! POSTGRES TRAFIC CHECK FAILED: ${pg_res} !!! ---\033[0m\n";
-      status_code=1;
+      echo -e "\033[0;91m--- !!! POSTGRES TRAFFIC CHECK FAILED: ${pg_res} !!! ---\033[0m\n";
+      postgres_failed=1;
     fi
 fi
 
-# Exit if there are failed tests
-if [[ status_code -eq 1 ]]; then
-  echo -e "\033[0;91m--- !!! INTEGRATION TEST HAS BEEN FAILED !!! ---\033[0m\n";
+# Report each failing check by name so the user can tell tests from infra issues at a glance.
+if [[ $tests_failed -eq 1 || $tests_skipped -eq 1 || $no_test_output_dir -eq 1 || $no_tests_launched -eq 1 || $postgres_failed -eq 1 ]]; then
+  echo -e "\033[0;91m--- !!! INTEGRATION TEST RUN FAILED !!! ---\033[0m"
+  [[ $no_test_output_dir -eq 1 ]] && echo -e "\033[0;91m    - test-output directory is missing\033[0m"
+  [[ $no_tests_launched -eq 1 ]]  && echo -e "\033[0;91m    - no tests were launched (fewer than 3 suite logs)\033[0m"
+  [[ $tests_failed -eq 1 ]]       && echo -e "\033[0;91m    - one or more tests failed\033[0m"
+  [[ $tests_skipped -eq 1 ]]      && echo -e "\033[0;91m    - one or more tests were skipped\033[0m"
+  [[ $postgres_failed -eq 1 ]]    && echo -e "\033[0;91m    - postgres traffic exceeded the ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT} limit\033[0m"
+  echo -e "\n"
   exit 1;
 fi
 
 echo -e "\n\033[0;92m+++ INTEGRATION TEST SUCCESSFULLY FINISHED +++\033[0m\n";
-
