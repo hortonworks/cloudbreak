@@ -158,15 +158,14 @@ elif [[ "$AWS" == true ]]; then
   export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
 else
   export INTEGRATIONTEST_PARALLEL=methods
-  # 24 parallel methods. DO NOT raise this without fixing the shared bottleneck first: raising it to
-  # 40 caused CONGESTION COLLAPSE, not speedup. Measured from testng-results.xml, the SAME 226 tests
-  # took +91% cumulative time at 40 threads vs 24 (e.g. testScaleDownAndUp 546s->1397s; 93 of 103
-  # heavy tests >15% slower), pushing the phase 25.6min->30.4min and failures 1->17 (flow poll
-  # timeouts from congestion). The shared bottleneck was mock-infrastructure, capped at 1 CPU core by
-  # the deployer default; that cap is now lifted via the CPUS_FOR_MOCK_INFRASTRUCTURE Profile var (see
-  # the start-wait section above), which dropped per-test durations enough for 24 to be stable. Threads
-  # could go higher now, but only until a shared resource starts saturating again -- verify first.
-  export INTEGRATIONTEST_THREADCOUNT=24
+  # 30 parallel methods. At mock-infrastructure's deployer-default 1-core cap the suite was
+  # throughput-bound and 24 was the stable ceiling -- raising it to 40 then caused CONGESTION COLLAPSE
+  # (same 226 tests, +91% cumulative time vs 24; failures 1->17 from flow-poll timeouts). Once that cap
+  # was lifted (CPUS_FOR_MOCK_INFRASTRUCTURE -- see the start-wait section above and the cap block in
+  # integration-test-steps_integration_test.sh), 30 became stable: 3/3 green at 19-21min, 0/226 fails.
+  # DO NOT raise further without re-verifying the shared bottleneck (docker-stats sampler for mock-infra
+  # saturation, per-test durations in testng-results.xml).
+  export INTEGRATIONTEST_THREADCOUNT=30
   export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
 fi
 

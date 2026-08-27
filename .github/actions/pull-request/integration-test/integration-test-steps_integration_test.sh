@@ -23,15 +23,19 @@ main() {
   # (32 vCPU / 128 GiB, RELENG-36083) with the whole node effectively to itself (dind is
   # uncapped at the K8s level), so lift the shared Profile_template baselines here -- NOT in the
   # template, which is also used by jobs on the smaller cb-ubuntu22-large runners. cloudbreak core
-  # is the hot path under 24 parallel test methods, so it gets the largest share; the higher
+  # is the hot path under the parallel test methods, so it gets the largest share; the higher
   # service ceiling lets environment/datalake/freeipa burst. mock-infrastructure is the cloud backend
   # every test funnels through -- at the deployer default (1 CPU / 768M) it pinned flat at ~1 core and
   # serialised the whole suite, so it gets a lifted cap too. These appends land after the template's
   # own exports, so they win.
+  # mock-infrastructure is the likeliest bottleneck at 30 parallel methods, so its cap is 10.0 (up from
+  # the 8.0 that paired with 24 threads). Total quota is cloudbreak 12 + services 8 + mock-infra 10 =
+  # 30 of the 32 vCPU (cgroup ceilings, not exclusive pins, so slight over-subscription is fine).
+  # Verified stable: 3/3 green at 19-21min at 30 threads.
   echo "export CPUS_FOR_CLOUDBREAK=12.0" >> integcb/Profile_template
   echo "export CPUS_FOR_SERVICES=8.0" >> integcb/Profile_template
   echo "export MEMORY_FOR_OTHER_SERVICES=4096M" >> integcb/Profile_template
-  echo "export CPUS_FOR_MOCK_INFRASTRUCTURE=8.0" >> integcb/Profile_template
+  echo "export CPUS_FOR_MOCK_INFRASTRUCTURE=10.0" >> integcb/Profile_template
   echo "export MEMORY_FOR_MOCK_INFRASTRUCTURE=2048M" >> integcb/Profile_template
   echo "export COMMON_DB_VOL=${GITHUB_RUN_ATTEMPT}-sm" >> integcb/Profile_template
   VERSION=$(get_latest_version) TARGET_BRANCH=$BRANCH make without-build
