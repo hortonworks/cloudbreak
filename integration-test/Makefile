@@ -109,6 +109,7 @@ upload-s3:
 	aws s3 cp ./apidefinitions/redbeams.json s3://redbeams-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/datalake.json s3://datalake-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/autoscale.json s3://autoscale-swagger/swagger-$(VERSION).json --acl public-read
+	aws s3 cp ./apidefinitions/maintenance.json s3://maintenance-swagger/swagger-$(VERSION).json --acl public-read
 
 start-integration-test:
 	./scripts/start-integration-test.sh

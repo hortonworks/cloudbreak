@@ -903,6 +903,7 @@ We are using Openapi to create API definitions for our services. The following l
 | Periscope         | `https://autoscale-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`           |
 | RemoteEnvironment | `https://remoteenvironment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`   |
 | ExternalCompute   | `https://externalizedcompute-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json` |
+| Maintenance       | `https://maintenance-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`       |
 
 # How to Contribute
 

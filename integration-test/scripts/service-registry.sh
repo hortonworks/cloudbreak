@@ -19,6 +19,7 @@ SERVICES=(
   "autoscale:autoscale:us-east-2:autoscale/build/openapi/autoscale.json"
   "remoteenvironment:environment-remote:us-east-2:environment-remote/build/openapi/remoteenvironment.json"
   "externalizedcompute:externalized-compute:us-east-2:externalized-compute/build/openapi/externalizedcompute.json"
+  "maintenance:maintenance:us-east-2:maintenance/build/openapi/maintenance.json"
 )
 
 # Parse the registry into associative arrays for use by sourcing scripts.

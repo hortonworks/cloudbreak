@@ -24,6 +24,7 @@ set -x
     autoscale:test --tests=com.sequenceiq.periscope.openapi.OpenApiGenerator \
     externalized-compute:test --tests=com.sequenceiq.externalizedcompute.openapi.OpenApiGenerator \
     environment-remote:test --tests=com.sequenceiq.remoteenvironment.openapi.OpenApiGenerator \
+    maintenance:test --tests=com.sequenceiq.maintenance.openapi.OpenApiGenerator \
 
 if [[ "${RUN_SONARQUBE}" == "true" ]]; then
     # removing core modul because that is instable
@@ -45,3 +46,4 @@ aws s3 cp ./datalake/build/openapi/datalake.json "s3://datalake-swagger/openapi-
 aws s3 cp ./autoscale/build/openapi/autoscale.json "s3://autoscale-swagger/openapi-${VERSION}.json" --acl public-read
 aws s3 cp ./externalized-compute/build/openapi/externalizedcompute.json "s3://externalizedcompute-swagger/openapi-${VERSION}.json" --acl public-read
 aws s3 cp ./environment-remote/build/openapi/remoteenvironment.json "s3://remoteenvironment-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./maintenance/build/openapi/maintenance.json "s3://maintenance-swagger/openapi-${VERSION}.json" --acl public-read
