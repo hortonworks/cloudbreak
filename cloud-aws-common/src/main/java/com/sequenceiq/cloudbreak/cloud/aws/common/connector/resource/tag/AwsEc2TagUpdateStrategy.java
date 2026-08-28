@@ -164,6 +164,54 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
                 .build());
     }
 
+    @Override
+    public boolean isBatchDeleteSupported() {
+        return true;
+    }
+
+    @Override
+    public void batchDeleteTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
+
+        List<String> resourcesToUpdate = new ArrayList<>();
+
+        Map<ResourceType, List<CloudResource>> cloudResourcesByType = cloudResources.stream()
+                .collect(Collectors.groupingBy(CloudResource::getType));
+
+        cloudResourcesByType.forEach((type, resources) -> {
+            switch (type) {
+                case AWS_ROOT_DISK, AWS_VOLUMESET -> {
+                    List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).distinct().toList();
+                    resourcesToUpdate.addAll(resolveVolumeIdsWithTagsToDelete(ec2Client, instanceIds, tagKeys));
+                }
+                case AWS_INSTANCE -> {
+                    List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).toList();
+                    resourcesToUpdate.addAll(filterResourcesWithTagsToDelete(ec2Client, instanceIds, tagKeys));
+                }
+                default -> {
+                    List<String> refs = resources.stream().map(CloudResource::getReference).toList();
+                    resourcesToUpdate.addAll(filterResourcesWithTagsToDelete(ec2Client, refs, tagKeys));
+                }
+            }
+        });
+
+        if (resourcesToUpdate.isEmpty()) {
+            LOGGER.info("No tags to delete for all {} EC2 resources, skipping.", cloudResources.size());
+            return;
+        }
+
+        Collection<Tag> ec2Tags = tagKeys.stream()
+                .map(key -> Tag.builder().key(key).build())
+                .toList();
+
+        Lists.partition(resourcesToUpdate, TAG_UPDATE_BATCH_SIZE).forEach(batch ->
+                ec2Client.deleteTags(DeleteTagsRequest.builder()
+                        .resources(batch)
+                        .tags(ec2Tags)
+                        .build())
+        );
+    }
+
     private List<String> resolveVolumeIdsToUpdate(AmazonEc2Client ec2Client,
             List<String> instanceIds, Map<String, String> newTags) {
         return Lists.partition(instanceIds, DESCRIBE_BATCH_SIZE).stream()

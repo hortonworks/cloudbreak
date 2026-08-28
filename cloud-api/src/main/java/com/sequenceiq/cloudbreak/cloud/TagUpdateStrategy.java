@@ -30,6 +30,14 @@ public interface TagUpdateStrategy {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    default boolean isBatchDeleteSupported() {
+        return false;
+    }
+
+    default void batchDeleteTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
     default boolean tagsAlreadyUpToDate(Map<String, String> existingTags, Map<String, String> newTags) {
         Map<String, String> existing = existingTags != null ? existingTags : Map.of();
         return existing.entrySet().containsAll(newTags.entrySet());

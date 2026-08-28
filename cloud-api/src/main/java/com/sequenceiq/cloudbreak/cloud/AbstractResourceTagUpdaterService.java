@@ -89,10 +89,16 @@ public abstract class AbstractResourceTagUpdaterService {
 
         resourcesByStrategy.forEach((strategy, resources) -> {
             try {
-                for (CloudResource cloudResource : resources) {
-                    LOGGER.info("Requested tag key deletion for cloud resource: {} with type: {} with tag keys: {}",
-                            cloudResource.getName(), cloudResource.getType(), preparedTagKeys);
-                    strategy.deleteTags(authenticatedContext, cloudResource, preparedTagKeys);
+                if (strategy.isBatchDeleteSupported()) {
+                    LOGGER.info("Deleting tags in batch for {} resources using {} with tag keys: {}",
+                            resources.size(), strategy.getClass().getSimpleName(), preparedTagKeys);
+                    strategy.batchDeleteTags(authenticatedContext, resources, preparedTagKeys);
+                } else {
+                    for (CloudResource cloudResource : resources) {
+                        LOGGER.info("Requested tag key deletion for cloud resource: {} with type: {} with tag keys: {}",
+                                cloudResource.getName(), cloudResource.getType(), preparedTagKeys);
+                        strategy.deleteTags(authenticatedContext, cloudResource, preparedTagKeys);
+                    }
                 }
             } catch (Exception e) {
                 throw handleDeleteFailure(strategy, e);

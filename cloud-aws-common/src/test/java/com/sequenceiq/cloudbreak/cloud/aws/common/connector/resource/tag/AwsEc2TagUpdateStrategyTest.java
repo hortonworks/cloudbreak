@@ -481,6 +481,148 @@ class AwsEc2TagUpdateStrategyTest {
         verify(ec2Client, times(2)).createTags(any(CreateTagsRequest.class));
     }
 
+    @Test
+    void testBatchDeleteTagsForAwsInstances() {
+        String instanceId1 = "instanceId1";
+        String instanceId2 = "instanceId2";
+        CloudResource cloudResource1 = buildResource(ResourceType.AWS_INSTANCE, instanceId1, null);
+        CloudResource cloudResource2 = buildResource(ResourceType.AWS_INSTANCE, instanceId2, null);
+
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tags(
+                        TagDescription.builder().resourceId(instanceId1).key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build(),
+                        TagDescription.builder().resourceId(instanceId2).key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build()
+                )
+                .build());
+
+        underTest.batchDeleteTags(authenticatedContext, List.of(cloudResource1, cloudResource2), Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client).deleteTags(deleteTagsRequestWithResources(List.of(instanceId1, instanceId2), Set.of(EXISTING_TAG_KEY)));
+    }
+
+    @Test
+    void testBatchDeleteTagsForAwsRootDisks() {
+        String instanceId1 = "instanceId1";
+        String instanceId2 = "instanceId2";
+        String volumeId1 = "volumeId1";
+        String volumeId2 = "volumeId2";
+        CloudResource cloudResource1 = buildResource(ResourceType.AWS_ROOT_DISK, instanceId1, null);
+        CloudResource cloudResource2 = buildResource(ResourceType.AWS_ROOT_DISK, instanceId2, null);
+
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeVolumes(any(DescribeVolumesRequest.class))).thenReturn(DescribeVolumesResponse.builder()
+                .volumes(
+                        Volume.builder().volumeId(volumeId1).tags(Tag.builder().key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build()).build(),
+                        Volume.builder().volumeId(volumeId2).tags(Tag.builder().key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build()).build()
+                )
+                .build());
+
+        underTest.batchDeleteTags(authenticatedContext, List.of(cloudResource1, cloudResource2), Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client).deleteTags(deleteTagsRequestWithResources(List.of(volumeId1, volumeId2), Set.of(EXISTING_TAG_KEY)));
+    }
+
+    @Test
+    void testBatchDeleteTagsForMixedResourceTypes() {
+        String instanceId = "instanceId";
+        String volumeId = "volumeId";
+        String securityGroupId = "sgId";
+        CloudResource instance = buildResource(ResourceType.AWS_INSTANCE, instanceId, null);
+        CloudResource rootDisk = buildResource(ResourceType.AWS_ROOT_DISK, instanceId, null);
+        CloudResource securityGroup = buildResource(ResourceType.AWS_SECURITY_GROUP, null, securityGroupId);
+
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tags(
+                        TagDescription.builder().resourceId(instanceId).key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build(),
+                        TagDescription.builder().resourceId(securityGroupId).key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build()
+                )
+                .build());
+        when(ec2Client.describeVolumes(any(DescribeVolumesRequest.class))).thenReturn(DescribeVolumesResponse.builder()
+                .volumes(Volume.builder()
+                        .volumeId(volumeId)
+                        .tags(Tag.builder().key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build())
+                        .build())
+                .build());
+
+        underTest.batchDeleteTags(authenticatedContext, List.of(instance, rootDisk, securityGroup), Set.of(EXISTING_TAG_KEY));
+
+        ArgumentCaptor<DeleteTagsRequest> captor = ArgumentCaptor.forClass(DeleteTagsRequest.class);
+        verify(ec2Client).deleteTags(captor.capture());
+
+        assertThat(captor.getValue().resources())
+                .containsExactlyInAnyOrder(instanceId, volumeId, securityGroupId);
+        assertThat(captor.getValue().tags())
+                .containsExactly(Tag.builder().key(EXISTING_TAG_KEY).build());
+    }
+
+    @Test
+    void testBatchDeleteTagsSkipsDeleteWhenKeyNotPresent() {
+        String instanceId1 = "instanceId1";
+        String instanceId2 = "instanceId2";
+        CloudResource cloudResource1 = buildResource(ResourceType.AWS_INSTANCE, instanceId1, null);
+        CloudResource cloudResource2 = buildResource(ResourceType.AWS_INSTANCE, instanceId2, null);
+
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tags(
+                        TagDescription.builder().resourceId(instanceId1).key("otherKey").value("otherValue").build(),
+                        TagDescription.builder().resourceId(instanceId2).key("otherKey").value("otherValue").build()
+                )
+                .build());
+
+        underTest.batchDeleteTags(authenticatedContext, List.of(cloudResource1, cloudResource2), Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client, times(0)).deleteTags(any(DeleteTagsRequest.class));
+    }
+
+    @Test
+    void testBatchDeleteTagsSkipsPartiallyWhenSomeKeysNotPresent() {
+        String instanceId1 = "instanceId1";
+        String instanceId2 = "instanceId2";
+        CloudResource cloudResource1 = buildResource(ResourceType.AWS_INSTANCE, instanceId1, null);
+        CloudResource cloudResource2 = buildResource(ResourceType.AWS_INSTANCE, instanceId2, null);
+
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenReturn(DescribeTagsResponse.builder()
+                .tags(
+                        TagDescription.builder().resourceId(instanceId1).key("otherKey").value("otherValue").build(),
+                        TagDescription.builder().resourceId(instanceId2).key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build()
+                )
+                .build());
+
+        underTest.batchDeleteTags(authenticatedContext, List.of(cloudResource1, cloudResource2), Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client).deleteTags(deleteTagsRequestWithResources(List.of(instanceId2), Set.of(EXISTING_TAG_KEY)));
+    }
+
+    @Test
+    void testBatchDeleteTagsPartitionsIntoChunksWhenExceedsBatchSize() {
+        List<CloudResource> cloudResources = IntStream.rangeClosed(1, 1001)
+                .mapToObj(i -> buildResource(ResourceType.AWS_INSTANCE, "instanceId" + i, null))
+                .toList();
+
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenAnswer(invocation -> {
+            DescribeTagsRequest request = invocation.getArgument(0);
+            List<String> resourceIds = request.filters().get(0).values();
+            List<TagDescription> tagDescriptions = resourceIds.stream()
+                    .map(id -> TagDescription.builder()
+                            .resourceId(id)
+                            .key(EXISTING_TAG_KEY)
+                            .value(EXISTING_TAG_VALUE)
+                            .build())
+                    .toList();
+            return DescribeTagsResponse.builder().tags(tagDescriptions).build();
+        });
+
+        underTest.batchDeleteTags(authenticatedContext, cloudResources, Set.of(EXISTING_TAG_KEY));
+
+        verify(ec2Client, times(6)).describeTags(any(DescribeTagsRequest.class));
+        verify(ec2Client, times(2)).deleteTags(any(DeleteTagsRequest.class));
+    }
+
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {
         return CloudResource.builder()
                 .withType(type)
@@ -495,6 +637,15 @@ class AwsEc2TagUpdateStrategyTest {
         return CreateTagsRequest.builder()
                 .resources(resources)
                 .tags(tags)
+                .build();
+    }
+
+    private DeleteTagsRequest deleteTagsRequestWithResources(List<String> resources, Set<String> tagKeys) {
+        return DeleteTagsRequest.builder()
+                .resources(resources)
+                .tags(tagKeys.stream()
+                        .map(key -> Tag.builder().key(key).build())
+                        .toList())
                 .build();
     }
 

@@ -94,10 +94,11 @@ class AwsNativeResourceTagUpdaterServiceTest {
     @Test
     void testDeleteTagsAwsInstance() throws IOException {
         CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+        when(ec2Strategy.isBatchDeleteSupported()).thenReturn(true);
 
         underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
 
-        verify(ec2Strategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verify(ec2Strategy).batchDeleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
         verifyNoMoreInteractions(elbStrategy);
     }
 
@@ -123,8 +124,9 @@ class AwsNativeResourceTagUpdaterServiceTest {
     @Test
     void testDeleteTagsWhenRuntimeExceptionOccurs() throws IOException {
         CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+        when(ec2Strategy.isBatchDeleteSupported()).thenReturn(true);
         doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
-                .deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+                .batchDeleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
 
         assertThrows(RuntimeException.class, () -> underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS));
     }

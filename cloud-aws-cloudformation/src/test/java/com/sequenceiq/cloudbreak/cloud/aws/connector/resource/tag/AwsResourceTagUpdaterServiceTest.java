@@ -108,10 +108,11 @@ class AwsResourceTagUpdaterServiceTest {
     @Test
     void testDeleteTagsAwsRootDisk() throws IOException {
         CloudResource cloudResource = buildResource(AWS_ROOT_DISK, INSTANCE_ID, null);
+        when(ec2Strategy.isBatchDeleteSupported()).thenReturn(true);
 
         underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
 
-        verify(ec2Strategy).deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+        verify(ec2Strategy).batchDeleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
         verifyNoMoreInteractions(cloudFormationStrategy);
     }
 
@@ -146,8 +147,9 @@ class AwsResourceTagUpdaterServiceTest {
     @Test
     void testDeleteTagsWhenRuntimeExceptionOccurs() throws IOException {
         CloudResource cloudResource = buildResource(AWS_ROOT_DISK, INSTANCE_ID, null);
+        when(ec2Strategy.isBatchDeleteSupported()).thenReturn(true);
         doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
-                .deleteTags(authenticatedContext, cloudResource, TAG_KEYS);
+                .batchDeleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
 
         assertThrows(CloudConnectorException.class, () -> underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS));
     }
