@@ -203,19 +203,36 @@ public class DnsRecordService {
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     @Measure(DnsRecordService.class)
-    public void addDnsCnameRecord(String accountId, AddDnsCnameRecordRequest request) throws FreeIpaClientException {
+    public void addOrUpdateDnsCnameRecord(String accountId, AddDnsCnameRecordRequest request) throws FreeIpaClientException {
         FreeIpaAndClient freeIpaAndClient = createFreeIpaAndClient(request.getEnvironmentCrn(), accountId);
+        addOrUpdateDnsCnameRecord(freeIpaAndClient, request);
+    }
+
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    @Measure(DnsRecordService.class)
+    public void addOrUpdateMultipleDnsCnameRecords(FreeIpa freeIpa, FreeIpaClient freeIpaClient, Set<AddDnsCnameRecordRequest> requests)
+            throws FreeIpaClientException {
+        FreeIpaAndClient freeIpaAndClient = new FreeIpaAndClient(freeIpa, freeIpaClient);
+        for (AddDnsCnameRecordRequest request : requests) {
+            addOrUpdateDnsCnameRecord(freeIpaAndClient, request);
+        }
+    }
+
+    private void addOrUpdateDnsCnameRecord(FreeIpaAndClient freeIpaAndClient, AddDnsCnameRecordRequest request) throws FreeIpaClientException {
         String zone = calculateZone(request.getDnsZone(), freeIpaAndClient);
         Optional<DnsRecord> dnsRecord = ignoreNotFoundExceptionWithValue(() -> freeIpaAndClient.getClient().showDnsRecord(zone, request.getCname()), null);
         String targetFqdn = StringUtils.appendIfMissing(request.getTargetFqdn(), ".");
         if (dnsRecord.isPresent()) {
-            handleExistingCname(freeIpaAndClient.getClient(), accountId, request, dnsRecord.get(), targetFqdn, zone);
+            handleExistingCname(freeIpaAndClient.getClient(), request, dnsRecord.get(), targetFqdn, zone);
         } else {
             createDnsCnameRecord(freeIpaAndClient.getClient(), zone, request.getCname(), targetFqdn);
         }
     }
 
-    private void handleExistingCname(FreeIpaClient freeIpaClient, String accountId, AddDnsCnameRecordRequest request, DnsRecord dnsRecord, String targetFqdn,
+    private void handleExistingCname(FreeIpaClient freeIpaClient, AddDnsCnameRecordRequest request, DnsRecord dnsRecord, String targetFqdn,
             String zone) throws FreeIpaClientException {
         boolean cnameTargetAlreadySet = dnsRecord.isCnameRecord() && dnsRecord.getCnamerecord().contains(targetFqdn);
         if (cnameTargetAlreadySet) {
@@ -223,7 +240,8 @@ public class DnsRecordService {
         } else if (request.isForce()) {
             LOGGER.info("Existing record for name [{}] does not match the requested CNAME target [{}]. Existing record: {}. "
                     + "Force is set, so deleting it and recreating as CNAME.", request.getCname(), targetFqdn, dnsRecord);
-            deleteDnsRecord(accountId, request.getEnvironmentCrn(), null, request.getCname());
+            ignoreNotFoundException(() -> freeIpaClient.deleteDnsRecord(request.getCname(), zone),
+                    "DNS record [{}] not found in zone [{}]", request.getCname(), zone);
             createDnsCnameRecord(freeIpaClient, zone, request.getCname(), targetFqdn);
         } else {
             validateExistingCnameRecordMatches(dnsRecord, targetFqdn);
@@ -246,7 +264,7 @@ public class DnsRecordService {
     private void createDnsCnameRecord(FreeIpaClient client, String zone, String cname, String targetFqdn) throws FreeIpaClientException {
         LOGGER.info("Creating CNAME record in zone [{}] with name [{}] with target [{}].", zone, cname, targetFqdn);
         Optional<DnsRecord> record = ignoreEmptyModExceptionWithValue(() -> client.addDnsCnameRecord(zone, cname, targetFqdn),
-                "CNAME record created with name [{}] with target [{}] is already exists, nothing to do.", cname, targetFqdn);
+                "CNAME record with name [{}] and target [{}] already exists, nothing to do.", cname, targetFqdn);
         LOGGER.info("CNAME record created with name [{}] with target [{}]. Record: {}", cname, targetFqdn, record);
     }
 

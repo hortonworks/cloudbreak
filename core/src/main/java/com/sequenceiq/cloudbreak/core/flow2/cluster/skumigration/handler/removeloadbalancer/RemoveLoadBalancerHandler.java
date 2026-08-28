@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.handler.removeloadbalancer;
 
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -14,13 +13,17 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationFailedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationFlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -36,6 +39,12 @@ public class RemoveLoadBalancerHandler extends ExceptionCatcherEventHandler<Remo
     @Inject
     private SkuMigrationService skuMigrationService;
 
+    @Inject
+    private ResourceService resourceService;
+
+    @Inject
+    private ResourceToCloudResourceConverter cloudResourceConverter;
+
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RemoveLoadBalancerRequest> event) {
         return new SkuMigrationFailedEvent(SkuMigrationFlowEvent.SKU_MIGRATION_FAILED_EVENT.event(), resourceId, e);
@@ -45,15 +54,18 @@ public class RemoveLoadBalancerHandler extends ExceptionCatcherEventHandler<Remo
     protected Selectable doAccept(HandlerEvent<RemoveLoadBalancerRequest> event) {
         RemoveLoadBalancerRequest request = event.getData();
         try {
-            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(request.getResourceId());
             CloudConnector connector = request.getCloudConnector();
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
-            List<String> loadBalancerNames = loadBalancers.stream()
-                    .filter(loadBalancer -> loadBalancer.getProviderConfig() != null && loadBalancer.getProviderConfig().getAzureConfig() != null)
-                    .map(loadBalancer -> loadBalancer.getProviderConfig().getAzureConfig().getName())
-                    .collect(Collectors.toList());
-            LOGGER.info("Removing load balancers: {}", loadBalancerNames);
-            measure(() -> connector.resources().deleteLoadBalancers(ac, request.getCloudStack(), loadBalancerNames), LOGGER,
+            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(request.getResourceId());
+            Set<ResourceType> lbResourceTypes = ResourceType.getLbResourceTypes(request.getCloudContext().getPlatform().value());
+
+            List<CloudResource> loadBalancersToRemove = resourceService
+                    .findAllByStackIdAndResourceTypeIn(request.getResourceId(), lbResourceTypes).stream()
+                    .map(cloudResourceConverter::convert)
+                    .toList();
+            LOGGER.info("Removing load balancers: {}", loadBalancersToRemove.stream().map(CloudResource::getName).toList());
+
+            checkedMeasure(() -> connector.resources().deleteLoadBalancers(ac, request.getCloudStack(), loadBalancersToRemove), LOGGER,
                     "Deleting load balancers took {} ms");
             skuMigrationService.updateSkuToStandard(request.getResourceId(), loadBalancers);
         } catch (Exception e) {

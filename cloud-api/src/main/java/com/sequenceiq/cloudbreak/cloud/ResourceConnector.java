@@ -106,7 +106,7 @@ public interface ResourceConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
      */
-    default void deleteLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, List<String> loadBalancersToRemove) {
+    default void deleteLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> loadBalancersToRemove) throws Exception {
         throw new UnsupportedOperationException("Load balancer removal is not supported for this provider.");
     }
 

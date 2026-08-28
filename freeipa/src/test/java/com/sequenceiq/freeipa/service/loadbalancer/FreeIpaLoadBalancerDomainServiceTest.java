@@ -30,9 +30,11 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsPtrRecordService;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordConflictException;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaLoadBalancerDomainServiceTest {
@@ -74,6 +76,12 @@ class FreeIpaLoadBalancerDomainServiceTest {
     @Mock
     private FreeIpaClient freeIpaClient;
 
+    @Mock
+    private FreeIpaClientFactory freeIpaClientFactory;
+
+    @Mock
+    private StackService stackService;
+
     // -----------------------------------------------------------------------
     // Helper factories
     // -----------------------------------------------------------------------
@@ -109,8 +117,9 @@ class FreeIpaLoadBalancerDomainServiceTest {
     @Test
     void registerLbDomainDoesNothingWhenNoLoadBalancerExists() throws Exception {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        underTest.registerLbDomain(STACK_ID, freeIpaClient);
+        underTest.registerLbDomain(STACK_ID);
 
         verify(freeIpaClient, never()).addDnsARecord(any(), any(), any(), anyBoolean());
         verify(dnsPtrRecordService, never()).addDnsPtrRecord(any(), any());
@@ -122,8 +131,9 @@ class FreeIpaLoadBalancerDomainServiceTest {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("AWS"));
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        underTest.registerLbDomain(STACK_ID, freeIpaClient);
+        underTest.registerLbDomain(STACK_ID);
 
         verify(freeIpaClient).addDnsARecord(DOMAIN, ENDPOINT, IP, false);
         verify(dnsPtrRecordService).addDnsPtrRecord(any(AddDnsPtrRecordRequest.class), eq(ACCOUNT_ID));
@@ -135,8 +145,9 @@ class FreeIpaLoadBalancerDomainServiceTest {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("AWS"));
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        underTest.registerLbDomain(STACK_ID, freeIpaClient);
+        underTest.registerLbDomain(STACK_ID);
 
         ArgumentCaptor<AddDnsPtrRecordRequest> captor = ArgumentCaptor.forClass(AddDnsPtrRecordRequest.class);
         verify(dnsPtrRecordService).addDnsPtrRecord(captor.capture(), eq(ACCOUNT_ID));
@@ -153,8 +164,9 @@ class FreeIpaLoadBalancerDomainServiceTest {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(ip1, ip2)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("AWS"));
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        underTest.registerLbDomain(STACK_ID, freeIpaClient);
+        underTest.registerLbDomain(STACK_ID);
 
         verify(freeIpaClient).addDnsARecord(DOMAIN, ENDPOINT, ip1, false);
         verify(freeIpaClient).addDnsARecord(DOMAIN, ENDPOINT, ip2, false);
@@ -172,11 +184,12 @@ class FreeIpaLoadBalancerDomainServiceTest {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("AWS"));
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         doThrow(new DnsRecordConflictException("conflict"))
                 .doNothing()
                 .when(dnsPtrRecordService).addDnsPtrRecord(any(), anyString());
 
-        underTest.registerLbDomain(STACK_ID, freeIpaClient);
+        underTest.registerLbDomain(STACK_ID);
 
         // delete the conflicting record, then add again
         verify(dnsPtrRecordService).deleteDnsPtrRecord(any(), eq(ACCOUNT_ID));
@@ -188,11 +201,12 @@ class FreeIpaLoadBalancerDomainServiceTest {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("AWS"));
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         doThrow(new DnsRecordConflictException("conflict"))
                 .doNothing()
                 .when(dnsPtrRecordService).addDnsPtrRecord(any(), anyString());
 
-        underTest.registerLbDomain(STACK_ID, freeIpaClient);
+        underTest.registerLbDomain(STACK_ID);
 
         ArgumentCaptor<com.sequenceiq.freeipa.api.v1.dns.model.DeleteDnsPtrRecordRequest> captor =
                 ArgumentCaptor.forClass(com.sequenceiq.freeipa.api.v1.dns.model.DeleteDnsPtrRecordRequest.class);
@@ -205,8 +219,9 @@ class FreeIpaLoadBalancerDomainServiceTest {
     void registerLbDomainSkipsPemUpdateForMockPlatform() throws Exception {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("MOCK"));
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        underTest.registerLbDomain(STACK_ID, freeIpaClient);
+        underTest.registerLbDomain(STACK_ID);
 
         verify(freeIpaClient).addDnsARecord(DOMAIN, ENDPOINT, IP, false);
         verify(dnsPtrRecordService).addDnsPtrRecord(any(), eq(ACCOUNT_ID));
@@ -219,8 +234,9 @@ class FreeIpaLoadBalancerDomainServiceTest {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("AWS"));
         when(freeIpaClient.addDnsARecord(anyString(), anyString(), anyString(), anyBoolean())).thenThrow(error);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        assertThrows(FreeIpaClientException.class, () -> underTest.registerLbDomain(STACK_ID, freeIpaClient));
+        assertThrows(FreeIpaClientException.class, () -> underTest.registerLbDomain(STACK_ID));
 
         verify(dnsPtrRecordService, never()).addDnsPtrRecord(any(), any());
     }
@@ -230,9 +246,10 @@ class FreeIpaLoadBalancerDomainServiceTest {
         FreeIpaClientException error = new FreeIpaClientException("PTR creation failed");
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("MOCK"));
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         doThrow(error).when(dnsPtrRecordService).addDnsPtrRecord(any(), anyString());
 
-        assertThrows(FreeIpaClientException.class, () -> underTest.registerLbDomain(STACK_ID, freeIpaClient));
+        assertThrows(FreeIpaClientException.class, () -> underTest.registerLbDomain(STACK_ID));
     }
 
     @Test
@@ -240,10 +257,61 @@ class FreeIpaLoadBalancerDomainServiceTest {
         when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa("AWS"));
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         doThrow(new PemDnsEntryCreateOrUpdateException("pem failed", null))
                 .when(freeIpaLoadBalancerPemService).createOrUpdateDnsEntry(any(), eq(ENV_NAME), eq(ACCOUNT_ID));
 
-        assertThrows(PemDnsEntryCreateOrUpdateException.class, () -> underTest.registerLbDomain(STACK_ID, freeIpaClient));
+        assertThrows(PemDnsEntryCreateOrUpdateException.class, () -> underTest.registerLbDomain(STACK_ID));
+    }
+
+    // -----------------------------------------------------------------------
+    // deregisterLbDomain tests
+    // -----------------------------------------------------------------------
+
+    @Test
+    void deregisterLbDomainDoesNothingWhenNoLoadBalancerExists() throws Exception {
+        when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+
+        underTest.deregisterLbDomain(STACK_ID);
+
+        verify(freeIpaLoadBalancerPemService, never()).deleteDnsEntry(any(), any());
+    }
+
+    @Test
+    void deregisterLbDomainDeletesPemEntry() throws Exception {
+        LoadBalancer lb = loadBalancer(IP);
+        FreeIpa freeIpa = freeIpa("AWS");
+        when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(lb));
+        when(stackService.getStackById(STACK_ID)).thenReturn(freeIpa.getStack());
+        when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+
+        underTest.deregisterLbDomain(STACK_ID);
+
+        verify(freeIpaLoadBalancerPemService).deleteDnsEntry(lb, ENV_NAME);
+    }
+
+    @Test
+    void deregisterLbDomainSkipsPemDeleteForMockPlatform() throws Exception {
+        FreeIpa freeIpa = freeIpa("MOCK");
+        when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer(IP)));
+        when(stackService.getStackById(STACK_ID)).thenReturn(freeIpa.getStack());
+
+        underTest.deregisterLbDomain(STACK_ID);
+
+        verify(freeIpaLoadBalancerPemService, never()).deleteDnsEntry(any(), any());
+    }
+
+    @Test
+    void deregisterLbDomainPropagatesPemDnsEntryException() throws Exception {
+        LoadBalancer lb = loadBalancer(IP);
+        FreeIpa freeIpa = freeIpa("AWS");
+        when(loadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(lb));
+        when(stackService.getStackById(STACK_ID)).thenReturn(freeIpa.getStack());
+        when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(envResponse());
+        doThrow(new PemDnsEntryCreateOrUpdateException("pem delete failed", null))
+                .when(freeIpaLoadBalancerPemService).deleteDnsEntry(lb, ENV_NAME);
+
+        assertThrows(PemDnsEntryCreateOrUpdateException.class, () -> underTest.deregisterLbDomain(STACK_ID));
     }
 }
 

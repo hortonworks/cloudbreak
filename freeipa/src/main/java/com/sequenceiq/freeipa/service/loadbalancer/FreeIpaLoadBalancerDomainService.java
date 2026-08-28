@@ -11,7 +11,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -46,9 +45,6 @@ public class FreeIpaLoadBalancerDomainService {
     private StackService stackService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private EnvironmentEndpoint environmentEndpoint;
 
     @Inject
@@ -59,6 +55,15 @@ public class FreeIpaLoadBalancerDomainService {
 
     @Inject
     private DnsPtrRecordService dnsPtrRecordService;
+
+    @Retryable(retryFor = FreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    public void registerLbDomain(Long stackId) throws FreeIpaClientException, PemDnsEntryCreateOrUpdateException {
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stackId);
+        registerLbDomain(stackId, freeIpaClient);
+    }
 
     public void registerLbDomain(Long stackId, FreeIpaClient freeIpaClient) throws FreeIpaClientException, PemDnsEntryCreateOrUpdateException {
         Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
@@ -74,6 +79,22 @@ public class FreeIpaLoadBalancerDomainService {
             Stack stack = freeIpa.getStack();
             if (manageLbDomainInPem(stack.getCloudPlatform())) {
                 performLoadBalancerDNSUpdateOnPEM(lb, stack.getEnvironmentCrn(), stack.getAccountId());
+            }
+        }
+    }
+
+    public void deregisterLbDomain(Long stackId) throws PemDnsEntryCreateOrUpdateException {
+        Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
+        if (loadBalancer.isPresent()) {
+            LoadBalancer lb = loadBalancer.get();
+            Stack stack = stackService.getStackById(stackId);
+            if (manageLbDomainInPem(stack.getCloudPlatform())) {
+                String environmentCrn = stack.getEnvironmentCrn();
+                DetailedEnvironmentResponse environmentResponse = environmentEndpoint.getByCrn(environmentCrn);
+                String environmentName = environmentResponse.getName();
+                freeIpaLoadBalancerPemService.deleteDnsEntry(lb, environmentName);
+            } else {
+                LOGGER.info("Load balancer domain was not managed in PEM for this platform, or load balancer does not exist");
             }
         }
     }
@@ -97,28 +118,6 @@ public class FreeIpaLoadBalancerDomainService {
             dnsPtrRecordService.deleteDnsPtrRecord(delRequest, accountId);
             LOGGER.info("Conflicting PTR record deleted. Proceeding to create PTR record for the load balancer");
             dnsPtrRecordService.addDnsPtrRecord(request, accountId);
-        }
-    }
-
-    @Retryable(retryFor = FreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void registerLbDomain(Long stackId) throws FreeIpaClientException, PemDnsEntryCreateOrUpdateException {
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stackId);
-        registerLbDomain(stackId, freeIpaClient);
-    }
-
-    public void deregisterLbDomain(Long stackId) throws PemDnsEntryCreateOrUpdateException {
-        Stack stack = stackService.getStackById(stackId);
-        Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
-        if (manageLbDomainInPem(stack.getCloudPlatform()) && loadBalancer.isPresent()) {
-            String environmentCrn = stack.getEnvironmentCrn();
-            DetailedEnvironmentResponse environmentResponse = environmentEndpoint.getByCrn(environmentCrn);
-            String environmentName = environmentResponse.getName();
-            freeIpaLoadBalancerPemService.deleteDnsEntry(loadBalancer.get(), environmentName);
-        } else {
-            LOGGER.info("Load balancer domain was not managed in PEM for this platform, or load balancer does not exist");
         }
     }
 

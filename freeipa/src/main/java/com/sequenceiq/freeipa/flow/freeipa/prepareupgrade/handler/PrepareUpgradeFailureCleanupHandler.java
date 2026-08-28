@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.handler;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -60,8 +61,9 @@ public class PrepareUpgradeFailureCleanupHandler extends ExceptionCatcherEventHa
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatform(), cloudContext.getVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
+            Set<ResourceType> lbResourceTypes = ResourceType.getLbResourceTypes(cloudContext.getPlatform().value());
             List<CloudResource> lbResources = resourceService.findAllByStackId(stackId).stream()
-                    .filter(r -> ResourceType.getAwsLbResourceTypes().contains(r.getResourceType()))
+                    .filter(r -> lbResourceTypes.contains(r.getResourceType()))
                     .map(resourceToCloudResourceConverter::convert)
                     .collect(Collectors.toList());
 

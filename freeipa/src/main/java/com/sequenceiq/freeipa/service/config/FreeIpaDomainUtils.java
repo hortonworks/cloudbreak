@@ -17,6 +17,14 @@ public class FreeIpaDomainUtils {
     private FreeIpaDomainUtils() {
     }
 
+    public static String getIpaCaHostFqdn(String domain) {
+        return buildFqdn(IPA_CA_HOST, domain);
+    }
+
+    public static String getIpaCaHost() {
+        return IPA_CA_HOST;
+    }
+
     public static String getKerberosFqdn(String domain) {
         return buildFqdn(KERBEROS_HOST, domain);
     }
@@ -47,10 +55,6 @@ public class FreeIpaDomainUtils {
 
     public static String getFreeIpaHost() {
         return FREEIPA_HOST;
-    }
-
-    public static String getBuiltInFreeIpaDnsLoadBalancedName(String domain) {
-        return buildFqdn(IPA_CA_HOST, domain);
     }
 
     public static String buildFqdn(String host, String domain) {

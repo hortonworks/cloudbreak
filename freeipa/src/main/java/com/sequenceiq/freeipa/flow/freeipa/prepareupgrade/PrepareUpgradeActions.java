@@ -481,8 +481,9 @@ public class PrepareUpgradeActions {
                 Long stackId = payload.getResourceId();
                 LOGGER.debug("Cleaning up load balancer DB records for stack {}", stackId);
                 freeIpaLoadBalancerService.delete(stackId);
+                Set<ResourceType> lbResourceTypes = ResourceType.getLbResourceTypes(context.getCloudContext().getPlatform().value());
                 resourceService.findAllByStackId(stackId).stream()
-                        .filter(r -> ResourceType.getAwsLbResourceTypes().contains(r.getResourceType()))
+                        .filter(r -> lbResourceTypes.contains(r.getResourceType()))
                         .forEach(r -> resourceService.deleteByStackIdAndNameAndType(stackId, r.getResourceName(), r.getResourceType()));
                 sendEvent(context, new StackEvent(PREPARE_UPGRADE_LB_DB_CLEANUP_FINISHED_EVENT.event(), stackId));
             }
@@ -572,8 +573,9 @@ public class PrepareUpgradeActions {
                         LOGGER.warn("Failed to clean up load balancer DB record during failure handling", e);
                     }
                     try {
+                        Set<ResourceType> lbResourceTypes = ResourceType.getLbResourceTypes(context.getCloudContext().getPlatform().value());
                         resourceService.findAllByStackId(stackId).stream()
-                                .filter(r -> ResourceType.getAwsLbResourceTypes().contains(r.getResourceType()))
+                                .filter(r -> lbResourceTypes.contains(r.getResourceType()))
                                 .forEach(r -> resourceService.deleteByStackIdAndNameAndType(stackId, r.getResourceName(), r.getResourceType()));
                     } catch (Exception e) {
                         LOGGER.warn("Failed to clean up resource DB records during failure handling", e);

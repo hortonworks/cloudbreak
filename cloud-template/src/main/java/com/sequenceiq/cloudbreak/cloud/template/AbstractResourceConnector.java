@@ -138,6 +138,14 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public void deleteLoadBalancers(AuthenticatedContext auth, CloudStack stack, List<CloudResource> loadBalancersToRemove) throws Exception {
+        CloudContext cloudContext = auth.getCloudContext();
+        ResourceBuilderContext resourceBuilderContext = contextBuilders.get(cloudContext.getPlatform())
+                .contextInit(cloudContext, auth, stack.getNetwork(), false);
+        loadBalancerResourceService.deleteResources(resourceBuilderContext, auth, loadBalancersToRemove, false);
+    }
+
+    @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) throws Exception {
         List<CloudResource> cloudResources = databaseServerLaunchService.launch(authenticatedContext, stack, persistenceNotifier);

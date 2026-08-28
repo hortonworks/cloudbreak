@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerDeletionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
@@ -64,6 +65,7 @@ class FreeIpaFlowInformationTest {
             FreeIpaRebuildFlowEvent.REBUILD_EVENT.event(),
             FreeIpaInstanceMetadataUpdateEvent.STACK_IMDUPDATE_EVENT.event(),
             FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(),
+            FreeIpaLoadBalancerDeletionEvent.LOAD_BALANCER_DELETION_EVENT.event(),
             FreeIpaTrustSetupFlowEvent.TRUST_SETUP_EVENT.event(),
             FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_EVENT.event(),
             FreeIpaTrustCancelFlowEvent.TRUST_CANCEL_EVENT.event(),

@@ -110,11 +110,6 @@ public enum ResourceType {
 
     private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE);
 
-    private static final Set<ResourceType> AWS_LB_RESOURCE_TYPES = Set.of(
-            ELASTIC_LOAD_BALANCER,
-            ELASTIC_LOAD_BALANCER_LISTENER,
-            ELASTIC_LOAD_BALANCER_TARGET_GROUP);
-
     private static final List<ResourceType> VOLUME_SET_TYPES = List.of(AWS_VOLUMESET, GCP_ATTACHED_DISKSET, AZURE_VOLUMESET, OPENSTACK_ATTACHED_DISK);
 
     private final CommonResourceType commonResourceType;
@@ -154,8 +149,15 @@ public enum ResourceType {
         return resourceType.getCommonResourceType() == CommonResourceType.CANARY;
     }
 
-    public static Set<ResourceType> getAwsLbResourceTypes() {
-        return AWS_LB_RESOURCE_TYPES;
+    public static Set<ResourceType> getLbResourceTypes(String platform) {
+        return switch (platform) {
+            case "AWS" -> Set.of(ELASTIC_LOAD_BALANCER, ELASTIC_LOAD_BALANCER_LISTENER, ELASTIC_LOAD_BALANCER_TARGET_GROUP);
+            case "AZURE" -> Set.of(AZURE_LOAD_BALANCER);
+            case "GCP" -> Set.of(GCP_BACKEND_SERVICE, GCP_FORWARDING_RULE, GCP_HEALTH_CHECK, GCP_HEALTHCHECK_FIREWALL, GCP_RESERVED_IP);
+            case "YARN" -> Set.of(YARN_LOAD_BALANCER);
+            case "MOCK" -> Set.of();
+            default -> throw new IllegalArgumentException("Unknown platform: " + platform);
+        };
     }
 
     public static boolean isVolumeSet(ResourceType resourceType) {

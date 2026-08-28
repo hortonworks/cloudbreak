@@ -269,11 +269,15 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
     }
 
-    public void deleteLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, List<String> loadBalancersToRemove) {
+    @Override
+    public void deleteLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> loadBalancersToRemove) {
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-        azureUtils.deleteLoadBalancers(client, resourceGroupName, loadBalancersToRemove);
+        List<String> lbNames = loadBalancersToRemove.stream()
+                .map(CloudResource::getName)
+                .toList();
+        azureUtils.deleteLoadBalancers(client, resourceGroupName, lbNames);
     }
 
     @Override
@@ -489,13 +493,13 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
+        List<CloudResource> mutableResourcesList = new ArrayList<>(resources);
 
         if (resourceGroupUsage != ResourceGroupUsage.MULTIPLE) {
-
             String deploymentName = azureUtils.getStackName(ac.getCloudContext());
             List<CloudResource> transientResources = azureTerminationHelperService.handleTransientDeployment(client, resourceGroupName, deploymentName);
-            NullUtil.doIfNotNull(transientResources, resources::addAll);
-            azureTerminationHelperService.terminate(ac, stack, resources);
+            NullUtil.doIfNotNull(transientResources, mutableResourcesList::addAll);
+            azureTerminationHelperService.terminate(ac, stack, mutableResourcesList);
             return check(ac, Collections.emptyList());
         } else {
             try {
@@ -512,7 +516,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                     return check(ac, Collections.emptyList());
                 }
             }
-            return check(ac, resources);
+            return check(ac, mutableResourcesList);
         }
     }
 

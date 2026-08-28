@@ -566,8 +566,7 @@ public class FreeIpaClient {
 
     public DnsRecord addDnsCnameRecord(String dnsZoneName, String recordName, String cnameRecord) throws FreeIpaClientException {
         List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
-        Map<String, Object> params = Map.of(
-                "cname_part_hostname", createDnsName(cnameRecord));
+        Map<String, Object> params = Map.of("cname_part_hostname", createDnsName(cnameRecord));
         return (DnsRecord) invoke("dnsrecord_add", flags, params, DnsRecord.class).getResult();
     }
 

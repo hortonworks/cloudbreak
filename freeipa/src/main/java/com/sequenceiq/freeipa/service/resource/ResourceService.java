@@ -51,6 +51,10 @@ public class ResourceService {
         return repository.findAllByStackId(id);
     }
 
+    public List<Resource> findAllByStackIdAndResourceTypeIn(Long id, Collection<ResourceType> resourceTypes) {
+        return repository.findAllByStackIdAndResourceTypeIn(id, resourceTypes);
+    }
+
     public Optional<Resource> findByStackIdAndNameAndType(Long stackId, String name, ResourceType type) {
         return repository.findByStackIdAndNameAndType(stackId, name, type);
     }

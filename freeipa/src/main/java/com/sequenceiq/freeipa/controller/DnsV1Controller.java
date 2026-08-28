@@ -153,7 +153,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     private void addDnsCnameRecordCommon(@RequestObject AddDnsCnameRecordRequest request, String accountId) {
         try {
-            dnsRecordService.addDnsCnameRecord(accountId, request);
+            dnsRecordService.addOrUpdateDnsCnameRecord(accountId, request);
         } catch (FreeIpaClientException e) {
             throw new FreeIpaClientExceptionWrapper(e);
         }
