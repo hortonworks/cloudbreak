@@ -168,6 +168,10 @@ public class InstanceGroupService {
         return repository.getByStackAndFetchTemplates(stackId);
     }
 
+    public Set<InstanceGroup> getByStackAndFetchTemplatesAndTargetGroups(Long stackId) {
+        return repository.getByStackAndFetchTemplatesAndTargetGroups(stackId);
+    }
+
     public List<com.sequenceiq.cloudbreak.view.InstanceGroupView> getInstanceGroupViewByStackId(Long stackId) {
         return new ArrayList<>(repository.findInstanceGroupViewByStackId(stackId));
     }

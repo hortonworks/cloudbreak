@@ -1292,13 +1292,22 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public boolean isServicePresent(String clusterName, String serviceType) {
         boolean servicePresent = false;
         try {
-            servicePresent = readServices(stack)
+            servicePresent = isServicePresentOrFail(clusterName, serviceType);
+        } catch (CloudbreakException e) {
+            LOGGER.debug("Failed to determine if {} service is present in cluster {}.", serviceType, stack.getCluster().getId(), e);
+        }
+        return servicePresent;
+    }
+
+    @Override
+    public boolean isServicePresentOrFail(String clusterName, String serviceType) throws CloudbreakException {
+        try {
+            return readServices(stack)
                     .stream()
                     .anyMatch(service -> serviceType.equalsIgnoreCase(service.getType()));
         } catch (ApiException e) {
-            LOGGER.debug("Failed to determine if {} service is present in cluster {}.", serviceType, stack.getCluster().getId());
+            throw new CloudbreakException(String.format("Failed to determine if %s service is present in cluster %s.", serviceType, clusterName), e);
         }
-        return servicePresent;
     }
 
     @Override

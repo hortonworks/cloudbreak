@@ -274,12 +274,6 @@ public class TrustManagementService {
     }
 
     public TrustSetupCommandsResponse getTrustCommands(String accountId, String environmentCrn, TrustCommandType trustCommandType) {
-        if (trustCommandType == TrustCommandType.SETUP) {
-            EnvironmentType environmentType = environmentService.getEnvironmentType(environmentCrn);
-            if (environmentType == EnvironmentType.PUBLIC_CLOUD) {
-                throw new BadRequestException("Use the public_cloud endpoint for PUBLIC_CLOUD environments.");
-            }
-        }
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stack.getId());
         if (!ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS.contains(crossRealmTrust.getTrustStatus())) {
