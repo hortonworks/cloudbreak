@@ -218,6 +218,10 @@ public interface ClusterApi {
         return clusterModificationService().isServicePresent(clusterName, serviceType);
     }
 
+    default boolean isServicePresentOrFail(String clusterName, String serviceType) throws CloudbreakException {
+        return clusterModificationService().isServicePresentOrFail(clusterName, serviceType);
+    }
+
     default void waitForHealthyServices(Optional<String> runtimeVersion) {
         clusterStatusService().waitForHealthyServices(runtimeVersion);
     }
