@@ -613,8 +613,8 @@ cb:
           7.3.3 - Lakehouse Optimizer HA=cdp-lakehouse-optimizer-ha;
           7.3.3 - Iceberg Replication Service=cdp-iceberg;
           7.3.3 - Data Visualization=cdp-dataviz;
-          7.3.3 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE=cdp-sdx-without-hdfs-hbase;
-          7.3.3 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph=cdp-sdx-enterprise-without-hdfs-hbase;
+          7.3.3 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE=cdp-sdx-light-duty-pro;
+          7.3.3 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph=cdp-sdx-enterprise-pro;
           7.3.3 - Semantic Search=cdp-semantic-search;
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
