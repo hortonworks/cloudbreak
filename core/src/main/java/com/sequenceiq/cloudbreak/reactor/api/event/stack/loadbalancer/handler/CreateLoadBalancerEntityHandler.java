@@ -99,7 +99,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
                 enableEndpointGateway(stack, environment);
             }
 
-            Set<InstanceGroup> instanceGroups = instanceGroupService.getByStackAndFetchTemplates(stack.getId());
+            Set<InstanceGroup> instanceGroups = instanceGroupService.getByStackAndFetchTemplatesAndTargetGroups(stack.getId());
             Set<LoadBalancer> existingLoadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
             stack.setInstanceGroups(instanceGroups);
             Set<LoadBalancer> newLoadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, null);

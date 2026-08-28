@@ -70,11 +70,14 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoad
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadBalancingV2Exception;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ListenerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class AwsNativeLoadBalancerLaunchServiceTest {
@@ -122,6 +125,12 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     private static final String TG_NAME_GWAYPRIV_NO_HASH = "sta-TG443GwayPriv";
 
     private static final String INTERNAL = "Internal";
+
+    private static final String STALE_LB_ARN = "aStaleLoadBalancerArn";
+
+    private static final String NEW_LB_ARN = "aNewLoadBalancerArn";
+
+    private static final String EXISTING_TG_ARN = "anExistingTargetGroupArn";
 
     private static final String EXTERNAL = "External";
 
@@ -947,6 +956,244 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         underTest.launchLoadBalancerResources(authenticatedContext, getCloudStack(), persistenceNotifier, loadBalancingClient, true);
 
         verify(loadBalancingClient, times(0)).modifyTargetGroupAttributes(any());
+    }
+
+    @Test
+    void testLaunchLoadBalancerResourcesWhenLoadBalancerResourceExistsButWasDeletedFromAwsThenItIsRecreated() {
+        CloudStack stack = getCloudStack();
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL, authenticatedContext.getCloudContext())).thenReturn(LB_NAME_INTERNAL_NEW);
+
+        CloudResource staleLbResource = CloudResource.builder()
+                .withName(LB_NAME_INTERNAL)
+                .withReference("aStaleLoadBalancerArn")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID))
+                .thenReturn(List.of(staleLbResource));
+
+        when(loadBalancingClient.describeLoadBalancers(any()))
+                .thenThrow(LoadBalancerNotFoundException.builder()
+                        .message("not found").build());
+
+        LoadBalancer awsLb = LoadBalancer.builder().loadBalancerArn("aNewLoadBalancerArn").build();
+        when(loadBalancingClient.registerLoadBalancer(any()))
+                .thenReturn(CreateLoadBalancerResponse.builder().loadBalancers(awsLb).build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, false);
+
+        verify(persistenceNotifier).notifyDeletion(eq(staleLbResource), any());
+        verify(loadBalancingClient).registerLoadBalancer(any());
+        ArgumentCaptor<CloudResource> allocationCaptor = ArgumentCaptor.forClass(CloudResource.class);
+        verify(persistenceNotifier).notifyAllocation(allocationCaptor.capture(), any());
+        assertEquals("aNewLoadBalancerArn", allocationCaptor.getValue().getReference());
+    }
+
+    @Test
+    void testLaunchLoadBalancerResourcesWhenLoadBalancerResourceExistsAndStillPresentInAwsThenItIsReused() {
+        CloudStack stack = mock(CloudStack.class);
+        AwsLoadBalancer loadBalancer = mock(AwsLoadBalancer.class);
+        when(loadBalancer.getScheme()).thenReturn(AwsLoadBalancerScheme.INTERNAL);
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(loadBalancer));
+
+        CloudResource existingLbResource = CloudResource.builder()
+                .withName(LB_NAME_INTERNAL)
+                .withReference("anExistingLoadBalancerArn")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID))
+                .thenReturn(List.of(existingLbResource));
+
+        when(loadBalancingClient.describeLoadBalancers(any()))
+                .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(
+                        LoadBalancer.builder().loadBalancerArn("anExistingLoadBalancerArn").build()).build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, false);
+
+        verify(loadBalancingClient, never()).registerLoadBalancer(any());
+        verify(persistenceNotifier, never()).notifyDeletion(any(), any());
+        verify(persistenceNotifier, never()).notifyAllocation(any(), any());
+    }
+
+    @Test
+    void testLaunchLoadBalancerResourcesWhenTargetGroupResourceExistsButWasDeletedFromAwsThenItIsRecreated() {
+        CloudStack stack = getCloudStack();
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
+
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL, authenticatedContext.getCloudContext())).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID))
+                .thenReturn(emptyList());
+        LoadBalancer awsLb = LoadBalancer.builder().loadBalancerArn("aNewLoadBalancerArn").build();
+        when(loadBalancingClient.registerLoadBalancer(any()))
+                .thenReturn(CreateLoadBalancerResponse.builder().loadBalancers(awsLb).build());
+
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
+                .thenReturn(TG_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(INTERNAL), eq(USER_FACING_PORT)))
+                .thenReturn("TG443Internal");
+        CloudResource staleTgResource = CloudResource.builder()
+                .withName(TG_NAME_INTERNAL)
+                .withReference("aStaleTargetGroupArn")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
+                .thenReturn(List.of(staleTgResource));
+        when(loadBalancingClient.describeTargetGroup(any()))
+                .thenThrow(TargetGroupNotFoundException.builder()
+                        .message("not found").build());
+        TargetGroup awsTg = TargetGroup.builder().targetGroupArn("aNewTargetGroupArn").build();
+        when(loadBalancingClient.createTargetGroup(any()))
+                .thenReturn(CreateTargetGroupResponse.builder().targetGroups(awsTg).build());
+
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
+                .thenReturn(emptyList());
+        Listener awsListener = Listener.builder().listenerArn("aNewListenerArn").build();
+        when(loadBalancingClient.registerListener(any()))
+                .thenReturn(CreateListenerResponse.builder().listeners(awsListener).build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true);
+
+        verify(persistenceNotifier).notifyDeletion(eq(staleTgResource), any());
+        verify(loadBalancingClient).createTargetGroup(any());
+    }
+
+    @Test
+    void testLaunchLoadBalancerResourcesWhenListenerResourceExistsButWasDeletedFromAwsThenItIsRecreated() {
+        CloudStack stack = getCloudStack();
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
+
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL, authenticatedContext.getCloudContext())).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID))
+                .thenReturn(emptyList());
+        LoadBalancer awsLb = LoadBalancer.builder().loadBalancerArn("aNewLoadBalancerArn").build();
+        when(loadBalancingClient.registerLoadBalancer(any()))
+                .thenReturn(CreateLoadBalancerResponse.builder().loadBalancers(awsLb).build());
+
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
+                .thenReturn(TG_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(INTERNAL), eq(USER_FACING_PORT)))
+                .thenReturn("TG443Internal");
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
+                .thenReturn(emptyList());
+        TargetGroup awsTg = TargetGroup.builder().targetGroupArn("aNewTargetGroupArn").build();
+        when(loadBalancingClient.createTargetGroup(any()))
+                .thenReturn(CreateTargetGroupResponse.builder().targetGroups(awsTg).build());
+
+        CloudResource staleListenerResource = CloudResource.builder()
+                .withName(TG_NAME_INTERNAL)
+                .withReference("aStaleListenerArn")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
+                .thenReturn(List.of(staleListenerResource));
+        when(loadBalancingClient.describeListeners(any()))
+                .thenThrow(ListenerNotFoundException.builder()
+                        .message("not found").build());
+        Listener awsListener = Listener.builder().listenerArn("aNewListenerArn").build();
+        when(loadBalancingClient.registerListener(any()))
+                .thenReturn(CreateListenerResponse.builder().listeners(awsListener).build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true);
+
+        verify(persistenceNotifier).notifyDeletion(eq(staleListenerResource), any());
+        verify(loadBalancingClient).registerListener(any());
+    }
+
+    @Test
+    void testLaunchLoadBalancerResourcesWhenLoadBalancerIsRecreatedThenReusedTargetGroupIsRepointedToTheNewLoadBalancer() {
+        CloudStack stack = getCloudStack();
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
+
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL, authenticatedContext.getCloudContext())).thenReturn(LB_NAME_INTERNAL_NEW);
+        CloudResource staleLbResource = CloudResource.builder()
+                .withName(LB_NAME_INTERNAL)
+                .withReference(STALE_LB_ARN)
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID))
+                .thenReturn(List.of(staleLbResource));
+        when(loadBalancingClient.describeLoadBalancers(any())).thenThrow(LoadBalancerNotFoundException.builder().message("not found").build());
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(CreateLoadBalancerResponse.builder()
+                .loadBalancers(LoadBalancer.builder().loadBalancerArn(NEW_LB_ARN).build()).build());
+
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
+                .thenReturn(TG_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(INTERNAL), eq(USER_FACING_PORT)))
+                .thenReturn("TG443Internal");
+        CloudResource survivingTgResource = CloudResource.builder()
+                .withName(TG_NAME_INTERNAL)
+                .withReference(EXISTING_TG_ARN)
+                .withInstanceId(STALE_LB_ARN)
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
+                .thenReturn(List.of(survivingTgResource));
+        when(loadBalancingClient.describeTargetGroup(any())).thenReturn(DescribeTargetGroupsResponse.builder()
+                .targetGroups(TargetGroup.builder().targetGroupArn(EXISTING_TG_ARN).build()).build());
+
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
+                .thenReturn(emptyList());
+        when(loadBalancingClient.registerListener(any())).thenReturn(CreateListenerResponse.builder()
+                .listeners(Listener.builder().listenerArn("aNewListenerArn").build()).build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true);
+
+        verify(loadBalancingClient, never()).createTargetGroup(any());
+        ArgumentCaptor<CloudResource> updateCaptor = ArgumentCaptor.forClass(CloudResource.class);
+        verify(persistenceNotifier).notifyUpdate(updateCaptor.capture(), any());
+        assertEquals(NEW_LB_ARN, updateCaptor.getValue().getInstanceId());
+        assertEquals(TG_NAME_INTERNAL, updateCaptor.getValue().getName());
+        assertEquals(EXISTING_TG_ARN, updateCaptor.getValue().getReference());
+    }
+
+    @Test
+    void testLaunchLoadBalancerResourcesWhenTargetGroupIsReusedThenRecreatedListenerKeepsTheTargetGroupName() {
+        CloudStack stack = getCloudStack();
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
+
+        CloudResource existingLbResource = CloudResource.builder()
+                .withName(LB_NAME_INTERNAL)
+                .withReference(NEW_LB_ARN)
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID))
+                .thenReturn(List.of(existingLbResource));
+        when(loadBalancingClient.describeLoadBalancers(any())).thenReturn(DescribeLoadBalancersResponse.builder()
+                .loadBalancers(LoadBalancer.builder().loadBalancerArn(NEW_LB_ARN).build()).build());
+
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
+                .thenReturn(TG_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(INTERNAL), eq(USER_FACING_PORT)))
+                .thenReturn("TG443Internal");
+        CloudResource existingTgResource = CloudResource.builder()
+                .withName(TG_NAME_INTERNAL)
+                .withReference(EXISTING_TG_ARN)
+                .withInstanceId(NEW_LB_ARN)
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
+                .thenReturn(List.of(existingTgResource));
+        when(loadBalancingClient.describeTargetGroup(any())).thenReturn(DescribeTargetGroupsResponse.builder()
+                .targetGroups(TargetGroup.builder().targetGroupArn(EXISTING_TG_ARN).build()).build());
+
+        CloudResource staleListenerResource = CloudResource.builder()
+                .withName(TG_NAME_INTERNAL)
+                .withReference("aStaleListenerArn")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
+                .thenReturn(List.of(staleListenerResource));
+        when(loadBalancingClient.describeListeners(any())).thenThrow(ListenerNotFoundException.builder().message("not found").build());
+        when(loadBalancingClient.registerListener(any())).thenReturn(CreateListenerResponse.builder()
+                .listeners(Listener.builder().listenerArn("aNewListenerArn").build()).build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true);
+
+        ArgumentCaptor<CloudResource> allocationCaptor = ArgumentCaptor.forClass(CloudResource.class);
+        verify(persistenceNotifier).notifyAllocation(allocationCaptor.capture(), any());
+        CloudResource recreatedListener = allocationCaptor.getValue();
+        assertEquals(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, recreatedListener.getType());
+        assertEquals(TG_NAME_INTERNAL, recreatedListener.getName());
     }
 
     private CloudStack getCloudStack() {
