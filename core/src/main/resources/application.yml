@@ -592,6 +592,7 @@ cb:
           7.3.3 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive=cdp-hybrid-data-engineering-spark3-ha;
           7.3.3 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.3.3 - Hybrid Data Mart: Apache Impala, Hue=cdp-hybrid-data-mart;
+          7.3.3 - Hybrid Spark3=cdp-hybrid-spark3;
           7.3.3 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark3=cdp-rt-data-mart-spark3;
           7.3.3 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;
           7.3.3 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming;
@@ -609,6 +610,7 @@ cb:
           7.3.3 - Streaming Analytics Heavy Duty High Availability with Apache Flink=cdp-flink-heavy-ha;
           7.3.3 - COD Edge Node=cdp-cod-edge-node;
           7.3.3 - Lakehouse Optimizer=cdp-lakehouse-optimizer;
+          7.3.3 - Lakehouse Optimizer HA=cdp-lakehouse-optimizer-ha;
           7.3.3 - Iceberg Replication Service=cdp-iceberg;
           7.3.3 - Data Visualization=cdp-dataviz;
           7.3.3 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE=cdp-sdx-without-hdfs-hbase;
