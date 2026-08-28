@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.KerberosAuthToLocalUtils;
@@ -117,13 +118,30 @@ class StreamsMessagingManagerServiceConfigProviderTest {
         assertThat(roleConfigs).contains(config(KERBEROS_NAME_RULES, AUTH_TO_LOCAL));
     }
 
+    @Test
+    void testGetRoleConfigsWithTrustAndRuntime732SP1() {
+        String inputJson = getBlueprintText("input/cdp-streaming.bp").replace("__CDH_VERSION__", "7.3.2");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, true, cmTemplateProcessor,
+                new TrustView("ip", "fqdn", "realm"), "7.3.2-1.cdh7.3.2.p10000.80393083");
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(STREAMS_MESSAGING_MANAGER_SERVER, cmTemplateProcessor, preparationObject);
+
+        assertThat(roleConfigs).doesNotContain(config(KERBEROS_NAME_RULES, AUTH_TO_LOCAL));
+    }
+
     private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl,
             CmTemplateProcessor cmTemplateProcessor) {
-        return getTemplatePreparationObject(internalFqdn, ssl, cmTemplateProcessor, null);
+        return getTemplatePreparationObject(internalFqdn, ssl, cmTemplateProcessor, null, null);
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl,
             CmTemplateProcessor cmTemplateProcessor, TrustView trustView) {
+        return getTemplatePreparationObject(internalFqdn, ssl, cmTemplateProcessor, trustView, null);
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl,
+            CmTemplateProcessor cmTemplateProcessor, TrustView trustView, String cdhProductVersion) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
@@ -139,10 +157,18 @@ class StreamsMessagingManagerServiceConfigProviderTest {
             when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/smm?ssl=true");
         }
 
+        List<ClouderaManagerProduct> products = new ArrayList<>();
+        if (cdhProductVersion != null) {
+            ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
+            cdhProduct.setName("CDH");
+            cdhProduct.setVersion(cdhProductVersion);
+            products.add(cdhProduct);
+        }
+
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withProductDetails(new ClouderaManagerRepo()
-                        .withVersion("7.2.2"), new ArrayList<>())
+                        .withVersion("7.2.2"), products)
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()

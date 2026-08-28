@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2_10000;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.GENERATED_RANGER_SERVICE_NAME;
@@ -8,18 +9,22 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistr
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.KerberosAuthToLocalUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Component
 public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigProvider {
@@ -93,10 +98,30 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
             ));
         }
         source.getTrustView().ifPresent(trustView -> {
-            // OPSAPS-76372 workaround for faulty kerberos.name.rules settings generation
-            roleConfigs.add(config(KERBEROS_NAME_RULES, kerberosAuthToLocalUtils.generateEscapedForTrustedRealm(trustView.realm())));
+            if (!isRuntimeAtLeast732SP1(source)) {
+                // OPSAPS-76372 workaround for faulty kerberos.name.rules settings generation
+                roleConfigs.add(config(KERBEROS_NAME_RULES, kerberosAuthToLocalUtils.generateEscapedForTrustedRealm(trustView.realm())));
+            }
         });
         return roleConfigs;
+    }
+
+    private boolean isRuntimeAtLeast732SP1(TemplatePreparationObject source) {
+        return getCdhFullVersion(source)
+                .filter(StringUtils::hasText)
+                .map(v -> isVersionNewerOrEqualThanLimited(v, CLOUDERA_STACK_VERSION_7_3_2_10000))
+                .orElse(false);
+    }
+
+    private Optional<String> getCdhFullVersion(TemplatePreparationObject source) {
+        if (source.getProductDetailsView() == null || source.getProductDetailsView().getProducts() == null) {
+            return Optional.empty();
+        }
+        return source.getProductDetailsView().getProducts().stream()
+                .filter(product -> "CDH".equals(product.getName()))
+                .findFirst()
+                .map(ClouderaManagerProduct::getVersion)
+                .map(CdhVersionProvider::getCdhFullVersionFromVersionString);
     }
 
     @Override

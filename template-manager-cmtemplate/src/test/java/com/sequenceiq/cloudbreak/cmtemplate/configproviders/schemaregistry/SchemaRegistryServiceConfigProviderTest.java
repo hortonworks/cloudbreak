@@ -17,6 +17,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +32,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.KerberosAuthToLocalUtils;
 import com.sequenceiq.cloudbreak.dto.TrustView;
@@ -131,7 +134,7 @@ class SchemaRegistryServiceConfigProviderTest {
     void testGetSchemaRegistryRoleConfigsWithTrust() {
         String inputJson = loadBlueprint("7.3.1");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, false, new TrustView("ip", "fqdn", "realm"));
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, false, new TrustView("ip", "fqdn", "realm"), null);
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER,
                 cmTemplateProcessor, preparationObject);
@@ -141,11 +144,27 @@ class SchemaRegistryServiceConfigProviderTest {
                 config(KERBEROS_NAME_RULES, AUTH_TO_LOCAL)));
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, boolean ssl) {
-        return getTemplatePreparationObject(cmTemplateProcessor, ssl, null);
+    @Test
+    void testGetSchemaRegistryRoleConfigsWithTrustAndRuntime732SP1() {
+        String inputJson = loadBlueprint("7.3.2");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, false,
+                new TrustView("ip", "fqdn", "realm"), "7.3.2-1.cdh7.3.2.p10000.80393083");
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER,
+                cmTemplateProcessor, preparationObject);
+
+        assertThat(roleConfigs).hasSameElementsAs(List.of(
+                config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME)));
+        assertThat(roleConfigs).doesNotContain(config(KERBEROS_NAME_RULES, AUTH_TO_LOCAL));
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, boolean ssl, TrustView trustView) {
+    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, boolean ssl) {
+        return getTemplatePreparationObject(cmTemplateProcessor, ssl, null, null);
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, boolean ssl,
+            TrustView trustView, String cdhProductVersion) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
@@ -163,10 +182,19 @@ class SchemaRegistryServiceConfigProviderTest {
             lenient().when(rdsConfig.isUseSsl()).thenReturn(true);
         }
 
+        List<ClouderaManagerProduct> products = new ArrayList<>();
+        if (cdhProductVersion != null) {
+            ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
+            cdhProduct.setName("CDH");
+            cdhProduct.setVersion(cdhProductVersion);
+            products.add(cdhProduct);
+        }
+
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfig))
+                .withProductDetails(new ClouderaManagerRepo(), products)
                 .withTrust(Optional.ofNullable(trustView))
                 .build();
     }
