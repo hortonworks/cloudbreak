@@ -1,0 +1,4 @@
+[
+  { "op": "test",    "path": "/blueprint/instanceGroups/name=master/template/instanceType", "value": "m5.xlarge" },
+  { "op": "replace", "path": "/blueprint/instanceGroups/name=master/template/instanceType", "value": "m5.2xlarge" }
+]

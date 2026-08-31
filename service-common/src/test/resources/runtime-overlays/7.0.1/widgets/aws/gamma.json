@@ -1,0 +1,8 @@
+{
+  "name": "7.0.0 - Gamma AWS",
+  "cluster": { "blueprintName": "7.0.0 - Gamma" },
+  "instanceGroups": [
+    { "name": "master", "template": { "instanceType": "m5.xlarge" } },
+    { "name": "worker", "template": { "instanceType": "r5.large" } }
+  ]
+}

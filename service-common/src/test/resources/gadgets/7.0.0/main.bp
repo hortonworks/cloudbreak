@@ -1,0 +1,10 @@
+{
+  "description": "7.0.0 - Main Gadget",
+  "blueprint": {
+    "cdhVersion": "7.0.0",
+    "displayName": "main_gadget",
+    "instanceGroups": [
+      { "name": "master", "template": { "instanceType": "m5.xlarge" } }
+    ]
+  }
+}

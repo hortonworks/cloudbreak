@@ -48,6 +48,7 @@ dependencies {
   testImplementation (group: 'org.testcontainers',           name: 'junit-jupiter',                  version: testContainersVersion) {
     exclude group: 'junit', module: 'junit'
   }
+  testImplementation project(path: ':common', configuration: 'tests')
 }
 
 tasks.register('testJar', Jar) {
