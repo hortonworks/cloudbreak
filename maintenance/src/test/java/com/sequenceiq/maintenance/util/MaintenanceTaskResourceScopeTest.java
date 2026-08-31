@@ -82,4 +82,19 @@ class MaintenanceTaskResourceScopeTest {
         assertThat(identity.resourceCrn()).isEqualTo(DATAHUB_CRN);
         assertThat(identity.resourceScopeType()).isEqualTo(MaintenanceScopeType.DATAHUB);
     }
+
+    @Test
+    void implicitPlatformOrderSortsFreeIpaBeforeDatalakeBeforeDatahub() {
+        assertThat(underTest.scopeTypeFromResourceCrn(FREEIPA_CRN).implicitPlatformOrder()).isLessThan(
+                underTest.scopeTypeFromResourceCrn(DATALAKE_CRN).implicitPlatformOrder());
+        assertThat(underTest.scopeTypeFromResourceCrn(DATALAKE_CRN).implicitPlatformOrder()).isLessThan(
+                underTest.scopeTypeFromResourceCrn(DATAHUB_CRN).implicitPlatformOrder());
+    }
+
+    @Test
+    void implicitPlatformOrderRejectsEnvironmentScope() {
+        assertThatThrownBy(() -> MaintenanceScopeType.ENVIRONMENT.implicitPlatformOrder())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ENVIRONMENT");
+    }
 }

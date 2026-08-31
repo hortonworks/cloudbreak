@@ -72,6 +72,16 @@ public class MaintenanceWindowRun implements Serializable {
     @Column(name = "error_detail", columnDefinition = "TEXT")
     private String errorDetail;
 
+    /**
+     * Number of execution attempts that have started for this (task, window occurrence) pair. Starts at {@code 1} when
+     * the first attempt is dispatched. The dispatcher must increment this when starting each subsequent attempt within
+     * the same occurrence (including redispatch after {@link MaintenanceRunStatus#FAILED}). This class does not
+     * enforce the increment — callers that dispatch without updating {@code attempt_count} break
+     * {@code maxAttemptsPerOccurrence} enforcement.
+     */
+    @Column(name = "attempt_count", nullable = false)
+    private int attemptCount = 1;
+
     @Version
     @Column(nullable = false, insertable = false)
     private Integer version;
@@ -188,6 +198,14 @@ public class MaintenanceWindowRun implements Serializable {
         this.errorDetail = errorDetail;
     }
 
+    public int getAttemptCount() {
+        return attemptCount;
+    }
+
+    public void setAttemptCount(int attemptCount) {
+        this.attemptCount = attemptCount;
+    }
+
     public Integer getVersion() {
         return version;
     }
@@ -213,6 +231,7 @@ public class MaintenanceWindowRun implements Serializable {
                 ", windowExecutionStart=" + windowExecutionStart +
                 ", windowExecutionEnd=" + windowExecutionEnd +
                 ", errorDetail='" + errorDetail + '\'' +
+                ", attemptCount=" + attemptCount +
                 ", version=" + version +
                 '}';
     }
