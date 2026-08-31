@@ -73,6 +73,8 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
     private static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
 
+    private static final String NODE_MANAGER_HOST_HEALTH = "NODE_MANAGER_HOST_HEALTH";
+
     private static final String FULL_WITH_HEALTH_CHECK_EXPLANATION = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
 
     private static final String HOST_AGENT_CERTIFICATE_EXPIRY = "HOST_AGENT_CERTIFICATE_EXPIRY";
@@ -237,15 +239,36 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     private Set<String> getServicesRolesWithBadHealth(ApiHost apiHost, List<ApiRole> apiRoles) {
         for (ApiRole apiRole : apiRoles) {
             if (apiRole.getHostRef().getHostname().equals(apiHost.getHostname())) {
-                return collectUnhealthyHealthChecks(apiRole);
+                return collectUnhealthyHealthChecks(apiRole, apiHost);
             }
         }
         return Collections.emptySet();
     }
 
-    private Set<String> collectUnhealthyHealthChecks(ApiRole apiRole) {
-        return emptyIfNull(apiRole.getHealthChecks()).stream().filter(hc -> BAD.equals(hc.getSummary()) ||
-                CONCERNING.equals(hc.getSummary())).map(ApiHealthCheck::getName).collect(Collectors.toSet());
+    private Set<String> collectUnhealthyHealthChecks(ApiRole apiRole, ApiHost apiHost) {
+        boolean certificateUnhealthy = emptyIfNull(apiHost.getHealthChecks()).stream()
+                .filter(health -> HOST_AGENT_CERTIFICATE_EXPIRY.equals(health.getName()))
+                .findFirst()
+                .map(i -> BAD.equals(i.getSummary()))
+                .orElse(Boolean.FALSE);
+        return emptyIfNull(apiRole.getHealthChecks())
+                .stream()
+                .filter(apiHealthCheck -> isHealthCheckUnhealthy(apiHealthCheck, certificateUnhealthy))
+                .map(ApiHealthCheck::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private boolean isHealthCheckUnhealthy(ApiHealthCheck apiHealthCheck, boolean certificateUnhealthy) {
+        ApiHealthSummary summary = apiHealthCheck.getSummary();
+        if (BAD.equals(summary)) {
+            return true;
+        }
+        if (CONCERNING.equals(summary)) {
+            if (NODE_MANAGER_HOST_HEALTH.equals(apiHealthCheck.getName())) {
+                return certificateUnhealthy;
+            }
+        }
+        return false;
     }
 
     private Set<String> collectDisconnectedNodeManagers(List<ApiRole> allNMRoles) {
@@ -272,7 +295,8 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
                 .filter(health -> HOST_AGENT_CERTIFICATE_EXPIRY.equals(health.getName()))
                 .findFirst()
                 .map(apiHealthCheck ->
-                        new DetailedCertHealthCheck(healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()), apiHealthCheck.getExplanation()));
+                        new DetailedCertHealthCheck(healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()),
+                                apiHealthCheck.getExplanation()));
     }
 
     private HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary apiHealthSummary) {
