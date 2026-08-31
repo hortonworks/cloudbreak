@@ -78,7 +78,6 @@ public class HiveRdsConfigProviderTest {
                 Optional.of(SdxBasicView.builder().withCrn(CDL_CRN.toString()).build()));
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
-        when(clusterView.getId()).thenReturn(1L);
         when(stackDto.getCluster()).thenReturn(clusterView);
         Blueprint blueprint = mock(Blueprint.class);
         when(stackDto.getBlueprint()).thenReturn(blueprint);

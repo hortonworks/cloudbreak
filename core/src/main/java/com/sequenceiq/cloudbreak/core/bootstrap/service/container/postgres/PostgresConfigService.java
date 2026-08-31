@@ -4,13 +4,13 @@ import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.DEFAULT;
 import static java.util.Collections.singletonMap;
 import static java.util.Objects.requireNonNull;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
@@ -266,11 +266,10 @@ public class PostgresConfigService {
     }
 
     public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(StackDtoDelegate stackDto) {
-        Set<AbstractRdsConfigProvider> rdsConfigProviders = rdsConfigProviderFactory.getAllSupportedRdsConfigProviders();
-        return rdsConfigProviders.stream()
+        return rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().stream()
                 .map(provider -> provider.createPostgresRdsConfigIfNeeded(stackDto))
-                .reduce((first, second) -> second)
-                .orElse(Collections.emptySet());
+                .flatMap(Optional::stream)
+                .collect(Collectors.toSet());
     }
 
     private Map<String, Object> initPostgresConfig(StackDto stackDto) {

@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -126,11 +125,6 @@ class AbstractRdsConfigProviderTest {
             rdsConfig.setId(RDS_CONFIG_ID);
             return rdsConfig;
         });
-        RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfigWithoutCluster.getType()).thenReturn(DatabaseType.CLOUDERA_MANAGER.name());
-        when(rdsConfigWithoutCluster.getStatus()).thenReturn(ResourceStatus.DEFAULT);
-        when(rdsConfigWithoutCluster.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
-        when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn("pwd");
         Stack testStack = TestUtil.stack();
         StackDto stackDto = mock(StackDto.class);
         InstanceMetaData metaData = new InstanceMetaData();
@@ -142,7 +136,6 @@ class AbstractRdsConfigProviderTest {
         testCluster.setDatabaseServerCrn("");
         when(stackDto.getCluster()).thenReturn(testCluster);
         when(stackDto.getStack()).thenReturn(testStack);
-        when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
         when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(testStack, testCluster, null)).thenReturn(sslEnforcement);
 
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(stackDto);
@@ -170,13 +163,11 @@ class AbstractRdsConfigProviderTest {
             rdsConfig.setId(RDS_CONFIG_ID);
             return rdsConfig;
         });
-        RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfigWithoutCluster.getType()).thenReturn(DatabaseType.CLOUDERA_MANAGER.name());
-        when(rdsConfigWithoutCluster.getStatus()).thenReturn(ResourceStatus.DEFAULT);
-        when(rdsConfigWithoutCluster.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
-        when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn("pwd");
         RDSConfig config = new RDSConfig();
         config.setType(DatabaseType.CLOUDERA_MANAGER.name());
+        config.setStatus(ResourceStatus.DEFAULT);
+        config.setDatabaseEngine(DatabaseVendor.POSTGRES);
+        config.setConnectionPassword("pwd");
         when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any(), any(), any())).thenReturn(config);
         DatabaseServerV4Response resp = new DatabaseServerV4Response();
         resp.setHost(DB_HOST);
@@ -195,7 +186,6 @@ class AbstractRdsConfigProviderTest {
         testCluster.setDatabaseServerCrn(DB_SERVER_CRN);
         when(stackDto.getCluster()).thenReturn(testCluster);
         when(stackDto.getStack()).thenReturn(testStack);
-        when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
 
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(stackDto);
 
@@ -218,7 +208,6 @@ class AbstractRdsConfigProviderTest {
     @Test
     void createRotationPillarForRemoteRdsConfig() {
         RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfigWithoutCluster.getType()).thenReturn(DatabaseType.CLOUDERA_MANAGER.name());
         when(rdsConfigWithoutCluster.getStatus()).thenReturn(ResourceStatus.DEFAULT);
         when(rdsConfigWithoutCluster.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
         when(rdsConfigWithoutCluster.getConnectionUserNamePath()).thenReturn(ROTATION_USER_PATH);
@@ -228,7 +217,7 @@ class AbstractRdsConfigProviderTest {
         when(dbUsernameConverterService.toDatabaseUsername(eq(ROTATION_NEW_USER))).thenReturn(ROTATION_NEW_USER);
         when(dbUsernameConverterService.toDatabaseUsername(eq(ROTATION_OLD_USER))).thenReturn(ROTATION_OLD_USER);
         when(rdsConfigService.existsByClusterIdAndType(anyLong(), any(DatabaseType.class))).thenReturn(Boolean.TRUE);
-        when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
+        when(rdsConfigWithoutClusterService.findByClusterIdAndType(anyLong(), any(DatabaseType.class))).thenReturn(rdsConfigWithoutCluster);
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);

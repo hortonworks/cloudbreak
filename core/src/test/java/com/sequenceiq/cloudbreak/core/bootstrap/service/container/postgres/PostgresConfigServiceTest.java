@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -648,24 +649,25 @@ class PostgresConfigServiceTest {
     }
 
     @Test
-    void testCreateRdsConfigIfNeededDelegatesAllProvidersAndReturnsLastResult() {
+    void testCreateRdsConfigIfNeededInvokesAllProvidersAndAggregatesResults() {
         AbstractRdsConfigProvider provider1 = mock(AbstractRdsConfigProvider.class);
         AbstractRdsConfigProvider provider2 = mock(AbstractRdsConfigProvider.class);
+        AbstractRdsConfigProvider provider3 = mock(AbstractRdsConfigProvider.class);
         RdsConfigWithoutCluster rdsConfig1 = mock(RdsConfigWithoutCluster.class);
         RdsConfigWithoutCluster rdsConfig2 = mock(RdsConfigWithoutCluster.class);
-        RdsConfigWithoutCluster rdsConfig3 = mock(RdsConfigWithoutCluster.class);
 
         when(rdsConfigProviderFactory.getAllSupportedRdsConfigProviders())
-                .thenReturn(new java.util.LinkedHashSet<>(List.of(provider1, provider2)));
-        when(provider1.createPostgresRdsConfigIfNeeded(stack)).thenReturn(Set.of(rdsConfig1));
-        when(provider2.createPostgresRdsConfigIfNeeded(stack)).thenReturn(Set.of(rdsConfig2, rdsConfig3));
+                .thenReturn(Set.of(provider1, provider2, provider3));
+        when(provider1.createPostgresRdsConfigIfNeeded(stack)).thenReturn(Optional.of(rdsConfig1));
+        when(provider2.createPostgresRdsConfigIfNeeded(stack)).thenReturn(Optional.of(rdsConfig2));
+        when(provider3.createPostgresRdsConfigIfNeeded(stack)).thenReturn(Optional.empty());
 
         Set<RdsConfigWithoutCluster> result = underTest.createRdsConfigIfNeeded(stack);
 
-        assertThat(result).size().isEqualTo(2);
-        assertThat(result).containsExactlyInAnyOrder(rdsConfig2, rdsConfig3);
+        assertThat(result).containsExactlyInAnyOrder(rdsConfig1, rdsConfig2);
         verify(provider1).createPostgresRdsConfigIfNeeded(stack);
         verify(provider2).createPostgresRdsConfigIfNeeded(stack);
+        verify(provider3).createPostgresRdsConfigIfNeeded(stack);
     }
 
     @Test

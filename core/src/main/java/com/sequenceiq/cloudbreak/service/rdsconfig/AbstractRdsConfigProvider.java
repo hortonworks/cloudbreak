@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutClusterAdapter;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -126,8 +127,8 @@ public abstract class AbstractRdsConfigProvider {
     }
 
     private RdsConfigWithoutCluster getRdsConfig(StackDto stackDto) {
-        Set<RdsConfigWithoutCluster> rdsConfigs = createPostgresRdsConfigIfNeeded(stackDto);
-        return rdsConfigs.stream().filter(c -> c.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
+        return createPostgresRdsConfigIfNeeded(stackDto)
+                .orElseThrow(() -> new IllegalStateException("RDS config is not present for type " + getRdsType().name()));
     }
 
     private void addRemoteDbToConfigIfNeeded(StackDto stackDto, Map<String, Object> postgres) {
@@ -141,28 +142,32 @@ public abstract class AbstractRdsConfigProvider {
         }
     }
 
-    public Set<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(StackDtoDelegate stackDto) {
+    public Optional<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(StackDtoDelegate stackDto) {
         ClusterView cluster = stackDto.getCluster();
-        if (isRdsConfigNeeded(stackDto)
-                && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
-            RDSConfig newRdsConfig;
-            StackView stack = stackDto.getStack();
-            if (isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
-                newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
-                        getDb(), getDbUser(), getRdsType());
-            } else {
-                LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
-                String databaseHost = stackDto.getPrimaryGatewayInstance().getDiscoveryFQDN();
-                newRdsConfig = createNewRdsConfigForEmbeddedDatabase(stack, cluster, stackDto.getDatabase(), databaseHost, getDb(), getDbUser(), getDbPort());
-            }
-            populateNewRdsConfig(stack.getCreator(), stackDto.getWorkspaceId(), cluster.getId(), newRdsConfig);
+        if (!isRdsConfigNeeded(stackDto)) {
+            return Optional.empty();
         }
-        return rdsConfigWithoutClusterService.findByClusterId(cluster.getId());
+        if (rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
+            return Optional.ofNullable(rdsConfigWithoutClusterService.findByClusterIdAndType(cluster.getId(), getRdsType()));
+        }
+        RDSConfig newRdsConfig;
+        StackView stack = stackDto.getStack();
+        if (isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+            newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
+                    getDb(), getDbUser(), getRdsType());
+        } else {
+            LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
+            String databaseHost = stackDto.getPrimaryGatewayInstance().getDiscoveryFQDN();
+            newRdsConfig = createNewRdsConfigForEmbeddedDatabase(stack, cluster, stackDto.getDatabase(), databaseHost, getDb(), getDbUser(), getDbPort());
+        }
+        RDSConfig createdRdsConfig = populateNewRdsConfig(stack.getCreator(), stackDto.getWorkspaceId(), cluster.getId(), newRdsConfig);
+        return Optional.of(new RdsConfigWithoutClusterAdapter(createdRdsConfig));
     }
 
-    protected void populateNewRdsConfig(User creator, Long workspaceId, Long clusterId, RDSConfig newRdsConfig) {
+    protected RDSConfig populateNewRdsConfig(User creator, Long workspaceId, Long clusterId, RDSConfig newRdsConfig) {
         RDSConfig rdsConfig = rdsConfigService.createIfNotExists(creator, newRdsConfig, workspaceId);
         clusterService.addRdsConfigToCluster(rdsConfig.getId(), clusterId);
+        return rdsConfig;
     }
 
     /**
