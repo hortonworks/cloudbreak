@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
-import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -83,7 +83,7 @@ public class AwsDownscaleService {
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
     @Inject
-    private LoadBalancerService loadBalancerService;
+    private AwsLoadBalancerService awsLoadBalancerService;
 
     @Inject
     private Poller<Boolean> poller;
@@ -124,7 +124,7 @@ public class AwsDownscaleService {
             updateAutoscalingGroups(auth, amazonASClient, downscaledGroupsWithCloudInstances);
 
             List<String> targetGroupArns = getTargetGroupArns(stack.getLoadBalancers(), auth);
-            loadBalancerService.removeLoadBalancerTargets(auth, targetGroupArns, resourcesToDownscale);
+            awsLoadBalancerService.removeLoadBalancerTargets(auth, targetGroupArns, resourcesToDownscale);
         }
         return awsResourceConnector.check(auth, resources);
     }

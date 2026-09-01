@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
@@ -33,6 +35,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public abstract class AbstractMultiAzMigrationInitAction<P extends Payload>
         extends AbstractCommonChainAction<MultiAzMigrationInitState, MultiAzMigrationInitFlowEvent, StackContext, P>
         implements OperationAwareAction, FlowChainAwareAction {
+
+    public static final String HAS_LOAD_BALANCER = "HAS_LOAD_BALANCER";
 
     @Inject
     private StackService stackService;
@@ -76,5 +80,13 @@ public abstract class AbstractMultiAzMigrationInitAction<P extends Payload>
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
         return new MultiAzMigrationInitFailedEvent(payload.getResourceId(), ex);
+    }
+
+    protected boolean isAws(StackContext context) {
+        return CloudPlatform.AWS.name().equals(context.getStack().getCloudPlatform());
+    }
+
+    protected boolean hasLoadBalancer(Map<Object, Object> variables) {
+        return Boolean.TRUE.equals(variables.getOrDefault(HAS_LOAD_BALANCER, Boolean.FALSE));
     }
 }

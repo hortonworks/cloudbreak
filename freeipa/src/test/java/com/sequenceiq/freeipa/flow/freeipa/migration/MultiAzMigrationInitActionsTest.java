@@ -51,8 +51,17 @@ import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationInitF
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationInitHandlerRequest;
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationInitResult;
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationInitTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbDnsUpdateHandlerRequest;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbDnsUpdateResult;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbMetadataCollectionHandlerRequest;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbMetadataCollectionResult;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbUpdateHandlerRequest;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbUpdateResult;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbWaitHandlerRequest;
+import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationLbWaitResult;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -81,6 +90,9 @@ class MultiAzMigrationInitActionsTest {
 
     @Mock
     private OperationService operationService;
+
+    @Mock
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
     @Mock
     private EventBus eventBus;
@@ -208,13 +220,225 @@ class MultiAzMigrationInitActionsTest {
     }
 
     @Test
-    void testMultiAzMigrationInitFinishedAction() throws Exception {
+    void testMultiAzMigrationLbUpdateActionWhenAwsAndLoadBalancerExists() throws Exception {
         MultiAzMigrationInitResult payload = new MultiAzMigrationInitResult(STACK_ID, OPERATION_ID);
-        Event<MultiAzMigrationInitResult> event = mock();
-        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationInitResult.class))).thenReturn(event);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        Map<Object, Object> variables = mock();
+        when(variables.getOrDefault(AbstractMultiAzMigrationInitAction.HAS_LOAD_BALANCER, Boolean.FALSE)).thenReturn(Boolean.TRUE);
+        Event<MultiAzMigrationLbUpdateHandlerRequest> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbUpdateHandlerRequest> requestCaptor =
+                ArgumentCaptor.forClass(MultiAzMigrationLbUpdateHandlerRequest.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbUpdateHandlerRequest.class))).thenReturn(event);
 
         AbstractMultiAzMigrationInitAction<MultiAzMigrationInitResult> action =
-                (AbstractMultiAzMigrationInitAction<MultiAzMigrationInitResult>) underTest.multiAzMigrationInitFinishedAction();
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationInitResult>) underTest.multiAzMigrationLbUpdateAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), requestCaptor.capture());
+        MultiAzMigrationLbUpdateHandlerRequest request = requestCaptor.getValue();
+        assertEquals(STACK_ID, request.getResourceId());
+        assertEquals(OPERATION_ID, request.getOperationId());
+        assertEquals(cloudContext, request.getCloudContext());
+        assertEquals(cloudCredential, request.getCloudCredential());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBUPDATEHANDLERREQUEST", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbUpdateActionWhenNotAwsSkipsUpdate() throws Exception {
+        MultiAzMigrationInitResult payload = new MultiAzMigrationInitResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        Map<Object, Object> variables = mock();
+        Event<MultiAzMigrationLbUpdateResult> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbUpdateResult> resultCaptor = ArgumentCaptor.forClass(MultiAzMigrationLbUpdateResult.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbUpdateResult.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationInitResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationInitResult>) underTest.multiAzMigrationLbUpdateAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), resultCaptor.capture());
+        MultiAzMigrationLbUpdateResult result = resultCaptor.getValue();
+        assertEquals(STACK_ID, result.getResourceId());
+        assertEquals(OPERATION_ID, result.getOperationId());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBUPDATERESULT", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbUpdateActionWhenAwsButNoLoadBalancerSkipsUpdate() throws Exception {
+        MultiAzMigrationInitResult payload = new MultiAzMigrationInitResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        Map<Object, Object> variables = mock();
+        Event<MultiAzMigrationLbUpdateResult> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbUpdateResult> resultCaptor = ArgumentCaptor.forClass(MultiAzMigrationLbUpdateResult.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbUpdateResult.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationInitResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationInitResult>) underTest.multiAzMigrationLbUpdateAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), resultCaptor.capture());
+        MultiAzMigrationLbUpdateResult result = resultCaptor.getValue();
+        assertEquals(STACK_ID, result.getResourceId());
+        assertEquals(OPERATION_ID, result.getOperationId());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBUPDATERESULT", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbWaitActionWhenAwsAndLoadBalancerExists() throws Exception {
+        MultiAzMigrationLbUpdateResult payload = new MultiAzMigrationLbUpdateResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        Map<Object, Object> variables = mock();
+        when(variables.getOrDefault(AbstractMultiAzMigrationInitAction.HAS_LOAD_BALANCER, Boolean.FALSE)).thenReturn(Boolean.TRUE);
+        Event<MultiAzMigrationLbWaitHandlerRequest> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbWaitHandlerRequest> requestCaptor =
+                ArgumentCaptor.forClass(MultiAzMigrationLbWaitHandlerRequest.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbWaitHandlerRequest.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationLbUpdateResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationLbUpdateResult>) underTest.multiAzMigrationLbWaitAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), requestCaptor.capture());
+        MultiAzMigrationLbWaitHandlerRequest request = requestCaptor.getValue();
+        assertEquals(STACK_ID, request.getResourceId());
+        assertEquals(OPERATION_ID, request.getOperationId());
+        assertEquals(cloudContext, request.getCloudContext());
+        assertEquals(cloudCredential, request.getCloudCredential());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBWAITHANDLERREQUEST", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbWaitActionWhenNotAwsSkipsWait() throws Exception {
+        MultiAzMigrationLbUpdateResult payload = new MultiAzMigrationLbUpdateResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        Map<Object, Object> variables = mock();
+        Event<MultiAzMigrationLbWaitResult> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbWaitResult> resultCaptor = ArgumentCaptor.forClass(MultiAzMigrationLbWaitResult.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbWaitResult.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationLbUpdateResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationLbUpdateResult>) underTest.multiAzMigrationLbWaitAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), resultCaptor.capture());
+        MultiAzMigrationLbWaitResult result = resultCaptor.getValue();
+        assertEquals(STACK_ID, result.getResourceId());
+        assertEquals(OPERATION_ID, result.getOperationId());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBWAITRESULT", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbMetadataCollectionActionWhenAwsAndLoadBalancerExists() throws Exception {
+        MultiAzMigrationLbWaitResult payload = new MultiAzMigrationLbWaitResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        Map<Object, Object> variables = mock();
+        when(variables.getOrDefault(AbstractMultiAzMigrationInitAction.HAS_LOAD_BALANCER, Boolean.FALSE)).thenReturn(Boolean.TRUE);
+        Event<MultiAzMigrationLbMetadataCollectionHandlerRequest> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbMetadataCollectionHandlerRequest> requestCaptor =
+                ArgumentCaptor.forClass(MultiAzMigrationLbMetadataCollectionHandlerRequest.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbMetadataCollectionHandlerRequest.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationLbWaitResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationLbWaitResult>) underTest.multiAzMigrationLbMetadataCollectionAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), requestCaptor.capture());
+        MultiAzMigrationLbMetadataCollectionHandlerRequest request = requestCaptor.getValue();
+        assertEquals(STACK_ID, request.getResourceId());
+        assertEquals(OPERATION_ID, request.getOperationId());
+        assertEquals(cloudContext, request.getCloudContext());
+        assertEquals(cloudCredential, request.getCloudCredential());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBMETADATACOLLECTIONHANDLERREQUEST", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbMetadataCollectionActionWhenNotAwsSkipsCollection() throws Exception {
+        MultiAzMigrationLbWaitResult payload = new MultiAzMigrationLbWaitResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        Map<Object, Object> variables = mock();
+        Event<MultiAzMigrationLbMetadataCollectionResult> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbMetadataCollectionResult> resultCaptor =
+                ArgumentCaptor.forClass(MultiAzMigrationLbMetadataCollectionResult.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbMetadataCollectionResult.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationLbWaitResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationLbWaitResult>) underTest.multiAzMigrationLbMetadataCollectionAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), resultCaptor.capture());
+        MultiAzMigrationLbMetadataCollectionResult result = resultCaptor.getValue();
+        assertEquals(STACK_ID, result.getResourceId());
+        assertEquals(OPERATION_ID, result.getOperationId());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBMETADATACOLLECTIONRESULT", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbDnsUpdateActionWhenAwsAndLoadBalancerExists() throws Exception {
+        MultiAzMigrationLbMetadataCollectionResult payload = new MultiAzMigrationLbMetadataCollectionResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        Map<Object, Object> variables = mock();
+        when(variables.getOrDefault(AbstractMultiAzMigrationInitAction.HAS_LOAD_BALANCER, Boolean.FALSE)).thenReturn(Boolean.TRUE);
+        Event<MultiAzMigrationLbDnsUpdateHandlerRequest> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbDnsUpdateHandlerRequest> requestCaptor = ArgumentCaptor.forClass(MultiAzMigrationLbDnsUpdateHandlerRequest.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbDnsUpdateHandlerRequest.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationLbMetadataCollectionResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationLbMetadataCollectionResult>) underTest.multiAzMigrationLbDnsUpdateAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), requestCaptor.capture());
+        MultiAzMigrationLbDnsUpdateHandlerRequest request = requestCaptor.getValue();
+        assertEquals(STACK_ID, request.getResourceId());
+        assertEquals(OPERATION_ID, request.getOperationId());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBDNSUPDATEHANDLERREQUEST", event);
+    }
+
+    @Test
+    void testMultiAzMigrationLbDnsUpdateActionWhenNotAwsSkipsDnsUpdate() throws Exception {
+        MultiAzMigrationLbMetadataCollectionResult payload = new MultiAzMigrationLbMetadataCollectionResult(STACK_ID, OPERATION_ID);
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        Map<Object, Object> variables = mock();
+        Event<MultiAzMigrationLbDnsUpdateResult> event = mock();
+        ArgumentCaptor<MultiAzMigrationLbDnsUpdateResult> resultCaptor = ArgumentCaptor.forClass(MultiAzMigrationLbDnsUpdateResult.class);
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbDnsUpdateResult.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationLbMetadataCollectionResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationLbMetadataCollectionResult>) underTest.multiAzMigrationLbDnsUpdateAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(reactorEventFactory).createEvent(any(), resultCaptor.capture());
+        MultiAzMigrationLbDnsUpdateResult result = resultCaptor.getValue();
+        assertEquals(STACK_ID, result.getResourceId());
+        assertEquals(OPERATION_ID, result.getOperationId());
+        verify(eventBus).notify("MULTIAZMIGRATIONLBDNSUPDATERESULT", event);
+    }
+
+    @Test
+    void testMultiAzMigrationInitFinishedAction() throws Exception {
+        MultiAzMigrationLbDnsUpdateResult payload = new MultiAzMigrationLbDnsUpdateResult(STACK_ID, OPERATION_ID);
+        Event<MultiAzMigrationLbDnsUpdateResult> event = mock();
+        when(reactorEventFactory.createEvent(any(), any(MultiAzMigrationLbDnsUpdateResult.class))).thenReturn(event);
+
+        AbstractMultiAzMigrationInitAction<MultiAzMigrationLbDnsUpdateResult> action =
+                (AbstractMultiAzMigrationInitAction<MultiAzMigrationLbDnsUpdateResult>) underTest.multiAzMigrationInitFinishedAction();
         initActionPrivateFields(action);
 
         new AbstractActionTestSupport<>(action).doExecute(context, payload, Map.of());

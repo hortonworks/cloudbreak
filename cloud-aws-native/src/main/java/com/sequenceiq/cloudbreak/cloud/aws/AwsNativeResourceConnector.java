@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
@@ -58,7 +58,10 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     private PersistenceNotifier persistenceNotifier;
 
     @Inject
-    private LoadBalancerService loadBalancerService;
+    private AwsLoadBalancerService awsLoadBalancerService;
+
+    @Inject
+    private AwsNativeLoadBalancerService awsNativeLoadBalancerService;
 
     @Inject
     private ResourceRetriever resourceRetriever;
@@ -86,6 +89,20 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         LOGGER.debug("Updating loadbalancer");
         return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
+    }
+
+    @Override
+    public void enableMultiAzOnLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        if (stack.isMultiAz()) {
+            awsNativeLoadBalancerService.updateMultiAzLoadBalancers(authenticatedContext, stack);
+        } else {
+            LOGGER.warn("Multi-AZ is not enabled on the stack, so skipping enabling multi-AZ for the load balancer.");
+        }
+    }
+
+    @Override
+    public void waitForLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        awsNativeLoadBalancerService.waitForLoadBalancers(authenticatedContext, stack);
     }
 
     @Override
@@ -136,7 +153,7 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
         List<String> targetGroupArns = resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, auth.getCloudContext().getId())
                 .stream().map(CloudResource::getReference).collect(Collectors.toList());
-        loadBalancerService.removeLoadBalancerTargets(auth, targetGroupArns, resourcesToRemove);
+        awsLoadBalancerService.removeLoadBalancerTargets(auth, targetGroupArns, resourcesToRemove);
         return downscale;
     }
 

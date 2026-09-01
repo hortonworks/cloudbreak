@@ -2,16 +2,20 @@ package com.sequenceiq.freeipa.flow.freeipa.migration;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
@@ -19,6 +23,8 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -28,7 +34,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.Authenticator;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
@@ -49,12 +62,15 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.events.EventSenderService;
@@ -65,10 +81,20 @@ import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaValidationProperties;
 import com.sequenceiq.freeipa.flow.freeipa.migration.action.MultiAzMigrationInitActions;
 import com.sequenceiq.freeipa.flow.freeipa.migration.event.MultiAzMigrationInitTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.handler.MultiAzMigrationInitHandler;
+import com.sequenceiq.freeipa.flow.freeipa.migration.handler.MultiAzMigrationLbDnsUpdateHandler;
+import com.sequenceiq.freeipa.flow.freeipa.migration.handler.MultiAzMigrationLbMetadataCollectionHandler;
+import com.sequenceiq.freeipa.flow.freeipa.migration.handler.MultiAzMigrationLbUpdateHandler;
+import com.sequenceiq.freeipa.flow.freeipa.migration.handler.MultiAzMigrationLbWaitHandler;
 import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerDomainService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerMetadataCollectionService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -86,6 +112,14 @@ class MultiAzMigrationInitFlowIntegrationTest {
     private static final long STACK_ID = 1L;
 
     private static final String OPERATION_ID = "opId";
+
+    private static final String LB_ENDPOINT = "lb.example.com";
+
+    private static final String LB_IP = "10.0.0.1";
+
+    private static final String DOMAIN = "example.com";
+
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:acc:environment:env";
 
     @Inject
     private FlowRegister flowRegister;
@@ -139,6 +173,9 @@ class MultiAzMigrationInitFlowIntegrationTest {
     private EventSenderService eventSenderService;
 
     @MockitoBean
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
+    @MockitoBean
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @MockitoBean
@@ -147,9 +184,34 @@ class MultiAzMigrationInitFlowIntegrationTest {
     @MockitoBean
     private StackToCloudStackConverter stackToCloudStackConverter;
 
+    @MockitoBean
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @MockitoBean
+    private PersistenceNotifier persistenceNotifier;
+
+    @MockitoBean
+    private FreeIpaLoadBalancerMetadataCollectionService freeIpaLoadBalancerMetadataCollectionService;
+
+    @MockitoBean
+    private FreeIpaService freeIpaService;
+
+    @MockitoBean
+    private FreeIpaClientFactory freeIpaClientFactory;
+
+    @MockitoBean
+    private DnsRecordService dnsRecordService;
+
+    @MockitoBean
+    private FreeIpaLoadBalancerDomainService freeIpaLoadBalancerDomainService;
+
     private DetailedEnvironmentResponse environment;
 
     private Stack stack;
+
+    private CloudStack cloudStack;
+
+    private ResourceConnector resourceConnector;
 
     @BeforeEach
     public void setup() {
@@ -166,6 +228,7 @@ class MultiAzMigrationInitFlowIntegrationTest {
         stack.setId(STACK_ID);
         stack.setCloudPlatform("AWS");
         stack.setAccountId("test-account");
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         stack.setStackStatus(new StackStatus(stack, "test", DetailedStackStatus.AVAILABLE));
 
         InstanceGroup masterIg = new InstanceGroup();
@@ -176,12 +239,16 @@ class MultiAzMigrationInitFlowIntegrationTest {
         im0.setPrivateId(0L);
         im0.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         masterIg.setInstanceMetaData(new HashSet<>(List.of(im0)));
+        masterIg.setAvailabilityZones(new HashSet<>());
 
         stack.setInstanceGroups(new HashSet<>(List.of(masterIg)));
+
+        cloudStack = mock(CloudStack.class);
 
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
         when(instanceGroupService.save(any())).thenReturn(null);
+        when(stackToCloudStackConverter.convert(stack)).thenReturn(cloudStack);
         doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
@@ -193,8 +260,63 @@ class MultiAzMigrationInitFlowIntegrationTest {
         letItFlow(flowIdentifier);
 
         flowFinishedSuccessfully();
-        verify(stackUpdater).updateStackStatus((Stack) any(), eq(DetailedStackStatus.MULTI_AZ_MIGRATION_IN_PROGRESS), anyString());
+        verify(stackUpdater)
+                .updateStackStatus((Stack) any(), eq(DetailedStackStatus.MULTI_AZ_MIGRATION_IN_PROGRESS), eq("Starting FreeIPA multi-AZ migration."));
+        verify(stackUpdater).updateStackStatus((Stack) any(), eq(DetailedStackStatus.MULTI_AZ_MIGRATION_IN_PROGRESS),
+                eq("FreeIPA multi-AZ migration initialization completed."));
         verify(eventSenderService).sendEventAndNotification(stack, USER_CRN, com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_MULTI_AZ_MIGRATION_STARTED);
+    }
+
+    @Test
+    public void testMultiAzMigrationInitSkipsLoadBalancerStatesWhenStackHasNoLoadBalancer() {
+        when(cachedEnvironmentClientService.getByCrn(any())).thenReturn(environment);
+        when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+
+        flowFinishedSuccessfully();
+        verifyNoInteractions(cloudPlatformConnectors, freeIpaLoadBalancerMetadataCollectionService, dnsRecordService, freeIpaLoadBalancerDomainService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"AZURE", "GCP", "MOCK"})
+    public void testMultiAzMigrationInitSkipsLoadBalancerStatesOnNonAwsPlatform(String cloudPlatform) {
+        stack.setCloudPlatform(cloudPlatform);
+        when(cachedEnvironmentClientService.getByCrn(any())).thenReturn(environment);
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setEndpoint(LB_ENDPOINT);
+        loadBalancer.setIp(Set.of(LB_IP));
+        when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer));
+
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+
+        flowFinishedSuccessfully();
+        verifyNoInteractions(cloudPlatformConnectors, freeIpaLoadBalancerMetadataCollectionService, dnsRecordService, freeIpaLoadBalancerDomainService);
+    }
+
+    @Test
+    public void testMultiAzMigrationInitRunsLoadBalancerStates() throws Exception {
+        when(cachedEnvironmentClientService.getByCrn(any())).thenReturn(environment);
+        LoadBalancer loadBalancer = setUpLoadBalancer();
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaLoadBalancerService.getByStackId(STACK_ID)).thenReturn(loadBalancer);
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+
+        flowFinishedSuccessfully();
+        verify(resourceConnector).enableMultiAzOnLoadBalancers(any(), eq(cloudStack));
+        verify(resourceConnector).updateLoadBalancers(any(), eq(cloudStack), eq(persistenceNotifier));
+        verify(resourceConnector).waitForLoadBalancers(any(), eq(cloudStack));
+        verify(freeIpaLoadBalancerMetadataCollectionService).collectLoadBalancerMetadata(any());
+        verify(dnsRecordService).reconcileDnsARecord(freeIpa, freeIpaClient, DOMAIN, LB_ENDPOINT, Set.of(LB_IP), ENVIRONMENT_CRN);
+        verify(freeIpaLoadBalancerDomainService).registerLbDomain(STACK_ID, freeIpaClient);
     }
 
     @Test
@@ -207,12 +329,27 @@ class MultiAzMigrationInitFlowIntegrationTest {
         verify(operationService).failOperation(eq(stack.getAccountId()), eq(OPERATION_ID), any());
     }
 
+    private LoadBalancer setUpLoadBalancer() {
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setEndpoint(LB_ENDPOINT);
+        loadBalancer.setIp(Set.of(LB_IP));
+        when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer));
+
+        resourceConnector = mock(ResourceConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        Authenticator authenticator = mock(Authenticator.class);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(authenticator.authenticate(any(), any())).thenReturn(mock(AuthenticatedContext.class));
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        return loadBalancer;
+    }
+
     private FlowIdentifier triggerFlow() {
         String selector = MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_INIT_EVENT.event();
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
-                () -> freeIpaFlowManager.notify(selector,
-                        new MultiAzMigrationInitTriggerEvent(selector, STACK_ID, OPERATION_ID)));
+                () -> freeIpaFlowManager.notify(selector, new MultiAzMigrationInitTriggerEvent(selector, STACK_ID, OPERATION_ID)));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {
@@ -228,8 +365,10 @@ class MultiAzMigrationInitFlowIntegrationTest {
 
     private void flowFinishedSuccessfully() {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
-        verify(flowLogRepository, times(2)).save(flowLog.capture());
+        verify(flowLogRepository, atLeast(2)).save(flowLog.capture());
         assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
+        // A failing flow finalizes too, so without this a flow that died in its first handler would still look successful here.
+        verify(operationService, never()).failOperation(any(), any(), any());
     }
 
     @Profile("integration-test")
@@ -239,6 +378,10 @@ class MultiAzMigrationInitFlowIntegrationTest {
             MultiAzMigrationInitFlowConfig.class,
             MultiAzMigrationInitActions.class,
             MultiAzMigrationInitHandler.class,
+            MultiAzMigrationLbUpdateHandler.class,
+            MultiAzMigrationLbWaitHandler.class,
+            MultiAzMigrationLbMetadataCollectionHandler.class,
+            MultiAzMigrationLbDnsUpdateHandler.class,
             FlowEventListenerAdapter.class,
             ImageConverter.class,
             ImageToImageEntityConverter.class,

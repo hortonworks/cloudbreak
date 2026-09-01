@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeLoadBalancerService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -84,7 +87,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     private AwsInstanceCommonService awsInstanceCommonService;
 
     @Inject
-    private AwsNativeLoadBalancerIpCollector awsNativeLoadBalancerIpCollector;
+    private AwsNativeLoadBalancerService awsNativeLoadBalancerService;
 
     @Value("${cb.aws.native.instance.fetch.max.item:100}")
     private int instanceFetchMaxBatchSize;
@@ -244,7 +247,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         return response;
     }
 
-    private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient,  AmazonEc2Client ec2Client,
+    private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient, AmazonEc2Client ec2Client,
             CloudResource loadBalancer, List<CloudResource> resources, String resourceCrn) {
         Optional<CloudLoadBalancerMetadata> response = Optional.empty();
         try {
@@ -285,7 +288,16 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                             .withHostedZoneId(awsLb.canonicalHostedZoneId())
                             .withName(awsLb.loadBalancerName())
                             .withParameters(parameters);
-                    awsNativeLoadBalancerIpCollector.getLoadBalancerIp(ec2Client, loadBalancer.getName(), resourceCrn).ifPresent(loadBalancerMetadata::withIp);
+                    CrnResourceDescriptor resourceDescriptor = CrnResourceDescriptor.getByCrnString(resourceCrn);
+                    if (CrnResourceDescriptor.FREEIPA.equals(resourceDescriptor)) {
+                        List<String> loadBalancerIps = awsNativeLoadBalancerService.getLoadBalancerIps(ec2Client, loadBalancer.getName());
+                        if (CollectionUtils.isNotEmpty(loadBalancerIps)) {
+                            loadBalancerMetadata.withIp(String.join(",", loadBalancerIps));
+                        }
+                    } else {
+                        LOGGER.debug("Skipping to retrieve load balancer private IP because the stack type is {} or the entitlement is not enabled.",
+                                resourceDescriptor);
+                    }
                     LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", awsLb.loadBalancerName(), awsLb.dnsName(),
                             awsLb.canonicalHostedZoneId());
                     return loadBalancerMetadata.build();

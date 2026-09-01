@@ -32,12 +32,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerService;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.tag.AwsNativeResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -47,6 +48,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -101,7 +104,10 @@ public class AwsNativeResourceConnectorTest {
     private PersistenceNotifier persistenceNotifier;
 
     @Mock
-    private LoadBalancerService loadBalancerService;
+    private AwsLoadBalancerService awsLoadBalancerService;
+
+    @Mock
+    private AwsNativeLoadBalancerService awsNativeLoadBalancerService;
 
     @Mock
     private AmazonElasticLoadBalancingClient elasticLoadBalancingClient;
@@ -196,7 +202,44 @@ public class AwsNativeResourceConnectorTest {
 
         underTest.downscale(ac, cloudStack, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 
-        verify(loadBalancerService).removeLoadBalancerTargets(ac, Collections.emptyList(), Collections.emptyList());
+        verify(awsLoadBalancerService).removeLoadBalancerTargets(ac, Collections.emptyList(), Collections.emptyList());
+    }
+
+    @Test
+    void testUpdateLoadBalancersOnlyLaunchesLoadBalancers() {
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region(REGION_NAME), AvailabilityZone.availabilityZone(AZ)));
+        when(commonAwsClient.createElasticLoadBalancingClient(any(), eq(REGION_NAME))).thenReturn(elasticLoadBalancingClient);
+
+        underTest.updateLoadBalancers(ac, cloudStack, persistenceNotifier);
+
+        verify(loadBalancerLaunchService).launchLoadBalancerResources(ac, cloudStack, persistenceNotifier, elasticLoadBalancingClient, true);
+        verifyNoInteractions(awsLoadBalancerService);
+    }
+
+    @Test
+    void testEnableMultiAzOnLoadBalancers() {
+        when(cloudStack.isMultiAz()).thenReturn(true);
+
+        underTest.enableMultiAzOnLoadBalancers(ac, cloudStack);
+
+        verify(awsNativeLoadBalancerService).updateMultiAzLoadBalancers(ac, cloudStack);
+    }
+
+    @Test
+    void testEnableMultiAzOnLoadBalancersWhenStackIsNotMultiAz() {
+        when(cloudStack.isMultiAz()).thenReturn(false);
+
+        underTest.enableMultiAzOnLoadBalancers(ac, cloudStack);
+
+        verifyNoInteractions(awsNativeLoadBalancerService);
+    }
+
+    @Test
+    void testWaitForLoadBalancers() {
+        underTest.waitForLoadBalancers(ac, cloudStack);
+
+        verify(awsNativeLoadBalancerService).waitForLoadBalancers(ac, cloudStack);
     }
 
     @Test

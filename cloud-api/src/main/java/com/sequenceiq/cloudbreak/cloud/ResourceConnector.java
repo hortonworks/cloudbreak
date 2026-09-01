@@ -60,11 +60,10 @@ public interface ResourceConnector {
      * need to wait/block until the infrastructure creation is finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)}
      * method is invoked to check regularly whether the infrastructure and all resources have already been created or not.
      *
-     * @param authenticatedContext      the authenticated context which holds the client object
-     * @param stack                     contains the full description of infrastructure
-     * @param persistenceNotifier       Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platform
-     * @param adjustmentTypeWithThreshold   defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
-
+     * @param authenticatedContext        the authenticated context which holds the client object
+     * @param stack                       contains the full description of infrastructure
+     * @param persistenceNotifier         Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platform
+     * @param adjustmentTypeWithThreshold defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
      * @return the status of resources allocated on Cloud platform
      * @throws Exception in case of any error
      */
@@ -93,11 +92,32 @@ public interface ResourceConnector {
      * @param stack                contains the full description of infrastructure
      * @param persistenceNotifier  Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platform
      * @return the status of load balancers allocated on Cloud platform
-     * @throws Exception in case of any error
      */
-    default List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
-            throws Exception {
+    default List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            PersistenceNotifier persistenceNotifier) {
         return List.of();
+    }
+
+    /**
+     * Reconfigures the already existing load balancers of a stack to span every availability zone the stack uses. This is only invoked when a
+     * single-AZ stack is migrated to multi-AZ, so it must not be called from the regular scaling or load balancer update flows. Default is
+     * no-op for providers where an existing load balancer cannot be made zone redundant in place.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     */
+    default void enableMultiAzOnLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    }
+
+    /**
+     * Waits until the previously updated load balancers are fully ready on the cloud provider side
+     * (e.g. network interfaces are provisioned on every configured subnet). Default is no-op for
+     * providers that don't need it.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     */
+    default void waitForLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack) {
     }
 
     /**
@@ -278,8 +298,9 @@ public interface ResourceConnector {
     /**
      * Starts the database server. The caller does not need to wait/block until
      * database server gets started.
+     *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param stack contains the full description of infrastructure
+     * @param stack                contains the full description of infrastructure
      * @throws Exception in case of any error
      */
     void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
@@ -287,39 +308,43 @@ public interface ResourceConnector {
     /**
      * Stops the database server. The caller does not need to wait/block until
      * database server gets stopped.
+     *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param stack contains the full description of infrastructure
+     * @param stack                contains the full description of infrastructure
      * @throws Exception in case of any error
      */
     void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
      * Determines the status of a database server.
+     *
      * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
-     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @param stack                contains the full description of infrastructure; must not be {@code null}
      * @return The status of the given database server instance; never {@code null}
      * @throws NullPointerException if either argument is {@code null}
-     * @throws Exception in case of any error
+     * @throws Exception            in case of any error
      */
     ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
      * Determines the status of a database server without retrying in case of timeout or any provider side exception
+     *
      * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
-     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @param stack                contains the full description of infrastructure; must not be {@code null}
      * @return The status of the given database server instance; never {@code null}
      * @throws NullPointerException if either argument is {@code null}
-     * @throws Exception in case of any error
+     * @throws Exception            in case of any error
      */
     ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
      * Collect database related parameters of a database server.
+     *
      * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
-     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @param stack                contains the full description of infrastructure; must not be {@code null}
      * @return The database parameters of the given database server instance; never {@code null}
      * @throws NullPointerException if either argument is {@code null}
-     * @throws Exception in case of any error
+     * @throws Exception            in case of any error
      */
     default ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         throw new UnsupportedOperationException("Interface not implemented.");
@@ -327,11 +352,12 @@ public interface ResourceConnector {
 
     /**
      * Queries the SSL root certificate currently active for a database server.
+     *
      * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
-     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @param stack                contains the full description of infrastructure; must not be {@code null}
      * @return The active SSL root certificate of the given database server instance, or {@code null} if the database server does not exist anymore
      * @throws NullPointerException if either argument is {@code null}
-     * @throws Exception in case of any error
+     * @throws Exception            in case of any error
      */
     default CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack)
             throws Exception {
@@ -385,12 +411,12 @@ public interface ResourceConnector {
      * finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the
      * infrastructure and all resources have already been updated or not.
      *
-     * @param authenticatedContext      the authenticated context which holds the client object
-     * @param stack                     contains the full description of the new infrastructure including new instances
-     *                                  ({@link com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate}) where the CREATE_REQUESTED status
-     *                                  {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is a new instance and needs to be created.
-     * @param resources                 resources that need to be updated (e.g HEAT_TEMPLATE)
-     * @param adjustmentTypeWithThreshold   defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
+     * @param authenticatedContext        the authenticated context which holds the client object
+     * @param stack                       contains the full description of the new infrastructure including new instances
+     *                                    ({@link com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate}) where the CREATE_REQUESTED status
+     *                                    {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is a new instance and needs to be created.
+     * @param resources                   resources that need to be updated (e.g HEAT_TEMPLATE)
+     * @param adjustmentTypeWithThreshold defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
      * @return the status of updated resources
      */
     List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
@@ -457,8 +483,8 @@ public interface ResourceConnector {
      * Updates the database root password
      *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param databaseStack contains the full description of infrastructure
-     * @param newPassword new password for the database root user
+     * @param databaseStack        contains the full description of infrastructure
+     * @param newPassword          new password for the database root user
      */
     void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword);
 
@@ -466,8 +492,8 @@ public interface ResourceConnector {
      * Updates the database root CA
      *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param databaseStack contains the full description of infrastructure
-     * @param desiredCertificate the cert which should be applied on the database
+     * @param databaseStack        contains the full description of infrastructure
+     * @param desiredCertificate   the cert which should be applied on the database
      */
     default void updateDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack,
             String desiredCertificate) {
@@ -480,8 +506,8 @@ public interface ResourceConnector {
      * - Tags present in both {@code tags} and the cloud resource will be overwritten with the new value.
      *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param cloudResources the list of cloud resources whose tags are being updated
-     * @param tags the desired tags to apply; new entries will be added, existing entries will be overwritten
+     * @param cloudResources       the list of cloud resources whose tags are being updated
+     * @param tags                 the desired tags to apply; new entries will be added, existing entries will be overwritten
      */
     default void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         if (tags == null || tags.isEmpty()) {
@@ -496,8 +522,8 @@ public interface ResourceConnector {
      * Providers override this method to call their specific tag updater service.
      *
      * @param authenticatedContext the authenticated context
-     * @param cloudResources cloud resources to update
-     * @param tags the tags to apply
+     * @param cloudResources       cloud resources to update
+     * @param tags                 the tags to apply
      */
     default void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         throw new UnsupportedOperationException("Interface not implemented.");
@@ -508,8 +534,8 @@ public interface ResourceConnector {
      * Deleting a non-existent key on a resource is a no-op.
      *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param cloudResources the list of cloud resources whose tags are being deleted
-     * @param tagKeys the tag keys to remove
+     * @param cloudResources       the list of cloud resources whose tags are being deleted
+     * @param tagKeys              the tag keys to remove
      */
     default void deleteTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
         if (tagKeys == null || tagKeys.isEmpty()) {
@@ -524,8 +550,8 @@ public interface ResourceConnector {
      * Providers override this method to call their specific tag updater service.
      *
      * @param authenticatedContext the authenticated context
-     * @param cloudResources cloud resources to update
-     * @param tagKeys the tag keys to remove
+     * @param cloudResources       cloud resources to update
+     * @param tagKeys              the tag keys to remove
      */
     default void deleteCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
         throw new UnsupportedOperationException("Interface not implemented.");
@@ -535,7 +561,7 @@ public interface ResourceConnector {
      * Migrate database from non ssl to ssl
      *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param databaseStack contains the full description of infrastructure
+     * @param databaseStack        contains the full description of infrastructure
      */
     default void migrateDatabaseFromNonSslToSsl(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack) {
         LOGGER.warn("Update database ssl is not implemented!");

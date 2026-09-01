@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -92,7 +92,7 @@ class AwsDownscaleServiceTest {
     private AwsCloudFormationClient awsClient;
 
     @Mock
-    private LoadBalancerService loadBalancerService;
+    private AwsLoadBalancerService awsLoadBalancerService;
 
     @Mock
     private Ec2Waiter ec2Waiter;
@@ -156,7 +156,7 @@ class AwsDownscaleServiceTest {
         List<DetachInstancesRequest> allValues = detachInstancesRequestArgumentCaptor.getAllValues();
         assertThat(allValues.get(0).instanceIds(), contains("i-worker1"));
         verify(amazonAutoScalingClient, times(1)).detachInstances(any());
-        verify(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());
+        verify(awsLoadBalancerService).removeLoadBalancerTargets(any(), any(), any());
 
         assertEquals(describeAutoScalingGroupsRequest.getValue().autoScalingGroupNames(), List.of("autoscalegroup-1"));
     }
@@ -215,7 +215,7 @@ class AwsDownscaleServiceTest {
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
         verify(amazonAutoScalingClient, never()).detachInstances(any());
-        verify(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());
+        verify(awsLoadBalancerService).removeLoadBalancerTargets(any(), any(), any());
 
         assertEquals(describeAutoScalingGroupsRequest.getValue().autoScalingGroupNames(), List.of("autoscalegroup-1"));
     }
@@ -268,7 +268,7 @@ class AwsDownscaleServiceTest {
         InOrder inOrder = inOrder(amazonAutoScalingClient, amazonEC2Client);
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
-        verify(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());
+        verify(awsLoadBalancerService).removeLoadBalancerTargets(any(), any(), any());
 
         // Following will make sure that detach, ivoked before terminate and terminate invoked before update ASG!
         inOrder.verify(amazonAutoScalingClient).detachInstances(any());
@@ -302,7 +302,7 @@ class AwsDownscaleServiceTest {
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
         when(cfStackUtil.getAutoscalingGroupName(any(), (String) any(), any())).thenReturn("autoscalegroup-1");
         when(stack.getLoadBalancers()).thenReturn(List.of(privateLoadBalancer, publicLoadBalancer));
-        doNothing().when(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());
+        doNothing().when(awsLoadBalancerService).removeLoadBalancerTargets(any(), any(), any());
 
         DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
                 .autoScalingGroups(AutoScalingGroup.builder()
@@ -319,7 +319,7 @@ class AwsDownscaleServiceTest {
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
-        verify(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());
+        verify(awsLoadBalancerService).removeLoadBalancerTargets(any(), any(), any());
     }
 
     @Test
@@ -382,7 +382,7 @@ class AwsDownscaleServiceTest {
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
         verify(amazonAutoScalingClient, never()).detachInstances(any());
-        verify(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());
+        verify(awsLoadBalancerService).removeLoadBalancerTargets(any(), any(), any());
 
         ArgumentCaptor<TerminateInstancesRequest> terminateInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(TerminateInstancesRequest.class);
 
@@ -549,7 +549,7 @@ class AwsDownscaleServiceTest {
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
         verify(amazonAutoScalingClient, never()).detachInstances(any());
-        verify(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());
+        verify(awsLoadBalancerService).removeLoadBalancerTargets(any(), any(), any());
 
         ArgumentCaptor<TerminateInstancesRequest> terminateInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(TerminateInstancesRequest.class);
 

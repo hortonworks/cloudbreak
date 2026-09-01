@@ -121,7 +121,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     private void addDnsARecordCommon(@RequestObject AddDnsARecordRequest request, String accountId) {
         try {
-            dnsRecordService.addDnsARecord(accountId, request);
+            dnsRecordService.addOrUpdateDnsARecord(accountId, request);
         } catch (FreeIpaClientException e) {
             throw new FreeIpaClientExceptionWrapper(e);
         }

@@ -97,6 +97,9 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
     @MockBean
     private AwsMetricPublisher awsMetricPublisher;
 
+    @MockBean
+    private AwsNativeLoadBalancerService awsNativeLoadBalancerService;
+
     @SpyBean
     private AwsApacheClient awsApacheClient;
 

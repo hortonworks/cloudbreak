@@ -19,6 +19,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTa
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancerAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancerAttributesResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsRequest;
@@ -35,6 +37,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTarg
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RemoveTagsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RemoveTagsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.SetSubnetsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.SetSubnetsResponse;
 
 public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
@@ -46,6 +50,10 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
     public DescribeLoadBalancersResponse describeLoadBalancers(DescribeLoadBalancersRequest describeLoadBalancersRequest) {
         return client.describeLoadBalancers(describeLoadBalancersRequest);
+    }
+
+    public DescribeLoadBalancerAttributesResponse describeLoadBalancerAttributes(DescribeLoadBalancerAttributesRequest request) {
+        return client.describeLoadBalancerAttributes(request);
     }
 
     public DescribeTargetHealthResponse describeTargetHealth(DescribeTargetHealthRequest describeTargetHealthRequest) {
@@ -110,5 +118,9 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
     public RemoveTagsResponse removeTags(RemoveTagsRequest removeTagsRequest) {
         return client.removeTags(removeTagsRequest);
+    }
+
+    public SetSubnetsResponse setSubnets(SetSubnetsRequest request) {
+        return client.setSubnets(request);
     }
 }

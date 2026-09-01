@@ -103,6 +103,7 @@ class DnsRecordServiceTest {
     private FreeIpa createFreeIpa() {
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
+        freeIpa.setStack(createStack());
         return freeIpa;
     }
 
@@ -142,7 +143,7 @@ class DnsRecordServiceTest {
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
@@ -164,7 +165,7 @@ class DnsRecordServiceTest {
         when(freeIpaClient.addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse()))
                 .thenThrow(new FreeIpaClientException("can't create", noModEx));
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
@@ -185,7 +186,7 @@ class DnsRecordServiceTest {
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname()))
                 .thenThrow(new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)));
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
@@ -204,7 +205,7 @@ class DnsRecordServiceTest {
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verify(freeIpaClient).addDnsARecord(request.getDnsZone(), request.getHostname(), request.getIp(), request.isCreateReverse());
     }
@@ -224,7 +225,7 @@ class DnsRecordServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         when(freeIpaClient.findAllDnsZone()).thenReturn(createDnsZones(DOMAIN, DOMAIN2));
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verify(freeIpaClient).addDnsARecord(request.getDnsZone(), request.getHostname(), request.getIp(), request.isCreateReverse());
     }
@@ -244,7 +245,7 @@ class DnsRecordServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         when(freeIpaClient.findAllDnsZone()).thenReturn(createDnsZones(DOMAIN));
 
-        assertThrows(BadRequestException.class, () -> underTest.addDnsARecord(ACCOUNT_ID, request));
+        assertThrows(BadRequestException.class, () -> underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request));
     }
 
     @Test
@@ -265,7 +266,7 @@ class DnsRecordServiceTest {
         dnsRecord.setIdnsname(request.getHostname());
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verify(freeIpaClient, times(0)).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
@@ -288,7 +289,7 @@ class DnsRecordServiceTest {
         dnsRecord.setIdnsname(request.getHostname());
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
 
-        assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsARecord(ACCOUNT_ID, request));
+        assertThrows(DnsRecordConflictException.class, () -> underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request));
     }
 
     @Test
@@ -309,7 +310,7 @@ class DnsRecordServiceTest {
         dnsRecord.setIdnsname(request.getHostname());
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
 
-        assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsARecord(ACCOUNT_ID, request));
+        assertThrows(DnsRecordConflictException.class, () -> underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request));
     }
 
     @Test
@@ -328,7 +329,9 @@ class DnsRecordServiceTest {
         when(freeIpaClient.addDnsARecord(anyString(), eq(request.getHostname()), eq(request.getIp()), eq(true)))
                 .thenThrow(new FreeIpaClientException("Duplicate", new JsonRpcClientException(4002, "Duplicate reverse", null)));
 
-        assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsARecord(ACCOUNT_ID, request));
+        assertThrows(DnsRecordConflictException.class, () -> underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request));
+
+        verify(freeIpaClient).addDnsARecord(anyString(), eq(request.getHostname()), eq(request.getIp()), eq(true));
     }
 
     @Test
@@ -350,10 +353,10 @@ class DnsRecordServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verify(crossRealmTrustService).getByStackIdIfExists(anyLong());
-        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN), eq(false));
+        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), eq(Set.of(request.getIp())), eq(DOMAIN), eq(ENV_CRN), eq(false));
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
 
@@ -376,7 +379,7 @@ class DnsRecordServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verifyNoInteractions(cleanupService);
         verify(freeIpaClient, times(0)).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
@@ -401,7 +404,7 @@ class DnsRecordServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
 
-        assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsARecord(ACCOUNT_ID, request));
+        assertThrows(DnsRecordConflictException.class, () -> underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request));
 
         verifyNoInteractions(cleanupService);
         verify(freeIpaClient, times(0)).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
@@ -423,9 +426,9 @@ class DnsRecordServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(null);
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
-        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN), eq(false));
+        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), eq(Set.of(request.getIp())), eq(DOMAIN), eq(ENV_CRN), eq(false));
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
 
@@ -445,7 +448,7 @@ class DnsRecordServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(null);
 
-        underTest.addDnsARecord(ACCOUNT_ID, request);
+        underTest.addOrUpdateDnsARecord(ACCOUNT_ID, request);
 
         verifyNoInteractions(cleanupService);
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
@@ -803,4 +806,97 @@ class DnsRecordServiceTest {
         verify(freeIpaClient).addDnsCnameRecord(DOMAIN, "ldap", TARGET_FQDN);
         verifyNoInteractions(stackService, freeIpaService, freeIpaClientFactory);
     }
+
+    @Test
+    public void testReconcileDnsARecordNoChange() throws FreeIpaClientException {
+        FreeIpa freeIpa = createFreeIpa();
+        Set<String> ips = Set.of("10.0.0.1", "10.0.1.1");
+        DnsRecord existing = new DnsRecord();
+        existing.setArecord(List.copyOf(ips));
+        when(freeIpaClient.showDnsRecord(DOMAIN, "freeipa-lb")).thenReturn(existing);
+
+        underTest.reconcileDnsARecord(freeIpa, freeIpaClient, DOMAIN, "freeipa-lb", ips, ENV_CRN);
+
+        verify(freeIpaClient, times(0)).addDnsARecord(anyString(), anyString(), anyString(), any(Boolean.class));
+        verify(freeIpaClient, times(0)).deleteDnsARecord(anyString(), anyString(), anySet());
+        verifyNoInteractions(cleanupService);
+    }
+
+    @Test
+    public void testReconcileDnsARecordAddOnly() throws FreeIpaClientException {
+        FreeIpa freeIpa = createFreeIpa();
+        DnsRecord existing = new DnsRecord();
+        existing.setArecord(List.of("10.0.0.1"));
+        when(freeIpaClient.showDnsRecord(DOMAIN, "freeipa-lb")).thenReturn(existing);
+
+        Set<String> desired = Set.of("10.0.0.1", "10.0.1.1", "10.0.2.1");
+        underTest.reconcileDnsARecord(freeIpa, freeIpaClient, DOMAIN, "freeipa-lb", desired, ENV_CRN);
+
+        verify(freeIpaClient).addDnsARecord(DOMAIN, "freeipa-lb", "10.0.1.1", false);
+        verify(freeIpaClient).addDnsARecord(DOMAIN, "freeipa-lb", "10.0.2.1", false);
+        verify(freeIpaClient, times(0)).deleteDnsARecord(anyString(), anyString(), anySet());
+        verifyNoInteractions(cleanupService);
+    }
+
+    @Test
+    public void testReconcileDnsARecordRemoveOnly() throws FreeIpaClientException {
+        FreeIpa freeIpa = createFreeIpa();
+        DnsRecord existing = new DnsRecord();
+        existing.setArecord(List.of("10.0.0.1", "10.0.1.1", "10.0.2.1"));
+        when(freeIpaClient.showDnsRecord(DOMAIN, "freeipa-lb")).thenReturn(existing);
+        when(crossRealmTrustService.getByStackIdIfExists(anyLong())).thenReturn(java.util.Optional.empty());
+
+        Set<String> desired = Set.of("10.0.0.1");
+        underTest.reconcileDnsARecord(freeIpa, freeIpaClient, DOMAIN, "freeipa-lb", desired, ENV_CRN);
+
+        verify(freeIpaClient, times(0)).addDnsARecord(anyString(), anyString(), anyString(), any(Boolean.class));
+        verify(freeIpaClient).deleteDnsARecord(eq("freeipa-lb"), eq(DOMAIN), eq(Set.of("10.0.1.1", "10.0.2.1")));
+        verify(cleanupService).removeDnsEntries(freeIpaClient, Set.of(), Set.of("10.0.1.1", "10.0.2.1"), DOMAIN, ENV_CRN, false);
+    }
+
+    @Test
+    public void testReconcileDnsARecordAddAndRemove() throws FreeIpaClientException {
+        FreeIpa freeIpa = createFreeIpa();
+        DnsRecord existing = new DnsRecord();
+        existing.setArecord(List.of("10.0.0.1", "10.0.1.1"));
+        when(freeIpaClient.showDnsRecord(DOMAIN, "freeipa-lb")).thenReturn(existing);
+        when(crossRealmTrustService.getByStackIdIfExists(anyLong())).thenReturn(java.util.Optional.empty());
+
+        Set<String> desired = Set.of("10.0.0.1", "10.0.2.1");
+        underTest.reconcileDnsARecord(freeIpa, freeIpaClient, DOMAIN, "freeipa-lb", desired, ENV_CRN);
+
+        verify(freeIpaClient).addDnsARecord(DOMAIN, "freeipa-lb", "10.0.2.1", false);
+        verify(freeIpaClient).deleteDnsARecord(eq("freeipa-lb"), eq(DOMAIN), eq(Set.of("10.0.1.1")));
+        verify(cleanupService).removeDnsEntries(freeIpaClient, Set.of(), Set.of("10.0.1.1"), DOMAIN, ENV_CRN, false);
+    }
+
+    @Test
+    public void testReconcileDnsARecordWhenShowDnsRecordNotFoundTreatsAsEmpty() throws FreeIpaClientException {
+        FreeIpa freeIpa = createFreeIpa();
+        when(freeIpaClient.showDnsRecord(DOMAIN, "freeipa-lb"))
+                .thenThrow(new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)));
+
+        Set<String> desired = Set.of("10.0.0.1", "10.0.1.1");
+        underTest.reconcileDnsARecord(freeIpa, freeIpaClient, DOMAIN, "freeipa-lb", desired, ENV_CRN);
+
+        verify(freeIpaClient).addDnsARecord(DOMAIN, "freeipa-lb", "10.0.0.1", false);
+        verify(freeIpaClient).addDnsARecord(DOMAIN, "freeipa-lb", "10.0.1.1", false);
+        verify(freeIpaClient, times(0)).deleteDnsARecord(anyString(), anyString(), anySet());
+        verifyNoInteractions(cleanupService);
+    }
+
+    @Test
+    public void testReconcileDnsARecordThrowsOnDuplicateEntry() throws FreeIpaClientException {
+        FreeIpa freeIpa = createFreeIpa();
+        when(freeIpaClient.showDnsRecord(DOMAIN, "freeipa-lb")).thenReturn(null);
+        when(freeIpaClient.addDnsARecord(DOMAIN, "freeipa-lb", "10.0.0.1", false))
+                .thenThrow(new FreeIpaClientException("dup",
+                        new JsonRpcClientException(FreeIpaErrorCodes.DUPLICATE_ENTRY.getValue(), "dup", null)));
+
+        assertThrows(DnsRecordConflictException.class,
+                () -> underTest.reconcileDnsARecord(freeIpa, freeIpaClient, DOMAIN, "freeipa-lb", Set.of("10.0.0.1"), ENV_CRN));
+
+        verifyNoInteractions(cleanupService);
+    }
+
 }

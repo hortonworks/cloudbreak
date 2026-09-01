@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerCertificateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerUpdateService;
@@ -71,19 +72,21 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier persistenceNotifier)
-            throws Exception {
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), true);
 
-        return loadBalancerResourceService.buildResources(context, auth, stack);
+        try {
+            return loadBalancerResourceService.buildResources(context, auth, stack);
+        }  catch (Exception e) {
+            throw new CloudConnectorException(e);
+        }
     }
 
     @Override
-    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
-            throws Exception {
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
     }
 

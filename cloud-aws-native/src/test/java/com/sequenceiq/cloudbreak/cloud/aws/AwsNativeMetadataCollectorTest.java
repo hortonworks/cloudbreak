@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,7 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsInstance
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeLbMetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeLoadBalancerIpCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -80,7 +80,7 @@ class AwsNativeMetadataCollectorTest {
 
     private static final String LB_PRIVATE_IP = "1.1.1.1";
 
-    private static final String CRN = "crn";
+    private static final String CRN = "crn:cdp:freeipa:us-west-1:cloudera:freeipa:4428e540-a878-42b1-a1d4-91747322d8b6";
 
     @Mock
     private AwsLifeCycleMapper awsLifeCycleMapper;
@@ -107,7 +107,7 @@ class AwsNativeMetadataCollectorTest {
     private AwsInstanceCommonService awsInstanceCommonService;
 
     @Mock
-    private AwsNativeLoadBalancerIpCollector awsNativeLoadBalancerIpCollector;
+    private AwsNativeLoadBalancerService awsNativeLoadBalancerService;
 
     @InjectMocks
     private AwsNativeMetadataCollector underTest;
@@ -420,7 +420,7 @@ class AwsNativeMetadataCollectorTest {
         when(loadBalancingClient.describeLoadBalancers(any()))
                 .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build())
                 .thenThrow(loadBalancerNotFoundException);
-        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any(), eq(CRN))).thenReturn(Optional.of(LB_PRIVATE_IP));
+        when(awsNativeLoadBalancerService.getLoadBalancerIps(eq(ec2Client), any())).thenReturn(List.of(LB_PRIVATE_IP));
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
@@ -443,7 +443,7 @@ class AwsNativeMetadataCollectorTest {
         when(loadBalancingClient.describeLoadBalancers(any()))
                 .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build());
         when(loadBalancerTypeConverter.convert(LoadBalancerSchemeEnum.INTERNAL)).thenReturn(LoadBalancerType.PRIVATE);
-        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any(), eq(CRN))).thenReturn(Optional.of(LB_PRIVATE_IP));
+        when(awsNativeLoadBalancerService.getLoadBalancerIps(eq(ec2Client), any())).thenReturn(List.of(LB_PRIVATE_IP));
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
@@ -453,6 +453,35 @@ class AwsNativeMetadataCollectorTest {
         assertThat(cloudLoadBalancerMetadata.stream().map(CloudLoadBalancerMetadata::getType).collect(Collectors.toSet()))
                 .containsExactlyInAnyOrder(LoadBalancerType.PRIVATE, LoadBalancerType.GATEWAY_PRIVATE);
         assertTrue(cloudLoadBalancerMetadata.stream().allMatch(metadata -> LB_PRIVATE_IP.equals(metadata.getIp())));
+    }
+
+    @Test
+    void collectLoadBalancerMetadataSkipsIpCollectionWhenNotFreeIpaCluster() {
+        List<LoadBalancerType> loadBalancerTypes = List.of();
+        CloudResource cloudResource = getCloudResource("aCrn", "lbname", null, ELASTIC_LOAD_BALANCER);
+        List<CloudResource> cloudResources = List.of(cloudResource);
+        String datalakeCrn = "crn:cdp:datalake:us-west-1:cloudera:datalake:4428e540-a878-42b1-a1d4-91747322d8b6";
+        CloudContext datalakeContext = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("context")
+                .withCrn(datalakeCrn)
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-central-1")))
+                .withAccountId("account")
+                .build();
+        when(authenticatedContext.getCloudContext()).thenReturn(datalakeContext);
+        when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
+        LoadBalancer loadBalancer = LoadBalancer.builder().scheme(LoadBalancerSchemeEnum.INTERNAL).build();
+        when(loadBalancingClient.describeLoadBalancers(any()))
+                .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build());
+
+        List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
+
+        assertFalse(cloudLoadBalancerMetadata.isEmpty());
+        assertTrue(cloudLoadBalancerMetadata.stream().allMatch(metadata -> metadata.getIp() == null));
+        verify(awsNativeLoadBalancerService, never()).getLoadBalancerIps(any(), any());
     }
 
     @Test

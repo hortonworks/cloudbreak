@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -601,6 +602,12 @@ public class FreeIpaClient {
         List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
         Map<String, Object> params = Map.of("del_all", true);
         return invoke("dnsrecord_del", flags, params, Object.class);
+    }
+
+    public RPCResponse<Object> deleteDnsARecord(String recordName, String dnsZoneName, Collection<String> ips) throws FreeIpaClientException {
+        List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
+        Map<String, Object> params = Map.of("arecord", ips);
+        return invoke("dnsrecord_del", flags, params, DnsRecord.class);
     }
 
     public RPCResponse<Object> deleteDnsSrvRecord(String recordName, String dnsZoneName, List<String> srvRecords) throws FreeIpaClientException {

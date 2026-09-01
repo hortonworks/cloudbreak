@@ -23,12 +23,11 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescri
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
 
 @Component
-public class LoadBalancerService {
+public class AwsLoadBalancerService {
 
-    private static final Logger LOGGER = getLogger(LoadBalancerService.class);
+    private static final Logger LOGGER = getLogger(AwsLoadBalancerService.class);
 
     @Inject
-
     private CommonAwsClient awsClient;
 
     public void removeLoadBalancerTargets(AuthenticatedContext ac, List<String> targetGroupArns, List<CloudResource> resourcesToRemove) {

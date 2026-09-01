@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.dns;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreEmptyModExceptionWithValue;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue;
+import static com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils.buildFqdn;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -32,7 +34,6 @@ import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -119,29 +120,61 @@ public class DnsRecordService {
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     @Measure(DnsRecordService.class)
-    public void addDnsARecord(String accountId, @Valid AddDnsARecordRequest request) throws FreeIpaClientException {
-        Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
-        FreeIpaAndClient freeIpaAndClient = createFreeIpaAndClient(stack);
+    public void addOrUpdateDnsARecord(String accountId, @Valid AddDnsARecordRequest request) throws FreeIpaClientException {
+        FreeIpaAndClient freeIpaAndClient = createFreeIpaAndClient(request.getEnvironmentCrn(), accountId);
         LOGGER.info("Processing AddDnsARecordRequest: {}", request);
+        String hostname = request.getHostname();
+        Set<String> ips = Set.of(request.getIp());
         String zone = calculateZone(request.getDnsZone(), freeIpaAndClient);
-        Optional<DnsRecord> dnsRecord = ignoreNotFoundExceptionWithValue(() -> freeIpaAndClient.getClient().showDnsRecord(zone, request.getHostname()), null);
+
+        Optional<DnsRecord> dnsRecord = ignoreNotFoundExceptionWithValue(() -> freeIpaAndClient.getClient().showDnsRecord(zone, hostname), null);
         if (dnsRecord.isEmpty() && !request.isForce()) {
-            createDnsARecord(freeIpaAndClient.getClient(), zone, request.getHostname(), request.getIp(), request.isCreateReverse());
-        } else if (request.isForce() && (dnsRecord.isEmpty() || !dnsRecord.get().getArecord().contains(request.getIp()))) {
-            LOGGER.debug("Force updating DNS record {} based on the requested data: {}", dnsRecord, request);
-            cleanupOldRecords(freeIpaAndClient.getClient(), request, stack);
-            createDnsARecord(freeIpaAndClient.getClient(), zone, request.getHostname(), request.getIp(), request.isCreateReverse());
+            createDnsARecord(freeIpaAndClient.getClient(), zone, hostname, ips, request.isCreateReverse());
+        } else if (request.isForce() && (dnsRecord.isEmpty() || !Set.copyOf(dnsRecord.get().getArecord()).equals(ips))) {
+            LOGGER.debug("Force updating DNS record {} based on the requested IPs {}", dnsRecord, ips);
+            cleanupOldRecords(freeIpaAndClient, hostname, ips, request.getEnvironmentCrn());
+            createDnsARecord(freeIpaAndClient.getClient(), zone, hostname, ips, request.isCreateReverse());
         } else {
-            dnsRecord.ifPresent(record -> validateExistingARecordMatchesRequested(request.getIp(), record));
+            dnsRecord.ifPresent(record -> existingARecordContainsRequestedIps(ips, record));
         }
     }
 
-    private void cleanupOldRecords(FreeIpaClient freeIpaClient, AddDnsARecordRequest request, Stack stack) throws FreeIpaClientException {
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(stack.getId()).isPresent();
-        String domain = freeIpa.getDomain();
-        cleanupService.removeDnsEntries(freeIpaClient, Set.of(FreeIpaDomainUtils.buildFqdn(request.getHostname(), domain)), Set.of(request.getIp()), domain,
-                stack.getEnvironmentCrn(), trustExists);
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    @Measure(DnsRecordService.class)
+    public void reconcileDnsARecord(FreeIpa freeIpa, FreeIpaClient client, String dnsZone, String hostname, Set<String> desiredIps, String environmentCrn)
+            throws FreeIpaClientException {
+        FreeIpaAndClient freeIpaAndClient = new FreeIpaAndClient(freeIpa, client);
+        String zone = calculateZone(dnsZone, freeIpaAndClient);
+        Set<String> current = ignoreNotFoundExceptionWithValue(() -> client.showDnsRecord(zone, hostname), null)
+                .map(r -> Set.copyOf(r.getArecord())).orElseGet(Set::of);
+
+        Set<String> toAdd = Sets.difference(desiredIps, current);
+        Set<String> toRemove = Sets.difference(current, desiredIps);
+
+        if (!toAdd.isEmpty()) {
+            createDnsARecord(client, zone, hostname, toAdd, false);
+        }
+        if (!toRemove.isEmpty()) {
+            ignoreNotFoundException(() -> client.deleteDnsARecord(hostname, zone, toRemove),
+                    "A values {} not present on [{}] in zone [{}]", toRemove, hostname, zone);
+            cleanupOldRecordsByIps(freeIpaAndClient, toRemove, environmentCrn);
+        }
+    }
+
+    private void cleanupOldRecords(FreeIpaAndClient freeIpaAndClient, String hostname, Set<String> ips, String environmentCrn) throws FreeIpaClientException {
+        String domain = freeIpaAndClient.getFreeIpa().getDomain();
+        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(freeIpaAndClient.getFreeIpa().getStack().getId()).isPresent();
+        cleanupService.removeDnsEntries(freeIpaAndClient.getClient(), Set.of(buildFqdn(hostname, domain)), ips, domain,
+                environmentCrn, trustExists);
+    }
+
+    private void cleanupOldRecordsByIps(FreeIpaAndClient freeIpaAndClient, Set<String> ips, String environmentCrn) throws FreeIpaClientException {
+        String domain = freeIpaAndClient.getFreeIpa().getDomain();
+        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(freeIpaAndClient.getFreeIpa().getStack().getId()).isPresent();
+        cleanupService.removeDnsEntries(freeIpaAndClient.getClient(), Set.of(), ips, domain, environmentCrn, trustExists);
     }
 
     private String calculateZone(String zoneFromRequest, FreeIpaAndClient freeIpaAndClient) throws FreeIpaClientException {
@@ -168,32 +201,33 @@ public class DnsRecordService {
         }
     }
 
-    private void validateExistingARecordMatchesRequested(String ip, DnsRecord record) {
+    private void existingARecordContainsRequestedIps(Set<String> ips, DnsRecord record) {
         LOGGER.debug("Validating already existing record: {}", record);
         if (!record.isARecord()) {
             LOGGER.info("Record already exists and it's not an A record");
             throw new DnsRecordConflictException("Record already exists and it's not an A record");
-        } else if (!record.getArecord().contains(ip)) {
-            LOGGER.info("Record already exists and the IP doesn't match");
-            throw new DnsRecordConflictException("Record already exists and the IP doesn't match");
+        } else if (!record.getArecord().containsAll(ips)) {
+            LOGGER.info("Record already exists and the IPs don't match");
+            throw new DnsRecordConflictException("Record already exists and the IPs don't match");
         } else {
             LOGGER.info("A record already exists and matches with requested. Nothing to do");
         }
     }
 
-    private void createDnsARecord(FreeIpaClient client, String zone, String hostname, String ip, boolean createReverse) throws FreeIpaClientException {
-        LOGGER.info("Creating A record in zone [{}] with hostname [{}] with IP [{}]. Create reverse set to [{}]",
-                zone, hostname, ip, createReverse);
-        try {
-            Optional<DnsRecord> record = ignoreEmptyModExceptionWithValue(() -> client.addDnsARecord(zone, hostname, ip, createReverse),
-                    "Record [{}] pointing to [{}] is already exists, nothing to do.", hostname, ip);
-            LOGGER.info("A record [{}] pointing to [{}] is created successfully. Created record: {}", hostname, ip, record);
-        } catch (FreeIpaClientException e) {
-            if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
-                LOGGER.warn("Duplicate entry, usually reverse entry already exists.", e);
-                throw new DnsRecordConflictException(e.getMessage());
-            } else {
-                throw e;
+    private void createDnsARecord(FreeIpaClient client, String zone, String hostname, Set<String> ips, boolean createReverse) throws FreeIpaClientException {
+        LOGGER.info("Creating A record in zone [{}] with hostname [{}] with IPs {}. Create reverse set to [{}]", zone, hostname, ips, createReverse);
+        for (String ip : ips) {
+            try {
+                Optional<DnsRecord> record = ignoreEmptyModExceptionWithValue(() -> client.addDnsARecord(zone, hostname, ip, createReverse),
+                        "Record [{}] pointing to [{}] already exists, nothing to do.", hostname, ip);
+                LOGGER.info("A record [{}] pointing to [{}] was created successfully. Created record: {}", hostname, ip, record);
+            } catch (FreeIpaClientException e) {
+                if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
+                    LOGGER.warn("Duplicate entry for IP [{}] on hostname [{}], usually reverse entry already exists.", ip, hostname, e);
+                    throw new DnsRecordConflictException(e.getMessage());
+                } else {
+                    throw e;
+                }
             }
         }
     }

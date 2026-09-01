@@ -5,11 +5,19 @@ import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInit
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_INIT_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_INIT_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_INIT_RESULT_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_LB_DNS_UPDATE_RESULT_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_LB_METADATA_COLLECTION_RESULT_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_LB_UPDATE_RESULT_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitFlowEvent.MULTI_AZ_MIGRATION_LB_WAIT_RESULT_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.MULTI_AZ_MIGRATION_INIT_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.MULTI_AZ_MIGRATION_INIT_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.MULTI_AZ_MIGRATION_INIT_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.MULTI_AZ_MIGRATION_LB_DNS_UPDATE_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.MULTI_AZ_MIGRATION_LB_METADATA_COLLECTION_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.MULTI_AZ_MIGRATION_LB_UPDATE_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState.MULTI_AZ_MIGRATION_LB_WAIT_STATE;
 
 import java.util.List;
 
@@ -31,8 +39,28 @@ public class MultiAzMigrationInitFlowConfig
                     .defaultFailureEvent()
 
                     .from(MULTI_AZ_MIGRATION_INIT_STATE)
-                    .to(MULTI_AZ_MIGRATION_INIT_FINISHED_STATE)
+                    .to(MULTI_AZ_MIGRATION_LB_UPDATE_STATE)
                     .event(MULTI_AZ_MIGRATION_INIT_RESULT_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(MULTI_AZ_MIGRATION_LB_UPDATE_STATE)
+                    .to(MULTI_AZ_MIGRATION_LB_WAIT_STATE)
+                    .event(MULTI_AZ_MIGRATION_LB_UPDATE_RESULT_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(MULTI_AZ_MIGRATION_LB_WAIT_STATE)
+                    .to(MULTI_AZ_MIGRATION_LB_METADATA_COLLECTION_STATE)
+                    .event(MULTI_AZ_MIGRATION_LB_WAIT_RESULT_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(MULTI_AZ_MIGRATION_LB_METADATA_COLLECTION_STATE)
+                    .to(MULTI_AZ_MIGRATION_LB_DNS_UPDATE_STATE)
+                    .event(MULTI_AZ_MIGRATION_LB_METADATA_COLLECTION_RESULT_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(MULTI_AZ_MIGRATION_LB_DNS_UPDATE_STATE)
+                    .to(MULTI_AZ_MIGRATION_INIT_FINISHED_STATE)
+                    .event(MULTI_AZ_MIGRATION_LB_DNS_UPDATE_RESULT_EVENT)
                     .defaultFailureEvent()
 
                     .from(MULTI_AZ_MIGRATION_INIT_FINISHED_STATE)
