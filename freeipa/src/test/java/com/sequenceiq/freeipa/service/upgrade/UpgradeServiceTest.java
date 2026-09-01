@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -656,5 +657,160 @@ class UpgradeServiceTest {
         assertEquals(currentImage, result.getCurrentImage());
         assertEquals(1, result.getImages().size());
         assertEquals(targetImage, result.getImages().getFirst());
+    }
+
+    @Test
+    void testCollectUpgradeOptionsDisablesMajorOsUpgradeWhenOldImageInstanceOnDifferentOs() {
+        Set<InstanceMetaData> instances = Set.of(
+                imWithImage("pgw", "old-1", CENTOS_7, REDHAT_7),
+                imWithImage("im2", "old-2", REDHAT_8, REDHAT_8));
+
+        boolean allowMajorOsUpgrade = runCollectUpgradeOptionsAndCaptureMajorOsUpgrade(instances, REDHAT_8, true);
+
+        assertFalse(allowMajorOsUpgrade);
+    }
+
+    @Test
+    void testCollectUpgradeOptionsKeepsMajorOsUpgradeWhenAllOldImageInstancesOnStackOs() {
+        Set<InstanceMetaData> instances = Set.of(
+                imWithImage("pgw", "old-1", REDHAT_8, REDHAT_8),
+                imWithImage("im2", "old-2", REDHAT_8, REDHAT_8));
+
+        boolean allowMajorOsUpgrade = runCollectUpgradeOptionsAndCaptureMajorOsUpgrade(instances, REDHAT_8, true);
+
+        assertTrue(allowMajorOsUpgrade);
+    }
+
+    @Test
+    void testCollectUpgradeOptionsDisablesMajorOsUpgradeWhenInstanceHasNoImage() {
+        Set<InstanceMetaData> instances = Set.of(
+                imWithoutImage("pgw"),
+                imWithImage("im2", "old-2", REDHAT_8, REDHAT_8));
+
+        boolean allowMajorOsUpgrade = runCollectUpgradeOptionsAndCaptureMajorOsUpgrade(instances, REDHAT_8, true);
+
+        assertFalse(allowMajorOsUpgrade);
+    }
+
+    @Test
+    void testCollectUpgradeOptionsKeepsMajorOsUpgradeWhenInstanceWithoutImageMatchesCentosStack() {
+        Set<InstanceMetaData> instances = Set.of(
+                imWithoutImage("pgw"),
+                imWithImage("im2", "old-2", CENTOS_7, REDHAT_7));
+
+        boolean allowMajorOsUpgrade = runCollectUpgradeOptionsAndCaptureMajorOsUpgrade(instances, CENTOS_7, true);
+
+        assertTrue(allowMajorOsUpgrade);
+    }
+
+    @Test
+    void testCollectUpgradeOptionsKeepsRequestedValueWhenNoInstancesOnOldImage() {
+        Set<InstanceMetaData> instances = Set.of(
+                imWithImage("pgw", "current-id", REDHAT_8, REDHAT_8),
+                imWithImage("im2", "current-id", REDHAT_8, REDHAT_8));
+
+        boolean allowMajorOsUpgrade = runCollectUpgradeOptionsAndCaptureMajorOsUpgrade(instances, REDHAT_8, true);
+
+        assertTrue(allowMajorOsUpgrade);
+    }
+
+    @Test
+    void testCollectUpgradeOptionsKeepsMajorOsUpgradeDisabledWhenRequestedFalseAndInstanceOnDifferentOs() {
+        Set<InstanceMetaData> instances = Set.of(
+                imWithImage("pgw", "old-1", CENTOS_7, REDHAT_7),
+                imWithImage("im2", "old-2", REDHAT_8, REDHAT_8));
+
+        boolean allowMajorOsUpgrade = runCollectUpgradeOptionsAndCaptureMajorOsUpgrade(instances, REDHAT_8, false);
+
+        assertFalse(allowMajorOsUpgrade);
+    }
+
+    @Test
+    void testUpgradeTriggerDisablesMajorOsUpgradeWhenInstanceOnDifferentOs() {
+        Set<InstanceMetaData> allInstances = Set.of(
+                imWithImage("pgw", "old-1", CENTOS_7, REDHAT_7),
+                imWithImage("im2", "old-2", REDHAT_8, REDHAT_8));
+
+        boolean allowMajorOsUpgrade = runUpgradeTriggerAndCaptureMajorOsUpgrade(allInstances, REDHAT_8);
+
+        assertFalse(allowMajorOsUpgrade);
+    }
+
+    @Test
+    void testUpgradeTriggerKeepsMajorOsUpgradeWhenAllOldImageInstancesOnStackOs() {
+        Set<InstanceMetaData> allInstances = Set.of(
+                imWithImage("pgw", "old-1", REDHAT_8, REDHAT_8),
+                imWithImage("im2", "old-2", REDHAT_8, REDHAT_8));
+
+        boolean allowMajorOsUpgrade = runUpgradeTriggerAndCaptureMajorOsUpgrade(allInstances, REDHAT_8);
+
+        assertTrue(allowMajorOsUpgrade);
+    }
+
+    private boolean runCollectUpgradeOptionsAndCaptureMajorOsUpgrade(Set<InstanceMetaData> instances, String currentOs, Boolean requestedAllowMajorOsUpgrade) {
+        Stack stack = mock(Stack.class);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instances);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setId("current-id");
+        currentImage.setOs(currentOs);
+        when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
+        when(imageService.findTargetImages(eq(stack), eq(IMAGE_CATALOG), eq(currentImage), anyBoolean(), eq(Map.of())))
+                .thenReturn(List.of(new ImageInfoResponse()));
+
+        underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, IMAGE_CATALOG, requestedAllowMajorOsUpgrade);
+
+        ArgumentCaptor<Boolean> captor = ArgumentCaptor.forClass(Boolean.class);
+        verify(imageService).findTargetImages(eq(stack), eq(IMAGE_CATALOG), eq(currentImage), captor.capture(), eq(Map.of()));
+        return captor.getValue();
+    }
+
+    private boolean runUpgradeTriggerAndCaptureMajorOsUpgrade(Set<InstanceMetaData> allInstances, String currentOs) {
+        FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
+        request.setImage(new ImageSettingsRequest());
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        request.setAllowMajorOsUpgrade(true);
+
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        mockSelectedImage(REDHAT_8);
+        mockCurrentImage(stack, currentOs);
+        mockOperation(OperationState.RUNNING);
+        when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
+
+        underTest.upgradeFreeIpa(ACCOUNT_ID, request);
+
+        ArgumentCaptor<FreeIpaImageFilterSettings> captor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
+        verify(imageService).selectImage(captor.capture());
+        return captor.getValue().allowMajorOsUpgrade();
+    }
+
+    private InstanceMetaData imWithImage(String instanceId, String imageId, String os, String osType) {
+        InstanceMetaData im = new InstanceMetaData();
+        im.setInstanceId(instanceId);
+        im.setImage(new Json(Image.builder()
+                .withImageName("name")
+                .withOs(os)
+                .withOsType(osType)
+                .withImageCatalogName("mockcatalog")
+                .withImageId(imageId)
+                .withDate("2019-10-24")
+                .withCreated(1571884856L)
+                .build()));
+        return im;
+    }
+
+    private InstanceMetaData imWithoutImage(String instanceId) {
+        InstanceMetaData im = new InstanceMetaData();
+        im.setInstanceId(instanceId);
+        return im;
     }
 }
