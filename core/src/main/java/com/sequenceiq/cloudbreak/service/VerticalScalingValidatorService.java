@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProv
 import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.common.model.Architecture;
 
 @Service
@@ -154,6 +156,10 @@ public class VerticalScalingValidatorService {
         }
         if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
             throw new BadRequestException(String.format("Only instance type modification is supported on %s Data Hubs.", stack.getCloudPlatform()));
+        }
+        if (CloudConstants.AWS.equals(stack.getPlatformVariant()) && OrchestratorType.ONE_BY_ONE.equals(verticalScaleV4Request.getOrchestratorType())) {
+            throw new BadRequestException(String.format("Clusters on the legacy AWS platform variant only support ALL_AT_ONCE vertical scaling. " +
+                    "To use ONE_BY_ONE vertical scaling, please perform an OS upgrade on the cluster. Cluster CRN: %s", stack.getResourceCrn()));
         }
     }
 

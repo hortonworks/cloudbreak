@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
@@ -91,7 +89,7 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
             LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
 
             Map<String, String> updatedInstanceType = collectInstanceTypeMetadataWithRetry(connector, ac,
-                    request.getCloudResources(), requestedInstanceType);
+                    rollingVerticalScaleResult.getInstanceIds(), requestedInstanceType);
 
             InstanceStoreMetadata instanceStoreMetadata =  stackUpscaleService.getInstanceStorageInfo(ac,
                     requestedInstanceType, connector);
@@ -101,7 +99,7 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
                     stackVerticalScaleV4Request, instanceStorageCount, instanceStorageSize);
 
             updateRollingVerticalScaleResult(request.getResourceId(), rollingVerticalScaleResult, updatedInstanceType,
-                    request.getCloudResources(), requestedInstanceType, stackVerticalScaleV4Request);
+                    requestedInstanceType, stackVerticalScaleV4Request);
 
             RollingVerticalScaleInstancesResult result = new RollingVerticalScaleInstancesResult(
                     request.getResourceId(),
@@ -110,8 +108,7 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
             return result;
         } catch (Exception e) {
             LOGGER.error("Vertical scaling stack failed", e);
-            updateRollingVerticalScaleResultOnError(request.getResourceId(), rollingVerticalScaleResult,
-                    request.getCloudResources(), e.getMessage(), stackVerticalScaleV4Request);
+            updateRollingVerticalScaleResultOnError(request.getResourceId(), rollingVerticalScaleResult, e.getMessage(), stackVerticalScaleV4Request);
             return new RollingVerticalScaleInstancesResult(request.getResourceId(), rollingVerticalScaleResult);
         }
     }
@@ -121,16 +118,12 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
     }
 
     private void updateRollingVerticalScaleResult(Long stackId, RollingVerticalScaleResult result, Map<String, String> updatedInstanceType,
-            List<CloudResource> cloudResources, String requestedInstanceType, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+            String requestedInstanceType, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         Set<String> successfullyScaledInstances = new HashSet<>();
         Map<String, String> failedInstancesWithReason = new LinkedHashMap<>();
         // cloudResources contains one entry per resource per instance (instance itself + attached EBS volumes
         // + network interfaces all share the same instanceId). Deduplicate so each instance is evaluated once.
-        Set<String> uniqueInstanceIds = cloudResources.stream()
-                .map(CloudResource::getInstanceId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        for (String instanceId : uniqueInstanceIds) {
+        for (String instanceId : result.getInstanceIds()) {
             if (updatedInstanceType.containsKey(instanceId) && updatedInstanceType.get(instanceId).equals(requestedInstanceType)) {
                 result.setStatus(instanceId, RollingVerticalScaleStatus.SCALED);
                 successfullyScaledInstances.add(instanceId);
@@ -157,18 +150,13 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
     }
 
     private Map<String, String> collectInstanceTypeMetadataWithRetry(CloudConnector connector, AuthenticatedContext ac,
-            List<CloudResource> cloudResources, String requestedInstanceType) {
-        List<String> instanceIds = cloudResources.stream()
-                .map(CloudResource::getInstanceId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
+            List<String> instanceIds, String requestedInstanceType) {
         // The cloud provider (e.g. AWS DescribeInstances) is eventually consistent after the scale, so keep
         // re-reading until the freshly collected metadata reflects the requested instance type for every instance.
         AtomicReference<Map<String, String>> lastMetadata = new AtomicReference<>(Map.of());
         try {
             return retry.testWith2SecDelayMax15Times(() -> {
-                Map<String, String> metadata = getInstancetypeMetadata(connector, ac, cloudResources);
+                Map<String, String> metadata = getInstancetypeMetadata(connector, ac, instanceIds);
                 lastMetadata.set(metadata);
                 boolean allReflectRequestedType = instanceIds.stream()
                         .allMatch(id -> requestedInstanceType == null ? metadata.get(id) != null
@@ -185,23 +173,14 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
         }
     }
 
-    private Map<String, String> getInstancetypeMetadata(CloudConnector connector, AuthenticatedContext ac, List<CloudResource> cloudResources) {
-        List<String> instanceIds = cloudResources.stream()
-                .map(CloudResource::getInstanceId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
+    private Map<String, String> getInstancetypeMetadata(CloudConnector connector, AuthenticatedContext ac, List<String> instanceIds) {
         InstanceTypeMetadata instanceTypeMetadata = connector.metadata().collectInstanceTypes(ac, instanceIds);
         return instanceTypeMetadata.getInstanceTypes();
     }
 
     private void updateRollingVerticalScaleResultOnError(Long stackId, RollingVerticalScaleResult result,
-            List<CloudResource> cloudResources, String errorMessage, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        List<String> instanceIds = cloudResources.stream()
-                .map(CloudResource::getInstanceId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
+            String errorMessage, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        List<String> instanceIds = result.getInstanceIds();
         for (String instanceId : instanceIds) {
             result.setStatus(instanceId, RollingVerticalScaleStatus.SCALING_FAILED, errorMessage);
         }
