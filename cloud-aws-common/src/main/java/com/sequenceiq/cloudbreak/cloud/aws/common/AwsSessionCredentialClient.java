@@ -50,6 +50,12 @@ public class AwsSessionCredentialClient {
     @Value("${cb.aws.role.session.name:}")
     private String roleSessionName;
 
+    @Value("${cb.aws.delegatorrole.session.name:}")
+    private String delegatorRoleSessionName;
+
+    @Value("${cb.aws.delegatorrole.arn:}")
+    private String delegatorRoleArn;
+
     @Value("${aws.use.fips.endpoint:false}")
     private boolean fipsEnabled;
 
@@ -92,41 +98,92 @@ public class AwsSessionCredentialClient {
     @Cacheable(value = AwsStsAssumeRoleCredentialsProviderCacheConfig.TEMPORARY_AWS_STS_ASSUMEROLE_CREDENTIALS_PROVIDER_CACHE,
             unless = "#awsCredential.getId() == null")
     public StsAssumeRoleCredentialsProvider createStsAssumeRoleCredentialsProvider(AwsCredentialView awsCredential) {
-        return StsAssumeRoleCredentialsProvider.builder()
-                .stsClient(awsSecurityTokenServiceClient(awsCredential))
-                .refreshRequest(AssumeRoleRequest.builder()
-                        .durationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
-                        .externalId(awsCredential.getExternalId())
-                        .roleArn(awsCredential.getRoleArn())
-                        .roleSessionName(roleSessionName)
-                        .build())
+        AssumeRoleRequest refreshRequest = AssumeRoleRequest.builder()
+                .durationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
+                .externalId(awsCredential.getExternalId())
+                .roleArn(awsCredential.getRoleArn())
+                .roleSessionName(roleSessionName)
                 .build();
+        StsAssumeRoleCredentialsProvider provider = StsAssumeRoleCredentialsProvider.builder()
+                .stsClient(awsSecurityTokenServiceClient(awsCredential))
+                .refreshRequest(refreshRequest)
+                .build();
+        if (StringUtils.isNotEmpty(delegatorRoleArn)) {
+            try {
+                provider.resolveCredentials();
+                LOGGER.info("SA role can assume [{}] directly, delegator not needed", awsCredential.getRoleArn());
+            } catch (SdkException e) {
+                LOGGER.info("SA role cannot assume [{}], rebuilding provider with delegator role [{}]",
+                        awsCredential.getRoleArn(), delegatorRoleArn, e);
+                provider.close();
+                return StsAssumeRoleCredentialsProvider.builder()
+                        .stsClient(buildDelegatorStsClient(awsCredential))
+                        .refreshRequest(refreshRequest)
+                        .build();
+            }
+        }
+        return provider;
     }
 
     private AwsSessionCredentials getAwsSessionCredentialsAndAssumeRole(AwsCredentialView awsCredential, AssumeRoleRequest assumeRoleRequest) {
         try {
-            AssumeRoleResponse result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
-            Credentials credentialsResponse = result.credentials();
-
-            String formattedExpirationDate = "";
-            Date expirationTime = null;
-            Instant expiration = credentialsResponse.expiration();
-            if (expiration != null) {
-                expirationTime = Date.from(expiration);
-                formattedExpirationDate = new StdDateFormat().format(expirationTime);
-            }
-            LOGGER.debug("Assume role result credential: role arn: {}, expiration date: {}",
-                    awsCredential.getRoleArn(), formattedExpirationDate);
-
-            return new AwsSessionCredentials(
-                    credentialsResponse.accessKeyId(),
-                    credentialsResponse.secretAccessKey(),
-                    credentialsResponse.sessionToken(),
-                    expirationTime);
+            return doAssumeRole(awsSecurityTokenServiceClient(awsCredential), assumeRoleRequest, awsCredential.getRoleArn());
         } catch (SdkException e) {
+            if (StringUtils.isNotEmpty(delegatorRoleArn)) {
+                LOGGER.warn("SA role cannot assume [{}], falling back to delegator role [{}]",
+                        awsCredential.getRoleArn(), delegatorRoleArn, e);
+                return doAssumeRole(buildDelegatorStsClient(awsCredential), assumeRoleRequest, awsCredential.getRoleArn());
+            }
             LOGGER.error("Unable to assume role. Check exception for details.", e);
             throw e;
         }
+    }
+
+    private AwsSessionCredentials doAssumeRole(StsClient stsClient, AssumeRoleRequest assumeRoleRequest, String roleArn) {
+        AssumeRoleResponse result = stsClient.assumeRole(assumeRoleRequest);
+        Credentials credentialsResponse = result.credentials();
+
+        String formattedExpirationDate = "";
+        Date expirationTime = null;
+        Instant expiration = credentialsResponse.expiration();
+        if (expiration != null) {
+            expirationTime = Date.from(expiration);
+            formattedExpirationDate = new StdDateFormat().format(expirationTime);
+        }
+        LOGGER.debug("Assume role result credential: role arn: {}, expiration date: {}",
+                roleArn, formattedExpirationDate);
+
+        return new AwsSessionCredentials(
+                credentialsResponse.accessKeyId(),
+                credentialsResponse.secretAccessKey(),
+                credentialsResponse.sessionToken(),
+                expirationTime);
+    }
+
+    StsClient buildDelegatorStsClient(AwsCredentialView awsCredential) {
+        String defaultZone = awsDefaultZoneProvider.getDefaultZone(awsCredential);
+        StsClient delegatorStsClient = StsClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
+                .region(Region.of(defaultZone))
+                .credentialsProvider(getCredential(awsCredential))
+                .build();
+        StsClientBuilder builder = StsClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
+                .region(Region.of(defaultZone))
+                .credentialsProvider(
+                        StsAssumeRoleCredentialsProvider.builder()
+                                .stsClient(delegatorStsClient)
+                                .refreshRequest(AssumeRoleRequest.builder()
+                                        .roleArn(delegatorRoleArn)
+                                        .roleSessionName(delegatorRoleSessionName)
+                                        .build())
+                                .build())
+                .overrideConfiguration(getDefaultClientConfiguration());
+        if (!fipsEnabled || !awsCredential.isGovernmentCloudEnabled()) {
+            URI endpointConfiguration = getEndpointConfiguration(defaultZone);
+            builder.endpointOverride(endpointConfiguration);
+        }
+        return builder.build();
     }
 
     public StsClient awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {

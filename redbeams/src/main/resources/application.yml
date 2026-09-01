@@ -158,6 +158,7 @@ cb:
     hostkey.verify: false
     external.id: provision-ambari
     role.session.name: cdp-provisioning
+    delegatorrole.session.name: cdp-delegator-provisioning
     cf.template.new.path: templates/aws-cf-stack.ftl
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
