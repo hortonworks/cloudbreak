@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -56,6 +58,8 @@ public class AzureDatabaseCapabilityService {
 
     private static final float THOUSAND = 1000.0f;
 
+    private static final Pattern VERSION_SUFFIX = Pattern.compile("_v(\\d+)$");
+
     private final VersionComparator versionComparator = new VersionComparator();
 
     @Value("${cb.azure.database.flexible.instanceTypeRegex:^Standard_E4d?s.*$}")
@@ -69,6 +73,9 @@ public class AzureDatabaseCapabilityService {
 
     @Value("${cb.azure.database.flexible.defaultInstanceType:Standard_E4ds_v5}")
     private String defaultFlexibleInstanceType;
+
+    @Value("${cb.azure.database.flexible.maxInstanceTypeVersion:v5}")
+    private String maxInstanceTypeVersion;
 
     @Value("${cb.azure.database.singleserver.defaultInstanceType:MO_Gen5_4}")
     private String defaultSingleServerInstanceType;
@@ -189,6 +196,7 @@ public class AzureDatabaseCapabilityService {
                         .flatMap(serverEdition -> serverEdition.supportedServerSkus().stream())
                         .map(ServerSkuCapability::name)
                         .filter(this::matchesInstanceType)
+                        .filter(this::matchesMaxInstanceTypeVersion)
                         .max(Comparator.comparing(this::getInstanceTypeVersion))
                         .orElse(defaultFlexibleInstanceType);
             } else {
@@ -233,6 +241,7 @@ public class AzureDatabaseCapabilityService {
                     .flatMap(Collection::stream)
                     .filter(this::matchesServerEdition)
                     .flatMap(serverEdition -> serverEdition.supportedServerSkus().stream())
+                    .filter(sku -> matchesMaxInstanceTypeVersion(sku.name()))
                     .map(sku -> {
                         return DatabaseVmType.databaseVmType(
                                 sku.name(),
@@ -260,6 +269,15 @@ public class AzureDatabaseCapabilityService {
 
     private boolean matchesInstanceType(String instanceType) {
         return StringUtils.isEmpty(instanceTypeRegex) || instanceType.matches(instanceTypeRegex);
+    }
+
+    private boolean matchesMaxInstanceTypeVersion(String instanceType) {
+        if (StringUtils.isEmpty(maxInstanceTypeVersion)) {
+            return true;
+        }
+        int maxVersion = Integer.parseInt(maxInstanceTypeVersion.replaceAll("\\D", ""));
+        Matcher matcher = VERSION_SUFFIX.matcher(instanceType);
+        return !matcher.find() || Integer.parseInt(matcher.group(1)) <= maxVersion;
     }
 
     private String getInstanceTypeVersion(String instanceType) {
