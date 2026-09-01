@@ -252,6 +252,13 @@ class EntitlementServiceTest {
         assertEquals(entitled, underTest.azureAddDiskEnabled(ACCOUNT_ID));
     }
 
+    @ParameterizedTest()
+    @ValueSource(booleans = {true, false})
+    void testCustomDatabaseInstanceTypeEnabled(boolean entitled) {
+        setUpUmsClient(entitled, "CDP_CUSTOM_DATABASE_INSTANCETYPE", "CDP_CUSTOM_DATABASE_INSTANCETYPE");
+        assertEquals(entitled, underTest.isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID));
+    }
+
     @Test
     void getEntitlementsTest() {
         when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);

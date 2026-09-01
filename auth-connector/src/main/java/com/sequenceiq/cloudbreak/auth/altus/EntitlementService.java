@@ -48,6 +48,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_ON_VM;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK_HOSTS_REMOVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CUSTOM_DATABASE_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_FORCE_OS_UPGRADE;
@@ -563,6 +564,10 @@ public class EntitlementService {
 
     public boolean isFallbackDatabaseInstanceTypeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_FALLBACK_DATABASE_INSTANCETYPE);
+    }
+
+    public boolean isCustomDatabaseInstanceTypeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CUSTOM_DATABASE_INSTANCETYPE);
     }
 
     public boolean isGcpSecureBootEnabled(String accountId) {

@@ -493,20 +493,7 @@ public class ExternalDatabaseService {
             instanceType = databaseCapabilities.getRegionDefaultInstances().get(environment.getLocation().getName());
         }
         DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
-        String requestedInstanceType = attributes.containsKey("instancetype")
-                ? attributes.get("instancetype").toString() : null;
-        if (requestedInstanceType != null) {
-            LOGGER.info("Using customer-requested database instance type '{}'; skipping fallback instance types", requestedInstanceType);
-            request.setInstanceType(requestedInstanceType);
-        } else {
-            request.setInstanceType(instanceType);
-            if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(environment.getAccountId())) {
-                List<String> fallbackInstanceTypes = databaseCapabilities.getRegionFallbackInstances()
-                        .getOrDefault(environment.getLocation().getName(), List.of());
-                LOGGER.info("Setting fallback database instance types {} for region {}", fallbackInstanceTypes, environment.getLocation().getName());
-                request.setFallbackInstanceTypes(fallbackInstanceTypes);
-            }
-        }
+        setInstanceTypeAndFallback(request, attributes, instanceType, databaseCapabilities, environment);
         request.setDatabaseVendor(databaseStackConfig.getVendor());
         request.setStorageSize(databaseStackConfig.getVolumeSize());
         DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
@@ -520,6 +507,32 @@ public class ExternalDatabaseService {
             request.setCloudPlatform(cloudPlatform);
         }
         return request;
+    }
+
+    private void setInstanceTypeAndFallback(DatabaseServerV4StackRequest request, Map<String, Object> attributes, String instanceType,
+            PlatformDatabaseCapabilitiesResponse databaseCapabilities, DetailedEnvironmentResponse environment) {
+        String requestedInstanceType = attributes.containsKey("instancetype") ? attributes.get("instancetype").toString() : null;
+        if (requestedInstanceType != null && entitlementService.isCustomDatabaseInstanceTypeEnabled(environment.getAccountId())) {
+            LOGGER.info("Using customer-requested database instance type '{}'; skipping fallback instance types", requestedInstanceType);
+            request.setInstanceType(requestedInstanceType);
+        } else {
+            setDefaultInstanceTypeAndFallback(request, requestedInstanceType, instanceType, databaseCapabilities, environment);
+        }
+    }
+
+    private void setDefaultInstanceTypeAndFallback(DatabaseServerV4StackRequest request, String requestedInstanceType, String instanceType,
+            PlatformDatabaseCapabilitiesResponse databaseCapabilities, DetailedEnvironmentResponse environment) {
+        if (requestedInstanceType != null) {
+            LOGGER.info("Ignoring customer-requested database instance type '{}': custom database instance type entitlement not granted; "
+                    + "using default '{}'", requestedInstanceType, instanceType);
+        }
+        request.setInstanceType(instanceType);
+        if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(environment.getAccountId())) {
+            List<String> fallbackInstanceTypes = databaseCapabilities.getRegionFallbackInstances()
+                    .getOrDefault(environment.getLocation().getName(), List.of());
+            LOGGER.info("Setting fallback database instance types {} for region {}", fallbackInstanceTypes, environment.getLocation().getName());
+            request.setFallbackInstanceTypes(fallbackInstanceTypes);
+        }
     }
 
     private void sendArmDatabaseNotAvailableNotification(Long stackId, String region) {
