@@ -29,8 +29,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeFlexibleDatabaseServerTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRootVolumeModificationTest
-      # CB-33763: disabled until KRaft migration restart flow is fixed (stale state / KRaft rolling restart)
-      # - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXKraftMigrationTest
-      #   excludedMethods:
-      #     - testKraftMigrationFailAtUpscale
-      # - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXKraftMigrationTest
+        excludedMethods:
+          - testKraftMigrationFailAtUpscale
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
