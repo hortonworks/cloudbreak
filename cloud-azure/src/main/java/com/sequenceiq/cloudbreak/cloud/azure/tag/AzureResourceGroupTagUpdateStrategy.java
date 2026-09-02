@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,14 +34,19 @@ public class AzureResourceGroupTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
+        String name = cloudResource.getName();
+        if (StringUtils.isBlank(name)) {
+            LOGGER.warn("Skipping tag update for resource group: resource name is null.");
+            return;
+        }
         AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
 
-        Map<String, String> existingTags = azureClient.getResourceGroupTags(cloudResource.getName());
+        Map<String, String> existingTags = azureClient.getResourceGroupTags(name);
         if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.debug("Tags for resource group {} are already up to date, skipping update.", cloudResource.getName());
+            LOGGER.debug("Tags for resource group {} are already up to date, skipping update.", name);
             return;
         }
 
-        azureClient.updateResourceGroupTags(cloudResource.getName(), mergeTags(existingTags, tags));
+        azureClient.updateResourceGroupTags(name, mergeTags(existingTags, tags));
     }
 }

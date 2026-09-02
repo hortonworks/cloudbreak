@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.tag;
 
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,8 +57,8 @@ class AzureVolumeSetTagUpdateStrategyTest {
 
     @BeforeEach
     void setUp() {
-        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
     }
 
     @Test
@@ -89,6 +91,23 @@ class AzureVolumeSetTagUpdateStrategyTest {
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         verify(azureClient,  times(0)).updateDiskTags(VOLUME_ID_1, USER_DEFINED_TAGS);
+    }
+
+    @Test
+    void testUpdateTagsAzureVolumeSetSkipsVolumesWithBlankId() {
+        VolumeSetAttributes.Volume volumeWithId = new VolumeSetAttributes.Volume(VOLUME_ID_1, "ssd", 100, null, null);
+        VolumeSetAttributes.Volume volumeWithoutId = new VolumeSetAttributes.Volume(null, "ssd", 100, null, null);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-east-1", false, null,
+                List.of(volumeWithoutId, volumeWithId), 100, null);
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_VOLUMESET, RESOURCE_NAME, RESOURCE_REFERENCE, volumeSetAttributes);
+
+        when(azureClientService.getClient(cloudContext, cloudCredential)).thenReturn(azureClient);
+
+        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+
+        verify(azureClient).updateDiskTags(VOLUME_ID_1, USER_DEFINED_TAGS);
+        verify(azureClient, never()).getDiskTags(null);
+        verify(azureClient, never()).updateDiskTags(null, USER_DEFINED_TAGS);
     }
 
     private CloudResource buildResource(ResourceType type, String resourceName, String reference, VolumeSetAttributes volumeSetAttributes) {
