@@ -298,6 +298,7 @@ class EnvironmentApiConverterTest {
         assertEquals("creator", actual.getCreator(),
                 "Creator must be the original creator from DB so default tags (owner, Cloudera-Creator-Resource-Name, etc) are preserved on edit.");
         assertTrue(actual.isRefreshNetwork());
+        assertTrue(actual.isUpdateTagsOnExistingResources());
 
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convertForEdit(any(), eq(request.getTelemetry()), any(), anyString());
@@ -645,6 +646,7 @@ class EnvironmentApiConverterTest {
         request.setFreeIpaEnableMultiAz(Boolean.TRUE);
         request.setFreeIpaPlatformVariant("AWS_NATIVE");
         request.setRefreshNetwork(true);
+        request.setUpdateTagsOnExistingResources(true);
         return request;
     }
 

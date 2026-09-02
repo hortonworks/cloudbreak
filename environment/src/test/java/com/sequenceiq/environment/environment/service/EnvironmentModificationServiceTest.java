@@ -1092,7 +1092,32 @@ class EnvironmentModificationServiceTest {
     }
 
     @Test
-    void editTags() {
+    void editTagsWithTagUpdatePropagation() {
+        Map<String, String> userDefinedTags = new HashMap<>(Map.of("owner", "john doe"));
+        Map<String, String> applicationTags = new HashMap<>(Map.of("application", "app"));
+        Map<String, String> defaultTags = new HashMap<>(Map.of("owner", "john doe", "creation-timestamp", "1773042126"));
+        Json tags = new Json(Map.of("userDefinedTags", userDefinedTags, "applicationTags", applicationTags, "defaultTags", defaultTags));
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withUserDefinedTags(userDefinedTags)
+                .withUpdateTagsOnExistingResources(true)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+
+        when(environmentTagsDtoConverter.getTags(eq(environmentEditDto), any(EnvironmentTags.class))).thenReturn(tags);
+
+        environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
+
+        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags);
+        ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(savedCaptor.capture());
+        Environment saved = savedCaptor.getValue();
+        assertThat(saved.getTags()).isEqualTo(tags);
+    }
+
+    @Test
+    void editTagsWithoutTagUpdatePropagationDoesNotTriggerFlow() {
         Map<String, String> userDefinedTags = new HashMap<>(Map.of("owner", "john doe"));
         Map<String, String> applicationTags = new HashMap<>(Map.of("application", "app"));
         Map<String, String> defaultTags = new HashMap<>(Map.of("owner", "john doe", "creation-timestamp", "1773042126"));
@@ -1108,11 +1133,26 @@ class EnvironmentModificationServiceTest {
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
-        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags);
+        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any());
         ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(savedCaptor.capture());
         Environment saved = savedCaptor.getValue();
         assertThat(saved.getTags()).isEqualTo(tags);
+    }
+
+    @Test
+    void editTagsWithEmptyMapDoesNotTriggerFlow() {
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withUserDefinedTags(Map.of())
+                .withUpdateTagsOnExistingResources(true)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+
+        environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
+
+        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any());
     }
 
     @NullSource

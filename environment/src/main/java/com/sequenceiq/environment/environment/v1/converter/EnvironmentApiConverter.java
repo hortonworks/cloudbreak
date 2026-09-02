@@ -479,7 +479,8 @@ public class EnvironmentApiConverter {
                 .withFreeipaNodeCount(request.getFreeIpaNodeCount())
                 .withFreeIpaEnableMultiAz(request.getFreeIpaEnableMultiAz())
                 .withFreeIpaPlatformVariant(request.getFreeIpaPlatformVariant())
-                .withRefreshNetwork(request.isRefreshNetwork());
+                .withRefreshNetwork(request.isRefreshNetwork())
+                .withUpdateTagsOnExistingResources(request.isUpdateTagsOnExistingResources());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convertForEdit(

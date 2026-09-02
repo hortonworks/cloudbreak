@@ -225,6 +225,11 @@ public class EnvironmentModelDescription {
 
     public static final String SECRET_ENCRYPTION_ENABLED = "Flag to enable or disable secret encryption";
 
+    public static final String UPDATE_TAGS_ON_EXISTING_RESOURCES = "When true, propagates the updated user-defined tags to existing resources " +
+            "(FreeIPA, Data Lake, Data Hubs, databases, experience services) by starting the environment tag modification flow. Updating tags on " +
+            "existing cloud resources requires the additional cloud permissions used by that flow. Defaults to false. When false the environment's " +
+            "user-defined tags are updated in the Environment Service database only, and new resources created after the edit inherit the updated tags.";
+
     public static final String REFRESH_NETWORK = "When true, re-discovers the environment's network metadata from the cloud provider and re-runs " +
             "the CIDR-propagation flow when the CIDR set has changed. Fields refreshed from the cloud provider: subnet metadata, endpoint-gateway subnet " +
             "metadata, networkCidr (singular), and networkCidrs (plural — the VPC CIDR list nginx allow-lists on FreeIPA, Data Lake, and every Data Hub). " +

@@ -59,6 +59,8 @@ public class EnvironmentEditDto {
 
     private final boolean refreshNetwork;
 
+    private final boolean updateTagsOnExistingResources;
+
     public EnvironmentEditDto(Builder builder) {
         this.description = builder.description;
         this.accountId = builder.accountId;
@@ -83,6 +85,7 @@ public class EnvironmentEditDto {
         this.freeIpaPlatformVariant = builder.freeIpaPlatformVariant;
         this.environmentHybridDto = builder.environmentHybridDto;
         this.refreshNetwork = builder.refreshNetwork;
+        this.updateTagsOnExistingResources = builder.updateTagsOnExistingResources;
     }
 
     public String getDescription() {
@@ -177,6 +180,10 @@ public class EnvironmentEditDto {
         return refreshNetwork;
     }
 
+    public boolean isUpdateTagsOnExistingResources() {
+        return updateTagsOnExistingResources;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -207,6 +214,7 @@ public class EnvironmentEditDto {
                 ", freeIpaPlatformVariant=" + freeIpaPlatformVariant +
                 ", environmentHybridDto=" + environmentHybridDto +
                 ", refreshNetwork=" + refreshNetwork +
+                ", updateTagsOnExistingResources=" + updateTagsOnExistingResources +
                 '}';
     }
 
@@ -256,6 +264,8 @@ public class EnvironmentEditDto {
         private EnvironmentHybridDto environmentHybridDto;
 
         private boolean refreshNetwork;
+
+        private boolean updateTagsOnExistingResources;
 
         private Builder() {
         }
@@ -372,6 +382,11 @@ public class EnvironmentEditDto {
 
         public Builder withRefreshNetwork(boolean refreshNetwork) {
             this.refreshNetwork = refreshNetwork;
+            return this;
+        }
+
+        public Builder withUpdateTagsOnExistingResources(boolean updateTagsOnExistingResources) {
+            this.updateTagsOnExistingResources = updateTagsOnExistingResources;
             return this;
         }
 

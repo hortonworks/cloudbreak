@@ -90,6 +90,9 @@ public class EnvironmentEditRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.REFRESH_NETWORK)
     private boolean refreshNetwork;
 
+    @Schema(description = EnvironmentModelDescription.UPDATE_TAGS_ON_EXISTING_RESOURCES)
+    private boolean updateTagsOnExistingResources;
+
     public String getDescription() {
         return description;
     }
@@ -250,6 +253,14 @@ public class EnvironmentEditRequest implements Serializable {
         this.refreshNetwork = refreshNetwork;
     }
 
+    public boolean isUpdateTagsOnExistingResources() {
+        return updateTagsOnExistingResources;
+    }
+
+    public void setUpdateTagsOnExistingResources(boolean updateTagsOnExistingResources) {
+        this.updateTagsOnExistingResources = updateTagsOnExistingResources;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentEditRequest{" +
@@ -273,6 +284,7 @@ public class EnvironmentEditRequest implements Serializable {
                 ", freeIpaPlatformVariant='" + freeIpaPlatformVariant + '\'' +
                 ", hybridEnvironment=" + hybridEnvironment +
                 ", refreshNetwork=" + refreshNetwork +
+                ", updateTagsOnExistingResources=" + updateTagsOnExistingResources +
                 '}';
     }
 }

@@ -291,7 +291,12 @@ public class EnvironmentModificationService {
         if (MapUtils.isNotEmpty(editDto.getUserDefinedTags())) {
             EnvironmentTags environmentTags = environment.getEnvironmentTags();
             environment.setTags(environmentTagsDtoConverter.getTags(editDto, environmentTags));
-            environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, editDto.getUserDefinedTags());
+            if (editDto.isUpdateTagsOnExistingResources()) {
+                environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, editDto.getUserDefinedTags());
+            } else {
+                LOGGER.info("Skipping environment tag modification flow for environment '{}' due to updateTagsOnExistingResources is false",
+                        environment.getName());
+            }
         }
     }
 
