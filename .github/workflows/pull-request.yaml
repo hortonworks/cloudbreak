@@ -41,7 +41,7 @@ jobs:
   unit-test:
     permissions: write-all
     name: Unit Test
-    runs-on: [cb-ubuntu22]
+    runs-on: [cb-ubuntu22-medium]
     steps:
       - name: checkout
         uses: actions/checkout@v3

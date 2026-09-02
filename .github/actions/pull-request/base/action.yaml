@@ -161,21 +161,37 @@ runs:
       # and lives on the large work volume. Gradle and the cache step below both
       # use this exact path, so they can no longer drift apart.
       run: echo "GRADLE_USER_HOME=${RUNNER_WORKSPACE}/.gradle" >> "$GITHUB_ENV"
-    - name: cache_java_libs
-      id: cache-java
+    # Gradle dependencies + metadata cache (SHARED across every PR job).
+    #
+    # This entry is everything under caches/ EXCEPT the task-output store
+    # (build-cache-1, which is handled per-job — see below). It is large but
+    # changes rarely, so key it on the version manifest only (dependencies.gradle
+    # + root build.gradle + the wrapper props) so ordinary code / per-module
+    # dependency-line PRs do NOT bust it, and lean on the broad prefix restore-key:
+    # on a bust we still restore the latest deps cache and Gradle fetches only the
+    # few changed jars. This large blob therefore stays put and stops churning the
+    # (~5 GB) budget. The key is content-stable and identical across all jobs, so
+    # the first job to finish saves the complete set (every job resolves the full
+    # graph via list_the_state_of_java_libs on a miss) and the rest log a benign
+    # "cache already exists" — one shared copy, no per-job duplication.
+    #
+    # The Gradle build cache (build-cache-1) is intentionally NOT cached here: it
+    # holds compiled/test task outputs that differ per job, and a run-shared key
+    # in this shared action races (a non-test job with an empty build cache wins
+    # the reservation and locks the real one out). It is cached per-job instead,
+    # only where it pays off — see unit-test/action.yaml.
+    - name: cache_gradle_deps
+      id: cache-gradle-deps
       uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
-      env:
-        cache-name: cache-java-libs
       with:
         path: |
           ${{ env.GRADLE_USER_HOME }}/caches
+          !${{ env.GRADLE_USER_HOME }}/caches/build-cache-1
           ${{ env.GRADLE_USER_HOME }}/wrapper
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+        key: ${{ runner.os }}-gradle-deps-${{ hashFiles('dependencies.gradle', 'build.gradle', 'gradle/wrapper/gradle-wrapper.properties') }}
         restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
-          ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
-          ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
-    - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+          ${{ runner.os }}-gradle-deps-
+    - if: ${{ steps.cache-gradle-deps.outputs.cache-hit != 'true' }}
       name: list_the_state_of_java_libs
       continue-on-error: true
       shell: bash

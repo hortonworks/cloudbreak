@@ -1,0 +1,44 @@
+name: cleanup-pr-caches
+
+# When a PR closes (merged or not), delete the GitHub Actions caches it created.
+# PR-run caches are scoped to the merge ref refs/pull/<number>/merge and are
+# useless once the PR is gone, yet they keep occupying the repo's (small, ~5 GB)
+# cache budget until LRU eviction gets to them. Reclaiming them on close keeps
+# headroom for the master seed + active PRs so the useful caches are not evicted.
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  cleanup:
+    name: Cleanup PR Caches
+    runs-on: [cb-ubuntu22]
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: delete caches for this PR ref
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_REF: refs/pull/${{ github.event.pull_request.number }}/merge
+        run: |
+          set -euo pipefail
+          echo "Deleting caches scoped to ${PR_REF} in ${REPO}"
+          # Paginate through the caches for this PR's ref and delete each by id.
+          # Never fail the workflow on a delete miss (a cache may have already
+          # been evicted between listing and deletion).
+          ids=$(gh api --paginate \
+            "repos/${REPO}/actions/caches?ref=${PR_REF}&per_page=100" \
+            --jq '.actions_caches[].id' || true)
+          if [ -z "${ids}" ]; then
+            echo "No caches found for ${PR_REF}."
+            exit 0
+          fi
+          for id in ${ids}; do
+            echo "Deleting cache id ${id}"
+            gh api --method DELETE "repos/${REPO}/actions/caches/${id}" || \
+              echo "  (already gone, skipping)"
+          done

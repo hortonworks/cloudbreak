@@ -4,6 +4,25 @@ description: 'Run unit tests with coverage reporting'
 runs:
   using: "composite"
   steps:
+    # Per-job Gradle build cache (compiled classes + test / jacoco task outputs).
+    # Scoped to THIS job so it never races the other ~12 PR jobs that share the
+    # base action (a run-shared key let a non-test job save an empty build cache
+    # and lock the populated one out). Rolling per-run key so each run saves a
+    # fresh entry; the prefix restore-key pulls this job's most recent prior build
+    # cache, so a warm run restores unchanged modules' outputs and skips re-running
+    # their tests. Correctness is unaffected: the GHA key only picks WHICH blob-bag
+    # is downloaded; Gradle's own per-task input hashing decides reuse, so a stale
+    # bag yields cache MISSES (re-run), never false reuse. GRADLE_USER_HOME is
+    # exported by the base action, which always runs before this step.
+    - name: cache_gradle_build_cache
+      id: cache-gradle-build-cache
+      uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+      with:
+        path: |
+          ${{ env.GRADLE_USER_HOME }}/caches/build-cache-1
+        key: ${{ runner.os }}-gradle-build-cache-unit-test-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-build-cache-unit-test-
     - name: gradle_build
       shell: bash
       run: |-

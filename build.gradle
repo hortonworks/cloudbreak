@@ -189,9 +189,13 @@ subprojects {
 
   jacocoTestReport {
     reports {
+      // CI's coverage gate (add_coverage_to_pr / jacoco-report action) consumes only the XML.
+      // Generating CSV + HTML for every module on the PR runner is pure report-task overhead
+      // there, so emit XML-only under -Penv=jenkins while keeping the browsable HTML/CSV locally.
+      boolean ciBuild = project.findProperty('env') == 'jenkins'
       xml.required = true
-      csv.required = true
-      html.required = true
+      csv.required = !ciBuild
+      html.required = !ciBuild
     }
     afterEvaluate {
       classDirectories.from = files(classDirectories.files.collect {

@@ -31,6 +31,25 @@ jobs:
           fetch-depth: 0
       - name: prepare
         uses: ./.github/actions/pull-request/base
+      # Seed the Gradle build cache (build-cache-1) on master. This master job
+      # runs the same `test jacocoTestReport` graph as the PR Unit Test job, so
+      # its task outputs are a valid warm start for PRs. The key deliberately
+      # reuses the PR job's `...-gradle-build-cache-unit-test-` prefix: a PR's
+      # first push has no own-branch build cache, and GitHub Actions falls back
+      # to default-branch (master) caches on a restore-key prefix match — so the
+      # newest master seed here restores into a PR's first Unit Test run. Rolling
+      # per-run key so each master push refreshes the seed; older seeds go unread
+      # and age out via LRU. Correctness is unaffected: the key only picks which
+      # blob-bag downloads; Gradle's per-task input hashing decides reuse.
+      - name: cache_gradle_build_cache
+        id: cache-gradle-build-cache
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        with:
+          path: |
+            ${{ env.GRADLE_USER_HOME }}/caches/build-cache-1
+          key: ${{ runner.os }}-gradle-build-cache-unit-test-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-build-cache-unit-test-
       - name: Sonar analyze
         run: |-
           #!/bin/bash -x
