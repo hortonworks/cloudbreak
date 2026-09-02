@@ -268,4 +268,37 @@ class PlatformAwareSdxConnectorTest {
         assertEquals(1, result.size());
         verify(pdlSdxStatusService).validateDistroXOperations(anyString());
     }
+
+    @Test
+    public void testGetSdxDomainsPaasWithNoRemoteEnvCrn() {
+        when(paasSdxDescribeService.listSdxCrns(ENV_CRN)).thenReturn(Set.of(PAAS_CRN));
+        when(paasSdxDescribeService.getSdxDomains(ENV_CRN)).thenReturn(Set.of("paas.domain.com"));
+
+        Set<String> domains = underTest.getSdxDomains(ENV_CRN, null);
+
+        assertEquals(Set.of("paas.domain.com"), domains);
+        verifyNoInteractions(pdlSdxDescribeService);
+    }
+
+    @Test
+    public void testGetSdxDomainsPaasWithRemoteEnvCrnAlsoQueriesPdl() {
+        when(paasSdxDescribeService.listSdxCrns(ENV_CRN)).thenReturn(Set.of(PAAS_CRN));
+        when(paasSdxDescribeService.getSdxDomains(ENV_CRN)).thenReturn(Set.of("paas.domain.com"));
+        when(pdlSdxDescribeService.getSdxDomains(ENV_CRN)).thenReturn(Set.of("onprem.cluster.domain.com"));
+
+        Set<String> domains = underTest.getSdxDomains(ENV_CRN, "remote-crn");
+
+        assertEquals(Set.of("paas.domain.com", "onprem.cluster.domain.com"), domains);
+    }
+
+    @Test
+    public void testGetSdxDomainsPaasWithRemoteEnvCrnReturnsOnlyPaasOnPdlException() {
+        when(paasSdxDescribeService.listSdxCrns(ENV_CRN)).thenReturn(Set.of(PAAS_CRN));
+        when(paasSdxDescribeService.getSdxDomains(ENV_CRN)).thenReturn(Set.of("paas.domain.com"));
+        when(pdlSdxDescribeService.getSdxDomains(ENV_CRN)).thenThrow(new RuntimeException("connection refused"));
+
+        Set<String> domains = underTest.getSdxDomains(ENV_CRN, "remote-crn");
+
+        assertEquals(Set.of("paas.domain.com"), domains);
+    }
 }
