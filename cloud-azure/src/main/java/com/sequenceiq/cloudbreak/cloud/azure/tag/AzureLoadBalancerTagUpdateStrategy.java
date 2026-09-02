@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,14 +34,20 @@ public class AzureLoadBalancerTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
+        String reference = cloudResource.getReference();
+        if (StringUtils.isBlank(reference)) {
+            LOGGER.warn("Skipping tag update for {} (AZURE_LOAD_BALANCER): resource reference is null.",
+                    cloudResource.getName());
+            return;
+        }
         AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
 
-        Map<String, String> existingTags = azureClient.getLoadBalancerTags(cloudResource.getReference());
+        Map<String, String> existingTags = azureClient.getLoadBalancerTags(reference);
         if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.debug("Tags for load balancer {} are already up to date, skipping update.", cloudResource.getReference());
+            LOGGER.debug("Tags for load balancer {} are already up to date, skipping update.", reference);
             return;
         }
 
-        azureClient.updateLoadBalancerTags(cloudResource.getReference(), mergeTags(existingTags, tags));
+        azureClient.updateLoadBalancerTags(reference, mergeTags(existingTags, tags));
     }
 }

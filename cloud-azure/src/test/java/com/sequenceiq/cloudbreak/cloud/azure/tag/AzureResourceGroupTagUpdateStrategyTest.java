@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.tag;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -50,8 +52,8 @@ class AzureResourceGroupTagUpdateStrategyTest {
 
     @BeforeEach
     void setUp() {
-        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
     }
 
     @Test
@@ -73,6 +75,15 @@ class AzureResourceGroupTagUpdateStrategyTest {
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         verify(azureClient, times(0)).updateResourceGroupTags(RESOURCE_NAME, USER_DEFINED_TAGS);
+    }
+
+    @Test
+    void testUpdateTagsAzureResourceGroupSkippedWhenNameIsBlank() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_RESOURCE_GROUP, " ", RESOURCE_REFERENCE);
+
+        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+
+        verifyNoInteractions(azureClient);
     }
 
     private CloudResource buildResource(ResourceType type, String resourceName, String reference) {

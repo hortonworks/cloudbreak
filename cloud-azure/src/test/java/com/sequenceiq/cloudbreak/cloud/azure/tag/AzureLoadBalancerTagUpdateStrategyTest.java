@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.tag;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -48,8 +50,8 @@ class AzureLoadBalancerTagUpdateStrategyTest {
 
     @BeforeEach
     void setUp() {
-        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
     }
 
     @Test
@@ -71,6 +73,15 @@ class AzureLoadBalancerTagUpdateStrategyTest {
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         verify(azureClient, times(0)).updateLoadBalancerTags(RESOURCE_REFERENCE, USER_DEFINED_TAGS);
+    }
+
+    @Test
+    void testUpdateTagsAzureLoadBalancerSkippedWhenReferenceIsNull() {
+        CloudResource cloudResource = buildResource(ResourceType.AZURE_LOAD_BALANCER, null, null);
+
+        underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+
+        verifyNoInteractions(azureClient);
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

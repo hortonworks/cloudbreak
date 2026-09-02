@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,14 +34,20 @@ public class AzureInstanceTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
+        String reference = cloudResource.getReference();
+        if (StringUtils.isBlank(reference)) {
+            LOGGER.warn("Skipping tag update for {} (AZURE_INSTANCE): resource reference is null.",
+                    cloudResource.getName());
+            return;
+        }
         AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
 
-        Map<String, String> existingTags = azureClient.getVirtualMachineTags(cloudResource.getReference());
+        Map<String, String> existingTags = azureClient.getVirtualMachineTags(reference);
         if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.debug("Tags for virtual machine {} are already up to date, skipping update.", cloudResource.getReference());
+            LOGGER.debug("Tags for virtual machine {} are already up to date, skipping update.", reference);
             return;
         }
 
-        azureClient.updateVirtualMachineTags(cloudResource.getReference(), mergeTags(existingTags, tags));
+        azureClient.updateVirtualMachineTags(reference, mergeTags(existingTags, tags));
     }
 }

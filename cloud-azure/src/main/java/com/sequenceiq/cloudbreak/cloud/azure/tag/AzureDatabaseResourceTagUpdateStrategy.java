@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,13 @@ public class AzureDatabaseResourceTagUpdateStrategy implements TagUpdateStrategy
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
-        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
         String resourceId = cloudResource.getReference();
+        if (StringUtils.isBlank(resourceId)) {
+            LOGGER.warn("Skipping tag update for {} (AZURE_DATABASE): resource reference is null.",
+                    cloudResource.getName());
+            return;
+        }
+        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
         String resourceType = ResourceUtils.resourceTypeFromResourceId(resourceId);
 
         if (FLEXIBLE_SERVER_RESOURCE_TYPE.equalsIgnoreCase(resourceType)) {

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,14 +34,20 @@ public class AzureNetworkInterfaceTagUpdateStrategy implements TagUpdateStrategy
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
+        String reference = cloudResource.getReference();
+        if (StringUtils.isBlank(reference)) {
+            LOGGER.warn("Skipping tag update for {} (AZURE_NETWORK_INTERFACE): resource reference is null.",
+                    cloudResource.getName());
+            return;
+        }
         AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
 
-        Map<String, String> existingTags = azureClient.getNetworkInterfaceTags(cloudResource.getReference());
+        Map<String, String> existingTags = azureClient.getNetworkInterfaceTags(reference);
         if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.debug("Tags for network interface {} are already up to date, skipping update.", cloudResource.getReference());
+            LOGGER.debug("Tags for network interface {} are already up to date, skipping update.", reference);
             return;
         }
 
-        azureClient.updateNetworkInterfaceTags(cloudResource.getReference(), mergeTags(existingTags, tags));
+        azureClient.updateNetworkInterfaceTags(reference, mergeTags(existingTags, tags));
     }
 }
