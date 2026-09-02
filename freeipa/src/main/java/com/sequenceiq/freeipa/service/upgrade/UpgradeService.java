@@ -93,9 +93,9 @@ public class UpgradeService {
         validationService.validateStackForUpgrade(allInstances, stack);
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
-        FreeIpaImageFilterSettings freeIpaImageFilterSettings = createFreeIpaImageFilterSettings(stack, request, imageSettingsRequest, currentImage.getOs());
+        FreeIpaImageFilterSettings freeIpaImageFilterSettings = createFreeIpaImageFilterSettings(stack, request, imageSettingsRequest, currentImage);
         ImageInfoResponse selectedImage = imageService.selectImage(freeIpaImageFilterSettings);
-        HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
+        HashSet<String> instancesOnOldImage = selectInstanceIdsWithOldImage(allInstances, selectedImage);
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
         validationService.validateSelectedImageEntitledFor(accountId, selectedImage);
         validationService.validateSelectedImageForArchitecture(currentImage, selectedImage);
@@ -103,14 +103,18 @@ public class UpgradeService {
     }
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest,
-            String currentOs) {
+            ImageInfoResponse currentImage) {
+        List<InstanceMetaData> instancesWithOldImage = selectInstancesWithOldImage(stack.getNotDeletedInstanceMetaDataSet(), currentImage);
+        Boolean overriddenMajorOsUpgradeAllowed = overrideMajorOsUpgradeAllowed(currentImage, instancesWithOldImage, request.getAllowMajorOsUpgrade());
         if (seLinuxEnforced(stack)) {
-            return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
-                    stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
+            return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentImage.getOs(),
+                    imageSettingsRequest.getOs(), stack.getRegion(), platformStringTransformer.getPlatformString(stack),
+                    Boolean.TRUE.equals(overriddenMajorOsUpgradeAllowed),
                     stack.getArchitecture(), Map.of(SELINUX_SUPPORTED_TAG, Boolean.TRUE.toString()));
         } else {
-            return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
-                    stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
+            return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentImage.getOs(),
+                    imageSettingsRequest.getOs(), stack.getRegion(), platformStringTransformer.getPlatformString(stack),
+                    Boolean.TRUE.equals(overriddenMajorOsUpgradeAllowed),
                     stack.getArchitecture());
         }
     }
@@ -165,7 +169,7 @@ public class UpgradeService {
                     verticalScaleRequest.setTemplate(templateRequest);
                     return verticalScaleRequest;
                 }).toList();
-        HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
+        HashSet<String> instancesOnOldImage = selectInstanceIdsWithOldImage(allInstances, selectedImage);
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         imageSettingsRequest.setId(selectedImage.getId());
         imageSettingsRequest.setOs(selectedImage.getOs());
@@ -211,22 +215,26 @@ public class UpgradeService {
     }
 
     @SuppressWarnings("IllegalType")
-    private HashSet<String> selectInstancesWithOldImage(Set<InstanceMetaData> allInstances, ImageInfoResponse imageInfoResponse) {
+    private HashSet<String> selectInstanceIdsWithOldImage(Set<InstanceMetaData> allInstances, ImageInfoResponse imageInfoResponse) {
         LOGGER.debug("Instances for image check: {} and selected image: {}", allInstances, imageInfoResponse);
-        HashSet<String> instancesWithOldImage = allInstances.stream().filter(im -> {
-                    if (im.getImage() != null && StringUtils.isNotBlank(im.getImage().getValue())) {
-                        Image image = im.getImage().getUnchecked(Image.class);
-                        return !(Objects.equals(image.getImageId(), imageInfoResponse.getId())
-                                && (Objects.equals(image.getImageCatalogName(), imageInfoResponse.getCatalog())
-                                || Objects.equals(image.getImageCatalogUrl(), imageInfoResponse.getCatalog())));
-                    } else {
-                        return true;
-                    }
-                })
+        HashSet<String> instancesWithOldImage = selectInstancesWithOldImage(allInstances, imageInfoResponse).stream()
                 .map(InstanceMetaData::getInstanceId)
                 .collect(Collectors.toCollection(HashSet::new));
         LOGGER.info("Instances with outdated image or without image info: {}", instancesWithOldImage);
         return instancesWithOldImage;
+    }
+
+    private List<InstanceMetaData> selectInstancesWithOldImage(Set<InstanceMetaData> allInstances, ImageInfoResponse imageInfoResponse) {
+        return allInstances.stream().filter(im -> {
+            if (im.getImage() != null && StringUtils.isNotBlank(im.getImage().getValue())) {
+                Image image = im.getImage().getUnchecked(Image.class);
+                return !(Objects.equals(image.getImageId(), imageInfoResponse.getId())
+                        && (Objects.equals(image.getImageCatalogName(), imageInfoResponse.getCatalog())
+                        || Objects.equals(image.getImageCatalogUrl(), imageInfoResponse.getCatalog())));
+            } else {
+                return true;
+            }
+        }).toList();
     }
 
     private Operation startUpgradeOperation(String accountId, FreeIpaUpgradeRequest request) {
@@ -260,14 +268,36 @@ public class UpgradeService {
     private List<ImageInfoResponse> getTargetImages(String catalog, Stack stack, ImageInfoResponse currentImage,
             Boolean allowMajorOsUpgrade, Map<String, String> tagFilters) {
         LOGGER.debug("Using ImageSettingsRequest to query for possible target images: {}", catalog);
-        List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, catalog, currentImage, allowMajorOsUpgrade, tagFilters);
+        List<InstanceMetaData> instancesWithOldImage = selectInstancesWithOldImage(stack.getNotDeletedInstanceMetaDataSet(), currentImage);
+        Boolean overriddenMajorOsUpgradeAllowed = overrideMajorOsUpgradeAllowed(currentImage, instancesWithOldImage, allowMajorOsUpgrade);
+        List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, catalog, currentImage, overriddenMajorOsUpgradeAllowed, tagFilters);
         if (targetImages.isEmpty()) {
-            Set<String> instancesWithOldImage = selectInstancesWithOldImage(stack.getNotDeletedInstanceMetaDataSet(), currentImage);
             LOGGER.debug("Target image is empty, if there is any instance on old image, return with current image");
             return instancesWithOldImage.isEmpty() ? List.of() : List.of(currentImage);
         } else {
             LOGGER.debug("Found target images: {}", targetImages);
             return targetImages;
+        }
+    }
+
+    private Boolean overrideMajorOsUpgradeAllowed(ImageInfoResponse currentImage, List<InstanceMetaData> instancesWithOldImage, Boolean allowMajorOsUpgrade) {
+        if (instancesWithOldImage.isEmpty()) {
+            LOGGER.debug("No instances with old image, returning allowMajorOsUpgrade: {}", allowMajorOsUpgrade);
+            return allowMajorOsUpgrade;
+        } else {
+            OsType currentStackOs = OsType.getByOsOptional(currentImage.getOs()).orElse(OsType.CENTOS7);
+            boolean allInstancesOnSameOsAsStack = instancesWithOldImage.stream()
+                    .map(im -> {
+                        if (im.getImage() != null && StringUtils.isNotBlank(im.getImage().getValue())) {
+                            Image image = im.getImage().getUnchecked(Image.class);
+                            return OsType.getByOsTypeStringWithCentos7Fallback(image.getOsType());
+                        } else {
+                            return OsType.CENTOS7;
+                        }
+                    }).allMatch(currentStackOs::equals);
+            LOGGER.debug("Current stack os: [{}], allInstancesOnSameOsAsStack: [{}], allowMajorOsUpgrade: [{}]",
+                    currentStackOs, allInstancesOnSameOsAsStack, allowMajorOsUpgrade);
+            return allInstancesOnSameOsAsStack ? allowMajorOsUpgrade : Boolean.FALSE;
         }
     }
 }

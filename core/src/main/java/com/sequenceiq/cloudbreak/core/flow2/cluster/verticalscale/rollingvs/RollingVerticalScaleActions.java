@@ -162,7 +162,7 @@ public class RollingVerticalScaleActions {
                 LOGGER.info("Vertical scaling the stopped instances: count={}, instanceIds=[{}]", stoppedInstanceIds.size(), stoppedInstanceIds);
                 rollingVerticalScaleService.verticalScaleInstances(payload.getResourceId(), stoppedInstanceIds, stackVerticalScaleV4Request);
                 StackDto stack = stackDtoService.getById(payload.getResourceId());
-                List<CloudResource> cloudResources = getCloudResources(stack, stoppedInstanceIds);
+                List<CloudResource> cloudResources = getCloudResources(stack);
                 CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
                 CloudStack cloudStack = cloudStackConverter.convert(stack);
                 cloudStack = cloudStackConverter.updateWithVerticalScaleRequest(cloudStack, stackVerticalScaleV4Request);
@@ -184,10 +184,8 @@ public class RollingVerticalScaleActions {
                         .filter(i -> result.getStatus(i).getStatus().equals(RollingVerticalScaleStatus.STOPPED)).toList();
             }
 
-            private List<CloudResource> getCloudResources(StackDto stack, List<String> stoppedInstanceIds) {
-                return stack.getResources().stream()
-                        .filter(i -> stoppedInstanceIds.contains(i.getInstanceId()))
-                        .map(i -> resourceToCloudResourceConverter.convert(i)).toList();
+            private List<CloudResource> getCloudResources(StackDto stack) {
+                return stack.getResources().stream().map(i -> resourceToCloudResourceConverter.convert(i)).toList();
             }
         };
     }

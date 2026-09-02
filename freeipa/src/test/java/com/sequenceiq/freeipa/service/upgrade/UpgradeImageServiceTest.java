@@ -275,7 +275,7 @@ class UpgradeImageServiceTest {
         stack.setArchitecture(Architecture.X86_64);
         Image image = createImage("2021-09-01", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
-        when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(false))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
+        when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         setDefaultOsToRhel8();
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
         FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(null, CATALOG_URL, DEFAULT_OS, DEFAULT_OS,
@@ -288,7 +288,7 @@ class UpgradeImageServiceTest {
         currentImage.setId("111-222");
         currentImage.setOs("centos7");
 
-        List<ImageInfoResponse> targetImages = underTest.findTargetImages(stack, CATALOG_URL, currentImage, false);
+        List<ImageInfoResponse> targetImages = underTest.findTargetImages(stack, CATALOG_URL, currentImage, true);
 
         assertEquals(2, targetImages.size());
         ImageInfoResponse imageInfoResponse = targetImages.get(0);
@@ -326,6 +326,29 @@ class UpgradeImageServiceTest {
         assertEquals(imageWrapper.getCatalogName(), imageInfoResponse.getCatalogName());
         assertEquals(imageWrapper.getCatalogUrl(), imageInfoResponse.getCatalog());
         assertEquals(image.getDate(), imageInfoResponse.getDate());
+        assertEquals(image.getUuid(), imageInfoResponse.getId());
+        assertEquals(image.getOs(), imageInfoResponse.getOs());
+    }
+
+    @Test
+    void testFindTargetImagesDefaultOsNotAddedWhenMajorOsUpgradeDisallowed() {
+        Stack stack = new Stack();
+        stack.setRegion("region");
+        stack.setArchitecture(Architecture.X86_64);
+        Image image = createImage("2021-09-01", "centos7");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
+        when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(false))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
+        setDefaultOsToRhel8();
+
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setDate("2021-08-21");
+        currentImage.setId("111-222");
+        currentImage.setOs("centos7");
+
+        List<ImageInfoResponse> targetImages = underTest.findTargetImages(stack, CATALOG_URL, currentImage, false);
+
+        assertEquals(1, targetImages.size());
+        ImageInfoResponse imageInfoResponse = targetImages.get(0);
         assertEquals(image.getUuid(), imageInfoResponse.getId());
         assertEquals(image.getOs(), imageInfoResponse.getOs());
     }

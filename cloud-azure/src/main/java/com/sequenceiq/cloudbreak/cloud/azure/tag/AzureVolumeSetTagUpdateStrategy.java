@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,14 +44,19 @@ public class AzureVolumeSetTagUpdateStrategy implements TagUpdateStrategy {
         }
 
         volumeSetAttributes.getVolumes().forEach(volume -> {
-            Map<String, String> existingTags = azureClient.getDiskTags(volume.getId());
+            String volumeId = volume.getId();
+            if (StringUtils.isBlank(volumeId)) {
+                LOGGER.warn("Skipping tag update for a volume in AZURE_VOLUMESET {}: volume ID is null.", cloudResource.getName());
+                return;
+            }
+            Map<String, String> existingTags = azureClient.getDiskTags(volumeId);
 
             if (tagsAlreadyUpToDate(existingTags, tags)) {
-                LOGGER.debug("Tags for disk {} are already up to date, skipping update.", cloudResource.getReference());
+                LOGGER.debug("Tags for volume {} are already up to date, skipping update.", volumeId);
                 return;
             }
 
-            azureClient.updateDiskTags(volume.getId(), mergeTags(existingTags, tags));
+            azureClient.updateDiskTags(volumeId, mergeTags(existingTags, tags));
         });
     }
 }

@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
@@ -120,6 +121,91 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
+
+    @Test
+    public void testCloudPlatformVariantAWSInValidateRequest() {
+
+        String instanceGroupNameInRequest = "compute";
+        String instanceTypeNameInRequest = "m3.xlarge";
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(instanceTypeNameInRequest);
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+        stackVerticalScaleV4Request.setOrchestratorType(OrchestratorType.ONE_BY_ONE);
+
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateRequest(stack, stackVerticalScaleV4Request));
+        assertEquals("Clusters on the legacy AWS platform variant only support ALL_AT_ONCE vertical scaling. To use ONE_BY_ONE vertical scaling, " +
+                "please perform an OS upgrade on the cluster. Cluster CRN: crn:cdp:datahub:us-west-1:default:cluster:b30acd9c-ef27-4ef5-9adf-205e87bd61f6",
+                badRequestException.getMessage());
+    }
+
+    @Test
+    public void testCloudPlatformVariantAWSNATIVEInValidateRequest() {
+
+        String instanceGroupNameInRequest = "compute";
+        String instanceTypeNameInRequest = "m3.xlarge";
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(instanceTypeNameInRequest);
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+        stackVerticalScaleV4Request.setOrchestratorType(OrchestratorType.ONE_BY_ONE);
+
+        when(stack.getPlatformVariant()).thenReturn("AWS_NATIVE");
+
+        underTest.validateRequest(stack, stackVerticalScaleV4Request);
+    }
+
+    @Test
+    public void testCloudPlatformVariantAWSNATIVEWithAllAtOnceInValidateRequest() {
+
+        String instanceGroupNameInRequest = "compute";
+        String instanceTypeNameInRequest = "m3.xlarge";
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(instanceTypeNameInRequest);
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+        stackVerticalScaleV4Request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE);
+
+        when(stack.getPlatformVariant()).thenReturn("AWS_NATIVE");
+
+        underTest.validateRequest(stack, stackVerticalScaleV4Request);
+    }
+
+    @Test
+    public void testCloudPlatformVariantAWSWithAllAtOnceInValidateRequest() {
+
+        String instanceGroupNameInRequest = "compute";
+        String instanceTypeNameInRequest = "m3.xlarge";
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(instanceTypeNameInRequest);
+
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+        stackVerticalScaleV4Request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE);
+
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+
+        underTest.validateRequest(stack, stackVerticalScaleV4Request);
+    }
 
     @Test
     public void testRequestValidateInstanceTypeForDeleteVolumesSuccess() {

@@ -107,4 +107,18 @@ public class UpgradeEvent extends StackEvent {
                         && Objects.equals(instancesOnOldImage, event.instancesOnOldImage));
     }
 
+    @Override
+    public String toString() {
+        return "UpgradeEvent{" +
+                "instanceIds=" + instanceIds +
+                ", primaryGwInstanceId='" + primareGwInstanceId + '\'' +
+                ", operationId='" + operationId + '\'' +
+                ", imageSettingsRequest=" + imageSettingsRequest +
+                ", backupSet=" + backupSet +
+                ", needMigration=" + needMigration +
+                ", triggeredVariant='" + triggeredVariant + '\'' +
+                ", verticalScaleRequest=" + verticalScaleRequest +
+                ", instancesOnOldImage=" + instancesOnOldImage +
+                "} " + super.toString();
+    }
 }

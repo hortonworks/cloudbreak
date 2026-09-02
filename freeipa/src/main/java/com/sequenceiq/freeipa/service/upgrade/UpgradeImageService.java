@@ -97,7 +97,7 @@ public class UpgradeImageService {
                 .filter(imageWrapperAndName -> filterBasedOnTags(tagFilters, imageWrapperAndName))
                 .map(this::convertImageWrapperAndNameToImageInfoResponse)
                 .collect(Collectors.toList());
-        fetchDefaultOsImageIfNotPresentInTargets(stack, catalog, currentImage, targetImages).ifPresent(targetImages::add);
+        fetchDefaultOsImageIfNotPresentInTargets(stack, catalog, currentImage, targetImages, allowMajorOsUpgrade).ifPresent(targetImages::add);
         return getLatestImagesGroupedByOs(targetImages);
     }
 
@@ -123,13 +123,14 @@ public class UpgradeImageService {
     }
 
     private Optional<ImageInfoResponse> fetchDefaultOsImageIfNotPresentInTargets(Stack stack, String catalog, ImageInfoResponse currentImage,
-            List<ImageInfoResponse> targetImages) {
+            List<ImageInfoResponse> targetImages, Boolean allowMajorOsUpgrade) {
         try {
             OsType defaultOsType = OsType.getByOs(defaultOs);
             OsType currentOsType = OsType.getByOs(currentImage.getOs());
             if (defaultOsType != currentOsType
                     && defaultOsType.ordinal() > currentOsType.ordinal()
                     && currentOsType.getMajorOsTargets().contains(defaultOsType)
+                    && Boolean.TRUE.equals(allowMajorOsUpgrade)
                     && targetImages.stream().noneMatch(img -> defaultOs.equalsIgnoreCase(img.getOs()))) {
                 String platformString = platformStringTransformer.getPlatformString(stack);
                 FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(null, catalog, defaultOs, defaultOs,

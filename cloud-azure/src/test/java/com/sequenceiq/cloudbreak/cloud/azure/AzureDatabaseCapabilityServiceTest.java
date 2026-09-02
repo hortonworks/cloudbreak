@@ -436,6 +436,110 @@ class AzureDatabaseCapabilityServiceTest {
         assertEquals(List.of("Standard_E4ads_v5", "Standard_E4ds_v4"), capabilities.getRegionFallbackInstanceTypeMap().get(region1Name));
     }
 
+    @Test
+    void testDatabaseCapabilitiesCapsInstanceTypeVersionToV5() {
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "maxInstanceTypeVersion", "v5");
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("Standard_E4ds_v6", "Standard_E4ds_v5", "Standard_E4ds_v4")));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
+                Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        Region region1Label = Region.region(com.azure.core.management.Region.fromName("westus").label());
+        assertEquals("Standard_E4ds_v5", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+        assertTrue(capabilities.getRegionAvailableInstanceTypes().get(region1Label).stream()
+                .noneMatch(vmType -> vmType.getValue().endsWith("_v6")));
+    }
+
+    @Test
+    void testDatabaseCapabilitiesFallsBackToDefaultWhenOnlyV6Available() {
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "maxInstanceTypeVersion", "v5");
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("Standard_E4ds_v6")));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
+                Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        Region region1Label = Region.region(com.azure.core.management.Region.fromName("westus").label());
+        assertEquals("Standard_E4ds_v4", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+    }
+
+    @Test
+    void testDatabaseCapabilitiesSelectsV6WhenVersionCapDisabled() {
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "maxInstanceTypeVersion", null);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("Standard_E4ds_v6", "Standard_E4ds_v5")));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
+                Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        Region region1Label = Region.region(com.azure.core.management.Region.fromName("westus").label());
+        assertEquals("Standard_E4ds_v6", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+    }
+
+    @Test
+    void testDatabaseCapabilitiesSelectsBelowCapVersionFromList() {
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "maxInstanceTypeVersion", "v5");
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultFlexibleInstanceType", "Standard_NOT_FROM_LIST");
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("Standard_E4ds_v4")));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
+                Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        Region region1Label = Region.region(com.azure.core.management.Region.fromName("westus").label());
+        assertEquals("Standard_E4ds_v4", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+        assertTrue(capabilities.getRegionAvailableInstanceTypes().get(region1Label).stream()
+                .anyMatch(vmType -> "Standard_E4ds_v4".equals(vmType.getValue())));
+    }
+
+    @Test
+    void testDatabaseCapabilitiesAdmitsInstanceTypeWithoutVersionSuffix() {
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "maxInstanceTypeVersion", "v5");
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("Standard_E4ds", "Standard_E4ds_v6")));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
+                Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        Region region1Label = Region.region(com.azure.core.management.Region.fromName("westus").label());
+        assertEquals("Standard_E4ds", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+        assertTrue(capabilities.getRegionAvailableInstanceTypes().get(region1Label).stream()
+                .anyMatch(vmType -> "Standard_E4ds".equals(vmType.getValue())));
+        assertTrue(capabilities.getRegionAvailableInstanceTypes().get(region1Label).stream()
+                .noneMatch(vmType -> vmType.getValue().endsWith("_v6")));
+    }
+
     private AzureCoordinate azureCoordinate(String name) {
         return AzureCoordinateBuilder.builder()
                 .longitude("1")
