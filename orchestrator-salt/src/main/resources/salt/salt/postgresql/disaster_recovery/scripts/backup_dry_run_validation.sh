@@ -109,6 +109,16 @@ kinit_as() {
   fi
 }
 
+# HDFS existence must be checked before validating with the hdfs identity: the hdfs 'dfs' commands below run
+# against cloud storage (s3a/abfs/gs) via the Hadoop client and only need a valid Kerberos ticket, so they do not
+# prove HDFS is installed. On shapes where HDFS is not deployed, the hdfs principal is absent from the host keytabs.
+# We read the keytab locally with 'klist -kt' (no KDC round-trip) to check whether the hdfs principal was provisioned
+# on this host. This keeps a genuinely missing principal a skip, while a later kinit failure stays a hard error.
+hdfs_principal_present() {
+  [[ -s "$HDFS_KEYTAB" ]] || return 1
+  klist -kt "$HDFS_KEYTAB" 2>/dev/null | grep -q "hdfs/$(hostname -f)"
+}
+
 is_database_exists() {
   SERVICE=$1
   doLog "INFO Checking the existence of database ${SERVICE}"
@@ -175,10 +185,15 @@ execute_run() {
     make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Ranger Audit Role"
     move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Ranger Audit Role"
 
-    kinit_as hdfs "$HDFS_KEYTAB"
-    doLog "INFO Try moveFromLocal via HDFS"
-    make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Datalake Admin Role"
-    move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Datalake Admin Role"
+    if hdfs_principal_present; then
+      touch "$TESTFILE_LOCATION"
+      kinit_as hdfs "$HDFS_KEYTAB"
+      doLog "INFO Try moveFromLocal via HDFS with hdfs principal"
+      make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Datalake Admin Role"
+      move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Datalake Admin Role"
+    else
+      doLog "WARN Skipping HDFS-identity object storage validation - hdfs principal not present in any on-host keytab; HDFS role not deployed here"
+    fi
   fi
   rm -rfv "$BACKUPS_DIR"
 }
