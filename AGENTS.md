@@ -16,6 +16,7 @@ Assistant-oriented playbooks live under **`.agent/skills/`**. The files are **pl
 - **cb-db-migration**: MyBatis Migrations procedure — file location, timestamp+ticket naming, mandatory `@UNDO`, idempotent/reversible DDL — load when changing a service database schema.
 - **cb-testing**: JUnit 5 + Mockito unit tests, Spring integration tests, the authorization-compliance test, flow-chain graph tests, Gradle/jacoco commands and coverage gates — load when writing tests or before opening a PR.
 - **cb-pr-ci-triage**: Triage PR GitHub Actions failures from a PR number (unit tests, Jacoco coverage, checkstyle, SpotBugs, integration checks) — load when a PR build is red or the user asks why CI failed.
+- **cb-swagger-check**: Run the OpenAPI/Swagger compatibility gate locally (oasdiff) and land a *deliberate* breaking API change via the per-service `openapi-breaking-allowlist.txt` — load to diagnose a red Swagger Compatibility check or ship an intentional API removal. Allowlist only breaks you meant to make; fix an unintentional break in code.
 - **cdp-docs**: Official CDP Public Cloud documentation lookup and verification.
 - **cb-cloud-providers**: Read-first AWS/Azure/GCP CLI/MCP recipes for inspecting live cloud state.
 - **cb-new-runtime**: Introduce a new Cloudera Runtime (CR) version — Data Lake + Data Hub blueprints, cluster templates, `application.yml` runtime properties, upgrade matrix, and the count-assertion tests to bump; plus how to later make it the default. Load when RE raises a new-CR ticket.
