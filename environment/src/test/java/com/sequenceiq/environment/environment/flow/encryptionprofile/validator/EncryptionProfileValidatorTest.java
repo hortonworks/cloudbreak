@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,11 +22,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
-import com.sequenceiq.environment.experience.ExperienceCluster;
-import com.sequenceiq.environment.experience.common.CommonExperienceService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -46,13 +41,7 @@ class EncryptionProfileValidatorTest {
     private StackService stackService;
 
     @Mock
-    private EnvironmentService environmentService;
-
-    @Mock
     private FreeIpaService freeIpaService;
-
-    @Mock
-    private CommonExperienceService commonExperienceService;
 
     @InjectMocks
     private EncryptionProfileValidator underTest;
@@ -122,33 +111,6 @@ class EncryptionProfileValidatorTest {
     }
 
     @Test
-    void testEnvironmentWithExperiences() {
-        StackViewV4Response stack1 = new StackViewV4Response();
-        stack1.setName("stack1");
-        stack1.setStackVersion("7.3.2");
-        stack1.setStatus(Status.AVAILABLE);
-        StackViewV4Response stack2 = new StackViewV4Response();
-        stack2.setName("stack2");
-        stack2.setStackVersion("7.3.2");
-        stack2.setStatus(Status.AVAILABLE);
-        List<StackViewV4Response> stacks = List.of(stack1, stack2);
-        EnvironmentDto environmentDto = new EnvironmentDto();
-        environmentDto.setName("env1");
-
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
-        when(stackService.getAllNotDeletedClustersByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(stacks);
-        when(environmentService.getByCrnAndAccountId(eq(ENVIRONMENT_CRN), any())).thenReturn(environmentDto);
-        when(commonExperienceService.getConnectedClustersForEnvironment(any()))
-                .thenReturn(Set.of(ExperienceCluster.builder().withExperienceName("liftie").build(),
-                        ExperienceCluster.builder().withExperienceName("anotherExperience").build()));
-
-        BadRequestException ex = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
-
-        assertEquals("Environment env1 contains experience(s) [anotherExperience,liftie]. Experiences do not support encryption profile yet", ex.getMessage());
-    }
-
-    @Test
     void testFreeIpaOnCentos7ThrowsException() {
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
@@ -174,8 +136,6 @@ class EncryptionProfileValidatorTest {
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of());
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setName("env1");
-        when(environmentService.getByCrnAndAccountId(eq(ENVIRONMENT_CRN), any())).thenReturn(environmentDto);
-        when(commonExperienceService.getConnectedClustersForEnvironment(any())).thenReturn(Set.of());
 
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
     }
@@ -187,8 +147,6 @@ class EncryptionProfileValidatorTest {
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of());
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setName("env1");
-        when(environmentService.getByCrnAndAccountId(eq(ENVIRONMENT_CRN), any())).thenReturn(environmentDto);
-        when(commonExperienceService.getConnectedClustersForEnvironment(any())).thenReturn(Set.of());
 
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
     }
