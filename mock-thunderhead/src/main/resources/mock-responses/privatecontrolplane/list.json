@@ -1,12 +1,5 @@
 [
   {
-    "name": "transactions",
-    "type": "REAL",
-    "url": "https://console-cdp.apps.transact.xcu2-8y8x.dev.cldr.work",
-    "pvcTenantId": "ed0c7321-7c57-4704-9184-4c520df3a539",
-    "auth": "fec3ed54-a594-4437-9b71-535684ed1cc3:gRqk7aRhEdG+oUwSsXhYfIcgCTJkq4MytCqNjcVvgos="
-  },
-  {
     "name": "mock",
     "type": "MOCK"
   }
