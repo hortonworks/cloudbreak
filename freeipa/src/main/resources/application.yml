@@ -106,6 +106,13 @@ freeipa:
   intermediate.threadpool:
     core.size: 100
     capacity.size: 4000
+  trust:
+    add:
+      retry:
+        maxAttempts: 10
+        delay: 5000
+        multiplier: 2
+        maxDelay: 30000
   delayed:
     stop-start-sec: 300
     scale-sec: 120
