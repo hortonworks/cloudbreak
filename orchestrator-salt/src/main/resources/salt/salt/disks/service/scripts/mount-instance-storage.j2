@@ -48,9 +48,16 @@ mount_one() {
       local path=$2
       local device=$(blkid -U $uuid)
       local fstab_entry="UUID=${uuid} ${path} ${FS_TYPE} defaults,noatime,nofail 0 2"
+      local counter=$3
 
       log $LOG_FILE "mounting to path $path"
       mkdir $path >> $LOG_FILE 2>&1
+
+      # if path contains fs* then the ephemeral volumes could have been mounted at ephfs. this branch is to remove them
+      if [[ "$path" =~ ^/hadoopfs/fs[0-9]+$ ]] >> $LOG_FILE 2>&1; then
+        sudo sed -i "\|/hadoopfs/ephfs${counter}|d" /etc/fstab >> $LOG_FILE 2>&1
+        umount "/hadoopfs/ephfs${counter}"
+      fi
 
       # Check if the mount point is already in /etc/fstab and update it if necessary.
       # First, check for an entry with the target mount path
@@ -104,7 +111,7 @@ mount_all_sequential() {
       hadoop_fs_dir_counter=$((max+1))
     fi
     for uuid in ${device_uuids_arr[@]}; do
-        mount_one $uuid "/hadoopfs/$MOUNT_PATH${hadoop_fs_dir_counter}"
+        mount_one $uuid "/hadoopfs/$MOUNT_PATH${hadoop_fs_dir_counter}" $hadoop_fs_dir_counter
         ((hadoop_fs_dir_counter++))
         return_value=$(($? || return_value ))
     done
@@ -141,7 +148,7 @@ find_format_and_mount_tempstorage_azure() {
         log $LOG_FILE "No NVMe temporary disks to mount"
       else
         for uuid in "${device_uuids_arr[@]}"; do
-          mount_one $uuid "/hadoopfs/ephfs${hadoop_ephfs_dir_counter}"
+          mount_one $uuid "/hadoopfs/ephfs${hadoop_ephfs_dir_counter}" $hadoop_ephfs_dir_counter
           ((hadoop_ephfs_dir_counter++))
           return_code=$?
           if [ ! $return_code -eq 0 ]; then
