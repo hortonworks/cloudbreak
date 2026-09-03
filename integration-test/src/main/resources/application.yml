@@ -169,8 +169,8 @@ integrationtest:
     sleepMinutes: 2
 
   trust:
-    remoteEnvironmentCrn: crn:cdp:classicclusters:us-west-1:ACCOUNT_ID:cluster:classiccluster-transactions
-    hdfsPath: transactions-master0.hybrid.cloudera.org/
+    remoteEnvironmentCrn: crn:cdp:classicclusters:us-west-1:ACCOUNT_ID:cluster:classiccluster-transactions-openstack-dl
+    hdfsPath: transactions-openstack-dl-master0.hybrid.cloudera.org/
     activeDirectory:
       fqdn: ec2amaz-uvredmu.hybrid.cloudera.org
       ip: 10.84.202.113
