@@ -87,6 +87,46 @@ You should have a running [Cloudbreak](https://github.infra.cloudera.com/cloudbr
 2. In IntelliJ, open the Run/Debug Configuration for the test, then go to **Edit configuration templates** → **TestNG** → **EnvFile** and load variables from your copy of `testng.env` (use the repo file only as a template).
 3. Run the test with the green play button.
 
+#### Troubleshooting:
+If a test fails immediately with a stack like this:
+
+```
+java.lang.NullPointerException: Cannot invoke "com.sequenceiq.it.cloudbreak.config.testinformation.TestInformation.getSuiteName()" 
+    because the return value of "com.sequenceiq.it.cloudbreak.config.testinformation.TestInformationService.getTestInformation()" is null
+    at com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider.getSuiteName(AbstractCloudProvider.java:...)
+    at com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider.getBaseLocation(...)
+    at ...
+    at org.testng.internal.invokers.MethodInvocationHelper.invokeWithTimeoutWithNewExecutor(...)
+```
+
+**Why it happens.** `TestInformationService` stores state in a `ThreadLocal`. `AbstractMinimalTest.beforeTest(...)` (a `@BeforeMethod`) sets that value on the TestNG worker thread. When a `@Test` is annotated with `timeOut = …`, TestNG runs the test body on a **separate executor thread** it spawns via `MethodInvocationHelper.invokeWithTimeoutWithNewExecutor`. The `ThreadLocal` value set by `@BeforeMethod` is not visible on that executor thread, so `getTestInformation()` returns `null` and any downstream call to `getSuiteName()` / `getTestName()` NPEs.
+
+**Workaround #1 (local only, do NOT commit).** Comment out the `timeOut` argument on the `@Test` annotation for the method you're running. Without a timeout, TestNG runs `@BeforeMethod` and `@Test` on the same thread and the `ThreadLocal` is visible.
+
+Before:
+```java
+@Test(dataProvider = TEST_CONTEXT, timeOut = 10800000)
+public void testCreateStopStartEnvironment(TestContext testContext) { ... }
+```
+
+After (local only):
+```java
+@Test(dataProvider = TEST_CONTEXT /*, timeOut = 10800000*/)
+public void testCreateStopStartEnvironment(TestContext testContext) { ... }
+```
+
+**Workaround #2 (local only, do NOT commit).** If you want to keep the timeout change 
+`integration-test/src/main/java/com/sequenceiq/it/cloudbreak/config/testinformation/TestInformationService.java` 's
+```java
+private static final ThreadLocal<TestInformation> TEST_INFORMATION_THREAD_LOCAL = new ThreadLocal<>();
+```
+to
+```java
+private static final ThreadLocal<TestInformation> TEST_INFORMATION_THREAD_LOCAL = new InheritableThreadLocal<>();
+```
+
+**Why we don't fix this in code.** Switching the field to `InheritableThreadLocal` would make the executor thread inherit the value and eliminate the NPE, but it would also cause any executor/thread pool created lazily inside a test to *capture* the current test's `TestInformation` and hold it forever — producing wrong-but-plausible values (wrong cloud-storage paths, wrong resource tags, wrong log labels) on any thread that pool is reused for. The current behavior — a loud NPE — is safer than a silent wrong value.
+
 ## Code organization
 
 ### Test cases
