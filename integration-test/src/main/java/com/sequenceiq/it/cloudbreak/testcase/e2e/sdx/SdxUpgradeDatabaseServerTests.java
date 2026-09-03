@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.it.cloudbreak.assertion.database.RedbeamsDatabaseTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -78,6 +79,8 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         sdxDatabaseRequest.setDatabaseEngineVersion(originalDatabaseMajorVersion);
         sdxDatabaseRequest = testContext.getCloudProvider().extendDBRequestWithProviderParams(sdxDatabaseRequest);
+        String customDatabaseInstanceType = testContext.getCloudProvider().getCustomDatabaseInstanceType();
+        sdxDatabaseRequest.setDatabaseInstanceType(customDatabaseInstanceType);
 
         testContext
                 .given(sdx, SdxTestDto.class)
@@ -87,6 +90,8 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
+                .then(RedbeamsDatabaseTestAssertion.hasDatabaseInstanceType(dto -> dto.getResponse().getDatabaseServerCrn(), customDatabaseInstanceType),
+                        key(sdx))
                 .given(SdxUpgradeDatabaseServerTestDto.class)
                 .withTargetMajorVersion(targetDatabaseMajorVersion)
                 .given(sdx, SdxTestDto.class)

@@ -36,6 +36,8 @@ public class AzureProperties {
 
     private final DatabaseEncryption databaseEncryption = new DatabaseEncryption();
 
+    private final Database database = new Database();
+
     private final Resourcegroup resourcegroup = new Resourcegroup();
 
     private FreeIpaProperties freeipa = new FreeIpaProperties();
@@ -124,6 +126,10 @@ public class AzureProperties {
         return resourcegroup;
     }
 
+    public Database getDatabase() {
+        return database;
+    }
+
     public Boolean getExternalDatabaseSslEnforcementSupported() {
         return Boolean.TRUE.equals(externalDatabaseSslEnforcementSupported);
     }
@@ -146,6 +152,19 @@ public class AzureProperties {
 
     public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
         this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
+    }
+
+    public static class Database {
+
+        private String customInstanceType;
+
+        public String getCustomInstanceType() {
+            return customInstanceType;
+        }
+
+        public void setCustomInstanceType(String customInstanceType) {
+            this.customInstanceType = customInstanceType;
+        }
     }
 
     public static class Credential {

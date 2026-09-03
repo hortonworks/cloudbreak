@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
+import com.sequenceiq.it.cloudbreak.assertion.database.RedbeamsDatabaseTestAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -86,6 +87,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
     )
     public void testSecretRotationAndMasterRepairWithTerminatedInstances(TestContext testContext) {
         createDataMartDatahubWithAutoTlsAndExternalDb(testContext);
+        validateCustomDatabaseInstanceType(testContext);
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         secretRotation(testContext, cloudProvider);
@@ -123,6 +125,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
         waitForDatalakeCreation(testContext);
         DistroXDatabaseRequest distroxDatabaseRequest = new DistroXDatabaseRequest();
         distroxDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+        distroxDatabaseRequest.setDatabaseInstanceType(testContext.getCloudProvider().getCustomDatabaseInstanceType());
 
         testContext
                 .given(DistroXTestDto.class)
@@ -136,6 +139,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .when(distroXTestClient.create())
                 .validate();
         waitForDatahubCreation(testContext);
+        validateCustomDatabaseInstanceType(testContext);
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         secretRotation(testContext, cloudProvider);
@@ -173,6 +177,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
         waitForDatalakeCreation(testContext);
         DistroXDatabaseRequest distroxDatabaseRequest = new DistroXDatabaseRequest();
         distroxDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+        distroxDatabaseRequest.setDatabaseInstanceType(testContext.getCloudProvider().getCustomDatabaseInstanceType());
 
         testContext
                 .given(DistroXTestDto.class)
@@ -185,10 +190,19 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .when(distroXTestClient.create())
                 .validate();
         waitForDatahubCreation(testContext);
+        validateCustomDatabaseInstanceType(testContext);
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         secretRotation(testContext, cloudProvider);
         masterRepairValidate(testContext);
+    }
+
+    private void validateCustomDatabaseInstanceType(TestContext testContext) {
+        testContext.given(DistroXTestDto.class)
+                .then(RedbeamsDatabaseTestAssertion.hasDatabaseInstanceType(
+                        dto -> dto.getResponse().getCluster().getDatabaseServerCrn(),
+                        testContext.getCloudProvider().getCustomDatabaseInstanceType()))
+                .validate();
     }
 
     private void secretRotation(TestContext testContext, String cloudProvider) {

@@ -256,6 +256,8 @@ integrationtest:
     diskEncryption:
       environmentKey:
       datahubKey:
+    database:
+      customInstanceType: db.m5.xlarge
     embeddedDbUpgradeSourceVersion: 11
     trust:
       subnetIds:
@@ -360,6 +362,8 @@ integrationtest:
         databackup: abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/hourly/
     databaseEncryption:
       encryptionKeyUrl:
+    database:
+      customInstanceType: Standard_E8ds_v5
     diskEncryption:
       encryptionKeyUrl:
       resourceGroupName:

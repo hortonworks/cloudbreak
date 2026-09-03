@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.it.cloudbreak.assertion.database.RedbeamsDatabaseTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -44,6 +45,8 @@ public class SdxUpgradeFlexibleDatabaseServerTests extends PreconditionSdxE2ETes
         SdxDatabaseAzureRequest sdxDatabaseAzureRequest = new SdxDatabaseAzureRequest();
         sdxDatabaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         sdxDatabaseRequest.setSdxDatabaseAzureRequest(sdxDatabaseAzureRequest);
+        String customDatabaseInstanceType = testContext.getCloudProvider().getCustomDatabaseInstanceType();
+        sdxDatabaseRequest.setDatabaseInstanceType(customDatabaseInstanceType);
 
         TargetMajorVersion targetDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
 
@@ -55,6 +58,8 @@ public class SdxUpgradeFlexibleDatabaseServerTests extends PreconditionSdxE2ETes
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
+                .then(RedbeamsDatabaseTestAssertion.hasDatabaseInstanceType(dto -> dto.getResponse().getDatabaseServerCrn(), customDatabaseInstanceType),
+                        key(sdx))
                 .given(SdxUpgradeDatabaseServerTestDto.class)
                     .withTargetMajorVersion(targetDatabaseMajorVersion)
                 .given(sdx, SdxTestDto.class)

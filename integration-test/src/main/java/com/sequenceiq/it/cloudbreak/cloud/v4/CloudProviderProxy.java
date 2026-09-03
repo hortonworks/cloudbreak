@@ -467,6 +467,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getCustomDatabaseInstanceType() {
+        return delegate.getCustomDatabaseInstanceType();
+    }
+
+    @Override
     public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
         return delegate.instanceGroupNetworkV4Request(subnetId);
     }

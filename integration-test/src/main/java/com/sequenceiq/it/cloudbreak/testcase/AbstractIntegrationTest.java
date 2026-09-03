@@ -243,6 +243,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void initiateDataMartDatahubCreationWithAutoTlsAndExternalDb(TestContext testContext) {
         DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
         databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+        databaseRequest.setDatabaseInstanceType(testContext.getCloudProvider().getCustomDatabaseInstanceType());
 
         testContext
                 .given(DistroXTestDto.class)

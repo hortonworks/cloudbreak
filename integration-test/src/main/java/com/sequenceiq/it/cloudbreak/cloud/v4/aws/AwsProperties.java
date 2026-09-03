@@ -47,6 +47,8 @@ public class AwsProperties {
 
     private final DiskEncryption diskEncryption = new DiskEncryption();
 
+    private final Database database = new Database();
+
     private FreeIpaProperties freeipa = new FreeIpaProperties();
 
     private VerticalScaleProperties verticalScale = new VerticalScaleProperties();
@@ -165,6 +167,10 @@ public class AwsProperties {
         return diskEncryption;
     }
 
+    public Database getDatabase() {
+        return database;
+    }
+
     public String getDynamoTableName() {
         return dynamoTableName;
     }
@@ -278,6 +284,19 @@ public class AwsProperties {
             public void setDatahub(Map<String, String> datahub) {
                 this.datahub = datahub;
             }
+        }
+    }
+
+    public static class Database {
+
+        private String customInstanceType;
+
+        public String getCustomInstanceType() {
+            return customInstanceType;
+        }
+
+        public void setCustomInstanceType(String customInstanceType) {
+            this.customInstanceType = customInstanceType;
         }
     }
 

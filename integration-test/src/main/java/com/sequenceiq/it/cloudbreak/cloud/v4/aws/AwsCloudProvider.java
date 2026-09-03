@@ -326,6 +326,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getCustomDatabaseInstanceType() {
+        return awsProperties.getDatabase().getCustomInstanceType();
+    }
+
+    @Override
     public String verticalScaleVolumeType() {
         return awsProperties.getVerticalScale().getVolumeType();
     }

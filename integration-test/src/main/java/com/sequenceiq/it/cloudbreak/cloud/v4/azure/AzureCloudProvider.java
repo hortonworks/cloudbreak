@@ -188,6 +188,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return sdxDatabaseRequest;
     }
 
+    @Override
+    public String getCustomDatabaseInstanceType() {
+        return azureProperties.getDatabase().getCustomInstanceType();
+    }
+
     public AzureDistroXV1Parameters distroXParameters() {
         return new AzureDistroXV1Parameters();
     }

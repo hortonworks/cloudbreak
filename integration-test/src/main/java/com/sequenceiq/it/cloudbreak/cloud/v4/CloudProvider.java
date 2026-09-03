@@ -247,6 +247,10 @@ public interface CloudProvider {
         return sdxDatabaseRequest;
     }
 
+    default String getCustomDatabaseInstanceType() {
+        return null;
+    }
+
     VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto);
 
     VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto);
