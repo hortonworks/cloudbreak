@@ -57,6 +57,7 @@ class ClusterPublicEndpointManagementServiceTest {
         underTest.refreshDnsEntries(stack);
 
         verify(gatewayPublicEndpointManagementService, never()).updateDnsEntry(stack, null);
+        verify(gatewayPublicEndpointManagementService, never()).updateDnsEntryForLoadBalancers(stack);
         verifyNoInteractions(dnsEntryServices);
         verify(freeIPAEndpointManagementService, times(1)).registerLoadBalancerDomainWithFreeIPA(stackView);
     }
@@ -70,6 +71,7 @@ class ClusterPublicEndpointManagementServiceTest {
 
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntry(stack, null);
         verify(dnsEntryServices, times(1)).forEach(any());
+        verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForLoadBalancers(stack);
         verify(freeIPAEndpointManagementService, times(1)).registerLoadBalancerDomainWithFreeIPA(stackView);
     }
 

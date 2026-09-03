@@ -80,6 +80,7 @@ public class ClusterPublicEndpointManagementService {
             LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
             gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
             dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
+            gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
         }
         registerLoadBalancerWithFreeIPA(stack.getStack());
     }
