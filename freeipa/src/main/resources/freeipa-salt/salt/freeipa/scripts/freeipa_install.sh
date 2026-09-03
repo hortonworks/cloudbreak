@@ -10,7 +10,9 @@ echo "The ipaddresses of the host are $IPADDRS"
 IPADDR="${IPADDRS%% *}"
 echo "The first ipaddress of the host is $IPADDR"
 
-ipa-server-install --unattended --uninstall
+if [ -f /var/log/ipaserver-install.log ] || [ -f /etc/ipa/default.conf ] || [ -f /var/lib/ipa/sysrestore/sysrestore.state ]; then
+  ipa-server-install --unattended --uninstall
+fi
 
 ipa-server-install \
           --realm "$REALM" \
