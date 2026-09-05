@@ -19,3 +19,4 @@ This module provides the Azure infrastructure integration for Cloudbreak.
 3. **Error Handling**: Use `AzureUtils` for common error parsing and retry logic.
 4. **Availability Zones**: Use `AzureAvailabilityZoneConnector` to handle regional AZ differences.
 5. **Private Links**: Be mindful of `AzureNetworkLinkService` when dealing with private network connectivity.
+6. **TLS Hardening**: The shared `okhttp3.OkHttpClient` used by every Azure SDK manager and `TokenCredential` is built inside `AzureHttpClientConfigurer`. Set `cb.azure.tlsHardening=true` (default `false`) to restrict the OkHttp `ConnectionSpec` to TLS 1.3 with the cipher list from `EncryptionProfileProvider.getTls13RecommendedCipherSuites(true)`.
