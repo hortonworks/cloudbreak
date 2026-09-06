@@ -52,6 +52,7 @@ public class FreeIpaRollingVerticalScaleTest extends PreconditionSdxE2ETest {
                 .when(freeIpaTestClient.describe())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()
+                .useAlternativeServiceEndpointIfConfigured()
                 .given(EnvironmentTestDto.class)
                 .when(freeIpaTestClient.rollingVerticalScale(FREEIPA_VERTICAL_SCALE_KEY))
                 .awaitForFlow()

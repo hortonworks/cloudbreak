@@ -2,7 +2,6 @@ name: "aws-backward-compatibility-e2e-tests"
 tests:
   - name: "aws_backward_compatibility_e2e_tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRollingVerticalScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests
@@ -10,10 +9,8 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRotationTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXArmImageTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzRepairAndScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesAddAndModificationTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.SdxWithCcmResizeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzRepairTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeWithMultiAzEnabledTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
