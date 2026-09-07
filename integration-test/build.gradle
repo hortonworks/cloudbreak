@@ -148,7 +148,7 @@ dependencies {
   implementation (group: 'com.google.cloud',              name: 'google-cloud-storage',           version: '2.23.0') {
     exclude group: "io.grpc"
   }
-  implementation group: 'com.google.cloud',             name: 'google-cloud-asset',                         version: '3.34.0'
+  implementation group: 'com.google.cloud',             name: 'google-cloud-asset',                         version: '3.101.0'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                      version: azureSdkResourceManagerVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage'
   implementation group: 'com.azure',                    name: 'azure-identity',                             version: azureSdkIdentityVersion
