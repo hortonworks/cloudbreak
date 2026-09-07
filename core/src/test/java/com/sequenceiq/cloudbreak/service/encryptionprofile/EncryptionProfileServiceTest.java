@@ -68,7 +68,7 @@ class EncryptionProfileServiceTest {
         when(mockStack.getCluster()).thenReturn(cluster);
         when(cluster.getEncryptionProfileCrn()).thenReturn(null);
 
-        String response = underTest.getEncryptionProfileByCrnOrDefault(environment, mockStack);
+        String response = underTest.getEffectiveEncryptionProfileCrn(environment, mockStack);
 
         assertEquals("environmentEp", response);
     }

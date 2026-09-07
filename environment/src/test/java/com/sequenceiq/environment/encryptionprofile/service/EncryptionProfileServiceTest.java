@@ -54,7 +54,7 @@ import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
-import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
+import com.sequenceiq.environment.encryptionprofile.repository.EncryptionProfileRepository;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 
@@ -207,40 +207,66 @@ public class EncryptionProfileServiceTest {
 
     @Test
     void testGetByCrn() {
-        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
 
-        EncryptionProfile result = underTest.getByCrn(ENCRYPTION_PROFILE_CRN);
+        EncryptionProfile result = underTest.getByCrn(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
 
         assertThat(result).isNotNull();
         assertThat(result.getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
         assertThat(result.getAccountId()).isEqualTo(ACCOUNT_ID);
 
-        verify(repository).findByResourceCrn(ENCRYPTION_PROFILE_CRN);
+        verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
     }
 
     @Test
     void testGetByCrnNotFound() {
-        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.empty());
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> underTest.getByCrn(ENCRYPTION_PROFILE_CRN))
+        assertThatThrownBy(() -> underTest.getByCrn(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Encryption Profile not found with crn: " + ENCRYPTION_PROFILE_CRN);
 
-        verify(repository).findByResourceCrn(ENCRYPTION_PROFILE_CRN);
+        verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
     }
 
     @Test
     void testGetByCrnWhenDefaultEncryptionProfileCrn() {
-        when(repository.findByResourceCrn(DEFAULT_ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.empty());
+        when(repository.findByResourceCrnAndAccountId(DEFAULT_ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn()).thenReturn(getDefaultEncryptionProfileCrnMap());
 
-        EncryptionProfile result = underTest.getByCrn(DEFAULT_ENCRYPTION_PROFILE_CRN);
+        EncryptionProfile result = underTest.getByCrn(DEFAULT_ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
 
         assertThat(result).isNotNull();
         assertThat(result.getResourceCrn()).isEqualTo(DEFAULT_ENCRYPTION_PROFILE_CRN);
         assertThat(result.getResourceStatus()).isEqualTo(ResourceStatus.DEFAULT);
 
-        verify(repository).findByResourceCrn(DEFAULT_ENCRYPTION_PROFILE_CRN);
+        verify(repository).findByResourceCrnAndAccountId(DEFAULT_ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
+    }
+
+    @Test
+    void testGetByCrnUserManagedFromAnotherAccountFallsBackToNotFound() {
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, "some-other-account")).thenReturn(Optional.empty());
+        when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn()).thenReturn(getDefaultEncryptionProfileCrnMap());
+
+        assertThatThrownBy(() -> underTest.getByCrn(ENCRYPTION_PROFILE_CRN, "some-other-account"))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Encryption Profile not found with crn: " + ENCRYPTION_PROFILE_CRN);
+
+        verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, "some-other-account");
+    }
+
+    @Test
+    void testGetByCrnDefaultProfileIsCrossAccountAccessible() {
+        when(repository.findByResourceCrnAndAccountId(DEFAULT_ENCRYPTION_PROFILE_CRN, "some-other-account")).thenReturn(Optional.empty());
+        when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn()).thenReturn(getDefaultEncryptionProfileCrnMap());
+
+        EncryptionProfile result = underTest.getByCrn(DEFAULT_ENCRYPTION_PROFILE_CRN, "some-other-account");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getResourceCrn()).isEqualTo(DEFAULT_ENCRYPTION_PROFILE_CRN);
+        assertThat(result.getResourceStatus()).isEqualTo(ResourceStatus.DEFAULT);
+
+        verify(repository).findByResourceCrnAndAccountId(DEFAULT_ENCRYPTION_PROFILE_CRN, "some-other-account");
     }
 
     @Test
@@ -274,28 +300,28 @@ public class EncryptionProfileServiceTest {
 
     @Test
     void testDeleteByResourceCrn() {
-        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
 
-        EncryptionProfile result = underTest.deleteByResourceCrn(ENCRYPTION_PROFILE_CRN);
+        EncryptionProfile result = underTest.deleteByResourceCrn(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
 
         assertThat(result).isNotNull();
         assertThat(result.getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
         assertThat(result.getAccountId()).isEqualTo(ACCOUNT_ID);
 
-        verify(repository).findByResourceCrn(ENCRYPTION_PROFILE_CRN);
+        verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
         verify(repository).delete(ENCRYPTION_PROFILE);
         verify(ownerAssignmentService).notifyResourceDeleted(ENCRYPTION_PROFILE_CRN);
     }
 
     @Test
     void testDeleteByResourceCrnNotFound() {
-        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.empty());
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> underTest.deleteByResourceCrn(ENCRYPTION_PROFILE_CRN))
+        assertThatThrownBy(() -> underTest.deleteByResourceCrn(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Encryption profile with crn '" + ENCRYPTION_PROFILE_CRN + "' not found.");
 
-        verify(repository).findByResourceCrn(ENCRYPTION_PROFILE_CRN);
+        verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
         verify(repository, never()).delete(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
@@ -444,18 +470,18 @@ public class EncryptionProfileServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn));
 
         verify(repository, times(1)).findByNameAndAccountId(eq("epName"), anyString());
-        verify(repository, never()).findByResourceCrn(anyString());
+        verify(repository, never()).findByResourceCrnAndAccountId(anyString(), anyString());
     }
 
     @Test
     void testGetEncryptionProfileByNameOrCrnWhenProfileCrnIsUsed() {
         String encryptionProfileNameOrCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
 
-        when(repository.findByResourceCrn(encryptionProfileNameOrCrn)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        when(repository.findByResourceCrnAndAccountId(encryptionProfileNameOrCrn, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn));
 
-        verify(repository, times(1)).findByResourceCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+        verify(repository, times(1)).findByResourceCrnAndAccountId("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123", ACCOUNT_ID);
         verify(repository, never()).findByNameAndAccountId(anyString(), anyString());
     }
 
@@ -464,7 +490,7 @@ public class EncryptionProfileServiceTest {
         EncryptionProfile encryptionProfile = assertDoesNotThrow(() ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileByNameOrCrn(null)));
 
-        verify(repository, never()).findByResourceCrn(any());
+        verify(repository, never()).findByResourceCrnAndAccountId(any(), any());
         verify(repository, never()).findByNameAndAccountId(any(), any());
         assertThat(encryptionProfile).isNull();
     }
@@ -473,12 +499,12 @@ public class EncryptionProfileServiceTest {
     void testGetEncryptionProfileByNameOrCrnWhenEncryptionProfileIsNotFoundByCrn() {
         String encryptionProfileNameOrCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
 
-        when(repository.findByResourceCrn(encryptionProfileNameOrCrn)).thenReturn(Optional.empty());
+        when(repository.findByResourceCrnAndAccountId(encryptionProfileNameOrCrn, ACCOUNT_ID)).thenReturn(Optional.empty());
 
         NotFoundException ex = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn)));
 
-        verify(repository, times(1)).findByResourceCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+        verify(repository, times(1)).findByResourceCrnAndAccountId("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123", ACCOUNT_ID);
         verify(repository, never()).findByNameAndAccountId(anyString(), anyString());
         assertThat(ex).hasMessage("Encryption Profile not found with crn: crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
     }
@@ -492,7 +518,7 @@ public class EncryptionProfileServiceTest {
         NotFoundException ex = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn)));
 
-        verify(repository, never()).findByResourceCrn(any());
+        verify(repository, never()).findByResourceCrnAndAccountId(any(), any());
         verify(repository, times(1)).findByNameAndAccountId(eq("epName"), anyString());
         assertThat(ex).hasMessage("Encryption Profile not found with name: epName");
 
@@ -528,9 +554,10 @@ public class EncryptionProfileServiceTest {
     @Test
     void testSetEncryptionProfile() {
         Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
         EncryptionProfile encryptionProfile = getTestEncryptionProfile();
 
-        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.of(encryptionProfile));
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.of(encryptionProfile));
 
         underTest.setEncryptionProfile(environment, ENCRYPTION_PROFILE_CRN);
 
@@ -540,8 +567,9 @@ public class EncryptionProfileServiceTest {
     @Test
     void testSetEncryptionProfileWhenEncryptionProfileDoesNotExist() {
         Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
 
-        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.empty());
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn()).thenReturn(getDefaultEncryptionProfileCrnMap());
 
         assertThatThrownBy(() -> underTest.setEncryptionProfile(environment, ENCRYPTION_PROFILE_CRN))

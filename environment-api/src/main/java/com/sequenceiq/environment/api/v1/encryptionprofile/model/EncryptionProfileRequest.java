@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.encryptionprofile.model;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -22,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @ValidEncryptionProfileRequest
 public class EncryptionProfileRequest {
 
+    @NotBlank(message = "The encryption profile's name must not be blank")
     @Size(max = 100, min = 5, message = "The length of the encryption-profile's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name of the encryption-profile can only contain lowercase alphanumeric characters and hyphens " +

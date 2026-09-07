@@ -133,14 +133,14 @@ public class EncryptionProfileControllerTest {
         EncryptionProfile profile = new EncryptionProfile();
         EncryptionProfileResponse expectedResponse = new EncryptionProfileResponse();
 
-        when(encryptionProfileService.getByCrn(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(profile);
+        when(encryptionProfileService.getByCrn(eq(ENCRYPTION_PROFILE_CRN), eq(ACCOUNT_ID))).thenReturn(profile);
         when(responseConverter.convert(profile)).thenReturn(expectedResponse);
 
         EncryptionProfileResponse actualResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.getByCrn(ENCRYPTION_PROFILE_CRN));
 
         assertThat(actualResponse).isEqualTo(expectedResponse);
 
-        verify(encryptionProfileService).getByCrn(eq(ENCRYPTION_PROFILE_CRN));
+        verify(encryptionProfileService).getByCrn(eq(ENCRYPTION_PROFILE_CRN), eq(ACCOUNT_ID));
         verify(responseConverter).convert(profile);
     }
 
@@ -189,14 +189,14 @@ public class EncryptionProfileControllerTest {
         EncryptionProfile profile = new EncryptionProfile();
         EncryptionProfileResponse expectedResponse = new EncryptionProfileResponse();
 
-        when(encryptionProfileService.deleteByResourceCrn(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(profile);
+        when(encryptionProfileService.deleteByResourceCrn(eq(ENCRYPTION_PROFILE_CRN), eq(ACCOUNT_ID))).thenReturn(profile);
         when(responseConverter.convert(profile)).thenReturn(expectedResponse);
 
         EncryptionProfileResponse actualResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.deleteByCrn(ENCRYPTION_PROFILE_CRN));
 
         assertThat(actualResponse).isEqualTo(expectedResponse);
 
-        verify(encryptionProfileService).deleteByResourceCrn(eq(ENCRYPTION_PROFILE_CRN));
+        verify(encryptionProfileService).deleteByResourceCrn(eq(ENCRYPTION_PROFILE_CRN), eq(ACCOUNT_ID));
         verify(responseConverter).convert(profile);
         verify(webSocketNotificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_DELETED), any(), Optional.ofNullable(any()));
     }

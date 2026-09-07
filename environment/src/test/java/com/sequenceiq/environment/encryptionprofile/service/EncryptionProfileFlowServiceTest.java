@@ -65,7 +65,7 @@ public class EncryptionProfileFlowServiceTest {
 
         when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByCrnAndAccountId(eq("crn:cdp:environments:us-west-1:tenant:environment:envCrn"), any())).thenReturn(environmentDto);
-        when(encryptionProfileService.getByCrn(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfile);
+        when(encryptionProfileService.getByCrn(eq(ENCRYPTION_PROFILE_CRN), any())).thenReturn(encryptionProfile);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.enableEncryptionProfileByCrn(
                 NameOrCrn.ofCrn("crn:cdp:environments:us-west-1:tenant:environment:envCrn"), ENCRYPTION_PROFILE_CRN));

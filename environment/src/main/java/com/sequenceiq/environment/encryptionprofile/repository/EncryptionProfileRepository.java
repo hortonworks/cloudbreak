@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.encryptionprofile.respository;
+package com.sequenceiq.environment.encryptionprofile.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +24,8 @@ public interface EncryptionProfileRepository extends JpaRepository<EncryptionPro
             @Param("name") String name,
             @Param("accountId") String accountId);
 
-    @Query("SELECT e FROM EncryptionProfile e WHERE e.resourceCrn = :resourceCrn AND e.archived = FALSE")
-    Optional<EncryptionProfile> findByResourceCrn(@Param("resourceCrn") String resourceCrn);
+    @Query("SELECT e FROM EncryptionProfile e WHERE e.resourceCrn = :resourceCrn AND e.accountId = :accountId AND e.archived = FALSE")
+    Optional<EncryptionProfile> findByResourceCrnAndAccountId(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(e.id, e.resourceCrn) FROM EncryptionProfile e " +
             "WHERE e.accountId = :accountId AND e.archived = FALSE")

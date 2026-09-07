@@ -50,7 +50,7 @@ public class EncryptionProfileService {
     @Inject
     private EnvironmentConfigProvider environmentConfigProvider;
 
-    public String getEncryptionProfileByCrnOrDefault(DetailedEnvironmentResponse environmentResponse, StackDtoDelegate stackDto) {
+    public String getEffectiveEncryptionProfileCrn(DetailedEnvironmentResponse environmentResponse, StackDtoDelegate stackDto) {
         ClusterView clusterView = stackDto.getCluster();
         String encryptionProfileCrn;
 
@@ -166,7 +166,7 @@ public class EncryptionProfileService {
         DetailedEnvironmentResponse environment = environmentResponse != null
                 ? environmentResponse
                 : environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
-        String crn = getEncryptionProfileByCrnOrDefault(environment, stackDto);
+        String crn = getEffectiveEncryptionProfileCrn(environment, stackDto);
 
         return getEncryptionProfileByCrnOrDefault(crn);
     }

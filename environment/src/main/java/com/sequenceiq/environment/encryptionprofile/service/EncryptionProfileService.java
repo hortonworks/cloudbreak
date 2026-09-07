@@ -36,7 +36,7 @@ import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
-import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
+import com.sequenceiq.environment.encryptionprofile.repository.EncryptionProfileRepository;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 
@@ -168,16 +168,16 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                 .collect(Collectors.toList());
     }
 
-    public EncryptionProfile getByCrnOrDefault(String encryptionProfileCrn) {
+    public EncryptionProfile getByCrnOrDefault(String encryptionProfileCrn, String accountId) {
         if (StringUtils.isNotEmpty(encryptionProfileCrn)) {
-            return getByCrn(encryptionProfileCrn);
+            return getByCrn(encryptionProfileCrn, accountId);
         } else {
             return getClouderaDefaultEncryptionProfile();
         }
     }
 
-    public EncryptionProfile getByCrn(String encryptionProfileCrn) {
-        Optional<EncryptionProfile> encryptionProfileOp = repository.findByResourceCrn(encryptionProfileCrn);
+    public EncryptionProfile getByCrn(String encryptionProfileCrn, String accountId) {
+        Optional<EncryptionProfile> encryptionProfileOp = repository.findByResourceCrnAndAccountId(encryptionProfileCrn, accountId);
         if (encryptionProfileOp.isPresent()) {
             return encryptionProfileOp.get();
         } else {
@@ -205,10 +205,10 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         return encryptionProfile;
     }
 
-    public EncryptionProfile deleteByResourceCrn(String crn) {
+    public EncryptionProfile deleteByResourceCrn(String crn, String accountId) {
         LOGGER.debug("Delete encryption profile with CRN: {} is received.", crn);
 
-        EncryptionProfile encryptionProfile = repository.findByResourceCrn(crn)
+        EncryptionProfile encryptionProfile = repository.findByResourceCrnAndAccountId(crn, accountId)
                 .orElseThrow(notFound("Encryption profile with crn", crn));
 
         checkEncryptionProfileCanBeDeleted(encryptionProfile);
@@ -231,7 +231,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     }
 
     private String createCRN(String accountId) {
-        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ENCYRPTION_PROFILE, accountId);
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ENCRYPTION_PROFILE, accountId);
     }
 
     private void checkEncryptionProfileCanBeDeleted(EncryptionProfile encryptionProfile) {
@@ -303,17 +303,18 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     public void setEncryptionProfile(Environment environment, String encryptionProfileCrn) {
         LOGGER.info("Enabling encryption profile for environment {}, env crn: {}, encryption profile crn: {}", environment.getName(),
                 environment.getResourceCrn(), encryptionProfileCrn);
-        EncryptionProfile encryptionProfile = getByCrn(encryptionProfileCrn);
+        EncryptionProfile encryptionProfile = getByCrn(encryptionProfileCrn, environment.getAccountId());
         environment.setEncryptionProfileCrn(encryptionProfile.getResourceCrn());
     }
 
     public EncryptionProfile getEncryptionProfileByNameOrCrn(String encryptionProfileNameOrCrn) {
         EncryptionProfile encryptionProfile = null;
         if (StringUtils.isNotBlank(encryptionProfileNameOrCrn)) {
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
             if (Crn.isCrn(encryptionProfileNameOrCrn)) {
-                encryptionProfile = getByCrnOrDefault(encryptionProfileNameOrCrn);
+                encryptionProfile = getByCrnOrDefault(encryptionProfileNameOrCrn, accountId);
             } else {
-                encryptionProfile = getByNameAndAccountId(encryptionProfileNameOrCrn, ThreadBasedUserCrnProvider.getAccountId());
+                encryptionProfile = getByNameAndAccountId(encryptionProfileNameOrCrn, accountId);
             }
         }
 

@@ -90,7 +90,8 @@ public class EncryptionProfileController extends WebSocketNotificationController
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE)
     public EncryptionProfileResponse getByCrn(@ResourceCrn String encryptionProfileCrn) {
-        EncryptionProfile encryptionProfile = encryptionProfileService.getByCrn(encryptionProfileCrn);
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EncryptionProfile encryptionProfile = encryptionProfileService.getByCrn(encryptionProfileCrn, accountId);
         return encryptionProfileResponseConverter.convert(encryptionProfile);
     }
 
@@ -130,7 +131,7 @@ public class EncryptionProfileController extends WebSocketNotificationController
 
         verifyEncryptionProfileEntitlement(accountId);
 
-        EncryptionProfile deletedEncryptionProfile = encryptionProfileService.deleteByResourceCrn(crn);
+        EncryptionProfile deletedEncryptionProfile = encryptionProfileService.deleteByResourceCrn(crn, accountId);
         notify(ResourceEvent.ENCRYPTION_PROFILE_DELETED);
         return encryptionProfileResponseConverter.convert(deletedEncryptionProfile);
     }

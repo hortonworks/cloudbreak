@@ -81,10 +81,11 @@ public class EncryptionProfileFlowService {
     }
 
     private EncryptionProfile getEncryptionProfileByNameOrCrn(String nameOrCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (Crn.isCrn(nameOrCrn)) {
-            return encryptionProfileService.getByCrn(nameOrCrn);
+            return encryptionProfileService.getByCrn(nameOrCrn, accountId);
         } else {
-            return encryptionProfileService.getByNameAndAccountId(nameOrCrn, ThreadBasedUserCrnProvider.getAccountId());
+            return encryptionProfileService.getByNameAndAccountId(nameOrCrn, accountId);
         }
     }
 }

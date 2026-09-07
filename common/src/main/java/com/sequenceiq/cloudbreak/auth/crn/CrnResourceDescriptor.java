@@ -48,7 +48,7 @@ public enum CrnResourceDescriptor {
     COMPUTE_DOCKER_CONFIG(Crn.ResourceType.DOCKER_CONFIG, Crn.Service.COMPUTE),
     COMPUTE_CLUSTER(Crn.ResourceType.CLUSTER, Crn.Service.COMPUTE),
     HYBRID(Crn.ResourceType.PVC_CONTROL_PLANE, Crn.Service.HYBRID),
-    ENCYRPTION_PROFILE(Crn.ResourceType.ENCRYPTION_PROFILE, Crn.Service.ENVIRONMENTS),
+    ENCRYPTION_PROFILE(Crn.ResourceType.ENCRYPTION_PROFILE, Crn.Service.ENVIRONMENTS),
     APP(Crn.ResourceType.APP, Crn.Service.APP_FACTORY),
     USERSYNC(Crn.ResourceType.USERSYNC, Crn.Service.ENVIRONMENTS),
     // for authz use cases
