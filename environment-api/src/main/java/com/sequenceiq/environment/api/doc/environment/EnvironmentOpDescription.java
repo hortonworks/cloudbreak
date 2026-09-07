@@ -26,6 +26,8 @@ public class EnvironmentOpDescription {
     public static final String CREATE_DISTRIBUTION_LIST = "Create distribution list by environment crn.";
     public static final String EDIT_BY_NAME = "Edit an environment by name. Location, regions and description can be changed.";
     public static final String EDIT_BY_CRN = "Edit an environment by CRN. Location, regions and description can be changed.";
+    public static final String DELETE_TAGS_BY_NAME = "Delete user-defined tags from an environment by name and cascade the deletion to child resources.";
+    public static final String DELETE_TAGS_BY_CRN = "Delete user-defined tags from an environment by CRN and cascade the deletion to child resources.";
     public static final String START_BY_NAME = "Start an environment by name. The freeipa, datalake and datahubs will be started in this order";
     public static final String START_BY_CRN = "Start an environment by CRN. The freeipa, datalake and datahubs will be started in this order";
     public static final String STOP_BY_NAME = "Stop an environment by name. The datahubs, datalake and freeipa will be stopped in this order";

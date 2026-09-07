@@ -32,6 +32,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDeleteTagsRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -117,6 +118,14 @@ public interface EnvironmentEndpoint {
             operationId = "editEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetailedEnvironmentResponse editByName(@PathParam("name") String environmentName, @NotNull @Valid EnvironmentEditRequest request);
+
+    @POST
+    @Path("/name/{name}/deleteTags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = EnvironmentOpDescription.DELETE_TAGS_BY_NAME, description = ENVIRONMENT_NOTES,
+            operationId = "deleteEnvironmentTagsByNameV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DetailedEnvironmentResponse deleteTagsByName(@PathParam("name") String environmentName, @NotNull @Valid EnvironmentDeleteTagsRequest request);
 
     @GET
     @Path("")
@@ -220,6 +229,15 @@ public interface EnvironmentEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @NotNull @Valid EnvironmentEditRequest request);
+
+    @POST
+    @Path("/crn/{crn}/deleteTags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = EnvironmentOpDescription.DELETE_TAGS_BY_CRN, description = ENVIRONMENT_NOTES,
+            operationId = "deleteEnvironmentTagsByCrnV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DetailedEnvironmentResponse deleteTagsByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @NotNull @Valid EnvironmentDeleteTagsRequest request);
 
     @PUT
     @Path("/crn/{crn}/change_credential")

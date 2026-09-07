@@ -3,7 +3,9 @@ package com.sequenceiq.environment.environment.domain;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -68,6 +70,37 @@ class EnvironmentTagsTest {
         assertThat(result.getDefaultTags()).isEqualTo(defaultTags);
         assertThat(result.getUserDefinedTags()).isNotNull();
         assertThat(result.getUserDefinedTags()).isEqualTo(userDefinedTags);
+    }
+
+    @Test
+    void removeUserDefinedTagsRemovesSpecifiedKeys() {
+        EnvironmentTags environmentTags = new EnvironmentTags(
+                new HashMap<>(Map.of("owner", "john doe", "project", "atlas")),
+                new HashMap<>(Map.of("creation-timestamp", "1773042126")));
+
+        EnvironmentTags result = environmentTags.removeUserDefinedTags(Set.of("owner"));
+
+        assertThat(result.getUserDefinedTags()).containsExactly(Map.entry("project", "atlas"));
+        assertThat(result.getDefaultTags()).containsExactly(Map.entry("creation-timestamp", "1773042126"));
+    }
+
+    @Test
+    void removeUserDefinedTagsIsNoOpForMissingKeys() {
+        EnvironmentTags environmentTags = new EnvironmentTags(Map.of("project", "atlas"), Map.of());
+
+        EnvironmentTags result = environmentTags.removeUserDefinedTags(Set.of("missing"));
+
+        assertThat(result.getUserDefinedTags()).containsExactly(Map.entry("project", "atlas"));
+    }
+
+    @Test
+    void removeUserDefinedTagsHandlesNullUserDefinedTags() {
+        EnvironmentTags environmentTags = new EnvironmentTags(null, Map.of("creation-timestamp", "1773042126"));
+
+        EnvironmentTags result = environmentTags.removeUserDefinedTags(Set.of("owner"));
+
+        assertThat(result.getUserDefinedTags()).isEmpty();
+        assertThat(result.getDefaultTags()).containsExactly(Map.entry("creation-timestamp", "1773042126"));
     }
 
 }

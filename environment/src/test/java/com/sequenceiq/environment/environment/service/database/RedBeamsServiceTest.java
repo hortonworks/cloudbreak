@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -136,5 +137,32 @@ class RedBeamsServiceTest {
         verify(flowEndpoint, never()).hasFlowRunningByFlowId(flowIdentifier.getPollableId());
         verify(flowEndpoint, never()).hasFlowRunningByChainId(flowIdentifier.getPollableId());
         assertEquals("Stack flow is not triggered", ex.getMessage());
+    }
+
+    @Test
+    public void testTriggerUserDefinedTagsDelete() {
+        String crn = "crn";
+        Set<String> tagKeys = Set.of("custom");
+
+        ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
+                redBeamsService.triggerUserDefinedTagsDelete(crn, tagKeys));
+
+        verify(databaseServerV4Endpoint).deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys));
+    }
+
+    @Test
+    public void testTriggerUserDefinedTagsDeleteWhenWebApplicationException() {
+        String crn = "crn";
+        Set<String> tagKeys = Set.of("custom");
+
+        WebApplicationException webApplicationException = new WebApplicationException("Error");
+        when(databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys))).thenThrow(webApplicationException);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("Extracted error message");
+
+        RedbeamsOperationFailedException redbeamsOperationFailedException = assertThrows(
+                RedbeamsOperationFailedException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
+                        redBeamsService.triggerUserDefinedTagsDelete(crn, tagKeys)));
+        assertEquals("Extracted error message", redbeamsOperationFailedException.getMessage());
     }
 }

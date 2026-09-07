@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +69,12 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
 
-        if (experienceScanEnabled) {
+        if (tagsToRemove != null && !tagsToRemove.isEmpty()) {
+            // CB-34078: propagate environment tag deletion to experiences
+            LOGGER.debug("Experience tag deletion is skipped for environment {}.", resourceCrn);
+        } else if (experienceScanEnabled) {
             Optional<Environment> environmentOpt = environmentService.findEnvironmentById(resourceId);
             if (environmentOpt.isEmpty()) {
                 LOGGER.warn("Environment not found with id: {}, skipping experience tag distribution.", resourceId);
@@ -92,6 +97,7 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
                 .withResourceName(resourceName)
                 .withResourceCrn(resourceCrn)
                 .withUserDefinedTags(userDefinedTags)
+                .withTagsToRemove(tagsToRemove)
                 .build();
     }
 

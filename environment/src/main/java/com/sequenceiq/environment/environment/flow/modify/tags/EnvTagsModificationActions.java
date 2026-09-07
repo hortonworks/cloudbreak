@@ -13,6 +13,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -53,12 +54,14 @@ public class EnvTagsModificationActions {
                 String resourceName = payload.getResourceName();
                 String resourceCrn = payload.getResourceCrn();
                 Map<String, String> tags = payload.getUserDefinedTags();
+                Set<String> tagsToRemove = payload.getTagsToRemove();
                 EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
                         .withSelector(nextEvent)
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)
                         .withUserDefinedTags(tags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
                 sendEvent(context, nextEvent, event);
             }
@@ -88,12 +91,14 @@ public class EnvTagsModificationActions {
                 String resourceName = payload.getResourceName();
                 String resourceCrn = payload.getResourceCrn();
                 Map<String, String> tags = payload.getUserDefinedTags();
+                Set<String> tagsToRemove = payload.getTagsToRemove();
                 EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
                         .withSelector(nextEvent)
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)
                         .withUserDefinedTags(tags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
                 sendEvent(context, nextEvent, event);
             }
@@ -127,12 +132,14 @@ public class EnvTagsModificationActions {
                 String resourceName = payload.getResourceName();
                 String resourceCrn = payload.getResourceCrn();
                 Map<String, String> tags = payload.getUserDefinedTags();
+                Set<String> tagsToRemove = payload.getTagsToRemove();
                 EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
                         .withSelector(nextEvent)
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)
                         .withUserDefinedTags(tags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
                 sendEvent(context, nextEvent, event);
             }
@@ -167,12 +174,14 @@ public class EnvTagsModificationActions {
                 String resourceName = payload.getResourceName();
                 String resourceCrn = payload.getResourceCrn();
                 Map<String, String> tags = payload.getUserDefinedTags();
+                Set<String> tagsToRemove = payload.getTagsToRemove();
                 EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
                         .withSelector(nextEvent)
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)
                         .withUserDefinedTags(tags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
                 sendEvent(context, nextEvent, event);
             }
@@ -207,12 +216,14 @@ public class EnvTagsModificationActions {
                 String resourceName = payload.getResourceName();
                 String resourceCrn = payload.getResourceCrn();
                 Map<String, String> tags = payload.getUserDefinedTags();
+                Set<String> tagsToRemove = payload.getTagsToRemove();
                 EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
                         .withSelector(nextEvent)
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)
                         .withUserDefinedTags(tags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
                 sendEvent(context, nextEvent, event);
             }
@@ -247,12 +258,14 @@ public class EnvTagsModificationActions {
                 String resourceName = payload.getResourceName();
                 String resourceCrn = payload.getResourceCrn();
                 Map<String, String> tags = payload.getUserDefinedTags();
+                Set<String> tagsToRemove = payload.getTagsToRemove();
                 EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
                         .withSelector(nextEvent)
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)
                         .withUserDefinedTags(tags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
                 sendEvent(context, nextEvent, event);
             }
@@ -281,12 +294,14 @@ public class EnvTagsModificationActions {
                 String resourceName = payload.getResourceName();
                 String resourceCrn = payload.getResourceCrn();
                 Map<String, String> tags = payload.getUserDefinedTags();
+                Set<String> tagsToRemove = payload.getTagsToRemove();
                 EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
                         .withSelector(nextEvent)
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)
                         .withUserDefinedTags(tags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
                 sendEvent(context, nextEvent, event);
             }

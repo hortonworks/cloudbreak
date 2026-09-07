@@ -359,7 +359,7 @@ public class EnvironmentReactorFlowManager {
         return sendEvent(event, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
-    public FlowIdentifier triggerEnvironmentTagsModification(Environment environment, Map<String, String> userDefinedTags) {
+    public FlowIdentifier triggerEnvironmentTagsModification(Environment environment, Map<String, String> userDefinedTags, Set<String> tagsToRemove) {
         LOGGER.info("Environment tags modification flow triggered.");
         EnvTagsModificationEvent envTagsModificationEvent =
                 EnvTagsModificationEvent.builder()
@@ -369,6 +369,7 @@ public class EnvironmentReactorFlowManager {
                         .withResourceName(environment.getName())
                         .withResourceCrn(environment.getResourceCrn())
                         .withUserDefinedTags(userDefinedTags)
+                        .withTagsToRemove(tagsToRemove)
                         .build();
         return sendEvent(envTagsModificationEvent, ThreadBasedUserCrnProvider.getUserCrn());
     }

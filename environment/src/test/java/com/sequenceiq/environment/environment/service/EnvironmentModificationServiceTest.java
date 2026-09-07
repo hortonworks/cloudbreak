@@ -88,6 +88,8 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.service.ProxyConfigModificationService;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -1109,7 +1111,7 @@ class EnvironmentModificationServiceTest {
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
-        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags);
+        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags, Set.of());
         ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(savedCaptor.capture());
         Environment saved = savedCaptor.getValue();
@@ -1133,7 +1135,7 @@ class EnvironmentModificationServiceTest {
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
-        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any());
+        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any(), any());
         ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(savedCaptor.capture());
         Environment saved = savedCaptor.getValue();
@@ -1152,7 +1154,52 @@ class EnvironmentModificationServiceTest {
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
-        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any());
+        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any(), any());
+    }
+
+    @Test
+    void deleteTagsByEnvironmentName() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        environment.setTags(new Json(new EnvironmentTags(new HashMap<>(Map.of("owner", "john doe", "project", "atlas")),
+                new HashMap<>(Map.of("creation-timestamp", "1773042126")))));
+        EnvironmentDto environmentDto = EnvironmentDto.builder().build();
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(ENVIRONMENT_NAME, ACCOUNT_ID)).thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenReturn(environment);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(environmentDto);
+        when(validatorService.validateTagKeysToRemove(eq(Set.of("owner")), any(EnvironmentTags.class), eq("AWS")))
+                .thenReturn(ValidationResult.builder().build());
+        Json updatedTags = new Json(new EnvironmentTags(new HashMap<>(Map.of("project", "atlas")),
+                new HashMap<>(Map.of("creation-timestamp", "1773042126"))));
+        when(environmentTagsDtoConverter.getTagsAfterRemovingUserDefinedKeys(any(EnvironmentTags.class), eq(Set.of("owner"))))
+                .thenReturn(updatedTags);
+        when(environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, Map.of(), Set.of("owner")))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
+
+        EnvironmentDto result = environmentModificationServiceUnderTest.deleteUserDefinedTagsByEnvironmentName(ACCOUNT_ID, ENVIRONMENT_NAME, Set.of("owner"));
+
+        assertThat(result).isSameAs(environmentDto);
+        assertThat(environment.getEnvironmentTags().getUserDefinedTags()).containsExactly(Map.entry("project", "atlas"));
+        verify(environmentTagsDtoConverter).getTagsAfterRemovingUserDefinedKeys(any(EnvironmentTags.class), eq(Set.of("owner")));
+        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, Map.of(), Set.of("owner"));
+    }
+
+    @Test
+    void deleteTagsByEnvironmentNameValidationFailure() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        environment.setTags(new Json(new EnvironmentTags(new HashMap<>(Map.of("project", "atlas")),
+                new HashMap<>(Map.of("creation-timestamp", "1773042126")))));
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(ENVIRONMENT_NAME, ACCOUNT_ID)).thenReturn(Optional.of(environment));
+        when(validatorService.validateTagKeysToRemove(eq(Set.of("creation-timestamp")), any(EnvironmentTags.class), eq("AWS")))
+                .thenReturn(ValidationResult.builder().error("default").build());
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> environmentModificationServiceUnderTest.deleteUserDefinedTagsByEnvironmentName(ACCOUNT_ID, ENVIRONMENT_NAME,
+                        Set.of("creation-timestamp")));
+
+        assertThat(exception.getMessage()).contains("default");
+        verify(environmentService, never()).save(any());
     }
 
     @NullSource

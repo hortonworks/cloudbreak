@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -27,6 +28,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.cloud.TagKeyNormalizer;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -84,6 +87,9 @@ class EnvironmentTagsDtoConverterTest {
 
     @Mock
     private UserDefinedTagValidator userDefinedTagValidator;
+
+    @Mock
+    private CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
 
     @InjectMocks
     private EnvironmentTagsDtoConverter underTest;
@@ -289,6 +295,43 @@ class EnvironmentTagsDtoConverterTest {
 
         assertThat(result.hasError()).isTrue();
         assertThat(result.getFormattedErrors()).contains("owner");
+    }
+
+    @Test
+    void validateUserDefinedTagKeysToRemoveShouldDelegateToUserDefinedTagValidator() {
+        EnvironmentTags existingTags = new EnvironmentTags(Map.of(), Map.of("owner", "originalowner"));
+        when(tagKeyNormalizerProvider.forPlatform(CLOUD_PLATFORM_AWS)).thenReturn(TagKeyNormalizer.IDENTITY);
+        when(userDefinedTagValidator.validateTagKeysToRemove(List.of("owner"), existingTags.getDefaultTags(), Map.of(), TagKeyNormalizer.IDENTITY))
+                .thenReturn(ValidationResult.builder().error("protected").build());
+
+        ValidationResult result = underTest.validateUserDefinedTagKeysToRemove(List.of("owner"), existingTags, CLOUD_PLATFORM_AWS);
+
+        assertThat(result.hasError()).isTrue();
+        assertThat(result.getFormattedErrors()).contains("protected");
+    }
+
+    @Test
+    void validateUserDefinedTagKeysToRemoveShouldTreatNullEnvironmentTagsAsEmptyDefaultTags() {
+        when(tagKeyNormalizerProvider.forPlatform(CLOUD_PLATFORM_AWS)).thenReturn(TagKeyNormalizer.IDENTITY);
+        when(userDefinedTagValidator.validateTagKeysToRemove(List.of("custom"), Map.of(), Map.of(), TagKeyNormalizer.IDENTITY))
+                .thenReturn(ValidationResult.builder().build());
+
+        ValidationResult result = underTest.validateUserDefinedTagKeysToRemove(List.of("custom"), null, CLOUD_PLATFORM_AWS);
+
+        assertThat(result.hasError()).isFalse();
+    }
+
+    @Test
+    void getTagsAfterRemovingUserDefinedKeysShouldReturnUpdatedJson() {
+        EnvironmentTags existingTags = new EnvironmentTags(
+                new HashMap<>(Map.of("owner", "john doe", "project", "atlas")),
+                new HashMap<>(Map.of("creation-timestamp", "1773042126")));
+
+        Json result = underTest.getTagsAfterRemovingUserDefinedKeys(existingTags, List.of("owner"));
+
+        EnvironmentTags resultTags = JsonUtil.readValueOpt(result.getValue(), EnvironmentTags.class).orElseThrow();
+        assertThat(resultTags.getUserDefinedTags()).containsExactly(Map.entry("project", "atlas"));
+        assertThat(resultTags.getDefaultTags()).containsExactly(Map.entry("creation-timestamp", "1773042126"));
     }
 
     @Test

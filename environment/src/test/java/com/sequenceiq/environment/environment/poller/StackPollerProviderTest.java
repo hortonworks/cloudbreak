@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.poller;
 import static com.sequenceiq.flow.api.model.FlowType.FLOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -13,11 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,12 +31,17 @@ import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.core.AttemptState;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.flow.config.update.EnvStackConfigUpdatesState;
 import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.environment.exception.StackOperationFailedException;
+import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 public class StackPollerProviderTest {
@@ -136,6 +144,60 @@ public class StackPollerProviderTest {
         assertEquals(expectedResult, result.getState());
     }
 
+    @ParameterizedTest
+    @MethodSource("userDefinedTagsDeleteStates")
+    void testUserDefinedTagsDeletePoller(Exception crn1Exception, Exception crn2Exception, AttemptState expectedResult) throws Exception {
+        List<String> stackCrns = new ArrayList<>();
+        stackCrns.add("crn1");
+        stackCrns.add("crn2");
+        Set<String> tagKeys = Set.of("key1");
+
+        FlowIdentifier flow1 = new FlowIdentifier(FLOW, "flow-crn1");
+        FlowIdentifier flow2 = new FlowIdentifier(FLOW, "flow-crn2");
+
+        if (crn1Exception != null) {
+            doThrow(crn1Exception).when(stackService).triggerUserDefinedTagsDelete("crn1", tagKeys);
+        } else {
+            when(stackService.triggerUserDefinedTagsDelete("crn1", tagKeys)).thenReturn(flow1);
+        }
+        if (crn2Exception != null) {
+            doThrow(crn2Exception).when(stackService).triggerUserDefinedTagsDelete("crn2", tagKeys);
+        } else {
+            when(stackService.triggerUserDefinedTagsDelete("crn2", tagKeys)).thenReturn(flow2);
+        }
+
+        stubFlowResultPollerEvaluator();
+
+        AttemptResult<List<FlowIdentifier>> result = underTest.userDefinedTagsDeletePoller(stackCrns, 1L, tagKeys).process();
+
+        assertEquals(expectedResult, result.getState());
+    }
+
+    @Test
+    void testUserDefinedTagsDeletePollerRetainsFlowIdentifiersAcrossAttempts() throws Exception {
+        Set<String> tagKeys = Set.of("key1");
+        FlowIdentifier flow1 = new FlowIdentifier(FLOW, "flow-crn1");
+        FlowIdentifier flow2 = new FlowIdentifier(FLOW, "flow-crn2");
+
+        when(stackService.triggerUserDefinedTagsDelete("crn1", tagKeys)).thenReturn(flow1);
+        when(stackService.triggerUserDefinedTagsDelete("crn2", tagKeys))
+                .thenThrow(flowRunningConflict())
+                .thenReturn(flow2);
+        stubFlowResultPollerEvaluator();
+
+        AttemptMaker<List<FlowIdentifier>> attemptMaker =
+                underTest.userDefinedTagsDeletePoller(List.of("crn1", "crn2"), 1L, tagKeys);
+
+        AttemptResult<List<FlowIdentifier>> firstResult = attemptMaker.process();
+        assertEquals(AttemptState.CONTINUE, firstResult.getState());
+
+        AttemptResult<List<FlowIdentifier>> secondResult = attemptMaker.process();
+        assertEquals(AttemptState.FINISH, secondResult.getState());
+        assertEquals(List.of(flow1, flow2), secondResult.getResult());
+        verify(stackService, times(1)).triggerUserDefinedTagsDelete("crn1", tagKeys);
+        verify(stackService, times(2)).triggerUserDefinedTagsDelete("crn2", tagKeys);
+    }
+
     private static Stream<Arguments> userDefinedTagsUpdateStates() {
         return Stream.of(
                 Arguments.of(null, null, AttemptState.FINISH),
@@ -143,6 +205,36 @@ public class StackPollerProviderTest {
                 Arguments.of(new BadRequestException("flow running"), new BadRequestException("flow running"), AttemptState.CONTINUE),
                 Arguments.of(new WebApplicationException("some 500 error"), null, AttemptState.BREAK)
         );
+    }
+
+    private static Stream<Arguments> userDefinedTagsDeleteStates() {
+        return Stream.of(
+                Arguments.of(null, null, AttemptState.FINISH),
+                Arguments.of(flowRunningConflict(), null, AttemptState.CONTINUE),
+                Arguments.of(flowRunningConflict(), flowRunningConflict(), AttemptState.CONTINUE),
+                Arguments.of(new WebApplicationException("some 500 error"), null, AttemptState.BREAK)
+        );
+    }
+
+    @Test
+    void testUserDefinedTagsDeletePollerRetriesWhenServiceWrapsConflict() throws Exception {
+        StackV4Endpoint stackV4Endpoint = mock(StackV4Endpoint.class);
+        StackService realStackService = new StackService(stackV4Endpoint, mock(FlowCancelService.class), flowLogDBService,
+                new WebApplicationExceptionMessageExtractor(), mock(FlowEndpoint.class));
+        StackPollerProvider providerWithRealService = new StackPollerProvider(realStackService, flowLogDBService, flowResultPollerEvaluator);
+        Set<String> tagKeys = Set.of("key1");
+        when(stackV4Endpoint.triggerUserDefinedTagsDeleteInternal(eq(0L), eq("crn1"), any()))
+                .thenThrow(new WebApplicationException(Response.status(Response.Status.CONFLICT).build()));
+        stubFlowResultPollerEvaluator();
+
+        AttemptResult<List<FlowIdentifier>> result = providerWithRealService.userDefinedTagsDeletePoller(List.of("crn1"), 1L, tagKeys).process();
+
+        assertEquals(AttemptState.CONTINUE, result.getState());
+    }
+
+    private static StackOperationFailedException flowRunningConflict() {
+        return new StackOperationFailedException("Cluster has flow running already",
+                new WebApplicationException(Response.status(Response.Status.CONFLICT).build()));
     }
 
     @SuppressWarnings("unchecked")

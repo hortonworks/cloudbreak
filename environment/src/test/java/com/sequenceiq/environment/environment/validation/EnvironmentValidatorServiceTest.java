@@ -13,6 +13,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -39,6 +41,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
@@ -680,6 +683,18 @@ class EnvironmentValidatorServiceTest {
 
         ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto, "accountId");
         assertEquals(!valid, validationResult.hasError());
+    }
+
+    @Test
+    void validateTagKeysToRemoveShouldDelegateToEnvironmentTagsDtoConverter() {
+        EnvironmentTags environmentTags = new EnvironmentTags(Map.of("project", "atlas"), Map.of("owner", "originalowner"));
+        when(environmentTagsDtoConverter.validateUserDefinedTagKeysToRemove(List.of("owner"), environmentTags, "AWS"))
+                .thenReturn(ValidationResult.builder().error("protected").build());
+
+        ValidationResult result = underTest.validateTagKeysToRemove(List.of("owner"), environmentTags, "AWS");
+
+        assertThat(result.hasError()).isTrue();
+        assertThat(result.getFormattedErrors()).contains("protected");
     }
 
 }

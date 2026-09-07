@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,13 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
-            stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.WORKLOAD);
+            if (tagsToRemove == null || tagsToRemove.isEmpty()) {
+                stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.WORKLOAD);
+            } else {
+                stackPollerService.deleteUserDefinedTagsOnStacks(resourceId, resourceCrn, tagsToRemove, StackType.WORKLOAD);
+            }
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on Data Hubs failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED, e);
@@ -53,6 +59,7 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
                 .withResourceName(resourceName)
                 .withResourceCrn(resourceCrn)
                 .withUserDefinedTags(userDefinedTags)
+                .withTagsToRemove(tagsToRemove)
                 .build();
     }
 

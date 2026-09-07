@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -238,6 +240,26 @@ class FreeIpaServiceTest {
         when(freeIpaV1Endpoint.triggerUserDefinedTagsUpdateInternal(ENVCRN, userDefinedTags)).thenThrow(new WebApplicationException("Error"));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(ENVCRN, userDefinedTags)))
+                .hasMessage("custom error")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
+    @Test
+    void triggerUserDefinedTagsDelete() {
+        Set<String> tagKeys = Set.of("owner");
+
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsDelete(ENVCRN, tagKeys));
+
+        verify(freeIpaV1Endpoint).deleteUserDefinedTagsByCrn(ENVCRN, new DeleteUserDefinedTagsRequest(tagKeys));
+    }
+
+    @Test
+    void triggerUserDefinedTagsDeleteFailureTest() {
+        Set<String> tagKeys = Set.of("owner");
+
+        when(freeIpaV1Endpoint.deleteUserDefinedTagsByCrn(ENVCRN, new DeleteUserDefinedTagsRequest(tagKeys))).thenThrow(new WebApplicationException("Error"));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsDelete(ENVCRN, tagKeys)))
                 .hasMessage("custom error")
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
     }

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Respo
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -116,6 +118,29 @@ class StackServiceTest {
         when(stackV4Endpoint.triggerUserDefinedTagsUpdateInternal(0L, resourceCrn, userDefinedTags)).thenThrow(new WebApplicationException("Error"));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(resourceCrn, userDefinedTags)))
+                .hasMessage("custom error")
+                .isExactlyInstanceOf(StackOperationFailedException.class);
+    }
+
+    @Test
+    void deleteUserDefinedTags() {
+        String resourceCrn = "resourceCrn";
+        Set<String> tagKeys = Set.of("owner");
+
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsDelete(resourceCrn, tagKeys));
+
+        verify(stackV4Endpoint).triggerUserDefinedTagsDeleteInternal(0L, resourceCrn, new DeleteUserDefinedTagsRequest(tagKeys));
+    }
+
+    @Test
+    void deleteUserDefinedTagsFailureTest() {
+        String resourceCrn = "resourceCrn";
+        Set<String> tagKeys = Set.of("owner");
+        when(stackV4Endpoint.triggerUserDefinedTagsDeleteInternal(0L, resourceCrn, new DeleteUserDefinedTagsRequest(tagKeys)))
+                .thenThrow(new WebApplicationException("Error"));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsDelete(resourceCrn, tagKeys)))
                 .hasMessage("custom error")
                 .isExactlyInstanceOf(StackOperationFailedException.class);
     }

@@ -68,6 +68,8 @@ class EnvironmentReactorFlowManagerTest {
 
     private static final String USER_CRN = "userCrn";
 
+    private static final Set<String> TAG_KEYS = Set.of("custom");
+
     @Mock
     private EventSender eventSender;
 
@@ -265,7 +267,7 @@ class EnvironmentReactorFlowManagerTest {
         when(eventSender.sendEvent(any(EnvTagsModificationEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
 
         FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.triggerEnvironmentTagsModification(environment, userDefinedTags));
+                () -> underTest.triggerEnvironmentTagsModification(environment, userDefinedTags, Set.of()));
 
         assertThat(result).isSameAs(flowIdentifier);
         ArgumentCaptor<EnvTagsModificationEvent> argumentCaptor = ArgumentCaptor.forClass(
@@ -277,7 +279,29 @@ class EnvironmentReactorFlowManagerTest {
                 .returns(ENVIRONMENT_CRN, EnvTagsModificationEvent::getResourceCrn)
                 .returns(ENVIRONMENT_NAME, EnvTagsModificationEvent::getResourceName)
                 .returns(ENVIRONMENT_ID, EnvTagsModificationEvent::getResourceId)
-                .returns(userDefinedTags, EnvTagsModificationEvent::getUserDefinedTags);
+                .returns(userDefinedTags, EnvTagsModificationEvent::getUserDefinedTags)
+                .returns(Set.of(), EnvTagsModificationEvent::getTagsToRemove);
+        verifyHeaders();
+    }
+
+    @Test
+    void triggerEnvironmentTagDeletion() {
+        Environment environment = mock(Environment.class);
+        when(environment.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environment.getName()).thenReturn(ENVIRONMENT_NAME);
+        when(environment.getId()).thenReturn(ENVIRONMENT_ID);
+        when(eventSender.sendEvent(any(EnvTagsModificationEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerEnvironmentTagsModification(environment, Map.of(), TAG_KEYS));
+
+        assertThat(result).isSameAs(flowIdentifier);
+        ArgumentCaptor<EnvTagsModificationEvent> argumentCaptor = ArgumentCaptor.forClass(EnvTagsModificationEvent.class);
+        verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
+        EnvTagsModificationEvent event = argumentCaptor.getValue();
+        assertThat(event)
+                .returns(Map.of(), EnvTagsModificationEvent::getUserDefinedTags)
+                .returns(TAG_KEYS, EnvTagsModificationEvent::getTagsToRemove);
         verifyHeaders();
     }
 

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -66,6 +67,8 @@ class EnvTagsModificationActionsTest {
     private static final String FLOW_ID = "flowId";
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Set<String> TAG_KEYS_TO_REMOVE = Set.of("obsolete");
 
     @Mock
     private EventBus eventBus;
@@ -183,7 +186,7 @@ class EnvTagsModificationActionsTest {
             EnvTagsModificationState expectedState) throws Exception {
 
         EnvTagsModificationEvent event = new EnvTagsModificationEvent(inputSelector,
-                ENV_ID, ENV_NAME, ENV_CRN, USER_DEFINED_TAGS, new Promise<>());
+                ENV_ID, ENV_NAME, ENV_CRN, USER_DEFINED_TAGS, TAG_KEYS_TO_REMOVE, new Promise<>());
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractEnvTagsModificationAction<EnvTagsModificationEvent> action =
@@ -201,6 +204,7 @@ class EnvTagsModificationActionsTest {
         assertEquals(ENV_CRN, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "resourceCrn"));
         assertEquals(ENV_NAME, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "resourceName"));
         assertEquals(USER_DEFINED_TAGS, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "userDefinedTags"));
+        assertEquals(TAG_KEYS_TO_REMOVE, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "tagsToRemove"));
     }
 
     @Test

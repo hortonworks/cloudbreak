@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +52,8 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
     private static final String ACCOUNT_ID = "account";
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Set<String> TAG_KEYS_TO_REMOVE = Set.of("custom");
 
     private static final String EXPERIENCE_PATH = "http://experience:8080/api/v1/environments";
 
@@ -202,5 +205,25 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationFailureEvent.class, result);
         assertEquals(FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+    }
+
+    // CB-34078: propagate environment tag deletion to experiences
+    @Test
+    @DisplayName("When environment tag deletion is cascaded, then experiences are skipped until CB-34078")
+    void testWhenDeletingTagsThenExperienceDistributionIsSkippedAndFinishEventIsReturned() {
+        EnvTagsModificationEvent deleteRequest = EnvTagsModificationEvent.builder()
+                .withSelector(MODIFY_USER_DEFINED_TAGS_ON_EXPERIENCES_EVENT.selector())
+                .withResourceId(ENV_ID)
+                .withResourceName(ENV_NAME)
+                .withResourceCrn(ENV_CRN)
+                .withUserDefinedTags(Map.of())
+                .withTagsToRemove(TAG_KEYS_TO_REMOVE)
+                .build();
+
+        Selectable result = underTest.doAccept(new HandlerEvent<>(new Event<>(deleteRequest)));
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
     }
 }

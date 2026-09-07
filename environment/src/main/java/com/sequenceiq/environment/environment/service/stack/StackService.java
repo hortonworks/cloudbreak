@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.flow.config.update.config.EnvStackConfigUpdatesFlowConfig;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
@@ -145,6 +146,19 @@ public class StackService {
         } catch (WebApplicationException e) {
             String errorMessage = messageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to update user defined tags for stack: {} due to: {}", crn, errorMessage);
+            throw new StackOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowIdentifier triggerUserDefinedTagsDelete(String crn, Set<String> tagKeys) {
+        try {
+            LOGGER.debug("Calling triggerUserDefinedTagsDeleteInternal endpoint for stack {} with tag keys {}", crn, tagKeys);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.triggerUserDefinedTagsDeleteInternal(0L, crn, new DeleteUserDefinedTagsRequest(tagKeys))
+            );
+        } catch (WebApplicationException e) {
+            String errorMessage = messageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to delete user defined tags for stack: {} due to: {}", crn, errorMessage);
             throw new StackOperationFailedException(errorMessage, e);
         }
     }

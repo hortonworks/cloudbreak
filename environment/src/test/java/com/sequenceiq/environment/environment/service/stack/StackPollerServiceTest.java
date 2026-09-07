@@ -396,6 +396,33 @@ class StackPollerServiceTest {
         assertThat(ex.getMessage()).contains("Update user defined tags on stack timed out or error happened");
     }
 
+    @Test
+    void deleteUserDefinedTagsWhenDataHubsNeedToBeUpdated() {
+        Set<String> tagKeys = Set.of("custom");
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        StackViewV4Response stackView1 = createAvailableStackViewV4Response(STACK_CRN_1);
+        stackView1.setStackType("WORKLOAD");
+        StackViewV4Response stackView2 = createAvailableStackViewV4Response(STACK_CRN_2);
+        stackView2.setStackType("WORKLOAD");
+        responsesSet.add(stackView1);
+        responsesSet.add(stackView2);
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(responsesSet);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(stackViewV4Responses);
+
+        List<FlowIdentifier> expectedFlows = List.of(
+                new FlowIdentifier(FlowType.FLOW, "flow-1"),
+                new FlowIdentifier(FlowType.FLOW, "flow-2"));
+        when(stackPollerProvider.userDefinedTagsDeletePoller(List.of(STACK_CRN_1, STACK_CRN_2), ENVIRONMENT_ID, tagKeys))
+                .thenReturn(() -> AttemptResults.finishWith(expectedFlows));
+        when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows))
+                .thenReturn(() -> AttemptResults.finishWith(null));
+
+        underTest.deleteUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, tagKeys, StackType.WORKLOAD);
+
+        verify(stackPollerProvider).userDefinedTagsDeletePoller(List.of(STACK_CRN_1, STACK_CRN_2), ENVIRONMENT_ID, tagKeys);
+        verify(stackPollerProvider).updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows);
+    }
+
     // ---- helpers ----
 
     private StackViewV4Response createStackViewV4ResponseWithStatus(Status status) {

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityG
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -167,6 +168,10 @@ public class EnvironmentValidatorService {
         validationResultBuilder.merge(validateTags(editDto));
         validationResultBuilder.merge(environmentTagsDtoConverter.validateUserDefinedTagsAgainstDefaultTags(editDto, environmentTags));
         return validationResultBuilder.build();
+    }
+
+    public ValidationResult validateTagKeysToRemove(Collection<String> tagKeys, EnvironmentTags environmentTags, String cloudPlatform) {
+        return environmentTagsDtoConverter.validateUserDefinedTagKeysToRemove(tagKeys, environmentTags, cloudPlatform);
     }
 
     public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {

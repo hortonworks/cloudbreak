@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDeleteTagsRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.CreateEnvironmentResponse;
@@ -164,6 +165,24 @@ class EnvironmentControllerTest {
                     .thenReturn(DetailedEnvironmentResponse.builder().build());
             DetailedEnvironmentResponse response = underTest.editByName(ENV_CRN, null);
             assertEquals(DetailedEnvironmentResponse.class, response.getClass());
+        }
+    }
+
+    @Test
+    void testDeleteTagsByName() {
+        String accountId = "accountId";
+        EnvironmentDto environmentDto = EnvironmentDto.builder().build();
+        DetailedEnvironmentResponse response = DetailedEnvironmentResponse.builder().build();
+        EnvironmentDeleteTagsRequest request = new EnvironmentDeleteTagsRequest();
+        request.setTagKeys(Set.of("custom"));
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.deleteUserDefinedTagsByEnvironmentName(accountId, ENV_CRN, Set.of("custom"))).thenReturn(environmentDto);
+            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto)).thenReturn(response);
+
+            DetailedEnvironmentResponse actual = underTest.deleteTagsByName(ENV_CRN, request);
+
+            assertThat(actual).isSameAs(response);
         }
     }
 

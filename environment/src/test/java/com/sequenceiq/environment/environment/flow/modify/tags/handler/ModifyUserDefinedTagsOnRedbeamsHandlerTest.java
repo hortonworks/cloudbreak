@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,8 @@ class ModifyUserDefinedTagsOnRedbeamsHandlerTest {
     private static final String ENV_CRN = "crn";
 
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Set<String> TAG_KEYS_TO_REMOVE = Set.of("custom");
 
     @Mock
     private RedbeamsPollerService redbeamsPollerService;
@@ -71,5 +74,23 @@ class ModifyUserDefinedTagsOnRedbeamsHandlerTest {
 
         assertInstanceOf(EnvTagsModificationFailureEvent.class, result);
         assertEquals(FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+    }
+
+    @Test
+    void testDoAcceptDeleteSuccess() {
+        EnvTagsModificationEvent request = EnvTagsModificationEvent.builder()
+                .withSelector(MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT.selector())
+                .withResourceId(ENV_ID)
+                .withResourceName(ENV_NAME)
+                .withResourceCrn(ENV_CRN)
+                .withUserDefinedTags(Map.of())
+                .withTagsToRemove(TAG_KEYS_TO_REMOVE)
+                .build();
+
+        Selectable result = underTest.doAccept(new HandlerEvent<>(new Event<>(request)));
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.name(), result.getSelector());
+        verify(redbeamsPollerService).deleteUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAG_KEYS_TO_REMOVE);
     }
 }

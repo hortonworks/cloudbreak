@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -208,5 +209,19 @@ public class StackPollerService {
                 throw new CloudbreakServiceException(message);
             }
         }
+    }
+
+    public void deleteUserDefinedTagsOnStacks(Long envId, String envCrn, Set<String> tagKeys, StackType stackType) {
+        StackViewV4Responses stackViews = stackV4Endpoint.list(0L, envCrn, false);
+        List<String> stackCrns = stackViews.getResponses().stream()
+                .filter(v -> stackType.name().equals(v.getStackType()))
+                .map(StackViewV4Response::getCrn)
+                .toList();
+        LOGGER.info("User defined tag keys will be deleted on stacks: {}", stackCrns);
+
+        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnStacks(stackCrns,
+                stackPollerProvider.userDefinedTagsDeletePoller(stackCrns, envId, tagKeys));
+
+        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service.database;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
@@ -77,6 +79,19 @@ public class RedBeamsService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to update user defined tags for DB: {} due to: {}", crn, errorMessage);
+            throw new RedbeamsOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowIdentifier triggerUserDefinedTagsDelete(String crn, Set<String> tagKeys) {
+        try {
+            LOGGER.debug("Calling deleteUserDefinedTags endpoint for DB {} with tag keys {}", crn, tagKeys);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys))
+            );
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to delete user defined tags for DB: {} due to: {}", crn, errorMessage);
             throw new RedbeamsOperationFailedException(errorMessage, e);
         }
     }

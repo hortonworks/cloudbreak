@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.modify.tags.event;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,6 +15,8 @@ public class EnvTagsModificationEvent extends BaseNamedFlowEvent {
 
     private final Map<String, String> userDefinedTags;
 
+    private final Set<String> tagsToRemove;
+
     @JsonCreator
     public EnvTagsModificationEvent(
             @JsonProperty("selector") String selector,
@@ -21,13 +24,27 @@ public class EnvTagsModificationEvent extends BaseNamedFlowEvent {
             @JsonProperty("resourceName") String resourceName,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("userDefinedTags") Map<String, String> userDefinedTags,
+            @JsonProperty("tagsToRemove") Set<String> tagsToRemove,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
         this.userDefinedTags = userDefinedTags;
+        this.tagsToRemove = tagsToRemove;
     }
 
     public Map<String, String> getUserDefinedTags() {
         return userDefinedTags;
+    }
+
+    public Set<String> getTagsToRemove() {
+        return tagsToRemove;
+    }
+
+    @Override
+    public String toString() {
+        return "EnvTagsModificationEvent{"
+                + "userDefinedTags=" + userDefinedTags
+                + ", tagsToRemove=" + tagsToRemove
+                + "} " + super.toString();
     }
 
     public static EnvTagsModificationEvent.Builder builder() {
@@ -45,6 +62,8 @@ public class EnvTagsModificationEvent extends BaseNamedFlowEvent {
         private String resourceCrn;
 
         private Map<String, String> userDefinedTags;
+
+        private Set<String> tagsToRemove;
 
         private Promise<AcceptResult> accepted;
 
@@ -76,6 +95,11 @@ public class EnvTagsModificationEvent extends BaseNamedFlowEvent {
             return this;
         }
 
+        public EnvTagsModificationEvent.Builder withTagsToRemove(Set<String> tagsToRemove) {
+            this.tagsToRemove = tagsToRemove;
+            return this;
+        }
+
         public EnvTagsModificationEvent.Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
@@ -88,6 +112,7 @@ public class EnvTagsModificationEvent extends BaseNamedFlowEvent {
                     resourceName,
                     resourceCrn,
                     userDefinedTags,
+                    tagsToRemove,
                     accepted);
         }
     }

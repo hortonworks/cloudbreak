@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.domain;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,14 @@ public class EnvironmentTags {
 
     public Map<String, String> getDefaultTags() {
         return defaultTags;
+    }
+
+    public EnvironmentTags removeUserDefinedTags(Collection<String> keys) {
+        Map<String, String> remainingUserDefinedTags = userDefinedTags != null ? new HashMap<>(userDefinedTags) : new HashMap<>();
+        if (keys != null) {
+            remainingUserDefinedTags.keySet().removeAll(keys);
+        }
+        return new EnvironmentTags(remainingUserDefinedTags, defaultTags != null ? new HashMap<>(defaultTags) : new HashMap<>());
     }
 
     @Override

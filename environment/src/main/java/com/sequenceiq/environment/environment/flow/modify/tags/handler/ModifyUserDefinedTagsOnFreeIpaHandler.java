@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -39,8 +40,13 @@ public class ModifyUserDefinedTagsOnFreeIpaHandler extends ExceptionCatcherEvent
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
-            freeIpaPollerService.waitForModifyUserDefinedTags(resourceId, resourceCrn, userDefinedTags);
+            if (tagsToRemove == null || tagsToRemove.isEmpty()) {
+                freeIpaPollerService.waitForModifyUserDefinedTags(resourceId, resourceCrn, userDefinedTags);
+            } else {
+                freeIpaPollerService.waitForDeleteUserDefinedTags(resourceId, resourceCrn, tagsToRemove);
+            }
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on FreeIPA failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED, e);
@@ -51,6 +57,7 @@ public class ModifyUserDefinedTagsOnFreeIpaHandler extends ExceptionCatcherEvent
                 .withResourceName(resourceName)
                 .withResourceCrn(resourceCrn)
                 .withUserDefinedTags(userDefinedTags)
+                .withTagsToRemove(tagsToRemove)
                 .build();
     }
 

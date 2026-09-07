@@ -4,7 +4,9 @@ import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -219,6 +221,16 @@ public class EnvironmentModificationService {
         return changeTelemetryFeatures(features, environment);
     }
 
+    public EnvironmentDto deleteUserDefinedTagsByEnvironmentName(String accountId, String environmentName, Set<String> tagKeys) {
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofName(environmentName));
+        return deleteUserDefinedTags(environment, tagKeys);
+    }
+
+    public EnvironmentDto deleteUserDefinedTagsByEnvironmentCrn(String accountId, String crn, Set<String> tagKeys) {
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofCrn(crn));
+        return deleteUserDefinedTags(environment, tagKeys);
+    }
+
     public FlowIdentifier setupCrossRealmSetup(String accountId, NameOrCrn nameOrCrn, SetupCrossRealmTrustRequest request) {
         Environment environment = getEnvironment(accountId, nameOrCrn);
         return environmentReactorFlowManager.triggerSetupCrossRealmTrust(
@@ -292,12 +304,25 @@ public class EnvironmentModificationService {
             EnvironmentTags environmentTags = environment.getEnvironmentTags();
             environment.setTags(environmentTagsDtoConverter.getTags(editDto, environmentTags));
             if (editDto.isUpdateTagsOnExistingResources()) {
-                environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, editDto.getUserDefinedTags());
+                environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, editDto.getUserDefinedTags(), Set.of());
             } else {
                 LOGGER.info("Skipping environment tag modification flow for environment '{}' due to updateTagsOnExistingResources is false",
                         environment.getName());
             }
         }
+    }
+
+    private EnvironmentDto deleteUserDefinedTags(Environment environment, Set<String> tagKeys) {
+        EnvironmentTags environmentTags = environment.getEnvironmentTags();
+        ValidationResult validationResult = environmentValidatorService.validateTagKeysToRemove(
+                tagKeys, environmentTags, environment.getCloudPlatform());
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        environment.setTags(environmentTagsDtoConverter.getTagsAfterRemovingUserDefinedKeys(environmentTags, tagKeys));
+        Environment saved = environmentService.save(environment);
+        environmentReactorFlowManager.triggerEnvironmentTagsModification(saved, Map.of(), tagKeys);
+        return environmentDtoConverter.environmentToDto(saved);
     }
 
     private EnvironmentDto changeCredential(String accountId, String environmentName, EnvironmentChangeCredentialDto dto, Environment environment) {

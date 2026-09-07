@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.service.database;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,6 +54,19 @@ public class RedbeamsPollerService {
 
         List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnDatabases(dbCrns,
                 redbeamsPollerProvider.userDefinedTagsUpdatePoller(dbCrns, envId, tags));
+
+        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
+    }
+
+    public void deleteUserDefinedTagsOnDatabases(Long envId, String envCrn, Set<String> tagKeys) {
+        DatabaseServerV4Responses databaseServerV4Responses = databaseServerV4Endpoint.list(envCrn);
+        List<String> dbCrns = databaseServerV4Responses.getResponses().stream()
+                .map(DatabaseServerV4Response::getCrn)
+                .toList();
+        LOGGER.info("User defined tag keys will be deleted on databases: {}", dbCrns);
+
+        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnDatabases(dbCrns,
+                redbeamsPollerProvider.userDefinedTagsDeletePoller(dbCrns, envId, tagKeys));
 
         awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
     }

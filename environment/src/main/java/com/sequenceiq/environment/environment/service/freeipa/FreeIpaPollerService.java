@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service.freeipa;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -144,6 +145,21 @@ public class FreeIpaPollerService {
             } catch (PollerStoppedException e) {
                 LOGGER.warn("FreeIPA user defined tags update timed out or error happened.", e);
                 throw new FreeIpaOperationFailedException("FreeIPA user defined tags update timed out or error happened: " + e.getMessage());
+            }
+        }
+    }
+
+    public void waitForDeleteUserDefinedTags(Long envId, String envCrn, Set<String> tagKeys) {
+        OperationStatus status = freeIpaService.triggerUserDefinedTagsDelete(envCrn, tagKeys);
+        if (status.getStatus() != OperationState.COMPLETED) {
+            try {
+                Polling.stopAfterAttempt(modifyUserDefinedTagsAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(modifyUserDefinedTagsSleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.modifyUserDefinedTagsPoller(envId, envCrn, status.getOperationId()));
+            } catch (PollerStoppedException e) {
+                LOGGER.warn("FreeIPA user defined tags deletion timed out or error happened.", e);
+                throw new FreeIpaOperationFailedException("FreeIPA user defined tags deletion timed out or error happened: " + e.getMessage());
             }
         }
     }

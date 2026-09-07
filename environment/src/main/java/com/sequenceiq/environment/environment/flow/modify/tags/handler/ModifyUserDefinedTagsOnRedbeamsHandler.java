@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -39,8 +40,13 @@ public class ModifyUserDefinedTagsOnRedbeamsHandler extends ExceptionCatcherEven
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
-            redbeamsPollerService.updateUserDefinedTagsOnDatabases(resourceId, resourceCrn, userDefinedTags);
+            if (tagsToRemove == null || tagsToRemove.isEmpty()) {
+                redbeamsPollerService.updateUserDefinedTagsOnDatabases(resourceId, resourceCrn, userDefinedTags);
+            } else {
+                redbeamsPollerService.deleteUserDefinedTagsOnDatabases(resourceId, resourceCrn, tagsToRemove);
+            }
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on Redbeams failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED, e);
@@ -51,6 +57,7 @@ public class ModifyUserDefinedTagsOnRedbeamsHandler extends ExceptionCatcherEven
                 .withResourceName(resourceName)
                 .withResourceCrn(resourceCrn)
                 .withUserDefinedTags(userDefinedTags)
+                .withTagsToRemove(tagsToRemove)
                 .build();
     }
 

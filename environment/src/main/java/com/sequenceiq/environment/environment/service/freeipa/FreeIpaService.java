@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
@@ -436,6 +437,18 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to modify user defined tags on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public OperationStatus triggerUserDefinedTagsDelete(String environmentCrn, Set<String> tagKeys) {
+        try {
+            LOGGER.debug("Calling FreeIPA delete user defined tags for environment {} with tag keys {}", environmentCrn, tagKeys);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> freeIpaV1Endpoint.deleteUserDefinedTagsByCrn(environmentCrn, new DeleteUserDefinedTagsRequest(tagKeys)));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to delete user defined tags on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

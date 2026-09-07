@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -40,8 +41,13 @@ public class ModifyUserDefinedTagsOnDatalakeHandler extends ExceptionCatcherEven
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
-            stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.DATALAKE);
+            if (tagsToRemove == null || tagsToRemove.isEmpty()) {
+                stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.DATALAKE);
+            } else {
+                stackPollerService.deleteUserDefinedTagsOnStacks(resourceId, resourceCrn, tagsToRemove, StackType.DATALAKE);
+            }
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on Data Lake failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_FAILED, e);
@@ -52,6 +58,7 @@ public class ModifyUserDefinedTagsOnDatalakeHandler extends ExceptionCatcherEven
                 .withResourceName(resourceName)
                 .withResourceCrn(resourceCrn)
                 .withUserDefinedTags(userDefinedTags)
+                .withTagsToRemove(tagsToRemove)
                 .build();
     }
 

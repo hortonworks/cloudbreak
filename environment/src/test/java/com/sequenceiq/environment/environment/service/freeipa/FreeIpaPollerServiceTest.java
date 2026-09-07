@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -212,6 +213,18 @@ public class FreeIpaPollerServiceTest {
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
 
         verify(freeIpaService).triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags);
+    }
+
+    @Test
+    void testWaitForDeleteUserDefinedTags() {
+        Set<String> tagKeys = Set.of("custom");
+        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.REQUESTED, null, null, null, 0, null);
+        when(freeIpaService.triggerUserDefinedTagsDelete(ENV_CRN, tagKeys)).thenReturn(status);
+        when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
+
+        underTest.waitForDeleteUserDefinedTags(ENV_ID, ENV_CRN, tagKeys);
+
+        verify(freeIpaService).triggerUserDefinedTagsDelete(ENV_CRN, tagKeys);
     }
 
     private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {

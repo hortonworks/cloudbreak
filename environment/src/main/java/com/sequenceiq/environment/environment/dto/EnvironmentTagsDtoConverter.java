@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
@@ -43,13 +45,16 @@ public class EnvironmentTagsDtoConverter {
 
     private final UserDefinedTagValidator userDefinedTagValidator;
 
+    private final CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
+
     public EnvironmentTagsDtoConverter(CostTagging costTagging,
             EntitlementService entitlementService,
             DefaultInternalAccountTagService defaultInternalAccountTagService,
             AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
             AccountTagService accountTagService,
             CrnUserDetailsService crnUserDetailsService,
-            UserDefinedTagValidator userDefinedTagValidator) {
+            UserDefinedTagValidator userDefinedTagValidator,
+            CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider) {
         this.costTagging = costTagging;
         this.entitlementService = entitlementService;
         this.accountTagService = accountTagService;
@@ -57,6 +62,7 @@ public class EnvironmentTagsDtoConverter {
         this.accountTagToAccountTagResponsesConverter = accountTagToAccountTagResponsesConverter;
         this.crnUserDetailsService = crnUserDetailsService;
         this.userDefinedTagValidator = userDefinedTagValidator;
+        this.tagKeyNormalizerProvider = tagKeyNormalizerProvider;
     }
 
     public Json getTags(EnvironmentCreationDto creationDto) {
@@ -89,6 +95,18 @@ public class EnvironmentTagsDtoConverter {
                 .map(EnvironmentTags::getDefaultTags)
                 .orElse(Map.of());
         return userDefinedTagValidator.validateAgainstDefaultTags(userDefinedTags, defaultTags);
+    }
+
+    public ValidationResult validateUserDefinedTagKeysToRemove(Collection<String> tagKeys, EnvironmentTags environmentTags, String cloudPlatform) {
+        Map<String, String> defaultTags = Optional.ofNullable(environmentTags)
+                .map(EnvironmentTags::getDefaultTags)
+                .orElse(Map.of());
+        return userDefinedTagValidator.validateTagKeysToRemove(tagKeys, defaultTags, Map.of(),
+                tagKeyNormalizerProvider.forPlatform(cloudPlatform));
+    }
+
+    public Json getTagsAfterRemovingUserDefinedKeys(EnvironmentTags environmentTags, Collection<String> keys) {
+        return new Json(environmentTags.removeUserDefinedTags(keys));
     }
 
     public Json getTags(EnvironmentEditDto editDto, EnvironmentTags environmentTags) {

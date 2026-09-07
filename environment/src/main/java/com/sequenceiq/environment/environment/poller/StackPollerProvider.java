@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.ws.rs.BadRequestException;
@@ -118,6 +119,47 @@ public class StackPollerProvider {
             return AttemptResults.justContinue();
         } catch (Exception e) {
             LOGGER.warn("Failure asking Cloudbreak for user defined tags update, error message is: {}",
+                    e.getMessage());
+            return AttemptResults.breakFor(e);
+        }
+    }
+
+    public AttemptMaker<List<FlowIdentifier>> userDefinedTagsDeletePoller(List<String> stackCrns, Long envId, Set<String> tagKeys) {
+        List<String> mutableCrnsList = new ArrayList<>(stackCrns);
+        List<FlowIdentifier> flowIdentifiers = new ArrayList<>();
+        return () -> {
+            LOGGER.info("Attempting to delete user defined tag keys on {} clusters for environment with ID {}",
+                    mutableCrnsList.size(), envId);
+            List<String> remaining = new ArrayList<>();
+            List<AttemptResult<FlowIdentifier>> results = mutableCrnsList.stream()
+                    .map(stackCrn -> fetchUserDefinedTagsDeleteResults(remaining, stackCrn, tagKeys))
+                    .collect(Collectors.toList());
+            AttemptResult<List<FlowIdentifier>> result = evaluateResultWithFlowIdentifier(results);
+            if (result.getState() == AttemptState.BREAK) {
+                return result;
+            }
+            flowIdentifiers.addAll(results.stream()
+                    .filter(attemptResult -> attemptResult.getState() == AttemptState.FINISH)
+                    .map(AttemptResult::getResult)
+                    .toList());
+            mutableCrnsList.retainAll(remaining);
+            return mutableCrnsList.isEmpty() ? AttemptResults.finishWith(flowIdentifiers) : AttemptResults.justContinue();
+        };
+    }
+
+    private AttemptResult<FlowIdentifier> fetchUserDefinedTagsDeleteResults(List<String> remainingStacks, String stackCrn, Set<String> tagKeys) {
+        try {
+            LOGGER.info("Calling cloudbreak to delete user defined tag keys for cluster {}", stackCrn);
+            FlowIdentifier flowIdentifier = stackService.triggerUserDefinedTagsDelete(stackCrn, tagKeys);
+            return AttemptResults.finishWith(flowIdentifier);
+        } catch (Exception e) {
+            if (FlowRunningConflictDetector.isFlowRunningConflict(e)) {
+                LOGGER.info("Unable to start user defined tag deletion for {}. Cluster has flow running already. Retrying.",
+                        stackCrn);
+                remainingStacks.add(stackCrn);
+                return AttemptResults.justContinue();
+            }
+            LOGGER.warn("Failure asking Cloudbreak for user defined tag deletion, error message is: {}",
                     e.getMessage());
             return AttemptResults.breakFor(e);
         }

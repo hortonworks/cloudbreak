@@ -53,6 +53,7 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDeleteTagsRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -320,12 +321,30 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public DetailedEnvironmentResponse deleteTagsByName(@ResourceName String environmentName, @RequestObject EnvironmentDeleteTagsRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto result = environmentModificationService.deleteUserDefinedTagsByEnvironmentName(
+                accountId, environmentName, request.getTagKeys());
+        return environmentResponseConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     public DetailedEnvironmentResponse editByCrn(@ResourceCrn String crn, EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofCrn(crn));
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(environment, request);
         EnvironmentDto result = environmentModificationService.edit(environment, editDto);
+        return environmentResponseConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public DetailedEnvironmentResponse deleteTagsByCrn(@ResourceCrn String crn, @RequestObject EnvironmentDeleteTagsRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto result = environmentModificationService.deleteUserDefinedTagsByEnvironmentCrn(
+                accountId, crn, request.getTagKeys());
         return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 
