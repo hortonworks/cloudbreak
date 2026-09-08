@@ -1,0 +1,8 @@
+{
+  "description": "7.3.3 - Brand New: Test Service",
+  "blueprint": {
+    "cdhVersion": "7.3.3",
+    "blueprintName": "brand-new",
+    "services": []
+  }
+}

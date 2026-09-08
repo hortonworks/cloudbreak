@@ -1,0 +1,23 @@
+{
+  "name": "7.3.3 - Streaming Analytics for AWS",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.3 - Streaming Analytics"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "instanceType": "m5.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

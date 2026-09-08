@@ -1,0 +1,4 @@
+[
+  { "op": "test",    "path": "/distroXTemplate/instanceGroups/name=master/template/instanceType", "value": "m5.4xlarge" },
+  { "op": "replace", "path": "/distroXTemplate/instanceGroups/name=master/template/instanceType", "value": "m5.16xlarge" }
+]

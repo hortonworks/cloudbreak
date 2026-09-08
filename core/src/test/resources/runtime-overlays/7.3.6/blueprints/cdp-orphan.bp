@@ -1,0 +1,8 @@
+{
+  "description": "7.3.3 - Orphan: No Sidecar",
+  "blueprint": {
+    "cdhVersion": "7.3.3",
+    "blueprintName": "orphan",
+    "services": []
+  }
+}

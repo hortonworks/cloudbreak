@@ -1,0 +1,4 @@
+[
+  { "op": "test",    "path": "/blueprint/services/refName=hdfs/roleConfigGroups/refName=hdfs-NAMENODE-BASE/configs/name=fs_trash_interval/value", "value": "0" },
+  { "op": "replace", "path": "/blueprint/services/refName=hdfs/roleConfigGroups/refName=hdfs-NAMENODE-BASE/configs/name=fs_trash_interval/value", "value": "2880" }
+]

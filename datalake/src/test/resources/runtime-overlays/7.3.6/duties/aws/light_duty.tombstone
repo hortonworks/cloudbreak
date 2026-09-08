@@ -1,0 +1,2 @@
+Dropped from 7.3.6 onward. Test-only overlay fixture for RuntimeDutyOverlayLoaderTest;
+the loader keys tombstones by the .json path it shadows (aws/light_duty.json).

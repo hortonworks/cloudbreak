@@ -1,0 +1,4 @@
+[
+  { "op": "test",    "path": "/instanceGroups/name=core/template/instanceType", "value": "m5.2xlarge" },
+  { "op": "replace", "path": "/instanceGroups/name=core/template/instanceType", "value": "m5.8xlarge" }
+]
