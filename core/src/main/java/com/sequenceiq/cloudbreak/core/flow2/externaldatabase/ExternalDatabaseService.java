@@ -539,7 +539,8 @@ public class ExternalDatabaseService {
                 env.getCloudPlatform(),
                 null,
                 databaseType,
-                architecture.getName());
+                architecture.getName(),
+                null);
     }
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,

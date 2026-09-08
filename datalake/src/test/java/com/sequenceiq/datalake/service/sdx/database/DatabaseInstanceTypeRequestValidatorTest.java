@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeCapabilityValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -49,16 +51,19 @@ class DatabaseInstanceTypeRequestValidatorTest {
     @Mock
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
+    @Mock
+    private DbOverrideConfig dbOverrideConfig;
+
     @Test
     void blankInstanceTypeShouldNotCallEndpoint() {
         SdxDatabaseRequest sdxDbRequest = new SdxDatabaseRequest();
         sdxDbRequest.setDatabaseInstanceType("");
         DetailedEnvironmentResponse env = createEnv();
 
-        underTest.validateIfPresent(sdxDbRequest, null, env, Architecture.X86_64, USER_CRN);
+        underTest.validateIfPresent(sdxDbRequest, null, env, Architecture.X86_64, USER_CRN, null);
 
         verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(
-                anyString(), anyString(), anyString(), any(), any(), anyString());
+                anyString(), anyString(), anyString(), any(), any(), anyString(), any());
     }
 
     @Test
@@ -72,10 +77,10 @@ class DatabaseInstanceTypeRequestValidatorTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                    anyString(), anyString(), anyString(), any(), any(), anyString()))
+                    anyString(), anyString(), anyString(), any(), any(), anyString(), any()))
                     .thenReturn(response);
 
-            underTest.validateIfPresent(sdxDbRequest, internalRequest, env, Architecture.X86_64, USER_CRN);
+            underTest.validateIfPresent(sdxDbRequest, internalRequest, env, Architecture.X86_64, USER_CRN, null);
 
             verify(capabilityValidator).validate(any(DatabaseInstanceTypeValidationInput.class));
         });
@@ -91,12 +96,32 @@ class DatabaseInstanceTypeRequestValidatorTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                    anyString(), anyString(), anyString(), any(), any(), anyString()))
+                    anyString(), anyString(), anyString(), any(), any(), anyString(), any()))
                     .thenReturn(response);
 
-            underTest.validateIfPresent(sdxDbRequest, internalRequest, env, Architecture.X86_64, USER_CRN);
+            underTest.validateIfPresent(sdxDbRequest, internalRequest, env, Architecture.X86_64, USER_CRN, null);
 
             verify(capabilityValidator).validate(any(DatabaseInstanceTypeValidationInput.class));
+        });
+    }
+
+    @Test
+    void runtimeVersionShouldBeForwardedAsEngineVersion() {
+        SdxDatabaseRequest sdxDbRequest = new SdxDatabaseRequest();
+        sdxDbRequest.setDatabaseInstanceType("db.m5.xlarge");
+        DetailedEnvironmentResponse env = createEnv();
+        PlatformDatabaseCapabilitiesResponse response = createCapabilitiesResponse();
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            when(dbOverrideConfig.findEngineVersionForRuntime("7.3.2")).thenReturn("17");
+            when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
+                    anyString(), anyString(), anyString(), any(), any(), any(), eq("17")))
+                    .thenReturn(response);
+
+            underTest.validateIfPresent(sdxDbRequest, null, env, Architecture.X86_64, USER_CRN, "7.3.2");
+
+            verify(environmentPlatformResourceEndpoint).getDatabaseCapabilities(
+                    anyString(), anyString(), anyString(), any(), any(), any(), eq("17"));
         });
     }
 
@@ -109,13 +134,13 @@ class DatabaseInstanceTypeRequestValidatorTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                    anyString(), anyString(), anyString(), any(), any(), anyString()))
+                    anyString(), anyString(), anyString(), any(), any(), anyString(), any()))
                     .thenReturn(response);
             doThrow(new BadRequestException("Instance type not available"))
                     .when(capabilityValidator).validate(any());
 
             assertThrows(BadRequestException.class,
-                    () -> underTest.validateIfPresent(sdxDbRequest, null, env, Architecture.X86_64, USER_CRN));
+                    () -> underTest.validateIfPresent(sdxDbRequest, null, env, Architecture.X86_64, USER_CRN, null));
         });
     }
 
@@ -127,10 +152,10 @@ class DatabaseInstanceTypeRequestValidatorTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                    anyString(), anyString(), anyString(), any(), any(), anyString()))
+                    anyString(), anyString(), anyString(), any(), any(), anyString(), any()))
                     .thenThrow(new RuntimeException("Connection timeout"));
 
-            assertDoesNotThrow(() -> underTest.validateIfPresent(sdxDbRequest, null, env, Architecture.X86_64, USER_CRN));
+            assertDoesNotThrow(() -> underTest.validateIfPresent(sdxDbRequest, null, env, Architecture.X86_64, USER_CRN, null));
         });
     }
 

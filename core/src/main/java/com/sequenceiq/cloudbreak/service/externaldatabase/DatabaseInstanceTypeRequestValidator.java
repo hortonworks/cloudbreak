@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeCapabilityValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput.InstanceTypeSpecs;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
@@ -38,17 +39,21 @@ public class DatabaseInstanceTypeRequestValidator {
     @Inject
     private DatabaseInstanceTypeCapabilityValidator capabilityValidator;
 
+    @Inject
+    private DbOverrideConfig dbOverrideConfig;
+
     public void validateIfPresent(String requestedInstanceType, DatabaseRequest databaseRequest,
-            DetailedEnvironmentResponse env, Architecture desiredArchitecture) {
+            DetailedEnvironmentResponse env, Architecture desiredArchitecture, String runtimeVersion) {
         if (StringUtils.isBlank(requestedInstanceType)) {
             return;
         }
         String regionName = env.getLocation().getName();
         DatabaseCapabilityType capabilityType = determineCapabilityType(env.getCloudPlatform(), databaseRequest);
         String archName = desiredArchitecture != null ? desiredArchitecture.getName() : null;
+        String engineVersion = dbOverrideConfig.findEngineVersionForRuntime(runtimeVersion);
         try {
             PlatformDatabaseCapabilitiesResponse capabilities = environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                    env.getCrn(), regionName, env.getCloudPlatform(), null, capabilityType, archName);
+                    env.getCrn(), regionName, env.getCloudPlatform(), null, capabilityType, archName, engineVersion);
             DatabaseInstanceTypeValidationInput input = buildInput(requestedInstanceType, regionName, desiredArchitecture, capabilities);
             capabilityValidator.validate(input);
         } catch (BadRequestException e) {

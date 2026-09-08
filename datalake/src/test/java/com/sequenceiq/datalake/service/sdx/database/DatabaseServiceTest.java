@@ -183,7 +183,7 @@ public class DatabaseServiceTest {
         env.setCrn(ENV_CRN);
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
         when(databaseServerV4Endpoint.createInternal(any(), any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
@@ -309,7 +309,7 @@ public class DatabaseServiceTest {
         DatabaseConfig databaseConfig = getDatabaseConfig();
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
 
         DatabaseServerStatusV4Response response =  ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(defaultSdxCluster, env));
@@ -358,7 +358,7 @@ public class DatabaseServiceTest {
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
 
         DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
@@ -393,10 +393,10 @@ public class DatabaseServiceTest {
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), eq("arm64")))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), eq("arm64"), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), new HashMap<>(),
                         Map.of("test", List.of("db.m7g.large", "db.m8g.large")), null, null));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), eq("x86_64")))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), eq("x86_64"), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
                         Map.of("test", List.of("db.m5.large", "db.m6i.large")), null, null));
         when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(any())).thenReturn(true);
@@ -433,7 +433,7 @@ public class DatabaseServiceTest {
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
                         Map.of("test", List.of("db.m5.large", "db.m6i.large", "db.m7i.large")), null, null));
         when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(any())).thenReturn(true);
@@ -468,7 +468,7 @@ public class DatabaseServiceTest {
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
                         Map.of("test", List.of("db.m5.large", "db.m6i.large")), null, null));
 
@@ -574,7 +574,7 @@ public class DatabaseServiceTest {
         env.setCrn(ENV_CRN);
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
         when(databaseServerV4Endpoint.createInternal(any(), any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
@@ -633,7 +633,7 @@ public class DatabaseServiceTest {
         env.setCrn(ENV_CRN);
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
         when(databaseServerV4Endpoint.createInternal(any(), any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
@@ -684,7 +684,7 @@ public class DatabaseServiceTest {
         env.setCrn(ENV_CRN);
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
         when(databaseServerV4Endpoint.createInternal(any(), any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);

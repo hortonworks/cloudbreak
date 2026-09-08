@@ -42,7 +42,7 @@ public class DatabaseInstanceTypeService {
 
         DatabaseCapabilityType resolvedType = resolveDatabaseCapabilityType(databaseType, cloudPlatform);
         PlatformDatabaseCapabilitiesResponse capabilities = environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                environmentCrn, region, cloudPlatform, null, resolvedType, architecture);
+                environmentCrn, region, cloudPlatform, null, resolvedType, architecture, null);
 
         String defaultInstanceType = capabilities.getRegionDefaultInstances().get(region);
         Set<DatabaseVmTypeResponse> vmTypes = capabilities.getDatabaseVmTypes().getOrDefault(region, Set.of());

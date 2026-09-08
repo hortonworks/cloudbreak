@@ -45,7 +45,7 @@ public class SdxDatabaseInstanceTypeService {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         PlatformDatabaseCapabilitiesResponse capabilities = ThreadBasedUserCrnProvider.doAs(userCrn,
                 () -> environmentPlatformResourceEndpoint.getDatabaseCapabilities(environmentCrn, region, cloudPlatform, null,
-                        resolvedType, architecture));
+                        resolvedType, architecture, null));
 
         String defaultInstanceType = capabilities.getRegionDefaultInstances().get(region);
         Set<DatabaseVmTypeResponse> vmTypes = capabilities.getDatabaseVmTypes().getOrDefault(region, Set.of());

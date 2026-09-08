@@ -77,7 +77,7 @@ class DatabaseInstanceTypeServiceTest {
                 vmType("db.m5d.large", 2, 8.0f, "x86_64")
         )));
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(eq(ENV_CRN), eq(REGION), eq("AWS"),
-                isNull(), eq(DatabaseCapabilityType.DEFAULT), isNull()))
+                isNull(), eq(DatabaseCapabilityType.DEFAULT), isNull(), isNull()))
                 .thenReturn(capabilities);
 
         DatabaseInstanceTypesV4Response response = underTest.listDatabaseInstanceTypes(ENV_CRN, null, null);
@@ -107,7 +107,7 @@ class DatabaseInstanceTypeServiceTest {
 
         PlatformDatabaseCapabilitiesResponse capabilities = new PlatformDatabaseCapabilitiesResponse();
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(eq(ENV_CRN), eq("westus2"), eq("AZURE"),
-                isNull(), eq(DatabaseCapabilityType.AZURE_FLEXIBLE), isNull()))
+                isNull(), eq(DatabaseCapabilityType.AZURE_FLEXIBLE), isNull(), isNull()))
                 .thenReturn(capabilities);
 
         underTest.listDatabaseInstanceTypes(ENV_CRN, null, null);

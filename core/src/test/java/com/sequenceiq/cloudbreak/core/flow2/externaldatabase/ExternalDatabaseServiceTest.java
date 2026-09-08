@@ -233,7 +233,7 @@ class ExternalDatabaseServiceTest {
         stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
         stack.setCluster(new Cluster());
         when(redbeamsClient.create(any())).thenThrow(BadRequestException.class);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
 
         assertThatThrownBy(() -> underTest.provisionDatabase(stack, environmentResponse))
@@ -257,7 +257,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
         underTest.provisionDatabase(stack, environmentResponse);
 
@@ -286,7 +286,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64")))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64"), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "armInstanceType"), null));
         underTest.provisionDatabase(stack, environmentResponse);
 
@@ -316,9 +316,9 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64")))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64"), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), new HashMap<>(), null));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("x86_64")))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("x86_64"), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "armInstanceType"), null));
         underTest.provisionDatabase(stack, environmentResponse);
 
@@ -350,7 +350,7 @@ class ExternalDatabaseServiceTest {
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
         when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(nullable(String.class))).thenReturn(true);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
                         Map.of("test", List.of("fallback1", "fallback2")), new HashMap<>(), null));
 
@@ -375,7 +375,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
                         Map.of("test", List.of("fallback1", "fallback2")), new HashMap<>(), null));
 
@@ -403,9 +403,9 @@ class ExternalDatabaseServiceTest {
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
         when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(nullable(String.class))).thenReturn(true);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64")))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64"), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), null));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("x86_64")))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("x86_64"), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "x86InstanceType"),
                         Map.of("test", List.of("x86Fallback1", "x86Fallback2")), new HashMap<>(), null));
 
@@ -434,7 +434,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
         underTest.provisionDatabase(stack, environmentResponse);
 
@@ -490,7 +490,7 @@ class ExternalDatabaseServiceTest {
     @Test
     void provisionDatabaseTestSslWhenUnsupportedCloudPlatform() throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(false);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance"), null));
 
         Blueprint blueprint = new Blueprint();
@@ -564,7 +564,7 @@ class ExternalDatabaseServiceTest {
     @Test
     void provisionDatabaseTestSslWhenNoBlueprint() throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance"), null));
 
         provisionDatabaseTestSslInternal(null, false);
@@ -576,7 +576,7 @@ class ExternalDatabaseServiceTest {
     @Test
     void provisionDatabaseTestSslWhenNoBlueprintText() throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance"), null));
 
         Blueprint blueprint = new Blueprint();
@@ -593,7 +593,7 @@ class ExternalDatabaseServiceTest {
     @NullSource
     void provisionDatabaseTestSslWhenBadRuntime(String runtime) throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance"), null));
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
@@ -607,7 +607,7 @@ class ExternalDatabaseServiceTest {
     @ValueSource(strings = {STACK_VERSION_GOOD_MINIMAL, STACK_VERSION_GOOD})
     void provisionDatabaseTestSslWhenSslEnabled(String runtime) throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance"), null));
 
         Blueprint blueprint = new Blueprint();
@@ -850,7 +850,7 @@ class ExternalDatabaseServiceTest {
             databaseResponse.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
             sdxClusterResponse.setSdxDatabaseResponse(databaseResponse);
             lenient().when(sdxClientService.getByCrnInternal(any())).thenReturn(sdxClusterResponse);
-            when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+            when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                     .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
         }
 
@@ -1225,7 +1225,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "defaultInstanceType"), null));
 
         underTest.provisionDatabase(stack, environmentResponse);

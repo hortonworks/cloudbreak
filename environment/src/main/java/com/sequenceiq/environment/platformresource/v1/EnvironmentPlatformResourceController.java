@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.platformresource.v1;
 
+import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.DATABASE_ENGINE_VERSION;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -554,7 +556,8 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String platformVariant,
             String availabilityZone,
             DatabaseCapabilityType databaseType,
-            String architecture) {
+            String architecture,
+            String databaseEngineVersion) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
@@ -566,6 +569,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 databaseType);
         if (architecture != null) {
             request.getFilters().put("architecture", Architecture.fromStringWithValidation(architecture).getName());
+        }
+        if (databaseEngineVersion != null && !databaseEngineVersion.isBlank()) {
+            request.getFilters().put(DATABASE_ENGINE_VERSION, databaseEngineVersion);
         }
         LOGGER.info("Get /platform_resources/database_capabilities, request: {}", request);
         PlatformDatabaseCapabilities platformDatabaseCapabilities = platformParameterService.getDatabaseCapabilities(request);

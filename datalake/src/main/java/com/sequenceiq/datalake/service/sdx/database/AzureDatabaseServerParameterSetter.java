@@ -141,6 +141,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
                         env.getCloudPlatform(),
                         null,
                         AZURE_FLEXIBLE,
+                        null,
                         null));
     }
 

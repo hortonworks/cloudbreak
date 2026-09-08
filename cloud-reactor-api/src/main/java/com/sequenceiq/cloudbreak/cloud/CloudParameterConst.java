@@ -7,6 +7,8 @@ public class CloudParameterConst {
 
     public static final String DATABASE_TYPE = "databaseType";
 
+    public static final String DATABASE_ENGINE_VERSION = "databaseEngineVersion";
+
     private CloudParameterConst() {
 
     }

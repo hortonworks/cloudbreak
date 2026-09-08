@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeCapabilityValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput.InstanceTypeSpecs;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
@@ -43,8 +44,11 @@ public class DatabaseInstanceTypeRequestValidator {
     @Inject
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
+    @Inject
+    private DbOverrideConfig dbOverrideConfig;
+
     public void validateIfPresent(SdxDatabaseRequest databaseRequest, DatabaseRequest internalDatabaseRequest,
-            DetailedEnvironmentResponse env, Architecture desiredArchitecture, String initiatorUserCrn) {
+            DetailedEnvironmentResponse env, Architecture desiredArchitecture, String initiatorUserCrn, String runtimeVersion) {
         String requestedInstanceType = resolveInstanceType(databaseRequest, internalDatabaseRequest);
         if (StringUtils.isBlank(requestedInstanceType)) {
             return;
@@ -52,10 +56,11 @@ public class DatabaseInstanceTypeRequestValidator {
         String regionName = env.getLocation().getName();
         DatabaseCapabilityType capabilityType = determineCapabilityType(env.getCloudPlatform(), databaseRequest, internalDatabaseRequest);
         String archName = desiredArchitecture != null ? desiredArchitecture.getName() : null;
+        String engineVersion = dbOverrideConfig.findEngineVersionForRuntime(runtimeVersion);
         try {
             PlatformDatabaseCapabilitiesResponse capabilities = ThreadBasedUserCrnProvider.doAs(initiatorUserCrn,
                     () -> environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                            env.getCrn(), regionName, env.getCloudPlatform(), null, capabilityType, archName));
+                            env.getCrn(), regionName, env.getCloudPlatform(), null, capabilityType, archName, engineVersion));
             DatabaseInstanceTypeValidationInput input = buildInput(requestedInstanceType, regionName, desiredArchitecture, capabilities);
             capabilityValidator.validate(input);
         } catch (BadRequestException e) {

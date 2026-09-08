@@ -67,7 +67,7 @@ public class DatabaseUpgradeRuntimeValidator {
                         DatabaseCapabilityType.AZURE_FLEXIBLE : DatabaseCapabilityType.DEFAULT;
 
         PlatformDatabaseCapabilitiesResponse databaseCapabilities = environmentPlatformResourceEndpoint.
-                getDatabaseCapabilities(environmentCrn, region, platformVariant, availabilityZone, databaseType, architecture);
+                getDatabaseCapabilities(environmentCrn, region, platformVariant, availabilityZone, databaseType, architecture, null);
 
         Map<String, Map<String, List<String>>> regionUpgradeVersions = databaseCapabilities.getRegionUpgradeVersions();
         return Optional.ofNullable(regionUpgradeVersions)

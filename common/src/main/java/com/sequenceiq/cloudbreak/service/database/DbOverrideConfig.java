@@ -49,6 +49,13 @@ public class DbOverrideConfig {
                 .orElse(null);
     }
 
+    public String findMaxEngineVersion() {
+        return versions.stream()
+                .map(DbOverrideVersion::getEngineVersion)
+                .max(Comparator.comparingInt(Integer::parseInt))
+                .orElse(null);
+    }
+
     public Optional<String> findMinRuntimeVersion(String targetMajorVersion) {
         return versions.stream().filter(dbOverrideVersion -> dbOverrideVersion.getEngineVersion().equals(targetMajorVersion))
                 .findFirst()

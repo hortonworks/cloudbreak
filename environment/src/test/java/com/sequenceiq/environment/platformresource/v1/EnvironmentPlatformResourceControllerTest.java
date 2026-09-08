@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.platformresource.v1;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -20,10 +21,13 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.CloudParameterConst;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -31,6 +35,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudVmTypesToPlatformVmTypesV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter;
 
 @ExtendWith(MockitoExtension.class)
 public class EnvironmentPlatformResourceControllerTest {
@@ -52,8 +57,37 @@ public class EnvironmentPlatformResourceControllerTest {
     @Mock
     private CloudVmTypesToPlatformVmTypesV1ResponseConverter cloudVmTypesToPlatformVmTypesV1ResponseConverter;
 
+    @Mock
+    private DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter databaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter;
+
     @InjectMocks
     private EnvironmentPlatformResourceController underTest;
+
+    @Test
+    void getDatabaseCapabilitiesPutsEngineVersionIntoFilters() {
+        PlatformResourceRequest request = new PlatformResourceRequest();
+        when(platformParameterService.getPlatformResourceRequestByEnvironment(any(), any(), any(), any(), any(), any(), any(DatabaseCapabilityType.class)))
+                .thenReturn(request);
+        when(platformParameterService.getDatabaseCapabilities(any())).thenReturn(mock(PlatformDatabaseCapabilities.class));
+
+        doAsCurrentUserCrn(() -> underTest.getDatabaseCapabilities(ENV_CRN, "us-west-2", "AWS", null,
+                DatabaseCapabilityType.DEFAULT, null, "17"));
+
+        assertThat(request.getFilters()).containsEntry(CloudParameterConst.DATABASE_ENGINE_VERSION, "17");
+    }
+
+    @Test
+    void getDatabaseCapabilitiesSkipsBlankEngineVersion() {
+        PlatformResourceRequest request = new PlatformResourceRequest();
+        when(platformParameterService.getPlatformResourceRequestByEnvironment(any(), any(), any(), any(), any(), any(), any(DatabaseCapabilityType.class)))
+                .thenReturn(request);
+        when(platformParameterService.getDatabaseCapabilities(any())).thenReturn(mock(PlatformDatabaseCapabilities.class));
+
+        doAsCurrentUserCrn(() -> underTest.getDatabaseCapabilities(ENV_CRN, "us-west-2", "AWS", null,
+                DatabaseCapabilityType.DEFAULT, null, "  "));
+
+        assertThat(request.getFilters()).doesNotContainKey(CloudParameterConst.DATABASE_ENGINE_VERSION);
+    }
 
     @Test
     void testGetVmTypesForVerticalScalingWithAvailabilityZonesFilterAsNull() {

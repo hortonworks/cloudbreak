@@ -13,6 +13,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -30,6 +32,7 @@ import jakarta.ws.rs.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -68,6 +71,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -112,7 +116,12 @@ import software.amazon.awssdk.services.kms.model.KmsException;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
+import software.amazon.awssdk.services.rds.model.DBEngineVersion;
 import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsResponse;
+import software.amazon.awssdk.services.rds.model.DescribeOrderableDbInstanceOptionsRequest;
+import software.amazon.awssdk.services.rds.model.OrderableDBInstanceOption;
+import software.amazon.awssdk.services.rds.paginators.DescribeOrderableDBInstanceOptionsIterable;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -169,6 +178,9 @@ public class AwsPlatformResourcesTest {
 
     @Mock
     private AmazonKmsUtil amazonKmsUtil;
+
+    @Mock
+    private DbOverrideConfig dbOverrideConfig;
 
     private ExtendedCloudCredential cloudCredential;
 
@@ -684,6 +696,52 @@ public class AwsPlatformResourcesTest {
         assertThat(result.getRegionDefaultInstanceTypeMap()).isNotEmpty();
         assertThat(result.getRegionDefaultInstanceTypeMap().get(region)).isEqualTo("db.m5.large");
         assertThat(result.getRegionAvailableInstanceTypes()).isEmpty();
+    }
+
+    @Test
+    void databaseCapabilitiesQueriesEngineVersionFromFilter() {
+        ArgumentCaptor<DescribeOrderableDbInstanceOptionsRequest> requestCaptor = stubRdsForEngineVersionQuery();
+
+        underTest.databaseCapabilities(cloudCredential, region, Map.of("architecture", "x86_64", "databaseEngineVersion", "17"));
+
+        assertEquals("17.5", requestCaptor.getValue().engineVersion());
+        verify(dbOverrideConfig, never()).findMaxEngineVersion();
+    }
+
+    @Test
+    void databaseCapabilitiesFallsBackToMaxEngineVersionWhenFilterAbsent() {
+        when(dbOverrideConfig.findMaxEngineVersion()).thenReturn("17");
+        ArgumentCaptor<DescribeOrderableDbInstanceOptionsRequest> requestCaptor = stubRdsForEngineVersionQuery();
+
+        underTest.databaseCapabilities(cloudCredential, region, Map.of("architecture", "x86_64"));
+
+        assertEquals("17.5", requestCaptor.getValue().engineVersion());
+        verify(dbOverrideConfig).findMaxEngineVersion();
+    }
+
+    private ArgumentCaptor<DescribeOrderableDbInstanceOptionsRequest> stubRdsForEngineVersionQuery() {
+        AmazonRdsClient amazonRdsClient = mock(AmazonRdsClient.class);
+        when(awsClient.createRdsClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonRdsClient);
+        DescribeDbEngineVersionsResponse engineVersionsResponse = DescribeDbEngineVersionsResponse.builder()
+                .dbEngineVersions(
+                        DBEngineVersion.builder().engineVersion("14.18").build(),
+                        DBEngineVersion.builder().engineVersion("17.5").build())
+                .build();
+        when(amazonRdsClient.describeDBEngineVersions(any())).thenReturn(engineVersionsResponse);
+
+        ArgumentCaptor<DescribeOrderableDbInstanceOptionsRequest> requestCaptor =
+                ArgumentCaptor.forClass(DescribeOrderableDbInstanceOptionsRequest.class);
+        DescribeOrderableDBInstanceOptionsIterable paginator = mock(DescribeOrderableDBInstanceOptionsIterable.class);
+        SdkIterable<OrderableDBInstanceOption> empty = Collections::emptyIterator;
+        when(paginator.orderableDBInstanceOptions()).thenReturn(empty);
+        when(amazonRdsClient.describeOrderableDbInstanceOptionsResponse(requestCaptor.capture())).thenReturn(paginator);
+
+        ReflectionTestUtils.setField(underTest, "awsDatabaseVmDefault", "db.m5.large");
+        ReflectionTestUtils.setField(underTest, "awsArmDatabaseVmDefault", "db.m6g.large");
+        Coordinate coordinate = mock(Coordinate.class);
+        when(coordinate.getDefaultDbVmTypes()).thenReturn(List.of("db.m5.large"));
+        ReflectionTestUtils.setField(underTest, "regionCoordinates", Map.of(region, coordinate));
+        return requestCaptor;
     }
 
     @Test

@@ -111,7 +111,7 @@ static Object[][] testInput() {
         when(databaseCapabilities.getRegionUpgradeVersions()).thenReturn(regionUpgradeVersions);
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
                 environmentCrn, region, platformVariant, availabilityZone,
-                DatabaseCapabilityType.DEFAULT, architectureName))
+                DatabaseCapabilityType.DEFAULT, architectureName, null))
                 .thenReturn(databaseCapabilities);
 
         // WHEN

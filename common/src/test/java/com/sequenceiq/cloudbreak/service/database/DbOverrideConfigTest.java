@@ -65,6 +65,28 @@ class DbOverrideConfigTest {
     }
 
     @Test
+    void testFindMaxEngineVersion() {
+        String result = underTest.findMaxEngineVersion();
+        assertEquals("3", result);
+    }
+
+    @Test
+    void testFindMaxEngineVersionSingleEntry() {
+        DbOverrideConfig single = new DbOverrideConfig();
+        DbOverrideVersion version = new DbOverrideVersion();
+        version.setEngineVersion("17");
+        single.setVersions(List.of(version));
+        assertEquals("17", single.findMaxEngineVersion());
+    }
+
+    @Test
+    void testFindMaxEngineVersionWhenEmpty() {
+        DbOverrideConfig empty = new DbOverrideConfig();
+        empty.setVersions(List.of());
+        assertEquals(null, empty.findMaxEngineVersion());
+    }
+
+    @Test
     void testFindMinRuntimeVersion() {
         Optional<String> result = underTest.findMinRuntimeVersion("1");
         assertFalse(result.isPresent());

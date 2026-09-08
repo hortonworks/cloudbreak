@@ -247,7 +247,7 @@ public class StackCreatorService {
         Optional<String> runtimeVersion = getRuntimeVersionFromBlueprint(stackRequest, workspace.getId());
         validateArchitecture(stackRequest, runtimeVersion);
         validateSeLinuxEntitlement(stackRequest);
-        measure(() -> validateDatabaseInstanceTypeIfPresent(stackRequest, environment),
+        measure(() -> validateDatabaseInstanceTypeIfPresent(stackRequest, environment, runtimeVersion.orElse(null)),
                 LOGGER, "Database instance type validation took {} ms for stack {}", stackName);
         updateImageOsIfRequired(stackRequest, runtimeVersion, accountId);
 
@@ -477,13 +477,13 @@ public class StackCreatorService {
         seLinuxValidationService.validateSeLinuxEntitlementGranted(seLinuxModeFromRequest);
     }
 
-    private void validateDatabaseInstanceTypeIfPresent(StackV4Request stackRequest, DetailedEnvironmentResponse environment) {
+    private void validateDatabaseInstanceTypeIfPresent(StackV4Request stackRequest, DetailedEnvironmentResponse environment, String runtimeVersion) {
         DatabaseRequest dbRequest = stackRequest.getExternalDatabase();
         if (dbRequest == null || StringUtils.isBlank(dbRequest.getDatabaseInstanceType())) {
             return;
         }
         databaseInstanceTypeRequestValidator.validateIfPresent(
-                dbRequest.getDatabaseInstanceType(), dbRequest, environment, stackRequest.getArchitectureEnum());
+                dbRequest.getDatabaseInstanceType(), dbRequest, environment, stackRequest.getArchitectureEnum(), runtimeVersion);
     }
 
     private boolean isCodRequest(StackV4Request stackRequest) {

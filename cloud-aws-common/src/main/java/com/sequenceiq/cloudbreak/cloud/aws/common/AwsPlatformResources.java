@@ -792,6 +792,7 @@ public class AwsPlatformResources implements PlatformResources {
             Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
             Map<Region, List<String>> regionFallbackInstanceTypeMap = new HashMap<>();
             String architecture = filters.getOrDefault("architecture", Architecture.X86_64.getName());
+            Optional<String> engineVersion = Optional.ofNullable(filters.get(CloudParameterConst.DATABASE_ENGINE_VERSION));
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
                 Coordinate coordinate = regionCoordinates.get(actualRegion);
                 boolean arm = ARM64.getName().equals(architecture);
@@ -810,7 +811,7 @@ public class AwsPlatformResources implements PlatformResources {
             }
             Map<Region, Set<DatabaseVmType>> regionAvailableInstanceTypes = new HashMap<>();
             try {
-                fillUpInstanceTypes(cloudCredential, region, architecture, regionAvailableInstanceTypes);
+                fillUpInstanceTypes(cloudCredential, region, architecture, engineVersion, regionAvailableInstanceTypes);
             } catch (Exception e) {
                 LOGGER.warn("Could not fetch available database instance types for region {}: {}", region, e.getMessage());
             }
@@ -828,13 +829,14 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private void fillUpInstanceTypes(CloudCredential cloudCredential, Region region, String architecture, Map<Region,
+    private void fillUpInstanceTypes(CloudCredential cloudCredential, Region region, String architecture, Optional<String> engineVersion, Map<Region,
             Set<DatabaseVmType>> regionAvailableInstanceTypes) {
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             Set<DatabaseVmType> instanceTypes = getAvailableDatabaseInstanceTypes(
                     new AwsCredentialView(cloudCredential),
                     region,
-                    architecture
+                    architecture,
+                    engineVersion
             );
             if (!instanceTypes.isEmpty()) {
                 regionAvailableInstanceTypes.put(region, instanceTypes);
@@ -927,9 +929,10 @@ public class AwsPlatformResources implements PlatformResources {
         Map<Region, Set<DatabaseVmType>> cloudVmResponses = new HashMap<>();
         Map<Region, String> defaultCloudVmResponses = new HashMap<>();
         String architecture = filters.getOrDefault("architecture", Architecture.X86_64.getName());
+        Optional<String> engineVersion = Optional.ofNullable(filters.get(CloudParameterConst.DATABASE_ENGINE_VERSION));
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
-            Set<DatabaseVmType> instanceTypes = getAvailableDatabaseInstanceTypes(awsCredentialView, region, architecture);
+            Set<DatabaseVmType> instanceTypes = getAvailableDatabaseInstanceTypes(awsCredentialView, region, architecture, engineVersion);
             if (!instanceTypes.isEmpty()) {
                 cloudVmResponses.put(region, instanceTypes);
                 defaultCloudVmResponses.put(region, getAwsDatabaseVmDefault(architecture));
@@ -945,16 +948,18 @@ public class AwsPlatformResources implements PlatformResources {
         return awsArmDatabaseVmDefault;
     }
 
-    private Set<DatabaseVmType> getAvailableDatabaseInstanceTypes(AwsCredentialView awsCredentialView, Region region, String architecture) {
+    private Set<DatabaseVmType> getAvailableDatabaseInstanceTypes(AwsCredentialView awsCredentialView, Region region, String architecture,
+            Optional<String> engineVersion) {
         Set<DatabaseVmType> instanceTypes = new HashSet<>();
         AmazonRdsClient rdsClient = awsClient.createRdsClient(awsCredentialView, region.getRegionName());
         DescribeDbEngineVersionsRequest engineVersionsRequest = DescribeDbEngineVersionsRequest.builder()
                 .engine(POSTGRES)
                 .build();
+        String majorVersion = engineVersion.filter(v -> !v.isBlank()).orElseGet(dbOverrideConfig::findMaxEngineVersion);
         Optional<DBEngineVersion> postgres = rdsClient.describeDBEngineVersions(engineVersionsRequest)
                 .dbEngineVersions()
                 .stream()
-                .filter(version -> version.engineVersion().startsWith(dbOverrideConfig.findMinEngineVersion()))
+                .filter(version -> version.engineVersion().startsWith(majorVersion))
                 .findFirst();
         if (postgres.isPresent()) {
             DescribeOrderableDbInstanceOptionsRequest request = DescribeOrderableDbInstanceOptionsRequest.builder()

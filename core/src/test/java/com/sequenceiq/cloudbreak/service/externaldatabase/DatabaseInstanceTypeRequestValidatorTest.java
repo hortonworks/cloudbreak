@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeCapabilityValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -44,16 +45,19 @@ class DatabaseInstanceTypeRequestValidatorTest {
     @Mock
     private DatabaseInstanceTypeCapabilityValidator capabilityValidator;
 
+    @Mock
+    private DbOverrideConfig dbOverrideConfig;
+
     @Test
     void blankInstanceTypeShouldNotCallEnvironmentEndpoint() {
         DetailedEnvironmentResponse env = createEnv();
         DatabaseRequest dbRequest = new DatabaseRequest();
         dbRequest.setDatabaseInstanceType("");
 
-        underTest.validateIfPresent("", dbRequest, env, Architecture.X86_64);
+        underTest.validateIfPresent("", dbRequest, env, Architecture.X86_64, null);
 
         verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(
-                anyString(), anyString(), anyString(), any(), any(), anyString());
+                anyString(), anyString(), anyString(), any(), any(), anyString(), any());
     }
 
     @Test
@@ -61,10 +65,10 @@ class DatabaseInstanceTypeRequestValidatorTest {
         DetailedEnvironmentResponse env = createEnv();
         DatabaseRequest dbRequest = new DatabaseRequest();
 
-        underTest.validateIfPresent(null, dbRequest, env, Architecture.X86_64);
+        underTest.validateIfPresent(null, dbRequest, env, Architecture.X86_64, null);
 
         verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(
-                anyString(), anyString(), anyString(), any(), any(), anyString());
+                anyString(), anyString(), anyString(), any(), any(), anyString(), any());
     }
 
     @Test
@@ -73,11 +77,28 @@ class DatabaseInstanceTypeRequestValidatorTest {
         DatabaseRequest dbRequest = new DatabaseRequest();
         PlatformDatabaseCapabilitiesResponse response = createCapabilitiesResponse();
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                eq("env-crn"), eq("us-east-1"), eq("AWS"), any(), eq(DatabaseCapabilityType.DEFAULT), eq("x86_64")))
+                eq("env-crn"), eq("us-east-1"), eq("AWS"), any(), eq(DatabaseCapabilityType.DEFAULT), eq("x86_64"), any()))
                 .thenReturn(response);
 
-        underTest.validateIfPresent("db.m5.xlarge", dbRequest, env, Architecture.X86_64);
+        underTest.validateIfPresent("db.m5.xlarge", dbRequest, env, Architecture.X86_64, null);
 
+        verify(capabilityValidator).validate(any(DatabaseInstanceTypeValidationInput.class));
+    }
+
+    @Test
+    void runtimeVersionShouldBeForwardedAsEngineVersion() {
+        DetailedEnvironmentResponse env = createEnv();
+        DatabaseRequest dbRequest = new DatabaseRequest();
+        PlatformDatabaseCapabilitiesResponse response = createCapabilitiesResponse();
+        when(dbOverrideConfig.findEngineVersionForRuntime("7.3.2")).thenReturn("17");
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
+                eq("env-crn"), eq("us-east-1"), eq("AWS"), any(), eq(DatabaseCapabilityType.DEFAULT), eq("x86_64"), eq("17")))
+                .thenReturn(response);
+
+        underTest.validateIfPresent("db.m5.xlarge", dbRequest, env, Architecture.X86_64, "7.3.2");
+
+        verify(environmentPlatformResourceEndpoint).getDatabaseCapabilities(
+                eq("env-crn"), eq("us-east-1"), eq("AWS"), any(), eq(DatabaseCapabilityType.DEFAULT), eq("x86_64"), eq("17"));
         verify(capabilityValidator).validate(any(DatabaseInstanceTypeValidationInput.class));
     }
 
@@ -87,13 +108,13 @@ class DatabaseInstanceTypeRequestValidatorTest {
         DatabaseRequest dbRequest = new DatabaseRequest();
         PlatformDatabaseCapabilitiesResponse response = createCapabilitiesResponse();
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                anyString(), anyString(), anyString(), any(), any(), anyString()))
+                anyString(), anyString(), anyString(), any(), any(), anyString(), any()))
                 .thenReturn(response);
         doThrow(new BadRequestException("Instance type not available"))
                 .when(capabilityValidator).validate(any());
 
         assertThrows(BadRequestException.class,
-                () -> underTest.validateIfPresent("db.invalid", dbRequest, env, Architecture.X86_64));
+                () -> underTest.validateIfPresent("db.invalid", dbRequest, env, Architecture.X86_64, null));
     }
 
     @Test
@@ -101,10 +122,10 @@ class DatabaseInstanceTypeRequestValidatorTest {
         DetailedEnvironmentResponse env = createEnv();
         DatabaseRequest dbRequest = new DatabaseRequest();
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                anyString(), anyString(), anyString(), any(), any(), anyString()))
+                anyString(), anyString(), anyString(), any(), any(), anyString(), any()))
                 .thenThrow(new RuntimeException("Connection timeout"));
 
-        assertDoesNotThrow(() -> underTest.validateIfPresent("db.m5.large", dbRequest, env, Architecture.X86_64));
+        assertDoesNotThrow(() -> underTest.validateIfPresent("db.m5.large", dbRequest, env, Architecture.X86_64, null));
     }
 
     private DetailedEnvironmentResponse createEnv() {

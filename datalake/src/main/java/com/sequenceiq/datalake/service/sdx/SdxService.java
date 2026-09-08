@@ -440,7 +440,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         DatabaseRequest internalDatabaseRequest = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getExternalDatabase).orElse(null);
         databaseInstanceTypeRequestValidator.validateIfPresent(
-                sdxClusterRequest.getExternalDatabase(), internalDatabaseRequest, environment, architecture, userCrn);
+                sdxClusterRequest.getExternalDatabase(), internalDatabaseRequest, environment, architecture, userCrn, runtimeVersion);
         sdxCluster.setSdxDatabase(externalDatabaseConfigurer.configure(environment, os, internalDatabaseRequest,
                 sdxClusterRequest.getExternalDatabase(), sdxCluster));
 

@@ -332,7 +332,8 @@ public class DatabaseService {
                 env.getCloudPlatform(),
                 null,
                 capabilityType,
-                architecture == null ? null : architecture.getName()));
+                architecture == null ? null : architecture.getName(),
+                null));
     }
 
     private Optional<DatabaseServerV4Response> getPreviousDatabaseIfPropertiesWereModified(Map<String, Object> attributes, CloudPlatform cloudPlatform,
