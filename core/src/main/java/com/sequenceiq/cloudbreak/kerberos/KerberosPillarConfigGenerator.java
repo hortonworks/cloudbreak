@@ -83,8 +83,9 @@ public class KerberosPillarConfigGenerator {
                 .map(DescribeFreeIpaResponse::getTrust)
                 .orElse(null);
         if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
-            Set<String> sdxDomains = platformAwareSdxConnector.getSdxDomains(detailedEnvironmentResponse.getCrn());
-            LOGGER.debug("Creating trust kerberos pillar configuration for realm: {}", trustResponse.getRealm());
+            Set<String> sdxDomains = platformAwareSdxConnector.getSdxDomains(
+                    detailedEnvironmentResponse.getCrn(), detailedEnvironmentResponse.getRemoteEnvironmentCrn());
+            LOGGER.debug("Creating trust kerberos pillar configuration for realm: {}, sdxDomains: {}", trustResponse.getRealm(), sdxDomains);
             return Map.of(
                     "extendRealms", KdcType.MIT.name().equals(trustResponse.getKdcType()),
                     "realm", trustResponse.getRealm().toUpperCase(Locale.ROOT),

@@ -25,6 +25,8 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsVolumeConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaKraftVolumeConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.zookeeper.ZooKeeperVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
@@ -277,6 +279,24 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
                 ),
                 roleConfigs.get("yarn-NODEMANAGER-BASE")
         );
+    }
+
+    @Test
+    public void testDoesNotCloneWhenAnotherProviderForSameServiceReturnsFalseForSharedRoleType() {
+        configProviders.addFirst(new KafkaKraftVolumeConfigProvider());
+        configProviders.add(new KafkaVolumeConfigProvider());
+        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView coreBroker = new HostgroupView("core_broker", 2, InstanceGroupType.CORE, 3);
+        HostgroupView broker = new HostgroupView("broker", 2, InstanceGroupType.CORE, 0);
+        HostgroupView kraft = new HostgroupView("kraft", 1, InstanceGroupType.CORE, 0);
+        setup("input/cdp-streaming-small.bp", Builder.builder().withHostgroupViews(Set.of(master, coreBroker, broker, kraft)));
+
+        underTest.process(templateProcessor, templatePreparator);
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
+        assertNotNull(roleConfigs.get("kafka-KAFKA_BROKER-BASE"), "kafka-KAFKA_BROKER-BASE must remain — it must not be cloned per host group");
+        assertNull(roleConfigs.get("kafka-KAFKA_BROKER-core_broker"), "kafka-KAFKA_BROKER-BASE must not be cloned into a per host group");
+        assertNull(roleConfigs.get("kafka-KAFKA_BROKER-broker"), "kafka-KAFKA_BROKER-BASE must not be cloned into a per host group");
     }
 
     @Test

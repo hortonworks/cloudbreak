@@ -149,6 +149,7 @@ public class AwsRdsVersionOperationsTest {
         DescribeDbEngineVersionsRequest describeDBEngineVersionsRequest = rdsEngineVersionArgumentCaptor.getValue();
         assertEquals("1.2", describeDBEngineVersionsRequest.engineVersion());
         assertEquals("postgres", describeDBEngineVersionsRequest.engine());
+        assertEquals(Boolean.TRUE, describeDBEngineVersionsRequest.includeAll());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.common;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,8 +146,17 @@ public class PlatformAwareSdxConnector {
         return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getCACertsForEnvironment(environmentCrn);
     }
 
-    public Set<String> getSdxDomains(String environmentCrn) {
-        return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getSdxDomains(environmentCrn);
+    public Set<String> getSdxDomains(String environmentCrn, String remoteEnvironmentCrn) {
+        TargetPlatform platform = calculatePlatform(environmentCrn);
+        Set<String> domains = new HashSet<>(platformDependentSdxDescribeServices.get(platform).getSdxDomains(environmentCrn));
+        if (platform == TargetPlatform.PAAS && StringUtils.isNotBlank(remoteEnvironmentCrn)) {
+            try {
+                domains.addAll(platformDependentSdxDescribeServices.get(TargetPlatform.PDL).getSdxDomains(environmentCrn));
+            } catch (Exception e) {
+                LOGGER.warn("Failed to get PDL domains for environment CRN: {}", environmentCrn, e);
+            }
+        }
+        return domains;
     }
 
     public void validateIfOtherPlatformsHasSdx(String environmentCrn, TargetPlatform currentPlatform) {
