@@ -409,7 +409,7 @@ class StackCreatorServiceJavaVersionTest {
     }
 
     @Test
-    void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoAfter713220000() throws Exception {
+    void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoAfter713230000AndEntitlementEnabled() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
         when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
@@ -417,8 +417,10 @@ class StackCreatorServiceJavaVersionTest {
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
         when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.13.2.20000"));
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null))
+                .thenReturn(new ClouderaManagerRepo().withVersion("7.13.2.30000"));
         when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
+        when(entitlementService.isGcpRazWithCabEnabled(ACCOUNT_ID)).thenReturn(true);
         StackV4Request stackRequest = createStackRequest("7.3.2");
         stack.setCloudPlatform("GCP");
         stack.setType(StackType.DATALAKE);
@@ -428,6 +430,52 @@ class StackCreatorServiceJavaVersionTest {
         callCreateStack(stackRequest);
         verify(stackParametersService, times(1)).setStackParameter(
                 stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, RAZ_AUTHENTICATION_TYPE_CAB);
+    }
+
+    @Test
+    void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoAfter713220000AndEntitlementDisabled() throws Exception {
+        Image image = mock(Image.class);
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
+        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
+        lenient().when(image.getArchitecture()).thenReturn("x86_64");
+        StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
+        setupImageFuture(statedImage);
+        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.13.2.20000"));
+        when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
+        when(entitlementService.isGcpRazWithCabEnabled(ACCOUNT_ID)).thenReturn(false);
+        StackV4Request stackRequest = createStackRequest("7.3.2");
+        stack.setCloudPlatform("GCP");
+        stack.setType(StackType.DATALAKE);
+        stack.getCluster().setRangerRazEnabled(true);
+        stack.setParameters(new HashMap<>());
+
+        callCreateStack(stackRequest);
+        verify(stackParametersService, times(1)).setStackParameter(
+                stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, RAZ_AUTHENTICATION_TYPE_HMAC);
+    }
+
+    @Test
+    void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoBefore713220000AndEntitlementEnabled() throws Exception {
+        Image image = mock(Image.class);
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
+        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
+        lenient().when(image.getArchitecture()).thenReturn("x86_64");
+        StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
+        setupImageFuture(statedImage);
+        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.3.2"));
+        when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
+        when(entitlementService.isGcpRazWithCabEnabled(ACCOUNT_ID)).thenReturn(true);
+        StackV4Request stackRequest = createStackRequest("7.3.2");
+        stack.setCloudPlatform("GCP");
+        stack.setType(StackType.DATALAKE);
+        stack.getCluster().setRangerRazEnabled(true);
+        stack.setParameters(new HashMap<>());
+
+        callCreateStack(stackRequest);
+        verify(stackParametersService, times(1)).setStackParameter(
+                stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, RAZ_AUTHENTICATION_TYPE_HMAC);
     }
 
     private StackV4Response callCreateStack(StackV4Request stackRequest) {

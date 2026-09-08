@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isGcpRazCabAuthTypeSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.common.notification.NotificationState.fromStateWithDisableIfNull;
 import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB;
@@ -60,7 +61,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -347,7 +347,7 @@ public class StackCreatorService {
                 } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-                updateRazAuthenticationTypeIfNeeded(newStack);
+                updateRazAuthenticationTypeIfNeeded(newStack, accountId);
                 return newStack;
             });
         } catch (TransactionExecutionException e) {
@@ -380,13 +380,11 @@ public class StackCreatorService {
         return response;
     }
 
-    private void updateRazAuthenticationTypeIfNeeded(Stack stack) {
-        if (stack.getType() == StackType.DATALAKE && CloudConstants.GCP.equals(stack.getCloudPlatform()) &&
-                stack.getCluster() != null && stack.getCluster().isRangerRazEnabled() &&
-                (stack.getParameters() == null || StringUtils.isBlank(stack.getParameters().get(PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE)))) {
+    private void updateRazAuthenticationTypeIfNeeded(Stack stack, String accountId) {
+        if (isGcpRazApplicable(stack)) {
             ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getClusterId());
             if (clouderaManagerRepo != null) {
-                String razAuthType = CMRepositoryVersionUtil.isGcpRazCabAuthTypeSupported(clouderaManagerRepo.getVersion()) ?
+                String razAuthType = isGcpRazWithCabApplicable(accountId, clouderaManagerRepo) ?
                         RAZ_AUTHENTICATION_TYPE_CAB : RAZ_AUTHENTICATION_TYPE_HMAC;
                 stackParametersService.setStackParameter(stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, razAuthType);
                 LOGGER.info("Raz authentication type set to {} (CM version: {}).", razAuthType, clouderaManagerRepo.getVersion());
@@ -395,6 +393,16 @@ public class StackCreatorService {
                 stack.setParameters(parameters);
             }
         }
+    }
+
+    private boolean isGcpRazWithCabApplicable(String accountId, ClouderaManagerRepo clouderaManagerRepo) {
+        return entitlementService.isGcpRazWithCabEnabled(accountId) && isGcpRazCabAuthTypeSupported(clouderaManagerRepo.getVersion());
+    }
+
+    private boolean isGcpRazApplicable(Stack stack) {
+        return stack.getType() == StackType.DATALAKE && CloudConstants.GCP.equals(stack.getCloudPlatform()) &&
+                stack.getCluster() != null && stack.getCluster().isRangerRazEnabled() &&
+                (stack.getParameters() == null || StringUtils.isBlank(stack.getParameters().get(PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE)));
     }
 
     private void updateImageOsIfRequired(StackV4Request stackRequest, Optional<String> runtimeVersion, String accountId) {

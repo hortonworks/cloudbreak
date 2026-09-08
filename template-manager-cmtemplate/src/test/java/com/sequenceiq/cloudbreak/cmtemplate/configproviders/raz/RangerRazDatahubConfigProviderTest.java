@@ -233,9 +233,9 @@ public class RangerRazDatahubConfigProviderTest {
 
     @Test
     @DisplayName("CM 7.13.2.20000 GCP DH is used and Raz is requested, Raz service needs to be added to the template")
-    void getAdditionalServicesWhenRazIsEnabledForGcpWithCm713220000() {
+    void getAdditionalServicesWhenRazIsEnabledForGcpWithCm713230000() {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
-        cmRepo.setVersion("7.13.2.20000");
+        cmRepo.setVersion("7.13.2.30000");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());

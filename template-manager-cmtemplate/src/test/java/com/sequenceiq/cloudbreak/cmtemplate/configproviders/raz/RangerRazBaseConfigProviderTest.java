@@ -217,11 +217,11 @@ public class RangerRazBaseConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenGcpDataLakeAndCmVersion71320000ShouldAddCabAuthType() {
+    public void getRoleConfigWhenGcpDataLakeAndCmVersion71330000ShouldAddCabAuthType() {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
-        cmRepo.setVersion("7.13.2.20000");
+        cmRepo.setVersion("7.13.2.30000");
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setRazAuthenticationType(GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB);

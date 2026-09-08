@@ -42,7 +42,7 @@ class CMRepositoryVersionUtilTest {
 
                 // GCP Datalake - minimum 7.11.0
                 Arguments.of(CloudPlatform.GCP, StackType.DATALAKE, "7.11.0"),
-                Arguments.of(CloudPlatform.GCP, StackType.DATALAKE, "7.13.2.20000"),
+                Arguments.of(CloudPlatform.GCP, StackType.DATALAKE, "7.13.2.30000"),
 
                 // AWS DataHub (WORKLOAD) - minimum 7.2.2
                 Arguments.of(CloudPlatform.AWS, StackType.WORKLOAD, "7.2.2"),
@@ -53,7 +53,7 @@ class CMRepositoryVersionUtilTest {
                 Arguments.of(CloudPlatform.AZURE, StackType.WORKLOAD, "7.11.0"),
 
                 // GCP DataHub (WORKLOAD) - minimum 7.13.2.20000
-                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, "7.13.2.20000"),
+                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, "7.13.2.30000"),
                 Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, "7.14.0")
         );
     }
@@ -97,6 +97,6 @@ class CMRepositoryVersionUtilTest {
         // GCP DataHub is NOT supported at 7.11.0
         assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(gcpDatalakeMinVersion, CloudPlatform.GCP, StackType.WORKLOAD));
         // GCP DataHub IS supported at 7.13.2.20000
-        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported("7.13.2.20000", CloudPlatform.GCP, StackType.WORKLOAD));
+        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported("7.13.2.30000", CloudPlatform.GCP, StackType.WORKLOAD));
     }
 }
