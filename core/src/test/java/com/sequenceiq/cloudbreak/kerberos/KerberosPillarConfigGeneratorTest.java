@@ -56,6 +56,8 @@ public class KerberosPillarConfigGeneratorTest {
 
     private static final String TEST_CRN = "test-crn";
 
+    private static final String REMOTE_ENV_CRN = "remote-env-crn";
+
     @Mock
     private KerberosDetailService kerberosDetailService;
 
@@ -212,7 +214,7 @@ public class KerberosPillarConfigGeneratorTest {
         when(kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, TEST_URL)).thenReturn(TEST_ADMIN_URL);
         when(freeipaClient.findByEnvironmentCrn(TEST_CRN)).thenReturn(Optional.of(freeIpaResponse));
         Set<String> domains = Set.of("domain1", "domain2");
-        when(platformAwareSdxConnector.getSdxDomains(TEST_CRN)).thenReturn(domains);
+        when(platformAwareSdxConnector.getSdxDomains(TEST_CRN, null)).thenReturn(domains);
 
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.createKerberosPillar(kerberosConfig, environmentResponse);
@@ -333,6 +335,72 @@ public class KerberosPillarConfigGeneratorTest {
         Map<String, Object> trustProperties = (Map<String, Object>) properties.get("trust");
         assertNotNull(trustProperties);
         assertTrue(trustProperties.isEmpty());
+    }
+
+    @Test
+    public void testCreateKerberosPillarWhenRemoteEnvironmentDomainIsPresent() throws IOException {
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withUrl(TEST_URL)
+                .withRealm(TEST_REALM)
+                .withVerifyKdcTrust(true)
+                .withContainerDn(TEST_CONTAINER_DN)
+                .build();
+        DetailedEnvironmentResponse environmentResponse = createEnvironmentResponse(EnvironmentType.PUBLIC_CLOUD.name());
+        environmentResponse.setRemoteEnvironmentCrn(REMOTE_ENV_CRN);
+
+        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
+        TrustResponse trustResponse = new TrustResponse();
+        trustResponse.setRealm(TEST_REALM);
+        trustResponse.setFqdn(TEST_FQDN);
+        trustResponse.setKdcType(KdcType.ACTIVE_DIRECTORY.name());
+        freeIpaResponse.setTrust(trustResponse);
+
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+        when(kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig)).thenReturn(false);
+        when(kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, TEST_URL)).thenReturn(TEST_ADMIN_URL);
+        when(freeipaClient.findByEnvironmentCrn(TEST_CRN)).thenReturn(Optional.of(freeIpaResponse));
+        when(platformAwareSdxConnector.getSdxDomains(TEST_CRN, REMOTE_ENV_CRN))
+                .thenReturn(Set.of("domain1", "onprem.cluster.domain.com"));
+
+        Map<String, SaltPillarProperties> result = underTest.createKerberosPillar(kerberosConfig, environmentResponse);
+
+        Map<String, Object> properties = result.get("kerberos").getProperties();
+        Map<String, Object> trustProperties = (Map<String, Object>) properties.get("trust");
+        Set<String> sdxDomains = (Set<String>) trustProperties.get("sdxDomains");
+        assertEquals(Set.of("domain1", "onprem.cluster.domain.com"), sdxDomains);
+    }
+
+    @Test
+    public void testCreateKerberosPillarWhenSdxDomainsAndRemoteDomainsOverlap() throws IOException {
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withUrl(TEST_URL)
+                .withRealm(TEST_REALM)
+                .withVerifyKdcTrust(true)
+                .withContainerDn(TEST_CONTAINER_DN)
+                .build();
+        DetailedEnvironmentResponse environmentResponse = createEnvironmentResponse(EnvironmentType.PUBLIC_CLOUD.name());
+        environmentResponse.setRemoteEnvironmentCrn(REMOTE_ENV_CRN);
+
+        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
+        TrustResponse trustResponse = new TrustResponse();
+        trustResponse.setRealm(TEST_REALM);
+        trustResponse.setFqdn(TEST_FQDN);
+        trustResponse.setKdcType(KdcType.ACTIVE_DIRECTORY.name());
+        freeIpaResponse.setTrust(trustResponse);
+
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+        when(kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig)).thenReturn(false);
+        when(kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, TEST_URL)).thenReturn(TEST_ADMIN_URL);
+        when(freeipaClient.findByEnvironmentCrn(TEST_CRN)).thenReturn(Optional.of(freeIpaResponse));
+        when(platformAwareSdxConnector.getSdxDomains(TEST_CRN, REMOTE_ENV_CRN))
+                .thenReturn(Set.of("shared.domain.com", "sdx-only.domain.com", "remote-only.domain.com"));
+
+        Map<String, SaltPillarProperties> result = underTest.createKerberosPillar(kerberosConfig, environmentResponse);
+
+        Map<String, Object> properties = result.get("kerberos").getProperties();
+        Map<String, Object> trustProperties = (Map<String, Object>) properties.get("trust");
+        Set<String> sdxDomains = (Set<String>) trustProperties.get("sdxDomains");
+        assertEquals(Set.of("shared.domain.com", "sdx-only.domain.com", "remote-only.domain.com"), sdxDomains);
     }
 
     private DetailedEnvironmentResponse createEnvironmentResponse(String environmentType) {

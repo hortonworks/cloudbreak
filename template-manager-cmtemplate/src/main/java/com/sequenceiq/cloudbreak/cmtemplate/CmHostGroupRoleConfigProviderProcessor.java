@@ -105,6 +105,7 @@ public class CmHostGroupRoleConfigProviderProcessor {
             int groupCount = configsByHostGroup.size();
             Optional<CmHostGroupRoleConfigProvider> provider = providers.stream()
                     .filter(it -> it.getServiceType().equals(templateService.getServiceType()))
+                    .filter(it -> it.getRoleTypes().contains(configGroup.getRoleType()))
                     .findFirst();
             boolean sharedRoleType = true;
             if (provider.isPresent()) {

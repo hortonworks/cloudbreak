@@ -90,6 +90,7 @@ public class AwsRdsVersionOperations {
         DescribeDbEngineVersionsRequest describeDBEngineVersionsRequest = DescribeDbEngineVersionsRequest.builder()
                 .engine("postgres")
                 .engineVersion(dbVersion.getVersion())
+                .includeAll(true)
                 .build();
         try {
             DescribeDbEngineVersionsResponse result = rdsClient.describeDBEngineVersions(describeDBEngineVersionsRequest);
