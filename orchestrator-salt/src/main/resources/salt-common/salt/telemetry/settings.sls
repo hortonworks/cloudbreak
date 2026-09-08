@@ -88,6 +88,16 @@
 
 {% set cdp_telemetry_package_version = salt['pkg.version']('cdp-telemetry') %}
 {% set cdp_logging_agent_package_version = salt['pkg.version']('cdp-logging-agent') %}
+
+{% set minifi_min_version = '1.25.09-b38' %}
+{% set cdp_telemetry_min_version = '1.3.14_b2' %}
+{% set minifi_package_version = salt['pkg.version']('nifi-minifi-cpp') %}
+{% set minifi_version_supported = minifi_package_version|length > 0
+    and salt['pkg.version_cmp'](minifi_package_version, minifi_min_version) >= 0
+    and cdp_telemetry_package_version|length > 0
+    and salt['pkg.version_cmp'](cdp_telemetry_package_version, cdp_telemetry_min_version) >= 0 %}
+{% set prefer_minifi_logging_requested = salt['pillar.get']('fluent:preferMinifiLogging', False) == True %}
+{% set prefer_minifi_logging = prefer_minifi_logging_requested and minifi_version_supported %}
 {% set desired_cdp_telemetry_version = salt['pillar.get']('telemetry:desiredCdpTelemetryVersion') %}
 {% set desired_cdp_logging_agent_version = salt['pillar.get']('telemetry:desiredCdpLoggingAgentVersion') %}
 {% set desired_cdp_request_signer_version = salt['pillar.get']('telemetry:desiredCdpRequestSignerVersion') %}
@@ -132,5 +142,7 @@
     "skipValidation": skip_validation,
     "testCloudStorageUploadParams": test_cloud_storage_upload_params,
     "testInfraRepoCurlCmd": test_infra_repo_curl_cmd,
-    "devTelemetrySupported": dev_telemetry_supported
+    "devTelemetrySupported": dev_telemetry_supported,
+    "preferMinifiLogging": prefer_minifi_logging,
+    "minifiPackageVersion": minifi_package_version
 }) %}

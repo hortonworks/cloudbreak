@@ -1,3 +1,4 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
 {% set fluent = {} %}
 {% if salt['pillar.get']('fluent:enabled') %}
     {% set fluent_enabled = True %}
@@ -144,7 +145,7 @@
   {% set uninstall_td_agent = False %}
 {% endif %}
 {% set cdp_logging_agent_package_version = salt['pkg.version']('cdp-logging-agent') %}
-{% set prefer_minifi_logging = salt['pillar.get']('fluent:preferMinifiLogging', False) == True %}
+{% set prefer_minifi_logging = telemetry.preferMinifiLogging %}
 {% do fluent.update({
     "enabled": fluent_enabled,
     "is_systemd" : is_systemd,

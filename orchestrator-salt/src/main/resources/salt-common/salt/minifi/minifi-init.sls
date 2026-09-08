@@ -1,19 +1,6 @@
 {%- from 'minifi/settings.sls' import minifi with context %}
 {%- from 'telemetry/settings.sls' import telemetry with context %}
-{% set os = salt['grains.get']('os') %}
-{% set cpuarch = salt['grains.get']('cpuarch') %}
 {% if minifi.cloudStorageLoggingEnabled %}
-{% if not minifi.minifiInstalled %}
-{% if os == "RedHat" or os == "CentOS" %}
-install_minifi:
-  cmd.run:
-    - name: rpm -if {{ minifi.minifiRpm }}
-{% else %}
-install_minifi_warning:
-  cmd.run:
-    - name: echo "Minifi cannot be installed to {{ os }}"
-{% endif %}
-{% endif %}
 
 {%- if minifi.is_systemd %}
 minifi_systemd_stop:

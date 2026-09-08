@@ -213,7 +213,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             if (CollectionUtils.emptyIfNull(logging.getEnabledSensitiveStorageLogs()).contains(SensitiveLoggingComponent.SALT)) {
                 builder.includeSaltLogsInCloudStorageLogs();
             }
-            if (isPreferMinifiLogging(stack)) {
+            if (entitlementService.isPreferMinifiLogging(stack.getAccountId())) {
                 builder.preferMinifiLogging();
             }
         }
@@ -303,11 +303,4 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         }
     }
 
-    private boolean isPreferMinifiLogging(Stack stack) {
-        if (entitlementService.isPreferMinifiLogging(stack.getAccountId())) {
-            Image image = imageService.getImageForStack(stack);
-            return telemetryFeatureService.isMinifiLoggingSupported(image.getPackageVersions());
-        }
-        return false;
-    }
 }
