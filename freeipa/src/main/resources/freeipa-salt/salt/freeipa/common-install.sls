@@ -24,6 +24,26 @@ update_cnames:
     - require:
         - file: /opt/salt/scripts/update_cnames.sh
 
+replace_default_tomcat_error_page:
+  file.replace:
+    - name: /var/lib/pki/pki-tomcat/conf/web.xml
+    - pattern: '</welcome-file-list>\s*</web-app>'
+    - repl: '</welcome-file-list>\n
+             <error-page>\n
+             <error-code>404</error-code>\n
+                <location>/dummy.jsp</location>\n
+             </error-page>\n
+             <error-page>\n
+             <error-code>403</error-code>\n
+                <location>/dummy.jsp</location>\n
+             </error-page>\n
+             <error-page>\n
+             <error-code>500</error-code>\n
+                <location>/dummy.jsp</location>\n
+             </error-page>\n
+             </web-app>'
+    - backup: False
+
 one_week_next_update_grace_period:
   cmd.run:
     - names:
@@ -78,28 +98,12 @@ add_keytab_sssd:
     - after: "ldap_tls_cacert.*"
 {% endif %}
 
-restart_freeipa_after_plugin_change:
-  service.running:
-    - name: ipa
-    - onlyif: test -f /etc/ipa/default.conf
-    - failhard: True
-    - watch:
-      - file: {{ ipaserverPath }}/plugins/getkeytab.py
-      - file: {{ ipaserverPath }}/rpcserver.py
-
 set_number_of_krb5kdc_workers:
   file.replace:
     - name: /etc/sysconfig/krb5kdc
     - pattern: ^KRB5KDC_ARGS=.*
     - repl: KRB5KDC_ARGS='-w 100'
     - unless: grep "^KRB5KDC_ARGS='-w 100'$" /etc/sysconfig/krb5kdc
-
-restart_krb5kdc:
-  service.running:
-    - name: krb5kdc
-    - failhard: True
-    - watch:
-      - file: /etc/sysconfig/krb5kdc
 
 /etc/httpd/conf.d/ipa-rewrite.conf:
   file.managed:
@@ -137,13 +141,18 @@ disable_http_trace:
     - name: /etc/httpd/conf/httpd.conf
     - text: 'TraceEnable Off'
 
-restart_httpd:
+restart_freeipa_after_plugin_change:
   service.running:
-    - name: httpd
+    - name: ipa
+    - onlyif: test -f /etc/ipa/default.conf
     - failhard: True
     - watch:
+      - file: {{ ipaserverPath }}/plugins/getkeytab.py
+      - file: {{ ipaserverPath }}/rpcserver.py
+      - file: /etc/sysconfig/krb5kdc
       - file: /etc/httpd/conf.d/ipa-rewrite.conf
       - file: /etc/httpd/conf/httpd.conf
+      - file: /var/lib/pki/pki-tomcat/conf/web.xml
 
 /etc/sssd/sssd.conf:
   file.line:

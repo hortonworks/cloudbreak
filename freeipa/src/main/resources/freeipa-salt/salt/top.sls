@@ -44,7 +44,6 @@ base:
              {% endif %}
              - freeipa.healthagent
              - freeipa.iptables
-             - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
              - freeipa.selinux-mode
              - faillock
@@ -64,7 +63,6 @@ base:
              - cdpluksvolumebackup
              {% endif %}
              - freeipa.healthagent
-             - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
              - freeipa.selinux-mode
              - faillock
@@ -84,7 +82,6 @@ base:
              - cdpluksvolumebackup
              {% endif %}
              - freeipa.healthagent
-             - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
              - freeipa.selinux-mode
              - faillock
