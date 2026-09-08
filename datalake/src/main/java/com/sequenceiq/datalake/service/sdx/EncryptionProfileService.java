@@ -30,7 +30,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 public class EncryptionProfileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionProfileService.class);
 
-    private static final String DEFAULT_ENCRYPTION_PROFILE_NAME = "cdp_default";
+    private static final String LEGACY_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_v1";
 
     @Inject
     private EncryptionProfileEndpoint encryptionProfileEndpoint;
@@ -90,8 +90,8 @@ public class EncryptionProfileService {
     public void validateEncryptionProfile(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment, String runtimeVersion) {
         ValidationResult.ValidationResultBuilder validationBuilder = new ValidationResult.ValidationResultBuilder();
 
-        if (checkIfEncryptionProfileCrnIsNeitherNullOrDefault(environment.getEncryptionProfileCrn()) ||
-                checkIfEncryptionProfileCrnIsNeitherNullOrDefault(clusterRequest.getEncryptionProfileCrn())) {
+        if (!isEncryptionProfileNullOrLegacy(environment.getEncryptionProfileCrn()) ||
+                !isEncryptionProfileNullOrLegacy(clusterRequest.getEncryptionProfileNameOrCrn())) {
 
             if (!entitlementService.isConfigureEncryptionProfileEnabled(environment.getAccountId())) {
                 validationBuilder.error("Encryption Profile entitlement is not granted to the account");
@@ -108,22 +108,23 @@ public class EncryptionProfileService {
         }
     }
 
-    private boolean checkIfEncryptionProfileCrnIsNeitherNullOrDefault(String crn) {
-        if (isNotEmpty(crn)) {
-            String encryptionProfileName = Crn.safeFromString(crn).getResource();
-            return !encryptionProfileName.startsWith(DEFAULT_ENCRYPTION_PROFILE_NAME);
+    private boolean isEncryptionProfileNullOrLegacy(String nameOrCrn) {
+        if (isNotEmpty(nameOrCrn)) {
+            String encryptionProfileName = Crn.isCrn(nameOrCrn)
+                    ? Crn.safeFromString(nameOrCrn).getResource()
+                    : nameOrCrn;
+            return LEGACY_ENCRYPTION_PROFILE_NAME.equals(encryptionProfileName);
         }
-        return false;
+        return true;
     }
 
     public EncryptionProfileResponse getEncryptionProfile(SdxClusterRequest sdxClusterRequest) {
-        String encryptionProfileNameOrCrn = StringUtils.isNotBlank(sdxClusterRequest.getEncryptionProfileNameOrCrn()) ?
-                sdxClusterRequest.getEncryptionProfileNameOrCrn() : sdxClusterRequest.getEncryptionProfileCrn();
+        String encryptionProfileNameOrCrn = sdxClusterRequest.getEncryptionProfileNameOrCrn();
         if (StringUtils.isNotBlank(encryptionProfileNameOrCrn)) {
             if (Crn.isCrn(encryptionProfileNameOrCrn)) {
                 return getByCrn(encryptionProfileNameOrCrn);
             } else  {
-                return getByName(sdxClusterRequest.getEncryptionProfileNameOrCrn());
+                return getByName(encryptionProfileNameOrCrn);
             }
         }
         return null;

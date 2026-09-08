@@ -67,9 +67,10 @@ public class DistroXClusterToClusterConverter {
         response.setCustomContainer(null);
         response.setCustomQueue(null);
 
-        EncryptionProfileResponse encryptionProfile = encryptionProfileService.getEncryptionProfileByNameOrCrn(
-                source.getEncryptionProfileNameOrCrn(), source.getEncryptionProfileCrn());
-        response.setEncryptionProfileCrn(encryptionProfile != null ? encryptionProfile.getCrn() : null);
+        response.setEncryptionProfileCrn(
+                encryptionProfileService.getEncryptionProfileByNameOrCrn(source.getEncryptionProfileNameOrCrn())
+                        .map(EncryptionProfileResponse::getCrn)
+                        .orElse(null));
         return response;
     }
 

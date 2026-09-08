@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -462,18 +463,17 @@ class DistroXClusterToClusterConverterTest {
     @Test
     public void testConvertToClusterV4RequestWhenEncryptionProfileIsNotNull() {
         DistroXClusterV1Request distroXClusterV1Request = new DistroXClusterV1Request();
-        distroXClusterV1Request.setEncryptionProfileCrn("epCrn");
+        distroXClusterV1Request.setEncryptionProfileNameOrCrn("epName");
         distroXV1RequestInput.setCluster(distroXClusterV1Request);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         EncryptionProfileResponse  encryptionProfileResponse = new EncryptionProfileResponse();
         encryptionProfileResponse.setCrn("epCrn");
 
-        when(encryptionProfileService.getEncryptionProfileByNameOrCrn(null, distroXClusterV1Request.getEncryptionProfileCrn()))
-                .thenReturn(encryptionProfileResponse);
+        when(encryptionProfileService.getEncryptionProfileByNameOrCrn("epName")).thenReturn(Optional.of(encryptionProfileResponse));
 
         ClusterV4Request result = ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.convert(distroXV1RequestInput, environmentResponse));
 
-        assertEquals(distroXClusterV1Request.getEncryptionProfileCrn(), result.getEncryptionProfileCrn());
+        assertEquals("epCrn", result.getEncryptionProfileCrn());
     }
 
     @Test

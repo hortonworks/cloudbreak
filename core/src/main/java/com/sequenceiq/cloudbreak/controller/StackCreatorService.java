@@ -249,6 +249,7 @@ public class StackCreatorService {
                 "Get Environment from Environment service took {} ms");
         nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
         Optional<String> runtimeVersion = getRuntimeVersionFromBlueprint(stackRequest, workspace.getId());
+        encryptionProfileService.validateEncryptionProfileForCreation(stackRequest.getCluster(), runtimeVersion, accountId);
         validateArchitecture(stackRequest, runtimeVersion);
         validateSeLinuxEntitlement(stackRequest);
         measure(() -> validateDatabaseInstanceTypeIfPresent(stackRequest, environment, runtimeVersion.orElse(null)),
@@ -333,8 +334,6 @@ public class StackCreatorService {
                 stackCreationRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 cmRepoOsValidator.validate(stackRequest, imgFromCatalog.getImage());
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
-                encryptionProfileService.getDefaultEncryptionProfileIfRequired(environment, stack.getCluster(), runtimeVersion)
-                        .ifPresent(stack.getCluster()::setEncryptionProfileCrn);
                 Stack newStack = measure(
                         () -> stackService.create(stack, imgFromCatalog, user, workspace),
                         LOGGER,

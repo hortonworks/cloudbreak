@@ -213,8 +213,7 @@ public class EnvironmentApiConverter {
     }
 
     private String getEncryptionProfileCrn(EnvironmentRequest request) {
-        String encryptionProfileNameOrCrn = request.getEncryptionProfileNameOrCrn() != null ? request.getEncryptionProfileNameOrCrn() :
-                request.getEncryptionProfileCrn();
+        String encryptionProfileNameOrCrn = request.getEncryptionProfileNameOrCrn();
         EncryptionProfile encryptionProfile = encryptionProfileService.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn);
         return encryptionProfile != null ? encryptionProfile.getResourceCrn() : null;
     }

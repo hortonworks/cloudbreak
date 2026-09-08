@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -213,6 +214,9 @@ class StackCreatorServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private EncryptionProfileService encryptionProfileService;
 
     @Mock
     private DetailedEnvironmentResponse environment;

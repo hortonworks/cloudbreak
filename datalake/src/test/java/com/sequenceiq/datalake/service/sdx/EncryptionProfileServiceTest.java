@@ -85,7 +85,7 @@ class EncryptionProfileServiceTest {
         SdxClusterRequest clusterRequest = new SdxClusterRequest();
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
-        clusterRequest.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-ep-123");
+        clusterRequest.setEncryptionProfileNameOrCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-ep-123");
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(false);
@@ -94,6 +94,37 @@ class EncryptionProfileServiceTest {
                 assertThrows(BadRequestException.class, () -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
 
         assertEquals("Encryption Profile is not supported in 7.3.1 runtime. Please use 7.3.2 or above", exception.getMessage());
+    }
+
+    @Test
+    void testValidateEncryptionProfileWhenNameInNameOrCrnAndRuntimeSupportedDoesNotThrow() {
+        String runtimeVersion = "7.3.2";
+        SdxClusterRequest clusterRequest = new SdxClusterRequest();
+        clusterRequest.setEncryptionProfileNameOrCrn("epName");
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+
+        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
+        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
+    }
+
+    @Test
+    void testValidateEncryptionProfileWhenNameInNameOrCrnAndNotEntitledThrows() {
+        String runtimeVersion = "7.3.2";
+        SdxClusterRequest clusterRequest = new SdxClusterRequest();
+        clusterRequest.setEncryptionProfileNameOrCrn("epName");
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+
+        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(false);
+        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(true);
+
+        BadRequestException exception =
+                assertThrows(BadRequestException.class, () -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
+
+        assertEquals("Encryption Profile entitlement is not granted to the account", exception.getMessage());
     }
 
     @Test
@@ -166,7 +197,7 @@ class EncryptionProfileServiceTest {
     @Test
     void testGetEncryptionProfileWhenProfileCrnIsUsed() {
         SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        clusterRequest.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+        clusterRequest.setEncryptionProfileNameOrCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
 
         underTest.getEncryptionProfile(clusterRequest);
 

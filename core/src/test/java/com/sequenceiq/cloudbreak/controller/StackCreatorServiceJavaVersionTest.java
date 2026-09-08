@@ -246,7 +246,6 @@ class StackCreatorServiceJavaVersionTest {
             Supplier<?> supplier = invocation.getArgument(0);
             return supplier.get();
         });
-        when(encryptionProfileService.getDefaultEncryptionProfileIfRequired(any(), any(), any())).thenReturn(Optional.empty());
         when(imageService.getSupportedImdsVersion(any(), any())).thenReturn(Optional.empty());
         when(stackService.create(any(Stack.class), any(StatedImage.class), any(User.class), any(Workspace.class))).thenReturn(stack);
         when(stackDtoService.getById(anyLong())).thenReturn(mock(com.sequenceiq.cloudbreak.dto.StackDto.class));

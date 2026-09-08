@@ -13,9 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -135,36 +137,28 @@ public class EncryptionProfileService {
         }
     }
 
-    public EncryptionProfileResponse getEncryptionProfileByNameOrCrn(String encryptionProfileNameOrCrn, String encryptionProfileCrn) {
-        EncryptionProfileResponse encryptionProfile = null;
-        if (entitlementService.isConfigureEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            String nameOrCrn = StringUtils.isNotBlank(encryptionProfileNameOrCrn) ?
-                    encryptionProfileNameOrCrn : encryptionProfileCrn;
-            if (StringUtils.isNotEmpty(nameOrCrn)) {
-                if (Crn.isCrn(nameOrCrn)) {
-                    encryptionProfile = getEncryptionProfileByCrn(nameOrCrn);
-                } else {
-                    encryptionProfile = getEncryptionProfileByName(nameOrCrn);
-                }
-            }
+    public Optional<EncryptionProfileResponse> getEncryptionProfileByNameOrCrn(String encryptionProfileNameOrCrn) {
+        if (StringUtils.isBlank(encryptionProfileNameOrCrn)) {
+            return Optional.empty();
         }
-        return encryptionProfile;
+        return Optional.ofNullable(Crn.isCrn(encryptionProfileNameOrCrn)
+                ? getEncryptionProfileByCrn(encryptionProfileNameOrCrn)
+                : getEncryptionProfileByName(encryptionProfileNameOrCrn));
     }
 
-    public Optional<String> getDefaultEncryptionProfileIfRequired(
-            DetailedEnvironmentResponse environment,
-            Cluster cluster,
-            Optional<String> runtimeVersion) {
-        if (StringUtils.isNotBlank(cluster.getEncryptionProfileCrn())) {
-            return Optional.ofNullable(cluster.getEncryptionProfileCrn());
-        } else if (govCloudAnd732AndProfileShouldApplied(environment, cluster, runtimeVersion)) {
-            if (inheritEncryptionProfileFromEnvironment(environment, cluster)) {
-                return Optional.ofNullable(environment.getEncryptionProfileCrn());
-            } else {
-                return Optional.empty();
-            }
-        } else {
-            return Optional.empty();
+    public void validateEncryptionProfileForCreation(ClusterV4Request cluster, Optional<String> runtimeVersion, String accountId) {
+        if (cluster == null || StringUtils.isBlank(cluster.getEncryptionProfileCrn())) {
+            return;
+        }
+        if (!entitlementService.isConfigureEncryptionProfileEnabled(accountId)) {
+            throw new BadRequestException(
+                    "Account not entitled for encryption profile. Please contact your CDP administrator to enable it.");
+        }
+        if (runtimeVersion.isEmpty()
+                || !isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_2)) {
+            throw new BadRequestException(String.format(
+                    "Encryption profile feature requires runtime 7.3.2 or above. Requested runtime: %s",
+                    runtimeVersion.orElse("unknown")));
         }
     }
 
