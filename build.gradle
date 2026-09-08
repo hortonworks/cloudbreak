@@ -81,6 +81,7 @@ allprojects {
   ext['httpclient5.version'] = httpClientVersion
   ext['httpcore5.version'] = httpCoreVersion
   ext['log4j2.version'] = log4jVersion
+  ext['tomcat.version'] = tomcatVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
@@ -123,6 +124,9 @@ allprojects {
         force "io.projectreactor.netty:reactor-netty-http:$reactorNettyHttp"
         force "io.opentelemetry:opentelemetry-api:$openTelemetryVersion"
         force "io.opentelemetry:opentelemetry-sdk:$openTelemetryVersion"
+        force "org.apache.tomcat.embed:tomcat-embed-core:$tomcatVersion"
+        force "org.apache.tomcat.embed:tomcat-embed-websocket:$tomcatVersion"
+        force "org.apache.tomcat.embed:tomcat-embed-el:$tomcatVersion"
       }
     }
   }
