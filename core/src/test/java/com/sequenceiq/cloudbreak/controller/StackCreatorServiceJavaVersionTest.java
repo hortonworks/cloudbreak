@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.controller.validation.stack.CmRepoOsValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
@@ -144,6 +145,9 @@ class StackCreatorServiceJavaVersionTest {
 
     @Mock
     private StackCreationRuntimeVersionValidator stackCreationRuntimeVersionValidator;
+
+    @Mock
+    private CmRepoOsValidator cmRepoOsValidator;
 
     @Mock
     private HueWorkaroundValidatorService hueWorkaroundValidatorService;

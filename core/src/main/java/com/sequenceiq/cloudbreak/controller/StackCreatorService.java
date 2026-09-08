@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.validation.stack.CmRepoOsValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
@@ -175,6 +176,9 @@ public class StackCreatorService {
 
     @Inject
     private StackCreationRuntimeVersionValidator stackCreationRuntimeVersionValidator;
+
+    @Inject
+    private CmRepoOsValidator cmRepoOsValidator;
 
     @Inject
     private HueWorkaroundValidatorService hueWorkaroundValidatorService;
@@ -327,6 +331,7 @@ public class StackCreatorService {
                 LOGGER.info("Selected java version: {}", javaVersion);
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackVersion, stackRequest.getJavaVersion());
                 stackCreationRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
+                cmRepoOsValidator.validate(stackRequest, imgFromCatalog.getImage());
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
                 encryptionProfileService.getDefaultEncryptionProfileIfRequired(environment, stack.getCluster(), runtimeVersion)
                         .ifPresent(stack.getCluster()::setEncryptionProfileCrn);
