@@ -550,8 +550,8 @@ class AzureUtilsTest {
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
         verifyCloudConnectorException(result,
-                "Checking resources failed: 'com.azure.core.management.exception.ManagementException: Terms failed: Marketplace purchase eligibilty" +
-                        " check returned errors. See inner errors for details.', please go to Azure Portal for detailed message");
+                "Checking resources failed, status code MarketplacePurchaseEligibilityFailed, error message: Marketplace purchase eligibilty" +
+                        " check returned errors. See inner errors for details.");
         assertEquals(CloudImageException.class, result.getClass());
     }
 
@@ -613,22 +613,36 @@ class AzureUtilsTest {
         return e;
     }
 
-    static Object[][] convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetailsDataProvider() {
-        return new Object[][]{
-                // testCaseName e
-                {"CloudException without body", createCloudExceptionWithNoDetails(false)},
-                {"CloudException with body but null details", createCloudExceptionWithNoDetails(true)},
-        };
-    }
+    @Test
+    void convertToCloudConnectorExceptionTestWhenCloudExceptionWithoutBody() {
+        ApiErrorException e = createCloudExceptionWithNoDetails(false);
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetailsDataProvider")
-    void convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetails(String testCaseName, ApiErrorException e) {
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
         verifyCloudConnectorException(result,
-                "Checking resources failed: 'com.azure.resourcemanager.compute.models.ApiErrorException: Serious problem', " +
-                        "please go to Azure Portal for detailed message");
+                "Checking resources failed: 'Serious problem', please go to Azure Portal for detailed message");
+    }
+
+    @Test
+    void convertToCloudConnectorExceptionTestWhenCloudExceptionWithBodyButNullDetails() {
+        ApiErrorException e = createCloudExceptionWithNoDetails(true);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
+
+        verifyCloudConnectorException(result,
+                "Checking resources failed: 'Serious problem', please go to Azure Portal for detailed message");
+    }
+
+    @Test
+    void convertToCloudConnectorExceptionTestWhenCloudExceptionWithBodyAndCodeAndMessageButNullDetails() {
+        ManagementError value = AzureTestUtils.managementError("SkuNotAvailable", "The requested VM size is not available.");
+        AzureTestUtils.setDetails(value, null);
+        ManagementException e = new ManagementException("raw json { \"error\": ... }", null, value);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
+
+        verifyCloudConnectorException(result,
+                "Checking resources failed, status code SkuNotAvailable, error message: The requested VM size is not available.");
     }
 
     @Test
@@ -638,8 +652,7 @@ class AzureUtilsTest {
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
         verifyCloudConnectorException(result,
-                "Checking resources failed: 'com.azure.resourcemanager.compute.models.ApiErrorException: Serious problem', " +
-                        "please go to Azure Portal for detailed message");
+                "Checking resources failed: 'Serious problem', please go to Azure Portal for detailed message");
     }
 
     @Test

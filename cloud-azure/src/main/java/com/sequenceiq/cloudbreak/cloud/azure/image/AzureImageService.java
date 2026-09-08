@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationPoller;
@@ -51,7 +52,7 @@ public class AzureImageService {
             azureManagedImageCreationPoller.startPolling(ac, new AzureManagedImageCreationCheckerContext(azureImageInfo, client));
         } catch (Exception e) {
             LOGGER.warn("Exception when polling for existing cloudbreak image: ", e);
-            throw new CloudConnectorException(e);
+            throw new CloudConnectorException(AzureUtils.extractErrorMessage(e), e);
         }
         return Optional.of(new AzureImage(azureImageInfo.getImageId(), azureImageInfo.getImageNameWithRegion(), true));
     }
@@ -100,7 +101,7 @@ public class AzureImageService {
             if (customImage.isEmpty()) {
                 updateImageStatus(ac, azureImageInfo.getImageNameWithRegion(), azureImageInfo.getImageId(), CommonStatus.FAILED);
                 LOGGER.error("Failed to create custom image, throwing: ", onError);
-                throw new CloudConnectorException(onError);
+                throw new CloudConnectorException(AzureUtils.extractErrorMessage(onError), onError);
             }
             return customImage;
         }

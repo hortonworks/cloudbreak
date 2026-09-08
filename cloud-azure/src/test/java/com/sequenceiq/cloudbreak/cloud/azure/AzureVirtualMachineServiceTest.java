@@ -212,7 +212,7 @@ class AzureVirtualMachineServiceTest {
         CloudVmInstanceStatus vmStatus = result.getStatuses().getFirst();
         assertEquals(cloudInstance, vmStatus.getCloudInstance());
         assertEquals(InstanceStatus.UNKNOWN, vmStatus.getStatus());
-        assertEquals("Failed to get VM's state from Azure: com.azure.resourcemanager.compute.models.ApiErrorException: instance-1 is bad.",
+        assertEquals("Failed to get VM's state from Azure: instance-1 is bad.",
                 vmStatus.getStatusReason());
     }
 

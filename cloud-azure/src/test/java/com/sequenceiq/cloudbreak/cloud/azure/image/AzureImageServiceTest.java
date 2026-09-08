@@ -120,7 +120,7 @@ public class AzureImageServiceTest {
         });
 
         // This assertion was introduced during junit4 to junit5 conversion, but it is not ideal to send back a java.lang.Exception to the end user.
-        assertEquals("java.util.concurrent.TimeoutException: timeout text", exception.getMessage());
+        assertEquals("timeout text", exception.getMessage());
         assertTrue(exception.getCause() instanceof TimeoutException);
         verifyPollingStarted();
     }
@@ -162,7 +162,7 @@ public class AzureImageServiceTest {
         });
 
         // This assertion was introduced during junit4 to junit5 conversion, but it is not ideal to send back a java.lang.Exception to the end user.
-        assertEquals("com.azure.resourcemanager.compute.models.ApiErrorException: cloud exception text", exception.getMessage());
+        assertEquals("cloud exception text", exception.getMessage());
 
         verifyPollingStarted();
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
@@ -182,7 +182,7 @@ public class AzureImageServiceTest {
         });
 
         // This assertion was introduced during junit4 to junit5 conversion, but it is not ideal to send back a java.lang.Exception to the end user.
-        assertEquals("java.lang.Exception: Custom exception during polling", exception.getMessage());
+        assertEquals("Custom exception during polling", exception.getMessage());
 
         verifyPollingStarted();
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);

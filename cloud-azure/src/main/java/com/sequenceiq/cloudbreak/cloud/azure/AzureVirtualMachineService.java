@@ -192,7 +192,7 @@ public class AzureVirtualMachineService {
                                 if (azureExceptionHandler.isNotFound(e)) {
                                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
                                 } else {
-                                    String msg = String.format("Failed to get VM's state from Azure: %s", e.toString());
+                                    String msg = String.format("Failed to get VM's state from Azure: %s", AzureUtils.extractErrorMessage(e));
                                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN, msg));
                                 }
                             });

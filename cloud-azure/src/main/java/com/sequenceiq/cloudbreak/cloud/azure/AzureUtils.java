@@ -819,13 +819,25 @@ public class AzureUtils {
         }
     }
 
+    public static String extractErrorMessage(Throwable e) {
+        if (e instanceof ManagementException managementException
+                && managementException.getValue() != null
+                && managementException.getValue().getMessage() != null) {
+            return managementException.getValue().getMessage();
+        }
+        return e.getMessage();
+    }
+
     private String getErrorMessage(ManagementException e, String actionDescription) {
         if (e.getValue() != null && e.getValue().getDetails() != null) {
             String details = e.getValue().getDetails().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
             return String.format("%s failed, status code %s, error message: %s, details: %s",
                     actionDescription, e.getValue().getCode(), e.getValue().getMessage(), details);
+        } else if (e.getValue() != null && e.getValue().getMessage() != null) {
+            return String.format("%s failed, status code %s, error message: %s",
+                    actionDescription, e.getValue().getCode(), e.getValue().getMessage());
         } else {
-            return String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e);
+            return String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e.getMessage());
         }
     }
 
