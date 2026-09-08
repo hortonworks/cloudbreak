@@ -59,6 +59,10 @@ public interface TagUpdateStrategy {
         logger.info("Deleting tag keys {} from {}", tagKeys, targetDescription);
     }
 
+    default void logTagUpdate(Logger logger, String resourceIdentifier, Map<String, String> updatedTags) {
+        logger.info("Updating tags for {} to {}", resourceIdentifier, updatedTags);
+    }
+
     default void logTagDeletion(Logger logger, String resourceIdentifier, Set<String> requestedTagKeys,
         Map<String, String> existingTags, Set<String> remainingKeys) {
         Set<String> deletingKeys = tagKeysToDelete(existingTags, requestedTagKeys);

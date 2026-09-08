@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure.tag;
 
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_VOLUMESET;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import jakarta.inject.Inject;
 
@@ -28,6 +30,9 @@ public class AzureVolumeSetTagUpdateStrategy implements TagUpdateStrategy {
     @Inject
     private AzureClientService azureClientService;
 
+    @Inject
+    private AzureSingleResourceTagUpdateStrategy azureSingleResourceTagUpdateStrategy;
+
     @Override
     public Set<ResourceType> supportedTypes() {
         return Set.of(AZURE_VOLUMESET);
@@ -35,57 +40,35 @@ public class AzureVolumeSetTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
-        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
-        VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-
-        if (volumeSetAttributes == null || volumeSetAttributes.getVolumes() == null || volumeSetAttributes.getVolumes().isEmpty()) {
-            LOGGER.warn("No volumes found in attributes for AZURE_VOLUMESET: {}", cloudResource.getName());
-            return;
-        }
-
-        volumeSetAttributes.getVolumes().forEach(volume -> {
-            String volumeId = volume.getId();
-            if (StringUtils.isBlank(volumeId)) {
-                LOGGER.warn("Skipping tag update for a volume in AZURE_VOLUMESET {}: volume ID is null.", cloudResource.getName());
-                return;
-            }
-            Map<String, String> existingTags = azureClient.getDiskTags(volumeId);
-
-            if (tagsAlreadyUpToDate(existingTags, tags)) {
-                LOGGER.debug("Tags for volume {} are already up to date, skipping update.", volumeId);
-                return;
-            }
-
-            azureClient.updateDiskTags(volumeId, mergeTags(existingTags, tags));
-        });
+        forEachVolume(authenticatedContext, cloudResource, "update",
+                (azureClient, volumeId) -> azureSingleResourceTagUpdateStrategy.applyTagUpdate(azureClient, AZURE_DISK, volumeId, tags));
     }
 
     @Override
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
-        AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
+        forEachVolume(authenticatedContext, cloudResource, "deletion",
+                (azureClient, volumeId) -> azureSingleResourceTagUpdateStrategy.applyTagDeletion(azureClient, AZURE_DISK, volumeId, tagKeys));
+    }
+
+    private void forEachVolume(AuthenticatedContext authenticatedContext, CloudResource cloudResource, String operation,
+            BiConsumer<AzureClient, String> volumeTagAction) {
         VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-
-        if (volumeSetAttributes == null || volumeSetAttributes.getVolumes() == null || volumeSetAttributes.getVolumes().isEmpty()) {
+        if (hasNoVolumes(volumeSetAttributes)) {
             LOGGER.warn("No volumes found in attributes for AZURE_VOLUMESET: {}", cloudResource.getName());
-            return;
+        } else {
+            AzureClient azureClient = azureClientService.getClient(authenticatedContext.getCloudContext(), authenticatedContext.getCloudCredential());
+            volumeSetAttributes.getVolumes().forEach(volume -> {
+                String volumeId = volume.getId();
+                if (StringUtils.isBlank(volumeId)) {
+                    LOGGER.warn("Skipping tag {} for a volume in AZURE_VOLUMESET {}: volume ID is null.", operation, cloudResource.getName());
+                } else {
+                    volumeTagAction.accept(azureClient, volumeId);
+                }
+            });
         }
+    }
 
-        volumeSetAttributes.getVolumes().forEach(volume -> {
-            String volumeId = volume.getId();
-            if (StringUtils.isBlank(volumeId)) {
-                LOGGER.warn("Skipping tag deletion for a volume in AZURE_VOLUMESET {}: volume ID is null.", cloudResource.getName());
-                return;
-            }
-            Map<String, String> existingTags = azureClient.getDiskTags(volumeId);
-
-            if (!hasTagKeysToDelete(existingTags, tagKeys)) {
-                LOGGER.debug("No tags to delete for disk {}, skipping.", volumeId);
-                return;
-            }
-
-            Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
-            logTagDeletion(LOGGER, volumeId, tagKeys, existingTags, remainingTags.keySet());
-            azureClient.updateDiskTags(volumeId, remainingTags);
-        });
+    private boolean hasNoVolumes(VolumeSetAttributes volumeSetAttributes) {
+        return volumeSetAttributes == null || volumeSetAttributes.getVolumes() == null || volumeSetAttributes.getVolumes().isEmpty();
     }
 }

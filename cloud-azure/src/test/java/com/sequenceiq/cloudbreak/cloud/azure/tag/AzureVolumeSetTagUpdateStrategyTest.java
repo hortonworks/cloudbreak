@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -54,6 +55,9 @@ class AzureVolumeSetTagUpdateStrategyTest {
 
     @Mock
     private AzureClient azureClient;
+
+    @Spy
+    private AzureSingleResourceTagUpdateStrategy azureSingleResourceTagUpdateStrategy = new AzureSingleResourceTagUpdateStrategy();
 
     @InjectMocks
     private AzureVolumeSetTagUpdateStrategy underTest;
