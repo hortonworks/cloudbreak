@@ -149,6 +149,27 @@ class AbstractActionTest {
     }
 
     @Test
+    void testEnteringFailureStateMarksFlowFailed() {
+        underTest.setFailureEvent(Event.FAILURE);
+        underTest.setFailureStateId(State.FAILED_STATE.name());
+        Payload payload = mock(Payload.class);
+        RuntimeException exception = new IllegalStateException("something went wrong");
+        BDDMockito.given(payload.getException()).willReturn(exception);
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS)));
+        stateMachine.sendEvent(new GenericMessage<>(Event.FAILURE, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS,
+                HEADERS.DATA.name(), payload)));
+        verify(flow, times(1)).setFlowFailed(exception);
+    }
+
+    @Test
+    void testEnteringNonFailureStateDoesNotMarkFlowFailed() {
+        underTest.setFailureEvent(Event.FAILURE);
+        underTest.setFailureStateId(State.FAILED_STATE.name());
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS)));
+        verify(flow, times(0)).setFlowFailed(any(Exception.class));
+    }
+
+    @Test
     void testFailedExecuteAndGetFailurePayloadFails() {
         underTest.setFailureEvent(Event.FAILURE);
         RuntimeException exception = new IllegalStateException("something went wrong");
