@@ -37,7 +37,7 @@ public class AwsCloudWatchService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudWatchService.class);
 
     private static final List<String> RECOVERABLE_INSTANCE_TYPES = List.of("a1", "c3", "c4", "c5", "c5a", "c5n", "c6g", "c6gn", "inf1", "m3", "m4", "m5", "m5a",
-            "m5n", "m5zn", "m6g", "m6i", "p3", "p4", "r3", "r4", "r5", "r5a", "r5b", "r5n", "r6g", "t2", "t3", "t3a", "t4g", "x1", "x1e");
+            "m5n", "m5zn", "m6g", "m6i", "p3", "p4", "p4d", "p4de", "r3", "r4", "r5", "r5a", "r5b", "r5n", "r6g", "t2", "t3", "t3a", "t4g", "x1", "x1e");
 
     @Value("${aws.cloudwatch.suffix:-Status-Check-Failed-System}")
     private String alarmSuffix;

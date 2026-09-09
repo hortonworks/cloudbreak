@@ -61,7 +61,10 @@ public class DistroxEnabledInstanceTypes {
             "m8i.xlarge,m8i.2xlarge,m8i.4xlarge,m8i.8xlarge,m8i.12xlarge,m8i.16xlarge,m8i.24xlarge,m8i.32xlarge,m8i.48xlarge," +
             "r8i.xlarge,r8i.2xlarge,r8i.4xlarge,r8i.8xlarge,r8i.12xlarge,r8i.16xlarge,r8i.24xlarge,r8i.32xlarge,r8i.48xlarge," +
             "c8i.2xlarge,c8i.4xlarge,c8i.8xlarge,c8i.12xlarge,c8i.16xlarge,c8i.24xlarge,c8i.32xlarge,c8i.48xlarge," +
-            "i7i.xlarge,i7i.2xlarge,i7i.4xlarge,i7i.8xlarge,i7i.12xlarge,i7i.16xlarge,i7i.24xlarge,i7i.48xlarge";
+            "i7i.xlarge,i7i.2xlarge,i7i.4xlarge,i7i.8xlarge,i7i.12xlarge,i7i.16xlarge,i7i.24xlarge,i7i.48xlarge," +
+
+            "p4d.24xlarge," +
+            "p4de.24xlarge";
 
     private static final String ENABLED_ARM64_TYPES =
             "i4g.xlarge,i4g.2xlarge,i4g.4xlarge,i4g.8xlarge,i4g.16xlarge," +
