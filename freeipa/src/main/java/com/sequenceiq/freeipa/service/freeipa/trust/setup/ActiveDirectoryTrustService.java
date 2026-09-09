@@ -67,9 +67,10 @@ public class ActiveDirectoryTrustService extends TrustProvider {
     }
 
     @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+            maxAttemptsExpression = "#{${freeipa.trust.add.retry.maxAttempts}}",
+            backoff = @Backoff(delayExpression = "#{${freeipa.trust.add.retry.delay}}",
+                    multiplierExpression = "#{${freeipa.trust.add.retry.multiplier}}",
+                    maxDelayExpression = "#{${freeipa.trust.add.retry.maxDelay}}"))
     public void addTrust(Long stackId) throws FreeIpaClientException {
         Stack stack = getStackService().getByIdWithListsInTransaction(stackId);
         CrossRealmTrust crossRealmTrust = getCrossRealmTrustService().getByStackId(stackId);
@@ -80,9 +81,10 @@ public class ActiveDirectoryTrustService extends TrustProvider {
     }
 
     @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+            maxAttemptsExpression = "#{${freeipa.trust.add.retry.maxAttempts}}",
+            backoff = @Backoff(delayExpression = "#{${freeipa.trust.add.retry.delay}}",
+                    multiplierExpression = "#{${freeipa.trust.add.retry.multiplier}}",
+                    maxDelayExpression = "#{${freeipa.trust.add.retry.maxDelay}}"))
     @Override
     public void addTwoWayTrust(Long stackId) throws FreeIpaClientException {
         Stack stack = getStackService().getByIdWithListsInTransaction(stackId);
@@ -147,6 +149,9 @@ public class ActiveDirectoryTrustService extends TrustProvider {
         twoWayResponse.setActiveDirectoryCommands(
                 activeDirectoryTrustInstructionsBuilder.buildInstructions(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust, TrustDirection.TWO_WAY));
         response.setTwoWay(twoWayResponse);
+
+        response.setBaseClusterCommands(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, TrustCommandType.SETUP, freeIpa,
+                crossRealmTrust, loadBalancer));
 
         return response;
     }

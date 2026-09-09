@@ -23,6 +23,9 @@ public class DirectionalTrustSetupCommandsResponse extends TrustSetupCommandsBas
     @Schema(description = "Two-way trust setup commands", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private TrustSetupCommandsResponse twoWay;
 
+    @Schema(description = FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions.BASE_CLUSTER_KRB5_CONF, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private BaseClusterTrustSetupCommands baseClusterCommands;
+
     public String getKdcType() {
         return kdcType;
     }
@@ -47,12 +50,21 @@ public class DirectionalTrustSetupCommandsResponse extends TrustSetupCommandsBas
         this.twoWay = twoWay;
     }
 
+    public BaseClusterTrustSetupCommands getBaseClusterCommands() {
+        return baseClusterCommands;
+    }
+
+    public void setBaseClusterCommands(BaseClusterTrustSetupCommands baseClusterCommands) {
+        this.baseClusterCommands = baseClusterCommands;
+    }
+
     @Override
     public String toString() {
         return "DirectionalTrustSetupCommandsResponse{" +
                 "kdcType='" + kdcType + '\'' +
                 ", oneWay=" + oneWay +
                 ", twoWay=" + twoWay +
+                ", baseClusterCommands=" + baseClusterCommands +
                 "} " + super.toString();
     }
 }
