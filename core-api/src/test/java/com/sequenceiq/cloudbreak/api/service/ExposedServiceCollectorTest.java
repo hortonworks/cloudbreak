@@ -284,7 +284,8 @@ class ExposedServiceCollectorTest {
                 "KNOX_TOKEN_INTEGRATOR",
                 "QUERY_PROCESSOR",
                 "RANGERRAZ",
-                "KAFKA_BROKER");
+                "KAFKA_BROKER",
+                "DATAVIZ");
     }
 
     @Test
@@ -345,7 +346,8 @@ class ExposedServiceCollectorTest {
                 "SSB-SSE-API",
                 "QUERY_PROCESSOR",
                 "RANGERRAZ",
-                "KAFKA_BROKER");
+                "KAFKA_BROKER",
+                "DATAVIZ");
     }
 
     @Test
@@ -407,7 +409,8 @@ class ExposedServiceCollectorTest {
                 "SSB-SSE-API",
                 "QUERY_PROCESSOR",
                 "RANGERRAZ",
-                "KAFKA_BROKER");
+                "KAFKA_BROKER",
+                "DATAVIZ");
     }
 
     @Test
@@ -469,7 +472,8 @@ class ExposedServiceCollectorTest {
                 "SSB-SSE-API",
                 "QUERY_PROCESSOR",
                 "RANGERRAZ",
-                "KAFKA_BROKER");
+                "KAFKA_BROKER",
+                "DATAVIZ");
     }
 
     @Test
