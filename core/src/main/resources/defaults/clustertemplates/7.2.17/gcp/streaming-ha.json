@@ -22,7 +22,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 2,
         "type": "GATEWAY",
@@ -33,6 +34,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "e2-highmem-16",
+          "fallbackInstanceTypes": ["c3d-highmem-16"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -55,7 +57,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -66,6 +69,7 @@
         "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -83,6 +87,7 @@
         "name": "broker",
         "template": {
           "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -106,7 +111,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -122,7 +128,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -138,7 +145,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 0,
         "type": "CORE",

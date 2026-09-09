@@ -19,7 +19,8 @@
               "type": "pd-balanced"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 1,
         "type": "GATEWAY",

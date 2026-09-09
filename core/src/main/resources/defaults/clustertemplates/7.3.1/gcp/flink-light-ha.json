@@ -23,7 +23,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -39,7 +40,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -55,7 +57,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 2,
         "type": "GATEWAY",
@@ -72,7 +75,8 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 1,
         "type": "CORE",

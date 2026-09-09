@@ -16,6 +16,7 @@
         "name": "master",
         "template": {
           "instanceType": "e2-highmem-8",
+          "fallbackInstanceTypes": ["c3d-highmem-8"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -32,6 +33,7 @@
         "name": "broker",
         "template": {
           "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"],
           "attachedVolumes": [
             {
               "count": 1,

@@ -26,7 +26,8 @@
           "rootVolume": {
             "size": 150
           },
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 2,
         "minimumNodeCount": 2,
@@ -46,7 +47,8 @@
           "rootVolume": {
             "size": 150
           },
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -65,7 +67,8 @@
           "rootVolume": {
             "size": 150
           },
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -84,7 +87,8 @@
           "rootVolume": {
             "size": 150
           },
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -103,7 +107,8 @@
           "rootVolume": {
             "size": 150
           },
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 1,
         "minimumNodeCount": 1,

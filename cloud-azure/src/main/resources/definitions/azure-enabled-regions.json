@@ -181,6 +181,22 @@
       }
     },
     {
+      "name": "Denmark East",
+      "latitude": "55.6761",
+      "longitude": "12.5683",
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4"]
+        }
+      }
+    },
+    {
       "name": "East Asia",
       "latitude": "22.267",
       "longitude": "114.188",
@@ -268,6 +284,22 @@
         "ENVIRONMENT",
         "DATAHUB",
         "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4"]
+        }
+      }
+    },
+    {
+      "name": "India South Central",
+      "latitude": "17.3850",
+      "longitude": "78.4867",
+      "cdpSupportedServices": [
+        "ALL"
       ],
       "defaultVmtypes": {
         "freeipa": {

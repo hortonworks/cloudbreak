@@ -19,6 +19,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"],
           "attachedVolumes": [
             {
               "size": 100,
@@ -35,6 +36,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"],
           "attachedVolumes": [
             {
               "size": 1000,
@@ -51,6 +53,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "e2-standard-4",
+          "fallbackInstanceTypes": ["c3d-standard-4"],
           "attachedVolumes": [
             {
               "size": 100,

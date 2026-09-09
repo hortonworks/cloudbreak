@@ -39,10 +39,48 @@
       }
     },
     {
+      "name": "northamerica-south1",
+      "displayName": "Queretaro, Mexico",
+      "latitude": "20.5888",
+      "longitude": "-100.3899",
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["e2-standard-2"]
+        },
+        "database": {
+          "x86_64": ["db-custom-2-13312"]
+        }
+      }
+    },
+    {
       "name": "southamerica-east1",
       "displayName": "São Paulo, Brazil",
       "latitude": "-23.55867959",
       "longitude": "-46.62501998",
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["e2-standard-2"]
+        },
+        "database": {
+          "x86_64": ["db-custom-2-13312"]
+        }
+      }
+    },
+    {
+      "name": "southamerica-west1",
+      "displayName": "Santiago, Chile",
+      "latitude": "-33.4489",
+      "longitude": "-70.6693",
       "cdpSupportedServices": [
         "ENVIRONMENT",
         "DATAHUB",
@@ -267,6 +305,25 @@
       }
     },
     {
+      "name": "europe-north2",
+      "displayName": "Stockholm, Sweden",
+      "latitude": "59.3293",
+      "longitude": "18.0686",
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["e2-standard-2"]
+        },
+        "database": {
+          "x86_64": ["db-custom-2-13312"]
+        }
+      }
+    },
+    {
       "name": "europe-southwest1",
       "displayName": "Madrid, Spain",
       "latitude": "40.41",
@@ -438,6 +495,25 @@
       }
     },
     {
+      "name": "europe-west10",
+      "displayName": "Berlin, Germany",
+      "latitude": "52.5200",
+      "longitude": "13.4050",
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["e2-standard-2"]
+        },
+        "database": {
+          "x86_64": ["db-custom-2-13312"]
+        }
+      }
+    },
+    {
       "name": "me-central1",
       "displayName": "Doha, Qatar, Middle East",
       "latitude": "25.286106",
@@ -499,6 +575,25 @@
       "displayName": "Changhua County, Taiwan",
       "latitude": "24.07340008",
       "longitude": "120.5134086",
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["e2-standard-2"]
+        },
+        "database": {
+          "x86_64": ["db-custom-2-13312"]
+        }
+      }
+    },
+    {
+      "name": "asia-east2",
+      "displayName": "Hong Kong, APAC",
+      "latitude": "22.3193",
+      "longitude": "114.1694",
       "cdpSupportedServices": [
         "ENVIRONMENT",
         "DATAHUB",
@@ -647,6 +742,25 @@
       }
     },
     {
+      "name": "asia-southeast3",
+      "displayName": "Bangkok, Thailand",
+      "latitude": "13.7563",
+      "longitude": "100.5018",
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["n4-standard-2"]
+        },
+        "database": {
+          "x86_64": ["db-custom-2-13312"]
+        }
+      }
+    },
+    {
       "name": "australia-southeast1",
       "displayName": "Sydney, Australia",
       "latitude": "-33.92001097",
@@ -670,6 +784,25 @@
       "displayName": "Melbourne, Australia",
       "latitude": "-37.84",
       "longitude": "144.94",
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["e2-standard-2"]
+        },
+        "database": {
+          "x86_64": ["db-custom-2-13312"]
+        }
+      }
+    },
+    {
+      "name": "africa-south1",
+      "displayName": "Johannesburg, South Africa",
+      "latitude": "-26.2041",
+      "longitude": "28.0473",
       "cdpSupportedServices": [
         "ENVIRONMENT",
         "DATAHUB",

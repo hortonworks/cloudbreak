@@ -16,6 +16,7 @@
         "name": "master",
         "template": {
           "instanceType": "e2-highmem-8",
+          "fallbackInstanceTypes": ["c3d-highmem-8"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -43,7 +44,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -64,7 +66,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -74,6 +77,7 @@
         "name": "broker",
         "template": {
           "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -102,7 +106,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-8",
+          "fallbackInstanceTypes": ["c3d-standard-8"]
         },
         "nodeCount": 0,
         "type": "CORE",

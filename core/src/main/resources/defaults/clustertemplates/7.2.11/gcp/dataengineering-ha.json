@@ -22,7 +22,8 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -38,7 +39,8 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 2,
         "minimumNodeCount": 2,
@@ -55,7 +57,8 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -71,7 +74,8 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -87,7 +91,8 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -103,7 +108,8 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-16",
+          "fallbackInstanceTypes": ["c3d-standard-16"]
         },
         "nodeCount": 1,
         "minimumNodeCount": 1,
