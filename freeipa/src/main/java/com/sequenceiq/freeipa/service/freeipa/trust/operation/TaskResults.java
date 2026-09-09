@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record TaskResults(
@@ -34,14 +35,17 @@ public record TaskResults(
         return taskResultMap.getOrDefault(taskResultType, List.of());
     }
 
+    @JsonIgnore
     public List<TaskResult> getErrors() {
         return getTaskResultsByType(TaskResultType.ERROR);
     }
 
+    @JsonIgnore
     public List<TaskResult> getWarnings() {
         return getTaskResultsByType(TaskResultType.WARNING);
     }
 
+    @JsonIgnore
     public List<TaskResult> getSuccessfulTasks() {
         return Stream.concat(getTaskResultsByType(TaskResultType.INFO).stream(), getTaskResultsByType(TaskResultType.WARNING).stream()).toList();
     }

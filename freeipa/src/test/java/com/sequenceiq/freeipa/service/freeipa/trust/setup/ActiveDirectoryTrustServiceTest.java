@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.BaseClusterTrustSetupCommands;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.DirectionalTrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -42,6 +43,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.crossrealm.TrustDirection;
 import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryBaseClusterTrustCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryTrustInstructionsBuilder;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -147,6 +149,33 @@ class ActiveDirectoryTrustServiceTest {
         assertEquals(KdcType.ACTIVE_DIRECTORY.name(), response.getKdcType());
         assertEquals(activeDirectoryTrustSetupCommands, response.getActiveDirectoryCommands());
         assertNull(response.getBaseClusterCommands());
+    }
+
+    @Test
+    void returnsDirectionalCommandsResponseWithBaseClusterCommands() {
+        String environmentCrn = "env-crn";
+        Stack stack = mock(Stack.class);
+        FreeIpa freeIpa = mock(FreeIpa.class);
+        LoadBalancer loadBalancer = mock(LoadBalancer.class);
+        CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
+        ActiveDirectoryTrustSetupCommands oneWayAdCommands = new ActiveDirectoryTrustSetupCommands();
+        ActiveDirectoryTrustSetupCommands twoWayAdCommands = new ActiveDirectoryTrustSetupCommands();
+        BaseClusterTrustSetupCommands baseClusterTrustSetupCommands = new BaseClusterTrustSetupCommands();
+        when(activeDirectoryTrustInstructionsBuilder.buildInstructions(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust, TrustDirection.ONE_WAY))
+                .thenReturn(oneWayAdCommands);
+        when(activeDirectoryTrustInstructionsBuilder.buildInstructions(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust, TrustDirection.TWO_WAY))
+                .thenReturn(twoWayAdCommands);
+        when(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, TrustCommandType.SETUP, freeIpa, crossRealmTrust, loadBalancer))
+                .thenReturn(baseClusterTrustSetupCommands);
+
+        DirectionalTrustSetupCommandsResponse response = underTest.buildDirectionalTrustSetupCommandsResponse(environmentCrn, stack, freeIpa,
+                crossRealmTrust, loadBalancer);
+
+        assertEquals(environmentCrn, response.getEnvironmentCrn());
+        assertEquals(KdcType.ACTIVE_DIRECTORY.name(), response.getKdcType());
+        assertEquals(oneWayAdCommands, response.getOneWay().getActiveDirectoryCommands());
+        assertEquals(twoWayAdCommands, response.getTwoWay().getActiveDirectoryCommands());
+        assertEquals(baseClusterTrustSetupCommands, response.getBaseClusterCommands());
     }
 
     @Test
