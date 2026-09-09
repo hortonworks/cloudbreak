@@ -19,7 +19,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -51,9 +50,6 @@ public class DefaultEncryptionProfileProvider {
 
     @Inject
     private ProviderPreferencesService preferencesService;
-
-    @Inject
-    private CommonGovService commonGovService;
 
     @PostConstruct
     public void loadDefaultEncryptionProfiles() throws IOException {
@@ -104,16 +100,9 @@ public class DefaultEncryptionProfileProvider {
 
     private boolean filterForDeploymentType(Resource resource) {
         try {
-            String parentFolderName = resource.getURL().getPath().toLowerCase(Locale.ROOT);
-
-            boolean publicCloudFile = parentFolderName.contains(PUBLIC_CLOUD_FOLDER);
-            boolean publicCloudEnabled = !preferencesService.enabledPlatforms().isEmpty()
-                    || preferencesService.enabledGovPlatforms().isEmpty();
-
-            boolean govCloudFile = parentFolderName.contains(FEDRAMP_FOLDER);
-            boolean govCloudEnabled = !preferencesService.enabledGovPlatforms().isEmpty();
-
-            return (publicCloudEnabled && publicCloudFile) || (govCloudEnabled && govCloudFile);
+            String path = resource.getURL().getPath().toLowerCase(Locale.ROOT);
+            String activeFolder = preferencesService.isGovCloudDeployment() ? FEDRAMP_FOLDER : PUBLIC_CLOUD_FOLDER;
+            return path.contains("/" + activeFolder + "/");
         } catch (IOException e) {
             LOGGER.debug("Could not load encryption profile file: {}", resource, e);
             return false;

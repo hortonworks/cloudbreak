@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 
@@ -27,9 +26,6 @@ public class DefaultEncryptionProfileProviderTest {
     @Mock
     private ProviderPreferencesService preferencesService;
 
-    @Mock
-    private CommonGovService commonGovService;
-
     @InjectMocks
     private DefaultEncryptionProfileProvider underTest;
 
@@ -38,8 +34,7 @@ public class DefaultEncryptionProfileProviderTest {
         Field region = ReflectionUtils.findField(DefaultEncryptionProfileProvider.class, "region");
         ReflectionUtils.makeAccessible(region);
         ReflectionUtils.setField(region, underTest, "us-west-1");
-        when(preferencesService.enabledPlatforms()).thenReturn(Set.of("AWS"));
-        when(preferencesService.enabledGovPlatforms()).thenReturn(Set.of());
+        when(preferencesService.isGovCloudDeployment()).thenReturn(false);
         underTest.loadDefaultEncryptionProfiles();
 
         EncryptionProfile defaultEncryptionProfileV1 = underTest.defaultEncryptionProfilesByName().get("cdp_default_fips_v1");
@@ -79,8 +74,7 @@ public class DefaultEncryptionProfileProviderTest {
         Field region = ReflectionUtils.findField(DefaultEncryptionProfileProvider.class, "region");
         ReflectionUtils.makeAccessible(region);
         ReflectionUtils.setField(region, underTest, "us-west-1");
-        when(preferencesService.enabledPlatforms()).thenReturn(Set.of("AWS"));
-        when(preferencesService.enabledGovPlatforms()).thenReturn(Set.of());
+        when(preferencesService.isGovCloudDeployment()).thenReturn(false);
         underTest.loadDefaultEncryptionProfiles();
         EncryptionProfile defaultEncryptionProfileV1 = underTest.defaultEncryptionProfilesByName().get("cdp_default_tls12_fips_140_3");
 
@@ -103,12 +97,10 @@ public class DefaultEncryptionProfileProviderTest {
 
     @Test
     void testLoadDefaultGovEncryptionProfiles() throws IOException {
-        when(preferencesService.enabledGovPlatforms()).thenReturn(Set.of("AWS"));
         Field region = ReflectionUtils.findField(DefaultEncryptionProfileProvider.class, "region");
         ReflectionUtils.makeAccessible(region);
         ReflectionUtils.setField(region, underTest, "us-west-1");
-        when(preferencesService.enabledPlatforms()).thenReturn(Set.of());
-        when(preferencesService.enabledGovPlatforms()).thenReturn(Set.of("AWS"));
+        when(preferencesService.isGovCloudDeployment()).thenReturn(true);
         underTest.loadDefaultEncryptionProfiles();
         EncryptionProfile defaultEncryptionProfileV1 = underTest.defaultEncryptionProfilesByName().get("cdp_default_fips_140_3_gov");
 
@@ -137,8 +129,7 @@ public class DefaultEncryptionProfileProviderTest {
         Field region = ReflectionUtils.findField(DefaultEncryptionProfileProvider.class, "region");
         ReflectionUtils.makeAccessible(region);
         ReflectionUtils.setField(region, underTest, "us-west-1");
-        when(preferencesService.enabledPlatforms()).thenReturn(Set.of("AWS"));
-        when(preferencesService.enabledGovPlatforms()).thenReturn(Set.of());
+        when(preferencesService.isGovCloudDeployment()).thenReturn(false);
         underTest.loadDefaultEncryptionProfiles();
         EncryptionProfile defaultEncryptionProfileV1 = underTest.defaultEncryptionProfilesByName().get("cdp_default_tls13_fips_140_3");
 
@@ -155,5 +146,23 @@ public class DefaultEncryptionProfileProviderTest {
                 underTest.defaultEncryptionProfilesByCrn().get("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:cdp_default_tls13_fips_140_3");
 
         assertThat(defaultByCrn).isEqualTo(defaultEncryptionProfileV1);
+    }
+
+    @Test
+    void testLegacyEncryptionProfileV1LoadsGovVariantInGovDeployment() throws IOException {
+        Field region = ReflectionUtils.findField(DefaultEncryptionProfileProvider.class, "region");
+        ReflectionUtils.makeAccessible(region);
+        ReflectionUtils.setField(region, underTest, "us-west-1");
+        when(preferencesService.isGovCloudDeployment()).thenReturn(true);
+
+        underTest.loadDefaultEncryptionProfiles();
+
+        EncryptionProfile profile = underTest.defaultEncryptionProfilesByName().get("cdp_default_fips_v1");
+        assertThat(profile).isNotNull();
+        assertThat(profile.getName()).isEqualTo("cdp_default_fips_v1");
+        assertThat(profile.getResourceCrn())
+                .isEqualTo("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:cdp_default_fips_v1");
+        assertThat(profile.getResourceStatus()).isEqualTo(ResourceStatus.DEFAULT);
+        assertThat(profile.getTlsVersions()).isEqualTo(Set.of(TLS_1_2));
     }
 }
