@@ -19,6 +19,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -95,7 +96,7 @@ public class AzureDatabaseCapabilityService {
         Map<Region, Optional<FlexibleServerCapability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
         enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), getZoneRedundantSupportedRegions(regions, capabilityMap));
         Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, filters);
-        Map<Region, List<String>> regionFallbackInstanceTypeMap = getRegionFallbackInstanceTypeMap(regions, regionInstanceTypeMap);
+        Map<Region, List<String>> regionFallbackInstanceTypeMap = getRegionFallbackInstanceTypeMap(regions, regionInstanceTypeMap, capabilityMap);
         Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade = getSupportedServerVersionsToUpgrade(regions, capabilityMap);
         Map<Region, Set<DatabaseVmType>> regionAvailableInstanceTypes = getRegionInstancesTypeMap(regions, capabilityMap);
         return new PlatformDatabaseCapabilities(
@@ -189,11 +190,7 @@ public class AzureDatabaseCapabilityService {
             Optional<FlexibleServerCapability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
             String instanceType;
             if (flexible) {
-                instanceType = serverCapability.stream()
-                        .map(FlexibleServerCapability::supportedServerEditions)
-                        .flatMap(Collection::stream)
-                        .filter(this::matchesServerEdition)
-                        .flatMap(serverEdition -> serverEdition.supportedServerSkus().stream())
+                instanceType = getServerSkus(serverCapability)
                         .map(ServerSkuCapability::name)
                         .filter(this::matchesInstanceType)
                         .filter(this::matchesMaxInstanceTypeVersion)
@@ -208,26 +205,48 @@ public class AzureDatabaseCapabilityService {
         return instanceTypeMap;
     }
 
-    private Map<Region, List<String>> getRegionFallbackInstanceTypeMap(Map<Region, AzureCoordinate> regions, Map<Region, String> regionInstanceTypeMap) {
+    private Map<Region, List<String>> getRegionFallbackInstanceTypeMap(Map<Region, AzureCoordinate> regions,
+            Map<Region, String> regionInstanceTypeMap, Map<Region, Optional<FlexibleServerCapability>> capabilityMap) {
         Map<Region, List<String>> fallbackInstanceTypeMap = new HashMap<>();
         for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
             com.azure.core.management.Region azureRegion = com.azure.core.management.Region.fromName(entry.getKey().getRegionName());
             String primaryInstanceType = regionInstanceTypeMap.get(region(azureRegion.label()));
-            List<String> fallbackInstanceTypes = getFallbackInstanceTypes(entry.getValue().getDefaultDbVmTypes(), primaryInstanceType);
+            Set<String> availableSkus = getAvailableSkuNames(capabilityMap.getOrDefault(entry.getKey(), Optional.empty()));
+            List<String> fallbackInstanceTypes = getFallbackInstanceTypes(entry.getValue().getDefaultDbVmTypes(), primaryInstanceType, availableSkus);
             putRegion(fallbackInstanceTypeMap, entry.getKey(), fallbackInstanceTypes);
         }
         LOGGER.debug("Fallback flexible server instance types by regions [{}]", fallbackInstanceTypeMap);
         return fallbackInstanceTypeMap;
     }
 
-    private List<String> getFallbackInstanceTypes(List<String> defaultDbVmTypes, String primaryInstanceType) {
+    private Stream<ServerSkuCapability> getServerSkus(Optional<FlexibleServerCapability> capability) {
+        return capability.stream()
+                .map(FlexibleServerCapability::supportedServerEditions)
+                .flatMap(Collection::stream)
+                .filter(this::matchesServerEdition)
+                .flatMap(edition -> edition.supportedServerSkus().stream());
+    }
+
+    private Set<String> getAvailableSkuNames(Optional<FlexibleServerCapability> capability) {
+        return getServerSkus(capability)
+                .map(ServerSkuCapability::name)
+                .collect(Collectors.toSet());
+    }
+
+    private List<String> getFallbackInstanceTypes(List<String> defaultDbVmTypes, String primaryInstanceType, Set<String> availableSkus) {
         if (defaultDbVmTypes == null || defaultDbVmTypes.isEmpty()) {
             return List.of();
-        } else {
-            return defaultDbVmTypes.stream()
-                    .filter(instanceType -> !instanceType.equals(primaryInstanceType))
-                    .toList();
         }
+        Stream<String> fallbacks = defaultDbVmTypes.stream()
+                .filter(instanceType -> !instanceType.equals(primaryInstanceType));
+        if (!availableSkus.isEmpty()) {
+            Map<Boolean, List<String>> partitioned = fallbacks.collect(Collectors.partitioningBy(availableSkus::contains));
+            if (!partitioned.get(false).isEmpty()) {
+                LOGGER.debug("Removed unavailable fallback SKUs {} (available: {})", partitioned.get(false), availableSkus);
+            }
+            return partitioned.get(true);
+        }
+        return fallbacks.toList();
     }
 
     private Map<Region, Set<DatabaseVmType>> getRegionInstancesTypeMap(Map<Region, AzureCoordinate> regions, Map<Region,
@@ -236,11 +255,7 @@ public class AzureDatabaseCapabilityService {
 
         for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
             Optional<FlexibleServerCapability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
-            Set<DatabaseVmType> types = serverCapability.stream()
-                    .map(FlexibleServerCapability::supportedServerEditions)
-                    .flatMap(Collection::stream)
-                    .filter(this::matchesServerEdition)
-                    .flatMap(serverEdition -> serverEdition.supportedServerSkus().stream())
+            Set<DatabaseVmType> types = getServerSkus(serverCapability)
                     .filter(sku -> matchesMaxInstanceTypeVersion(sku.name()))
                     .map(sku -> {
                         return DatabaseVmType.databaseVmType(

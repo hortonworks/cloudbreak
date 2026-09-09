@@ -420,7 +420,7 @@ class AzureDatabaseCapabilityServiceTest {
                         List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
         FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
-                Map.of("MemoryOptimized", List.of("Standard_E4ds_v5")));
+                Map.of("MemoryOptimized", List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
         Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
@@ -434,6 +434,50 @@ class AzureDatabaseCapabilityServiceTest {
         assertEquals("Standard_E4ds_v5", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
         assertEquals(List.of("Standard_E4ads_v5", "Standard_E4ds_v4"), capabilities.getRegionFallbackInstanceTypeMap().get(region1Label));
         assertEquals(List.of("Standard_E4ads_v5", "Standard_E4ds_v4"), capabilities.getRegionFallbackInstanceTypeMap().get(region1Name));
+    }
+
+    @Test
+    void testFallbackInstanceTypesFilteredByLiveCapabilities() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(
+                Region.region("westus"), azureCoordinateWithDbTypes("westus",
+                        List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("Standard_E4ds_v5", "Standard_E4ds_v4")));
+        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+                Region.region("westus"), Optional.of(flexibleServerCapability));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
+        Region region1Label = Region.region(azureRegion1.label());
+        assertEquals("Standard_E4ds_v5", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+        assertEquals(List.of("Standard_E4ds_v4"), capabilities.getRegionFallbackInstanceTypeMap().get(region1Label));
+    }
+
+    @Test
+    void testFallbackInstanceTypesPreservedWhenCapabilityEmpty() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(
+                Region.region("westus"), azureCoordinateWithDbTypes("westus",
+                        List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+                Region.region("westus"), Optional.empty());
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
+        Region region1Label = Region.region(azureRegion1.label());
+        assertEquals("Standard_E4ds_v4", capabilities.getRegionDefaultInstanceTypeMap().get(region1Label));
+        assertEquals(List.of("Standard_E4ds_v5", "Standard_E4ads_v5"), capabilities.getRegionFallbackInstanceTypeMap().get(region1Label));
     }
 
     @Test
