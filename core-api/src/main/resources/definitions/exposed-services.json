@@ -952,6 +952,18 @@
       "minVersion": "7.3.2"
     },
     {
+      "name": "DATAVIZ_WEBSERVER",
+      "displayName": "Cloudera Data Visualization",
+      "serviceName": "DATAVIZ_WEBSERVER",
+      "knoxService": "DATAVIZ",
+      "knoxUrl": "/dataviz/arc/apps/data",
+      "ssoSupported": true,
+      "apiOnly": false,
+      "apiIncluded": false,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true
+    },
+    {
       "name": "OPENSEARCH_MASTER",
       "displayName": "Cloudera OpenSearch",
       "serviceName": "OPENSEARCH_MASTER",
