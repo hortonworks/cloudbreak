@@ -128,6 +128,7 @@ public class UserDefinedTagUpdateTest extends AbstractE2ETest {
             then = "the tags are updated on the Environment, SDX and DistroX resources in the cloud provider side")
     public void testUserDefinedTagUpdate(TestContext testContext, ITestContext iTestContext) {
         EnvironmentEditRequest environmentEditRequest = new EnvironmentEditRequest();
+        environmentEditRequest.setUpdateTagsOnExistingResources(true);
         environmentEditRequest.setTags(USER_DEFINED_TAGS);
         testContext
                 .given(EnvironmentTestDto.class)
