@@ -38,58 +38,64 @@ public class GcpDatabaseTagUpdateStrategy implements TagUpdateStrategy {
     }
 
     @Override
-    public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) throws IOException {
-        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
-        String project = gcpContext.getProjectId();
+    public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> labels) throws IOException {
+        SQLAdmin sqlAdmin = sqlAdmin(authenticatedContext);
+        String project = projectId(authenticatedContext);
         String instanceName = cloudResource.getName();
-
-        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudCredential().getName());
-        DatabaseInstance databaseInstance = sqlAdmin.instances().get(project, instanceName).execute();
-        Settings existingSettings = databaseInstance.getSettings();
-
-        Map<String, String> existingLabels = existingSettings.getUserLabels();
-        if (tagsAlreadyUpToDate(existingLabels, tags)) {
-            LOGGER.debug("Tags for database {} are already up to date, skipping update.", cloudResource.getName());
-            return;
-        }
-
-        Map<String, String> mergedTags = mergeTags(existingLabels, tags);
-        LOGGER.debug("Updating tags for database {} with tags {}", instanceName, mergedTags);
-        DatabaseInstance patch = new DatabaseInstance()
-                .setSettings(new Settings()
-                        .setUserLabels(mergedTags)
-                        .setSettingsVersion(existingSettings.getSettingsVersion()));
-
-        sqlAdmin.instances()
-                .patch(project, instanceName, patch)
-                .execute();
+        updateInstanceLabels(sqlAdmin, project, instanceName, labels);
     }
 
     @Override
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
-        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
-        String project = gcpContext.getProjectId();
+        SQLAdmin sqlAdmin = sqlAdmin(authenticatedContext);
+        String project = projectId(authenticatedContext);
         String instanceName = cloudResource.getName();
+        deleteInstanceLabels(sqlAdmin, project, instanceName, tagKeys);
+    }
 
-        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudCredential().getName());
-        DatabaseInstance databaseInstance = sqlAdmin.instances().get(project, instanceName).execute();
-        Settings existingSettings = databaseInstance.getSettings();
-
+    private void updateInstanceLabels(SQLAdmin sqlAdmin, String project, String instanceName, Map<String, String> newLabels) throws IOException {
+        Settings existingSettings = fetchSettings(sqlAdmin, project, instanceName);
         Map<String, String> existingLabels = existingSettings.getUserLabels();
-        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
-            LOGGER.debug("No tags to delete for database {}, skipping.", cloudResource.getName());
-            return;
+        if (tagsAlreadyUpToDate(existingLabels, newLabels)) {
+            LOGGER.debug("Labels for database {} are already up to date, skipping update.", instanceName);
+        } else {
+            Map<String, String> mergedLabels = mergeTags(existingLabels, newLabels);
+            logTagUpdate(LOGGER, instanceName, mergedLabels);
+            patchUserLabels(sqlAdmin, project, instanceName, mergedLabels, existingSettings.getSettingsVersion());
         }
+    }
 
-        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
-        logTagDeletion(LOGGER, instanceName, tagKeys, existingLabels, remainingLabels.keySet());
+    private void deleteInstanceLabels(SQLAdmin sqlAdmin, String project, String instanceName, Set<String> labelKeys) throws IOException {
+        Settings existingSettings = fetchSettings(sqlAdmin, project, instanceName);
+        Map<String, String> existingLabels = existingSettings.getUserLabels();
+        if (hasTagKeysToDelete(existingLabels, labelKeys)) {
+            Map<String, String> remainingLabels = removeTagKeys(existingLabels, labelKeys);
+            logTagDeletion(LOGGER, instanceName, labelKeys, existingLabels, remainingLabels.keySet());
+            patchUserLabels(sqlAdmin, project, instanceName, remainingLabels, existingSettings.getSettingsVersion());
+        } else {
+            LOGGER.debug("No labels to delete for database {}, skipping.", instanceName);
+        }
+    }
+
+    private Settings fetchSettings(SQLAdmin sqlAdmin, String project, String instanceName) throws IOException {
+        return sqlAdmin.instances().get(project, instanceName).execute().getSettings();
+    }
+
+    private void patchUserLabels(SQLAdmin sqlAdmin, String project, String instanceName, Map<String, String> labels, Long settingsVersion)
+            throws IOException {
         DatabaseInstance patch = new DatabaseInstance()
                 .setSettings(new Settings()
-                        .setUserLabels(remainingLabels)
-                        .setSettingsVersion(existingSettings.getSettingsVersion()));
+                        .setUserLabels(labels)
+                        .setSettingsVersion(settingsVersion));
+        sqlAdmin.instances().patch(project, instanceName, patch).execute();
+    }
 
-        sqlAdmin.instances()
-                .patch(project, instanceName, patch)
-                .execute();
+    private SQLAdmin sqlAdmin(AuthenticatedContext authenticatedContext) {
+        return gcpSQLAdminFactory.buildSQLAdmin(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudCredential().getName());
+    }
+
+    private String projectId(AuthenticatedContext authenticatedContext) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        return gcpContext.getProjectId();
     }
 }

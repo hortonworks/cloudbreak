@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.GcpComputeLabelSupport.LabelSnapshot;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -39,49 +40,41 @@ public class GcpDiskTagUpdateStrategy implements TagUpdateStrategy {
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> labels) throws IOException {
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
-        Compute compute = gcpContext.getCompute();
-        String project = gcpContext.getProjectId();
-        String zone = cloudResource.getAvailabilityZone();
-        String diskName = cloudResource.getName();
-
-        Disk disk = compute.disks().get(project, zone, diskName).execute();
-
-        Map<String, String> existingLabels = disk.getLabels();
-        if (tagsAlreadyUpToDate(existingLabels, labels)) {
-            LOGGER.debug("Tags for disk {} are already up to date, skipping update.", cloudResource.getName());
-            return;
-        }
-
-        ZoneSetLabelsRequest setLabelsRequest = new ZoneSetLabelsRequest();
-        setLabelsRequest.setLabelFingerprint(disk.getLabelFingerprint());
-        setLabelsRequest.setLabels(mergeTags(existingLabels, labels));
-
-        compute.disks().setLabels(project, zone, diskName, setLabelsRequest).execute();
+        updateDiskLabels(this, gcpContext.getCompute(), gcpContext.getProjectId(), cloudResource.getAvailabilityZone(), cloudResource.getName(),
+                labels);
     }
 
     @Override
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) throws IOException {
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
-        Compute compute = gcpContext.getCompute();
-        String project = gcpContext.getProjectId();
-        String zone = cloudResource.getAvailabilityZone();
-        String diskName = cloudResource.getName();
+        deleteDiskLabels(this, gcpContext.getCompute(), gcpContext.getProjectId(), cloudResource.getAvailabilityZone(), cloudResource.getName(),
+                tagKeys);
+    }
 
+    static void updateDiskLabels(TagUpdateStrategy tagUpdateStrategy, Compute compute, String project, String zone, String diskName,
+            Map<String, String> labels) throws IOException {
+        GcpComputeLabelSupport.updateLabels(tagUpdateStrategy, LOGGER, "disk", diskName, labels,
+                () -> fetchSnapshot(compute, project, zone, diskName),
+                (mergedLabels, fingerprint) -> writeLabels(compute, project, zone, diskName, mergedLabels, fingerprint));
+    }
+
+    static void deleteDiskLabels(TagUpdateStrategy tagUpdateStrategy, Compute compute, String project, String zone, String diskName,
+            Set<String> tagKeys) throws IOException {
+        GcpComputeLabelSupport.deleteLabels(tagUpdateStrategy, LOGGER, "disk", diskName, tagKeys,
+                () -> fetchSnapshot(compute, project, zone, diskName),
+                (remainingLabels, fingerprint) -> writeLabels(compute, project, zone, diskName, remainingLabels, fingerprint));
+    }
+
+    private static LabelSnapshot fetchSnapshot(Compute compute, String project, String zone, String diskName) throws IOException {
         Disk disk = compute.disks().get(project, zone, diskName).execute();
+        return new LabelSnapshot(disk.getLabelFingerprint(), disk.getLabels());
+    }
 
-        Map<String, String> existingLabels = disk.getLabels();
-        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
-            LOGGER.debug("No tags to delete for disk {}, skipping.", cloudResource.getName());
-            return;
-        }
-
-        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
-        logTagDeletion(LOGGER, diskName, tagKeys, existingLabels, remainingLabels.keySet());
-
-        ZoneSetLabelsRequest setLabelsRequest = new ZoneSetLabelsRequest();
-        setLabelsRequest.setLabelFingerprint(disk.getLabelFingerprint());
-        setLabelsRequest.setLabels(remainingLabels);
-
+    private static void writeLabels(Compute compute, String project, String zone, String diskName, Map<String, String> labels, String fingerprint)
+            throws IOException {
+        ZoneSetLabelsRequest setLabelsRequest = new ZoneSetLabelsRequest()
+                .setLabelFingerprint(fingerprint)
+                .setLabels(labels);
         compute.disks().setLabels(project, zone, diskName, setLabelsRequest).execute();
     }
 }

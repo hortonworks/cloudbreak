@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.GcpComputeLabelSupport.LabelSnapshot;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -43,19 +44,9 @@ public class GcpAddressTagUpdateStrategy implements TagUpdateStrategy {
         String region = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         String addressName = cloudResource.getName();
 
-        Address address = compute.addresses().get(project, region, addressName).execute();
-
-        Map<String, String> existingLabels = address.getLabels();
-        if (tagsAlreadyUpToDate(existingLabels, labels)) {
-            LOGGER.debug("Tags for reserved IP {} are already up to date, skipping update.", cloudResource.getName());
-            return;
-        }
-
-        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest();
-        setLabelsRequest.setLabelFingerprint(address.getLabelFingerprint());
-        setLabelsRequest.setLabels(mergeTags(existingLabels, labels));
-
-        compute.addresses().setLabels(project, region, addressName, setLabelsRequest).execute();
+        GcpComputeLabelSupport.updateLabels(this, LOGGER, "reserved IP", addressName, labels,
+                () -> fetchSnapshot(compute, project, region, addressName),
+                (mergedLabels, fingerprint) -> writeLabels(compute, project, region, addressName, mergedLabels, fingerprint));
     }
 
     @Override
@@ -66,21 +57,21 @@ public class GcpAddressTagUpdateStrategy implements TagUpdateStrategy {
         String region = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         String addressName = cloudResource.getName();
 
+        GcpComputeLabelSupport.deleteLabels(this, LOGGER, "reserved IP", addressName, tagKeys,
+                () -> fetchSnapshot(compute, project, region, addressName),
+                (remainingLabels, fingerprint) -> writeLabels(compute, project, region, addressName, remainingLabels, fingerprint));
+    }
+
+    private LabelSnapshot fetchSnapshot(Compute compute, String project, String region, String addressName) throws IOException {
         Address address = compute.addresses().get(project, region, addressName).execute();
+        return new LabelSnapshot(address.getLabelFingerprint(), address.getLabels());
+    }
 
-        Map<String, String> existingLabels = address.getLabels();
-        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
-            LOGGER.debug("No tags to delete for reserved IP {}, skipping.", cloudResource.getName());
-            return;
-        }
-
-        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
-        logTagDeletion(LOGGER, addressName, tagKeys, existingLabels, remainingLabels.keySet());
-
-        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest();
-        setLabelsRequest.setLabelFingerprint(address.getLabelFingerprint());
-        setLabelsRequest.setLabels(remainingLabels);
-
+    private void writeLabels(Compute compute, String project, String region, String addressName, Map<String, String> labels, String fingerprint)
+            throws IOException {
+        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest()
+                .setLabelFingerprint(fingerprint)
+                .setLabels(labels);
         compute.addresses().setLabels(project, region, addressName, setLabelsRequest).execute();
     }
 }

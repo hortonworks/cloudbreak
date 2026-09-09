@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.GcpComputeLabelSupport.LabelSnapshot;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -43,19 +44,9 @@ public class GcpForwardingRuleTagUpdateStrategy implements TagUpdateStrategy {
         String region = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         String forwardingRuleName = cloudResource.getName();
 
-        ForwardingRule forwardingRule = compute.forwardingRules().get(project, region, forwardingRuleName).execute();
-
-        Map<String, String> existingLabels = forwardingRule.getLabels();
-        if (tagsAlreadyUpToDate(existingLabels, labels)) {
-            LOGGER.debug("Tags for forwarding rule {} are already up to date, skipping update.", cloudResource.getName());
-            return;
-        }
-
-        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest();
-        setLabelsRequest.setLabelFingerprint(forwardingRule.getLabelFingerprint());
-        setLabelsRequest.setLabels(mergeTags(existingLabels, labels));
-
-        compute.forwardingRules().setLabels(project, region, forwardingRuleName, setLabelsRequest).execute();
+        GcpComputeLabelSupport.updateLabels(this, LOGGER, "forwarding rule", forwardingRuleName, labels,
+                () -> fetchSnapshot(compute, project, region, forwardingRuleName),
+                (mergedLabels, fingerprint) -> writeLabels(compute, project, region, forwardingRuleName, mergedLabels, fingerprint));
     }
 
     @Override
@@ -66,21 +57,21 @@ public class GcpForwardingRuleTagUpdateStrategy implements TagUpdateStrategy {
         String region = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         String forwardingRuleName = cloudResource.getName();
 
+        GcpComputeLabelSupport.deleteLabels(this, LOGGER, "forwarding rule", forwardingRuleName, tagKeys,
+                () -> fetchSnapshot(compute, project, region, forwardingRuleName),
+                (remainingLabels, fingerprint) -> writeLabels(compute, project, region, forwardingRuleName, remainingLabels, fingerprint));
+    }
+
+    private LabelSnapshot fetchSnapshot(Compute compute, String project, String region, String forwardingRuleName) throws IOException {
         ForwardingRule forwardingRule = compute.forwardingRules().get(project, region, forwardingRuleName).execute();
+        return new LabelSnapshot(forwardingRule.getLabelFingerprint(), forwardingRule.getLabels());
+    }
 
-        Map<String, String> existingLabels = forwardingRule.getLabels();
-        if (!hasTagKeysToDelete(existingLabels, tagKeys)) {
-            LOGGER.debug("No tags to delete for forwarding rule {}, skipping.", cloudResource.getName());
-            return;
-        }
-
-        Map<String, String> remainingLabels = removeTagKeys(existingLabels, tagKeys);
-        logTagDeletion(LOGGER, forwardingRuleName, tagKeys, existingLabels, remainingLabels.keySet());
-
-        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest();
-        setLabelsRequest.setLabelFingerprint(forwardingRule.getLabelFingerprint());
-        setLabelsRequest.setLabels(remainingLabels);
-
+    private void writeLabels(Compute compute, String project, String region, String forwardingRuleName, Map<String, String> labels, String fingerprint)
+            throws IOException {
+        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest()
+                .setLabelFingerprint(fingerprint)
+                .setLabels(labels);
         compute.forwardingRules().setLabels(project, region, forwardingRuleName, setLabelsRequest).execute();
     }
 }
