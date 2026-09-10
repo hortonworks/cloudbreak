@@ -75,15 +75,11 @@ public class CertificateExpirationService {
         if (isCertFullyExpired(stackDto.getCluster())) {
             LOGGER.info("Host certificates are expired on cluster {}", stackDto.getName());
             return true;
-        } else if (hasUnhealthyHosts(stackDto)) {
-            if (isAnyCertExpiredOnHosts(stackDto)) {
-                LOGGER.info("Cluster {} has unhealthy hosts with expired certificates",  stackDto.getName());
-                return true;
-            } else {
-                LOGGER.warn("Cluster {} has unhealthy hosts but host certificates are not expired, trying to rotate certs via CM API",  stackDto.getName());
-                return false;
-            }
+        } else if (isAnyCertExpiredOnHosts(stackDto)) {
+            LOGGER.info("Cluster {} has hosts with expired certificates",  stackDto.getName());
+            return true;
         } else {
+            LOGGER.info("Host certificates are valid on cluster {}, trying to rotate certs via CM API", stackDto.getName());
             return false;
         }
     }

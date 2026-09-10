@@ -159,32 +159,11 @@ class CertificateExpirationServiceTest {
     }
 
     @Test
-    void validateCertificateFullyExpiredShouldReturnFalseWhenHostsAreHealthy() throws CloudbreakOrchestratorFailedException {
-        when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getCertExpirationState()).thenReturn(CertExpirationState.VALID);
-        when(clusterView.getId()).thenReturn(1L);
-        when(runtimeVersionService.getRuntimeVersion(1L)).thenReturn(Optional.of("7.2.18"));
-        when(apiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
-        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(clusterStatusService.getExtendedHostStatuses(Optional.of("7.2.18"))).thenReturn(extendedHostStatuses);
-        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(false);
-        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE)).thenReturn(false);
-
-        assertFalse(underTest.validateCertificateFullyExpired(stackDto));
-    }
-
-    @Test
-    void validateCertificateFullyExpiredShouldReturnTrueWhenUnhealthyAndSaltConfirmsExpired() throws CloudbreakOrchestratorFailedException {
+    void validateCertificateFullyExpiredShouldReturnTrueWhenSaltConfirmsExpired() throws CloudbreakOrchestratorFailedException {
         Node node = new Node("10.0.0.1", null, null, null, "host1.example.com", null);
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(stackDto.getAllFunctioningNodes()).thenReturn(Set.of(node));
         when(clusterView.getCertExpirationState()).thenReturn(CertExpirationState.VALID);
-        when(clusterView.getId()).thenReturn(1L);
-        when(runtimeVersionService.getRuntimeVersion(1L)).thenReturn(Optional.of("7.2.18"));
-        when(apiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
-        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(clusterStatusService.getExtendedHostStatuses(Optional.of("7.2.18"))).thenReturn(extendedHostStatuses);
-        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(true);
         Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
         nodesWithErrors.put("host1.example.com", "stderr=Certificate check error: Certificate is expired, comment=Command failed");
         doThrow(new CloudbreakOrchestratorFailedException("Salt state failed", nodesWithErrors))
@@ -194,19 +173,39 @@ class CertificateExpirationServiceTest {
     }
 
     @Test
-    void validateCertificateFullyExpiredShouldReturnFalseWhenUnhealthyButSaltSaysCertsNotExpired() throws CloudbreakOrchestratorFailedException {
+    void validateCertificateFullyExpiredShouldReturnFalseWhenSaltSaysCertsNotExpired() throws CloudbreakOrchestratorFailedException {
         Node node = new Node("10.0.0.1", null, null, null, "host1.example.com", null);
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(stackDto.getAllFunctioningNodes()).thenReturn(Set.of(node));
         when(clusterView.getCertExpirationState()).thenReturn(CertExpirationState.VALID);
+        doNothing().when(saltService).executeSaltState(eq(stackDto), eq(Set.of("host1.example.com")), any());
+
+        assertFalse(underTest.validateCertificateFullyExpired(stackDto));
+    }
+
+    @Test
+    void testHasUnhealthyHostsWhenUnhealthyHosts() {
+        when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getId()).thenReturn(1L);
         when(runtimeVersionService.getRuntimeVersion(1L)).thenReturn(Optional.of("7.2.18"));
         when(apiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getExtendedHostStatuses(Optional.of("7.2.18"))).thenReturn(extendedHostStatuses);
         when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(true);
-        doNothing().when(saltService).executeSaltState(eq(stackDto), eq(Set.of("host1.example.com")), any());
 
-        assertFalse(underTest.validateCertificateFullyExpired(stackDto));
+        assertTrue(underTest.hasUnhealthyHosts(stackDto));
+    }
+
+    @Test
+    void testHasUnhealthyHostsWhenHealthyHosts() {
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getId()).thenReturn(1L);
+        when(runtimeVersionService.getRuntimeVersion(1L)).thenReturn(Optional.of("7.2.18"));
+        when(apiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterStatusService.getExtendedHostStatuses(Optional.of("7.2.18"))).thenReturn(extendedHostStatuses);
+        when(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.HOST)).thenReturn(false);
+
+        assertFalse(underTest.hasUnhealthyHosts(stackDto));
     }
 }
