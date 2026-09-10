@@ -21,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskSyncMode;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -65,12 +64,11 @@ class DiskSyncServiceTest {
         when(stackDto.getId()).thenReturn(1L);
         when(stackDto.getCloudPlatform()).thenReturn("AWS");
         when(stackService.getByIdWithLists(1L)).thenReturn(stack);
-        when(stack.getDetailedStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(false);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN));
 
-        verify(eventService).fireCloudbreakEvent(eq(1L), eq("AVAILABLE"), eq(DISK_SYNC_FAILED), anyList());
+        verify(eventService).fireCloudbreakEvent(eq(1L), eq("UPDATE_FAILED"), eq(DISK_SYNC_FAILED), anyList());
         assertEquals("Exception while trying to sync disks - The stack is either not in a valid state or not all nodes or reachable for disk sync to run!",
                 exception.getMessage());
     }
@@ -82,7 +80,6 @@ class DiskSyncServiceTest {
         StackView stackView = mock(StackView.class);
         when(stackDto.getId()).thenReturn(1L);
         when(stackService.getByIdWithLists(1L)).thenReturn(stack);
-        when(stack.getDetailedStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(true);
         when(stackDto.getCloudPlatform()).thenReturn("AWS");
         when(stackDto.getStack()).thenReturn(stackView);
@@ -112,12 +109,11 @@ class DiskSyncServiceTest {
         when(stackDto.getCloudPlatform()).thenReturn("AWS");
         Stack stack = mock(Stack.class);
         when(stackService.getByIdWithLists(1L)).thenReturn(stack);
-        when(stack.getDetailedStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenThrow(new RuntimeException("error"));
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN));
 
-        verify(eventService).fireCloudbreakEvent(eq(1L), eq("AVAILABLE"), eq(DISK_SYNC_FAILED), anyList());
+        verify(eventService).fireCloudbreakEvent(eq(1L), eq("UPDATE_FAILED"), eq(DISK_SYNC_FAILED), anyList());
         assertEquals("Exception while trying to sync disks - error", exception.getMessage());
     }
 }

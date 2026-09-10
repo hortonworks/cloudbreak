@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskSyncMode;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -66,7 +66,6 @@ public class DiskSyncService {
             return;
         }
         Stack stack = stackService.getByIdWithLists(stackDto.getId());
-        DetailedStackStatus stackStatus = stack.getDetailedStatus();
         try {
             if (!stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)) {
                 LOGGER.warn("Disk sync will be skipped for {} stack, because its status is not valid or not all nodes are reachable, status: {}",
@@ -87,7 +86,7 @@ public class DiskSyncService {
             updateProviderSyncState(stackDto, diskSyncMode, mismatchFound, alreadyReported);
         } catch (Exception ex) {
             LOGGER.error("Exception while running disk sync job on stack {}. Exception::", stackDto.getId(), ex);
-            eventService.fireCloudbreakEvent(stackDto.getId(), stackStatus.name(), DISK_SYNC_FAILED, Collections.singletonList(ex.getMessage()));
+            eventService.fireCloudbreakEvent(stackDto.getId(), Status.UPDATE_FAILED.name(), DISK_SYNC_FAILED, Collections.singletonList(ex.getMessage()));
             throw new CloudbreakServiceException("Exception while trying to sync disks - " + ex.getMessage());
         }
     }
