@@ -150,7 +150,7 @@ class MaintenanceWindowTaskValidatorTest {
         MaintenanceWindowTask existing = activeTask(5L, "secret-rotation", "secret-1", null);
         existing.setEnvironmentCrn(ENV_CRN);
         existing.setTaskKind(MaintenanceTaskKind.ONE_SHOT);
-        existing.setSubmitterService("secret-rotation-service");
+        existing.setSubmitterService("cloudbreak");
         existing.setExecutionRef(new com.sequenceiq.cloudbreak.common.json.Json(Map.of("type", "http", "url", "http://example/a")));
         MaintenanceWindowTaskRequest request = validRequest();
         request.setExecutionRef(Map.of("type", "http", "url", "http://example/b"));
@@ -167,7 +167,7 @@ class MaintenanceWindowTaskValidatorTest {
         MaintenanceWindowTask existing = activeTask(11L, "RUNTIME_UPGRADE", "runtime:7.2.18", 10L);
         existing.setEnvironmentCrn(ENV_CRN);
         existing.setTaskKind(MaintenanceTaskKind.ONE_SHOT);
-        existing.setSubmitterService("secret-rotation-service");
+        existing.setSubmitterService("cloudbreak");
         existing.setExecutionRef(new com.sequenceiq.cloudbreak.common.json.Json(Map.of("type", "http")));
         when(taskRepository.findByIdAndAccountId(10L, ACCOUNT_ID)).thenReturn(Optional.of(dependency));
 
@@ -208,7 +208,7 @@ class MaintenanceWindowTaskValidatorTest {
         request.setTaskType("secret-rotation");
         request.setWorkItemId("secret-1");
         request.setTaskKind("ONE_SHOT");
-        request.setSubmitterService("secret-rotation-service");
+        request.setSubmitterService("cloudbreak");
         request.setExecutionRef(Map.of("type", "http"));
         return request;
     }

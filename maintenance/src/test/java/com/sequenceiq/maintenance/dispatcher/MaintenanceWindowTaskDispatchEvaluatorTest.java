@@ -2,14 +2,18 @@ package com.sequenceiq.maintenance.dispatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +32,7 @@ import com.sequenceiq.maintenance.domain.MaintenanceTaskStatus;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowRun;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowTask;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowRunRepository;
+import com.sequenceiq.maintenance.repository.MaintenanceWindowTaskRepository;
 import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 import com.sequenceiq.maintenance.util.MaintenanceTaskResourceScope;
 
@@ -46,8 +51,17 @@ class MaintenanceWindowTaskDispatchEvaluatorTest {
 
     private static final String FREEIPA_CRN = "crn:cdp:freeipa:us-west-1:acc-1:freeipa:fp-1";
 
+    private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+
+    private static final Set<MaintenanceTaskStatus> DEPENDENCY_RESOLVABLE_STATUSES = Set.of(
+            MaintenanceTaskStatus.ACTIVE,
+            MaintenanceTaskStatus.COMPLETED);
+
     @Mock
     private MaintenanceWindowRunRepository runRepository;
+
+    @Mock
+    private MaintenanceWindowTaskRepository taskRepository;
 
     @Mock
     private Clock clock;
@@ -59,8 +73,9 @@ class MaintenanceWindowTaskDispatchEvaluatorTest {
     @BeforeEach
     void setUp() {
         underTest = new MaintenanceWindowTaskDispatchEvaluator(
-                runRepository, clock, new MaintenanceTaskResourceScope());
+                runRepository, taskRepository, clock, new MaintenanceTaskResourceScope());
         occurrence = new WindowOccurrence(WINDOW_START_MS, WINDOW_END.toEpochMilli());
+        lenient().when(taskRepository.findByIdAndStatusIn(anyLong(), anySet())).thenReturn(Optional.empty());
         lenient().when(runRepository
                 .findFirstByMaintenanceWindowTaskIdAndWindowStartLessThanAndWindowEndGreaterThanOrderByWindowStartDesc(
                         anyLong(), anyLong(), anyLong()))
@@ -177,15 +192,31 @@ class MaintenanceWindowTaskDispatchEvaluatorTest {
     }
 
     @Test
-    void skipsWhenDependencyAbsentFromActiveTasks() {
+    void defersWhenDependencyAbsentFromActiveTasksAndPrerequisiteNotCompleted() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask dependency = task(1L, "TASK_A", 200, null, DATALAKE_CRN);
+        MaintenanceWindowTask dependent = task(2L, "TASK_B", 150, 1L, DATALAKE_CRN);
+        when(taskRepository.findByIdAndStatusIn(1L, DEPENDENCY_RESOLVABLE_STATUSES)).thenReturn(Optional.of(dependency));
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(2L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(dependent, List.of(dependent));
+
+        assertThat(evaluation.shouldDispatch()).isFalse();
+        assertThat(evaluation.skipReason()).contains(TaskDispatchSkipReason.DEPENDENCY_NOT_COMPLETED);
+    }
+
+    @Test
+    void skipsWhenDependencyIsDeletedAndAbsentFromActiveSnapshot() {
         stubNow(WINDOW_START.plusSeconds(1));
         MaintenanceWindowTask dependent = task(2L, "TASK_B", 150, 1L, DATALAKE_CRN);
+        when(taskRepository.findByIdAndStatusIn(1L, DEPENDENCY_RESOLVABLE_STATUSES)).thenReturn(Optional.empty());
         when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(2L, WINDOW_START_MS)).thenReturn(Optional.empty());
 
         TaskDispatchEvaluation evaluation = evaluate(dependent, List.of(dependent));
 
         assertThat(evaluation.shouldDispatch()).isFalse();
         assertThat(evaluation.skipReason()).contains(TaskDispatchSkipReason.DEPENDENCY_NOT_FOUND);
+        verify(taskRepository).findByIdAndStatusIn(1L, DEPENDENCY_RESOLVABLE_STATUSES);
     }
 
     @Test
@@ -217,14 +248,17 @@ class MaintenanceWindowTaskDispatchEvaluatorTest {
     }
 
     @Test
-    void dispatchesWhenDependencyCompleted() {
+    void dispatchesWhenCompletedOneShotDependencyAbsentFromActiveSnapshot() {
         stubNow(WINDOW_START.plusSeconds(1));
         MaintenanceWindowTask dependency = task(1L, "TASK_A", 200, null, DATALAKE_CRN);
+        dependency.setTaskKind(MaintenanceTaskKind.ONE_SHOT);
+        dependency.setStatus(MaintenanceTaskStatus.COMPLETED);
         MaintenanceWindowTask dependent = task(2L, "TASK_B", 150, 1L, DATALAKE_CRN);
+        when(taskRepository.findByIdAndStatusIn(1L, DEPENDENCY_RESOLVABLE_STATUSES)).thenReturn(Optional.of(dependency));
         stubOverlappingPrerequisiteRun(1L, occurrence, completedRun(dependency));
         when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(2L, WINDOW_START_MS)).thenReturn(Optional.empty());
 
-        TaskDispatchEvaluation evaluation = evaluate(dependent, List.of(dependency, dependent));
+        TaskDispatchEvaluation evaluation = evaluate(dependent, List.of(dependent));
 
         assertThat(evaluation.shouldDispatch()).isTrue();
     }
@@ -595,6 +629,77 @@ class MaintenanceWindowTaskDispatchEvaluatorTest {
     }
 
     @Test
+    void implicitOrderingDefersDatahubWhileDatalakeIsRunning() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask datalake = task(11L, "DATALAKE_TASK", 100, null, DATALAKE_CRN);
+        MaintenanceWindowTask datahub = task(12L, "DATAHUB_TASK", 100, null, DATAHUB_CRN);
+        MaintenanceWindowRun running = completedRun(datalake);
+        running.setStatus(MaintenanceRunStatus.RUNNING);
+        stubOverlappingPrerequisiteRun(11L, occurrence, running);
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(12L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(datahub, List.of(datalake, datahub));
+
+        assertThat(evaluation.shouldDispatch()).isFalse();
+        assertThat(evaluation.skipReason()).contains(TaskDispatchSkipReason.IMPLICIT_PLATFORM_ORDERING);
+    }
+
+    @Test
+    void implicitOrderingDefersDatahubWhileFreeIpaIsRunningAfterDatalakeCompletes() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask freeIpa = task(10L, "FREEIPA_TASK", 100, null, FREEIPA_CRN);
+        MaintenanceWindowTask datalake = task(11L, "DATALAKE_TASK", 100, null, DATALAKE_CRN);
+        MaintenanceWindowTask datahub = task(12L, "DATAHUB_TASK", 100, null, DATAHUB_CRN);
+        MaintenanceWindowRun freeIpaRunning = completedRun(freeIpa);
+        freeIpaRunning.setStatus(MaintenanceRunStatus.RUNNING);
+        stubOverlappingPrerequisiteRun(10L, occurrence, freeIpaRunning);
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(12L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(datahub, List.of(freeIpa, datalake, datahub));
+
+        assertThat(evaluation.shouldDispatch()).isFalse();
+        assertThat(evaluation.skipReason()).contains(TaskDispatchSkipReason.IMPLICIT_PLATFORM_ORDERING);
+        verify(runRepository, never())
+                .findFirstByMaintenanceWindowTaskIdAndWindowStartLessThanAndWindowEndGreaterThanOrderByWindowStartDesc(
+                        eq(11L), eq(occurrence.windowEnd()), eq(occurrence.windowStart()));
+    }
+
+    @Test
+    void dispatchesFreeIpaWhileDatalakeIsRunningInSameEnvironment() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask freeIpa = task(10L, "FREEIPA_TASK", 100, null, FREEIPA_CRN);
+        MaintenanceWindowTask datalake = task(11L, "DATALAKE_TASK", 100, null, DATALAKE_CRN);
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(10L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(freeIpa, List.of(freeIpa, datalake));
+
+        assertThat(evaluation.shouldDispatch()).isTrue();
+        verify(runRepository, never())
+                .findFirstByMaintenanceWindowTaskIdAndWindowStartLessThanAndWindowEndGreaterThanOrderByWindowStartDesc(
+                        eq(11L), eq(occurrence.windowEnd()), eq(occurrence.windowStart()));
+    }
+
+    @Test
+    void implicitOrderingChecksFreeIpaTierBeforeDatalakeWhenBothWouldBlockDatahub() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask freeIpa = task(10L, "FREEIPA_TASK", 100, null, FREEIPA_CRN);
+        MaintenanceWindowTask datalake = task(11L, "DATALAKE_TASK", 100, null, DATALAKE_CRN);
+        MaintenanceWindowTask datahub = task(12L, "DATAHUB_TASK", 100, null, DATAHUB_CRN);
+        MaintenanceWindowRun freeIpaRunning = completedRun(freeIpa);
+        freeIpaRunning.setStatus(MaintenanceRunStatus.RUNNING);
+        stubOverlappingPrerequisiteRun(10L, occurrence, freeIpaRunning);
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(12L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(datahub, List.of(datalake, freeIpa, datahub));
+
+        assertThat(evaluation.shouldDispatch()).isFalse();
+        assertThat(evaluation.skipReason()).contains(TaskDispatchSkipReason.IMPLICIT_PLATFORM_ORDERING);
+        verify(runRepository, never())
+                .findFirstByMaintenanceWindowTaskIdAndWindowStartLessThanAndWindowEndGreaterThanOrderByWindowStartDesc(
+                        eq(11L), eq(occurrence.windowEnd()), eq(occurrence.windowStart()));
+    }
+
+    @Test
     void dispatchesWhenLowerTierTaskHasDependsOnAndIsExcludedFromImplicitOrdering() {
         stubNow(WINDOW_START.plusSeconds(1));
         MaintenanceWindowTask freeIpaWithExplicitDependency = task(10L, "FREEIPA_TASK", 100, 99L, FREEIPA_CRN);
@@ -602,6 +707,30 @@ class MaintenanceWindowTaskDispatchEvaluatorTest {
         when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(11L, WINDOW_START_MS)).thenReturn(Optional.empty());
 
         TaskDispatchEvaluation evaluation = evaluate(datalake, List.of(freeIpaWithExplicitDependency, datalake));
+
+        assertThat(evaluation.shouldDispatch()).isTrue();
+    }
+
+    @Test
+    void dispatchesWhenEvaluatedTaskAbsentFromActiveSnapshot() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask datalake = task(11L, "DATALAKE_TASK", 100, null, DATALAKE_CRN);
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(11L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(datalake, List.of());
+
+        assertThat(evaluation.shouldDispatch()).isTrue();
+    }
+
+    @Test
+    void dispatchesWhenEnvironmentCrnNullSkipsImplicitOrdering() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask freeIpa = task(10L, "FREEIPA_TASK", 100, null, FREEIPA_CRN);
+        MaintenanceWindowTask datalake = task(11L, "DATALAKE_TASK", 100, null, DATALAKE_CRN);
+        datalake.setEnvironmentCrn(null);
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(11L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(datalake, List.of(freeIpa, datalake));
 
         assertThat(evaluation.shouldDispatch()).isTrue();
     }

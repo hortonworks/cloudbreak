@@ -174,7 +174,7 @@ class MaintenanceWindowScheduleEligibilityServiceTest {
 
         assertThat(evaluation.dispatchable()).isFalse();
         assertThat(evaluation.schedule()).contains(resource);
-        assertThat(evaluation.currentOccurrence()).isEmpty();
+        assertThat(evaluation.currentOccurrence()).contains(occurrence);
     }
 
     private MaintenanceWindowSchedule schedule(long id, MaintenanceScopeType scopeType, String scopeId) {

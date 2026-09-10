@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-BUCKET=maintenance-swagger
+BUCKET=cdp-maintenance-swagger
 REGION=us-east-2
 
 echo "Creating bucket s3://${BUCKET} in ${REGION} (skip if it already exists)..."

@@ -20,6 +20,8 @@ public interface MaintenanceWindowTaskRepository extends JpaRepository<Maintenan
 
     Optional<MaintenanceWindowTask> findByIdAndAccountId(Long id, String accountId);
 
+    Optional<MaintenanceWindowTask> findByIdAndStatusIn(Long id, Collection<MaintenanceTaskStatus> statuses);
+
     List<MaintenanceWindowTask> findByAccountIdAndIdIn(String accountId, Collection<Long> ids);
 
     List<MaintenanceWindowTask> findByStatusOrderByPriorityDescCreatedAtAsc(MaintenanceTaskStatus status);

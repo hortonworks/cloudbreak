@@ -46,6 +46,24 @@ maintenance:
   cert.dir: /certs/
   dispatcher:
     interval-minutes: 15
+    submitter:
+      # Outbound HTTP to submitter execute callbacks (not bound by the 15-minute tick interval).
+      connect-timeout-ms: 30000
+      read-timeout-ms: 120000
+  # Submitter service base URLs for dispatch execute callbacks (target services, not this service).
+  cloudbreak:
+    url: http://localhost:9091
+    server:
+      # Context path on the target Cloudbreak service.
+      contextPath: /cb
+  datalake:
+    url: http://localhost:8086
+    server:
+      contextPath: /dl
+  freeipa:
+    url: http://localhost:8090
+    server:
+      contextPath: /freeipa
   db:
     port.5432.tcp.port: 5432
     port.5432.tcp.addr: 127.0.0.1

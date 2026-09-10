@@ -65,7 +65,7 @@ public class MaintenanceWindowScheduleEligibilityService {
         if (isSkipped(winningSchedule.getId(), occurrence)) {
             LOGGER.debug("Maintenance window not dispatchable: schedule id={} occurrence windowStart={} is skipped",
                     winningSchedule.getId(), occurrence.windowStart());
-            return MaintenanceWindowScheduleEligibility.withoutActiveOccurrence(winningSchedule);
+            return MaintenanceWindowScheduleEligibility.skippedOccurrence(winningSchedule, occurrence);
         }
         LOGGER.debug("Maintenance window dispatchable: schedule id={} scopeType={} windowStart={} windowEnd={}",
                 winningSchedule.getId(), winningSchedule.getScopeType(), occurrence.windowStart(), occurrence.windowEnd());

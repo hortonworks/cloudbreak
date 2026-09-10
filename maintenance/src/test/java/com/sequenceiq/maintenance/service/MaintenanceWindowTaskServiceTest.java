@@ -373,7 +373,7 @@ class MaintenanceWindowTaskServiceTest {
         request.setTaskType("secret-rotation");
         request.setWorkItemId("secret-1");
         request.setTaskKind("EVERY_WINDOW");
-        request.setSubmitterService("secret-rotation-service");
+        request.setSubmitterService("cloudbreak");
         request.setExecutionRef(Map.of("type", "http", "url", "http://example/execute"));
         request.setTaskPayload(Map.of("secretId", "secret-1"));
         request.setPriority(200);

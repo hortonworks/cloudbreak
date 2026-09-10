@@ -57,7 +57,7 @@ class MaintenanceWindowTaskRequestValidationTest {
         request.setTaskType("secret-rotation");
         request.setWorkItemId("secret-1");
         request.setTaskKind("EVERY_WINDOW");
-        request.setSubmitterService("secret-rotation-service");
+        request.setSubmitterService("cloudbreak");
         request.setExecutionRef(Map.of("type", "http"));
         return request;
     }

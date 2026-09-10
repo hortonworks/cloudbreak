@@ -38,7 +38,7 @@ class MaintenanceWindowTaskConverterTest {
         task.setEnvironmentCrn("crn:cdp:environments:us-west-1:acc-1:environment:env-1");
         task.setTaskType("secret-rotation");
         task.setWorkItemId("secret-1");
-        task.setSubmitterService("secret-rotation-service");
+        task.setSubmitterService("cloudbreak");
 
         MaintenanceWindowTaskResponse response = converter.toResponse(task, null);
 
@@ -80,7 +80,7 @@ class MaintenanceWindowTaskConverterTest {
         request.setTaskType("secret-rotation");
         request.setWorkItemId("secret-1");
         request.setTaskKind("EVERY_WINDOW");
-        request.setSubmitterService("secret-rotation-service");
+        request.setSubmitterService("cloudbreak");
         request.setExecutionRef(Map.of("type", "http", "url", "http://example/execute"));
         return request;
     }

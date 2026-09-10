@@ -16,6 +16,9 @@ public interface MaintenanceWindowRunRepository extends JpaRepository<Maintenanc
 
     Optional<MaintenanceWindowRun> findByMaintenanceWindowTaskIdAndWindowStart(Long maintenanceWindowTaskId, Long windowStart);
 
+    Optional<MaintenanceWindowRun> findByIdAndMaintenanceWindowTaskIdAndAccountId(
+            Long id, Long maintenanceWindowTaskId, String accountId);
+
     /**
      * Overlapping run for a prerequisite task relative to a dependent {@code [windowStart, windowEnd)} occurrence.
      * Predicate matches {@link com.sequenceiq.maintenance.service.model.WindowOccurrence#overlaps} half-open semantics:

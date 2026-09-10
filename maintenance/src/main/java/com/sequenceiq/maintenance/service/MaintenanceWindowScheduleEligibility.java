@@ -18,8 +18,15 @@ public record MaintenanceWindowScheduleEligibility(
         return new MaintenanceWindowScheduleEligibility(Optional.empty(), Optional.empty(), false);
     }
 
+    /**
+     * Schedule applies but there is no current occurrence — for example {@code now} is outside the active window.
+     */
     public static MaintenanceWindowScheduleEligibility withoutActiveOccurrence(MaintenanceWindowSchedule schedule) {
         return new MaintenanceWindowScheduleEligibility(Optional.of(schedule), Optional.empty(), false);
+    }
+
+    public static MaintenanceWindowScheduleEligibility skippedOccurrence(MaintenanceWindowSchedule schedule, WindowOccurrence occurrence) {
+        return new MaintenanceWindowScheduleEligibility(Optional.of(schedule), Optional.of(occurrence), false);
     }
 
     public static MaintenanceWindowScheduleEligibility dispatchable(MaintenanceWindowSchedule schedule, WindowOccurrence occurrence) {
