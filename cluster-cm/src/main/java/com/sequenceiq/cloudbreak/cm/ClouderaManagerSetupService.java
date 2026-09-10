@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerApiExceptionUtil.extractMessage;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,7 @@ import com.cloudera.api.swagger.model.ApiConfigPolicy;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.cloudera.api.swagger.model.ApiUpdateGlobalTruststoreArguments;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -63,7 +66,6 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapper;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerApiExceptionUtil;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
@@ -250,9 +252,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Override
     public void configureManagementServices(TemplatePreparationObject templatePreparationObject,
             String sdxContext,
+            String caCerts,
             String sdxStackCrn,
             Telemetry telemetry,
             ProxyConfig proxyConfig) {
+        if (StringUtils.isNotBlank(caCerts)) {
+            updateGlobalTruststore(caCerts);
+        }
         String sdxContextName = Optional.ofNullable(sdxContext).map(this::setupRemoteDataContext).orElse(null);
         try {
             configureCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName, proxyConfig);
@@ -260,6 +266,30 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw mapApiException(e);
         } catch (Exception e) {
             throw mapException(e);
+        }
+    }
+
+    private void updateGlobalTruststore(String certs) {
+        try {
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+            ApiUpdateGlobalTruststoreArguments globalTruststoreArguments = new ApiUpdateGlobalTruststoreArguments()
+                    .newCertLocation("")
+                    .newCertContent(certs);
+            ApiCommand apiCommand = clouderaManagerResourceApi.updateGlobalTruststore(globalTruststoreArguments);
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startDefaultPolling(
+                    stack, apiClient, apiCommand.getId(), apiCommand.getName());
+            if (pollingResult.isSuccess()) {
+                LOGGER.debug("Successfully updated global truststore! Polling result: {}", pollingResult);
+            } else if (pollingResult.isExited()) {
+                throw new CancellationException("Polling of update global truststore has been cancelled.");
+            } else {
+                LOGGER.debug("Failed to update global truststore. polling result: {}", pollingResult);
+                throw new ClouderaManagerOperationFailedException(
+                        String.format("Failed to update global truststore. polling result: '%s'", pollingResult), pollingResult.getException());
+            }
+        } catch (ApiException e) {
+            LOGGER.error("Error while updating global truststore", e);
+            throw new ClouderaManagerOperationFailedException(String.format("Error while updating global truststore: %s", extractMessage(e)), e);
         }
     }
 
@@ -316,7 +346,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             }
             importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
         } catch (ApiException e) {
-            String msg = "Installation of CDP with Cloudera Manager has failed: " + ClouderaManagerApiExceptionUtil.extractMessage(e);
+            String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
             throw new ClouderaManagerOperationFailedException(msg, e);
         } catch (Exception e) {
             throw mapException(e);
@@ -381,7 +411,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             mgmtApi.autoConfigure();
         } catch (ApiException e) {
-            String msg = "Error happened when CM autoconfigure was called: " + ClouderaManagerApiExceptionUtil.extractMessage(e);
+            String msg = "Error happened when CM autoconfigure was called: " + extractMessage(e);
             LOGGER.error(msg, e);
             throw new ClouderaManagerOperationFailedException(msg, e);
         }

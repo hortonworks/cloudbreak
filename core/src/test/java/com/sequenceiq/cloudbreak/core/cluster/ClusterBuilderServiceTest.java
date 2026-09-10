@@ -217,15 +217,16 @@ class ClusterBuilderServiceTest {
     }
 
     @Test
-    void configureManagementServiceCDLDatalake() {
+    void configureManagementServicePDLDatalake() {
         when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.of(proxyConfig));
         when(mockStackDtoService.getById(eq(STACK_ID))).thenReturn(mockStack);
         when(mockStack.getStack()).thenReturn(stackView);
         when(mockStack.getDatalakeCrn()).thenReturn(null);
-        when(mockStack.getEnvironmentCrn()).thenReturn("envcrn");
+        when(mockStack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         underTest.configureManagementServices(STACK_ID);
         verify(platformAwareSdxConnector, times(1)).getSdxBasicViewByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector, times(1)).getCACertsForEnvironment(ENV_CRN);
     }
 
     @Test
@@ -239,7 +240,7 @@ class ClusterBuilderServiceTest {
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(platformAwareSdxConnector, times(1)).getRemoteDataContext(any());
         verify(platformAwareSdxConnector, times(0)).getSdxBasicViewByEnvironmentCrn(anyString());
-        verify(mockClusterSetupService, times(1)).configureManagementServices(any(), any(), captor.capture(), any(), any());
+        verify(mockClusterSetupService, times(1)).configureManagementServices(any(), any(), any(), captor.capture(), any(), any());
         assertEquals("dlCrn", captor.getValue());
     }
 

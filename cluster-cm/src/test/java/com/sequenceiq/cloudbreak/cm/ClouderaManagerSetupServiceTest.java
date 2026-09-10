@@ -28,7 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -62,6 +61,7 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.cloudera.api.swagger.model.ApiUpdateGlobalTruststoreArguments;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -95,7 +95,6 @@ import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -114,6 +113,10 @@ class ClouderaManagerSetupServiceTest {
     private static final String PROXY_PASSWORD = "pw";
 
     private static final String PROXY_NO_PROXY_HOSTS = "noproxy.com";
+
+    private static final String SDX_STACK_CRN = "mockSdxStackCrn";
+
+    private static final String FQDN = "fqdn";
 
     @Mock
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
@@ -178,8 +181,41 @@ class ClouderaManagerSetupServiceTest {
     @InjectMocks
     private ClouderaManagerSetupService underTest;
 
+    @Mock
+    private MgmtServiceResourceApi mgmtServiceResourceApi;
+
+    @Mock
+    private ClouderaManagerResourceApi clouderaManagerResourceApi;
+
+    @Mock
+    private HostsResourceApi hostsResourceApi;
+
+    @Mock
+    private CdpResourceApi cdpResourceApi;
+
+    @Mock
+    private TemplatePreparationObject templatePreparationObject;
+
+    @Mock
+    private GeneralClusterConfigs generalClusterConfigs;
+
+    @Mock
+    private ApiHostList apiHostList;
+
+    @Mock
+    private ApiRemoteDataContext apiRemoteDataContext;
+
+    @Mock
+    private Telemetry telemetry;
+
+    @Mock
+    private ProxyConfig proxyConfig;
+
+    @Mock
+    private ApiClient apiClient;
+
     @BeforeEach
-    void before() {
+    void before() throws Exception {
         underTest = new ClouderaManagerSetupService(testStack(), new HttpClientConfig("10.0.0.0"));
 
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
@@ -202,14 +238,33 @@ class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "entitlementService", entitlementService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerCommandsService", clouderaManagerCommandsService);
         ReflectionTestUtils.setField(underTest, "cmTemplateProcessorFactory", cmTemplateProcessorFactory);
+
+        lenient().when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any(ApiClient.class)))
+                .thenReturn(mgmtServiceResourceApi);
+        lenient().when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any()))
+                .thenReturn(clouderaManagerResourceApi);
+        lenient().when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class)))
+                .thenReturn(hostsResourceApi);
+        lenient().when(clouderaManagerApiFactory.getCdpResourceApi(any(ApiClient.class)))
+                .thenReturn(cdpResourceApi);
+        lenient().doReturn(apiClient)
+                .when(clouderaManagerApiClientProvider).getRootClient(any(Integer.class), anyString(), anyString(), any(HttpClientConfig.class));
+        lenient().doReturn(apiHostList)
+                .when(hostsResourceApi).readHosts(null, null, DataView.SUMMARY.name());
+        lenient().when(apiHostList.getItems())
+                .thenReturn(List.of(apiHost(FQDN)));
+        lenient().when(templatePreparationObject.getGeneralClusterConfigs())
+                .thenReturn(generalClusterConfigs);
+        lenient().when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN())
+                .thenReturn(Optional.of(FQDN));
+        lenient().doReturn(apiRemoteDataContext)
+                .when(cdpResourceApi).postRemoteContext(any(ApiRemoteDataContext.class));
+        lenient().when(apiRemoteDataContext.getEndPointId())
+                .thenReturn("endpoint");
     }
 
     @Test
     void testAutoconfigureWhenItDoesItsJob() throws ApiException {
-        MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any(ApiClient.class)))
-                .thenReturn(mgmtServiceResourceApi);
-
         underTest.autoConfigureClusterManager();
 
         verify(mgmtServiceResourceApi, times(1)).autoConfigure();
@@ -217,9 +272,6 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testAutoconfigureWhenThrowsException() throws ApiException {
-        MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any(ApiClient.class)))
-                .thenReturn(mgmtServiceResourceApi);
         doThrow(ApiException.class).when(mgmtServiceResourceApi).autoConfigure();
 
         assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.autoConfigureClusterManager());
@@ -239,8 +291,6 @@ class ClouderaManagerSetupServiceTest {
     @ValueSource(booleans = {true, false})
     void testPublishPolicyWhenCMVersionHigherThan792(boolean govCloud) throws ApiException {
         ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
 
         underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", govCloud);
 
@@ -255,8 +305,6 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testPublishPolicyWhenCMVersionLowerThan792() throws ApiException, IOException {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
         underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.1\",\"displayName\":\"opdb\"}", true);
 
         verify(clouderaManagerCipherService, never()).getApiConfigEnforcements();
@@ -278,33 +326,9 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void testConfigureManagementServicesWhenApiExceptionHappensThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
         ApiException error = mock(ApiException.class);
-        HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
-        TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
-        String mockSdxContext = JsonUtil.writeValueAsString(new ApiRemoteDataContext());
-        String mockSdxStackCrn = "mockSdxStackCrn";
-        Telemetry telemetry = mock(Telemetry.class);
-        ProxyConfig proxyConfig = mock(ProxyConfig.class);
-        ApiClient apiClient = mock(ApiClient.class);
-        ApiHostList apiHostList = mock(ApiHostList.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-        CdpResourceApi cdpResourceApi = mock(CdpResourceApi.class);
-        ApiRemoteDataContext mockApiRemoteDataContext = mock(ApiRemoteDataContext.class);
 
         when(error.getResponseBody()).thenReturn(null);
         when(error.getMessage()).thenReturn("error");
-        when(mockHostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()))
-                .thenReturn(apiHostList);
-        when(mockTemplatePreparationObject.getGeneralClusterConfigs())
-                .thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN())
-                .thenReturn(Optional.of("fqdn"));
-        when(apiHostList.getItems()).thenReturn(List.of(apiHost("fqdn")));
-        when(clouderaManagerApiClientProvider.getRootClient(any(Integer.class), anyString(), anyString(), any(HttpClientConfig.class)))
-                .thenReturn(apiClient);
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(mockHostsResourceApi);
-        when(clouderaManagerApiFactory.getCdpResourceApi(any(ApiClient.class))).thenReturn(cdpResourceApi);
-        when(cdpResourceApi.postRemoteContext(any(ApiRemoteDataContext.class))).thenReturn(mockApiRemoteDataContext);
-        when(mockApiRemoteDataContext.getEndPointId()).thenReturn("endpoint");
         doThrow(error).when(mgmtSetupService).setupMgmtServices(
                 any(Stack.class),
                 any(ApiClient.class),
@@ -315,49 +339,15 @@ class ClouderaManagerSetupServiceTest {
                 any(ProxyConfig.class)
         );
 
-        ClouderaManagerOperationFailedException actual =
-                assertThrows(ClouderaManagerOperationFailedException.class,
-                        () -> underTest.configureManagementServices(mockTemplatePreparationObject, mockSdxContext, mockSdxStackCrn, telemetry, proxyConfig));
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class, () ->
+                underTest.configureManagementServices(templatePreparationObject, sdxContext(), null, SDX_STACK_CRN, telemetry, proxyConfig));
 
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
-        verify(mgmtSetupService, times(1)).setupMgmtServices(
-                any(Stack.class),
-                any(ApiClient.class),
-                any(ApiHostRef.class),
-                any(Telemetry.class),
-                anyString(),
-                anyString(),
-                any(ProxyConfig.class)
-        );
+        verifySetupMgmtServicesCalledOnce();
     }
 
     @Test
     void testConfigureManagementServicesWhenCManagerOperationFailedExceptionHappensThenShouldThrowCManagerOperationFailedException() throws Exception {
-        HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
-        TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
-        String mockSdxContext = JsonUtil.writeValueAsString(new ApiRemoteDataContext());
-        String mockSdxStackCrn = "mockSdxStackCrn";
-        Telemetry telemetry = mock(Telemetry.class);
-        ProxyConfig proxyConfig = mock(ProxyConfig.class);
-        ApiClient apiClient = mock(ApiClient.class);
-        ApiHostList apiHostList = mock(ApiHostList.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-        CdpResourceApi cdpResourceApi = mock(CdpResourceApi.class);
-        ApiRemoteDataContext mockApiRemoteDataContext = mock(ApiRemoteDataContext.class);
-
-        when(mockHostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()))
-                .thenReturn(apiHostList);
-        when(mockTemplatePreparationObject.getGeneralClusterConfigs())
-                .thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN())
-                .thenReturn(Optional.of("fqdn"));
-        when(apiHostList.getItems()).thenReturn(List.of(apiHost("fqdn")));
-        when(clouderaManagerApiClientProvider.getRootClient(any(Integer.class), anyString(), anyString(), any(HttpClientConfig.class)))
-                .thenReturn(apiClient);
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(mockHostsResourceApi);
-        when(clouderaManagerApiFactory.getCdpResourceApi(any(ApiClient.class))).thenReturn(cdpResourceApi);
-        when(cdpResourceApi.postRemoteContext(any(ApiRemoteDataContext.class))).thenReturn(mockApiRemoteDataContext);
-        when(mockApiRemoteDataContext.getEndPointId()).thenReturn("endpoint");
         doThrow(new ClouderaManagerOperationFailedException("error")).when(mgmtSetupService).setupMgmtServices(
                 any(Stack.class),
                 any(ApiClient.class),
@@ -368,123 +358,96 @@ class ClouderaManagerSetupServiceTest {
                 any(ProxyConfig.class)
         );
 
-        ClouderaManagerOperationFailedException actual =
-                assertThrows(ClouderaManagerOperationFailedException.class,
-                        () -> underTest.configureManagementServices(mockTemplatePreparationObject, mockSdxContext, mockSdxStackCrn, telemetry, proxyConfig));
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class, () ->
+                underTest.configureManagementServices(templatePreparationObject, sdxContext(), null, SDX_STACK_CRN, telemetry, proxyConfig));
 
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
-        verify(mgmtSetupService, times(1)).setupMgmtServices(
-                any(Stack.class),
-                any(ApiClient.class),
-                any(ApiHostRef.class),
-                any(Telemetry.class),
-                anyString(),
-                anyString(),
-                any(ProxyConfig.class)
-        );
+        verifySetupMgmtServicesCalledOnce();
     }
 
     @Test
     void testConfigureManagementServicesWhenThePrimaryGatewayInstanceDiscoveryFQDNIsPresentedOnCMSideShoudCallSetupMgmtServices() throws Exception {
-        HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
-        TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
-        String mockSdxContext = JsonUtil.writeValueAsString(new ApiRemoteDataContext());
-        String mockSdxStackCrn = "mockSdxStackCrn";
-        Telemetry telemetry = mock(Telemetry.class);
-        ProxyConfig proxyConfig = mock(ProxyConfig.class);
-        ApiClient apiClient = mock(ApiClient.class);
-        ApiHostList apiHostList = mock(ApiHostList.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-        CdpResourceApi cdpResourceApi = mock(CdpResourceApi.class);
-        ApiRemoteDataContext mockApiRemoteDataContext = mock(ApiRemoteDataContext.class);
+        underTest.configureManagementServices(templatePreparationObject, sdxContext(), null, SDX_STACK_CRN, telemetry, proxyConfig);
 
+        verifySetupMgmtServicesCalledOnce();
+        verify(clouderaManagerApiFactory, never()).getClouderaManagerResourceApi(any());
+    }
 
-        when(mockHostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()))
-                .thenReturn(apiHostList);
-        when(mockTemplatePreparationObject.getGeneralClusterConfigs())
-                .thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN())
-                .thenReturn(Optional.of("fqdn"));
-        when(apiHostList.getItems()).thenReturn(List.of(apiHost("fqdn")));
-        when(clouderaManagerApiClientProvider.getRootClient(any(Integer.class), anyString(), anyString(), any(HttpClientConfig.class)))
-                .thenReturn(apiClient);
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(mockHostsResourceApi);
-        when(clouderaManagerApiFactory.getCdpResourceApi(any(ApiClient.class))).thenReturn(cdpResourceApi);
-        when(cdpResourceApi.postRemoteContext(any(ApiRemoteDataContext.class))).thenReturn(mockApiRemoteDataContext);
-        when(mockApiRemoteDataContext.getEndPointId()).thenReturn("endpoint");
-        doNothing().when(mgmtSetupService).setupMgmtServices(
-                any(Stack.class),
-                any(ApiClient.class),
-                any(ApiHostRef.class),
-                any(Telemetry.class),
-                anyString(),
-                anyString(),
-                any(ProxyConfig.class)
-        );
+    @Test
+    void testConfigureManagementServicesSuccessWhenCaCertsArePresent() throws Exception {
+        String caCerts = "---certs---";
+        ArgumentCaptor<ApiUpdateGlobalTruststoreArguments> requestCaptor = ArgumentCaptor.forClass(ApiUpdateGlobalTruststoreArguments.class);
 
-        underTest.configureManagementServices(mockTemplatePreparationObject, mockSdxContext, mockSdxStackCrn, telemetry, proxyConfig);
+        when(clouderaManagerResourceApi.updateGlobalTruststore(any())).thenReturn(mock());
+        ExtendedPollingResult pollingResult = mock();
+        when(pollingResult.isSuccess()).thenReturn(true);
+        when(clouderaManagerPollingServiceProvider.startDefaultPolling(any(), any(), any(), any())).thenReturn(pollingResult);
 
-        verify(mgmtSetupService, times(1)).setupMgmtServices(
-                any(Stack.class),
-                any(ApiClient.class),
-                any(ApiHostRef.class),
-                any(Telemetry.class),
-                anyString(),
-                anyString(),
-                any(ProxyConfig.class)
-        );
+        underTest.configureManagementServices(templatePreparationObject, sdxContext(), caCerts, SDX_STACK_CRN, telemetry, proxyConfig);
+
+        verifySetupMgmtServicesCalledOnce();
+        verify(clouderaManagerResourceApi).updateGlobalTruststore(requestCaptor.capture());
+        assertEquals(caCerts, requestCaptor.getValue().getNewCertContent());
+    }
+
+    @Test
+    void testConfigureManagementServicesExitedWhenCaCertsArePresent() throws Exception {
+        String caCerts = "---certs---";
+
+        when(clouderaManagerResourceApi.updateGlobalTruststore(any())).thenReturn(mock());
+        ExtendedPollingResult pollingResult = mock();
+        when(pollingResult.isExited()).thenReturn(true);
+        when(clouderaManagerPollingServiceProvider.startDefaultPolling(any(), any(), any(), any())).thenReturn(pollingResult);
+
+        assertThrows(CancellationException.class,
+                () -> underTest.configureManagementServices(templatePreparationObject, sdxContext(), caCerts, SDX_STACK_CRN, telemetry, proxyConfig));
+    }
+
+    @Test
+    void testConfigureManagementServicesCallFailedWhenCaCertsArePresent() throws Exception {
+        String caCerts = "---certs---";
+
+        ApiException exception = mock();
+        when(exception.getResponseBody()).thenReturn("{\"message\": \"failed\"}");
+        when(clouderaManagerResourceApi.updateGlobalTruststore(any())).thenThrow(exception);
+
+        ClouderaManagerOperationFailedException clouderaManagerOperationFailedException = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.configureManagementServices(templatePreparationObject, sdxContext(), caCerts, SDX_STACK_CRN, telemetry, proxyConfig));
+
+        assertEquals(exception, clouderaManagerOperationFailedException.getCause());
+        assertEquals("Error while updating global truststore: failed", clouderaManagerOperationFailedException.getMessage());
+    }
+
+    @Test
+    void testConfigureManagementServicesPollingFailedWhenCaCertsArePresent() throws Exception {
+        String caCerts = "---certs---";
+
+        when(clouderaManagerResourceApi.updateGlobalTruststore(any())).thenReturn(mock());
+        ExtendedPollingResult pollingResult = mock();
+        ClouderaManagerOperationFailedException exception = new ClouderaManagerOperationFailedException("error");
+        when(pollingResult.getException()).thenReturn(exception);
+        when(clouderaManagerPollingServiceProvider.startDefaultPolling(any(), any(), any(), any())).thenReturn(pollingResult);
+
+        ClouderaManagerOperationFailedException clouderaManagerOperationFailedException = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.configureManagementServices(templatePreparationObject, sdxContext(), caCerts, SDX_STACK_CRN, telemetry, proxyConfig));
+
+        assertEquals(exception, clouderaManagerOperationFailedException.getCause());
     }
 
     @Test
     void testConfigureManagementServicesWhenThePrimaryGatewayInstanceDiscoveryFQDNIsNOTPresentedOnCMSideShoudNOTCallSetupMgmtServices() throws Exception {
-        HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
-        TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
-        String mockSdxContext = JsonUtil.writeValueAsString(new ApiRemoteDataContext());
-        String mockSdxStackCrn = "mockSdxStackCrn";
-        Telemetry telemetry = mock(Telemetry.class);
-        ProxyConfig proxyConfig = mock(ProxyConfig.class);
-        ApiClient apiClient = mock(ApiClient.class);
-        ApiHostList apiHostList = mock(ApiHostList.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-        CdpResourceApi cdpResourceApi = mock(CdpResourceApi.class);
-        ApiRemoteDataContext mockApiRemoteDataContext = mock(ApiRemoteDataContext.class);
+        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn1"));
 
+        underTest.configureManagementServices(templatePreparationObject, sdxContext(), null, SDX_STACK_CRN, telemetry, proxyConfig);
 
-        when(mockHostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()))
-                .thenReturn(apiHostList);
-        when(mockTemplatePreparationObject.getGeneralClusterConfigs())
-                .thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN())
-                .thenReturn(Optional.of("fqdn1"));
-        when(apiHostList.getItems()).thenReturn(List.of(apiHost("fqdn")));
-        when(clouderaManagerApiClientProvider.getRootClient(any(Integer.class), anyString(), anyString(), any(HttpClientConfig.class)))
-                .thenReturn(apiClient);
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(mockHostsResourceApi);
-        when(clouderaManagerApiFactory.getCdpResourceApi(any(ApiClient.class))).thenReturn(cdpResourceApi);
-        when(cdpResourceApi.postRemoteContext(any(ApiRemoteDataContext.class))).thenReturn(mockApiRemoteDataContext);
-        when(mockApiRemoteDataContext.getEndPointId()).thenReturn("endpoint");
-
-        underTest.configureManagementServices(mockTemplatePreparationObject, mockSdxContext, mockSdxStackCrn, telemetry, proxyConfig);
-
-        verify(mgmtSetupService, times(0)).setupMgmtServices(
-                any(Stack.class),
-                any(ApiClient.class),
-                any(ApiHostRef.class),
-                any(Telemetry.class),
-                anyString(),
-                anyString(),
-                any(ProxyConfig.class)
-        );
+        verifySetupMgmtServicesCalled(never());
     }
 
     @Test
     void testConfigureKerberosWhenCMVersionIsLowerThen630ShouldCallConfigureKerberos() throws Exception {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("6.2.0");
 
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("6.2.0"));
         doNothing().when(kerberosService)
                 .configureKerberosViaApi(
                         any(ApiClient.class),
@@ -506,11 +469,8 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void testConfigureKerberosWhenCMVersionIsHigherThen630ShouldCallConfigureKerberos() throws Exception {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("6.5.0");
 
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("6.5.0"));
 
         underTest.configureKerberos(kerberosConfig);
 
@@ -526,13 +486,10 @@ class ClouderaManagerSetupServiceTest {
     void testConfigureKerberosWhenThrowApiExceptionThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
         ApiException error = mock(ApiException.class);
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("6.2.0");
 
         when(error.getResponseBody()).thenReturn(null);
         when(error.getMessage()).thenReturn("error");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("6.2.0"));
         doThrow(error).when(kerberosService)
                 .configureKerberosViaApi(
                         any(ApiClient.class),
@@ -558,10 +515,7 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void testConfigureKerberosWhenThrowClouderaManagerOperationFailedExceptionThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("6.2.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("6.2.0"));
         doThrow(new ClouderaManagerOperationFailedException("error")).when(kerberosService)
                 .configureKerberosViaApi(
                         any(ApiClient.class),
@@ -584,10 +538,6 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testUpdateConfigWhenUpdateConfigShouldCall() throws Exception {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
                 .thenReturn(new ApiConfigList());
 
@@ -600,15 +550,10 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testUpdateConfigWhenUpdateConfigWithDmpEntitlement() throws Exception {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
         lenient().when(entitlementService.isObservabilityDmpEnabled(any())).thenReturn(true);
         lenient().when(entitlementService.isObservabilityRealTimeJobsEnabled(any())).thenReturn(true);
         lenient().when(entitlementService.isObservabilitySaasPremiumEnabled(any())).thenReturn(false);
         lenient().when(entitlementService.isObservabilitySaasTrialEnabled(any())).thenReturn(false);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
                 .thenReturn(new ApiConfigList());
 
@@ -622,15 +567,10 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testUpdateConfigWhenUpdateConfigWithAllObservabilityEntitlement() throws Exception {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
         lenient().when(entitlementService.isObservabilityDmpEnabled(any())).thenReturn(true);
         lenient().when(entitlementService.isObservabilityRealTimeJobsEnabled(any())).thenReturn(true);
         lenient().when(entitlementService.isObservabilitySaasPremiumEnabled(any())).thenReturn(true);
         lenient().when(entitlementService.isObservabilitySaasTrialEnabled(any())).thenReturn(true);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
                 .thenReturn(new ApiConfigList());
 
@@ -645,13 +585,9 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void testUpdateConfigWhenThrowApiExceptionThenThrowClouderaManagerOperationFailedException() throws Exception {
         ApiException error = mock(ApiException.class);
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         when(error.getResponseBody()).thenReturn(null);
         when(error.getMessage()).thenReturn("error");
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         doThrow(error).when(clouderaManagerResourceApi).updateConfig(any(ApiConfigList.class), anyString());
 
         ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
@@ -666,8 +602,6 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testUpdateConfigDisablesFasterFirstRunWhenRazEnabledDatalakeWithoutHdfs() throws Exception {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
         Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
         cluster.setRangerRazEnabled(true);
@@ -686,8 +620,6 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testUpdateConfigDoesNotDisableFasterFirstRunWhenRazDisabled() throws Exception {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
         Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
         cluster.setRangerRazEnabled(false);
@@ -702,8 +634,6 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testUpdateConfigDoesNotDisableFasterFirstRunWhenHdfsPresent() throws Exception {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
         Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
         cluster.setRangerRazEnabled(true);
@@ -722,13 +652,8 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testUpdateConfigWhenThrowClouderaManagerOperationFailedExceptionThenThrowClouderaManagerOperationFailedException() throws Exception {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         doThrow(new ClouderaManagerOperationFailedException("error"))
                 .when(clouderaManagerResourceApi).updateConfig(any(ApiConfigList.class), anyString());
-
 
         ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.updateConfig());
@@ -743,12 +668,10 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void testRefreshParcelReposWithPreWarmedImageShouldCallStartPollingCmParcelRepositoryRefresh() throws Exception {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
         ApiCommand apiCommand = mock(ApiCommand.class);
 
         when(clouderaManagerRepo.getPredefined()).thenReturn(true);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
         when(apiCommand.getId()).thenReturn(1L);
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(apiCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(
@@ -798,8 +721,6 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testWaitForHostsWhenEverythingFineShouldCmHostStatus() throws Exception {
-        ApiClient apiClient = mock(ApiClient.class);
-
         when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class)))
                 .thenReturn(apiClient);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(any(Stack.class), any(ApiClient.class), anyList()))
@@ -908,22 +829,9 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testConfigureSupportTagsWhenCmHostPresentedShouldEverythingWorks() throws ApiException {
-        HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
-        ApiHostList apiHostList = mock(ApiHostList.class);
-        TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-
-        when(mockTemplatePreparationObject.getGeneralClusterConfigs())
-                .thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN())
-                .thenReturn(Optional.of("fqdn"));
-        when(apiHostList.getItems()).thenReturn(List.of(apiHost("fqdn")));
-        when(mockHostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()))
-                .thenReturn(apiHostList);
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(mockHostsResourceApi);
         doNothing().when(clouderaManagerSupportSetupService).prepareSupportRole(any(ApiClient.class), any(StackType.class));
 
-        underTest.configureSupportTags(mockTemplatePreparationObject);
+        underTest.configureSupportTags(templatePreparationObject);
 
         verify(clouderaManagerSupportSetupService, times(1)).prepareSupportRole(
                 any(ApiClient.class),
@@ -933,24 +841,11 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testConfigureSupportTagsWhenThrowCManagerOperationFailedExceptionShouldThrowCManagerOperationFailedException() throws ApiException {
-        HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
-        ApiHostList apiHostList = mock(ApiHostList.class);
-        TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-
-        when(mockTemplatePreparationObject.getGeneralClusterConfigs())
-                .thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN())
-                .thenReturn(Optional.of("fqdn"));
-        when(apiHostList.getItems()).thenReturn(List.of(apiHost("fqdn")));
-        when(mockHostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()))
-                .thenReturn(apiHostList);
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(mockHostsResourceApi);
         doThrow(new ClouderaManagerOperationFailedException("error")).when(clouderaManagerSupportSetupService)
                 .prepareSupportRole(any(ApiClient.class), any(StackType.class));
 
         ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
-                () -> underTest.configureSupportTags(mockTemplatePreparationObject));
+                () -> underTest.configureSupportTags(templatePreparationObject));
 
         verify(clouderaManagerSupportSetupService, times(1)).prepareSupportRole(
                 any(ApiClient.class),
@@ -961,17 +856,9 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineButNoProxyHostBecauseOfVersion() throws ApiException {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
                 .thenReturn(new ApiConfigList());
-
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("7.1.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("7.1.0"));
 
         underTest.setupProxy(testProxyConfig());
 
@@ -998,17 +885,9 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineWithNoProxyHost() throws ApiException {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
                 .thenReturn(new ApiConfigList());
-
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("7.6.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("7.6.0"));
 
         underTest.setupProxy(testProxyConfig());
 
@@ -1036,17 +915,9 @@ class ClouderaManagerSetupServiceTest {
 
     @Test
     void testSetupProxyWhenProxyConfigIsNull() throws ApiException {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
                 .thenReturn(new ApiConfigList());
-
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("7.6.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("7.6.0"));
 
         underTest.setupProxy(null);
 
@@ -1075,16 +946,9 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void testSetupProxyWhenProxysetupThrowApiExceptionShouldThrowClouderaManagerOperationFailedException() throws ApiException {
         ApiException error = mock(ApiException.class);
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         doThrow(error).when(clouderaManagerResourceApi).updateConfig(any(ApiConfigList.class), anyString());
-
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("7.1.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("7.1.0"));
 
         ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.setupProxy(testProxyConfig()));
@@ -1117,20 +981,14 @@ class ClouderaManagerSetupServiceTest {
         ApiCommand apiCommand = mock(ApiCommand.class);
         ApiCluster apiCluster = mock(ApiCluster.class);
         ClusterCommand clusterCommand = mock(ClusterCommand.class);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("6.2.0");
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("6.2.0"));
         when(clouderaManagerApiFactory.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
         when(clustersResourceApi.readCluster(anyString(), anyString())).thenReturn(apiCluster);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
                 .thenReturn(Optional.empty());
         when(apiCommand.getId()).thenReturn(1L);
         when(clusterCommand.getCommandId()).thenReturn(1L);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.importClusterTemplate(any(ApiClusterTemplate.class), anyBoolean())).thenReturn(apiCommand);
         when(clusterCommandService.save(any(ClusterCommand.class))).thenReturn(clusterCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(any(Stack.class), any(ApiClient.class), any(Long.class)))
@@ -1149,12 +1007,8 @@ class ClouderaManagerSetupServiceTest {
         ApiCommand apiCommand = mock(ApiCommand.class);
         ApiCluster apiCluster = mock(ApiCluster.class);
         ClusterCommand clusterCommand = mock(ClusterCommand.class);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("6.2.0");
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("6.2.0"));
         when(clouderaManagerApiFactory.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
         when(clustersResourceApi.readCluster(anyString(), anyString())).thenReturn(apiCluster);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
@@ -1179,12 +1033,8 @@ class ClouderaManagerSetupServiceTest {
         ApiCommand apiCommand = mock(ApiCommand.class);
         ApiCluster apiCluster = mock(ApiCluster.class);
         ClusterCommand clusterCommand = mock(ClusterCommand.class);
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("6.2.0");
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(cmRepo("6.2.0"));
         when(clouderaManagerApiFactory.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
         when(clustersResourceApi.readCluster(anyString(), anyString())).thenReturn(apiCluster);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
@@ -1210,70 +1060,48 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void getCMHosFromMGMTWithEnterpiseDL() throws ApiException, IOException {
         ClouderaManagerSetupService spy = spy(underTest);
-
-        ApiHostList apiHostList = getApiHostList();
-
-        String template = FileReaderUtils.readFileFromPath(Path.of("../core/src/main/resources/defaults/blueprints/7.2.17/cdp-sdx-enterprise.bp"));
-
-        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
+        ApiHostList realApiHostList = getApiHostList();
         BlueprintView blueprintView = mock(BlueprintView.class);
-        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
-        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
-        doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
+
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
+
         verify(spy, times(1)).getAuxiliaryHost(any(), any());
     }
 
     @Test
     void getCMHosFromMGMTWithEnterpiseDLHostNotFound() throws ApiException, IOException {
         ClouderaManagerSetupService spy = spy(underTest);
-
-        ApiHostList apiHostList = getApiHostList();
-        apiHostList.getItems().clear();
-
-        String template = FileReaderUtils.readFileFromPath(Path.of("../core/src/main/resources/defaults/blueprints/7.2.17/cdp-sdx-enterprise.bp"));
-
-        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
+        ApiHostList realApiHostList = getApiHostList();
+        realApiHostList.getItems().clear();
         BlueprintView blueprintView = mock(BlueprintView.class);
-        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getVersion()).thenReturn("7.2.17");
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
-        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
         when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
 
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
 
         verify(spy, times(1)).getAuxiliaryHost(any(), any());
-        verify(mgmtSetupService, times(0)).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
+        verifySetupMgmtServicesCalled(never());
     }
 
     @Test
     void getCMHosFromMGMTWithEnterpiseDH() throws ApiException {
         ClouderaManagerSetupService spy = spy(underTest);
-
-        ApiHostList apiHostList = getApiHostList();
-
-        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        ApiHostList realApiHostList = getApiHostList();
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
-        when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn"));
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
-        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
-        doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
 
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
 
         verify(spy, times(0)).getAuxiliaryHost(any(), any());
     }
@@ -1281,28 +1109,44 @@ class ClouderaManagerSetupServiceTest {
     @Test
     void getCMHosFromMGMTWithEnterpiseOldVersonDL() throws ApiException, IOException {
         ClouderaManagerSetupService spy = spy(underTest);
-
-        ApiHostList apiHostList = getApiHostList();
-
-        String template = FileReaderUtils.readFileFromPath(Path.of("../datalake/src/main/resources/duties/7.2.16/aws/medium_duty_ha.json"));
-
-        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
+        ApiHostList realApiHostList = getApiHostList();
         BlueprintView blueprintView = mock(BlueprintView.class);
-        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
-        when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn"));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getVersion()).thenReturn("7.2.17");
-        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
-        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
-        doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
         when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(false);
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
 
         verify(spy, times(0)).getAuxiliaryHost(any(), any());
+    }
+
+    private void verifySetupMgmtServicesCalledOnce() throws ApiException {
+        verifySetupMgmtServicesCalled(times(1));
+    }
+
+    private void verifySetupMgmtServicesCalled(org.mockito.verification.VerificationMode mode) throws ApiException {
+        verify(mgmtSetupService, mode).setupMgmtServices(
+                any(Stack.class),
+                any(ApiClient.class),
+                any(ApiHostRef.class),
+                any(Telemetry.class),
+                anyString(),
+                anyString(),
+                any(ProxyConfig.class)
+        );
+    }
+
+    private String sdxContext() throws IOException {
+        return JsonUtil.writeValueAsString(new ApiRemoteDataContext());
+    }
+
+    private ClouderaManagerRepo cmRepo(String version) {
+        ClouderaManagerRepo repo = new ClouderaManagerRepo();
+        repo.setVersion(version);
+        return repo;
     }
 
     private ApiHostList getApiHostList() {

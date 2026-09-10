@@ -32,6 +32,7 @@ public interface ClusterSetupService {
 
     void configureManagementServices(TemplatePreparationObject templatePreparationObject,
         String sdxContext,
+        String caCerts,
         String sdxStackCrn,
         Telemetry telemetry,
         ProxyConfig proxyConfig);

@@ -185,14 +185,15 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
 
     @Override
     public Optional<String> getCACertsForEnvironment(String environmentCrn) {
-        String pvcCrn = getPrivateCloudEnvCrn(environmentCrn).orElse(null);
+        Optional<String> pvcCrn = getPrivateCloudEnvCrn(environmentCrn);
         try {
-            GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(pvcCrn);
-            return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
+            return pvcCrn
+                    .map(getRemoteEnvironmentEndPoint()::getRootCertificateByCrn)
+                    .map(GetRootCertificateResponse::getContents);
         } catch (RuntimeException exception) {
             String message = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
             LOGGER.error("Not able to fetch CA certs for PDL {}: {}.", pvcCrn, message, exception);
-            throw new RuntimeException(String.format("Not able to fetch CA certs for PDL %s: %s", pvcCrn, message), exception);
+            throw new RuntimeException(String.format("Not able to fetch CA certs for PDL %s: %s", pvcCrn.orElse(null), message), exception);
         }
     }
 
