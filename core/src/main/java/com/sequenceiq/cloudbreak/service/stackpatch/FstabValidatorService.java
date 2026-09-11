@@ -56,6 +56,8 @@ public class FstabValidatorService extends ExistingStackPatchService {
     @Override
     public boolean isAffected(Stack stack) {
         if (!stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)) {
+            LOGGER.warn("Fstab validation stack patch will be skipped for {} stack, because its status is not valid or not all nodes are reachable, status: {}",
+                    stack.getName(), stack.getStatus());
             throw new CloudbreakServiceException("The stack is not in a valid state to start disk stack patch!");
         }
         boolean affected = false;

@@ -935,6 +935,8 @@ existing-stack-patcher:
     aws-gp2-to-gp3-migration:
       enabled: false
       entitlement: GP2_TO_GP3_MIGRATION
+    minifi-retry-config-fix:
+      enabled: false
 
 dynamic-entitlement:
   entitlements:

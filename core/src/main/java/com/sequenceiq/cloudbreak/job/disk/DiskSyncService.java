@@ -69,6 +69,8 @@ public class DiskSyncService {
         DetailedStackStatus stackStatus = stack.getDetailedStatus();
         try {
             if (!stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)) {
+                LOGGER.warn("Disk sync will be skipped for {} stack, because its status is not valid or not all nodes are reachable, status: {}",
+                        stack.getName(), stack.getStatus());
                 throw new CloudbreakServiceException("The stack is either not in a valid state or not all nodes or reachable for disk sync to run!");
             }
             boolean alreadyReported = stackDto.getStack().getProviderSyncStates().contains(ProviderSyncState.DISK_MISMATCH_FOUND);
