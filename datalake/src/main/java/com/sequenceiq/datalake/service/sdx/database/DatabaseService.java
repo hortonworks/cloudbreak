@@ -297,10 +297,7 @@ public class DatabaseService {
         }
 
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
-        req.setInstanceType(attributes.containsKey(INSTANCE_TYPE) ? attributes.get(INSTANCE_TYPE).toString() : instanceType);
-        if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(env.getAccountId())) {
-            req.setFallbackInstanceTypes(fallbackInstanceTypes);
-        }
+        setInstanceTypeAndFallback(req, attributes, instanceType, fallbackInstanceTypes, env);
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(attributes.containsKey(STORAGE) ? Long.parseLong(attributes.get(STORAGE).toString()) : storageSize);
         databaseServerParameterSetter.setParameters(req, sdxCluster, env, initiatorUserCrn);
@@ -309,6 +306,29 @@ public class DatabaseService {
         LOGGER.info("Database requested parameters {}", req);
 
         return req;
+    }
+
+    private void setInstanceTypeAndFallback(DatabaseServerV4StackRequest req, Map<String, Object> attributes, String instanceType,
+            List<String> fallbackInstanceTypes, DetailedEnvironmentResponse env) {
+        String requestedInstanceType = attributes.containsKey(INSTANCE_TYPE) ? attributes.get(INSTANCE_TYPE).toString() : null;
+        if (requestedInstanceType != null && entitlementService.isCustomDatabaseInstanceTypeEnabled(env.getAccountId())) {
+            LOGGER.info("Using customer-requested database instance type '{}'; skipping fallback instance types", requestedInstanceType);
+            req.setInstanceType(requestedInstanceType);
+        } else {
+            setDefaultInstanceTypeAndFallback(req, requestedInstanceType, instanceType, fallbackInstanceTypes, env);
+        }
+    }
+
+    private void setDefaultInstanceTypeAndFallback(DatabaseServerV4StackRequest req, String requestedInstanceType, String instanceType,
+            List<String> fallbackInstanceTypes, DetailedEnvironmentResponse env) {
+        if (requestedInstanceType != null) {
+            LOGGER.info("Ignoring customer-requested database instance type '{}': custom database instance type entitlement not granted; "
+                    + "using default '{}'", requestedInstanceType, instanceType);
+        }
+        req.setInstanceType(instanceType);
+        if (entitlementService.isFallbackDatabaseInstanceTypeEnabled(env.getAccountId())) {
+            req.setFallbackInstanceTypes(fallbackInstanceTypes);
+        }
     }
 
     private void sendArmDatabaseNotAvailableNotification(SdxCluster sdxCluster, String initiatorUserCrn, String region) {

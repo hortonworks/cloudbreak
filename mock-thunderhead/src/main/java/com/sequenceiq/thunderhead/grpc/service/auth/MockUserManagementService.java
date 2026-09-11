@@ -49,6 +49,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK_HOSTS_REMOVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CUSTOM_DATABASE_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_FORCE_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
@@ -1041,6 +1042,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, true, CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION);
         addEntitlement(builder, accountId, true, CDP_FALLBACK_INSTANCETYPE);
         addEntitlement(builder, accountId, true, CDP_FALLBACK_DATABASE_INSTANCETYPE);
+        addEntitlement(builder, accountId, true, CDP_CUSTOM_DATABASE_INSTANCETYPE);
 
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
