@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.not;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -140,7 +139,8 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 CompressUtil.compressDirectoryToTarGz(reportDir);
                 FileUtils.deleteDirectory(reportDir.toFile());
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                LOGGER.warn("Error during compression of SELinux report directory. " +
+                        "(Possibly race-condition on the deletion of the report directory after compression.)", e);
             }
         } else {
             LOGGER.info("There was no SELinux report directory to compress.");
