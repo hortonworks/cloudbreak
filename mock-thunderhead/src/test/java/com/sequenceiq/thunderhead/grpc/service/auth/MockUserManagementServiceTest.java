@@ -240,7 +240,7 @@ class MockUserManagementServiceTest {
             assertThat(res).isNotNull();
             assertThat(res.getPasswordHash()).isNotNull();
             assertThat(res.getKerberosKeysList()).isNotNull();
-            assertThat(res.getKerberosKeysList().size()).isEqualTo(2);
+            assertThat(res.getKerberosKeysList().size()).isEqualTo(3);
             assertThat(res.getPasswordHashExpirationDate() > currentTime).isTrue();
             assertThat(res.getSshPublicKeyCount()).isEqualTo(1);
             assertThat(res.getSshPublicKey(0).getPublicKey()).isEqualTo(SAMPLE_SSH_PUBLIC_KEY);

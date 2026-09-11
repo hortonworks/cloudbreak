@@ -1,3 +1,5 @@
+{%- from 'java/settings.sls' import java with context %}
+
 /opt/salt/scripts/cmca_renewal.sh:
   file.managed:
     - makedirs: True
@@ -5,6 +7,8 @@
     - source: salt://cloudera/manager/scripts/cmca_renewal.sh
     - template: jinja
     - replace: True
+    - context:
+        java: {{ java }}
 
 renew-cmca:
   cmd.run:

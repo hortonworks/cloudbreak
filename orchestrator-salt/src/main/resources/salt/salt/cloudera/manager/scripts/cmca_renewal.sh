@@ -20,16 +20,30 @@ if [ -n "$LOADBALANCER_SAN" ]; then
   ALTNAME+="--altname ${LOADBALANCER_SAN} "
 fi
 OVERRIDES="--override ca_dn=CN=${HOSTNAME} "
+KEYTOOL_EXTRA_ARGS=""
+FIPS_ENABLED_ARGS=""
 {% if gov_cloud == True %}
+{% if java.java_version == "8" %}
   OVERRIDES+="--override keystore_type=BCFKS "
+{%- elif java.java_version == "17" %}
+  # On JDK 17+ under FIPS, certmanager must forward module-access flags to both
+  # the java launcher (JDK_JAVA_OPTIONS, for the BCFKSTool path) and to keytool
+  # (KEYTOOL_EXTRA_ARGS, -J-prefixed, for the truststore build), and it needs the
+  # BouncyCastle FIPS provider (ccj.jar). Mirror setup-autotls.sh.j2 so renewal
+  # builds the BCFKS truststore the same way initial provisioning does.
+  export JDK_JAVA_OPTIONS+=" --add-opens java.base/sun.security.internal.spec=ALL-UNNAMED --add-opens java.base/sun.security.provider=ALL-UNNAMED --add-exports java.base/sun.security.provider=ALL-UNNAMED"
+  OVERRIDES+=" --override keystore_type=BCFKS "
+  KEYTOOL_EXTRA_ARGS+=" -storetype BCFKS -J--add-exports=java.base/sun.security.provider=ALL-UNNAMED -J--add-opens=java.base/sun.security.provider=ALL-UNNAMED -providerclass {{ java.security_providerclass }} -providerpath {{ java.jre_ext_path }}/ccj.jar"
+  FIPS_ENABLED_ARGS=true
+{% endif %}
 {% endif %}
 
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Generating new CMCA."
 mv ${CERTMANAGER_DIR} ${CERTMANAGER_DIR}_bkp_$(date '+%d%m%Y%H%M%S')
-/opt/cloudera/cm-agent/bin/certmanager --location ${CERTMANAGER_DIR} setup --skip-invalid-ca-certs --configure-services ${CERTMANAGER_ARGS} ${OVERRIDES} --stop-at-csr ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
+KEYTOOL_EXTRA_ARGS="${KEYTOOL_EXTRA_ARGS}" FIPS_ENABLED=${FIPS_ENABLED_ARGS} /opt/cloudera/cm-agent/bin/certmanager --location ${CERTMANAGER_DIR} setup --skip-invalid-ca-certs --configure-services ${CERTMANAGER_ARGS} ${OVERRIDES} --stop-at-csr ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
 kinit -kt ${CM_KEYTAB_FILE} ${CM_PRINCIPAL}
 /opt/cloudera/cm/bin/generate_intermediate_ca_ipa.sh ${CM_PRINCIPAL} ${CERTMANAGER_DIR}/CMCA/private/ca_csr.pem ${OUT_FILE}
-/opt/cloudera/cm-agent/bin/certmanager --location ${CERTMANAGER_DIR} setup --skip-invalid-ca-certs --configure-services ${CERTMANAGER_ARGS} ${OVERRIDES} --signed-ca-cert=${OUT_FILE} --skip-cm-init ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem > ${CERTMANAGER_DIR}/auto-tls.init.txt
+KEYTOOL_EXTRA_ARGS="${KEYTOOL_EXTRA_ARGS}" FIPS_ENABLED=${FIPS_ENABLED_ARGS} /opt/cloudera/cm-agent/bin/certmanager --location ${CERTMANAGER_DIR} setup --skip-invalid-ca-certs --configure-services ${CERTMANAGER_ARGS} ${OVERRIDES} --signed-ca-cert=${OUT_FILE} --skip-cm-init ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem > ${CERTMANAGER_DIR}/auto-tls.init.txt
 
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Updating cm.settings."
 AUTO_TLS_INIT_FILE=${CERTMANAGER_DIR}/auto-tls.init.txt
