@@ -443,7 +443,8 @@
       "zones": [
         "eu-west-2a",
         "eu-west-2b",
-        "eu-west-2c"
+        "eu-west-2c",
+        "eu-west-2d"
       ],
       "defaultVmtypes": {
         "database": {
