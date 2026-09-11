@@ -463,6 +463,24 @@ public class AwsPlatformResourcesTest {
     }
 
     @Test
+    public void getSubnetsInUnsupportedAvailabilityZonesShouldReturnRequestedSubnetsOutsideAllowlistAndIgnoreUnknownIds() {
+        // The request is filtered by vpc-id, so AWS returns only the VPC's subnets. A non-existent requested ID (subnet-unknown) must not be
+        // classified and must not fail the call, unlike passing it directly to DescribeSubnets.
+        DescribeSubnetsResponse subnets = DescribeSubnetsResponse.builder()
+                .subnets(List.of(
+                        Subnet.builder().subnetId("subnet-supported").vpcId("vpc-1").availabilityZone(AZ_NAME).build(),
+                        Subnet.builder().subnetId("subnet-unsupported").vpcId("vpc-1").availabilityZone(NOT_ENABLED_AZ_NAME).build(),
+                        Subnet.builder().subnetId("subnet-not-requested").vpcId("vpc-1").availabilityZone(NOT_ENABLED_AZ_NAME).build()))
+                .build();
+        when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
+
+        Map<String, String> unsupportedSubnets = underTest.getSubnetsInUnsupportedAvailabilityZones(cloudCredential, region, "vpc-1",
+                List.of("subnet-supported", "subnet-unsupported", "subnet-unknown"));
+
+        assertThat(unsupportedSubnets).containsExactly(Map.entry("subnet-unsupported", NOT_ENABLED_AZ_NAME));
+    }
+
+    @Test
     public void networksSubnetsShouldBeFilteredByEnabledRegionsAndNotCdpTrialAccount() {
         DescribeRouteTablesResponse routeTables = DescribeRouteTablesResponse.builder().build();
         when(amazonEC2Client.describeRouteTables(any())).thenReturn(routeTables);

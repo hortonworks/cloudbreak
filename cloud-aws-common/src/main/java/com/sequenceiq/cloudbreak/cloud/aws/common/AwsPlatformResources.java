@@ -448,6 +448,32 @@ public class AwsPlatformResources implements PlatformResources {
         return awsSubnets;
     }
 
+    public Map<String, String> getSubnetsInUnsupportedAvailabilityZones(ExtendedCloudCredential cloudCredential, Region region,
+            String vpcId, Collection<String> subnetIds) {
+        if (CollectionUtils.isEmpty(subnetIds)) {
+            return Map.of();
+        }
+        // Filter by VPC rather than passing the subnet IDs explicitly: DescribeSubnets fails the whole request with InvalidSubnetID.NotFound
+        // if any requested ID does not exist, and this method is called exactly with the subnet IDs that could not be resolved (which may include
+        // genuinely non-existent ones). Fetching the VPC's subnets and intersecting locally keeps unknown IDs from turning validation into an error.
+        Set<String> requestedSubnetIds = new HashSet<>(subnetIds);
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
+        Map<String, String> unsupportedSubnets = new HashMap<>();
+        DescribeSubnetsResponse describeSubnetsResponse = null;
+        do {
+            DescribeSubnetsRequest describeSubnetsRequest = DescribeSubnetsRequest.builder()
+                    .filters(Filter.builder().name("vpc-id").values(vpcId).build())
+                    .nextToken(describeSubnetsResponse == null ? null : describeSubnetsResponse.nextToken())
+                    .build();
+            describeSubnetsResponse = ec2Client.describeSubnets(describeSubnetsRequest);
+            describeSubnetsResponse.subnets().stream()
+                    .filter(subnet -> requestedSubnetIds.contains(subnet.subnetId()))
+                    .filter(subnet -> !enabledAvailabilityZones.contains(availabilityZone(subnet.availabilityZone())))
+                    .forEach(subnet -> unsupportedSubnets.put(subnet.subnetId(), subnet.availabilityZone()));
+        } while (!isEmpty(describeSubnetsResponse.nextToken()));
+        return unsupportedSubnets;
+    }
+
     private List<VpcEndpoint> getVpcEndpoints(AmazonEc2Client ec2Client, Vpc vpc) {
         DescribeVpcEndpointsRequest vpcEndpointsRequest = DescribeVpcEndpointsRequest.builder()
                 .filters(Filter.builder()

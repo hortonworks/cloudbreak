@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -68,6 +70,12 @@ class CloudNetworkServiceTest {
 
     @Mock
     private PlatformParameterService platformParameterService;
+
+    @Mock
+    private AwsPlatformResources awsPlatformResources;
+
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
     @Mock
     private CloudNetworks cloudNetworks;

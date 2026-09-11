@@ -19,13 +19,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -43,8 +46,15 @@ public class CloudNetworkService {
 
     private final PlatformParameterService platformParameterService;
 
-    public CloudNetworkService(PlatformParameterService platformParameterService) {
+    private final AwsPlatformResources awsPlatformResources;
+
+    private final CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
+
+    public CloudNetworkService(PlatformParameterService platformParameterService, AwsPlatformResources awsPlatformResources,
+            CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter) {
         this.platformParameterService = platformParameterService;
+        this.awsPlatformResources = awsPlatformResources;
+        this.credentialToExtendedCloudCredentialConverter = credentialToExtendedCloudCredentialConverter;
     }
 
     public Map<String, CloudSubnet> retrieveSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network) {
@@ -104,6 +114,23 @@ public class CloudNetworkService {
         Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environment, network, network == null ? Set.of() : network.getEndpointGatewaySubnetIds());
         subnetMetadata.forEach((name, subnet) -> subnet.setDeploymentRestrictions(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
         return subnetMetadata;
+    }
+
+    public Map<String, String> findAwsSubnetsInUnsupportedAvailabilityZones(EnvironmentDto environmentDto, NetworkDto network,
+            Set<String> subnetIds) {
+        if (!isAws(environmentDto.getCloudPlatform()) || network == null || CollectionUtils.isEmpty(subnetIds)
+                || environmentDto.getRegions() == null || environmentDto.getRegions().isEmpty()
+                || environmentDto.getCredential() == null) {
+            return Map.of();
+        }
+        Optional<String> vpcId = getAwsVpcId(network);
+        if (vpcId.isEmpty()) {
+            return Map.of();
+        }
+        String regionName = environmentDto.getRegions().iterator().next().getName();
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(environmentDto.getCredential());
+        return awsPlatformResources.getSubnetsInUnsupportedAvailabilityZones(cloudCredential,
+                com.sequenceiq.cloudbreak.cloud.model.Region.region(regionName), vpcId.get(), subnetIds);
     }
 
     public Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network, Set<String> subnetIds) {

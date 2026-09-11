@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +51,7 @@ class AwsEnvironmentNetworkValidatorTest {
     @BeforeEach
     void setUp() {
         underTest = new AwsEnvironmentNetworkValidator(cloudNetworkService);
+        lenient().when(cloudNetworkService.findAwsSubnetsInUnsupportedAvailabilityZones(any(), any(), any())).thenReturn(Map.of());
     }
 
     @Test
@@ -169,7 +172,7 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder,
-                List.of("There should be at least two Subnets in the environment network configuration.")
+                List.of("There should be at least two subnets in the environment network configuration.")
         );
     }
 
@@ -184,6 +187,32 @@ class AwsEnvironmentNetworkValidatorTest {
 
         ValidationResult validationResult = validationResultBuilder.build();
         assertFalse(validationResult.hasError(), validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateDuringFlowWhenSubnetIsInUnsupportedAvailabilityZone() {
+        AwsParams awsParams = getAwsParams();
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2, RegistrationType.EXISTING);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setName(ENV_NAME);
+        environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
+        Map<String, CloudSubnet> subnetMetasFromProvider = new HashMap<>();
+        subnetMetasFromProvider.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-2a"));
+
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetasFromProvider);
+        when(cloudNetworkService.findAwsSubnetsInUnsupportedAvailabilityZones(environmentDto, networkDto, Set.of("key1")))
+                .thenReturn(Map.of("key1", "eu-west-2d"));
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
+                "Subnet IDs (key1 in eu-west-2d) of the environment (someenv) are in availability zones not supported by the platform. "
+                        + "Please select subnets from supported availability zones."
+        ));
     }
 
     @Test
@@ -202,7 +231,7 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "Subnet IDs of the environment (someenv) are not found in the VPC (key1, key0). All subnets are expected to belong to the same VPC."
+                "Subnet IDs (key1, key0) of the environment (someenv) are not found in the VPC. All subnets are expected to belong to the same VPC."
         ));
     }
 
@@ -225,9 +254,9 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "The Subnets in the VPC (eu-west-1-a) should be present at least in two different availability zones, " +
-                        "but they are present only in availability zone name, name. Please add subnets to the environment " +
-                        "from the required number of different availability zones."
+                "The subnets (name, name) should be present in at least two different availability zones, " +
+                        "but they are present only in eu-west-1-a. "
+                        + "Please add subnets from at least two different availability zones."
         ));
     }
 
@@ -301,7 +330,7 @@ class AwsEnvironmentNetworkValidatorTest {
         ValidationResult validationResult = validationResultBuilder.build();
         assertTrue(validationResult.hasError());
         assertThat(validationResult.getFormattedErrors())
-                .startsWith("Endpoint gateway subnet IDs of the environment (someenv) are not found in the VPC (key1).");
+                .startsWith("Endpoint gateway subnet IDs (key1) of the environment (someenv) are not found in the VPC.");
     }
 
     @Test
@@ -328,10 +357,11 @@ class AwsEnvironmentNetworkValidatorTest {
         ValidationResult validationResult = validationResultBuilder.build();
         assertTrue(validationResult.hasError());
         assertThat(validationResult.getFormattedErrors())
-                .startsWith("Environment 'someenv' has been requested with invalid public endpoint access gateway setup. The selected subnets must have " +
-                        "different Availability Zones, which means select one subnet per zone only. But")
-                .contains("are from zone 'eu-west-1-b'")
-                .contains("are from zone 'eu-west-1-a'");
+                .startsWith("Environment 'someenv' has been requested with an invalid public endpoint access gateway setup. "
+                        + "Select only one endpoint gateway subnet per availability zone. "
+                        + "The following availability zones have multiple selected subnets:")
+                .contains("eu-west-1-b (subnets: ")
+                .contains("eu-west-1-a (subnets: ");
     }
 
     @Test
