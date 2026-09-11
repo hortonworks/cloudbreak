@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
@@ -179,6 +180,26 @@ class MeteringV2ConfigProviderTest {
         inputHost = "dbusapi.sigma-dev.cloudera.com";
         newHost = underTest.extractHost(inputHost);
         assertEquals(expectedHost, newHost);
+    }
+
+    @Test
+    void getAdditionalServicesDLMIsPresentInHAAndAlsoMetering() {
+        ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
+        // This will cause isConfigurationNeeded to return true.
+        when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, List.of(DLM_SERVER))).thenReturn(true);
+        // Return a clo standby group that only has the CLO server in it. The config provider should add the metering
+        // role.
+        when(mockTemplateProcessor.getComponentsByHostGroup()).thenReturn(Map.of(InstanceGroupName.CLO_STANDBY.getName(), Set.of(CLO_SERVER)));
+        // This will list metering as present.
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
+        when(mockTemplateProcessor.getServiceByType(METERINGV2_SERVICE)).thenReturn(Optional.of(apiClusterTemplateService));
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+
+        Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
+
+        assertFalse(additionalServices.isEmpty());
+        assertEquals(1, additionalServices.size());
+        assertTrue(additionalServices.containsKey(InstanceGroupName.CLO_STANDBY.getName()));
     }
 
     @Test

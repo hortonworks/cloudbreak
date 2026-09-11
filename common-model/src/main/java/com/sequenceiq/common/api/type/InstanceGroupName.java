@@ -12,7 +12,8 @@ public enum InstanceGroupName {
     KAFKA_SCALE_OUT("kafka_scale_out"),
     RAZ_SCALE_OUT("raz_scale_out"),
     ATLAS_SCALE_OUT("atlas_scale_out"),
-    HMS_SCALE_OUT("hms_scale_out");
+    HMS_SCALE_OUT("hms_scale_out"),
+    CLO_STANDBY("clostandby");
 
     private final String name;
 

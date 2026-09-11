@@ -12,7 +12,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.Me
 
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,7 +47,8 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(MeteringV2ConfigProvider.class);
 
-    private static final Set<String> ADDITIONAL_SERVICE_HOSTGROUPS = Set.of(InstanceGroupName.HMS_SCALE_OUT.getName());
+    private static final Set<String> ADDITIONAL_SERVICE_HOSTGROUPS = Set.of(InstanceGroupName.HMS_SCALE_OUT.getName(),
+            InstanceGroupName.CLO_STANDBY.getName());
 
     @Inject
     private AltusDatabusConfiguration altusDatabusConfiguration;
@@ -103,17 +106,49 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        if (isConfigurationNeeded(cmTemplateProcessor, source)
-                && cmTemplateProcessor.getServiceByType(METERINGV2_SERVICE).isEmpty()) {
-            LOGGER.info("'{}' is not part of the template so adding it as an additional service with '{}' role.", METERINGV2_SERVICE, METERINGV2_SERVER);
-            ApiClusterTemplateService meteringv2Settings = stubMeteringV2Settings();
-            Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
-            return hostgroupViews.stream()
-                    .filter(hg ->
-                            (InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()) || ADDITIONAL_SERVICE_HOSTGROUPS.contains(hg.getName().toLowerCase())))
-                    .collect(Collectors.toMap(HostgroupView::getName, v -> meteringv2Settings));
+        if (isConfigurationNeeded(cmTemplateProcessor, source)) {
+            if (cmTemplateProcessor.getServiceByType(METERINGV2_SERVICE).isEmpty()) {
+                return addMeteringToHostGroups(source);
+            } else {
+                return addMeteringToAdditionalGroups(cmTemplateProcessor);
+            }
         }
         return Map.of();
+    }
+
+    /**
+     * For datalake clusters there is no blueprint so the meteringv2 client needs to be added
+     * automatically.
+     */
+    private Map<String, ApiClusterTemplateService> addMeteringToHostGroups(TemplatePreparationObject source) {
+        LOGGER.info("'{}' is not part of the template so adding it as an additional service with '{}' role.", METERINGV2_SERVICE, METERINGV2_SERVER);
+        ApiClusterTemplateService meteringv2Settings = stubMeteringV2Settings();
+        Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
+        return hostgroupViews.stream()
+                .filter(hg ->
+                        (InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()) ||
+                                ADDITIONAL_SERVICE_HOSTGROUPS.contains(hg.getName().toLowerCase(Locale.ROOT))))
+                .collect(Collectors.toMap(HostgroupView::getName, v -> meteringv2Settings));
+    }
+
+    /**
+     * For datahub clusters, there will be a meteringv2 service configured in the blueprint, but
+     * we need to add the service to more nodes than it is explicitly configured for.
+     */
+    private Map<String, ApiClusterTemplateService> addMeteringToAdditionalGroups(CmTemplateProcessor cmTemplateProcessor) {
+        ApiClusterTemplateService service = cmTemplateProcessor.getServiceByType(METERINGV2_SERVICE).get();
+        Map<String, Set<String>> componentsByGroup = cmTemplateProcessor.getComponentsByHostGroup();
+        Map<String, ApiClusterTemplateService> retval = new HashMap<>();
+        for (Map.Entry<String, Set<String>> entry : componentsByGroup.entrySet()) {
+            if (ADDITIONAL_SERVICE_HOSTGROUPS.contains(entry.getKey().toLowerCase(Locale.ROOT))) {
+                Set<String> components = entry.getValue();
+                if (!components.contains(METERINGV2_SERVER)) {
+                    LOGGER.info("Adding {} to group {}", METERINGV2_SERVICE, entry.getKey());
+                    retval.put(entry.getKey(), service);
+                }
+            }
+        }
+        return retval;
     }
 
     private ApiClusterTemplateService stubMeteringV2Settings() {
