@@ -132,6 +132,7 @@ Processors:
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
         - success
+        - failure
     Properties:
       Bucket: {{minifi.s3LogArchiveBucketName}}
       Region: {{minifi.region}}
@@ -145,6 +146,7 @@ Processors:
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
       - success
+      - failure
     Properties:
       Container Name: {{ minifi.azureContainer }}
       Credential Configuration Strategy: Default Credential
@@ -158,6 +160,7 @@ Processors:
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
         - success
+        - failure
     Properties:
       Bucket: {{ minifi.gcsBucket }}
       Key: {{ minifi.logFolderName }}/${upload_date}/${upload_hour}/${filename}
@@ -231,13 +234,6 @@ Connections:
     source name: CompressContent
     source relationship names:
       - success
-    destination name: UploadToProvider
-
-  - id: {{ "conn_Upload_retry" | uuid }}
-    name: UploadToProvider/failure/UploadToProvider
-    source name: UploadToProvider
-    source relationship names:
-      - failure
     destination name: UploadToProvider
 
 Remote Process Groups: []

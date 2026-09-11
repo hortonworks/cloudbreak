@@ -1221,6 +1221,7 @@ class ExternalDatabaseServiceTest {
         database.setAttributes(new Json(Map.of("instancetype", "custom.instance.type")));
         stack.setDatabase(database);
         stack.setCluster(cluster);
+        when(entitlementService.isCustomDatabaseInstanceTypeEnabled(nullable(String.class))).thenReturn(true);
         when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
@@ -1235,6 +1236,33 @@ class ExternalDatabaseServiceTest {
         assertThat(captor.getValue().getDatabaseServer().getInstanceType()).isEqualTo("custom.instance.type");
         assertThat(captor.getValue().getDatabaseServer().getFallbackInstanceTypes()).isEmpty();
         verify(entitlementService, never()).isFallbackDatabaseInstanceTypeEnabled(anyString());
+    }
+
+    @Test
+    void provisionDatabaseWithCustomInstanceTypeWhenEntitlementNotGranted() throws JsonProcessingException {
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        database.setAttributes(new Json(Map.of("instancetype", "custom.instance.type")));
+        stack.setDatabase(database);
+        stack.setCluster(cluster);
+        when(entitlementService.isCustomDatabaseInstanceTypeEnabled(nullable(String.class))).thenReturn(false);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "defaultInstanceType"), null));
+
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
+        verify(redbeamsClient).create(captor.capture());
+        assertThat(captor.getValue().getDatabaseServer().getInstanceType()).isEqualTo("defaultInstanceType");
     }
 
     @Test
