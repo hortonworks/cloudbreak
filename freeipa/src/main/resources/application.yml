@@ -469,6 +469,14 @@ cross-realm-trust:
   status-sync:
     enabled: true
 
+existing-stack-patcher:
+  interval-in-hours: 24
+  max-initial-start-delay-in-hours: 12
+  initialization-chunk-size: 100
+  patch-configs:
+    minifi-retry-config-fix:
+      enabled: false
+
 flow.trigger.node.heartbeat.validation.enabled: true
 
 wiam:

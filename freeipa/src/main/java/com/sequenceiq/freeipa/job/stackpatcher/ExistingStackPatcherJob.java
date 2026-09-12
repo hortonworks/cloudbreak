@@ -1,0 +1,133 @@
+package com.sequenceiq.freeipa.job.stackpatcher;
+
+import static com.sequenceiq.freeipa.job.stackpatcher.ExistingStackPatcherJobAdapter.STACK_PATCH_TYPE_NAME;
+
+import java.util.Optional;
+
+import jakarta.inject.Inject;
+
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackPatch;
+import com.sequenceiq.freeipa.entity.StackPatchStatus;
+import com.sequenceiq.freeipa.entity.StackPatchType;
+import com.sequenceiq.freeipa.entity.StackPatchTypeStatus;
+import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stackpatch.ExistingStackPatchApplyException;
+import com.sequenceiq.freeipa.service.stackpatch.ExistingStackPatchService;
+import com.sequenceiq.freeipa.service.stackpatch.StackPatchService;
+
+@DisallowConcurrentExecution
+@Component
+public class ExistingStackPatcherJob extends StatusCheckerJob {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExistingStackPatcherJob.class);
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private ExistingStackPatcherJobService jobService;
+
+    @Inject
+    private ExistingStackPatcherServiceProvider existingStackPatcherServiceProvider;
+
+    @Inject
+    private StackPatchService stackPatchService;
+
+    @Override
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackService.getStackById(getLocalIdAsLong()));
+    }
+
+    @Override
+    protected void executeJob(JobExecutionContext context) throws JobExecutionException {
+        Stack stack = stackService.getByIdWithListsInTransaction(getLocalIdAsLong());
+        Status stackStatus = stack.getStackStatus().getStatus();
+        String stackPatchTypeName = context.getJobDetail().getJobDataMap().getString(STACK_PATCH_TYPE_NAME);
+        try {
+            ExistingStackPatchService existingStackPatchService = existingStackPatcherServiceProvider.provide(stackPatchTypeName);
+            StackPatchType stackPatchType = existingStackPatchService.getStackPatchType();
+            StackPatch stackPatch = stackPatchService.getOrCreate(stack, stackPatchType);
+            if (StackPatchTypeStatus.DEPRECATED.equals(stackPatchType.getStatus())) {
+                unscheduleJob(context, stackPatch);
+            } else {
+                if (!stackStatus.isUnschedulableState()) {
+                    boolean success = applyStackPatch(existingStackPatchService, stackPatch);
+                    if (success) {
+                        unscheduleJob(context, stackPatch);
+                    }
+                } else {
+                    LOGGER.debug("Existing stack patching will be unscheduled, because stack {} status is {}", stack.getResourceCrn(), stackStatus);
+                    stackPatchService.updateStatus(stackPatch, StackPatchStatus.UNSCHEDULED);
+                    unscheduleJob(context, stackPatch);
+                }
+            }
+        } catch (UnknownStackPatchTypeException e) {
+            String message = "Unknown stack patch type: " + stackPatchTypeName;
+            unscheduleAndFailJob(message, context, new StackPatch(stack, StackPatchType.UNKNOWN));
+        } catch (Exception e) {
+            LOGGER.error("Failed", e);
+            throw e;
+        }
+    }
+
+    private void unscheduleAndFailJob(String message, JobExecutionContext context, StackPatch stackPatch)
+            throws JobExecutionException {
+        LOGGER.info("Unscheduling and failing stack patcher {} for stack {} with message: {}",
+                stackPatch.getType(), stackPatch.getStack().getResourceCrn(), message);
+        unscheduleJob(context, stackPatch);
+        stackPatchService.updateStatus(stackPatch, StackPatchStatus.FAILED, message);
+        throw new JobExecutionException(message);
+    }
+
+    private void unscheduleJob(JobExecutionContext context, StackPatch stackPatch) {
+        LOGGER.info("Unscheduling stack patcher {} job for stack {}", stackPatch.getType(), stackPatch.getStack().getResourceCrn());
+        jobService.unschedule(context.getJobDetail().getKey());
+    }
+
+    private boolean applyStackPatch(ExistingStackPatchService existingStackPatchService, StackPatch stackPatch) throws JobExecutionException {
+        Stack stack = stackPatch.getStack();
+        StackPatchType stackPatchType = existingStackPatchService.getStackPatchType();
+        if (!StackPatchStatus.FIXED.equals(stackPatch.getStatus())) {
+            try {
+                if (existingStackPatchService.isAffected(stack)) {
+                    LOGGER.debug("Stack {} needs patch for {}", stack.getResourceCrn(), stackPatchType);
+                    if (!existingStackPatchService.isEntitled(stack)) {
+                        LOGGER.debug("Stack {} is not entitled for patch {}", stack.getResourceCrn(), stackPatchType);
+                        stackPatchService.updateStatus(stackPatch, StackPatchStatus.SKIPPED);
+                        return false;
+                    }
+                    stackPatchService.updateStatus(stackPatch, StackPatchStatus.AFFECTED);
+                    boolean success = existingStackPatchService.apply(stack);
+                    if (success) {
+                        stackPatchService.updateStatus(stackPatch, StackPatchStatus.FIXED);
+                    } else {
+                        stackPatchService.updateStatus(stackPatch, StackPatchStatus.SKIPPED);
+                    }
+                    return success;
+                } else {
+                    LOGGER.debug("Stack {} is not affected by {}", stack.getResourceCrn(), stackPatchType);
+                    stackPatchService.updateStatus(stackPatch, StackPatchStatus.NOT_AFFECTED);
+                    return true;
+                }
+            } catch (ExistingStackPatchApplyException e) {
+                String message = String.format("Failed to patch stack %s for %s", stack.getResourceCrn(), stackPatchType);
+                LOGGER.error(message, e);
+                stackPatchService.updateStatus(stackPatch, StackPatchStatus.FAILED, e.getMessage());
+                throw new JobExecutionException(message, e);
+            }
+        } else {
+            LOGGER.debug("Stack {} was already patched for {}", stack.getResourceCrn(), stackPatchType);
+            return true;
+        }
+    }
+}
