@@ -1,0 +1,62 @@
+package com.sequenceiq.freeipa.job.stackpatcher.config;
+
+import java.util.Map;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.freeipa.entity.StackPatchType;
+
+@Component
+@ConfigurationProperties(prefix = "existing-stack-patcher")
+public class ExistingStackPatcherConfig {
+
+    @NotNull
+    @Min(1)
+    private Integer intervalInHours;
+
+    @NotNull
+    @Min(0)
+    private Integer maxInitialStartDelayInHours;
+
+    @NotNull
+    @Min(1)
+    private Integer initializationChunkSize;
+
+    private Map<StackPatchType, StackPatchTypeConfig> patchConfigs;
+
+    public int getIntervalInHours() {
+        return intervalInHours;
+    }
+
+    public void setIntervalInHours(int intervalInHours) {
+        this.intervalInHours = intervalInHours;
+    }
+
+    public int getMaxInitialStartDelayInHours() {
+        return maxInitialStartDelayInHours;
+    }
+
+    public void setMaxInitialStartDelayInHours(int maxInitialStartDelayInHours) {
+        this.maxInitialStartDelayInHours = maxInitialStartDelayInHours;
+    }
+
+    public Integer getInitializationChunkSize() {
+        return initializationChunkSize;
+    }
+
+    public void setInitializationChunkSize(Integer initializationChunkSize) {
+        this.initializationChunkSize = initializationChunkSize;
+    }
+
+    public Map<StackPatchType, StackPatchTypeConfig> getPatchConfigs() {
+        return patchConfigs;
+    }
+
+    public void setPatchConfigs(Map<StackPatchType, StackPatchTypeConfig> patchConfigs) {
+        this.patchConfigs = patchConfigs;
+    }
+}
