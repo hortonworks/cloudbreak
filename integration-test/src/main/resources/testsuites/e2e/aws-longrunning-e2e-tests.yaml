@@ -15,6 +15,7 @@ tests:
           - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2Instances
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRollingVerticalScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeWithMultiAzEnabledTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeWithSameShapeTest
