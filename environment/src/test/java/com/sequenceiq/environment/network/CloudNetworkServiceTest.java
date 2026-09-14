@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
@@ -670,6 +673,81 @@ class CloudNetworkServiceTest {
                             () -> assertEquals(networkId, capturedFilters.get(GcpStackUtil.NETWORK_ID))
                     );
                 });
+    }
+
+    @Test
+    @DisplayName("when findAwsSubnetsInUnsupportedAvailabilityZones is called with empty subnet IDs then an empty map should return")
+    void findAwsSubnetsInUnsupportedAvailabilityZonesShouldReturnEmptyMapWhenSubnetIdsAreEmpty() {
+        Map<String, String> result = underTest.findAwsSubnetsInUnsupportedAvailabilityZones(
+                testEnvironmentDto, testNetworkDto, Collections.emptySet());
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(awsPlatformResources);
+    }
+
+    @Test
+    @DisplayName("when findAwsSubnetsInUnsupportedAvailabilityZones is called with non-AWS platform then an empty map should return")
+    void findAwsSubnetsInUnsupportedAvailabilityZonesShouldReturnEmptyMapWhenNotAws() {
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(AZURE_CLOUD_PLATFORM);
+
+        Map<String, String> result = underTest.findAwsSubnetsInUnsupportedAvailabilityZones(
+                testEnvironmentDto, testNetworkDto, DEFAULT_TEST_SUBNET_ID_SET);
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(awsPlatformResources);
+    }
+
+    @Test
+    @DisplayName("when findAwsSubnetsInUnsupportedAvailabilityZones is called with null network then an empty map should return")
+    void findAwsSubnetsInUnsupportedAvailabilityZonesShouldReturnEmptyMapWhenNetworkIsNull() {
+        Map<String, String> result = underTest.findAwsSubnetsInUnsupportedAvailabilityZones(
+                testEnvironmentDto, null, DEFAULT_TEST_SUBNET_ID_SET);
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(awsPlatformResources);
+    }
+
+    @Test
+    @DisplayName("when findAwsSubnetsInUnsupportedAvailabilityZones is called without VPC ID then an empty map should return")
+    void findAwsSubnetsInUnsupportedAvailabilityZonesShouldReturnEmptyMapWhenVpcIdIsMissing() {
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
+        when(testEnvironmentDto.getCredential()).thenReturn(new Credential());
+
+        Map<String, String> result = underTest.findAwsSubnetsInUnsupportedAvailabilityZones(
+                testEnvironmentDto, testNetworkDto, DEFAULT_TEST_SUBNET_ID_SET);
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(awsPlatformResources);
+    }
+
+    @Test
+    @DisplayName("when findAwsSubnetsInUnsupportedAvailabilityZones is called for AWS then it should delegate to AwsPlatformResources")
+    void findAwsSubnetsInUnsupportedAvailabilityZonesShouldDelegateToAwsPlatformResources() {
+        AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
+        Credential credential = new Credential();
+        ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
+        Map<String, String> unsupportedSubnets = Map.of(TEST_SUBNET_ID, "eu-west-2d");
+
+        when(testNetworkDto.getAws()).thenReturn(awsParams);
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
+        when(testEnvironmentDto.getCredential()).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
+        when(awsPlatformResources.getSubnetsInUnsupportedAvailabilityZones(
+                extendedCloudCredential,
+                com.sequenceiq.cloudbreak.cloud.model.Region.region(DEFAULT_TEST_REGION_NAME),
+                DEFAULT_TEST_VPC_ID,
+                DEFAULT_TEST_SUBNET_ID_SET)).thenReturn(unsupportedSubnets);
+
+        Map<String, String> result = underTest.findAwsSubnetsInUnsupportedAvailabilityZones(
+                testEnvironmentDto, testNetworkDto, DEFAULT_TEST_SUBNET_ID_SET);
+
+        assertThat(result).isEqualTo(unsupportedSubnets);
+        verify(credentialToExtendedCloudCredentialConverter).convert(credential);
+        verify(awsPlatformResources).getSubnetsInUnsupportedAvailabilityZones(
+                extendedCloudCredential,
+                com.sequenceiq.cloudbreak.cloud.model.Region.region(DEFAULT_TEST_REGION_NAME),
+                DEFAULT_TEST_VPC_ID,
+                DEFAULT_TEST_SUBNET_ID_SET);
     }
 
     @Test
