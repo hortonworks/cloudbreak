@@ -91,7 +91,7 @@ ext {
   // Protobuf
   protobufVersion = '3.25.5'
   grpcVersion = '1.82.2'
-  openTelemetryVersion = '1.65.0'
+  openTelemetryVersion = '1.66.0'
 
   // Database
   hibernateCoreVersion = '6.2.9.Final'
