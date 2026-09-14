@@ -220,6 +220,20 @@ class MaintenanceWindowTaskDispatchEvaluatorTest {
     }
 
     @Test
+    void skipsWhenDependencyIsDisabledAndAbsentFromActiveSnapshot() {
+        stubNow(WINDOW_START.plusSeconds(1));
+        MaintenanceWindowTask dependent = task(2L, "TASK_B", 150, 1L, DATALAKE_CRN);
+        when(taskRepository.findByIdAndStatusIn(1L, DEPENDENCY_RESOLVABLE_STATUSES)).thenReturn(Optional.empty());
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(2L, WINDOW_START_MS)).thenReturn(Optional.empty());
+
+        TaskDispatchEvaluation evaluation = evaluate(dependent, List.of(dependent));
+
+        assertThat(evaluation.shouldDispatch()).isFalse();
+        assertThat(evaluation.skipReason()).contains(TaskDispatchSkipReason.DEPENDENCY_NOT_FOUND);
+        verify(taskRepository).findByIdAndStatusIn(1L, DEPENDENCY_RESOLVABLE_STATUSES);
+    }
+
+    @Test
     void skipsWhenDependencyInDifferentAccount() {
         stubNow(WINDOW_START.plusSeconds(1));
         MaintenanceWindowTask dependency = task(1L, "TASK_A", 200, null, DATALAKE_CRN);

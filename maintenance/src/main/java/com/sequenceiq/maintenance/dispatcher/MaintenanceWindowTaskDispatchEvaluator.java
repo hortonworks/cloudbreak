@@ -27,6 +27,9 @@ import com.sequenceiq.maintenance.util.MaintenanceTaskResourceScope;
 
 /**
  * Evaluates whether an ACTIVE task should dispatch for the current window occurrence.
+ * Prerequisite tasks are resolved from the tick snapshot when {@link MaintenanceTaskStatus#ACTIVE ACTIVE};
+ * when absent, loaded by id from {@link MaintenanceWindowTaskRepository} to support completed
+ * {@link com.sequenceiq.maintenance.domain.MaintenanceTaskKind#ONE_SHOT ONE_SHOT} prerequisites.
  * <p>
  * Checks, in order: window still open; deduplication and retry policy on an existing run; explicit
  * {@code depends_on}; then implicit tier ordering (FreeIPA before Datalake before Datahub) when

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.maintenance.dispatcher.model.MaintenanceTaskSubmitterDispatchResult;
 import com.sequenceiq.maintenance.dispatcher.model.MaintenanceTaskSubmitterOutcome;
+import com.sequenceiq.maintenance.dispatcher.model.TaskDispatchSkipReason;
 import com.sequenceiq.maintenance.domain.MaintenanceRunStatus;
 import com.sequenceiq.maintenance.domain.MaintenanceTaskKind;
 import com.sequenceiq.maintenance.domain.MaintenanceTaskStatus;
@@ -86,8 +87,22 @@ public class MaintenanceWindowRunService {
             MaintenanceWindowSchedule schedule,
             WindowOccurrence occurrence,
             String policyRevision) {
+        return recordSkipped(task, schedule, occurrence, policyRevision, null);
+    }
+
+    @Transactional(TxType.REQUIRED)
+    public MaintenanceWindowRun recordSkipped(
+            MaintenanceWindowTask task,
+            MaintenanceWindowSchedule schedule,
+            WindowOccurrence occurrence,
+            String policyRevision,
+            TaskDispatchSkipReason skipReason) {
         return runRepository.findByMaintenanceWindowTaskIdAndWindowStart(task.getId(), occurrence.windowStart())
-                .orElseGet(() -> createSkippedRunIfAbsent(task, schedule, occurrence, policyRevision));
+                .map(existing -> {
+                    logSkippedRunNotWritten(task, occurrence, existing, skipReason);
+                    return existing;
+                })
+                .orElseGet(() -> createSkippedRunIfAbsent(task, schedule, occurrence, policyRevision, skipReason));
     }
 
     /**
@@ -241,15 +256,49 @@ public class MaintenanceWindowRunService {
             MaintenanceWindowTask task,
             MaintenanceWindowSchedule schedule,
             WindowOccurrence occurrence,
-            String policyRevision) {
+            String policyRevision,
+            TaskDispatchSkipReason skipReason) {
         try {
             MaintenanceWindowRun saved = createTerminalRun(
                     task, schedule, occurrence, policyRevision, MaintenanceRunStatus.SKIPPED, null);
-            LOGGER.debug("Recorded SKIPPED maintenance run: taskId={} runId={}", task.getId(), saved.getId());
+            logSkippedRunWritten(task, occurrence, saved, skipReason);
             return saved;
         } catch (DataIntegrityViolationException e) {
-            return runRepository.findByMaintenanceWindowTaskIdAndWindowStart(task.getId(), occurrence.windowStart())
+            MaintenanceWindowRun existing = runRepository.findByMaintenanceWindowTaskIdAndWindowStart(
+                            task.getId(), occurrence.windowStart())
                     .orElseThrow(() -> e);
+            logSkippedRunNotWritten(task, occurrence, existing, skipReason);
+            return existing;
+        }
+    }
+
+    private void logSkippedRunWritten(
+            MaintenanceWindowTask task,
+            WindowOccurrence occurrence,
+            MaintenanceWindowRun run,
+            TaskDispatchSkipReason skipReason) {
+        if (skipReason == null) {
+            LOGGER.info("Recorded SKIPPED maintenance run for taskId={} runId={} windowStart={}",
+                    task.getId(), run.getId(), occurrence.windowStart());
+        } else {
+            LOGGER.info("Recorded SKIPPED maintenance run for taskId={} runId={} windowStart={} reason={}",
+                    task.getId(), run.getId(), occurrence.windowStart(), skipReason);
+        }
+    }
+
+    private void logSkippedRunNotWritten(
+            MaintenanceWindowTask task,
+            WindowOccurrence occurrence,
+            MaintenanceWindowRun existing,
+            TaskDispatchSkipReason skipReason) {
+        if (skipReason == null) {
+            LOGGER.info(
+                    "SKIPPED maintenance run not written for taskId={} windowStart={}: existing runId={} status={}",
+                    task.getId(), occurrence.windowStart(), existing.getId(), existing.getStatus());
+        } else {
+            LOGGER.info(
+                    "SKIPPED maintenance run not written for taskId={} windowStart={} reason={}: existing runId={} status={}",
+                    task.getId(), occurrence.windowStart(), skipReason, existing.getId(), existing.getStatus());
         }
     }
 

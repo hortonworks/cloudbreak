@@ -195,6 +195,19 @@ class MaintenanceWindowRunServiceTest {
     }
 
     @Test
+    void recordSkippedDoesNotOverwriteExistingNonSkippedRun() {
+        MaintenanceWindowRun existing = priorRun(MaintenanceRunStatus.RUNNING);
+        when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(task.getId(), WINDOW_START))
+                .thenReturn(Optional.of(existing));
+
+        MaintenanceWindowRun run = underTest.recordSkipped(task, schedule, occurrence, "42:v1");
+
+        assertThat(run).isSameAs(existing);
+        assertThat(run.getStatus()).isEqualTo(MaintenanceRunStatus.RUNNING);
+        verify(runRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void recordSkippedRecoversWhenConcurrentInsertWinsRace() {
         MaintenanceWindowRun existing = priorRun(MaintenanceRunStatus.SKIPPED);
         when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(task.getId(), WINDOW_START))
