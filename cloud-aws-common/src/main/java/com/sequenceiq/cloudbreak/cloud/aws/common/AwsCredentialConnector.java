@@ -391,7 +391,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         if (credentialVerificationContext.getCreationVerification() && !entitlementService.internalTenant(accountId)) {
             String roleArn = awsCredential.getRoleArn();
             try {
-                credentialClient.retrieveSessionCredentialsWithoutExternalId(awsCredential);
+                credentialClient.retrieveSessionCredentialsWithoutExternalIdForValidationOnly(awsCredential);
                 String message = String.format("CDP Control Pane is able to perform 'sts:AssumeRole' on '%s' role without external id. " +
                         "The role is vulnerable and could be exploited by confused deputy attacks. " +
                         "Please update the role's trust relationship to have a condition on external id " +

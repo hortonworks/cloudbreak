@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.auth.altus;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_DELEGATOR_ROLE_BASED_CREDENTIAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
@@ -680,5 +681,9 @@ public class EntitlementService {
 
     public boolean isGlobalDefaultTemplateEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_GLOBAL_DEFAULT_TEMPLATE);
+    }
+
+    public boolean isAwsDelegatorRoleBasedCredentialEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AWS_DELEGATOR_ROLE_BASED_CREDENTIAL);
     }
 }

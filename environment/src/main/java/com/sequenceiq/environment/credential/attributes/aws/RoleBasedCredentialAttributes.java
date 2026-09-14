@@ -6,6 +6,8 @@ public class RoleBasedCredentialAttributes {
 
     private String externalId;
 
+    private String roleAssumeType;
+
     public String getRoleArn() {
         return roleArn;
     }
@@ -20,5 +22,13 @@ public class RoleBasedCredentialAttributes {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+    public String getRoleAssumeType() {
+        return roleAssumeType;
+    }
+
+    public void setRoleAssumeType(String roleAssumeType) {
+        this.roleAssumeType = roleAssumeType;
     }
 }

@@ -34,6 +34,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
@@ -110,6 +111,9 @@ class AwsValidatorsTest {
 
     @MockBean
     private AwsMetricPublisher awsMetricPublisher;
+
+    @MockBean
+    private EntitlementService entitlementService;
 
     private AuthenticatedContext authenticatedContext;
 

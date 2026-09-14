@@ -163,7 +163,7 @@ public class AwsCredentialConnectorTest {
                 PolicyType.GOV, encodedAwsEnvPolicy));
         when(credentialView.getRoleArn()).thenReturn(roleArn);
         SdkException amazonClientException = SdkException.builder().message(ROLE_IS_NOT_ASSUMABLE_ERROR_MESSAGE_INDICATOR).build();
-        when(credentialClient.retrieveSessionCredentialsWithoutExternalId(any())).thenThrow(amazonClientException);
+        when(credentialClient.retrieveSessionCredentialsWithoutExternalIdForValidationOnly(any())).thenThrow(amazonClientException);
         CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
 
         assertNotNull(result);
@@ -183,7 +183,7 @@ public class AwsCredentialConnectorTest {
         String roleArn = "someRoleArn";
         when(credentialView.getRoleArn()).thenReturn(roleArn);
         SdkException amazonClientException = SdkException.builder().message("Something unexpected happened").build();
-        when(credentialClient.retrieveSessionCredentialsWithoutExternalId(any())).thenThrow(amazonClientException);
+        when(credentialClient.retrieveSessionCredentialsWithoutExternalIdForValidationOnly(any())).thenThrow(amazonClientException);
 
         CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
 

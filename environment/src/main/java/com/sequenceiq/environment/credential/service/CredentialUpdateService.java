@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,5 +75,13 @@ public class CredentialUpdateService {
 
     public Credential update(Credential credential) {
         return credentialRepository.save(credential);
+    }
+
+    public Credential updateAttributes(Credential credential, String previousAttributesSecret) {
+        Credential updated = update(credential);
+        if (StringUtils.isNotEmpty(previousAttributesSecret)) {
+            secretService.deleteByVaultSecretJson(previousAttributesSecret);
+        }
+        return updated;
     }
 }

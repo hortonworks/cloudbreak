@@ -44,9 +44,14 @@ public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
     private RoleBasedCredentialAttributes getRoleBased(RoleBasedParameters source, Optional<Credential> originalCredential) {
         RoleBasedCredentialAttributes roleBased = new RoleBasedCredentialAttributes();
         roleBased.setRoleArn(source.getRoleArn());
+
         Optional<String> externalId = getExternalId(originalCredential);
         if (externalId.isPresent()) {
             roleBased.setExternalId(externalId.get());
+        }
+        Optional<String> roleAssumeType = getRoleAssumeType(originalCredential);
+        if (roleAssumeType.isPresent()) {
+            roleBased.setRoleAssumeType(roleAssumeType.get());
         }
         return roleBased;
     }
@@ -67,6 +72,22 @@ public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
         return Optional.empty();
     }
 
+    private Optional<String> getRoleAssumeType(Optional<Credential> originalCredential) {
+        if (originalCredential.isPresent()) {
+            Json json = new Json(originalCredential.get().getAttributes());
+            try {
+                CredentialAttributes credentialAttributes = json.get(CredentialAttributes.class);
+                return Optional.ofNullable(credentialAttributes)
+                        .map(CredentialAttributes::getAws)
+                        .map(AwsCredentialAttributes::getRoleBased)
+                        .map(RoleBasedCredentialAttributes::getRoleAssumeType);
+            } catch (IOException e) {
+                return Optional.empty();
+            }
+        }
+        return Optional.empty();
+    }
+
     private KeyBasedCredentialAttributes getKeyBased(KeyBasedParameters source) {
         KeyBasedCredentialAttributes keyBased = new KeyBasedCredentialAttributes();
         keyBased.setAccessKey(source.getAccessKey());
@@ -77,6 +98,7 @@ public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
     private RoleBasedParameters getRoleBased(RoleBasedCredentialAttributes source) {
         RoleBasedParameters roleBased = new RoleBasedParameters();
         roleBased.setRoleArn(source.getRoleArn());
+        roleBased.setRoleAssumeType(source.getRoleAssumeType());
         return roleBased;
     }
 

@@ -50,6 +50,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.dyngr.exception.PollerStoppedException;
 import com.google.common.base.Joiner;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
@@ -130,6 +131,9 @@ class AwsInstanceConnectorTest {
 
     @MockBean
     private AwsMetricPublisher awsMetricPublisher;
+
+    @MockBean
+    private EntitlementService entitlementService;
 
     private AuthenticatedContext authenticatedContext;
 

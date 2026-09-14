@@ -25,6 +25,9 @@ public class RoleBasedParameters implements Serializable {
     @Size(max = 2048, min = 20, message = ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG)
     private String roleArn;
 
+    @Schema(description = "The assume role type detected during credential verification (DEFAULT_CREDENTIAL_CHAIN or DELEGATOR)")
+    private String roleAssumeType;
+
     public String getRoleArn() {
         return roleArn;
     }
@@ -33,10 +36,19 @@ public class RoleBasedParameters implements Serializable {
         this.roleArn = roleArn;
     }
 
+    public String getRoleAssumeType() {
+        return roleAssumeType;
+    }
+
+    public void setRoleAssumeType(String roleAssumeType) {
+        this.roleAssumeType = roleAssumeType;
+    }
+
     @Override
     public String toString() {
         return "RoleBasedParameters{" +
                 "roleArn='" + roleArn + '\'' +
+                ", roleAssumeType='" + roleAssumeType + '\'' +
                 '}';
     }
 }

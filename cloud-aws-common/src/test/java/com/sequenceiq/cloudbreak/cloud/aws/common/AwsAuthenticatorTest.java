@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
@@ -74,6 +76,9 @@ class AwsAuthenticatorTest {
     @MockBean
     private AwsMetricPublisher awsMetricPublisher;
 
+    @MockBean
+    private EntitlementService entitlementService;
+
     @BeforeEach
     void awsClientSetup() {
         doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class));
@@ -96,8 +101,10 @@ class AwsAuthenticatorTest {
     void testAuthenticateSucceedWithRole() {
         when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", Map.of("roleArn", "role"))));
-        verify(awsEnvironmentVariableChecker, times(2)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
+        Map<String, String> roleArn = new HashMap<>();
+        roleArn.put("roleArn", "role");
+        testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", roleArn)));
+        verify(awsEnvironmentVariableChecker, times(3)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
         verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
     }
 
@@ -105,9 +112,11 @@ class AwsAuthenticatorTest {
     void testAuthenticateSucceedWithRoleWhenMultipleClientNeeded() {
         when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", Map.of("roleArn", "role"))),
+        Map<String, String> roleArn = new HashMap<>();
+        roleArn.put("roleArn", "role");
+        testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", roleArn)),
                 getCloudContextBuilder().withEnableMultipleClient(true).build());
-        verify(awsEnvironmentVariableChecker, times(3)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
+        verify(awsEnvironmentVariableChecker, times(5)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
         verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
     }
 

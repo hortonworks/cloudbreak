@@ -4,12 +4,19 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.GOV_CLOUD;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.cloud.aws.common.AssumeRoleType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class AwsCredentialView {
+
     public static final String DEFAULT_REGION_KEY = "defaultRegion";
 
     public static final String AWS = "aws";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialView.class);
 
     private static final String ROLE_ARN = "roleArn";
 
@@ -22,6 +29,8 @@ public class AwsCredentialView {
     private static final String ROLE_BASED = "roleBased";
 
     private static final String EXTERNAL_ID = "externalId";
+
+    private static final String ROLE_ASSUME_TYPE = "roleAssumeType";
 
     private final CloudCredential cloudCredential;
 
@@ -58,6 +67,33 @@ public class AwsCredentialView {
             return getRoleBased().get(EXTERNAL_ID);
         }
         return cloudCredential.getParameter(EXTERNAL_ID, String.class);
+    }
+
+    public AssumeRoleType getRoleAssumeType() {
+        String value;
+        if (cloudCredential.hasParameter(AWS)) {
+            Map<String, String> roleBased = getRoleBased();
+            if (roleBased == null) {
+                return null;
+            }
+            value = roleBased.get(ROLE_ASSUME_TYPE);
+        } else {
+            value = cloudCredential.getParameter(ROLE_ASSUME_TYPE, String.class);
+        }
+        return AssumeRoleType.fromString(value);
+    }
+
+    public void setRoleAssumeType(AssumeRoleType roleAssumeType) {
+        if (cloudCredential.hasParameter(AWS)) {
+            Map<String, String> roleBased = getRoleBased();
+            if (roleBased != null) {
+                roleBased.put(ROLE_ASSUME_TYPE, roleAssumeType.name());
+            } else {
+                LOGGER.warn("Cannot set roleAssumeType to [{}] because roleBased map is null", roleAssumeType);
+            }
+        } else {
+            LOGGER.warn("Cannot set roleAssumeType to [{}] because credential has no AWS parameter", roleAssumeType);
+        }
     }
 
     public Boolean isGovernmentCloudEnabled() {
@@ -104,11 +140,22 @@ public class AwsCredentialView {
         return cloudCredential.getId();
     }
 
+    public String getAccountId() {
+        return cloudCredential.getAccountId();
+    }
+
     public String getDefaultRegion() {
         return (String) cloudCredential.getParameter(AWS, Map.class).get(DEFAULT_REGION_KEY);
     }
 
     public boolean isSkipOrgPolicyDecisions() {
         return cloudCredential.getCredentialSettings().isSkipOrgPolicyDecisions();
+    }
+
+    @Override
+    public String toString() {
+        return "AwsCredentialView{" +
+                "cloudCredential=" + cloudCredential +
+                '}';
     }
 }
