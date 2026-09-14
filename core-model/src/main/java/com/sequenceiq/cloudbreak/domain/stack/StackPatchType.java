@@ -20,6 +20,7 @@ public enum StackPatchType {
     ATTACHED_VOLUMES_FIX,
     FSTAB_VALIDATION,
     AWS_GP2_TO_GP3_MIGRATION,
+    MINIFI_RETRY_CONFIG_FIX,
     UNKNOWN,
     // for UT we need sample values
     TEST_PATCH_1,
