@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -49,6 +50,17 @@ class DnsSoaRecordServiceTest {
         underTest.updateSoaRecords(1L, Set.of(fqdn1));
 
         verify(mockIpaClient).setDnsZoneAuthoritativeNameserver(eq(zoneName), eq(fqdn2));
+    }
+
+    @Test
+    void testUpdateDnsSystemRecords() throws Exception {
+        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(1L)).thenReturn(mockIpaClient);
+
+        underTest.updateDnsSystemRecords(1L);
+
+        verify(mockIpaClient).updateDnsSystemRecords();
+        verifyNoMoreInteractions(mockIpaClient);
     }
 
 }

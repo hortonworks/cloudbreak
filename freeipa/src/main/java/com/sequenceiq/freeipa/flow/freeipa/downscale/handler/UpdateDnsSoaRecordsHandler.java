@@ -51,6 +51,12 @@ public class UpdateDnsSoaRecordsHandler extends ExceptionCatcherEventHandler<Upd
                     .map(hostname -> StringUtils.appendIfMissing(hostname, "."))
                     .collect(Collectors.toSet());
             dnsSoaRecordService.updateSoaRecords(stackId, fqdns);
+            try {
+                dnsSoaRecordService.updateDnsSystemRecords(stackId);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to update DNS system records (_kerberos/_kpasswd URI RRsets). "
+                        + "Stale URI records may remain until the next dns-update-system-records call.", e);
+            }
 
             return new UpdateDnsSoaRecordsResponse(request.getResourceId());
         } catch (Exception e) {

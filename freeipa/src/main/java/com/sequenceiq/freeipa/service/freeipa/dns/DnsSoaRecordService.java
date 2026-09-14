@@ -32,6 +32,17 @@ public class DnsSoaRecordService {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    public void updateDnsSystemRecords(Long stackId) throws FreeIpaClientException {
+        LOGGER.info("Updating DNS system records to regenerate _kerberos and _kpasswd URI RRsets");
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stackId);
+        freeIpaClient.updateDnsSystemRecords();
+        LOGGER.info("DNS system records updated successfully");
+    }
+
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void updateSoaRecords(Long stackId, Set<String> fqdnsToUpdate) throws FreeIpaClientException {
         LOGGER.info("Updating SOA records for FQDNs: {}", fqdnsToUpdate);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stackId);

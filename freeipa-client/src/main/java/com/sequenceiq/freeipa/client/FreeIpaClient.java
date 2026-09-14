@@ -409,6 +409,10 @@ public class FreeIpaClient {
         return (DnsZone) invoke("dnszone_mod", flags, params, DnsZone.class).getResult();
     }
 
+    public RPCResponse<Object> updateDnsSystemRecords() throws FreeIpaClientException {
+        return invoke("dns_update_system_records", List.of(), Map.of(), Object.class);
+    }
+
     public Set<Service> findAllService() throws FreeIpaClientException {
         return findAllService(List.of(), Map.of());
     }
