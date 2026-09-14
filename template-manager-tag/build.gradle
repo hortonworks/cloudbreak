@@ -12,6 +12,7 @@ jar {
 }
 
 dependencies {
+    implementation project(':cloud-api')
     implementation project(':common')
     implementation project(':common-handlebar')
 

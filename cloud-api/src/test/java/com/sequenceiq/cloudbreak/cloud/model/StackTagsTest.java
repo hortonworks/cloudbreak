@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.sequenceiq.cloudbreak.cloud.TagKeyNormalizer;
 
 class StackTagsTest {
 
@@ -46,5 +50,35 @@ class StackTagsTest {
     @Test
     void getUserDefinedTagsWithoutDefaultTags() {
         assertEquals(Map.of("custom", "value"), stackTags.getUserDefinedTagsWithoutDefaultTags(Map.of("custom", "value", "owner", "jane doe")));
+    }
+
+    @Test
+    void testRemoveUserDefinedTags() {
+        stackTags.removeUserDefinedTags(Set.of("custom"));
+
+        assertEquals(Map.of(), stackTags.getUserDefinedTags());
+        assertEquals(APPLICATION_TAGS, stackTags.getApplicationTags());
+        assertEquals(DEFAULT_TAGS, stackTags.getDefaultTags());
+    }
+
+    @Test
+    void getUserDefinedTagKeysWithoutProtectedTags() {
+        assertEquals(Set.of("custom"), stackTags.getUserDefinedTagKeysWithoutProtectedTags(
+                Set.of("custom", "owner", "application"), TagKeyNormalizer.IDENTITY));
+    }
+
+    @Test
+    void getUserDefinedTagKeysWithoutProtectedTagsReturnsEmptyForNullOrEmptyInput() {
+        assertTrue(stackTags.getUserDefinedTagKeysWithoutProtectedTags(null, TagKeyNormalizer.IDENTITY).isEmpty());
+        assertTrue(stackTags.getUserDefinedTagKeysWithoutProtectedTags(Set.of(), TagKeyNormalizer.IDENTITY).isEmpty());
+    }
+
+    @Test
+    void getUserDefinedTagKeysWithoutProtectedTagsFiltersNormalizedProtectedKeys() {
+        StackTags tagsWithProtectedName = new StackTags(USER_DEFINED_TAGS, APPLICATION_TAGS,
+                Map.of("Cloudera-Resource-Name", "resourceName"));
+
+        assertTrue(tagsWithProtectedName.getUserDefinedTagKeysWithoutProtectedTags(
+                Set.of("cloudera-resource-name"), key -> key.toLowerCase()).isEmpty());
     }
 }

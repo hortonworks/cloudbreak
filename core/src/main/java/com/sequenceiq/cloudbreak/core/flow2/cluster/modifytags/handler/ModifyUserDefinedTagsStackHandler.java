@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -47,10 +48,14 @@ public class ModifyUserDefinedTagsStackHandler extends ExceptionCatcherEventHand
     public Selectable doAccept(HandlerEvent<ModifyUserDefinedTagsStackHandlerEvent> event) {
         Long resourceId = event.getData().getResourceId();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
             Stack stack = stackService.getById(resourceId);
-            stackUpdater.updateUserDefinedTags(stack, userDefinedTags);
-            return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.selector(), resourceId, userDefinedTags);
+            if (!userDefinedTags.isEmpty()) {
+                stackUpdater.updateUserDefinedTags(stack, userDefinedTags);
+            }
+            stackUpdater.removeUserDefinedTags(stack, tagsToRemove);
+            return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.selector(), resourceId, userDefinedTags, tagsToRemove);
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on stack failed.", e);
             return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_STACK_PHASE", e);

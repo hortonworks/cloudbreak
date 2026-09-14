@@ -244,6 +244,7 @@ class ReactorFlowManagerTest {
         underTest.triggerResetJvmParams(STACK_ID);
         underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true, false);
         underTest.triggerUserDefinedTagsUpdate(STACK_ID, Map.of("custom", "value"));
+        underTest.triggerUserDefinedTagsDelete(STACK_ID, Set.of("custom"));
         underTest.triggerVolumeResourcesUpdateByCrn(mock(ResourceUpdateRequest.class));
         underTest.triggerDisableEncryptionProfileChain(STACK_ID);
 

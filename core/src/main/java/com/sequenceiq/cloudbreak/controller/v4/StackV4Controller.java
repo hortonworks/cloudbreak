@@ -107,6 +107,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
@@ -878,6 +879,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     public FlowIdentifier triggerUserDefinedTagsUpdateInternal(Long workspaceId, @ResourceCrn String crn, Map<String, String> tags) {
         return stackOperationService.triggerUserDefinedTagsUpdate(crn, ThreadBasedUserCrnProvider.getAccountId(), tags);
+    }
+
+    @InternalOnly
+    @Override
+    public FlowIdentifier triggerUserDefinedTagsDeleteInternal(Long workspaceId, @ResourceCrn String crn, DeleteUserDefinedTagsRequest request) {
+        return stackOperationService.triggerUserDefinedTagsDelete(crn, request.tagKeys());
     }
 
     @Override

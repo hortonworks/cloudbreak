@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.TagKeyNormalizer;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeResourceConnector;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpConnector;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -81,6 +84,9 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
     private CredentialService credentialService;
 
     @Mock
+    private CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
+
+    @Mock
     private AwsNativeConnector awsNativeConnector;
 
     @Mock
@@ -111,6 +117,7 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(tagKeyNormalizerProvider.forPlatform(any())).thenReturn(TagKeyNormalizer.IDENTITY);
         ModifyUserDefinedTagsCloudResourcesHandlerEvent request = new ModifyUserDefinedTagsCloudResourcesHandlerEvent(STACK_ID, USER_DEFINED_TAGS);
         event = new HandlerEvent<>(new Event<>(request));
     }
@@ -160,10 +167,10 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
         when(dbResourceService.getAllAsCloudResource(dbStack.getId())).thenReturn(List.of(cloudResource1, cloudResource2));
         when(credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId())).thenReturn(credential);
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
-        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(azureConnector);
-        when(azureConnector.authentication()).thenReturn(authenticator);
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
         when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
-        when(azureConnector.resources()).thenReturn(resourceConnector);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
 
         Selectable result = underTest.doAccept(event);
 

@@ -197,4 +197,14 @@ public class StackUpdater {
         stack.setTags(new Json(stackTags));
         stackService.save(stack);
     }
+
+    public void removeUserDefinedTags(Stack stack, Set<String> tagKeys) {
+        if (tagKeys != null && !tagKeys.isEmpty()) {
+            LOGGER.info("Removing user defined tags {} for {}", tagKeys, stack.getResourceCrn());
+            StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
+            stackTags.removeUserDefinedTags(tagKeys);
+            stack.setTags(new Json(stackTags));
+            stackService.save(stack);
+        }
+    }
 }

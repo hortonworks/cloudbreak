@@ -668,6 +668,11 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new ModifyUserDefinedTagsEvent(selector, stackId, userDefinedTags));
     }
 
+    public FlowIdentifier triggerUserDefinedTagsDelete(Long stackId, Set<String> tagKeys) {
+        String selector = MODIFY_USER_DEFINED_TAGS_START_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new ModifyUserDefinedTagsEvent(selector, stackId, Map.of(), tagKeys));
+    }
+
     public FlowIdentifier triggerUpdatePublicDnsEntriesInPem(Long stackId) {
         String selector = UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_TRIGGER_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));

@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn;
@@ -555,6 +556,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @InternalOnly
     public OperationStatus triggerUserDefinedTagsUpdateInternal(@ResourceCrn String environmentCrn, Map<String, String> tags) {
         return freeIpaModifyTagsService.startUserDefinedTagsModificationOperation(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(), tags);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public OperationStatus deleteUserDefinedTagsByCrn(@ResourceCrn String environmentCrn, DeleteUserDefinedTagsRequest request) {
+        return freeIpaModifyTagsService.startUserDefinedTagsDeletionOperation(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(),
+                request.tagKeys());
     }
 
     @Override

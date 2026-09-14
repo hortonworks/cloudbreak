@@ -1022,6 +1022,20 @@ class StackOperationServiceTest {
     }
 
     @Test
+    public void testDeleteUserDefinedTags() {
+        StackDto stack = mock(StackDto.class);
+        String resourceCrn = "resourceCrn";
+        Set<String> tagKeys = Set.of("custom");
+
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getByCrnWithMdcContext(resourceCrn)).thenReturn(stack);
+
+        underTest.triggerUserDefinedTagsDelete(resourceCrn, tagKeys);
+
+        verify(flowManager).triggerUserDefinedTagsDelete(STACK_ID, tagKeys);
+    }
+
+    @Test
     public void testUpdateSslConfigsOnCluster() {
         StackDto stack = mock(StackDto.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");

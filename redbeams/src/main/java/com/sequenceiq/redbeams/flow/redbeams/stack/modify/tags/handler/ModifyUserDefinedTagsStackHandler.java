@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.handler;
 import static com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.event.ModifyUserDefinedTagsStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -48,10 +49,14 @@ public class ModifyUserDefinedTagsStackHandler extends ExceptionCatcherEventHand
     protected Selectable doAccept(HandlerEvent<ModifyUserDefinedTagsStackHandlerEvent> event) {
         Long resourceId = event.getData().getResourceId();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
             DBStack stack = dbStackService.getById(resourceId);
-            dbStackUpdater.updateUserDefinedTags(stack, userDefinedTags);
-            return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.selector(), resourceId, userDefinedTags);
+            if (!userDefinedTags.isEmpty()) {
+                dbStackUpdater.updateUserDefinedTags(stack, userDefinedTags);
+            }
+            dbStackUpdater.removeUserDefinedTags(stack, tagsToRemove);
+            return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.selector(), resourceId, userDefinedTags, tagsToRemove);
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on external database stack failed.", e);
             return new ModifyUserDefinedTagsFailedEvent(resourceId, e);

@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -238,6 +239,9 @@ public class StackOperationService {
 
     @Inject
     private UserDefinedTagValidator userDefinedTagValidator;
+
+    @Inject
+    private CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
 
     @Inject
     private NetworkService networkService;
@@ -845,14 +849,32 @@ public class StackOperationService {
         return flowManager.triggerUserDefinedTagsUpdate(stack.getId(), userDefinedTags);
     }
 
+    public FlowIdentifier triggerUserDefinedTagsDelete(String crn, Set<String> tagKeys) {
+        LOGGER.info("Triggering user defined tags deletion on stack ('{}')", crn);
+        StackDto stack = stackDtoService.getByCrnWithMdcContext(crn);
+        validateTagKeysToRemove(stack, tagKeys);
+        return flowManager.triggerUserDefinedTagsDelete(stack.getId(), tagKeys);
+    }
+
     private void validateUserDefinedTagsAgainstDefaultTags(StackDto stack, Map<String, String> userDefinedTags) {
-        if (stack.getTags() == null) {
-            return;
+        if (stack.getTags() != null) {
+            StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
+            ValidationResult validationResult = userDefinedTagValidator.validateAgainstDefaultTags(userDefinedTags, stackTags.getDefaultTags());
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
         }
-        StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
-        ValidationResult validationResult = userDefinedTagValidator.validateAgainstDefaultTags(userDefinedTags, stackTags.getDefaultTags());
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
+    }
+
+    private void validateTagKeysToRemove(StackDto stack, Set<String> tagKeys) {
+        if (stack.getTags() != null) {
+            StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
+            ValidationResult validationResult = userDefinedTagValidator.validateTagKeysToRemove(
+                    tagKeys, stackTags.getDefaultTags(), stackTags.getApplicationTags(),
+                    tagKeyNormalizerProvider.forPlatform(stack.getStack().getCloudPlatform()));
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
         }
     }
 

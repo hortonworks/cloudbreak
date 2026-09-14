@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
@@ -426,6 +427,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @InternalOnly
     public FlowIdentifier modifyUserDefinedTags(@ResourceCrn String crn, Map<String, String> tags, @InitiatorUserCrn String initiatorUserCrn) {
         return redbeamsTagUpdaterService.triggerUserDefinedTagsUpdate(crn, tags);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier deleteUserDefinedTags(@ResourceCrn String crn, DeleteUserDefinedTagsRequest request) {
+        return redbeamsTagUpdaterService.triggerUserDefinedTagsDelete(crn, request.tagKeys());
     }
 
     @Override

@@ -67,6 +67,8 @@ public final class Notes {
                 "Rotates database server secrets";
         public static final String MODIFY_USER_DEFINED_TAGS =
                 "Updates the user defined tags of a database server";
+        public static final String DELETE_USER_DEFINED_TAGS =
+                "Deletes user defined tags from a database server";
         public static final String VALIDATE_UPGRADE =
                 "Validates if upgrade is possible on the database server to a higher major version.";
         public static final String VALIDATE_UPGRADE_CLEANUP =

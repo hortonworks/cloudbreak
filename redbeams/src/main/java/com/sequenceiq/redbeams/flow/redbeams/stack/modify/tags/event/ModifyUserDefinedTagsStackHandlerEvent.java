@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.event;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,16 +12,28 @@ public class ModifyUserDefinedTagsStackHandlerEvent extends RedbeamsEvent {
 
     private final Map<String, String> userDefinedTags;
 
+    private final Set<String> tagsToRemove;
+
+    public ModifyUserDefinedTagsStackHandlerEvent(Long resourceId, Map<String, String> userDefinedTags) {
+        this(resourceId, userDefinedTags, Set.of());
+    }
+
     @JsonCreator
     public ModifyUserDefinedTagsStackHandlerEvent(
             @JsonProperty("resourceId") Long resourceId,
-            @JsonProperty("userDefinedTags") Map<String, String> userDefinedTags) {
+            @JsonProperty("userDefinedTags") Map<String, String> userDefinedTags,
+            @JsonProperty("tagsToRemove") Set<String> tagsToRemove) {
         super(EventSelectorUtil.selector(ModifyUserDefinedTagsStackHandlerEvent.class), resourceId);
         this.userDefinedTags = userDefinedTags;
+        this.tagsToRemove = tagsToRemove != null ? tagsToRemove : Set.of();
     }
 
     public Map<String, String> getUserDefinedTags() {
         return userDefinedTags;
+    }
+
+    public Set<String> getTagsToRemove() {
+        return tagsToRemove;
     }
 
     @Override
@@ -30,6 +43,7 @@ public class ModifyUserDefinedTagsStackHandlerEvent extends RedbeamsEvent {
                 "selector='" + getSelector() + '\'' +
                 ", resourceId='" + getResourceId() + '\'' +
                 ", userDefinedTags='" + userDefinedTags + '\'' +
+                ", tagsToRemove='" + tagsToRemove + '\'' +
                 '}';
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -159,6 +160,16 @@ public class StackUpdater {
         stackTags.updateUserDefinedTags(userDefinedTags);
         stack.setTags(new Json(stackTags));
         stackService.save(stack);
+    }
+
+    public void removeUserDefinedTags(Stack stack, Set<String> tagKeys) {
+        if (tagKeys != null && !tagKeys.isEmpty()) {
+            LOGGER.info("Removing user defined tags {} for {}", tagKeys, stack.getResourceCrn());
+            StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
+            stackTags.removeUserDefinedTags(tagKeys);
+            stack.setTags(new Json(stackTags));
+            stackService.save(stack);
+        }
     }
 
     public void updateNetworkCidrs(Stack stack, List<String> networkCidrs) {

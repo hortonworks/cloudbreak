@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
@@ -430,4 +431,13 @@ public interface DatabaseServerV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier modifyUserDefinedTags(@ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
     @PathParam("crn") String crn, @NotNull Map<String, String> tags, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/crn/{crn}/delete_user_defined_tags")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = DatabaseServerOpDescription.DELETE_USER_DEFINED_TAGS, description = DatabaseServerNotes.DELETE_USER_DEFINED_TAGS,
+            operationId = "deleteUserDefinedTags",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier deleteUserDefinedTags(@ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+    @PathParam("crn") String crn, @NotNull @Valid DeleteUserDefinedTagsRequest request);
 }

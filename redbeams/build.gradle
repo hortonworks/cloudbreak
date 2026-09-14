@@ -133,7 +133,7 @@ dependencies {
   implementation project(':service-common')
 
   runtimeOnly project(':cloud-mock')
-  runtimeOnly project(':cloud-gcp')
+  implementation project(':cloud-gcp')
   runtimeOnly project(':cloud-aws-cloudformation')
 
   testImplementation project(':cloud-gcp')

@@ -5,6 +5,7 @@ import static com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.event.Modi
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
@@ -63,6 +64,11 @@ public class RedbeamsFlowManager {
     public FlowIdentifier triggerUserDefinedTagsUpdate(Long resourceId, Map<String, String> userDefinedTags) {
         String selector = MODIFY_USER_DEFINED_TAGS_REDBEAMS_START_EVENT.event();
         return notify(selector, new ModifyUserDefinedTagsEvent(selector, resourceId, userDefinedTags));
+    }
+
+    public FlowIdentifier triggerUserDefinedTagsDelete(Long resourceId, Set<String> tagKeys) {
+        String selector = MODIFY_USER_DEFINED_TAGS_REDBEAMS_START_EVENT.event();
+        return notify(selector, new ModifyUserDefinedTagsEvent(selector, resourceId, Map.of(), tagKeys));
     }
 
     private FlowIdentifier notify(String selector, Event<Acceptable> event) {

@@ -64,7 +64,8 @@ public class ModifyUserDefinedTagsActions {
                         STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES,
                         String.valueOf(stack.getName()));
                 ModifyUserDefinedTagsCloudResourcesHandlerEvent modifyUserDefinedTagsCloudResourcesEvent =
-                        new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(),
+                                payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, modifyUserDefinedTagsCloudResourcesEvent);
             }
         };
@@ -82,7 +83,8 @@ public class ModifyUserDefinedTagsActions {
                         STACK_UPDATE_USER_DEFINED_TAGS,
                         String.valueOf(stack.getName()));
                 ModifyUserDefinedTagsStackHandlerEvent modifyUserDefinedTagsStackEvent =
-                        new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(),
+                                payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, modifyUserDefinedTagsStackEvent);
             }
         };
@@ -102,7 +104,7 @@ public class ModifyUserDefinedTagsActions {
                         String.valueOf(stack.getName()));
                 String selector = ModifyUserDefinedTagsStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT.event();
                 ModifyUserDefinedTagsEvent finalizeEvent =
-                        new ModifyUserDefinedTagsEvent(selector, payload.getResourceId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsEvent(selector, payload.getResourceId(), payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, selector, finalizeEvent);
             }
         };

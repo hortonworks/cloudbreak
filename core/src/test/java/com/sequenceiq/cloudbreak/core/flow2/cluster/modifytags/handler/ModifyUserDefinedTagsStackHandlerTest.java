@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.Modi
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +66,24 @@ class ModifyUserDefinedTagsStackHandlerTest {
         assertInstanceOf(ModifyUserDefinedTagsEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
         verify(stackUpdater).updateUserDefinedTags(stack, USER_DEFINED_TAGS);
+    }
+
+    @Test
+    void testDoAcceptRemovesTagsFromStack() {
+        Stack stack = new Stack();
+        stack.setResourceCrn(STACK_CRN);
+        Set<String> tagsToRemove = Set.of("custom");
+
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        ModifyUserDefinedTagsStackHandlerEvent request =
+                new ModifyUserDefinedTagsStackHandlerEvent(STACK_ID, Map.of(), tagsToRemove);
+        HandlerEvent<ModifyUserDefinedTagsStackHandlerEvent> deleteEvent = new HandlerEvent<>(new Event<>(request));
+
+        Selectable result = underTest.doAccept(deleteEvent);
+
+        assertInstanceOf(ModifyUserDefinedTagsEvent.class, result);
+        verify(stackUpdater, never()).updateUserDefinedTags(stack, Map.of());
+        verify(stackUpdater).removeUserDefinedTags(stack, tagsToRemove);
     }
 
     @Test

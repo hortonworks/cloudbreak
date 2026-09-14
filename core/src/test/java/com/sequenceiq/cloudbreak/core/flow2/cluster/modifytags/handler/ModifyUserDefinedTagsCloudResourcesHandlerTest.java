@@ -7,13 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.TagKeyNormalizer;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeResourceConnector;
@@ -39,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpConnector;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -80,6 +85,9 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
+    private CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
+
+    @Mock
     private AwsNativeConnector awsNativeConnector;
 
     @Mock
@@ -110,6 +118,7 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(tagKeyNormalizerProvider.forPlatform(any())).thenReturn(TagKeyNormalizer.IDENTITY);
         ModifyUserDefinedTagsCloudResourcesHandlerEvent request = new ModifyUserDefinedTagsCloudResourcesHandlerEvent(STACK_ID, USER_DEFINED_TAGS);
         event = new HandlerEvent<>(new Event<>(request));
     }
@@ -174,6 +183,44 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
         assertInstanceOf(ModifyUserDefinedTagsEvent.class, result);
         assertEquals(MODIFY_USER_DEFINED_TAGS_STACK_EVENT.name(), result.getSelector());
         verify(resourceConnector).updateTags(authenticatedContext, List.of(cloudResource1, cloudResource2), USER_DEFINED_TAGS);
+    }
+
+    @Test
+    void testDoAcceptDeletesTagsFromCloudResources() {
+        Stack stack = new Stack();
+        stack.setResourceCrn(STACK_CRN);
+        stack.setEnvironmentCrn(ENV_CRN);
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
+        stack.setWorkspace(workspace);
+
+        Map<String, String> userDefinedTags = new HashMap<>(Map.of("custom", "value"));
+        Map<String, String> applicationTags = new HashMap<>(Map.of("application", "app"));
+        Map<String, String> defaultTags = new HashMap<>(Map.of("owner", "john doe"));
+        stack.setTags(new Json(Map.of("userDefinedTags", userDefinedTags, "applicationTags", applicationTags, "defaultTags", defaultTags)));
+
+        CloudResource cloudResource = mock(CloudResource.class);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        Authenticator authenticator = mock(Authenticator.class);
+
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(List.of(cloudResource));
+        when(stackUtil.getCloudCredential(ENV_CRN)).thenReturn(cloudCredential);
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(awsConnector);
+        when(awsConnector.authentication()).thenReturn(authenticator);
+        when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
+        when(awsConnector.resources()).thenReturn(awsResourceConnector);
+
+        ModifyUserDefinedTagsCloudResourcesHandlerEvent request =
+                new ModifyUserDefinedTagsCloudResourcesHandlerEvent(STACK_ID, Map.of(), Set.of("custom", "owner", "application"));
+        HandlerEvent<ModifyUserDefinedTagsCloudResourcesHandlerEvent> deleteEvent = new HandlerEvent<>(new Event<>(request));
+
+        Selectable result = underTest.doAccept(deleteEvent);
+
+        assertInstanceOf(ModifyUserDefinedTagsEvent.class, result);
+        verify(awsResourceConnector, never()).updateTags(any(), any(), any());
+        verify(awsResourceConnector).deleteTags(authenticatedContext, List.of(cloudResource), Set.of("custom"));
     }
 
     @Test

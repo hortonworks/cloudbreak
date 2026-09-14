@@ -53,7 +53,8 @@ public class ModifyUserDefinedTagsActions {
                 DBStack stack = context.getDBStack();
                 stackUpdater.updateStatus(stack.getId(), DetailedDBStackStatus.MODIFY_USER_DEFINED_TAGS_IN_PROGRESS);
                 ModifyUserDefinedTagsCloudResourcesHandlerEvent modifyUserDefinedTagsCloudResourcesEvent =
-                        new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(), payload.getUserDefinedTags(),
+                                payload.getTagsToRemove());
                 sendEvent(context, modifyUserDefinedTagsCloudResourcesEvent);
             }
         };
@@ -66,7 +67,7 @@ public class ModifyUserDefinedTagsActions {
             protected void doExecute(RedbeamsContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Update user defined tags for external database {}", payload);
                 ModifyUserDefinedTagsStackHandlerEvent modifyUserDefinedTagsStackEvent =
-                        new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, modifyUserDefinedTagsStackEvent);
             }
         };
@@ -82,7 +83,7 @@ public class ModifyUserDefinedTagsActions {
                 stackUpdater.updateStatus(stack.getId(), DetailedDBStackStatus.MODIFY_USER_DEFINED_TAGS_COMPLETED);
                 String selector = ModifyUserDefinedTagsStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.event();
                 ModifyUserDefinedTagsEvent finalizeEvent =
-                        new ModifyUserDefinedTagsEvent(selector, payload.getResourceId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsEvent(selector, payload.getResourceId(), payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, selector, finalizeEvent);
             }
         };

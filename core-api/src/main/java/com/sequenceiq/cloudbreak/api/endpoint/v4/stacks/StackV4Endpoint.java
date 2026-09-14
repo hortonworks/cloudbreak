@@ -165,6 +165,7 @@ import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
@@ -1154,6 +1155,18 @@ public interface StackV4Endpoint {
             @PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @Valid Map<String, String> tags);
+
+    @POST
+    @Path("internal/crn/{crn}/delete_user_defined_tags")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Delete user defined tags of cluster by CRN",
+            operationId = "deleteUserDefinedTagsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier triggerUserDefinedTagsDeleteInternal(
+            @PathParam("workspaceId") Long workspaceId,
+            @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @Valid @NotNull DeleteUserDefinedTagsRequest request);
 
     @POST
     @Path("internal/crn/{crn}/reset_jvm_params")

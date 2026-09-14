@@ -56,6 +56,7 @@ dependencies {
 
     testImplementation project(path: ':core-model', configuration: 'tests')
     testImplementation project(':cloud-reactor')
+    testImplementation project(':template-manager-tag')
     testImplementation        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
     // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version

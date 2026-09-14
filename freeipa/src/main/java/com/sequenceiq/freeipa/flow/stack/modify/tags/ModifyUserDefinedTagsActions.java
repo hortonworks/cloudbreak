@@ -61,7 +61,8 @@ public class ModifyUserDefinedTagsActions {
                         "Starting to update user defined tags on cloud resources of FreeIPA: " + context.getStack().getName());
                 setOperationId(variables, payload.getOperationId());
                 ModifyUserDefinedTagsCloudResourcesHandlerEvent modifyUserDefinedTagsCloudResourcesEvent =
-                        new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(), payload.getOperationId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(), payload.getOperationId(),
+                                payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, modifyUserDefinedTagsCloudResourcesEvent);
             }
         };
@@ -77,7 +78,8 @@ public class ModifyUserDefinedTagsActions {
                         "Starting to update user defined tags on FreeIPA stack: " + context.getStack().getName());
                 setOperationId(variables, payload.getOperationId());
                 ModifyUserDefinedTagsStackHandlerEvent modifyUserDefinedTagsStackEvent =
-                        new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getOperationId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getOperationId(),
+                                payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, modifyUserDefinedTagsStackEvent);
             }
         };
@@ -96,7 +98,8 @@ public class ModifyUserDefinedTagsActions {
                 operationService.completeOperation(stack.getAccountId(), payload.getOperationId(), Set.of(successDetails), Set.of());
                 String selector = ModifyUserDefinedTagsStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.event();
                 ModifyUserDefinedTagsEvent finalizeEvent =
-                        new ModifyUserDefinedTagsEvent(selector, payload.getResourceId(), payload.getOperationId(), payload.getUserDefinedTags());
+                        new ModifyUserDefinedTagsEvent(selector, payload.getResourceId(), payload.getOperationId(),
+                                payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, selector, finalizeEvent);
             }
         };

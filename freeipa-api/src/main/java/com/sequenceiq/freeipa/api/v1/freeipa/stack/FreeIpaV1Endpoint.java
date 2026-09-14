@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.DELETE_USER_DEFINED_TAGS_BY_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_RECOMMENDATION;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.IMD_UPDATE;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -453,6 +455,17 @@ public interface FreeIpaV1Endpoint {
     OperationStatus triggerUserDefinedTagsUpdateInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @NotNull Map<String, String> tags);
+
+    @POST
+    @Path("/delete_user_defined_tags")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = DELETE_USER_DEFINED_TAGS_BY_CRN,
+            description = FreeIpaNotes.FREEIPA_NOTES, operationId = "deleteUserDefinedTagsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    OperationStatus deleteUserDefinedTagsByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @NotNull @Valid DeleteUserDefinedTagsRequest request);
 
     @PUT
     @Path("/internal/modify_network_cidrs")

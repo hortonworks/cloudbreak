@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.Modi
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -56,6 +58,9 @@ public class ModifyUserDefinedTagsCloudResourcesHandler extends ExceptionCatcher
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ModifyUserDefinedTagsCloudResourcesHandlerEvent.class);
@@ -71,18 +76,20 @@ public class ModifyUserDefinedTagsCloudResourcesHandler extends ExceptionCatcher
     public Selectable doAccept(HandlerEvent<ModifyUserDefinedTagsCloudResourcesHandlerEvent> event) {
         Long resourceId = event.getData().getResourceId();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
             Stack stack = stackService.getById(resourceId);
-            LOGGER.debug("Updating cloud resources tags of stack: {} with tags: {}", stack.getResourceCrn(), userDefinedTags);
-            updateCloudResourcesTags(stack, userDefinedTags);
-            return new ModifyUserDefinedTagsEvent(MODIFY_USER_DEFINED_TAGS_STACK_EVENT.selector(), resourceId, userDefinedTags);
+            LOGGER.debug("Updating cloud resources tags of stack: {} with tags: {} and tags to remove: {}",
+                    stack.getResourceCrn(), userDefinedTags, tagsToRemove);
+            updateCloudResourcesTags(stack, userDefinedTags, tagsToRemove);
+            return new ModifyUserDefinedTagsEvent(MODIFY_USER_DEFINED_TAGS_STACK_EVENT.selector(), resourceId, userDefinedTags, tagsToRemove);
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on stack's cloud resources failed.", e);
             return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_CLOUD_RESOURCES_PHASE", e);
         }
     }
 
-    private void updateCloudResourcesTags(Stack stack, Map<String, String> userDefinedTags) {
+    private void updateCloudResourcesTags(Stack stack, Map<String, String> userDefinedTags, Set<String> tagsToRemove) {
         List<CloudResource> cloudResources = resourceService.getAllCloudResource(stack.getId());
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         CloudContext cloudContext = createCloudContext(stack);
@@ -93,8 +100,15 @@ public class ModifyUserDefinedTagsCloudResourcesHandler extends ExceptionCatcher
 
         StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
         Map<String, String> tagsToUpdate = stackTags.getUserDefinedTagsWithoutDefaultTags(userDefinedTags);
+        if (!tagsToUpdate.isEmpty()) {
+            cloudConnector.resources().updateTags(ac, cloudResources, tagsToUpdate);
+        }
 
-        cloudConnector.resources().updateTags(ac, cloudResources, tagsToUpdate);
+        Set<String> tagKeysToDelete = stackTags.getUserDefinedTagKeysWithoutProtectedTags(tagsToRemove,
+                tagKeyNormalizerProvider.forPlatform(stack.getCloudPlatform()));
+        if (!tagKeysToDelete.isEmpty()) {
+            cloudConnector.resources().deleteTags(ac, cloudResources, tagKeysToDelete);
+        }
     }
 
     private CloudContext createCloudContext(Stack stack) {

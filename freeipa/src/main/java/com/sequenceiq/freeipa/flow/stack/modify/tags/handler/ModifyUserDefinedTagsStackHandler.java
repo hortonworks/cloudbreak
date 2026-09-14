@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.modify.tags.event.ModifyUserDefinedTagsStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -50,10 +51,15 @@ public class ModifyUserDefinedTagsStackHandler extends ExceptionCatcherEventHand
         Long resourceId = event.getData().getResourceId();
         String operationId = event.getData().getOperationId();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
+        Set<String> tagsToRemove = event.getData().getTagsToRemove();
         try {
             Stack stack = stackService.getStackById(resourceId);
-            stackUpdater.updateUserDefinedTags(stack, userDefinedTags);
-            return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector(), resourceId, operationId, userDefinedTags);
+            if (!userDefinedTags.isEmpty()) {
+                stackUpdater.updateUserDefinedTags(stack, userDefinedTags);
+            }
+            stackUpdater.removeUserDefinedTags(stack, tagsToRemove);
+            return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector(), resourceId, operationId,
+                    userDefinedTags, tagsToRemove);
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on FreeIPA stack failed.", e);
             return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_FREEIPA_STACK_PHASE", e, ERROR);

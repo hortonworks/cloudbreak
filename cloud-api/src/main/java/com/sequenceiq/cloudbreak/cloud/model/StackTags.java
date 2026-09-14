@@ -3,13 +3,17 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.TagKeyNormalizer;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -45,6 +49,30 @@ public class StackTags {
         if (tags != null) {
             userDefinedTags.putAll(tags);
         }
+    }
+
+    public void removeUserDefinedTags(Collection<String> keys) {
+        if (keys != null) {
+            keys.forEach(userDefinedTags::remove);
+        }
+    }
+
+    public Set<String> getUserDefinedTagKeysWithoutProtectedTags(Set<String> tagKeys, TagKeyNormalizer tagKeyNormalizer) {
+        if (tagKeys == null || tagKeys.isEmpty()) {
+            return Set.of();
+        }
+        Set<String> result = new HashSet<>(tagKeys);
+        result.removeIf(key -> isProtectedTagKey(key, defaultTags, tagKeyNormalizer) || isProtectedTagKey(key, applicationTags, tagKeyNormalizer));
+        return result;
+    }
+
+    private boolean isProtectedTagKey(String requestedKey, Map<String, String> protectedTags, TagKeyNormalizer tagKeyNormalizer) {
+        if (protectedTags == null || protectedTags.isEmpty()) {
+            return false;
+        }
+        String normalizedRequestedKey = tagKeyNormalizer.normalize(requestedKey);
+        return protectedTags.keySet().stream()
+                .anyMatch(protectedKey -> tagKeyNormalizer.normalize(protectedKey).equals(normalizedRequestedKey));
     }
 
     public Map<String, String> getUserDefinedTagsWithoutDefaultTags(Map<String, String> userDefinedTags) {
