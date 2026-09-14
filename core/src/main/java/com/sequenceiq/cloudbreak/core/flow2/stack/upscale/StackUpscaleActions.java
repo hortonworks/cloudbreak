@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStack
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -71,6 +72,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.UpscaleUpdateLoadBalancersRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
@@ -85,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointMan
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -93,6 +96,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -142,6 +146,9 @@ public class StackUpscaleActions {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     @Bean(name = "UPDATE_DOMAIN_DNS_RESOLVER_STATE")
     public Action<?, ?> updateDomainDnsResolverAction() {
@@ -415,6 +422,26 @@ public class StackUpscaleActions {
                 CloudStack cloudStack = cloudStackConverter.convert(stack);
                 UpscaleUpdateLoadBalancersRequest request =
                         new UpscaleUpdateLoadBalancersRequest(context.getStackId(), cloudStack, context.getCloudContext(), context.getCloudCredential());
+                sendEvent(context, request.selector(), request);
+            }
+        };
+    }
+
+    @Bean("UPSCALE_COLLECT_LOAD_BALANCER_METADATA_STATE")
+    public Action<?, ?> upscaleCollectLoadBalancerMetadataAction() {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
+                        .map(LoadBalancer::getType)
+                        .collect(Collectors.toList());
+                List<CloudResource> cloudResources = resourceService.getAllByStackId(stack.getId()).stream()
+                        .map(r -> cloudResourceConverter.convert(r))
+                        .collect(Collectors.toList());
+                LoadBalancerMetadataRequest request = new LoadBalancerMetadataRequest(context.getStackId(), context.getCloudContext(),
+                        context.getCloudCredential(), cloudStack, loadBalancerTypes, cloudResources);
                 sendEvent(context, request.selector(), request);
             }
         };

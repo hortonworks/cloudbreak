@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolver
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackImageFallbackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataFailure;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsFailed;
@@ -42,7 +44,10 @@ public enum StackUpscaleEvent implements FlowEvent {
     EXTEND_METADATA_FAILURE_EVENT(CloudPlatformResult.failureSelector(CollectMetadataResult.class)),
     EXTEND_METADATA_FINISHED_FAILURE_EVENT("EXTEND_METADATA_FINISHED_FAILURE_EVENT"),
     UPSCALE_UPDATE_LOAD_BALANCERS_EVENT("UPSCALE_UPDATE_LOAD_BALANCERS_EVENT"),
+    UPSCALE_UPDATE_LOAD_BALANCERS_FINISHED_EVENT("UPSCALE_UPDATE_LOAD_BALANCERS_FINISHED_EVENT"),
     UPSCALE_UPDATE_LOAD_BALANCERS_FAILURE_EVENT("UPSCALE_UPDATE_LOAD_BALANCERS_FAILURE_EVENT"),
+    UPSCALE_COLLECT_LOAD_BALANCER_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(LoadBalancerMetadataSuccess.class)),
+    UPSCALE_COLLECT_LOAD_BALANCER_METADATA_FAILED_EVENT(EventSelectorUtil.selector(LoadBalancerMetadataFailure.class)),
     UPSCALE_UPDATE_USERDATA_SECRETS_EVENT("UPSCALE_UPDATE_USERDATA_SECRETS_EVENT"),
     UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleUpdateUserdataSecretsSuccess.class)),
     UPSCALE_UPDATE_USERDATA_SECRETS_FAILURE_EVENT(EventSelectorUtil.selector(UpscaleUpdateUserdataSecretsFailed.class)),

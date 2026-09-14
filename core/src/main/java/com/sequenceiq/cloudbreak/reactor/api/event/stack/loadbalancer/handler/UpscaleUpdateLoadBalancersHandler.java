@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.handler;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_LOAD_BALANCERS_FINISHED_EVENT;
 
 import jakarta.inject.Inject;
 
@@ -63,6 +63,6 @@ public class UpscaleUpdateLoadBalancersHandler extends ExceptionCatcherEventHand
             LOGGER.error("Failed to update load balancers", e);
             return new UpscaleUpdateLoadBalancersFailed(stackId, e);
         }
-        return new StackEvent(UPSCALE_UPDATE_USERDATA_SECRETS_EVENT.selector(), stackId);
+        return new StackEvent(UPSCALE_UPDATE_LOAD_BALANCERS_FINISHED_EVENT.selector(), stackId);
     }
 }

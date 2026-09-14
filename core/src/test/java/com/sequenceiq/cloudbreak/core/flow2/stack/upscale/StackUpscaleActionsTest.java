@@ -57,21 +57,27 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequ
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsRequest;
@@ -83,6 +89,7 @@ import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAv
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -91,6 +98,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -140,6 +148,12 @@ class StackUpscaleActionsTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Mock
+    private ResourceToCloudResourceConverter cloudResourceConverter;
 
     @InjectMocks
     private StackUpscaleActions underTest;
@@ -224,6 +238,13 @@ class StackUpscaleActionsTest {
 
     private AbstractStackUpscaleAction<StackEvent> getUpdateUserdataSecretsFinishedAction() {
         AbstractStackUpscaleAction<StackEvent> action = (AbstractStackUpscaleAction<StackEvent>) underTest.updateUserdataSecretsFinishedAction();
+        initActionPrivateFields(action);
+        return action;
+    }
+
+    private AbstractStackCreationAction<StackEvent> getUpscaleCollectLoadBalancerMetadataAction() {
+        AbstractStackCreationAction<StackEvent> action =
+                (AbstractStackCreationAction<StackEvent>) underTest.upscaleCollectLoadBalancerMetadataAction();
         initActionPrivateFields(action);
         return action;
     }
@@ -404,6 +425,39 @@ class StackUpscaleActionsTest {
         UpscaleStackRequest stackEvent = (UpscaleStackRequest) responsePayload;
         assertThat(stackEvent.getResourceId()).isEqualTo(STACK_ID);
         verify(userdataSecretsService).assignSecretsToInstances(stackDto, secretResources, instanceMetaDatas);
+    }
+
+    @Test
+    void testUpscaleCollectLoadBalancerMetadataActionCollectsTypesAndResourcesIntoRequest() throws Exception {
+        StackCreationContext creationContext = new StackCreationContext(flowParameters, stack, "AWS", cloudContext, cloudCredential);
+        StackEvent payload = new StackEvent(STACK_ID);
+
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        CloudStack convertedCloudStack = mock(CloudStack.class);
+        when(cloudStackConverter.convert(stackDto)).thenReturn(convertedCloudStack);
+        LoadBalancer loadBalancer = mock(LoadBalancer.class);
+        when(loadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
+        when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(Set.of(loadBalancer));
+        Resource resource = new Resource();
+        when(resourceService.getAllByStackId(STACK_ID)).thenReturn(List.of(resource));
+        CloudResource cloudResource = mock(CloudResource.class);
+        when(cloudResourceConverter.convert(resource)).thenReturn(cloudResource);
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(getUpscaleCollectLoadBalancerMetadataAction()).doExecute(creationContext, payload, new HashMap<>());
+
+        verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
+        verify(eventBus).notify("LOADBALANCERMETADATAREQUEST", event);
+        Object responsePayload = payloadArgumentCaptor.getValue();
+        assertThat(responsePayload).isInstanceOf(LoadBalancerMetadataRequest.class);
+        LoadBalancerMetadataRequest request = (LoadBalancerMetadataRequest) responsePayload;
+        assertThat(request.getResourceId()).isEqualTo(STACK_ID);
+        assertThat(request.getCloudContext()).isSameAs(cloudContext);
+        assertThat(request.getCloudCredential()).isSameAs(cloudCredential);
+        assertThat(request.getCloudStack()).isSameAs(convertedCloudStack);
+        assertThat(request.getTypesPresentInStack()).containsExactly(LoadBalancerType.PUBLIC);
+        assertThat(request.getCloudResources()).containsExactly(cloudResource);
     }
 
     public Map<Object, Object> createVariables(Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<String>> hostGroupsWithHostNames,
