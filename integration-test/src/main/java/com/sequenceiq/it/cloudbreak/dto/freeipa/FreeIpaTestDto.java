@@ -456,6 +456,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     public FreeIpaTestDto awaitForHealthyInstances() {
+        refresh();
         Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> instanceStatusMap =
                 getInstanceStatusMapIfAvailableInResponse(() -> freeIpaInstanceUtil.getInstanceStatusMap(getResponse()));
         return awaitForFreeIpaInstance(instanceStatusMap);
