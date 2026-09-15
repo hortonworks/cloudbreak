@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.ums.VirtualGroupTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -161,7 +163,11 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
     }
 
     private Set<String> getIpAddresses(TestContext testContext) {
-        Set<String> ipAddresses = testContext.get(FreeIpaTestDto.class).getResponse().getFreeIpa().getServerIp();
+        Set<String> ipAddresses = testContext.get(FreeIpaTestDto.class).getResponse().getInstanceGroups().stream()
+                .map(InstanceGroupResponse::getMetaData)
+                .flatMap(Set::stream)
+                .map(InstanceMetaDataResponse::getPrivateIp)
+                .collect(Collectors.toSet());
         ipAddresses.addAll(getSdxInternalStackPrivateIpAddressesExcludingIdBroker(testContext));
 
         return ipAddresses;
