@@ -48,8 +48,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
@@ -332,16 +330,16 @@ public class StackUpscaleActions {
 
     @Bean(name = "UPSCALE_IMAGE_FALLBACK_STATE")
     public Action<?, ?> imageFallbackAction() {
-        return new AbstractStackCreationAction<>(UpscaleStackImageFallbackResult.class) {
+        return new AbstractStackUpscaleAction<>(UpscaleStackImageFallbackResult.class) {
 
             @Override
-            protected void doExecute(StackCreationContext context, UpscaleStackImageFallbackResult payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, UpscaleStackImageFallbackResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.fireImageFallbackFlowMessage(context.getStackId(), payload.getNotificationMessage());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackCreationContext context) {
+            protected Selectable createRequest(StackScalingFlowContext context) {
                 return new ImageFallbackRequest(context.getStackId(), context.getCloudContext());
             }
 
@@ -415,9 +413,9 @@ public class StackUpscaleActions {
 
     @Bean("UPSCALE_UPDATE_LOAD_BALANCERS_STATE")
     public Action<?, ?> upscaleUpdateLoadBalancersAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackUpscaleAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 CloudStack cloudStack = cloudStackConverter.convert(stack);
                 UpscaleUpdateLoadBalancersRequest request =
@@ -429,19 +427,19 @@ public class StackUpscaleActions {
 
     @Bean("UPSCALE_COLLECT_LOAD_BALANCER_METADATA_STATE")
     public Action<?, ?> upscaleCollectLoadBalancerMetadataAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackUpscaleAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
                 StackDto stack = stackDtoService.getById(context.getStackId());
-                CloudStack cloudStack = cloudStackConverter.convert(stack);
                 List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
                         .map(LoadBalancer::getType)
                         .collect(Collectors.toList());
                 List<CloudResource> cloudResources = resourceService.getAllByStackId(stack.getId()).stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
+                LOGGER.info("Updating load balancer metadata for stack {}, with load balancer types: {}", stack.getName(), loadBalancerTypes);
                 LoadBalancerMetadataRequest request = new LoadBalancerMetadataRequest(context.getStackId(), context.getCloudContext(),
-                        context.getCloudCredential(), cloudStack, loadBalancerTypes, cloudResources);
+                        context.getCloudCredential(), null, loadBalancerTypes, cloudResources);
                 sendEvent(context, request.selector(), request);
             }
         };

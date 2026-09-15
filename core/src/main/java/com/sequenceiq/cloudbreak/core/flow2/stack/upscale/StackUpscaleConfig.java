@@ -38,6 +38,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_LOAD_BALANCERS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_LOAD_BALANCERS_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_LOAD_BALANCERS_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_FAILURE_EVENT;
@@ -99,6 +100,8 @@ public class StackUpscaleConfig extends StackStatusFinalizerAbstractFlowConfig<S
                     .failureEvent(EXTEND_METADATA_FAILURE_EVENT)
                     .from(EXTEND_METADATA_FINISHED_STATE).to(UPSCALE_UPDATE_LOAD_BALANCERS_STATE).event(UPSCALE_UPDATE_LOAD_BALANCERS_EVENT)
                     .failureEvent(EXTEND_METADATA_FINISHED_FAILURE_EVENT)
+                    .from(UPSCALE_UPDATE_LOAD_BALANCERS_STATE).to(UPSCALE_UPDATE_USERDATA_SECRETS_STATE)
+                    .event(UPSCALE_UPDATE_USERDATA_SECRETS_EVENT).failureEvent(UPSCALE_UPDATE_LOAD_BALANCERS_FAILURE_EVENT)
                     .from(UPSCALE_UPDATE_LOAD_BALANCERS_STATE).to(UPSCALE_COLLECT_LOAD_BALANCER_METADATA_STATE)
                     .event(UPSCALE_UPDATE_LOAD_BALANCERS_FINISHED_EVENT).failureEvent(UPSCALE_UPDATE_LOAD_BALANCERS_FAILURE_EVENT)
                     .from(UPSCALE_COLLECT_LOAD_BALANCER_METADATA_STATE).to(UPSCALE_UPDATE_USERDATA_SECRETS_STATE)

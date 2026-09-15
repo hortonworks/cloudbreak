@@ -25,7 +25,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.Bean;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -65,8 +68,6 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -242,9 +243,9 @@ class StackUpscaleActionsTest {
         return action;
     }
 
-    private AbstractStackCreationAction<StackEvent> getUpscaleCollectLoadBalancerMetadataAction() {
-        AbstractStackCreationAction<StackEvent> action =
-                (AbstractStackCreationAction<StackEvent>) underTest.upscaleCollectLoadBalancerMetadataAction();
+    private AbstractStackUpscaleAction<StackEvent> getUpscaleCollectLoadBalancerMetadataAction() {
+        AbstractStackUpscaleAction<StackEvent> action =
+                (AbstractStackUpscaleAction<StackEvent>) underTest.upscaleCollectLoadBalancerMetadataAction();
         initActionPrivateFields(action);
         return action;
     }
@@ -429,13 +430,10 @@ class StackUpscaleActionsTest {
 
     @Test
     void testUpscaleCollectLoadBalancerMetadataActionCollectsTypesAndResourcesIntoRequest() throws Exception {
-        StackCreationContext creationContext = new StackCreationContext(flowParameters, stack, "AWS", cloudContext, cloudCredential);
         StackEvent payload = new StackEvent(STACK_ID);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getId()).thenReturn(STACK_ID);
-        CloudStack convertedCloudStack = mock(CloudStack.class);
-        when(cloudStackConverter.convert(stackDto)).thenReturn(convertedCloudStack);
         LoadBalancer loadBalancer = mock(LoadBalancer.class);
         when(loadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
         when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(Set.of(loadBalancer));
@@ -445,7 +443,7 @@ class StackUpscaleActionsTest {
         when(cloudResourceConverter.convert(resource)).thenReturn(cloudResource);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
-        new AbstractActionTestSupport<>(getUpscaleCollectLoadBalancerMetadataAction()).doExecute(creationContext, payload, new HashMap<>());
+        new AbstractActionTestSupport<>(getUpscaleCollectLoadBalancerMetadataAction()).doExecute(context, payload, new HashMap<>());
 
         verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
         verify(eventBus).notify("LOADBALANCERMETADATAREQUEST", event);
@@ -455,7 +453,7 @@ class StackUpscaleActionsTest {
         assertThat(request.getResourceId()).isEqualTo(STACK_ID);
         assertThat(request.getCloudContext()).isSameAs(cloudContext);
         assertThat(request.getCloudCredential()).isSameAs(cloudCredential);
-        assertThat(request.getCloudStack()).isSameAs(convertedCloudStack);
+        assertThat(request.getCloudStack()).isNull();
         assertThat(request.getTypesPresentInStack()).containsExactly(LoadBalancerType.PUBLIC);
         assertThat(request.getCloudResources()).containsExactly(cloudResource);
     }
@@ -580,6 +578,23 @@ class StackUpscaleActionsTest {
             verify(eventBus).notify("BOOTSTRAP_NEW_NODES", event);
             StackEvent event = (StackEvent) payloadArgumentCaptor.getValue();
             assertEquals(STACK_ID, event.getResourceId());
+        }
+    }
+
+    @Test
+    void allUpscaleActionBeansExtendAbstractStackUpscaleAction() {
+        Set<String> nonUpscaleActionBeans = Set.of("stackUpscaleFailedAction");
+        List<Method> actionBeanMethods = Arrays.stream(StackUpscaleActions.class.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(Bean.class))
+                .filter(method -> !nonUpscaleActionBeans.contains(method.getName()))
+                .toList();
+
+        assertThat(actionBeanMethods).as("Expected StackUpscaleActions to declare @Bean action methods").isNotEmpty();
+        for (Method method : actionBeanMethods) {
+            Object action = ReflectionTestUtils.invokeMethod(underTest, method.getName());
+            assertThat(action)
+                    .as("Action bean '%s' must extend AbstractStackUpscaleAction", method.getName())
+                    .isInstanceOf(AbstractStackUpscaleAction.class);
         }
     }
 }
