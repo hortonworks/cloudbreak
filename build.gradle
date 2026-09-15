@@ -116,6 +116,7 @@ allprojects {
         force "org.ow2.asm:asm:9.10.1"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
+        force "com.google.http-client:google-http-client:$googleHttpClientVersion"
         force "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"
         force "ch.qos.logback:logback-classic:$logbackVersion"
         force "ch.qos.logback:logback-core:$logbackVersion"

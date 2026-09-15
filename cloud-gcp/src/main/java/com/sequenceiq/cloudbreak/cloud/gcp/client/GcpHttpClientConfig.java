@@ -1,14 +1,21 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
+import static com.sequenceiq.common.api.encryptionprofile.TlsVersion.TLS_1_3;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 
+import jakarta.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,16 +23,49 @@ import com.google.api.client.googleapis.GoogleUtils;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.util.SecurityUtils;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 
 @Configuration
 public class GcpHttpClientConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpHttpClientConfig.class);
 
+    private static final String CIPHER_SUITE_SEPARATOR = ":";
+
+    private static final String[] TLS_PROTOCOLS = {TLS_1_3.getVersion()};
+
+    @Value("${cb.gcp.tlsHardening:false}")
+    private boolean tlsHardeningEnabled;
+
+    @Inject
+    private EncryptionProfileProvider encryptionProfileProvider;
+
     @Bean
     public HttpTransport httpTransport() throws GeneralSecurityException, IOException {
-        return new NetHttpTransport.Builder()
-                .trustCertificates(getCertificateTrustStore())
-                .build();
+        NetHttpTransport.Builder builder = new NetHttpTransport.Builder()
+                .trustCertificates(getCertificateTrustStore());
+        applyTlsHardeningIfEnabled(builder);
+        return builder.build();
+    }
+
+    private void applyTlsHardeningIfEnabled(NetHttpTransport.Builder builder) {
+        if (tlsHardeningEnabled) {
+            String[] ciphers = resolveCipherSuites();
+            builder.setSslSocketConfigurator(socket -> {
+                socket.setEnabledProtocols(TLS_PROTOCOLS);
+                socket.setEnabledCipherSuites(ciphers);
+
+            });
+            LOGGER.info("Initialising GCP HTTP client with TLS protocols={} ciphers={}",
+                    Arrays.toString(TLS_PROTOCOLS), Arrays.toString(ciphers));
+        } else {
+            LOGGER.info("GCP HTTP client TLS hardening is disabled");
+        }
+    }
+
+    private String[] resolveCipherSuites() {
+        String cipherSuites = encryptionProfileProvider.getTls13RecommendedCipherSuites(true);
+        LOGGER.debug("TLS 1.3 recommended cipher suites: {}", cipherSuites);
+        return StringUtils.isBlank(cipherSuites) ? new String[0] : cipherSuites.split(CIPHER_SUITE_SEPARATOR);
     }
 
     private KeyStore getCertificateTrustStore() throws IOException, GeneralSecurityException {
