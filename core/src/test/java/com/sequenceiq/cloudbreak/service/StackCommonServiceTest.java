@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,6 +53,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesR
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -59,12 +63,15 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -145,6 +152,9 @@ class StackCommonServiceTest {
     private StackScaleV4RequestToUpdateStackV4RequestConverter stackScaleV4RequestToUpdateStackV4RequestConverter;
 
     @Mock
+    private StackScaleV4RequestToUpdateClusterV4RequestConverter stackScaleV4RequestToUpdateClusterV4RequestConverter;
+
+    @Mock
     private CloudParameterCache cloudParameterCache;
 
     @Mock
@@ -179,6 +189,9 @@ class StackCommonServiceTest {
 
     @Mock
     private SaltVersionUpgradeService saltVersionUpgradeService;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -652,7 +665,83 @@ class StackCommonServiceTest {
 
     @ParameterizedTest
     @MethodSource("scalingAdjustmentProvider")
-    void testPutScalingInWorkspaceWhenUpscalingKraftHostGroup(String cloudPlatform, String platformVariant,
+    void testPutScalingInWorkspaceWhenUpscalingKraftHostGroupIsAllowedOnSupportedRuntime(String cloudPlatform, String platformVariant,
+            AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
+        String group = "kraft";
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getPlatformVariant()).thenReturn(platformVariant);
+        when(stackView.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stackView.getResourceCrn()).thenReturn(STACK_CRN.getCrn());
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
+        StackScaleV4Request updateRequest = new StackScaleV4Request();
+        updateRequest.setGroup(group);
+        updateRequest.setAdjustmentType(inputAdjustmentType);
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustment.setScalingAdjustment(1);
+        instanceGroupAdjustment.setInstanceGroup(group);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
+        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct();
+        cdh.setName("CDH");
+        cdh.setVersion("7.3.2-1.cdh7.3.2.p10000.80393083");
+        when(clusterComponentConfigProvider.getCdhProduct(anyLong())).thenReturn(Optional.of(cdh));
+        when(cloudParameterCache.isUpScalingSupported(anyString())).thenReturn(Boolean.TRUE);
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(cloudbreakUser.getUserCrn()).thenReturn("crn:cdp:" + Crn.Service.AUTOSCALE.getName() + ":us-west-1:altus:user:__internal__actor__");
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(regionAwareInternalCrnGeneratorFactory.autoscale()).thenReturn(regionAwareInternalCrnGenerator);
+        when(multiAzValidator.validateNetworkScaleRequest(any(), any(), anyString())).thenReturn(ValidationResult.builder().build());
+        lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
+
+        underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest);
+
+        verify(saltVersionUpgradeService, times(1)).validateSaltVersion(eq(stack));
+        verify(stackOperationService, times(1)).updateNodeCount(eq(stack), eq(instanceGroupAdjustment), anyBoolean());
+    }
+
+    @ParameterizedTest
+    @MethodSource("scalingAdjustmentProvider")
+    void testPutScalingInWorkspaceWhenDownscalingKraftHostGroupIsAllowedOnSupportedRuntime(String cloudPlatform, String platformVariant,
+            AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
+        String group = "kraft";
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getPlatformVariant()).thenReturn(platformVariant);
+        when(stackView.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stackView.getResourceCrn()).thenReturn(STACK_CRN.getCrn());
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
+        StackScaleV4Request updateRequest = new StackScaleV4Request();
+        updateRequest.setGroup(group);
+        updateRequest.setAdjustmentType(inputAdjustmentType);
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustment.setScalingAdjustment(-1);
+        instanceGroupAdjustment.setInstanceGroup(group);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
+        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct();
+        cdh.setName("CDH");
+        cdh.setVersion("7.3.2-1.cdh7.3.2.p10000.80393083");
+        when(clusterComponentConfigProvider.getCdhProduct(anyLong())).thenReturn(Optional.of(cdh));
+        when(cloudParameterCache.isDownScalingSupported(anyString())).thenReturn(Boolean.TRUE);
+        when(multiAzValidator.validateNetworkScaleRequest(any(), any(), anyString())).thenReturn(ValidationResult.builder().build());
+        UpdateClusterV4Request updateClusterV4Request = new UpdateClusterV4Request();
+        when(stackScaleV4RequestToUpdateClusterV4RequestConverter.convert(any())).thenReturn(updateClusterV4Request);
+        lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
+
+        underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest);
+
+        verify(saltVersionUpgradeService, never()).validateSaltVersion(any());
+        verify(clusterCommonService, times(1)).put(eq(stack), eq(updateClusterV4Request));
+    }
+
+    @ParameterizedTest
+    @MethodSource("scalingAdjustmentProvider")
+    void testPutScalingInWorkspaceKraftHostGroupIsBlockedOnRuntimeVersion(String cloudPlatform, String platformVariant,
             AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
         String group = "kraft";
         StackDto stack = mock(StackDto.class);
@@ -668,36 +757,11 @@ class StackCommonServiceTest {
         instanceGroupAdjustment.setScalingAdjustment(1);
         instanceGroupAdjustment.setInstanceGroup(group);
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
-        ArgumentCaptor<StackScaleV4Request> scaleRequestCaptor = ArgumentCaptor.forClass(StackScaleV4Request.class);
-        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(scaleRequestCaptor.capture())).thenReturn(updateStackV4Request);
-        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
-        lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
-
-        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest));
-        assertEquals(actual.getMessage(), "Resizing is not supported for kraft host group");
-    }
-
-    @ParameterizedTest
-    @MethodSource("scalingAdjustmentProvider")
-    void testPutScalingInWorkspaceWhenDownscalingKraftHostGroup(String cloudPlatform, String platformVariant,
-            AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
-        String group = "kraft";
-        StackDto stack = mock(StackDto.class);
-        StackView stackView = mock(StackView.class);
-        when(stack.getStack()).thenReturn(stackView);
-        when(stack.getPlatformVariant()).thenReturn(platformVariant);
-        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
-        StackScaleV4Request updateRequest = new StackScaleV4Request();
-        updateRequest.setGroup(group);
-        updateRequest.setAdjustmentType(inputAdjustmentType);
-        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
-        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
-        instanceGroupAdjustment.setScalingAdjustment(-1);
-        instanceGroupAdjustment.setInstanceGroup(group);
-        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
-        ArgumentCaptor<StackScaleV4Request> scaleRequestCaptor = ArgumentCaptor.forClass(StackScaleV4Request.class);
-        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(scaleRequestCaptor.capture())).thenReturn(updateStackV4Request);
-        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct();
+        cdh.setName("CDH");
+        cdh.setVersion("7.3.2-1.cdh7.3.2.p0.80393083");
+        when(clusterComponentConfigProvider.getCdhProduct(anyLong())).thenReturn(Optional.of(cdh));
         lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest));

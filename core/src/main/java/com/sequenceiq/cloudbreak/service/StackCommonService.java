@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2_10000;
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,7 +43,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -68,6 +73,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -166,6 +172,9 @@ public class StackCommonService {
 
     @Inject
     private CloudbreakFlowRetryService cloudbreakFlowRetryService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
@@ -358,7 +367,12 @@ public class StackCommonService {
 
     private void validateScalingRequest(StackView stack, String instanceGroupName, Integer scalingAdjustment) {
         if (KRAFT_HOST_GROUP.equalsIgnoreCase(instanceGroupName)) {
-            throw new BadRequestException(String.format("Resizing is not supported for %s host group", instanceGroupName));
+            boolean kraftResizeSupported = getCdhFullVersion(stack)
+                    .map(v -> CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(v, CLOUDERA_STACK_VERSION_7_3_2_10000))
+                    .orElse(false);
+            if (!kraftResizeSupported) {
+                throw new BadRequestException(String.format("Resizing is not supported for %s host group", instanceGroupName));
+            }
         }
         if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
@@ -367,6 +381,13 @@ public class StackCommonService {
             throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
         nodeCountLimitValidator.validateScale(stack, scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+    }
+
+    private Optional<String> getCdhFullVersion(StackView stack) {
+        return clusterComponentConfigProvider.getCdhProduct(stack.getClusterId())
+                .map(ClouderaManagerProduct::getVersion)
+                .map(CdhVersionProvider::getCdhFullVersionFromVersionString)
+                .filter(StringUtils::isNotBlank);
     }
 
     private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
