@@ -54,6 +54,7 @@ dependencies {
     }
     implementation     group: 'com.google.guava',          name: 'guava',                                      version: guavaVersion
 
+    testImplementation project(path: ':cloud-common', configuration: 'tests')
     testImplementation project(path: ':core-model', configuration: 'tests')
     testImplementation project(':cloud-reactor')
     testImplementation project(':template-manager-tag')

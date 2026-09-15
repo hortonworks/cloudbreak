@@ -15,14 +15,24 @@ IAM policy documents under this directory are valid JSON for AWS APIs and cannot
 policyFile: aws-environment-minimal-policy.json   # must match the IAM JSON file name
 title: Short human title
 summary: When this policy is used and any important scope notes (tags, GovCloud, etc.)
-permissions:
-  "service:Action": What CDP uses this permission for during onboarding or operations.
+permissionGroups:
+  ec2:
+    description: Required to provision cluster VMs and their VPC networking.
+    permissions:
+      "ec2:RunInstances": What Cloudera uses this permission for.
 ```
 
 - Keys under `permissions` must match every `Action` in the IAM policy (including wildcards such as `ec2:*`).
 - Always quote permission keys (for example `"ec2:RunInstances"`). IAM actions always use the `service:operation` form, and YAML treats `:` as the key/value separator unless the key is quoted.
 - When adding or removing actions in the `.json` file, update the matching `-descriptions.yaml` entry.
 - Descriptions should explain **what Cloudbreak uses each permission for** (credential prerequisites, connectors, CloudFormation stacks), not generic AWS API behavior.
+
+## Permission groups
+
+- Each entry under `permissionGroups` has a stable group name, a non-empty `description`, and a `permissions` map.
+- Group descriptions explain why Cloudera needs the related resources in the customer's account. Groups represent a shared purpose, not cloud resource groups.
+- Every policy permission must occur in exactly one group; retain its individual description under that group's `permissions` map.
+- Validation checks group descriptions and membership, rejects duplicate keys, and compares all grouped permissions with the policy JSON.
 
 ## Validation
 

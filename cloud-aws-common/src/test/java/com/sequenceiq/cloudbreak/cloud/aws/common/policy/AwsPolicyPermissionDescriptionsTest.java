@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.policy;
 
+import static com.sequenceiq.cloudbreak.cloud.policy.PolicyPermissionDescriptionsTestUtil.loadDescriptions;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -7,16 +8,14 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.cloud.policy.PolicyPermissionDescriptionsTestUtil.PolicyDescriptions;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 /**
@@ -77,29 +76,10 @@ class AwsPolicyPermissionDescriptionsTest {
         return actions;
     }
 
-    @SuppressWarnings("unchecked")
-    private static PolicyDescriptions loadDescriptions(String yamlContent) {
-        Object loaded = new Yaml().load(yamlContent);
-        assertThat(loaded).isInstanceOf(Map.class);
-        Map<String, Object> root = (Map<String, Object>) loaded;
-        Object permissions = root.get("permissions");
-        assertThat(permissions).isInstanceOf(Map.class);
-        Map<String, String> permissionDescriptions = ((Map<?, ?>) permissions).entrySet().stream()
-                .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue())));
-        return new PolicyDescriptions(
-                String.valueOf(root.get("policyFile")),
-                String.valueOf(root.get("title")),
-                String.valueOf(root.get("summary")),
-                permissionDescriptions);
-    }
-
     private static String readClasspath(String path) throws IOException {
         try (InputStream in = AwsPolicyPermissionDescriptionsTest.class.getClassLoader().getResourceAsStream(path)) {
             assertThat(in).as("classpath resource %s", path).isNotNull();
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
-    }
-
-    private record PolicyDescriptions(String policyFile, String title, String summary, Map<String, String> permissions) {
     }
 }

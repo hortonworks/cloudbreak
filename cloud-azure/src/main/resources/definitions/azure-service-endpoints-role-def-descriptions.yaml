@@ -1,8 +1,6 @@
-# Permission descriptions for azure-minimal-role-def.json
-# Keep in sync with the custom role JSON; validated by AzurePolicyPermissionDescriptionsTest.
-policyFile: azure-minimal-role-def.json
-title: Azure Cloudera platform environment minimal custom role (single resource group)
-summary: Narrower custom role JSON Cloudera platform exposes as MinimalRoleDefinition in granular credential prerequisites (AzureCredentialConnector). Scoped to one resource group for minimal Azure environment credentials. Azure connectors use these Actions and DataActions when deploying environment stacks within the assigned resource group.
+policyFile: azure-service-endpoints-role-def.json
+title: Azure Cloudera platform single resource group role with service endpoints
+summary: Documents role definition for provisioning Cloudera resources in an existing resource group using service endpoints.
 permissionGroups:
   authorization:
     description: Required to inspect role assignments and authorization metadata when validating the provisioning credential.
@@ -31,29 +29,29 @@ permissionGroups:
   databases:
     description: Required to provision and manage PostgreSQL databases used by Cloudera clusters, including their network access and configuration.
     permissions:
-      "Microsoft.DBforPostgreSQL/flexibleServers/delete": "Cloudera platform deletes flexible PostgreSQL servers during environment cleanup."
-      "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write": "Cloudera platform configures flexible server firewall rules for environment access."
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action": "Cloudera platform approves private endpoint connections to flexible PostgreSQL servers."
-      "Microsoft.DBforPostgreSQL/flexibleServers/read": "Cloudera platform reads flexible server metadata for environment PostgreSQL databases."
-      "Microsoft.DBforPostgreSQL/flexibleServers/start/action": "Cloudera platform starts flexible PostgreSQL servers after environment recovery."
-      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action": "Cloudera platform stops flexible PostgreSQL servers during maintenance."
-      "Microsoft.DBforPostgreSQL/flexibleServers/write": "Cloudera platform provisions flexible PostgreSQL servers in the resource group."
+      "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write": "Cloudera platform adjusts PostgreSQL flexible server parameters during Azure environment database setup."
+      "Microsoft.DBforPostgreSQL/flexibleServers/delete": "Cloudera platform deletes PostgreSQL flexible servers when tearing down Azure environments."
+      "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write": "Cloudera platform configures firewall rules on PostgreSQL flexible servers for environment connectivity."
+      "Microsoft.DBforPostgreSQL/flexibleServers/read": "Cloudera platform reads Azure database for PostgreSQL flexible server metadata for environment databases."
+      "Microsoft.DBforPostgreSQL/flexibleServers/start/action": "Cloudera platform starts stopped PostgreSQL flexible servers during Azure environment recovery."
+      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action": "Cloudera platform stops PostgreSQL flexible servers during Azure environment maintenance."
+      "Microsoft.DBforPostgreSQL/flexibleServers/write": "Cloudera platform creates and updates PostgreSQL flexible servers for Azure environment database workloads."
       "Microsoft.DBforPostgreSQL/servers/delete": "Cloudera platform deletes PostgreSQL servers during environment teardown."
-      "Microsoft.DBforPostgreSQL/servers/privateEndpointConnectionsApproval/action": "Cloudera platform approves private endpoint connections to single-server PostgreSQL instances."
       "Microsoft.DBforPostgreSQL/servers/read": "Cloudera platform reads single-server PostgreSQL metadata for environment databases."
-      "Microsoft.DBforPostgreSQL/servers/write": "Cloudera platform creates and updates PostgreSQL servers for environment database workloads."
+      "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/write": "Cloudera platform links PostgreSQL servers to environment virtual networks using VNet rules."
+      "Microsoft.DBforPostgreSQL/servers/write": "Cloudera platform creates and updates single-server PostgreSQL instances for legacy Azure environment stacks."
   identities:
     description: Required to discover and assign managed identities that give cluster resources access to customer Azure services.
     permissions:
-      "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action": "Cloudera platform assigns managed identities to environment VMs in the scoped resource group."
-      "Microsoft.ManagedIdentity/userAssignedIdentities/read": "Cloudera platform reads managed identities assigned to environment resources in the resource group."
+      "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action": "Cloudera platform assigns user-assigned managed identities to Azure environment VMs and services."
+      "Microsoft.ManagedIdentity/userAssignedIdentities/read": "Cloudera platform reads managed identity metadata used by Azure environment credentials."
   load-balancing:
     description: Required to distribute traffic to cluster hosts through Azure load balancers and their backend pools.
     permissions:
-      "Microsoft.Network/loadBalancers/backendAddressPools/join/action": "Cloudera platform registers environment VM NICs in load balancer backend pools."
+      "Microsoft.Network/loadBalancers/backendAddressPools/join/action": "Cloudera platform joins environment VM NICs to load balancer backend pools for Azure ingress."
       "Microsoft.Network/loadBalancers/delete": "Cloudera platform deletes load balancers when decommissioning environment ingress."
       "Microsoft.Network/loadBalancers/read": "Cloudera platform reads load balancer configuration for environment endpoint health."
-      "Microsoft.Network/loadBalancers/write": "Cloudera platform creates and updates load balancers for environment cluster ingress."
+      "Microsoft.Network/loadBalancers/write": "Cloudera platform creates and updates load balancers fronting Azure environment cluster endpoints."
   networking:
     description: Required to connect cluster VMs through virtual networks, subnets, network interfaces, and IP addresses, and control traffic with security groups.
     permissions:
@@ -71,31 +69,13 @@ permissionGroups:
       "Microsoft.Network/publicIPAddresses/read": "Cloudera platform reads public IP metadata for environment ingress endpoints."
       "Microsoft.Network/publicIPAddresses/write": "Cloudera platform creates and updates public IPs for environment gateway nodes."
       "Microsoft.Network/virtualNetworks/delete": "Cloudera platform deletes VNets when tearing down single resource group Azure environments."
-      "Microsoft.Network/virtualNetworks/join/action": "Cloudera platform joins services to environment VNets for private connectivity."
       "Microsoft.Network/virtualNetworks/read": "Cloudera platform reads VNet configuration for single resource group Azure environment networking."
       "Microsoft.Network/virtualNetworks/subnets/delete": "Cloudera platform deletes subnets during single resource group environment decommission."
       "Microsoft.Network/virtualNetworks/subnets/join/action": "Cloudera platform joins VMs and services to environment subnets."
+      "Microsoft.Network/virtualNetworks/subnets/joinViaServiceEndpoint/action": "Cloudera platform connects Azure services to environment subnets through service endpoints."
       "Microsoft.Network/virtualNetworks/subnets/read": "Cloudera platform reads subnet definitions for Azure environment host placement."
       "Microsoft.Network/virtualNetworks/subnets/write": "Cloudera platform creates and updates subnets for environment host groups."
       "Microsoft.Network/virtualNetworks/write": "Cloudera platform creates and updates VNets for environment subnets in the resource group."
-  private-connectivity:
-    description: Required to connect Cloudera resources to Azure services through private endpoints and resolve those endpoints using private DNS.
-    permissions:
-      "Microsoft.Network/privateDnsZones/A/delete": "Cloudera platform deletes A records when removing environment private DNS entries."
-      "Microsoft.Network/privateDnsZones/A/read": "Cloudera platform reads A records in private DNS zones for environment service discovery."
-      "Microsoft.Network/privateDnsZones/A/write": "Cloudera platform creates A records mapping environment private endpoints in DNS zones."
-      "Microsoft.Network/privateDnsZones/delete": "Cloudera platform deletes private DNS zones during environment cleanup."
-      "Microsoft.Network/privateDnsZones/join/action": "Cloudera platform links VNets to private DNS zones for environment name resolution."
-      "Microsoft.Network/privateDnsZones/read": "Cloudera platform reads private DNS zones for environment private-link name resolution."
-      "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete": "Cloudera platform deletes VNet links during environment DNS cleanup."
-      "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read": "Cloudera platform reads VNet links on private DNS zones."
-      "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write": "Cloudera platform creates VNet links connecting environment networks to private DNS."
-      "Microsoft.Network/privateDnsZones/write": "Cloudera platform creates and updates private DNS zones for environment private link."
-      "Microsoft.Network/privateEndpoints/delete": "Cloudera platform deletes private endpoints during single resource group environment teardown."
-      "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/read": "Cloudera platform reads DNS zone group bindings on environment private endpoints."
-      "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/write": "Cloudera platform configures DNS zone groups for environment private endpoint resolution."
-      "Microsoft.Network/privateEndpoints/read": "Cloudera platform reads private endpoint state for environment database and storage connectivity."
-      "Microsoft.Network/privateEndpoints/write": "Cloudera platform creates private endpoints linking environment services over private link."
   deployments:
     description: Required to submit, inspect, and clean up ARM deployments that provision Cloudera infrastructure.
     permissions:
@@ -115,7 +95,7 @@ permissionGroups:
   storage:
     description: Required to manage storage accounts, containers, and data used by Cloudera clusters, including storage access keys and network associations.
     permissions:
-      "Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action": "Cloudera platform clears VNet/subnet associations on storage during resource-group-scoped cleanup."
+      "Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action": "Cloudera platform removes stale VNet/subnet associations on storage accounts during Azure environment cleanup."
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action": "Cloudera platform adds block blobs to environment storage containers (data plane)."
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete": "Cloudera platform deletes blobs during environment storage cleanup (data plane)."
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read": "Cloudera platform reads blobs in environment storage containers (data plane, resource group scope)."
@@ -123,10 +103,10 @@ permissionGroups:
       "Microsoft.Storage/storageAccounts/blobServices/containers/delete": "Cloudera platform deletes blob containers during minimal-credential environment teardown."
       "Microsoft.Storage/storageAccounts/blobServices/containers/read": "Cloudera platform lists and reads blob container metadata for environment storage sync."
       "Microsoft.Storage/storageAccounts/blobServices/containers/write": "Cloudera platform creates and updates blob containers for environment datalake storage."
-      "Microsoft.Storage/storageAccounts/blobServices/write": "Cloudera platform configures blob services on environment storage accounts in the resource group."
-      "Microsoft.Storage/storageAccounts/delete": "Cloudera platform deletes environment storage accounts in the scoped resource group."
+      "Microsoft.Storage/storageAccounts/blobServices/write": "Cloudera platform configures blob services on storage accounts provisioned for Azure environments."
+      "Microsoft.Storage/storageAccounts/delete": "Cloudera platform deletes storage accounts when decommissioning Azure environment resources."
       "Microsoft.Storage/storageAccounts/fileServices/write": "Cloudera platform configures file shares on environment storage accounts when required."
-      "Microsoft.Storage/storageAccounts/listkeys/action": "Cloudera platform retrieves storage keys to wire Azure environment cluster access in the resource group."
+      "Microsoft.Storage/storageAccounts/listkeys/action": "Cloudera platform retrieves storage account keys to configure Azure environment cluster access."
       "Microsoft.Storage/storageAccounts/read": "Cloudera platform reads storage account metadata in the target resource group for minimal Azure environment credentials."
-      "Microsoft.Storage/storageAccounts/regeneratekey/action": "Cloudera platform rotates storage account keys for minimal-credential environment maintenance."
-      "Microsoft.Storage/storageAccounts/write": "Cloudera platform creates and updates environment storage accounts scoped to the single resource group."
+      "Microsoft.Storage/storageAccounts/regeneratekey/action": "Cloudera platform rotates storage account keys during Azure environment credential maintenance."
+      "Microsoft.Storage/storageAccounts/write": "Cloudera platform creates and updates storage accounts for Azure environment datalake and logs."
