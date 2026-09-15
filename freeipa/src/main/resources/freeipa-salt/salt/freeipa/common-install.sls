@@ -168,6 +168,25 @@ restart_sssd_if_reconfigured:
     - watch:
       - file: /etc/sssd/sssd.conf
 
+{%- if osMajorRelease == 7 or osMajorRelease == 8 %}
+/etc/sysctl.d/60-freeipa-tcp-keepalive.conf:
+  file.managed:
+    - user: root
+    - group: root
+    - mode: 644
+    - contents: |
+        # Managed by Salt (freeipa/common-install.sls) - CB-34105
+        net.ipv4.tcp_keepalive_time = 600
+        net.ipv4.tcp_keepalive_intvl = 30
+        net.ipv4.tcp_keepalive_probes = 5
+
+apply_freeipa_tcp_keepalive:
+  cmd.run:
+    - name: sysctl -p /etc/sysctl.d/60-freeipa-tcp-keepalive.conf
+    - onchanges:
+      - file: /etc/sysctl.d/60-freeipa-tcp-keepalive.conf
+{%- endif %}
+
 {%- if os == 'RedHat' and (osMajorRelease == 8 or osMajorRelease == 9) %}
 /etc/named/ipa-ext.conf:
   file.managed:
