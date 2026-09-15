@@ -12,6 +12,8 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 @Component
 public class CrnGeneratorService {
 
+    public static final String GLOBAL_DEFAULT_ACCOUNT = "cloudera_default";
+
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
@@ -21,11 +23,11 @@ public class CrnGeneratorService {
 
     public String createGlobalDefaultBlueprintCrn(String name) {
         String resourceId = name.toLowerCase(Locale.ROOT).replaceAll("[^a-zA-Z0-9]", "");
-        return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.CLUSTER_TEMPLATE, resourceId, "cloudera_default");
+        return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.CLUSTER_TEMPLATE, resourceId, GLOBAL_DEFAULT_ACCOUNT);
     }
 
     public String createGlobalDefaultClusterDefinitionCrn(String name) {
         String resourceId = name.toLowerCase(Locale.ROOT).replaceAll("[^a-zA-Z0-9]", "");
-        return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.CLUSTER_DEF, resourceId, "cloudera_default");
+        return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.CLUSTER_DEF, resourceId, GLOBAL_DEFAULT_ACCOUNT);
     }
 }

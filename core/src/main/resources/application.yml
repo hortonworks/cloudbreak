@@ -937,6 +937,9 @@ existing-stack-patcher:
       entitlement: GP2_TO_GP3_MIGRATION
     minifi-retry-config-fix:
       enabled: false
+    global-default-blueprint-migration:
+      enabled: true
+      entitlement: CDP_GLOBAL_DEFAULT_TEMPLATE
 
 dynamic-entitlement:
   entitlements:

@@ -368,6 +368,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return super.getByNameForWorkspaceId(name, workspaceId);
     }
 
+    public Optional<Blueprint> getGlobalDefaultBlueprintByName(String name) {
+        return blueprintRepository.findGlobalDefaultByName(name);
+    }
+
     @Override
     public Set<Blueprint> getByNamesForWorkspaceId(Set<String> names, Long workspaceId) {
         if (isGlobalDefaultTemplateEnabled()) {

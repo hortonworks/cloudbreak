@@ -21,6 +21,7 @@ public enum StackPatchType {
     FSTAB_VALIDATION,
     AWS_GP2_TO_GP3_MIGRATION,
     MINIFI_RETRY_CONFIG_FIX,
+    GLOBAL_DEFAULT_BLUEPRINT_MIGRATION,
     UNKNOWN,
     // for UT we need sample values
     TEST_PATCH_1,

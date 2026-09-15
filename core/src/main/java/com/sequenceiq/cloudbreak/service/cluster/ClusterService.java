@@ -514,6 +514,14 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         return repository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("Cluster '%s' not found", id)));
     }
 
+    public Cluster updateBlueprint(Long clusterId, Blueprint blueprint) {
+        Cluster cluster = getCluster(clusterId);
+        cluster.setBlueprint(blueprint);
+        cluster = repository.save(cluster);
+        LOGGER.info("Updated cluster: [blueprint: '{}', blueprintCrn: '{}'].", blueprint.getName(), blueprint.getResourceCrn());
+        return cluster;
+    }
+
     public Map<HostName, String> getHostStatuses(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
         return clusterApiConnectors.getConnector(stackDto).clusterStatusService().getHostStatusesRaw();
