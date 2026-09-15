@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -69,7 +70,9 @@ import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentTagUpdatePermissionService;
 import com.sequenceiq.environment.events.EventSenderService;
+import com.sequenceiq.environment.exception.EnvironmentTagUpdatePermissionMissingException;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -165,6 +168,9 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private EnvironmentValidatorService validatorService;
+
+    @MockBean
+    private EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService;
 
     @Mock
     private ValidationResult.ValidationResultBuilder validationResultBuilder;
@@ -1111,11 +1117,37 @@ class EnvironmentModificationServiceTest {
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
+        verify(environmentTagUpdatePermissionService).validate(environment);
         verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags, Set.of());
         ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(savedCaptor.capture());
         Environment saved = savedCaptor.getValue();
         assertThat(saved.getTags()).isEqualTo(tags);
+    }
+
+    @Test
+    void editTagsWithTagUpdatePropagationFailsWhenPermissionCheckFails() {
+        Map<String, String> userDefinedTags = new HashMap<>(Map.of("owner", "john doe"));
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withUserDefinedTags(userDefinedTags)
+                .withUpdateTagsOnExistingResources(true)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+
+        EnvironmentTagUpdatePermissionMissingException permissionException = new EnvironmentTagUpdatePermissionMissingException(
+                "missing action:ec2:CreateTags", List.of("ec2:CreateTags : *"), null);
+        doThrow(permissionException).when(environmentTagUpdatePermissionService).validate(environment);
+
+        EnvironmentTagUpdatePermissionMissingException thrown = assertThrows(EnvironmentTagUpdatePermissionMissingException.class,
+                () -> environmentModificationServiceUnderTest.edit(environment, environmentEditDto));
+
+        assertEquals("missing action:ec2:CreateTags", thrown.getMessage());
+        assertEquals(List.of("ec2:CreateTags : *"), thrown.getFailedActions());
+        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any(), any());
+        verify(environmentService, never()).save(any());
+        verify(environmentTagsDtoConverter, never()).getTags(any(), any());
     }
 
     @Test
@@ -1135,6 +1167,7 @@ class EnvironmentModificationServiceTest {
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
+        verify(environmentTagUpdatePermissionService, never()).validate(any());
         verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any(), any());
         ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(savedCaptor.capture());

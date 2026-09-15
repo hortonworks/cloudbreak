@@ -818,6 +818,9 @@
         "os": "centos7",
         "os_type": "redhat7",
         "uuid": "3cba3cd0-a169-4d62-8bc5-709df5f73b50",
+        "tags": {
+          "azure-hyper-v-generation": "2"
+        },
         "package-versions": {
           "cdh-build-number": "7150148",
           "cfm": "2.0.3.0-13",

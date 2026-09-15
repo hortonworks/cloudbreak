@@ -56,7 +56,7 @@ class AwsPlatformParametersTest {
 
     private static final List<String> RESOURCES_IN_SUB_DIR = List.of("cdp-bucket-access-policy", "cdp-datalake-admin-s3-policy", "cdp-dynamodb-policy",
             "cdp-log-policy", "cdp-ranger-audit-s3-policy", "cdp-ranger-raz-s3-policy", "datalake-backup-policy", "datalake-restore-policy",
-            "cdp-idbroker-assume-role-policy");
+            "cdp-idbroker-assume-role-policy", "cdp-tag-update-policy");
 
     private static final List<String> GOV_RESOURCES_IN_SUB_DIR = List.of("cdp-log-policy", "cdp-idbroker-assume-role-policy");
 

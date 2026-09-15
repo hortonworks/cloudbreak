@@ -54,6 +54,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentTagUpdatePermissionService;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -117,6 +118,8 @@ public class EnvironmentModificationService {
 
     private final FreeIpaService freeIpaService;
 
+    private final EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService;
+
     public EnvironmentModificationService(
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentService environmentService,
@@ -135,7 +138,8 @@ public class EnvironmentModificationService {
             EnvironmentTagsDtoConverter environmentTagsDtoConverter,
             EnvironmentValidatorService environmentValidatorService,
             EventSenderService eventSenderService,
-            FreeIpaService freeIpaService) {
+            FreeIpaService freeIpaService,
+            EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -154,6 +158,7 @@ public class EnvironmentModificationService {
         this.environmentTagsDtoConverter = environmentTagsDtoConverter;
         this.environmentValidatorService = environmentValidatorService;
         this.eventSenderService = eventSenderService;
+        this.environmentTagUpdatePermissionService = environmentTagUpdatePermissionService;
     }
 
     public EnvironmentDto edit(Environment environment, EnvironmentEditDto editDto) {
@@ -301,6 +306,9 @@ public class EnvironmentModificationService {
 
     private void editTags(EnvironmentEditDto editDto, Environment environment) {
         if (MapUtils.isNotEmpty(editDto.getUserDefinedTags())) {
+            if (editDto.isUpdateTagsOnExistingResources()) {
+                environmentTagUpdatePermissionService.validate(environment);
+            }
             EnvironmentTags environmentTags = environment.getEnvironmentTags();
             environment.setTags(environmentTagsDtoConverter.getTags(editDto, environmentTags));
             if (editDto.isUpdateTagsOnExistingResources()) {

@@ -69,6 +69,19 @@ public class AzurePermissionValidator {
         }
     }
 
+    /**
+     * Diffs the actions the tag-update flow needs against the role definitions assigned to the credential's service
+     * principal. Returned as data instead of a thrown {@link AzureResourceException} because the caller has to report
+     * the individual actions in a structured payload.
+     *
+     * @return a Pair of the missing actions and the explicitly denied ('notActions') ones
+     */
+    public Pair<Set<String>, Set<String>> findMissingTagUpdatePermissions(AzureClient client) {
+        Set<RoleDefinition> roleDefinitions = getRoleDefinitions(client);
+        List<String> requiredActions = azureRoleDefinitionProvider.loadAzureTagUpdateMinimalRoleDefinition().getActions();
+        return findMissingPermissions(getAllowedActions(roleDefinitions), getNotAllowedActions(roleDefinitions), requiredActions);
+    }
+
     private Set<RoleDefinition> getRoleDefinitionsForVault(AzureClient azureClient, Identity managedIdentity, Vault vault) {
         return azureClient.listRoleAssignmentsByServicePrincipal(managedIdentity.principalId()).stream()
                 .filter(roleAssignment -> vault.id().contains(roleAssignment.scope()))

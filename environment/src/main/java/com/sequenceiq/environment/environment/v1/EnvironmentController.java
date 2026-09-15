@@ -64,6 +64,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentC
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.environment.api.v1.environment.model.response.OutboundTypeValidationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
@@ -102,6 +103,9 @@ import com.sequenceiq.environment.environment.service.externalizedcompute.Extern
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentTagUpdatePermissionService;
+import com.sequenceiq.environment.environment.validation.validators.TagUpdatePermissionResult;
+import com.sequenceiq.environment.environment.verification.TagUpdatePermissionPolicyResponseConverter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.service.FlowProgressService;
@@ -164,6 +168,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EncryptionProfileFlowService encryptionProfileFlowService;
 
+    private final EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -189,7 +195,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentReactorFlowManager environmentReactorFlowManager,
             RedBeamsService redBeamsService,
             EnvironmentOutboundService environmentOutboundService,
-            EncryptionProfileFlowService encryptionProfileFlowService) {
+            EncryptionProfileFlowService encryptionProfileFlowService,
+            EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -214,6 +221,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.redBeamsService = redBeamsService;
         this.environmentOutboundService = environmentOutboundService;
         this.encryptionProfileFlowService = encryptionProfileFlowService;
+        this.environmentTagUpdatePermissionService = environmentTagUpdatePermissionService;
     }
 
     @Override
@@ -470,6 +478,24 @@ public class EnvironmentController implements EnvironmentEndpoint {
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(crn, accountId, ENVIRONMENT);
         Credential verifiedCredential = credentialService.verify(credential);
         return credentialConverter.convert(verifiedCredential);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = DESCRIBE_ENVIRONMENT)
+    public PolicyValidationErrorResponses getTagUpdatePermissionsByEnvName(@ResourceName String environmentName) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofName(environmentName));
+        TagUpdatePermissionResult result = environmentTagUpdatePermissionService.findMissingPermissions(environment);
+        return TagUpdatePermissionPolicyResponseConverter.convert(result.message(), result.failedActions());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public PolicyValidationErrorResponses getTagUpdatePermissionsByEnvCrn(@ResourceCrn String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofCrn(environmentCrn));
+        TagUpdatePermissionResult result = environmentTagUpdatePermissionService.findMissingPermissions(environment);
+        return TagUpdatePermissionPolicyResponseConverter.convert(result.message(), result.failedActions());
     }
 
     @Override

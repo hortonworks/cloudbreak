@@ -117,6 +117,8 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> cdpDatalakeRestorePolicyJson;
 
+    private Map<PolicyType, String> cdpTagUpdatePolicyJson;
+
     @PostConstruct
     public void init() {
         credentialPoliciesJson = initCBPolicyJson();
@@ -132,6 +134,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         cdpIdbrokerPolicyJson = initCdpIdbrokerAssumerPolicyJson();
         cdpDatalakeBackupPolicyJson = initCdpDatalakeBackupPolicyJson();
         cdpDatalakeRestorePolicyJson = initCdpDatalakeRestorePolicyJson();
+        cdpTagUpdatePolicyJson = initCdpTagUpdatePolicyJson();
     }
 
     @Override
@@ -297,6 +300,10 @@ public class AwsPlatformParameters implements PlatformParameters {
         return cdpDatalakeRestorePolicyJson;
     }
 
+    public Map<PolicyType, String> getCdpTagUpdatePolicyJson() {
+        return cdpTagUpdatePolicyJson;
+    }
+
     private VmRecommendations initVmRecommendations() {
         VmRecommendations result = null;
         String vmRecommendation = resourceDefinition("vm-recommendation");
@@ -366,6 +373,11 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> initCdpDatalakeRestorePolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "datalake-restore-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private Map<PolicyType, String> initCdpTagUpdatePolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-tag-update-policy");
         return getPolicyJson(resourceDefinition);
     }
 

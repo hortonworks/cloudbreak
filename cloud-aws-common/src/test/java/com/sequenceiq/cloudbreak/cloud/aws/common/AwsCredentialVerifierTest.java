@@ -34,6 +34,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialSettings;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
+import software.amazon.awssdk.services.iam.model.ContextEntry;
+import software.amazon.awssdk.services.iam.model.ContextKeyTypeEnum;
 import software.amazon.awssdk.services.iam.model.EvaluationResult;
 import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
 import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
@@ -254,6 +256,50 @@ public class AwsCredentialVerifierTest {
                 "expect if " + simulateRequestNumber + " simulate request has been sent");
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
                 assertEquals("arn", simulatePrincipalPolicyRequest.policySourceArn()));
+    }
+
+    @Test
+    public void tagUpdatePolicyCloudWatchActionsAreSimulatedWithResourceTagContext() throws IOException, AwsPermissionMissingException {
+        URL url = Resources.getResource("definitions/cdp/aws-cdp-tag-update-policy.json");
+        String tagUpdatePolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedTagUpdatePolicy = Base64Util.encode(tagUpdatePolicy);
+        Map<String, Object> awsParameters = new HashMap<>();
+        awsParameters.put("accessKey", "a");
+        awsParameters.put("secretKey", "b");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", new CloudCredentialSettings(true, false));
+
+        AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
+        when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
+
+        AmazonSecurityTokenServiceClient awsSecurityTokenService = mock(AmazonSecurityTokenServiceClient.class);
+        GetCallerIdentityResponse getCallerIdentityResult = GetCallerIdentityResponse.builder().arn("arn").build();
+        when(awsSecurityTokenService.getCallerIdentity(any(GetCallerIdentityRequest.class))).thenReturn(getCallerIdentityResult);
+        when(awsClient.createSecurityTokenService(any(AwsCredentialView.class))).thenReturn(awsSecurityTokenService);
+
+        ArgumentCaptor<SimulatePrincipalPolicyRequest> requestArgumentCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
+        when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture()))
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(List.of()).build());
+
+        awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedTagUpdatePolicy);
+
+        List<SimulatePrincipalPolicyRequest> cloudWatchTagRequests = requestArgumentCaptor.getAllValues().stream()
+                .filter(request -> request.actionNames().contains("cloudwatch:TagResource"))
+                .toList();
+        assertEquals(1, cloudWatchTagRequests.size(), "cloudwatch:TagResource must be simulated in exactly one request");
+        SimulatePrincipalPolicyRequest cloudWatchTagRequest = cloudWatchTagRequests.get(0);
+        assertThat(cloudWatchTagRequest.actionNames(), CoreMatchers.hasItem("cloudwatch:ListTagsForResource"));
+
+        assertEquals(1, cloudWatchTagRequest.contextEntries().size(),
+                "the CloudWatch statement's condition must be translated into exactly one simulation context entry");
+        ContextEntry contextEntry = cloudWatchTagRequest.contextEntries().get(0);
+        assertEquals("aws:ResourceTag/Cloudera-Resource-Name", contextEntry.contextKeyName());
+        assertEquals(ContextKeyTypeEnum.STRING, contextEntry.contextKeyType());
+        assertEquals(List.of("crn:cdp:*"), contextEntry.contextKeyValues());
+
+        requestArgumentCaptor.getAllValues().stream()
+                .filter(request -> !request.actionNames().contains("cloudwatch:TagResource"))
+                .forEach(request -> assertThat("only the CloudWatch statement is conditioned",
+                        request.contextEntries(), CoreMatchers.is(List.of())));
     }
 
     @Test

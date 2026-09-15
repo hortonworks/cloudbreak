@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.endpoint;
 
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
+import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.TAG_UPDATE_PERMISSIONS_NOTES;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.environment.api.v1.environment.model.response.OutboundTypeValidationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
@@ -308,6 +310,23 @@ public interface EnvironmentEndpoint {
             operationId = "verifyCredentialByEnvCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponse verifyCredentialByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+
+    @GET
+    @Path("/name/{name}/tag_update_permissions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = EnvironmentOpDescription.TAG_UPDATE_PERMISSIONS_BY_NAME, description = TAG_UPDATE_PERMISSIONS_NOTES,
+            operationId = "getTagUpdatePermissionsByEnvName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    PolicyValidationErrorResponses getTagUpdatePermissionsByEnvName(@PathParam("name") String environmentName);
+
+    @GET
+    @Path("/crn/{crn}/tag_update_permissions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = EnvironmentOpDescription.TAG_UPDATE_PERMISSIONS_BY_CRN, description = TAG_UPDATE_PERMISSIONS_NOTES,
+            operationId = "getTagUpdatePermissionsByEnvCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    PolicyValidationErrorResponses getTagUpdatePermissionsByEnvCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @POST
     @Path("/crn/{crn}/cli_create")

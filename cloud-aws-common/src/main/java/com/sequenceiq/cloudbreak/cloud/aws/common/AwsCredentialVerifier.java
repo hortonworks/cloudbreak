@@ -92,7 +92,7 @@ public class AwsCredentialVerifier {
                 if (errorMessage.contains(DENIED_BY_ORGANIZATION_RULE)) {
                     errorMessage = errorMessage.concat(DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE);
                 }
-                throw new AwsPermissionMissingException(errorMessage);
+                throw new AwsPermissionMissingException(errorMessage, failedActionList);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Can not parse aws policy json", e);

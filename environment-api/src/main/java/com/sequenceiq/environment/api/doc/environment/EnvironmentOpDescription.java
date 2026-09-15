@@ -33,6 +33,10 @@ public class EnvironmentOpDescription {
     public static final String STOP_BY_NAME = "Stop an environment by name. The datahubs, datalake and freeipa will be stopped in this order";
     public static final String STOP_BY_CRN = "Stop an environment by CRN. The datahubs, datalake and freeipa will be stopped in this order";
     public static final String VERIFY_CREDENTIAL_BY_CRN = "Verifies the credential used by the given environment.";
+    public static final String TAG_UPDATE_PERMISSIONS_BY_NAME =
+            "Checks by environment name whether the environment's credential is allowed to propagate tag changes to the already created resources.";
+    public static final String TAG_UPDATE_PERMISSIONS_BY_CRN =
+            "Checks by environment CRN whether the environment's credential is allowed to propagate tag changes to the already created resources.";
     public static final String CLI_COMMAND = "produce cli command input for environment creation";
     public static final String GET_CRN_BY_NAME = "Get the crn of an environment by name.";
     public static final String GET_NAME_BY_CRN = "Get the name of an environment by crn.";

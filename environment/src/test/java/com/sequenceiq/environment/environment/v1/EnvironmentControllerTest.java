@@ -40,6 +40,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.CreateEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
@@ -58,6 +59,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmServi
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentTagUpdatePermissionService;
+import com.sequenceiq.environment.environment.validation.validators.TagUpdatePermissionResult;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentControllerTest {
@@ -67,6 +70,8 @@ class EnvironmentControllerTest {
     private static final Set<String> SUBNETS = Set.of("subnet1", "subnet2");
 
     private static final String ENV_CRN = "envCrn";
+
+    private static final String ENV_NAME = "envName";
 
     @Mock
     private EnvironmentApiConverter environmentApiConverter;
@@ -100,6 +105,9 @@ class EnvironmentControllerTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator iam;
+
+    @Mock
+    private EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService;
 
     @InjectMocks
     private EnvironmentController underTest;
@@ -222,6 +230,38 @@ class EnvironmentControllerTest {
                     .thenReturn(DetailedEnvironmentResponse.builder().build());
             DetailedEnvironmentResponse response = underTest.changeCredentialByEnvironmentName(ENV_CRN, null);
             assertEquals(DetailedEnvironmentResponse.class, response.getClass());
+        }
+    }
+
+    @Test
+    void getTagUpdatePermissionsByEnvNameReturnsAnEmptyListWhenEveryPermissionIsGranted() {
+        String accountId = "accountId";
+        Environment env = new Environment();
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, NameOrCrn.ofName(ENV_NAME))).thenReturn(env);
+            when(environmentTagUpdatePermissionService.findMissingPermissions(env)).thenReturn(TagUpdatePermissionResult.granted());
+
+            PolicyValidationErrorResponses response = underTest.getTagUpdatePermissionsByEnvName(ENV_NAME);
+
+            assertThat(response.getResponses()).isEmpty();
+        }
+    }
+
+    @Test
+    void getTagUpdatePermissionsByEnvCrnReturnsARowPerMissingActionWithoutThrowing() {
+        String accountId = "accountId";
+        Environment env = new Environment();
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, NameOrCrn.ofCrn(ENV_CRN))).thenReturn(env);
+            when(environmentTagUpdatePermissionService.findMissingPermissions(env))
+                    .thenReturn(TagUpdatePermissionResult.error("missing actions", List.of("ec2:CreateTags : *", "kms:TagResource : *"), null));
+
+            PolicyValidationErrorResponses response = underTest.getTagUpdatePermissionsByEnvCrn(ENV_CRN);
+
+            assertThat(response.getResponses()).hasSize(2);
+            assertThat(response.getResponses()).allSatisfy(row -> assertEquals(404, row.getCode()));
         }
     }
 

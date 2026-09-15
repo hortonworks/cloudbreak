@@ -1,0 +1,54 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateTags",
+        "ec2:DeleteTags",
+        "ec2:DescribeInstances",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:DescribeTags",
+        "ec2:DescribeVolumes",
+        "elasticloadbalancing:AddTags",
+        "elasticloadbalancing:DescribeListeners",
+        "elasticloadbalancing:DescribeTags",
+        "elasticloadbalancing:DescribeTargetGroups",
+        "elasticloadbalancing:ModifyTargetGroup",
+        "elasticloadbalancing:ModifyListener",
+        "elasticfilesystem:TagResource",
+        "elasticfilesystem:ListTagsForResource",
+        "kms:TagResource",
+        "kms:ListResourceTags",
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:DescribeAlarmsForMetric",
+        "rds:AddTagsToResource",
+        "rds:ListTagsForResource",
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:UpdateStack",
+        "secretsmanager:TagResource",
+        "secretsmanager:DescribeSecret",
+        "autoscaling:CreateOrUpdateTags",
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DeleteTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:TagResource",
+        "cloudwatch:ListTagsForResource"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/Cloudera-Resource-Name": [
+            "crn:cdp:*"
+          ]
+        }
+      }
+    }
+  ]
+}

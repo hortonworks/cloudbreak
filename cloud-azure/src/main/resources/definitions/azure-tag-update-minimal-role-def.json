@@ -1,0 +1,31 @@
+{
+  "Name": "Cloudera Management Console Azure Operator for tag update",
+  "IsCustom": true,
+  "Description": "This role definition contains the required actions to propagate the environment's user defined tags to the already created Azure resources.",
+  "Actions": [
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Compute/virtualMachines/write",
+    "Microsoft.Compute/disks/read",
+    "Microsoft.Compute/disks/write",
+    "Microsoft.Compute/availabilitySets/read",
+    "Microsoft.Compute/availabilitySets/write",
+    "Microsoft.Network/networkInterfaces/read",
+    "Microsoft.Network/networkInterfaces/write",
+    "Microsoft.Network/networkSecurityGroups/read",
+    "Microsoft.Network/networkSecurityGroups/write",
+    "Microsoft.Network/publicIPAddresses/read",
+    "Microsoft.Network/publicIPAddresses/write",
+    "Microsoft.Network/loadBalancers/read",
+    "Microsoft.Network/loadBalancers/write",
+    "Microsoft.Resources/subscriptions/resourceGroups/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/write",
+    "Microsoft.DBforPostgreSQL/flexibleServers/read",
+    "Microsoft.DBforPostgreSQL/flexibleServers/write",
+    "Microsoft.DBforPostgreSQL/servers/read",
+    "Microsoft.DBforPostgreSQL/servers/write"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": []
+}

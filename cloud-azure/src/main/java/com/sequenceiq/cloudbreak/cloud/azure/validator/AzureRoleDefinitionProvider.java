@@ -17,8 +17,14 @@ public class AzureRoleDefinitionProvider {
 
     private static final String AZURE_CMK_MINIMAL_ROLE_DEF_JSON_LOCATION = "definitions/azure-cmk-minimal-role-def.json";
 
+    private static final String AZURE_TAG_UPDATE_MINIMAL_ROLE_DEF_JSON_LOCATION = "definitions/azure-tag-update-minimal-role-def.json";
+
     AzureRoleDefinitionProperties loadAzureFlexibleMinimalRoleDefinition() {
         return loadAzureRoleDefinition(AZURE_FLEXIBLE_MINIMAL_ROLE_DEF_JSON_LOCATION);
+    }
+
+    AzureRoleDefinitionProperties loadAzureTagUpdateMinimalRoleDefinition() {
+        return loadAzureRoleDefinition(AZURE_TAG_UPDATE_MINIMAL_ROLE_DEF_JSON_LOCATION);
     }
 
     AzureRoleDefinitionProperties loadAzureCMKMinimalRoleDefinition() {
