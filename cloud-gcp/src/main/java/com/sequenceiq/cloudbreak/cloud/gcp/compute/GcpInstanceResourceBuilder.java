@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,6 +81,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
+import com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -134,6 +136,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private InstanceTypeFallbackReporter instanceTypeFallbackReporter;
+
     @Override
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -173,7 +178,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         possibleInstanceTypes.add(template.getFlavor());
         possibleInstanceTypes.addAll(Optional.ofNullable(template.getFallbackInstanceTypes()).orElse(List.of()));
         GoogleJsonResponseException exceptionDuringCreation = null;
-        for (String instanceType : possibleInstanceTypes) {
+        ListIterator<String> possibleInstanceTypesIterator = possibleInstanceTypes.listIterator();
+        while (possibleInstanceTypesIterator.hasNext()) {
+            String instanceType = possibleInstanceTypesIterator.next();
             try {
                 instance = createNewInstance(instanceCreationContext, cloudInstance, privateId, group, buildableResource, cloudStack, instanceType);
                 LOGGER.info("Successfully created instance using instance type: {}", instanceType);
@@ -183,12 +190,19 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 if (GcpInstanceTypeRetryExceptionMatcher.isInstanceTypeNotSupported(e)) {
                     LOGGER.info("Instance creation with instance type {} was not successful. " +
                             "Retrying instance creation with different instance type.", instanceType, e);
+                    if (possibleInstanceTypesIterator.hasNext()) {
+                        instanceTypeFallbackReporter.reportFallback(instanceCreationContext.auth().getCloudContext(), group.getName(), template.getFlavor(),
+                                possibleInstanceTypes.get(possibleInstanceTypesIterator.nextIndex()),
+                                GcpInstanceTypeRetryExceptionMatcher.getGcpErrorCodeForNotification(e));
+                    }
                 } else {
                     throw e;
                 }
             }
         }
         if (instance == null) {
+            instanceTypeFallbackReporter.reportFallbackExhausted(instanceCreationContext.auth().getCloudContext(), group.getName(), template.getFlavor(),
+                    GcpInstanceTypeRetryExceptionMatcher.getGcpErrorCodeForNotification(exceptionDuringCreation));
             throw exceptionDuringCreation;
         }
         return instance;

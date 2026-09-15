@@ -62,6 +62,22 @@ public class AzureInstanceTypeRetryExceptionMatcher {
         return anyErrorMatches(managementException.getValue(), this::matchesQuotaCode);
     }
 
+    public String getAzureErrorCodeForNotification(ManagementException managementException) {
+        if (managementException == null || managementException.getValue() == null) {
+            return "Unknown";
+        }
+        List<ManagementError> errors = flattenErrors(managementException.getValue());
+        return errors.stream()
+                .map(ManagementError::getCode)
+                .filter(Objects::nonNull)
+                .filter(code -> matchesCapacityCode(code) || matchesQuotaCode(code))
+                .findFirst()
+                .orElseGet(() -> {
+                    String topLevel = managementException.getValue().getCode();
+                    return topLevel != null && !topLevel.isBlank() ? topLevel : "Unknown";
+                });
+    }
+
     public Set<String> findGroupsWithCapacityFailure(String resourceGroupName, String deploymentName, String stackName,
             List<String> groupNames, AzureClient client) {
         try {

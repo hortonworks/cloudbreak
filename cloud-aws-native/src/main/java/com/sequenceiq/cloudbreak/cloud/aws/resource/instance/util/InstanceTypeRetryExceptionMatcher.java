@@ -17,4 +17,12 @@ public class InstanceTypeRetryExceptionMatcher {
                 (e.awsErrorDetails().errorCode().equalsIgnoreCase(INVALID_PARAMETER_VALUE) &&
                         e.awsErrorDetails().errorMessage().contains("Cannot execute method: runInstances. Invalid value"));
     }
+
+    public static String getAwsErrorCodeForNotification(AwsServiceException e) {
+        if (e == null || e.awsErrorDetails() == null) {
+            return "Unknown";
+        }
+        String errorCode = e.awsErrorDetails().errorCode();
+        return errorCode == null || errorCode.isBlank() ? "Unknown" : errorCode;
+    }
 }

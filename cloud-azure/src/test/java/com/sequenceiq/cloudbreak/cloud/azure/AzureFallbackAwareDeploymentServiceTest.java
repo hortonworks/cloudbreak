@@ -88,6 +88,9 @@ class AzureFallbackAwareDeploymentServiceTest {
     @Mock
     private Deployment deployment;
 
+    @Mock
+    private com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter instanceTypeFallbackReporter;
+
     @InjectMocks
     private AzureFallbackAwareDeploymentService underTest;
 
@@ -138,6 +141,8 @@ class AzureFallbackAwareDeploymentServiceTest {
         when(azureTemplateBuilder.build(eq(STACK_NAME), any(), eq(credentialView), eq(azureStackView), eq(cloudContext), eq(cloudStack),
                 eq(AzureInstanceTemplateOperation.PROVISION), eq(marketplaceImage))).thenReturn(REBUILT_TEMPLATE);
 
+        when(retryExceptionMatcher.getAzureErrorCodeForNotification(capacityException)).thenReturn("SkuNotAvailable");
+
         Deployment result = underTest.createTemplateDeploymentWithFallback(request());
 
         assertSame(deployment, result);
@@ -146,6 +151,8 @@ class AzureFallbackAwareDeploymentServiceTest {
         assertEquals("Standard_D8s_v5", overridesCaptor.getValue().get("master"));
         verify(azureClient).createTemplateDeployment(RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS);
         verify(azureClient).createTemplateDeployment(RG, STACK_NAME, REBUILT_TEMPLATE, PARAMETERS);
+        verify(instanceTypeFallbackReporter).reportFallback(cloudContext, "master", "master-orig-flavor", "Standard_D8s_v5", "SkuNotAvailable");
+        verify(instanceTypeFallbackReporter, org.mockito.Mockito.never()).reportFallbackExhausted(any(), any(), any(), any());
     }
 
     @Test
@@ -163,6 +170,8 @@ class AzureFallbackAwareDeploymentServiceTest {
         when(azureTemplateBuilder.build(eq(STACK_NAME), any(), eq(credentialView), eq(azureStackView), eq(cloudContext), eq(cloudStack),
                 eq(AzureInstanceTemplateOperation.PROVISION), eq(marketplaceImage))).thenReturn(REBUILT_TEMPLATE);
 
+        when(retryExceptionMatcher.getAzureErrorCodeForNotification(any(ManagementException.class))).thenReturn("SkuNotAvailable");
+
         ManagementException thrown = assertThrows(ManagementException.class,
                 () -> underTest.createTemplateDeploymentWithFallback(request()));
 
@@ -170,6 +179,9 @@ class AzureFallbackAwareDeploymentServiceTest {
         assertSame(secondFailure, thrown);
         verify(azureClient).createTemplateDeployment(RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS);
         verify(azureClient).createTemplateDeployment(RG, STACK_NAME, REBUILT_TEMPLATE, PARAMETERS);
+        // First attempt fell back from orig -> Standard_D8s_v5; second attempt exhausted the chain.
+        verify(instanceTypeFallbackReporter).reportFallback(cloudContext, "master", "master-orig-flavor", "Standard_D8s_v5", "SkuNotAvailable");
+        verify(instanceTypeFallbackReporter).reportFallbackExhausted(cloudContext, "master", "master-orig-flavor", "SkuNotAvailable");
     }
 
     @Test
@@ -300,11 +312,16 @@ class AzureFallbackAwareDeploymentServiceTest {
     }
 
     private Group group(String name, List<String> fallbackTypes) {
+        return group(name, name + "-orig-flavor", fallbackTypes);
+    }
+
+    private Group group(String name, String originalFlavor, List<String> fallbackTypes) {
         Group group = org.mockito.Mockito.mock(Group.class);
         InstanceTemplate template = org.mockito.Mockito.mock(InstanceTemplate.class);
         org.mockito.Mockito.doReturn(name).when(group).getName();
         org.mockito.Mockito.doReturn(template).when(group).getReferenceInstanceTemplate();
         org.mockito.Mockito.doReturn(fallbackTypes).when(template).getFallbackInstanceTypes();
+        org.mockito.Mockito.doReturn(originalFlavor).when(template).getFlavor();
         return group;
     }
 

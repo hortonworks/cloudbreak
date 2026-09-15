@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureInstanceTypeRetryExceptio
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter;
 
 @Service
 public class AzureFallbackAwareDeploymentService {
@@ -34,6 +35,9 @@ public class AzureFallbackAwareDeploymentService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private InstanceTypeFallbackReporter instanceTypeFallbackReporter;
+
     public Deployment createTemplateDeploymentWithFallback(AzureTemplateDeploymentRequest request) {
         String accountId = request.cloudContext().getAccountId();
         String resourceGroupName = request.resourceGroupName();
@@ -48,6 +52,7 @@ public class AzureFallbackAwareDeploymentService {
             LOGGER.debug("No fallback instance types configured on stack {}, submitting template deployment as-is.", stackName);
             return request.client().createTemplateDeployment(resourceGroupName, stackName, request.initialTemplate(), parameters);
         }
+        Map<String, String> originalFlavors = collectOriginalFlavors(request.cloudStack());
         Map<String, Integer> nextFallbackIndex = new HashMap<>();
         String template = request.initialTemplate();
         ManagementException lastException = null;
@@ -64,6 +69,9 @@ public class AzureFallbackAwareDeploymentService {
                 Map<String, String> nextFlavors = resolveNextFallbackFlavorsOrThrow(e, request, fallbackChains, nextFallbackIndex, vmToSkuFamily);
                 LOGGER.info("Template deployment {}/{} failed with capacity-style error; retrying with fallback flavors {}.",
                         resourceGroupName, stackName, nextFlavors);
+                String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(e);
+                nextFlavors.forEach((groupName, newFlavor) -> instanceTypeFallbackReporter.reportFallback(request.cloudContext(), groupName,
+                        originalFlavors.get(groupName), newFlavor, reasonSummary));
                 request.azureStackView().applyFlavorOverrides(nextFlavors);
                 template = azureTemplateBuilder.build(stackName, request.customImageId(), request.credentialView(), request.azureStackView(),
                         request.cloudContext(), request.cloudStack(), request.operation(), request.azureMarketplaceImage());
@@ -71,9 +79,20 @@ public class AzureFallbackAwareDeploymentService {
         }
         if (lastException != null) {
             LOGGER.info("Azure fallback deployment loop terminated with exception.", lastException);
+            String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(lastException);
+            fallbackChains.keySet().forEach(groupName -> instanceTypeFallbackReporter.reportFallbackExhausted(request.cloudContext(), groupName,
+                    originalFlavors.get(groupName), reasonSummary));
             throw lastException;
         }
         throw new IllegalStateException("Azure fallback deployment loop terminated without a result");
+    }
+
+    private Map<String, String> collectOriginalFlavors(CloudStack cloudStack) {
+        Map<String, String> flavors = new HashMap<>();
+        for (Group group : cloudStack.getGroups()) {
+            flavors.put(group.getName(), group.getReferenceInstanceTemplate().getFlavor());
+        }
+        return flavors;
     }
 
     private String getRegion(AzureTemplateDeploymentRequest request) {
@@ -109,6 +128,10 @@ public class AzureFallbackAwareDeploymentService {
         if (nextFlavors.isEmpty()) {
             LOGGER.warn("Template deployment {}/{} failed and all fallback instance types are exhausted for failing groups {}; rethrowing.",
                     resourceGroupName, stackName, failingGroups);
+            String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(managementException);
+            Map<String, String> originalFlavors = collectOriginalFlavors(request.cloudStack());
+            failingGroups.forEach(groupName -> instanceTypeFallbackReporter.reportFallbackExhausted(request.cloudContext(), groupName,
+                    originalFlavors.get(groupName), reasonSummary));
             throw managementException;
         }
         return nextFlavors;

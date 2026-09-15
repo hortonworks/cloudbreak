@@ -264,6 +264,8 @@ public enum ResourceEvent {
     STACK_IMAGE_FALLBACK("stack.image.fallback"),
     STACK_IMAGE_MARKETPLACE_ERROR("stack.image.marketplace.error"),
     STACK_UPSCALE_IMAGE_FALLBACK("stack.upscale.image.fallback"),
+    STACK_INSTANCE_TYPE_FALLBACK("stack.instance.type.fallback"),
+    STACK_INSTANCE_TYPE_FALLBACK_EXHAUSTED("stack.instance.type.fallback.exhausted"),
     STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK("stack.upscale.adjustment.type.fallback"),
     STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
     STACK_INFRASTRUCTURE_CREATE_FAILED("stack.infrastructure.create.failed"),

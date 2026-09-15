@@ -179,6 +179,9 @@ class AwsNativeInstanceResourceBuilderTest {
     @Mock
     private CloudContext cloudContext;
 
+    @Mock
+    private com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter instanceTypeFallbackReporter;
+
     static Object[][] testBuildWhenInstanceNoExistSource() {
         return new Object[][]{
                 // supportedImdsVersionOfStack, expectedTokenState, secretEncryptionEnabled
@@ -865,6 +868,12 @@ class AwsNativeInstanceResourceBuilderTest {
                 .map(request -> request.instanceType())
                 .collect(Collectors.toSet());
         assertTrue(requestInstanceTypes.containsAll(Set.of(A1_MEDIUM, A1_LARGE, A1_XLARGE)));
+        // The fallback loop moved through orig -> A1_LARGE, orig -> A1_XLARGE, then exhausted.
+        verify(instanceTypeFallbackReporter).reportFallback(cloudContext, "groupName", A1_MEDIUM.toString(), A1_LARGE.toString(),
+                INSUFFICIENT_INSTANCE_CAPACITY);
+        verify(instanceTypeFallbackReporter).reportFallback(cloudContext, "groupName", A1_MEDIUM.toString(), A1_XLARGE.toString(),
+                INSUFFICIENT_INSTANCE_CAPACITY);
+        verify(instanceTypeFallbackReporter).reportFallbackExhausted(cloudContext, "groupName", A1_MEDIUM.toString(), INSUFFICIENT_INSTANCE_CAPACITY);
     }
 
     @Test

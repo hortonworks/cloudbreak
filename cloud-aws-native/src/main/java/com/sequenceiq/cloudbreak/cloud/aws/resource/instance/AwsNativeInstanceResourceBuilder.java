@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter;
 import com.sequenceiq.cloudbreak.cloud.template.init.SshKeyNameGenerator;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
@@ -117,6 +119,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private InstanceTypeFallbackReporter instanceTypeFallbackReporter;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -184,7 +189,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         possibleInstanceTypes.add(instanceTemplate.getFlavor());
         possibleInstanceTypes.addAll(Optional.ofNullable(instanceTemplate.getFallbackInstanceTypes()).orElse(List.of()));
         AwsServiceException exceptionDuringCreation = null;
-        for (String instanceType : possibleInstanceTypes) {
+        ListIterator<String> possibleInstanceTypesIterator = possibleInstanceTypes.listIterator();
+        while (possibleInstanceTypesIterator.hasNext()) {
+            String instanceType = possibleInstanceTypesIterator.next();
             try {
                 instance = createNewInstance(ic, cloudInstance, group, cloudStack, cloudResource, instanceName, instanceType);
                 LOGGER.info("Successfully created instance using instance type: {}", instanceType);
@@ -192,9 +199,16 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             } catch (AwsServiceException e) {
                 exceptionDuringCreation = e;
                 shouldRetryWithDifferentInstanceType(e, instanceType);
+                if (possibleInstanceTypesIterator.hasNext()) {
+                    instanceTypeFallbackReporter.reportFallback(ic.auth().getCloudContext(), group.getName(), instanceTemplate.getFlavor(),
+                            possibleInstanceTypes.get(possibleInstanceTypesIterator.nextIndex()),
+                            InstanceTypeRetryExceptionMatcher.getAwsErrorCodeForNotification(e));
+                }
             }
         }
         if (instance == null) {
+            instanceTypeFallbackReporter.reportFallbackExhausted(ic.auth().getCloudContext(), group.getName(), instanceTemplate.getFlavor(),
+                    InstanceTypeRetryExceptionMatcher.getAwsErrorCodeForNotification(exceptionDuringCreation));
             throw exceptionDuringCreation;
         }
         return instance;

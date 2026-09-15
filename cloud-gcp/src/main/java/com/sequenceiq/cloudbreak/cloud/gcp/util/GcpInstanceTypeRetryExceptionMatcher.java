@@ -32,4 +32,20 @@ public class GcpInstanceTypeRetryExceptionMatcher {
         }
         return false;
     }
+
+    public static String getGcpErrorCodeForNotification(GoogleJsonResponseException e) {
+        if (e == null || e.getDetails() == null) {
+            return "Unknown";
+        }
+        String message = e.getDetails().getMessage();
+        int statusCode = e.getStatusCode();
+        if (statusCode == HttpStatus.SC_BAD_REQUEST && message != null && message.contains("Invalid value for field 'resource.machineType'")) {
+            return "INVALID_MACHINE_TYPE";
+        }
+        if ((statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE || statusCode == UNAVAILABLE_STATUS_CODE)
+                && message != null && message.contains(ZONE_RESOURCE_POOL_EXHAUSTED)) {
+            return ZONE_RESOURCE_POOL_EXHAUSTED;
+        }
+        return "HTTP_" + statusCode;
+    }
 }

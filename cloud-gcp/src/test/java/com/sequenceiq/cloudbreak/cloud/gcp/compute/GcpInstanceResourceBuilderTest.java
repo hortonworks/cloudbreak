@@ -181,6 +181,9 @@ class GcpInstanceResourceBuilderTest {
     @Mock
     private PersistenceNotifier persistenceNotifier;
 
+    @Mock
+    private com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter instanceTypeFallbackReporter;
+
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
 
@@ -630,6 +633,9 @@ class GcpInstanceResourceBuilderTest {
         List<Instance> capturedInstances = instanceArg.getAllValues();
         assertTrue(capturedInstances.get(0).getMachineType().contains(flavor));
         assertTrue(capturedInstances.get(1).getMachineType().contains(fallbackFlavor));
+        // The fallback loop reported the flavor -> fallbackFlavor transition and then the exhaustion.
+        verify(instanceTypeFallbackReporter).reportFallback(authenticatedContext.getCloudContext(), name, flavor, fallbackFlavor, "INVALID_MACHINE_TYPE");
+        verify(instanceTypeFallbackReporter).reportFallbackExhausted(authenticatedContext.getCloudContext(), name, flavor, "INVALID_MACHINE_TYPE");
     }
 
     @Test
