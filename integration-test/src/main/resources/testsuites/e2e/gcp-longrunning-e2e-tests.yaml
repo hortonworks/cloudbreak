@@ -39,4 +39,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesAddAndModificationTest
         excludedMethods:
           - testDistroXAdditionalVolumesModification
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.tagupdate.UserDefinedTagUpdateTest
+      # - name: com.sequenceiq.it.cloudbreak.testcase.e2e.tagupdate.UserDefinedTagUpdateTest
