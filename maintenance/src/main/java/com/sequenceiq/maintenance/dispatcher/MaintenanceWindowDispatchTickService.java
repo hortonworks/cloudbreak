@@ -85,8 +85,10 @@ public class MaintenanceWindowDispatchTickService {
      * {@link MaintenanceWindowRunService#applySubmitterOutcome}. Non-dispatchable or evaluator-deferred tasks may
      * record a terminal {@code SKIPPED} run when the skip reason will not resolve within the window.
      * <p>
-     * Per-task failures are caught and logged so one bad task does not block the rest of the tick. Eligibility uses a
-     * single wall-clock read at tick start so every task in the cycle shares the same {@code now}.
+     * Per-task failures are caught and logged so one bad task does not block the rest of the tick. Schedule
+     * eligibility uses a single {@code now} at tick start for every task; {@link MaintenanceWindowTaskDispatchEvaluator}
+     * reads wall clock on each call (e.g. {@link TaskDispatchSkipReason#WINDOW_ENDED}), so this is not one frozen
+     * snapshot for the whole tick—usually sub-second skew.
      */
     public void tick() {
         long tickStartMs = clock.getCurrentTimeMillis();
@@ -143,7 +145,8 @@ public class MaintenanceWindowDispatchTickService {
         }
         WindowOccurrence occurrence = eligibility.currentOccurrence().get();
         String policyRevision = MaintenanceWindowRunService.policyRevision(schedule);
-        runService.recordSkipped(task, schedule, occurrence, policyRevision);
+        runService.recordSkipped(
+                task, schedule, occurrence, policyRevision, TaskDispatchSkipReason.SCHEDULE_OCCURRENCE_SKIPPED);
     }
 
     private void handleEvaluatorSkip(
@@ -173,8 +176,8 @@ public class MaintenanceWindowDispatchTickService {
      */
     static boolean recordsTerminalSkippedRun(TaskDispatchSkipReason reason) {
         return switch (reason) {
-            case WINDOW_ENDED, DEPENDENCY_SKIPPED, DEPENDENCY_FAILED, IMPLICIT_PREREQUISITE_SKIPPED,
-                    IMPLICIT_PREREQUISITE_FAILED -> true;
+            case SCHEDULE_OCCURRENCE_SKIPPED, WINDOW_ENDED, DEPENDENCY_SKIPPED, DEPENDENCY_FAILED,
+                    IMPLICIT_PREREQUISITE_SKIPPED, IMPLICIT_PREREQUISITE_FAILED -> true;
             case DEPENDENCY_NOT_FOUND, DEPENDENCY_SCOPE_MISMATCH, DEPENDENCY_NOT_COMPLETED,
                     IMPLICIT_PLATFORM_ORDERING, DEDUP_RUNNING, DEDUP_COMPLETED, DEDUP_SKIPPED, RETRY_NOT_ALLOWED,
                     RETRY_COOLDOWN -> false;

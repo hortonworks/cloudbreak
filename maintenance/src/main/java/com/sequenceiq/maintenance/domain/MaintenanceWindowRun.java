@@ -72,6 +72,9 @@ public class MaintenanceWindowRun implements Serializable {
     @Column(name = "error_detail", columnDefinition = "TEXT")
     private String errorDetail;
 
+    @Column(name = "skip_reason")
+    private String skipReason;
+
     /**
      * Number of execution attempts that have started for this (task, window occurrence) pair. Starts at {@code 1} when
      * the first attempt is dispatched. The dispatcher must increment this when starting each subsequent attempt within
@@ -198,6 +201,14 @@ public class MaintenanceWindowRun implements Serializable {
         this.errorDetail = errorDetail;
     }
 
+    public String getSkipReason() {
+        return skipReason;
+    }
+
+    public void setSkipReason(String skipReason) {
+        this.skipReason = skipReason;
+    }
+
     public int getAttemptCount() {
         return attemptCount;
     }
@@ -231,6 +242,7 @@ public class MaintenanceWindowRun implements Serializable {
                 ", windowExecutionStart=" + windowExecutionStart +
                 ", windowExecutionEnd=" + windowExecutionEnd +
                 ", errorDetail='" + errorDetail + '\'' +
+                ", skipReason='" + skipReason + '\'' +
                 ", attemptCount=" + attemptCount +
                 ", version=" + version +
                 '}';

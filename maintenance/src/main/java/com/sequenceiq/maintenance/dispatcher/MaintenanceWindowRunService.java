@@ -229,6 +229,7 @@ public class MaintenanceWindowRunService {
         }
         run.setWindowExecutionEnd(null);
         run.setErrorDetail(null);
+        run.setSkipReason(null);
         MaintenanceWindowRun saved = runRepository.saveAndFlush(run);
         LOGGER.debug("Marked maintenance run status RUNNING: taskId={} runId={} attemptCount={}",
                 task.getId(), saved.getId(), saved.getAttemptCount());
@@ -260,7 +261,7 @@ public class MaintenanceWindowRunService {
             TaskDispatchSkipReason skipReason) {
         try {
             MaintenanceWindowRun saved = createTerminalRun(
-                    task, schedule, occurrence, policyRevision, MaintenanceRunStatus.SKIPPED, null);
+                    task, schedule, occurrence, policyRevision, MaintenanceRunStatus.SKIPPED, null, skipReason);
             logSkippedRunWritten(task, occurrence, saved, skipReason);
             return saved;
         } catch (DataIntegrityViolationException e) {
@@ -334,7 +335,8 @@ public class MaintenanceWindowRunService {
             WindowOccurrence occurrence,
             String policyRevision,
             MaintenanceRunStatus status,
-            String errorDetail) {
+            String errorDetail,
+            TaskDispatchSkipReason skipReason) {
         long now = clock.getCurrentTimeMillis();
         MaintenanceWindowRun run = new MaintenanceWindowRun();
         run.setMaintenanceWindowTask(task);
@@ -350,6 +352,7 @@ public class MaintenanceWindowRunService {
         run.setWindowExecutionStart(now);
         run.setWindowExecutionEnd(now);
         run.setErrorDetail(errorDetail);
+        run.setSkipReason(skipReason != null ? skipReason.name() : null);
         run.setAttemptCount(1);
         return runRepository.saveAndFlush(run);
     }

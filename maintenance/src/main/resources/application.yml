@@ -45,6 +45,7 @@ maintenance:
   client.id: maintenance
   cert.dir: /certs/
   dispatcher:
+    enabled: false
     interval-minutes: 15
     submitter:
       # Outbound HTTP to submitter execute callbacks (not bound by the 15-minute tick interval).

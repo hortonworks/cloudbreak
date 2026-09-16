@@ -1,6 +1,8 @@
 package com.sequenceiq.maintenance.dispatcher.model;
 
 public enum TaskDispatchSkipReason {
+    /** Customer-declared skip of this schedule occurrence ({@code maintenance_window_skip}). */
+    SCHEDULE_OCCURRENCE_SKIPPED,
     WINDOW_ENDED,
     DEPENDENCY_NOT_FOUND,
     DEPENDENCY_SCOPE_MISMATCH,

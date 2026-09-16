@@ -144,7 +144,8 @@ class MaintenanceWindowDispatchTickServiceTest {
 
         underTest.tick();
 
-        verify(runService).recordSkipped(task, schedule, occurrence, POLICY_REVISION);
+        verify(runService).recordSkipped(
+                task, schedule, occurrence, POLICY_REVISION, TaskDispatchSkipReason.SCHEDULE_OCCURRENCE_SKIPPED);
         verify(dispatchEvaluator, never()).evaluate(any());
     }
 
@@ -272,8 +273,8 @@ class MaintenanceWindowDispatchTickServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = TaskDispatchSkipReason.class,
-            names = {"WINDOW_ENDED", "DEPENDENCY_SKIPPED", "DEPENDENCY_FAILED", "IMPLICIT_PREREQUISITE_SKIPPED",
-                    "IMPLICIT_PREREQUISITE_FAILED"})
+            names = {"SCHEDULE_OCCURRENCE_SKIPPED", "WINDOW_ENDED", "DEPENDENCY_SKIPPED", "DEPENDENCY_FAILED",
+                    "IMPLICIT_PREREQUISITE_SKIPPED", "IMPLICIT_PREREQUISITE_FAILED"})
     void recordsTerminalSkippedRunClassifiesTerminalReasonsAsTerminal(TaskDispatchSkipReason reason) {
         assertThat(MaintenanceWindowDispatchTickService.recordsTerminalSkippedRun(reason)).isTrue();
     }

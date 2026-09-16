@@ -21,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.maintenance.dispatcher.model.MaintenanceTaskSubmitterDispatchResult;
 import com.sequenceiq.maintenance.dispatcher.model.MaintenanceTaskSubmitterOutcome;
+import com.sequenceiq.maintenance.dispatcher.model.TaskDispatchSkipReason;
 import com.sequenceiq.maintenance.domain.MaintenanceRunStatus;
 import com.sequenceiq.maintenance.domain.MaintenanceTaskKind;
 import com.sequenceiq.maintenance.domain.MaintenanceTaskStatus;
@@ -175,9 +176,11 @@ class MaintenanceWindowRunServiceTest {
         MaintenanceWindowTask oneShot = task(MaintenanceTaskKind.ONE_SHOT);
         when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(oneShot.getId(), WINDOW_START)).thenReturn(Optional.empty());
 
-        MaintenanceWindowRun run = underTest.recordSkipped(oneShot, schedule, occurrence, "42:v1");
+        MaintenanceWindowRun run = underTest.recordSkipped(
+                oneShot, schedule, occurrence, "42:v1", TaskDispatchSkipReason.DEPENDENCY_SKIPPED);
 
         assertThat(run.getStatus()).isEqualTo(MaintenanceRunStatus.SKIPPED);
+        assertThat(run.getSkipReason()).isEqualTo(TaskDispatchSkipReason.DEPENDENCY_SKIPPED.name());
         verify(taskRepository, never()).saveAndFlush(oneShot);
         assertThat(oneShot.getStatus()).isEqualTo(MaintenanceTaskStatus.ACTIVE);
     }
@@ -188,7 +191,8 @@ class MaintenanceWindowRunServiceTest {
         when(runRepository.findByMaintenanceWindowTaskIdAndWindowStart(task.getId(), WINDOW_START))
                 .thenReturn(Optional.of(existing));
 
-        MaintenanceWindowRun run = underTest.recordSkipped(task, schedule, occurrence, "42:v1");
+        MaintenanceWindowRun run = underTest.recordSkipped(
+                task, schedule, occurrence, "42:v1", TaskDispatchSkipReason.DEPENDENCY_SKIPPED);
 
         assertThat(run).isSameAs(existing);
         verify(runRepository, never()).saveAndFlush(any());
@@ -216,7 +220,8 @@ class MaintenanceWindowRunServiceTest {
         when(runRepository.saveAndFlush(any(MaintenanceWindowRun.class)))
                 .thenThrow(new DataIntegrityViolationException("duplicate key"));
 
-        MaintenanceWindowRun run = underTest.recordSkipped(task, schedule, occurrence, "42:v1");
+        MaintenanceWindowRun run = underTest.recordSkipped(
+                task, schedule, occurrence, "42:v1", TaskDispatchSkipReason.DEPENDENCY_SKIPPED);
 
         assertThat(run).isSameAs(existing);
     }
