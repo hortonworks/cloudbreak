@@ -96,7 +96,7 @@ notification/                                                                   
 
 # DB SSL related changes in orchestrator-salt shall be assigned to Duck
 orchestrator-salt/**/postgresql/root-certs.sls                                      @cloudbreak/cloudbreak-duck
-orchestrator-salt/**/postgresql/scripts/conf_pgsql_ssl.sh                           @cloudbreak/cloudbreak-duck
+orchestrator-salt/**/postgresql/configure_ssl.sls                                   @cloudbreak/cloudbreak-duck
 orchestrator-salt/**/postgresql/scripts/create_embeddeddb_certificate.sh            @cloudbreak/cloudbreak-duck
 
 core/src/main/java/com/sequenceiq/cloudbreak/service/upgrade/                       @cloudbreak/cloudbreak-duck

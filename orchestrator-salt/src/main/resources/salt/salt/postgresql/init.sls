@@ -114,6 +114,9 @@ include:
   {%- if postgres_version in [11, 14, 17] %}
   - postgresql.pg{{ postgres_version }}
   {%- endif %}
+  {%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
+  - postgresql.configure_ssl
+  {%- endif %}
   {%- if postgres_version == 17 and postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
   - postgresql.configure_tls
   {%- endif %}
@@ -205,46 +208,6 @@ configure-max-connections:
       - file: /opt/salt/scripts/conf_pgsql_max_connections.sh
       - service: start-postgresql
     - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured
-
-{%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
-
-/opt/salt/scripts/conf_pgsql_ssl.sh:
-  file.managed:
-    - makedirs: True
-    - user: root
-    - group: postgres
-    - mode: 750
-    - source: salt://postgresql/scripts/conf_pgsql_ssl.sh
-    - template: jinja
-    - context:
-        postgres_directory: {{ postgres_directory }}
-        tls_advanced_control: {{ postgresql.tls_advanced_control | default(false) }}
-        tls_min_version: {{ postgresql.tls_min_version | default('') }}
-        tls_max_version: {{ postgresql.tls_max_version | default('') }}
-        tls12_ciphers: {{ postgresql.tls12_ciphers | default('') }}
-
-{{ postgres_scripts_executed_directory }}/pgsql_ssl_configured:
-  file.rename:
-    - makedirs: True
-    - source: {{ postgres_log_directory }}/pgsql_ssl_configured
-    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
-
-rerun-pgsql-ssl-configuration-if-script-changed:
-  file.absent:
-    - name: {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
-    - onchanges:
-      - file: /opt/salt/scripts/conf_pgsql_ssl.sh
-
-configure-ssl:
-  cmd.run:
-    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/conf_pgsql_ssl.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
-    - require:
-      - file: /opt/salt/scripts/conf_pgsql_ssl.sh
-      - service: start-postgresql
-      - file: rerun-pgsql-ssl-configuration-if-script-changed
-    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
-
-{%- endif %}
 
 /opt/salt/scripts/init_db.sh:
   file.managed:

@@ -93,6 +93,11 @@ public class EncryptionProfileProvider {
         return getCipherSuites(userEncryptionProfileMap, new CipherSuiteOptions(cipherSuitesLimitType, legacyEncryptionProfile, false, false));
     }
 
+    public String getLegacyCipherSuites(CipherSuitesLimitType cipherSuitesLimitType, boolean useIanaName) {
+        return EncryptionProfileConverter.toString(
+                cipherSuiteProvider.getLegacyCipherSuitesByLimitType(cipherSuitesLimitType), useIanaName, COLON_SEPARATOR);
+    }
+
     public String getCipherSuites(Map<String, List<String>> userEncryptionProfileMap, CipherSuiteOptions cipherSuiteOptions) {
         String result = cipherSuiteOptions.legacyEncryptionProfile()
                 ? getLegacyCipherSuites(userEncryptionProfileMap.get(TLS_1_2.getVersion()), cipherSuiteOptions)

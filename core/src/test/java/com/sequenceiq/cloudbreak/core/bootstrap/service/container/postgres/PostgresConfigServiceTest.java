@@ -4,13 +4,13 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -124,6 +124,7 @@ class PostgresConfigServiceTest {
         lenient().when(stack.getCluster()).thenReturn(cluster);
         lenient().when(externalDatabaseConfig.getGcpExternalDatabaseSslVerificationMode()).thenReturn("verify-ca");
         lenient().when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(false);
+        lenient().when(encryptionProfileProvider.getLegacyCipherSuites(CipherSuitesLimitType.MINIMAL, false)).thenReturn("");
     }
 
     @Test
@@ -521,6 +522,105 @@ class PostgresConfigServiceTest {
     }
 
     @Test
+    void decorateServicePillarWithPostgresIfNeededWiresDefaultTls12CiphersFromEncryptionProfileProvider() {
+        String expectedDefault = "ECDHE-ECDSA-AES128-GCM-SHA256:DHE-RSA-AES256-SHA256";
+        when(encryptionProfileProvider.getLegacyCipherSuites(CipherSuitesLimitType.MINIMAL, false)).thenReturn(expectedDefault);
+
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        Set<String> rootCerts = new LinkedHashSet<>();
+        rootCerts.add("cert1");
+        Cluster cluster = new Cluster();
+        cluster.setDbSslRootCertBundle(null);
+        cluster.setId(CLUSTER_ID);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, true));
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
+
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
+
+        Map<String, Object> rootSslCertsMap = (Map<String, Object>) servicePillar.get(POSTGRES_COMMON).getProperties().get("postgres_root_certs");
+        assertThat(rootSslCertsMap).contains(entry("tls12_ciphers", expectedDefault));
+        verify(encryptionProfileProvider).getLegacyCipherSuites(CipherSuitesLimitType.MINIMAL, false);
+    }
+
+    @Test
+    void decorateServicePillarWithPostgresIfNeededKeepsTls12CiphersEmptyForTls13OnlyProfile() {
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        Set<String> rootCerts = new LinkedHashSet<>();
+        rootCerts.add("cert1");
+        Cluster cluster = new Cluster();
+        cluster.setDbSslRootCertBundle(null);
+        cluster.setId(CLUSTER_ID);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
+        cluster.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:tls13");
+        when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getAccountId()).thenReturn("acct");
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn("17");
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, true));
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
+        when(entitlementService.isConfigureEncryptionProfileEnabled("acct")).thenReturn(true);
+        EncryptionProfileResponse tls13OnlyProfile = new EncryptionProfileResponse();
+        tls13OnlyProfile.setName("custom-tls13-only");
+        tls13OnlyProfile.setTlsVersions(Set.of("TLSv1.3"));
+        Map<String, List<String>> cipherSuites = new HashMap<>();
+        tls13OnlyProfile.setCipherSuites(cipherSuites);
+        when(encryptionProfileService.getEncryptionProfile(stack, null)).thenReturn(tls13OnlyProfile);
+        when(encryptionProfileProvider.getOpenSslCipherSuites(cipherSuites, CipherSuitesLimitType.DEFAULT, false)).thenReturn("");
+        when(encryptionProfileProvider.getTls13CipherSuites(cipherSuites)).thenReturn("TLS_AES_256_GCM_SHA384");
+
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
+
+        Map<String, Object> rootSslCertsMap = (Map<String, Object>) servicePillar.get(POSTGRES_COMMON).getProperties().get("postgres_root_certs");
+        assertThat(rootSslCertsMap).contains(
+                entry("tls_advanced_control", "true"),
+                entry("tls_min_version", "TLSv1.3"),
+                entry("tls_max_version", "TLSv1.3"),
+                entry("tls12_ciphers", ""),
+                entry("tls13_ciphers", "TLS_AES_256_GCM_SHA384"));
+        verify(encryptionProfileProvider, never()).getLegacyCipherSuites(any(), anyBoolean());
+    }
+
+    @Test
+    void decorateServicePillarWithPostgresIfNeededKeepsProfileTls12CiphersWhenNonEmpty() {
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        Set<String> rootCerts = new LinkedHashSet<>();
+        rootCerts.add("cert1");
+        Cluster cluster = new Cluster();
+        cluster.setDbSslRootCertBundle(null);
+        cluster.setId(CLUSTER_ID);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
+        cluster.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:test");
+        when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getAccountId()).thenReturn("acct");
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn("17");
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, true));
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
+        when(entitlementService.isConfigureEncryptionProfileEnabled("acct")).thenReturn(true);
+        EncryptionProfileResponse profile = new EncryptionProfileResponse();
+        profile.setName("custom");
+        profile.setTlsVersions(Set.of("TLSv1.2", "TLSv1.3"));
+        Map<String, List<String>> cipherSuites = new HashMap<>();
+        profile.setCipherSuites(cipherSuites);
+        when(encryptionProfileService.getEncryptionProfile(stack, null)).thenReturn(profile);
+        when(encryptionProfileProvider.getOpenSslCipherSuites(cipherSuites, CipherSuitesLimitType.DEFAULT, false)).thenReturn("ECDHE-A:ECDHE-B");
+        when(encryptionProfileProvider.getTls13CipherSuites(cipherSuites)).thenReturn("TLS_AES_128_GCM_SHA256");
+
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
+
+        Map<String, Object> rootSslCertsMap = (Map<String, Object>) servicePillar.get(POSTGRES_COMMON).getProperties().get("postgres_root_certs");
+        assertThat(rootSslCertsMap).contains(entry("tls12_ciphers", "ECDHE-A:ECDHE-B"));
+        verify(encryptionProfileProvider, never()).getLegacyCipherSuites(any(), anyBoolean());
+    }
+
+    @Test
     void decorateServicePillarWithPostgresIfNeededPropagatesWhenEncryptionProfileServiceFails() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
@@ -645,7 +745,9 @@ class PostgresConfigServiceTest {
                 entry("tls_max_version", ""),
                 entry("tls12_ciphers", ""),
                 entry("tls13_ciphers", ""));
-        verifyNoInteractions(encryptionProfileProvider);
+        verify(encryptionProfileProvider, never()).getTls13CipherSuites(any());
+        verify(encryptionProfileProvider, never())
+                .getOpenSslCipherSuites(any(), eq(CipherSuitesLimitType.DEFAULT), anyBoolean());
     }
 
     @Test

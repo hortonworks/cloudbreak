@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
 import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.DEFAULT;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.MINIMAL;
 import static java.util.Collections.singletonMap;
 import static java.util.Objects.requireNonNull;
 
@@ -123,6 +124,9 @@ public class PostgresConfigService {
             sslSaltConfig = getSslSaltConfigWhenRootCertAlreadyInitialized(stackDto);
         }
         enrichSslSaltConfigWithEncryptionProfile(sslSaltConfig, stackDto, environmentResponse);
+        if (!sslSaltConfig.isTlsAdvancedControl() && StringUtils.isBlank(sslSaltConfig.getTls12Ciphers())) {
+            sslSaltConfig.setTls12Ciphers(getDefaultTls12CipherString());
+        }
         if (StringUtils.isNotBlank(sslSaltConfig.getRootCertsBundle())) {
             boolean externalDatabaseRequested = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn());
             generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig, stackDto.getCloudPlatform(), externalDatabaseRequested);
@@ -250,6 +254,10 @@ public class PostgresConfigService {
         } else {
             LOGGER.debug("Skipping encryption profile enrichment: Postgres version [{}] or entitlement did not match.", dbEngineVersion);
         }
+    }
+
+    private String getDefaultTls12CipherString() {
+        return encryptionProfileProvider.getLegacyCipherSuites(MINIMAL, false);
     }
 
     private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig, String cloudPlatform,
