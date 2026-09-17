@@ -3,6 +3,7 @@ package com.sequenceiq.maintenance.dispatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,7 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.maintenance.dispatcher.model.MaintenanceTaskSubmitterDispatchResult;
 import com.sequenceiq.maintenance.dispatcher.model.MaintenanceTaskSubmitterOutcome;
@@ -28,6 +31,7 @@ import com.sequenceiq.maintenance.domain.MaintenanceTaskStatus;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowRun;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowTask;
+import com.sequenceiq.maintenance.exception.ConflictException;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowRunRepository;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowTaskRepository;
 import com.sequenceiq.maintenance.service.model.WindowOccurrence;
@@ -284,6 +288,18 @@ class MaintenanceWindowRunServiceTest {
     }
 
     @Test
+    void applySubmitterOutcomeRejectsNonRunningRun() {
+        MaintenanceWindowRun run = priorRun(MaintenanceRunStatus.COMPLETED);
+        run.setId(99L);
+        run.setMaintenanceWindowTask(task);
+
+        assertThatThrownBy(() -> underTest.applySubmitterOutcome(task, run,
+                MaintenanceTaskSubmitterDispatchResult.failed("boom")))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Run 99 cannot transition from COMPLETED to FAILED");
+    }
+
+    @Test
     void applySubmitterOutcomeRejectsMismatchedRun() {
         MaintenanceWindowRun run = priorRun(MaintenanceRunStatus.RUNNING);
         MaintenanceWindowTask otherTask = task(MaintenanceTaskKind.EVERY_WINDOW);
@@ -317,20 +333,125 @@ class MaintenanceWindowRunServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> underTest.completeRun("other-account", 99L, task.getId()))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    void completeRunRejectsNonRunningStatus() {
+    void completeRunMapsOptimisticLockFailureToConflict() {
+        MaintenanceWindowRun run = priorRun(MaintenanceRunStatus.RUNNING);
+        run.setId(99L);
+        when(runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(99L, task.getId(), ACCOUNT_ID))
+                .thenReturn(Optional.of(run));
+        when(taskRepository.findByIdAndAccountId(task.getId(), ACCOUNT_ID)).thenReturn(Optional.of(task));
+        when(runRepository.saveAndFlush(run))
+                .thenThrow(new ObjectOptimisticLockingFailureException(MaintenanceWindowRun.class, 99L));
+
+        assertThatThrownBy(() -> underTest.completeRun(ACCOUNT_ID, 99L, task.getId()))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Run was modified concurrently.");
+    }
+
+    @Test
+    void completeRunIsIdempotentWhenAlreadyCompleted() {
         MaintenanceWindowRun completed = priorRun(MaintenanceRunStatus.COMPLETED);
         completed.setId(99L);
         when(runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(99L, task.getId(), ACCOUNT_ID))
                 .thenReturn(Optional.of(completed));
         when(taskRepository.findByIdAndAccountId(task.getId(), ACCOUNT_ID)).thenReturn(Optional.of(task));
 
+        MaintenanceWindowRun saved = underTest.completeRun(ACCOUNT_ID, 99L, task.getId());
+
+        assertThat(saved).isSameAs(completed);
+        verify(runRepository, never()).saveAndFlush(completed);
+    }
+
+    @Test
+    void completeRunRejectsConflictingTerminalStatus() {
+        MaintenanceWindowRun failed = priorRun(MaintenanceRunStatus.FAILED);
+        failed.setId(99L);
+        when(runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(99L, task.getId(), ACCOUNT_ID))
+                .thenReturn(Optional.of(failed));
+        when(taskRepository.findByIdAndAccountId(task.getId(), ACCOUNT_ID)).thenReturn(Optional.of(task));
+
         assertThatThrownBy(() -> underTest.completeRun(ACCOUNT_ID, 99L, task.getId()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("is not RUNNING");
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Run 99 cannot transition from FAILED to COMPLETED");
+    }
+
+    @Test
+    void failRunMarksFailedAndCompletesOneShotWhenRetriesExhausted() {
+        MaintenanceWindowTask oneShot = task(MaintenanceTaskKind.ONE_SHOT);
+        oneShot.setRetryWithinOccurrence(true);
+        oneShot.setMaxAttemptsPerOccurrence(1);
+        MaintenanceWindowRun run = priorRun(MaintenanceRunStatus.RUNNING);
+        run.setId(99L);
+        run.setAttemptCount(1);
+        run.setMaintenanceWindowTask(oneShot);
+        when(runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(99L, oneShot.getId(), ACCOUNT_ID))
+                .thenReturn(Optional.of(run));
+        when(taskRepository.findByIdAndAccountId(oneShot.getId(), ACCOUNT_ID)).thenReturn(Optional.of(oneShot));
+
+        MaintenanceWindowRun saved = underTest.failRun(ACCOUNT_ID, 99L, oneShot.getId(), "boom");
+
+        assertThat(saved.getStatus()).isEqualTo(MaintenanceRunStatus.FAILED);
+        assertThat(saved.getErrorDetail()).isEqualTo("boom");
+        assertThat(saved.getWindowExecutionEnd()).isEqualTo(NOW);
+        assertThat(saved.getUpdatedAt()).isEqualTo(NOW);
+        verify(runRepository).saveAndFlush(argThat(r ->
+                r.getStatus() == MaintenanceRunStatus.FAILED
+                        && "boom".equals(r.getErrorDetail())
+                        && r.getWindowExecutionEnd() == NOW
+                        && r.getUpdatedAt() == NOW));
+        verify(taskRepository).saveAndFlush(oneShot);
+    }
+
+    @Test
+    void failRunKeepsOneShotActiveWhenRetriesRemain() {
+        MaintenanceWindowTask oneShot = task(MaintenanceTaskKind.ONE_SHOT);
+        oneShot.setRetryWithinOccurrence(true);
+        oneShot.setMaxAttemptsPerOccurrence(3);
+        MaintenanceWindowRun run = priorRun(MaintenanceRunStatus.RUNNING);
+        run.setId(99L);
+        run.setAttemptCount(1);
+        run.setMaintenanceWindowTask(oneShot);
+        when(runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(99L, oneShot.getId(), ACCOUNT_ID))
+                .thenReturn(Optional.of(run));
+        when(taskRepository.findByIdAndAccountId(oneShot.getId(), ACCOUNT_ID)).thenReturn(Optional.of(oneShot));
+
+        MaintenanceWindowRun saved = underTest.failRun(ACCOUNT_ID, 99L, oneShot.getId(), "boom");
+
+        assertThat(saved.getStatus()).isEqualTo(MaintenanceRunStatus.FAILED);
+        verify(taskRepository, never()).saveAndFlush(oneShot);
+        assertThat(oneShot.getStatus()).isEqualTo(MaintenanceTaskStatus.ACTIVE);
+    }
+
+    @Test
+    void failRunIsIdempotentWhenAlreadyFailed() {
+        MaintenanceWindowRun failed = priorRun(MaintenanceRunStatus.FAILED);
+        failed.setId(99L);
+        failed.setErrorDetail("original");
+        when(runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(99L, task.getId(), ACCOUNT_ID))
+                .thenReturn(Optional.of(failed));
+        when(taskRepository.findByIdAndAccountId(task.getId(), ACCOUNT_ID)).thenReturn(Optional.of(task));
+
+        MaintenanceWindowRun saved = underTest.failRun(ACCOUNT_ID, 99L, task.getId(), "retry detail");
+
+        assertThat(saved).isSameAs(failed);
+        assertThat(saved.getErrorDetail()).isEqualTo("original");
+        verify(runRepository, never()).saveAndFlush(failed);
+    }
+
+    @Test
+    void failRunRejectsConflictingTerminalStatus() {
+        MaintenanceWindowRun completed = priorRun(MaintenanceRunStatus.COMPLETED);
+        completed.setId(99L);
+        when(runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(99L, task.getId(), ACCOUNT_ID))
+                .thenReturn(Optional.of(completed));
+        when(taskRepository.findByIdAndAccountId(task.getId(), ACCOUNT_ID)).thenReturn(Optional.of(task));
+
+        assertThatThrownBy(() -> underTest.failRun(ACCOUNT_ID, 99L, task.getId(), "boom"))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Run 99 cannot transition from COMPLETED to FAILED");
     }
 
     @Test

@@ -12,9 +12,12 @@ import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.maintenance.api.v1.task.endpoint.MaintenanceWindowTaskEndpoint;
 import com.sequenceiq.maintenance.api.v1.task.model.request.MaintenanceWindowTaskListParams;
 import com.sequenceiq.maintenance.api.v1.task.model.request.MaintenanceWindowTaskRequest;
+import com.sequenceiq.maintenance.api.v1.task.model.request.ReportMaintenanceWindowRunOutcomeRequest;
 import com.sequenceiq.maintenance.api.v1.task.model.request.UpdateMaintenanceWindowTaskRequest;
+import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowRunResponse;
 import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowTaskListResponse;
 import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowTaskResponse;
+import com.sequenceiq.maintenance.service.MaintenanceWindowRunReportService;
 import com.sequenceiq.maintenance.service.MaintenanceWindowTaskService;
 import com.sequenceiq.maintenance.service.MaintenanceWindowTaskService.TaskRegistrationResult;
 
@@ -23,11 +26,16 @@ public class MaintenanceWindowTaskInternalController implements MaintenanceWindo
 
     private final MaintenanceWindowTaskService taskService;
 
+    private final MaintenanceWindowRunReportService runReportService;
+
     @Context
     private UriInfo uriInfo;
 
-    public MaintenanceWindowTaskInternalController(MaintenanceWindowTaskService taskService) {
+    public MaintenanceWindowTaskInternalController(
+            MaintenanceWindowTaskService taskService,
+            MaintenanceWindowRunReportService runReportService) {
         this.taskService = taskService;
+        this.runReportService = runReportService;
     }
 
     @Override
@@ -67,6 +75,16 @@ public class MaintenanceWindowTaskInternalController implements MaintenanceWindo
                 taskId,
                 request,
                 ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    @Override
+    @InternalOnly
+    public MaintenanceWindowRunResponse reportRunOutcome(
+            @AccountId String accountId,
+            Long taskId,
+            Long runId,
+            ReportMaintenanceWindowRunOutcomeRequest request) {
+        return runReportService.reportOutcome(accountId, taskId, runId, request);
     }
 
     @Override

@@ -87,6 +87,18 @@ public class MaintenanceWindowTaskListParams {
         this.status = status;
     }
 
+    @Override
+    public String toString() {
+        return "MaintenanceWindowTaskListParams{" +
+                "resourceCrn='" + resourceCrn + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", taskType='" + taskType + '\'' +
+                ", workItemId='" + workItemId + '\'' +
+                ", taskKind='" + taskKind + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
+
     @AssertTrue(message = "taskType requires resourceCrn")
     public boolean isTaskTypeFilterValid() {
         return isBlank(taskType) || !isBlank(resourceCrn);

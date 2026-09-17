@@ -173,4 +173,23 @@ public class MaintenanceWindowTaskRequest {
     public void setRetryCooldownMinutes(Integer retryCooldownMinutes) {
         this.retryCooldownMinutes = retryCooldownMinutes;
     }
+
+    @Override
+    public String toString() {
+        return "MaintenanceWindowTaskRequest{" +
+                "resourceCrn='" + resourceCrn + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", taskType='" + taskType + '\'' +
+                ", workItemId='" + workItemId + '\'' +
+                ", taskKind='" + taskKind + '\'' +
+                ", submitterService='" + submitterService + '\'' +
+                ", taskPayload=" + taskPayload +
+                ", executionRef=" + executionRef +
+                ", priority=" + priority +
+                ", dependsOn=" + dependsOn +
+                ", retryWithinOccurrence=" + retryWithinOccurrence +
+                ", maxAttemptsPerOccurrence=" + maxAttemptsPerOccurrence +
+                ", retryCooldownMinutes=" + retryCooldownMinutes +
+                '}';
+    }
 }

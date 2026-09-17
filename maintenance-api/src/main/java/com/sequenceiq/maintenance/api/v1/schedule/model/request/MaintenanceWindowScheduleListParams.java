@@ -37,6 +37,14 @@ public class MaintenanceWindowScheduleListParams {
         this.scopeId = scopeId;
     }
 
+    @Override
+    public String toString() {
+        return "MaintenanceWindowScheduleListParams{" +
+                "scopeType='" + scopeType + '\'' +
+                ", scopeId='" + scopeId + '\'' +
+                '}';
+    }
+
     @AssertTrue(message = "scopeType and scopeId must both be provided or both omitted")
     public boolean isScopeFilterValid() {
         boolean hasScopeType = scopeType != null && !scopeType.isBlank();

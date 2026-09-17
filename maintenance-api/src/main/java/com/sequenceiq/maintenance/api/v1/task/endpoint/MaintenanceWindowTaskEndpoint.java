@@ -18,7 +18,9 @@ import jakarta.ws.rs.core.Response;
 import com.sequenceiq.maintenance.api.doc.MaintenanceWindowTaskOpDescription;
 import com.sequenceiq.maintenance.api.v1.task.model.request.MaintenanceWindowTaskListParams;
 import com.sequenceiq.maintenance.api.v1.task.model.request.MaintenanceWindowTaskRequest;
+import com.sequenceiq.maintenance.api.v1.task.model.request.ReportMaintenanceWindowRunOutcomeRequest;
 import com.sequenceiq.maintenance.api.v1.task.model.request.UpdateMaintenanceWindowTaskRequest;
+import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowRunResponse;
 import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowTaskListResponse;
 import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowTaskResponse;
 
@@ -89,6 +91,25 @@ public interface MaintenanceWindowTaskEndpoint {
             @Parameter(description = MaintenanceWindowTaskOpDescription.TASK_ID, required = true)
             @PathParam("taskId") Long taskId,
             @Valid UpdateMaintenanceWindowTaskRequest request);
+
+    @PATCH
+    @Path("{taskId}/runs/{runId}")
+    @Operation(summary = MaintenanceWindowTaskOpDescription.REPORT_RUN_OUTCOME,
+            description = MaintenanceWindowTaskOpDescription.REPORT_RUN_OUTCOME_NOTES,
+            operationId = "reportMaintenanceWindowRunOutcomeInternal")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Run outcome recorded", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "404", description = "Task or run not found"),
+            @ApiResponse(responseCode = "409", description = "Conflicting terminal outcome or concurrent modification")
+    })
+    MaintenanceWindowRunResponse reportRunOutcome(
+            @QueryParam("accountId") @NotEmpty String accountId,
+            @Parameter(description = MaintenanceWindowTaskOpDescription.TASK_ID, required = true)
+            @PathParam("taskId") Long taskId,
+            @Parameter(description = MaintenanceWindowTaskOpDescription.RUN_ID, required = true)
+            @PathParam("runId") Long runId,
+            @Valid ReportMaintenanceWindowRunOutcomeRequest request);
 
     @DELETE
     @Path("{taskId}")

@@ -47,4 +47,13 @@ public class MaintenanceWindowTaskDependencyRequest {
     public void setWorkItemId(String workItemId) {
         this.workItemId = workItemId;
     }
+
+    @Override
+    public String toString() {
+        return "MaintenanceWindowTaskDependencyRequest{" +
+                "resourceCrn='" + resourceCrn + '\'' +
+                ", taskType='" + taskType + '\'' +
+                ", workItemId='" + workItemId + '\'' +
+                '}';
+    }
 }

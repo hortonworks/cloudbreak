@@ -115,4 +115,18 @@ public class UpdateMaintenanceWindowTaskRequest {
     public boolean isSupportedStatusUpdate() {
         return status == null || MaintenanceTaskStatus.DISABLED.name().equals(status);
     }
+
+    @Override
+    public String toString() {
+        return "UpdateMaintenanceWindowTaskRequest{" +
+                "status='" + status + '\'' +
+                ", priority=" + priority +
+                ", dependsOn=" + dependsOn +
+                ", retryWithinOccurrence=" + retryWithinOccurrence +
+                ", maxAttemptsPerOccurrence=" + maxAttemptsPerOccurrence +
+                ", retryCooldownMinutes=" + retryCooldownMinutes +
+                ", taskPayload=" + taskPayload +
+                ", executionRef=" + executionRef +
+                '}';
+    }
 }

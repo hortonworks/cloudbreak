@@ -1,12 +1,16 @@
 package com.sequenceiq.maintenance.dispatcher;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+
 import jakarta.inject.Inject;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -19,6 +23,7 @@ import com.sequenceiq.maintenance.domain.MaintenanceTaskStatus;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowRun;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowTask;
+import com.sequenceiq.maintenance.exception.ConflictException;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowRunRepository;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowTaskRepository;
 import com.sequenceiq.maintenance.service.model.WindowOccurrence;
@@ -109,8 +114,10 @@ public class MaintenanceWindowRunService {
      * Applies a submitter dispatch result to the run and, when appropriate, to the owning task.
      * <p>
      * The caller must invoke {@link #markRunning} beforehand so {@code run} is a managed entity in status
-     * {@link MaintenanceRunStatus#RUNNING}; this method does not re-validate the run status but does verify
-     * that {@code run} belongs to {@code task}.
+     * {@link MaintenanceRunStatus#RUNNING}; this method verifies both that {@code run} belongs to {@code task}
+     * and that its status is still {@code RUNNING} before applying a terminal transition (non-RUNNING runs are
+     * rejected with {@link ConflictException} except for idempotent callback retries on {@link #completeRun} /
+     * {@link #failRun}).
      * <p>
      * Effects by {@link MaintenanceTaskSubmitterDispatchResult#outcome()}:
      * <ul>
@@ -131,27 +138,15 @@ public class MaintenanceWindowRunService {
             MaintenanceWindowRun run,
             MaintenanceTaskSubmitterDispatchResult result) {
         validateRunBelongsToTask(run, task);
-        long now = clock.getCurrentTimeMillis();
         switch (result.outcome()) {
-            case SYNC_COMPLETED -> {
-                run.setStatus(MaintenanceRunStatus.COMPLETED);
-                run.setWindowExecutionEnd(now);
-                run.setUpdatedAt(now);
-                runRepository.saveAndFlush(run);
-                completeTaskIfOneShot(task, now);
-            }
+            case SYNC_COMPLETED -> applyTerminalOutcome(run, task, MaintenanceRunStatus.COMPLETED, null);
             case ASYNC_ACCEPTED -> {
+                requireRunning(run);
+                long now = clock.getCurrentTimeMillis();
                 run.setUpdatedAt(now);
                 runRepository.saveAndFlush(run);
             }
-            case FAILED -> {
-                run.setStatus(MaintenanceRunStatus.FAILED);
-                run.setWindowExecutionEnd(now);
-                run.setErrorDetail(result.errorDetail());
-                run.setUpdatedAt(now);
-                runRepository.saveAndFlush(run);
-                completeOneShotIfTerminalFailure(task, run, now);
-            }
+            case FAILED -> applyTerminalOutcome(run, task, MaintenanceRunStatus.FAILED, result.errorDetail());
             default -> throw new IllegalStateException("Unhandled submitter outcome: " + result.outcome());
         }
         LOGGER.debug("Applied submitter outcome {} to taskId={} runId={}", result.outcome(), task.getId(), run.getId());
@@ -159,6 +154,7 @@ public class MaintenanceWindowRunService {
 
     /**
      * Marks a run {@link MaintenanceRunStatus#COMPLETED} and completes a {@link MaintenanceTaskKind#ONE_SHOT} task when applicable.
+     * Re-reporting {@code COMPLETED} for an already completed run is an idempotent no-op (at-least-once callback retries).
      * <p>
      * Uses two repository reads: {@code findByIdAndMaintenanceWindowTaskIdAndAccountId} validates run ownership and
      * tenant scope without initializing the run's lazy task association; {@code findByIdAndAccountId(taskId)} loads
@@ -166,22 +162,69 @@ public class MaintenanceWindowRunService {
      */
     @Transactional(TxType.REQUIRED)
     public MaintenanceWindowRun completeRun(String accountId, Long runId, Long taskId) {
+        return applyCallbackOutcome(accountId, runId, taskId, MaintenanceRunStatus.COMPLETED, null);
+    }
+
+    /**
+     * Marks a run {@link MaintenanceRunStatus#FAILED} after async submitter work and applies ONE_SHOT task rules
+     * consistent with {@link #applySubmitterOutcome} for {@code FAILED}. Re-reporting {@code FAILED} for an already
+     * failed run is an idempotent no-op.
+     */
+    @Transactional(TxType.REQUIRED)
+    public MaintenanceWindowRun failRun(String accountId, Long runId, Long taskId, String errorDetail) {
+        return applyCallbackOutcome(accountId, runId, taskId, MaintenanceRunStatus.FAILED, errorDetail);
+    }
+
+    private MaintenanceWindowRun applyCallbackOutcome(
+            String accountId, Long runId, Long taskId, MaintenanceRunStatus terminalStatus, String errorDetail) {
         MaintenanceWindowRun run = runRepository.findByIdAndMaintenanceWindowTaskIdAndAccountId(runId, taskId, accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Run not found for task"));
+                .orElseThrow(notFound(String.format(
+                        "Maintenance run not found for accountId=%s taskId=%s runId=%s", accountId, taskId, runId)));
         MaintenanceWindowTask task = taskRepository.findByIdAndAccountId(taskId, accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(notFound(String.format(
+                        "Maintenance task not found for accountId=%s taskId=%s", accountId, taskId)));
+        MaintenanceWindowRun saved = applyTerminalOutcome(run, task, terminalStatus, errorDetail);
+        LOGGER.debug("Applied {} to maintenance run: taskId={} runId={}", terminalStatus, taskId, runId);
+        return saved;
+    }
+
+    private MaintenanceWindowRun applyTerminalOutcome(
+            MaintenanceWindowRun run,
+            MaintenanceWindowTask task,
+            MaintenanceRunStatus terminalStatus,
+            String errorDetail) {
+        if (run.getStatus() == terminalStatus) {
+            LOGGER.info("Outcome callback skipped for run id={}: already {}", run.getId(), terminalStatus);
+            return run;
+        }
         if (run.getStatus() != MaintenanceRunStatus.RUNNING) {
-            throw new IllegalStateException(
-                    "Run " + runId + " is not RUNNING (status=" + run.getStatus() + ")");
+            throw new ConflictException(String.format(
+                    "Run %s cannot transition from %s to %s", run.getId(), run.getStatus(), terminalStatus));
         }
         long now = clock.getCurrentTimeMillis();
-        run.setStatus(MaintenanceRunStatus.COMPLETED);
+        run.setStatus(terminalStatus);
         run.setWindowExecutionEnd(now);
+        run.setErrorDetail(errorDetail);
         run.setUpdatedAt(now);
-        MaintenanceWindowRun saved = runRepository.saveAndFlush(run);
-        completeTaskIfOneShot(task, now);
-        LOGGER.debug("Completed maintenance run: taskId={} runId={}", taskId, runId);
+        MaintenanceWindowRun saved;
+        try {
+            saved = runRepository.saveAndFlush(run);
+        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
+            throw new ConflictException("Run was modified concurrently.", e);
+        }
+        if (terminalStatus == MaintenanceRunStatus.COMPLETED) {
+            completeTaskIfOneShot(task, now);
+        } else {
+            completeOneShotIfTerminalFailure(task, run, now);
+        }
         return saved;
+    }
+
+    private static void requireRunning(MaintenanceWindowRun run) {
+        if (run.getStatus() != MaintenanceRunStatus.RUNNING) {
+            throw new ConflictException(
+                    "Run " + run.getId() + " is not RUNNING (status=" + run.getStatus() + ")");
+        }
     }
 
     public static String policyRevision(MaintenanceWindowSchedule schedule) {

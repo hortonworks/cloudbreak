@@ -30,6 +30,14 @@ public final class MaintenanceWindowTaskOpDescription {
 
     public static final String DELETE_NOTES = NOTES + " Soft-deletes the task (status DELETED), removing it from the dispatcher set.";
 
+    public static final String REPORT_RUN_OUTCOME = "Report async maintenance run outcome";
+
+    public static final String REPORT_RUN_OUTCOME_NOTES = NOTES
+            + " Called by submitter services after HTTP 202 dispatch when long-running work finishes."
+            + " Only RUNNING runs accept COMPLETED or FAILED; FAILED requires errorDetail.";
+
+    public static final String RUN_ID = "Maintenance window run id returned by the dispatch response";
+
     public static final String LOCATION = "URI of the created task: /internal/maintenance-tasks/{taskId}";
 
     private MaintenanceWindowTaskOpDescription() {

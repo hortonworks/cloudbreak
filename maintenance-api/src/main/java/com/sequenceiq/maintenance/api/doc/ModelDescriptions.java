@@ -325,6 +325,44 @@ public final class ModelDescriptions {
         }
     }
 
+    public static final class RunOutcomeRequest {
+
+        public static final String REQUEST = "Async submitter callback reporting terminal run outcome after HTTP 202 dispatch";
+
+        public static final String STATUS = "Terminal run status: COMPLETED or FAILED";
+
+        public static final String ERROR_DETAIL = "Failure detail when status is FAILED (max 1024 characters)";
+
+        private RunOutcomeRequest() {
+        }
+    }
+
+    public static final class RunResponse {
+
+        public static final String RESPONSE = "Maintenance window run execution row for one schedule occurrence";
+
+        public static final String ID = "Run id";
+
+        public static final String TASK_ID = "Owning maintenance window task id";
+
+        public static final String STATUS = "Run status";
+
+        public static final String ERROR_DETAIL = "Failure detail when status is FAILED";
+
+        public static final String WINDOW_START = "Occurrence window start (" + EPOCH_MS + ")";
+
+        public static final String WINDOW_END = "Occurrence window end (" + EPOCH_MS + ")";
+
+        public static final String WINDOW_EXECUTION_END = "When execution finished (" + EPOCH_MS + ")";
+
+        public static final String ATTEMPT_COUNT = "Number of execution attempts that have started for this occurrence";
+
+        public static final String VERSION = "Optimistic-locking version of the run row; use for If-Match / conflict detection";
+
+        private RunResponse() {
+        }
+    }
+
     public static final class TaskDependency {
 
         public static final String REQUEST = "Reference to another registered task by its natural key";
