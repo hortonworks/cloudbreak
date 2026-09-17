@@ -140,6 +140,7 @@ public class SdxRollingVerticalScaleTest extends PreconditionSdxE2ETest {
 
     private String selectAzureTargetInstanceType(String currentInstanceType) {
         return switch (currentInstanceType) {
+            // v3 sizes (have local temp/resource disk)
             case "Standard_D2s_v3" -> "Standard_D4s_v3";
             case "Standard_D4s_v3" -> "Standard_D8s_v3";
             case "Standard_D8s_v3" -> "Standard_E8s_v3";
@@ -148,8 +149,23 @@ public class SdxRollingVerticalScaleTest extends PreconditionSdxE2ETest {
             case "Standard_E4s_v3" -> "Standard_E8s_v3";
             case "Standard_E8s_v3" -> "Standard_D8s_v3";
             case "Standard_E16s_v3" -> "Standard_D16s_v3";
+            // v5 sizes (no local temp disk — must not cross to v3)
+            case "Standard_D2s_v5" -> "Standard_D4s_v5";
+            case "Standard_D4s_v5" -> "Standard_D8s_v5";
+            case "Standard_D8s_v5" -> "Standard_E8s_v5";
+            case "Standard_D16s_v5" -> "Standard_E16s_v5";
+            case "Standard_E2s_v5" -> "Standard_E4s_v5";
+            case "Standard_E4s_v5" -> "Standard_E8s_v5";
+            case "Standard_E8s_v5" -> "Standard_D8s_v5";
+            case "Standard_E16s_v5" -> "Standard_D16s_v5";
             default -> {
-                if (currentInstanceType.startsWith("Standard_D")) {
+                // Stay within the same generation to avoid crossing the resource-disk boundary
+                // (v3 sizes have a local temp disk; v5 sizes do not — Azure rejects cross-generation resizes)
+                if (currentInstanceType.endsWith("v5") && currentInstanceType.startsWith("Standard_D")) {
+                    yield "Standard_D8s_v5";
+                } else if (currentInstanceType.endsWith("v5") && currentInstanceType.startsWith("Standard_E")) {
+                    yield "Standard_E8s_v5";
+                } else if (currentInstanceType.startsWith("Standard_D")) {
                     yield "Standard_E8s_v3";
                 } else if (currentInstanceType.startsWith("Standard_E")) {
                     yield "Standard_D8s_v3";
