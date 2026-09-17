@@ -135,7 +135,11 @@ public interface ClusterModificationService {
 
     void rollingRestartServiceRolesByType(String serviceType, List<String> roleTypes, boolean staleConfigsOnly);
 
-    List<String> getActiveServiceRoleTypes(String clusterName, String serviceType, List<String> roleTypes);
+    void deployServiceClientConfig(String serviceType);
+
+    Set<String> getActiveServiceRoleTypes(String clusterName, String serviceType, Set<String> roleTypes);
+
+    Set<String> getInactiveServiceRoleTypes(String clusterName, String serviceType, Set<String> roleTypes);
 
     void updateServiceConfig(String serviceType, Map<String, String> config, List<String> roleGroupNames) throws CloudbreakException;
 

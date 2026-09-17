@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cm.DataView.FULL;
 import static com.sequenceiq.cloudbreak.cm.DataView.SUMMARY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART;
@@ -9,10 +10,10 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -40,6 +41,7 @@ import com.cloudera.api.swagger.model.ApiRollingRestartArgs;
 import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -152,32 +154,66 @@ public class ClouderaManagerRestartService {
         }
     }
 
-    public List<String> getActiveServiceRoleTypes(StackDtoDelegate stack, ApiClient apiClient, String serviceType, List<String> roleTypes) {
+    public void deployServiceClientConfig(StackDtoDelegate stack, ApiClient apiClient, String serviceType) {
+        try {
+            String serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType)
+                    .orElseThrow(() -> new ClouderaManagerOperationFailedException(String.format("Cannot find CM service by type '%s' in cluster '%s'.",
+                            serviceType, stack.getName())));
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+            ApiCommand deployClientConfigCommand = servicesResourceApi.deployClientConfigCommand(stack.getName(), serviceName, new ApiRoleNameList());
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClient,
+                    deployClientConfigCommand.getId());
+            if (pollingResult.isExited()) {
+                throw new CancellationException(String.format("Cluster was terminated while waiting for client configuration deployment of service '%s' "
+                        + "in cluster '%s'.", serviceName, stack.getName()));
+            } else if (pollingResult.isTimeout()) {
+                throw new CloudbreakException(String.format("Timeout while Cloudera Manager was deploying client configuration of service '%s' "
+                        + "in cluster '%s'.", serviceName, stack.getName()));
+            }
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.warn("Could not deploy client configuration for '{}' service type in cluster '{}'.", serviceType, stack.getName(), e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public Set<String> getActiveServiceRoleTypes(StackDtoDelegate stack, ApiClient apiClient, String serviceType, Set<String> roleTypes) {
+        return getMatchingServiceRoleTypes(stack, apiClient, serviceType, roleTypes, this::isActive, "active");
+    }
+
+    public Set<String> getInactiveServiceRoleTypes(StackDtoDelegate stack, ApiClient apiClient, String serviceType, Set<String> roleTypes) {
+        return getMatchingServiceRoleTypes(stack, apiClient, serviceType, roleTypes, this::isNotActive, "inactive");
+    }
+
+    private boolean isActive(ApiRole role) {
+        return ACTIVE_ROLE_STATES.contains(role.getRoleState());
+    }
+
+    private boolean isNotActive(ApiRole role) {
+        return !isActive(role);
+    }
+
+    private Set<String> getMatchingServiceRoleTypes(StackDtoDelegate stack, ApiClient apiClient, String serviceType, Set<String> roleTypes,
+            Predicate<ApiRole> roleMatcher, String roleTypeDescription) {
         if (roleTypes.isEmpty()) {
-            return List.of();
+            return Set.of();
         }
         try {
             Optional<String> serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType);
             if (serviceName.isEmpty()) {
-                return List.of();
+                return Set.of();
             }
             RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(apiClient);
-            ApiRoleList apiRoleList = rolesResourceApi.readRoles(stack.getName(), serviceName.get(), "", SUMMARY.name());
+            ApiRoleList apiRoleList = rolesResourceApi.readRoles(stack.getName(), serviceName.get(), "", FULL.name());
             if (apiRoleList.getItems() == null || apiRoleList.getItems().isEmpty()) {
-                return List.of();
+                return Set.of();
             }
-            Set<String> requestedRoleTypes = Set.copyOf(roleTypes);
-            Map<String, List<ApiRole>> rolesByType = apiRoleList.getItems().stream()
-                    .filter(apiRole -> requestedRoleTypes.contains(apiRole.getType()))
-                    .collect(Collectors.groupingBy(ApiRole::getType));
-            return roleTypes.stream()
-                    .filter(rolesByType::containsKey)
-                    .filter(roleType -> rolesByType.get(roleType).stream()
-                            .map(ApiRole::getRoleState)
-                            .anyMatch(ACTIVE_ROLE_STATES::contains))
-                    .toList();
+            return apiRoleList.getItems().stream()
+                    .filter(apiRole -> roleTypes.contains(apiRole.getType()))
+                    .filter(roleMatcher)
+                    .map(ApiRole::getType)
+                    .collect(Collectors.toSet());
         } catch (ApiException e) {
-            LOGGER.info("Could not read active role types for {} service type.", serviceType, e);
+            LOGGER.info("Could not read {} role types for {} service type.", roleTypeDescription, serviceType, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }

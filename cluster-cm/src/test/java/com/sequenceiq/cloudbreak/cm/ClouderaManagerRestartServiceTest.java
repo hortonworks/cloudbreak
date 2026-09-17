@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,6 +49,7 @@ import com.cloudera.api.swagger.model.ApiRollingRestartArgs;
 import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -410,20 +412,104 @@ class ClouderaManagerRestartServiceTest {
         when(apiRoleList.getItems()).thenReturn(List.of(startedKraftRole, stoppedBrokerRole, startedConnectRole));
         when(rolesResourceApi.readRoles(eq(stack.getName()), eq(serviceName), eq(""), any())).thenReturn(apiRoleList);
 
-        List<String> activeRoleTypes = underTest.getActiveServiceRoleTypes(stack, apiClient, serviceType,
-                List.of("KRAFT", "KAFKA_BROKER", "KAFKA_CONNECT"));
+        Set<String> activeRoleTypes = underTest.getActiveServiceRoleTypes(stack, apiClient, serviceType,
+                Set.of("KRAFT", "KAFKA_BROKER", "KAFKA_CONNECT"));
 
-        assertEquals(List.of("KRAFT", "KAFKA_CONNECT"), activeRoleTypes);
+        assertEquals(Set.of("KRAFT", "KAFKA_CONNECT"), activeRoleTypes);
         verify(servicesResourceApi, times(1)).readServices(eq(stack.getName()), any());
         verify(rolesResourceApi, times(1)).readRoles(eq(stack.getName()), eq(serviceName), eq(""), any());
     }
 
     @Test
     void testGetActiveServiceRoleTypesWhenRoleTypesEmpty() {
-        assertEquals(List.of(), underTest.getActiveServiceRoleTypes(stack, apiClient, "KAFKA", List.of()));
+        assertEquals(Set.of(), underTest.getActiveServiceRoleTypes(stack, apiClient, "KAFKA", Set.of()));
 
         verifyNoInteractions(servicesResourceApi);
         verifyNoInteractions(rolesResourceApi);
+    }
+
+    @Test
+    void testGetInactiveServiceRoleTypes() throws ApiException {
+        String serviceType = "KAFKA";
+        String serviceName = "kafka-abc123";
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn(serviceType);
+        when(apiService.getName()).thenReturn(serviceName);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+        ApiRole stoppedKraftRole = new ApiRole().type("KRAFT").roleState(ApiRoleState.STOPPED);
+        ApiRole stoppedBrokerRole = new ApiRole().type("KAFKA_BROKER").roleState(ApiRoleState.STOPPED);
+        ApiRole startedConnectRole = new ApiRole().type("KAFKA_CONNECT").roleState(ApiRoleState.STARTED);
+        ApiRoleList apiRoleList = mock(ApiRoleList.class);
+        when(apiRoleList.getItems()).thenReturn(List.of(stoppedKraftRole, stoppedBrokerRole, startedConnectRole));
+        when(rolesResourceApi.readRoles(eq(stack.getName()), eq(serviceName), eq(""), any())).thenReturn(apiRoleList);
+
+        Set<String> inactiveRoleTypes = underTest.getInactiveServiceRoleTypes(stack, apiClient, serviceType,
+                Set.of("KRAFT", "KAFKA_BROKER", "KAFKA_CONNECT"));
+
+        assertEquals(Set.of("KRAFT", "KAFKA_BROKER"), inactiveRoleTypes);
+    }
+
+    @Test
+    void testDeployServiceClientConfig() throws ApiException, CloudbreakException {
+        String serviceType = "KAFKA";
+        String serviceName = "kafka-abc123";
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn(serviceType);
+        when(apiService.getName()).thenReturn(serviceName);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+        when(servicesResourceApi.deployClientConfigCommand(eq(stack.getName()), eq(serviceName), any(ApiRoleNameList.class)))
+                .thenReturn(new ApiCommand().id(COMMAND_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+
+        underTest.deployServiceClientConfig(stack, apiClient, serviceType);
+
+        verify(servicesResourceApi).deployClientConfigCommand(eq(stack.getName()), eq(serviceName), any(ApiRoleNameList.class));
+        verify(clouderaManagerPollingServiceProvider).startPollingCmClientConfigDeployment(stack, apiClient, COMMAND_ID);
+    }
+
+    @Test
+    void testDeployServiceClientConfigWhenClusterTerminated() throws ApiException {
+        String serviceType = "KAFKA";
+        String serviceName = "kafka-abc123";
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn(serviceType);
+        when(apiService.getName()).thenReturn(serviceName);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+        when(servicesResourceApi.deployClientConfigCommand(eq(stack.getName()), eq(serviceName), any(ApiRoleNameList.class)))
+                .thenReturn(new ApiCommand().id(COMMAND_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(pollingResult.isExited()).thenReturn(true);
+
+        assertThrows(CancellationException.class, () -> underTest.deployServiceClientConfig(stack, apiClient, serviceType));
+    }
+
+    @Test
+    void testDeployServiceClientConfigWhenTimeout() throws ApiException {
+        String serviceType = "KAFKA";
+        String serviceName = "kafka-abc123";
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn(serviceType);
+        when(apiService.getName()).thenReturn(serviceName);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+        when(servicesResourceApi.deployClientConfigCommand(eq(stack.getName()), eq(serviceName), any(ApiRoleNameList.class)))
+                .thenReturn(new ApiCommand().id(COMMAND_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(pollingResult.isTimeout()).thenReturn(true);
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.deployServiceClientConfig(stack, apiClient, serviceType));
     }
 
     @Test
@@ -433,7 +519,7 @@ class ClouderaManagerRestartServiceTest {
         when(apiServiceList.getItems()).thenReturn(Collections.emptyList());
         when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
 
-        assertEquals(List.of(), underTest.getActiveServiceRoleTypes(stack, apiClient, "KAFKA", List.of("KRAFT")));
+        assertEquals(Set.of(), underTest.getActiveServiceRoleTypes(stack, apiClient, "KAFKA", Set.of("KRAFT")));
 
         verifyNoInteractions(rolesResourceApi);
     }

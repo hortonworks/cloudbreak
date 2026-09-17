@@ -1241,8 +1241,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public List<String> getActiveServiceRoleTypes(String clusterName, String serviceType, List<String> roleTypes) {
+    public void deployServiceClientConfig(String serviceType) {
+        clouderaManagerRestartService.deployServiceClientConfig(stack, v31Client, serviceType);
+    }
+
+    @Override
+    public Set<String> getActiveServiceRoleTypes(String clusterName, String serviceType, Set<String> roleTypes) {
         return clouderaManagerRestartService.getActiveServiceRoleTypes(stack, v31Client, serviceType, roleTypes);
+    }
+
+    @Override
+    public Set<String> getInactiveServiceRoleTypes(String clusterName, String serviceType, Set<String> roleTypes) {
+        return clouderaManagerRestartService.getInactiveServiceRoleTypes(stack, v31Client, serviceType, roleTypes);
     }
 
     @Override

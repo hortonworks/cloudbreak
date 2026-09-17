@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_ROLES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.ZookeeperToKraftKafkaRollingRestartRoleTypes.resolve;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.ZookeeperToKraftKafkaRollingRestartRoleTypes.shouldDeployKafkaClientConfigBeforeRestart;
 
 import java.util.List;
 
@@ -49,13 +50,19 @@ public class MigrateZookeeperToKraftRestartKafkaRolesHandler extends ExceptionCa
         ClusterModificationService clusterModificationService = getClusterModificationService(stackDto);
         boolean staleConfigsOnly = event.getData().isStaleConfigsOnly();
         boolean kraftHostGroupPresent = event.getData().isKraftHostGroupPresent();
+        String clusterName = stackDto.getCluster().getName();
         try {
-            List<String> roleTypes = resolve(clusterModificationService, stackDto.getCluster().getName(), staleConfigsOnly, kraftHostGroupPresent);
-            if (roleTypes.isEmpty()) {
+            if (shouldDeployKafkaClientConfigBeforeRestart(clusterModificationService, clusterName, staleConfigsOnly)) {
+                LOGGER.debug("Deploying Kafka client configuration before rolling restart because KRaft roles are inactive "
+                        + "and rolling restart cannot refresh them.");
+                clusterModificationService.deployServiceClientConfig(KAFKA_SERVICE_TYPE);
+            }
+            List<String> roleTypesToRestart = resolve(clusterModificationService, clusterName, staleConfigsOnly, kraftHostGroupPresent);
+            if (roleTypesToRestart.isEmpty()) {
                 LOGGER.debug("No Kafka roles to restart before Zookeeper to KRaft migration.");
             } else {
-                LOGGER.debug("Rolling restart for Kafka role types {} with staleConfigsOnly={}.", roleTypes, staleConfigsOnly);
-                clusterModificationService.rollingRestartServiceRolesByType(KAFKA_SERVICE_TYPE, roleTypes, staleConfigsOnly);
+                LOGGER.debug("Rolling restart for Kafka role types {} with staleConfigsOnly={}.", roleTypesToRestart, staleConfigsOnly);
+                clusterModificationService.rollingRestartServiceRolesByType(KAFKA_SERVICE_TYPE, roleTypesToRestart, staleConfigsOnly);
             }
         } catch (Exception e) {
             LOGGER.error("Migrate Zookeeper to KRaft (restart Kafka roles) failed.", e);

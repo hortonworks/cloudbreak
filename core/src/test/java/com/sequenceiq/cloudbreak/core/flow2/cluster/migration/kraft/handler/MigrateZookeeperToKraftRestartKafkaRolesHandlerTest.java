@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +46,7 @@ public class MigrateZookeeperToKraftRestartKafkaRolesHandlerTest {
 
     private static final String KAFKA_CONNECT_ROLE = "KAFKA_CONNECT";
 
-    private static final List<String> KAFKA_ROLE_TYPES = List.of("KRAFT", KAFKA_BROKER_ROLE, KAFKA_CONNECT_ROLE);
+    private static final Set<String> KAFKA_ROLE_TYPES = Set.of("KRAFT", KAFKA_BROKER_ROLE, KAFKA_CONNECT_ROLE);
 
     @Mock
     private StackDtoService stackDtoService;
@@ -69,6 +70,30 @@ public class MigrateZookeeperToKraftRestartKafkaRolesHandlerTest {
     private MigrateZookeeperToKraftRestartKafkaRolesHandler underTest;
 
     @Test
+    void testDoAcceptDeploysClientConfigWhenReMigrateAndKraftRolesInactive() {
+        String clusterName = "testCluster";
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_ROLES_EVENT.selector(), STACK_ID, true, true);
+        HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getName()).thenReturn(clusterName);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterModificationService.getInactiveServiceRoleTypes(clusterName, KAFKA_SERVICE_TYPE, Set.of("KRAFT")))
+                .thenReturn(Set.of("KRAFT"));
+        when(clusterModificationService.getActiveServiceRoleTypes(clusterName, KAFKA_SERVICE_TYPE, KAFKA_ROLE_TYPES))
+                .thenReturn(Set.of(KAFKA_BROKER_ROLE, KAFKA_CONNECT_ROLE));
+
+        Selectable result = underTest.doAccept(event);
+
+        assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
+        assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
+        verify(clusterModificationService).deployServiceClientConfig(KAFKA_SERVICE_TYPE);
+        verify(clusterModificationService).rollingRestartServiceRolesByType(KAFKA_SERVICE_TYPE,
+                List.of(KAFKA_BROKER_ROLE, KAFKA_CONNECT_ROLE), true);
+    }
+
+    @Test
     void testDoAcceptSuccess() {
         String clusterName = "testCluster";
         MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_ROLES_EVENT.selector(), STACK_ID, false, false);
@@ -79,12 +104,13 @@ public class MigrateZookeeperToKraftRestartKafkaRolesHandlerTest {
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterModificationService.getActiveServiceRoleTypes(clusterName, KAFKA_SERVICE_TYPE, KAFKA_ROLE_TYPES))
-                .thenReturn(List.of(KAFKA_BROKER_ROLE, KAFKA_CONNECT_ROLE));
+                .thenReturn(Set.of(KAFKA_BROKER_ROLE, KAFKA_CONNECT_ROLE));
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
+        verify(clusterModificationService, never()).deployServiceClientConfig(any());
         verify(clusterModificationService).rollingRestartServiceRolesByType(KAFKA_SERVICE_TYPE,
                 List.of(KAFKA_BROKER_ROLE, KAFKA_CONNECT_ROLE), false);
     }
@@ -99,8 +125,10 @@ public class MigrateZookeeperToKraftRestartKafkaRolesHandlerTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterModificationService.getInactiveServiceRoleTypes(clusterName, KAFKA_SERVICE_TYPE, Set.of("KRAFT")))
+                .thenReturn(Set.of());
         when(clusterModificationService.getActiveServiceRoleTypes(clusterName, KAFKA_SERVICE_TYPE, KAFKA_ROLE_TYPES))
-                .thenReturn(List.of("KRAFT", KAFKA_BROKER_ROLE));
+                .thenReturn(Set.of("KRAFT", KAFKA_BROKER_ROLE));
 
         Selectable result = underTest.doAccept(event);
 
@@ -121,7 +149,7 @@ public class MigrateZookeeperToKraftRestartKafkaRolesHandlerTest {
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterModificationService.getActiveServiceRoleTypes(clusterName, KAFKA_SERVICE_TYPE, KAFKA_ROLE_TYPES))
-                .thenReturn(List.of());
+                .thenReturn(Set.of());
 
         Selectable result = underTest.doAccept(event);
 
@@ -141,7 +169,7 @@ public class MigrateZookeeperToKraftRestartKafkaRolesHandlerTest {
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterModificationService.getActiveServiceRoleTypes(clusterName, KAFKA_SERVICE_TYPE, KAFKA_ROLE_TYPES))
-                .thenReturn(List.of(KAFKA_BROKER_ROLE));
+                .thenReturn(Set.of(KAFKA_BROKER_ROLE));
 
         ArgumentCaptor<List<String>> roleTypesCaptor = ArgumentCaptor.forClass(List.class);
         doThrow(new RuntimeException("error")).when(clusterModificationService)
