@@ -205,6 +205,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private ClusterCommandService clusterCommandService;
 
     @Inject
+    private ClouderaManagerCommandsService clouderaManagerCommandsService;
+
+    @Inject
     private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
 
     @Inject
@@ -1324,29 +1327,52 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 LOGGER.info("Current action is repair and CM version is newer than 7.9.0, start services on hosts because services were stopped");
                 if (!hosts.isEmpty()) {
                     LOGGER.info("Start roles on hosts: {}", hosts);
-                    clusterCommandService.findTopByClusterIdAndClusterCommandType(stack.getCluster().getId(), ClusterCommandType.HOST_START_ROLES)
-                            .ifPresentOrElse(this::waitStartRolesCommand, () -> {
-                                try {
-                                    ApiHostNameList items = new ApiHostNameList().items(hosts);
-                                    ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(v31Client).hostsStartRolesCommand(items);
-
-                                    ClusterCommand clusterCommand = new ClusterCommand();
-                                    clusterCommand.setClusterId(stack.getCluster().getId());
-                                    clusterCommand.setCommandId(apiCommand.getId());
-                                    clusterCommand.setClusterCommandType(ClusterCommandType.HOST_START_ROLES);
-                                    clusterCommandService.save(clusterCommand);
-
-                                    waitStartRolesCommand(clusterCommand);
-                                } catch (ApiException e) {
-                                    LOGGER.error("Failed to start roles on nodes: {}", hosts, e);
-                                    throw new CloudbreakServiceException("Failed to start roles on nodes: " + hosts, e);
-                                }
-                            });
-
+                    Optional<ClusterCommand> savedStartRolesCommand = clusterCommandService
+                            .findTopByClusterIdAndClusterCommandType(stack.getCluster().getId(), ClusterCommandType.HOST_START_ROLES);
+                    if (savedStartRolesCommand.isPresent() && isStartRolesCommandActive(savedStartRolesCommand.get())) {
+                        LOGGER.info("Reusing active HOST_START_ROLES CM command with id: {}", savedStartRolesCommand.get().getCommandId());
+                        waitStartRolesCommand(savedStartRolesCommand.get());
+                    } else {
+                        savedStartRolesCommand.ifPresent(staleStartRolesCommand -> {
+                            LOGGER.info("Discarding stale HOST_START_ROLES CM command with id: {}, a fresh start roles command will be issued",
+                                    staleStartRolesCommand.getCommandId());
+                            clusterCommandService.delete(staleStartRolesCommand);
+                        });
+                        startRolesCommandAndWait(hosts);
+                    }
                 }
             }
         } else {
             LOGGER.warn("Don't run start roles command because hosts are empty");
+        }
+    }
+
+    private boolean isStartRolesCommandActive(ClusterCommand clusterCommand) {
+        try {
+            Optional<ApiCommand> apiCommand = clouderaManagerCommandsService.getApiCommandIfExist(v31Client, clusterCommand.getCommandId());
+            return apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().isActive());
+        } catch (ApiException e) {
+            LOGGER.warn("Failed to read saved HOST_START_ROLES CM command with id: {} from Cloudera Manager, a fresh start roles command will be issued",
+                    clusterCommand.getCommandId(), e);
+            return false;
+        }
+    }
+
+    private void startRolesCommandAndWait(List<String> hosts) {
+        try {
+            ApiHostNameList items = new ApiHostNameList().items(hosts);
+            ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(v31Client).hostsStartRolesCommand(items);
+
+            ClusterCommand clusterCommand = new ClusterCommand();
+            clusterCommand.setClusterId(stack.getCluster().getId());
+            clusterCommand.setCommandId(apiCommand.getId());
+            clusterCommand.setClusterCommandType(ClusterCommandType.HOST_START_ROLES);
+            clusterCommandService.save(clusterCommand);
+
+            waitStartRolesCommand(clusterCommand);
+        } catch (ApiException e) {
+            LOGGER.error("Failed to start roles on nodes: {}", hosts, e);
+            throw new CloudbreakServiceException("Failed to start roles on nodes: " + hosts, e);
         }
     }
 
