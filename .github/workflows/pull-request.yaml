@@ -20,6 +20,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Fetches the PR's current labels via the REST API at run time so that a manual
+  # workflow re-run reflects any label changes made since the first run. Using
+  # `github.event.pull_request.labels.*.name` in a job's `if:` reads the event
+  # payload frozen at the original run, which is what we want to avoid here.
+  # Downstream label-gated jobs consume `needs.resolve-labels.outputs.labels`.
+  resolve-labels:
+    permissions:
+      pull-requests: read
+    name: Resolve PR labels
+    runs-on: [cb-ubuntu22]
+    # No pull_request context on workflow_dispatch — skip and let label-gated
+    # jobs stay skipped (matches prior behavior on manual dispatch).
+    if: ${{ github.event.pull_request.number != '' }}
+    outputs:
+      labels: ${{ steps.fetch.outputs.labels }}
+    steps:
+      - name: Fetch current PR labels
+        id: fetch
+        run: |
+          labels=$(curl -sSf \
+            -H "Accept: application/json" \
+            "https://github.infra.cloudera.com/api/v3/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
+            | jq -r '[.labels[].name] | join(",")')
+          echo "labels=${labels}" >> "$GITHUB_OUTPUT"
+          echo "PR labels at run time: ${labels}"
+
   jira-update:
     permissions: write-all
     name: Jira Update
@@ -220,7 +246,10 @@ jobs:
     # own script is a no-op ("no need for build"), so skipping the whole job avoids the
     # runner spin-up. A job-level skip reports "skipped" (counts as passing for branch
     # protection), unlike a workflow/path skip which would stay pending and block merge.
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'fedramp-it') }}
+    # Label list is resolved live in `resolve-labels` so re-runs see the current labels.
+    needs:
+      - resolve-labels
+    if: ${{ contains(needs.resolve-labels.outputs.labels, 'fedramp-it') }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -239,7 +268,10 @@ jobs:
     # Opt-in: only run when the PR carries the `real_ums_test` label. Without it the job's
     # own script is a no-op ("no need for build"), so skipping the whole job avoids the
     # runner spin-up. A job-level skip counts as passing for branch protection.
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'real_ums_test') }}
+    # Label list is resolved live in `resolve-labels` so re-runs see the current labels.
+    needs:
+      - resolve-labels
+    if: ${{ contains(needs.resolve-labels.outputs.labels, 'real_ums_test') }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -259,14 +291,16 @@ jobs:
     # Each label selects a suite in aws-test-steps_aws_test.sh (datahub > datalake >
     # environment). This is the expensive job (real infra, up to 120 min) that serializes
     # after the whole mock/static wave, so gating it saves the most PR time when unneeded.
+    # Label list is resolved live in `resolve-labels` so re-runs see the current labels.
     if: >-
-      ${{ contains(github.event.pull_request.labels.*.name, 'aws-smoke-datahub-test')
-          || contains(github.event.pull_request.labels.*.name, 'aws-smoke-datalake-test')
-          || contains(github.event.pull_request.labels.*.name, 'aws-smoke-environment-test') }}
+      ${{ contains(needs.resolve-labels.outputs.labels, 'aws-smoke-datahub-test')
+          || contains(needs.resolve-labels.outputs.labels, 'aws-smoke-datalake-test')
+          || contains(needs.resolve-labels.outputs.labels, 'aws-smoke-environment-test') }}
     # fedramp-integration-test and real-ums-test are intentionally NOT in `needs`: they are
     # now label-gated too, and a skipped `needs` dependency cascades (default success()
     # semantics) — keeping them here would skip aws-test even when a smoke label is present.
     needs:
+      - resolve-labels
       - unit-test
       - bootstrap-cert-filter-test
       - checkstyle-main
