@@ -20,12 +20,10 @@
                 <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - %msg%n</pattern>
             </layout>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>mock-infrastructure-log/mock-infrastructure-log-%d{yyyy-MM-dd}.log</FileNamePattern>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>mock-infrastructure-log/mock-infrastructure-log-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>1024MB</maxFileSize>
         </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>1024MB</MaxFileSize>
-        </triggeringPolicy>
     </appender>
 
     <root level="INFO">

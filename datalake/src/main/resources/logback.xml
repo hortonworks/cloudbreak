@@ -24,12 +24,10 @@
                 <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
             </layout>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>datalake-log/datalake-%d{yyyy-MM-dd}.log</FileNamePattern>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>datalake-log/datalake-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>1024MB</maxFileSize>
         </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>1024MB</MaxFileSize>
-        </triggeringPolicy>
     </appender>
 
     <root level="${SDX_ROOT_LOG_LEVEL:-INFO}">
