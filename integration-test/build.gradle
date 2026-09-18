@@ -199,31 +199,20 @@ dependencies {
   implementation project(path: ':environment-public-api-client')
 }
 
-// Pin the google-cloud-asset transitive family (used by GcpClient.buildAsset for the
-// UserDefinedTagUpdateTest GCP verification path) to versions known compatible with the
-// repo-wide forced protobuf-java version. Without this, Gradle's default "highest version
-// wins" resolution can silently pick a newer gencode release (compiled against a newer
-// protobuf-java than what's forced at runtime), causing NoClassDefFoundError on classes
-// like com.google.protobuf.RuntimeVersion$RuntimeDomain at runtime.
+// google-cloud-asset:3.101.0's own POM pulls a fully-consistent, up-to-date dependency
+// family (gax 2.85.0, api-common 2.68.0, grpc-protobuf 1.83.0, proto-google-cloud-asset-v1
+// 3.101.0, etc.) - let it resolve naturally instead of forcing it down to match the
+// repo-wide protobuf-java force. Only protobuf-java/protobuf-java-util need a local
+// override here: this resolutionStrategy block runs after root build.gradle's allprojects
+// force, so a later force() for the same coordinate wins for this subproject only, without
+// touching root build.gradle or other modules that share protobufVersion. A newer runtime
+// is always compatible with gencode compiled against an older protobuf-java, so this is
+// safe for the other in-house modules (grpc-common, common, databus-connector, etc.) that
+// land on this module's runtime classpath and are compiled against protobufVersion.
 configurations.configureEach {
   resolutionStrategy {
-    force "com.google.api.grpc:proto-google-cloud-asset-v1:3.34.0"
-    force "com.google.api.grpc:proto-google-cloud-asset-v1p1beta1:0.134.0"
-    force "com.google.api.grpc:proto-google-cloud-asset-v1p2beta1:0.134.0"
-    force "com.google.api.grpc:proto-google-cloud-asset-v1p5beta1:0.134.0"
-    force "com.google.api.grpc:proto-google-cloud-asset-v1p7beta1:3.34.0"
-    force "com.google.api.grpc:proto-google-cloud-orgpolicy-v1:2.30.0"
-    force "com.google.api.grpc:proto-google-cloud-os-config-v1:2.32.0"
-    force "com.google.api.grpc:proto-google-identity-accesscontextmanager-v1:1.31.0"
-    force "com.google.api.grpc:proto-google-identity-accesscontextmanager-type:1.31.0"
-    force "com.google.api.grpc:proto-google-iam-v1:1.23.0"
-    force "com.google.api.grpc:proto-google-common-protos:2.64.1"
-    force "com.google.api:gax:2.37.0"
-    force "com.google.api:gax-grpc:2.37.0"
-    force "com.google.api:gax-httpjson:2.37.0"
-    force "com.google.api:api-common:2.68.0"
-    force "io.grpc:grpc-protobuf:1.82.2"
-    force "io.grpc:grpc-protobuf-lite:1.82.2"
+    force "com.google.protobuf:protobuf-java:$e2eTestProtobufVersion"
+    force "com.google.protobuf:protobuf-java-util:$e2eTestProtobufVersion"
   }
 }
 

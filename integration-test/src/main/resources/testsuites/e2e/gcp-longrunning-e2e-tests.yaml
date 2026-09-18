@@ -34,4 +34,4 @@ tests:
           - testKraftMigrationFailAtUpscale
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesAddAndModificationTest
-      # - name: com.sequenceiq.it.cloudbreak.testcase.e2e.tagupdate.UserDefinedTagUpdateTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.tagupdate.UserDefinedTagUpdateTest
