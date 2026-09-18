@@ -11,11 +11,10 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -105,7 +104,7 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     }
 
     @Override
-    public <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResource(List<StructuredEventType> eventTypes, String resourceCrn, Pageable pageable) {
+    public <T extends CDPStructuredEvent> Slice<T> getPagedEventsOfResource(List<StructuredEventType> eventTypes, String resourceCrn, Pageable pageable) {
         LOGGER.debug("Gathering pageable events for types: '{}' and resource CRN: '{}'", eventTypes, resourceCrn);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
@@ -114,12 +113,7 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
                 LOGGER,
                 String.format("getPagedEventsOfResource for resourceCrn='%s', types=%s, pageable=%s", resourceCrn, types, pageable)
             );
-            List<T> content = (List<T>) Optional.ofNullable(events)
-                    .map(Slice::stream)
-                    .orElse(Stream.empty())
-                    .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter.convert(event))
-                    .collect(Collectors.toList());
-            return new PageImpl<>(content, pageable, content.size());
+            return convertSlice(events, pageable);
         } catch (Exception ex) {
             String msg = String.format("Failed get pageable events for types: '%s' and resource CRN: '%s'", types, resourceCrn);
             LOGGER.warn(msg, ex);
@@ -128,7 +122,8 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     }
 
     @Override
-    public <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResources(List<StructuredEventType> eventTypes, List<String> resourceCrns, Pageable pageable) {
+    public <T extends CDPStructuredEvent> Slice<T> getPagedEventsOfResources(List<StructuredEventType> eventTypes, List<String> resourceCrns,
+            Pageable pageable) {
         LOGGER.debug("Gathering pageable events for types: '{}' and resource CRNs: '{}'", eventTypes, resourceCrns);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
@@ -137,12 +132,7 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
                 LOGGER,
                 String.format("getPagedEventsOfResources for resourceCrns='%s', types=%s, pageable=%s", resourceCrns, types, pageable)
             );
-            List<T> content = (List<T>) Optional.ofNullable(events)
-                    .map(Slice::stream)
-                    .orElse(Stream.empty())
-                    .map(cdpStructuredEventEntityToCDPStructuredEventConverter::convert)
-                    .collect(Collectors.toList());
-            return new PageImpl<>(content, pageable, content.size());
+            return convertSlice(events, pageable);
         } catch (Exception ex) {
             String msg = String.format("Failed get pageable events for types: '%s' and resource CRNs: '%s'", types, resourceCrns);
             LOGGER.warn(msg, ex);
@@ -228,6 +218,19 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
                     CDPStructuredEventEntity.class.getSimpleName(), e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * A slice rather than a page, because the queries behind it deliberately fetch one page and no count: the table
+     * holds every event of every resource, and counting it to fill in a total nobody asked for is not worth the scan.
+     */
+    private <T extends CDPStructuredEvent> Slice<T> convertSlice(Slice<CDPStructuredEventEntity> events, Pageable pageable) {
+        List<T> content = (List<T>) Optional.ofNullable(events)
+                .map(Slice::stream)
+                .orElse(Stream.empty())
+                .map(cdpStructuredEventEntityToCDPStructuredEventConverter::convert)
+                .collect(Collectors.toList());
+        return new SliceImpl<>(content, pageable, events != null && events.hasNext());
     }
 
     private PageRequest createPageRequest() {

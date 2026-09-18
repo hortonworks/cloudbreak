@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventTyp
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.REST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,9 +23,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -102,7 +103,7 @@ public class CDPStructuredEventDBServiceTest {
         when(cdpStructuredEventEntityToCDPStructuredEventConverter.convert(entity1)).thenReturn(converted1);
         when(cdpStructuredEventEntityToCDPStructuredEventConverter.convert(entity2)).thenReturn(converted2);
 
-        Page<CDPStructuredEvent> result = underTest.getPagedEventsOfResource(List.of(NOTIFICATION), RESOURCE_CRN, pageable);
+        Slice<CDPStructuredEvent> result = underTest.getPagedEventsOfResource(List.of(NOTIFICATION), RESOURCE_CRN, pageable);
 
         assertEquals(2, result.getContent().size());
         assertEquals(converted1, result.getContent().get(0));
@@ -116,7 +117,7 @@ public class CDPStructuredEventDBServiceTest {
         when(pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(any(), eq(RESOURCE_CRN), eq(pageable)))
                 .thenReturn(null);
 
-        Page<CDPStructuredEvent> result = underTest.getPagedEventsOfResource(List.of(NOTIFICATION), RESOURCE_CRN, pageable);
+        Slice<CDPStructuredEvent> result = underTest.getPagedEventsOfResource(List.of(NOTIFICATION), RESOURCE_CRN, pageable);
 
         assertTrue(result.getContent().isEmpty());
     }
@@ -133,6 +134,30 @@ public class CDPStructuredEventDBServiceTest {
     }
 
     @Test
+    public void testGetPagedEventsOfResourceSaysAFurtherPageFollowsWhenTheQueryFoundOne() {
+        Pageable pageable = PageRequest.of(0, 2);
+        CDPStructuredEventEntity entity = new CDPStructuredEventEntity();
+
+        when(pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(any(), eq(RESOURCE_CRN), eq(pageable)))
+                .thenReturn(new SliceImpl<>(List.of(entity), pageable, true));
+        when(cdpStructuredEventEntityToCDPStructuredEventConverter.convert(entity)).thenReturn(new CDPStructuredNotificationEvent());
+
+        assertTrue(underTest.getPagedEventsOfResource(List.of(NOTIFICATION), RESOURCE_CRN, pageable).hasNext());
+    }
+
+    @Test
+    public void testGetPagedEventsOfResourceSaysNoFurtherPageFollowsWhenTheQueryExhaustedTheEvents() {
+        Pageable pageable = PageRequest.of(0, 2);
+        CDPStructuredEventEntity entity = new CDPStructuredEventEntity();
+
+        when(pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(any(), eq(RESOURCE_CRN), eq(pageable)))
+                .thenReturn(new SliceImpl<>(List.of(entity), pageable, false));
+        when(cdpStructuredEventEntityToCDPStructuredEventConverter.convert(entity)).thenReturn(new CDPStructuredNotificationEvent());
+
+        assertFalse(underTest.getPagedEventsOfResource(List.of(NOTIFICATION), RESOURCE_CRN, pageable).hasNext());
+    }
+
+    @Test
     public void testGetPagedEventsOfResourcesReturnsConvertedEvents() {
         Pageable pageable = PageRequest.of(0, 10);
         List<String> crns = List.of(RESOURCE_CRN, RESOURCE_CRN_2);
@@ -143,7 +168,7 @@ public class CDPStructuredEventDBServiceTest {
                 .thenReturn(new SliceImpl<>(List.of(entity)));
         when(cdpStructuredEventEntityToCDPStructuredEventConverter.convert(entity)).thenReturn(converted);
 
-        Page<CDPStructuredEvent> result = underTest.getPagedEventsOfResources(List.of(NOTIFICATION), crns, pageable);
+        Slice<CDPStructuredEvent> result = underTest.getPagedEventsOfResources(List.of(NOTIFICATION), crns, pageable);
 
         assertEquals(1, result.getContent().size());
         assertEquals(converted, result.getContent().get(0));
@@ -170,7 +195,7 @@ public class CDPStructuredEventDBServiceTest {
         when(pagingStructuredEventRepository.findByEventTypeInAndResourceCrnIn(any(), eq(crns), eq(pageable)))
                 .thenReturn(null);
 
-        Page<CDPStructuredEvent> result = underTest.getPagedEventsOfResources(List.of(NOTIFICATION), crns, pageable);
+        Slice<CDPStructuredEvent> result = underTest.getPagedEventsOfResources(List.of(NOTIFICATION), crns, pageable);
 
         assertTrue(result.getContent().isEmpty());
     }
