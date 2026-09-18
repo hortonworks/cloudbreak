@@ -17,7 +17,7 @@ class TriggerRedbeamsProvisionEventTest {
             "resourceId":14710,"networkParameters":{""" + """
             "@type":"com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest",""" + """
             "aws":{"subnetId":"subnet-05298c25c080b5035,subnet-09e1883e8da76e990,subnet-06b65e94536fb84ca"}},""" + """
-            "forced":false,"exception":null}""";
+            "forced":false}""";
 
     @Test
     void testDeserialization() {

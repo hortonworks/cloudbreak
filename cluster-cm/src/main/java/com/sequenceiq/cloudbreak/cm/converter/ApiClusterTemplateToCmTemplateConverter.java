@@ -32,7 +32,7 @@ public class ApiClusterTemplateToCmTemplateConverter {
         doIfNotNull(apiClusterTemplate.getProducts(), newApiClusterTemplate::setProducts);
         doIfNotNull(apiClusterTemplate.getDataServicesVersion(), newApiClusterTemplate::setDataServicesVersion);
         newApiClusterTemplate.setInstantiator(getApiClusterTemplateInstantiatorFromExtendedBlueprintText(extendedBlueprintText));
-        return JsonUtil.writeValueAsStringSilent(newApiClusterTemplate, true);
+        return JsonUtil.writeValueAsStringSilent(newApiClusterTemplate);
     }
 
     private ApiClusterTemplateInstantiator getApiClusterTemplateInstantiatorFromExtendedBlueprintText(String extendedBlueprintText) {

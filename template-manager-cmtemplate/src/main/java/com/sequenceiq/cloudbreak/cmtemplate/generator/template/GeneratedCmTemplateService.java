@@ -48,7 +48,7 @@ public class GeneratedCmTemplateService {
     }
 
     private String prepareTemplate(CmTemplateProcessor processor) {
-        return JsonUtil.writeValueAsStringSilent(processor.getTemplate(), true);
+        return JsonUtil.writeValueAsStringSilent(processor.getTemplate());
     }
 
     private CmTemplateProcessor initiateTemplate() {

@@ -47,6 +47,7 @@ public class JsonUtil {
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         MAPPER.disable(SerializationFeature.FAIL_ON_SELF_REFERENCES);
         MAPPER.enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL);
+        MAPPER.setSerializationInclusion(Include.NON_NULL);
         MAPPER.registerModule(new Jdk8Module());
         MAPPER.registerModule(new JavaTimeModule());
         MAPPER.registerModule(new Hibernate6Module());
@@ -56,6 +57,12 @@ public class JsonUtil {
 
     static {
         STRICT_MAPPER.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
+    private static final ObjectMapper NULL_EMITTING_MAPPER = MAPPER.copy();
+
+    static {
+        NULL_EMITTING_MAPPER.setSerializationInclusion(Include.ALWAYS);
     }
 
     private JsonUtil() {
@@ -74,7 +81,7 @@ public class JsonUtil {
     }
 
     public static <T> String readValueIntoOneLine(String content, Class<T> valueType) throws IOException {
-        return writeValueAsStringSilent(readValue(content, valueType), true);
+        return writeValueAsStringSilent(readValue(content, valueType));
     }
 
     public static <T> T readValueUnchecked(String content, Class<T> valueType) {
@@ -134,20 +141,13 @@ public class JsonUtil {
         }
     }
 
+    public static String writeValueAsStringWithNulls(Object object) throws JsonProcessingException {
+        return NULL_EMITTING_MAPPER.writeValueAsString(object);
+    }
+
     public static String writeValueAsStringSilent(Object object) {
-        return writeValueAsStringSilent(object, false);
-    }
-
-    public static String writeValueAsStringSilentSafe(Object object) {
-        return String.valueOf(writeValueAsStringSilent(object, true));
-    }
-
-    public static String writeValueAsStringSilent(Object object, boolean ignoreNull) {
         if (object != null) {
             try {
-                if (ignoreNull) {
-                    MAPPER.setSerializationInclusion(Include.NON_NULL);
-                }
                 return MAPPER.writeValueAsString(object);
             } catch (JsonProcessingException e) {
                 LOGGER.warn("JSON serialization went wrong in silent mode. Root cause: {}", e.getCause(), e);
@@ -155,6 +155,10 @@ public class JsonUtil {
             }
         }
         return null;
+    }
+
+    public static String writeValueAsStringSilentSafe(Object object) {
+        return String.valueOf(writeValueAsStringSilent(object));
     }
 
     public static JsonNode readTree(String content) throws JsonProcessingException {

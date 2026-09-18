@@ -58,4 +58,24 @@ class JsonUtilTest {
         // Verify STRICT_MAPPER specific configuration
         assertTrue(strictMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
     }
+
+    @Test
+    void everyWriteOmitsNullFieldsByDefault() throws Exception {
+        Tag tagWithoutValue = new Tag("owner", null);
+
+        assertEquals("{\"key\":\"owner\"}", JsonUtil.writeValueAsString(tagWithoutValue));
+        assertEquals("{\"key\":\"owner\"}", JsonUtil.writeValueAsStringUnchecked(tagWithoutValue));
+        assertEquals("{\"key\":\"owner\"}", JsonUtil.writeValueAsStringSilent(tagWithoutValue));
+        assertEquals("{\"key\":\"owner\"}", JsonUtil.writeValueAsStringSilentSafe(tagWithoutValue));
+    }
+
+    @Test
+    void writeValueAsStringWithNullsEmitsNullFields() throws Exception {
+        Tag tagWithoutValue = new Tag("owner", null);
+
+        assertEquals("{\"key\":\"owner\",\"value\":null}", JsonUtil.writeValueAsStringWithNulls(tagWithoutValue));
+    }
+
+    private record Tag(String key, String value) {
+    }
 }
