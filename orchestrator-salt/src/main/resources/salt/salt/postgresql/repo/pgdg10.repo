@@ -1,7 +1,7 @@
 [postgresql10-rhel7]
 name=postgresql10-rhel7
-baseurl=https://mirror.infra.cloudera.com/repos/postgresql/yum/10/rhel-7-x86_64
+baseurl=https://mirror-nexus.eng.cloudera.com/repos/postgresql/yum/10/rhel-7-x86_64
 enabled=1
 gpgcheck=1
-gpgkey=https://mirror.infra.cloudera.com/repos/postgresql/yum/10/keys/RPM-GPG-KEY-PGDG
+gpgkey=https://mirror-nexus.eng.cloudera.com/repos/postgresql/yum/10/keys/RPM-GPG-KEY-PGDG
 sslverify=1
