@@ -1,12 +1,9 @@
 package com.sequenceiq.environment.encryptionprofile.service;
 
-import jakarta.ws.rs.ForbiddenException;
-
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -15,10 +12,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.validator.EncryptionProfileValidator;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.sdx.SdxService;
-import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
 public class EncryptionProfileFlowService {
@@ -29,23 +23,13 @@ public class EncryptionProfileFlowService {
 
     private final EnvironmentReactorFlowManager reactorFlowManager;
 
-    private final SdxService sdxService;
-
-    private final StackService stackService;
-
-    private final EntitlementService entitlementService;
-
     private final EncryptionProfileValidator encryptionProfileValidator;
 
     public EncryptionProfileFlowService(EnvironmentService environmentService, EncryptionProfileService encryptionProfileService,
-            EnvironmentReactorFlowManager reactorFlowManager, SdxService sdxService, StackService stackService, EntitlementService entitlementService,
-            EncryptionProfileValidator encryptionProfileValidator) {
+            EnvironmentReactorFlowManager reactorFlowManager, EncryptionProfileValidator encryptionProfileValidator) {
         this.environmentService = environmentService;
         this.encryptionProfileService = encryptionProfileService;
         this.reactorFlowManager = reactorFlowManager;
-        this.sdxService = sdxService;
-        this.stackService = stackService;
-        this.entitlementService = entitlementService;
         this.encryptionProfileValidator = encryptionProfileValidator;
     }
 
@@ -62,9 +46,6 @@ public class EncryptionProfileFlowService {
     }
 
     private FlowIdentifier enableEncryptionProfile(EnvironmentDto environmentDto, EncryptionProfile encryptionProfile) {
-        if (!entitlementService.isChangeEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new ForbiddenException("Enable encryption profile is not granted for the account");
-        }
         if (environmentDto.getStatus() != EnvironmentStatus.AVAILABLE) {
             throw new BadRequestException(String.format("Environment '%s' needs to be in AVAILABLE state to enable encryption profile. Current status: %s",
                     environmentDto.getName(), environmentDto.getStatus()));
@@ -75,13 +56,13 @@ public class EncryptionProfileFlowService {
     }
 
     public FlowIdentifier disableEncryptionProfile(NameOrCrn envNameOrCrn) {
-        if (!entitlementService.isChangeEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new ForbiddenException("Disable encryption profile is not granted for the account");
-        }
+        encryptionProfileValidator.validateDisable();
         EnvironmentDto environmentDto = getEnvironmentByNameOrCrn(envNameOrCrn);
-        SdxClusterResponse sdxCluster = sdxService.list(environmentDto.getName()).getFirst();
-        environmentService.disableEncryptionProfile(environmentDto.getResourceCrn());
-        return stackService.updatePillarConfigurationByCrn(sdxCluster.getCrn());
+        if (!environmentDto.getStatus().isEncryptionProfileDisableAllowed()) {
+            throw new BadRequestException(String.format("Environment '%s' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. "
+                    + "Current status: %s", environmentDto.getName(), environmentDto.getStatus()));
+        }
+        return reactorFlowManager.triggerDisableEncryptionProfile(environmentDto.getId(), environmentDto.getName(), environmentDto.getResourceCrn());
     }
 
     private EnvironmentDto getEnvironmentByNameOrCrn(NameOrCrn nameOrCrn) {

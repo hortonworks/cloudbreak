@@ -494,9 +494,7 @@ class ClusterHostServiceRunnerTest {
         Set<Node> nodes = Sets.union(Set.of(node("fqdn3")), gatewayNodes);
         List<InstanceMetadataView> gwNodes = Lists.newArrayList(createInstanceMetadata("gateway1"), createInstanceMetadata("gateway2"),
                 createInstanceMetadata("1.1.3.1"), createInstanceMetadata("1.1.3.2"));
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(gwNodes);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
@@ -652,9 +650,7 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
@@ -703,9 +699,7 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
@@ -815,6 +809,7 @@ class ClusterHostServiceRunnerTest {
         List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         setupMocksForRunClusterServices();
+        when(environmentService.getByCrn(anyString())).thenReturn(mock(DetailedEnvironmentResponse.class));
         when(encryptionProfileService.getEffectiveEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
         when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
         doThrow(new CloudbreakOrchestratorFailedException("upload pillar failed")).when(hostOrchestrator).uploadGatewayPillar(any(), any(), any(), any());
@@ -838,6 +833,7 @@ class ClusterHostServiceRunnerTest {
         List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         setupMocksForRunClusterServices();
+        when(environmentService.getByCrn(anyString())).thenReturn(mock(DetailedEnvironmentResponse.class));
         when(encryptionProfileService.getEffectiveEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
         when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
         OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
@@ -958,8 +954,6 @@ class ClusterHostServiceRunnerTest {
 
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
         when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of("TLSv1.2", "TLSv1.3"));
         when(encryptionProfileService.getEffectiveEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
@@ -1290,9 +1284,7 @@ class ClusterHostServiceRunnerTest {
     void testKnoxSecurityConfigToRunClusterServices() throws CloudbreakOrchestratorException, IOException {
         setupMocksForRunClusterServices();
         GatewayView clusterGateway = mock(GatewayView.class);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
@@ -1334,9 +1326,7 @@ class ClusterHostServiceRunnerTest {
     void testCdpLuksVolumeBackUpToRunClusterServices() throws CloudbreakOrchestratorException, IOException {
         setupMocksForRunClusterServices();
         GatewayView clusterGateway = mock(GatewayView.class);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
@@ -1346,7 +1336,6 @@ class ClusterHostServiceRunnerTest {
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         EncryptionProfileResponse cdpLuksEncryptionProfile = new EncryptionProfileResponse();
         cdpLuksEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
         when(encryptionProfileService.getEffectiveEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
@@ -1371,9 +1360,7 @@ class ClusterHostServiceRunnerTest {
     void testCmVersionSupportsTlsSetup() throws CloudbreakOrchestratorException, IOException {
         setupMocksForRunClusterServices("7.13.2.0");
         GatewayView clusterGateway = mock(GatewayView.class);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
@@ -1406,11 +1393,34 @@ class ClusterHostServiceRunnerTest {
 
     @Test
     void testAlternativeUserfacingCert() throws CloudbreakOrchestratorException {
+        SaltConfig saltConfig = runClusterServicesWithAlternativeUserfacingCert(ENCRYPTION_PROFILE_CRN, true);
+
+        verifyEncryptionProfile(saltConfig);
+        verifyTlsAdvancedControl(saltConfig, true);
+        verifyAlternativeUserfacingCertAndKey(saltConfig, true, "cert", "key");
+    }
+
+    @Test
+    void testAlternativeUserfacingCertNotConfiguredWhenNotEntitled() throws CloudbreakOrchestratorException {
+        SaltConfig saltConfig = runClusterServicesWithAlternativeUserfacingCert(ENCRYPTION_PROFILE_CRN, false);
+
+        verifyTlsAdvancedControl(saltConfig, false);
+        verifyAlternativeUserfacingCertAndKey(saltConfig, null, null, null);
+    }
+
+    @Test
+    void testAlternativeUserfacingCertNotConfiguredWhenEncryptionProfileDisabled() throws CloudbreakOrchestratorException {
+        SaltConfig saltConfig = runClusterServicesWithAlternativeUserfacingCert(null, true);
+
+        verifyTlsAdvancedControl(saltConfig, false);
+        verifyAlternativeUserfacingCertAndKey(saltConfig, null, null, null);
+    }
+
+    private SaltConfig runClusterServicesWithAlternativeUserfacingCert(String effectiveEncryptionProfileCrn, boolean entitled)
+            throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices("7.13.2.0");
         GatewayView clusterGateway = mock(GatewayView.class);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
@@ -1422,19 +1432,22 @@ class ClusterHostServiceRunnerTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         EncryptionProfileResponse alternativeCertEncryptionProfile = new EncryptionProfileResponse();
         alternativeCertEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
-        when(encryptionProfileService.getEffectiveEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(alternativeCertEncryptionProfile);
+        when(encryptionProfileService.getEffectiveEncryptionProfileCrn(any(), any())).thenReturn(effectiveEncryptionProfileCrn);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(effectiveEncryptionProfileCrn)).thenReturn(alternativeCertEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(entitled);
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
-        verifyEncryptionProfile(saltConfig.getValue());
-        verifyAlternativeUserfacingCertAndKey(saltConfig.getValue(), true, "cert", "key");
+        verify(entitlementService, times(1)).isConfigureEncryptionProfileEnabled(any());
+        verify(encryptionProfileService, times(1)).getEncryptionProfileByCrnOrDefault(effectiveEncryptionProfileCrn);
+        verify(environmentService, never()).getByCrn(anyString());
+        return saltConfig.getValue();
     }
 
     @Test
@@ -1442,7 +1455,6 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices("7.13.2.0");
         String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
         GatewayView clusterGateway = mock(GatewayView.class);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
         Set<String> tlsVersions = Set.of("TLSv1.2", "TLSv1.3");
         Map<String, List<String>> cipherSuites = Map.of("TLSv1.2",
@@ -1450,7 +1462,6 @@ class ClusterHostServiceRunnerTest {
                 "TLSv1.3",
                 List.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"));
 
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());

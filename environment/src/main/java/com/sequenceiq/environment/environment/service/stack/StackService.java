@@ -164,17 +164,6 @@ public class StackService {
         }
     }
 
-    public FlowIdentifier updatePillarConfigurationByCrn(String stackCrn) {
-        try {
-            LOGGER.debug("Updating pillar configuration for cluster {}", stackCrn);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.updatePillarConfigurationByCrn(0L, stackCrn));
-        } catch (WebApplicationException e) {
-            String errorMessage = messageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to update pillar configuration for cluster {} due to: '{}'.", stackCrn, errorMessage, e);
-            throw new StackOperationFailedException(errorMessage, e);
-        }
-    }
-
     public void updateNetworkCidrsForEnvironment(String environmentCrn, List<String> networkCidrs) {
         try {
             LOGGER.debug("Updating network CIDRs for stacks in environment {} with network CIDRs {}", environmentCrn, networkCidrs);

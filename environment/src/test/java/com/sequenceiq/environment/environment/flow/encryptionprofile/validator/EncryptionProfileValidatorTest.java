@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -61,12 +62,44 @@ class EncryptionProfileValidatorTest {
 
     @Test
     void testEntitlement() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(false);
+
+        ForbiddenException ex = assertThrows(ForbiddenException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
+
+        assertEquals("Account not entitled for encryption profile. Please contact your CDP administrator to enable it.", ex.getMessage());
+        verifyNoInteractions(stackService, freeIpaService);
+    }
+
+    @Test
+    void testEnableRequiresConfigureEntitlement() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(false);
 
         ForbiddenException ex = assertThrows(ForbiddenException.class, () ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(ENVIRONMENT_CRN)));
 
         assertEquals("Account not entitled for encryption profile. Please contact your CDP administrator to enable it.", ex.getMessage());
+        verifyNoInteractions(stackService, freeIpaService);
+    }
+
+    @Test
+    void testValidateDisableNotEntitled() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(false);
+
+        ForbiddenException ex = assertThrows(ForbiddenException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateDisable()));
+
+        assertEquals("Account not entitled for encryption profile. Please contact your CDP administrator to enable it.", ex.getMessage());
+    }
+
+    @Test
+    void testValidateDisableIgnoresClusterAndFreeIpaState() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateDisable()));
+
+        verifyNoInteractions(stackService, freeIpaService);
     }
 
     @Test
@@ -85,6 +118,7 @@ class EncryptionProfileValidatorTest {
         stack4.setStackVersion("7.3.3");
         List<StackViewV4Response> stacks = List.of(stack1, stack2, stack3, stack4);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(stacks);
 
@@ -104,6 +138,7 @@ class EncryptionProfileValidatorTest {
         StackViewV4Response stack6 = stack("stack6", "7.4.0", Status.AVAILABLE, Status.MAINTENANCE_MODE_ENABLED, DATAHUB);
         List<StackViewV4Response> stacks = List.of(stack1, stack2, stack3, stack4, stack5, stack6);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(stacks);
 
@@ -120,6 +155,7 @@ class EncryptionProfileValidatorTest {
         StackViewV4Response stoppedWithOverride = stack("dh-override", "7.3.3", Status.STOPPED, Status.STOPPED, DATAHUB);
         StackViewV4Response stoppedWithoutOverride = stack("dh-inherit", "7.3.3", Status.STOPPED, Status.STOPPED, DATAHUB);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN))
                 .thenReturn(List.of(datalake, stoppedWithOverride, stoppedWithoutOverride));
@@ -138,6 +174,7 @@ class EncryptionProfileValidatorTest {
         StackViewV4Response datalake = stack("dl", "7.3.3", Status.AVAILABLE, Status.AVAILABLE, DATALAKE);
         StackViewV4Response stoppedWithOverride = stack("dh-override", "7.3.3", Status.STOPPED, Status.STOPPED, DATAHUB);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of(datalake, stoppedWithOverride));
         when(encryptionProfileClusterResolver.hasOwnEncryptionProfile(stoppedWithOverride)).thenReturn(true);
@@ -149,6 +186,7 @@ class EncryptionProfileValidatorTest {
     void testEncryptionProfileLookupFailure() {
         StackViewV4Response stopped = stack("dh1", "7.3.3", Status.STOPPED, Status.STOPPED, DATAHUB);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of(stopped));
         when(encryptionProfileClusterResolver.hasOwnEncryptionProfile(stopped)).thenThrow(new DatahubOperationFailedException("boom"));
@@ -165,6 +203,7 @@ class EncryptionProfileValidatorTest {
         StackViewV4Response datalake2 = stack("dl2", "7.3.3", Status.AVAILABLE, Status.AVAILABLE, DATALAKE);
         StackViewV4Response datahub = stack("dh1", "7.3.3", Status.AVAILABLE, Status.AVAILABLE, DATAHUB);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of(datalake1, datalake2, datahub));
 
@@ -180,6 +219,7 @@ class EncryptionProfileValidatorTest {
         StackViewV4Response datahub1 = stack("dh1", "7.3.3", Status.AVAILABLE, Status.AVAILABLE, DATAHUB);
         StackViewV4Response datahub2 = stack("dh2", "7.3.3", Status.AVAILABLE, Status.AVAILABLE, DATAHUB);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of(datalake, datahub1, datahub2));
 
@@ -189,6 +229,7 @@ class EncryptionProfileValidatorTest {
 
     @Test
     void testFreeIpaOnCentos7ThrowsException() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
         ImageSettingsResponse imageSettings = new ImageSettingsResponse();
@@ -204,6 +245,7 @@ class EncryptionProfileValidatorTest {
 
     @Test
     void testFreeIpaOnRedhat8DoesNotThrow() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
         ImageSettingsResponse imageSettings = new ImageSettingsResponse();
@@ -219,6 +261,7 @@ class EncryptionProfileValidatorTest {
 
     @Test
     void testFreeIpaNotFoundDoesNotThrow() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
         when(stackService.getAllNotDeletedClustersByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of());

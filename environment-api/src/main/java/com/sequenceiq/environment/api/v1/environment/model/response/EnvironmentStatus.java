@@ -185,7 +185,8 @@ public enum EnvironmentStatus {
     UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_FAILED("Failed to upgrade Default Outbound on FreeIPA"),
 
     ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS("Enable encryption profile in progress"),
-    ENABLE_ENCRYPTION_PROFILE_FAILED("Enable encryption profile failed");
+    ENABLE_ENCRYPTION_PROFILE_FAILED("Enable encryption profile failed"),
+    DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS("Disable encryption profile in progress");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,

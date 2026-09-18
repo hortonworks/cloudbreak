@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DISABLE_ENCRYPTION_PROFILE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DISABLE_ENCRYPTION_PROFILE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.DisableEncryptionProfileOnClusterStateSelectors.DISABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,6 +15,8 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.DisableEncryptionProfileOnClusterState;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.DisableEncryptionProfileOnClusterEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restartcm.RestartClusterManagerFlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restartcm.RestartClusterManagerFlowState;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -34,6 +37,9 @@ public class DisableEncryptionProfileFlowEventChainFactory implements FlowEventC
     public FlowTriggerEventQueue createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
+        flowEventChain.add(new DisableEncryptionProfileOnClusterEvent(DISABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT.event(), event.getResourceId(),
+                event.accepted()));
+
         flowEventChain.add(new StackEvent(PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
 
         flowEventChain.add(new StackEvent(RestartClusterManagerFlowEvent.RESTART_CLUSTER_MANAGER_TRIGGER_EVENT.event(), event.getResourceId(),
@@ -44,11 +50,12 @@ public class DisableEncryptionProfileFlowEventChainFactory implements FlowEventC
 
     @Override
     public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
-        if (PillarConfigUpdateState.INIT_STATE.equals(flowState)) {
+        if (DisableEncryptionProfileOnClusterState.INIT_STATE.equals(flowState)) {
             return DISABLE_ENCRYPTION_PROFILE_STARTED;
         } else if (RestartClusterManagerFlowState.RESTART_CLUSTER_MANAGER_FINISED_STATE.equals(flowState)) {
             return DISABLE_ENCRYPTION_PROFILE_FINISHED;
-        } else if (PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FAILED_STATE.equals(flowState)
+        } else if (DisableEncryptionProfileOnClusterState.DISABLE_ENCRYPTION_PROFILE_ON_CLUSTER_FAILED_STATE.equals(flowState)
+                || PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FAILED_STATE.equals(flowState)
                 || RestartClusterManagerFlowState.RESTART_CLUSTER_MANAGER_FAILED_STATE.equals(flowState)) {
             return DISABLE_ENCRYPTION_PROFILE_FAILED;
         } else {

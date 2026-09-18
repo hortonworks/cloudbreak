@@ -135,4 +135,27 @@ class DatahubServiceTest {
                 .hasMessage("Failed to enable encryption profile for Data Hub CRN '%s' due to '%s'.", DH_CRN_1, EXTRACTED_ERROR);
     }
 
+    @Test
+    void disableEncryptionProfileSuccess() {
+        when(distroXV1Endpoint.disableEncryptionProfileByCrn(DH_CRN_1)).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN,
+                () -> underTest.disableEncryptionProfile(DH_CRN_1));
+
+        assertThat(result).isEqualTo(flowIdentifier);
+        verify(distroXV1Endpoint).disableEncryptionProfileByCrn(DH_CRN_1);
+    }
+
+    @Test
+    void disableEncryptionProfileFailure() {
+        WebApplicationException cause = new WebApplicationException("cause");
+        when(distroXV1Endpoint.disableEncryptionProfileByCrn(DH_CRN_1)).thenThrow(cause);
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN,
+                () -> underTest.disableEncryptionProfile(DH_CRN_1)))
+                .isInstanceOf(DatahubOperationFailedException.class)
+                .hasCause(cause)
+                .hasMessage("Failed to disable encryption profile for Data Hub CRN '%s' due to '%s'.", DH_CRN_1, EXTRACTED_ERROR);
+    }
+
 }

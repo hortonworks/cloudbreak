@@ -200,6 +200,28 @@ class SdxServiceTest {
         verify(webApplicationExceptionMessageExtractor).getErrorMessage(cause);
     }
 
+    @Test
+    void disableEncryptionProfileSuccess() {
+        when(sdxEncryptionProfileEndpoint.disableEncryptionProfileByCrn(SDX_CRN)).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = doAsCurrentUserCrn(() -> underTest.disableEncryptionProfile(SDX_CRN));
+
+        assertThat(result).isEqualTo(flowIdentifier);
+        verify(sdxEncryptionProfileEndpoint).disableEncryptionProfileByCrn(SDX_CRN);
+    }
+
+    @Test
+    void disableEncryptionProfileFailure() {
+        WebApplicationException cause = new WebApplicationException("cause");
+        when(sdxEncryptionProfileEndpoint.disableEncryptionProfileByCrn(SDX_CRN)).thenThrow(cause);
+
+        assertThatThrownBy(() -> doAsCurrentUserCrn(() -> underTest.disableEncryptionProfile(SDX_CRN)))
+                .isInstanceOf(SdxOperationFailedException.class)
+                .hasCause(cause)
+                .hasMessage(EXTRACTED_MESSAGE);
+        verify(webApplicationExceptionMessageExtractor).getErrorMessage(cause);
+    }
+
     private <T> T doAsCurrentUserCrn(Supplier<T> callable) {
         return ThreadBasedUserCrnProvider.doAs(CURRENT_USER_CRN, callable);
     }

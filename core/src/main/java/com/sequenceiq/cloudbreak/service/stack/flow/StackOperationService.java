@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -995,11 +996,14 @@ public class StackOperationService {
 
     public FlowIdentifier disableEncryptionProfile(NameOrCrn nameOrCrn, String accountId) {
         if (!entitlementService.isChangeEncryptionProfileEnabled(accountId)) {
-            throw new CloudbreakServiceException("Disable encryption profile is not granted to the account. " +
+            throw new ForbiddenException("Disable encryption profile is not granted to the account. " +
                     "Please contact your CDP administrator to enable it.");
         }
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        clusterService.disableEncryptionProfile(stack.getCluster().getId());
+        if (!stack.getStatus().isEncryptionProfileDisableAllowed()) {
+            throw new BadRequestException(format("Cluster '%s' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. "
+                    + "Current status: %s", stack.getName(), stack.getStatus()));
+        }
         return flowManager.triggerDisableEncryptionProfileChain(stack.getId());
     }
 

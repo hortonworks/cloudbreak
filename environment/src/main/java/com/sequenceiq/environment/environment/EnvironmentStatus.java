@@ -272,6 +272,8 @@ public enum EnvironmentStatus {
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS),
     ENABLE_ENCRYPTION_PROFILE_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_FAILED),
+    DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS),
 
     USER_DEFINED_TAGS_MODIFICATION_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_IN_PROGRESS),
@@ -354,6 +356,11 @@ public enum EnvironmentStatus {
             UPGRADE_CCM_FAILED
     );
 
+    public static final Set<EnvironmentStatus> ENCRYPTION_PROFILE_DISABLEABLE_STATES = Set.of(
+            AVAILABLE,
+            UPDATE_FAILED
+    );
+
     public static final Set<EnvironmentStatus> NON_VERTICAL_SCALABLE_STATES = Set.of(
             VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS,
             FREEIPA_DELETED_ON_PROVIDER_SIDE,
@@ -398,6 +405,10 @@ public enum EnvironmentStatus {
 
     public boolean isEnableSeLinuxAllowed() {
         return !NON_VERTICAL_SCALABLE_STATES.contains(this);
+    }
+
+    public boolean isEncryptionProfileDisableAllowed() {
+        return ENCRYPTION_PROFILE_DISABLEABLE_STATES.contains(this);
     }
 
 }

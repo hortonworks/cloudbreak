@@ -144,6 +144,10 @@ public enum Status {
         return Sets.immutableEnumSet(STOPPED);
     }
 
+    public static Set<Status> getEncryptionProfileDisableAllowedStatuses() {
+        return Sets.immutableEnumSet(AVAILABLE, UPDATE_FAILED);
+    }
+
     public static Set<Status> getAllowedDataHubStatesForSdxUpgrade() {
         return Sets.immutableEnumSet(STOPPED, DELETE_COMPLETED,
                 CREATE_FAILED, DELETE_FAILED, DELETED_ON_PROVIDER_SIDE);
@@ -179,6 +183,10 @@ public enum Status {
 
     public boolean isAvailable() {
         return getAvailableStatuses().contains(this);
+    }
+
+    public boolean isEncryptionProfileDisableAllowed() {
+        return getEncryptionProfileDisableAllowedStatuses().contains(this);
     }
 
     public boolean isInProgress() {

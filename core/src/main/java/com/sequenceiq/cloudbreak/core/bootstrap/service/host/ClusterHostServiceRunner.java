@@ -563,14 +563,15 @@ public class ClusterHostServiceRunner {
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
+        EncryptionProfilePillarContext encryptionProfileContext = resolveEncryptionProfilePillarContext(detailedEnvironmentResponse, stackDto);
         servicePillar.putAll(createMetadataPillars(stackDto, stack, detailedEnvironmentResponse, virtualGroupsEnvironmentCrn,
-                clouderaManagerRepo.getVersion()));
+                clouderaManagerRepo.getVersion(), encryptionProfileContext));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
         servicePillar.putAll(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
-                clouderaManagerRepo));
+                clouderaManagerRepo, encryptionProfileContext));
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto, detailedEnvironmentResponse);
         servicePillar.putAll(javaPillarDecorator.createJavaPillars(stackDto, detailedEnvironmentResponse));
@@ -606,7 +607,7 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, SaltPillarProperties> createMetadataPillars(StackDto stackDto, StackView stack, DetailedEnvironmentResponse detailedEnvironmentResponse,
-            String virtualGroupsEnvironmentCrn, String cmVersion) {
+            String virtualGroupsEnvironmentCrn, String cmVersion, EncryptionProfilePillarContext encryptionProfileContext) {
         boolean deployedInChildEnvironment = !virtualGroupsEnvironmentCrn.equals(stack.getEnvironmentCrn());
         String seLinux = stackDto.getSecurityConfig() != null && stackDto.getSecurityConfig().getSeLinux() != null ?
                 stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
@@ -617,14 +618,11 @@ public class ClusterHostServiceRunner {
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
 
-        String encryptionProfileCrn = encryptionProfileService.getEffectiveEncryptionProfileCrn(detailedEnvironmentResponse, stackDto);
-        EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileContext.encryptionProfile();
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
         boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();
-        boolean encryptionProfileEnabled =
-                entitlementService.isConfigureEncryptionProfileEnabled(detailedEnvironmentResponse.getAccountId())
-                        && StringUtils.isNotEmpty(encryptionProfileCrn);
+        boolean encryptionProfileEnabled = encryptionProfileContext.enabled();
 
         Map<String, ? extends Serializable> clusterProperties = Map.ofEntries(
                 Map.entry("name", stackDto.getCluster().getName()),
@@ -676,11 +674,13 @@ public class ClusterHostServiceRunner {
         LOGGER.debug("Getting kerberos config for Gateway pillar");
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
+        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
+        EncryptionProfilePillarContext encryptionProfileContext = resolveEncryptionProfilePillarContext(detailedEnvironmentResponse, stackDto);
 
         LOGGER.debug("Creating gateway pillar");
         Map<String, SaltPillarProperties> servicePillar =
                 new HashMap<>(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
-                        clouderaManagerRepo));
+                        clouderaManagerRepo, encryptionProfileContext));
 
         return new SaltConfig(servicePillar, grainsProperties);
     }
@@ -880,7 +880,7 @@ public class ClusterHostServiceRunner {
     @SuppressWarnings("ParameterNumber")
     private Map<String, SaltPillarProperties> createGatewayPillar(GatewayConfig gatewayConfig, StackDto stackDto,
             VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations,
-            ClouderaManagerRepo clouderaManagerRepo) throws IOException {
+            ClouderaManagerRepo clouderaManagerRepo, EncryptionProfilePillarContext encryptionProfileContext) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         if (gatewayConfig.getPublicAddress() != null) {
@@ -889,12 +889,11 @@ public class ClusterHostServiceRunner {
             gateway.put("address_is_ip", addressIsIp);
         }
         ClusterView cluster = stackDto.getCluster();
-        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
-        String encryptionProfileCrn = encryptionProfileService.getEffectiveEncryptionProfileCrn(detailedEnvironmentResponse, stackDto);
-        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileContext.encryptionProfile();
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
+        boolean encryptionProfileEnabled = encryptionProfileContext.enabled();
 
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
@@ -915,7 +914,7 @@ public class ClusterHostServiceRunner {
         gateway.put("tls13CipherSuites", encryptionProfileProvider.getTls13CipherSuites(userEncryptionProfileMap));
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
-        gateway.putAll(createGatewayAlternativeUserFacingCert(gatewayConfig));
+        gateway.putAll(createGatewayAlternativeUserFacingCert(gatewayConfig, encryptionProfileEnabled));
         gateway.put("gatewayServiceConfig", createGatewayServiceConfig(gatewayConfig));
 
         gateway.put("kerberos", kerberosConfig != null);
@@ -1084,11 +1083,23 @@ public class ClusterHostServiceRunner {
         return gateway;
     }
 
-    private Map<String, Object> createGatewayAlternativeUserFacingCert(GatewayConfig gatewayConfig) {
+    private EncryptionProfilePillarContext resolveEncryptionProfilePillarContext(DetailedEnvironmentResponse detailedEnvironmentResponse,
+            StackDto stackDto) {
+        String encryptionProfileCrn = encryptionProfileService.getEffectiveEncryptionProfileCrn(detailedEnvironmentResponse, stackDto);
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
+        return new EncryptionProfilePillarContext(encryptionProfileResponse, isEncryptionProfileEnabled(detailedEnvironmentResponse, encryptionProfileCrn));
+    }
+
+    private boolean isEncryptionProfileEnabled(DetailedEnvironmentResponse detailedEnvironmentResponse, String encryptionProfileCrn) {
+        return entitlementService.isConfigureEncryptionProfileEnabled(detailedEnvironmentResponse.getAccountId())
+                && StringUtils.isNotEmpty(encryptionProfileCrn);
+    }
+
+    private Map<String, Object> createGatewayAlternativeUserFacingCert(GatewayConfig gatewayConfig, boolean encryptionProfileEnabled) {
         boolean alternativeUserFacingCertHasBeenGenerated = isNotEmpty(gatewayConfig.getAlternativeUserFacingCert())
                 && isNotEmpty(gatewayConfig.getAlternativeUserFacingKey());
         Map<String, Object> gateway = new HashMap<>();
-        if (alternativeUserFacingCertHasBeenGenerated) {
+        if (alternativeUserFacingCertHasBeenGenerated && encryptionProfileEnabled) {
             gateway.put("alternativeuserfacingcert_configured", Boolean.TRUE);
             gateway.put("alternativeuserfacingkey", gatewayConfig.getAlternativeUserFacingKey());
             gateway.put("alternativeuserfacingcert", gatewayConfig.getAlternativeUserFacingCert());
@@ -1287,5 +1298,8 @@ public class ClusterHostServiceRunner {
             }
 
         }
+    }
+
+    private record EncryptionProfilePillarContext(EncryptionProfileResponse encryptionProfile, boolean enabled) {
     }
 }

@@ -35,6 +35,8 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.DisableEncryptionProfileEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.DisableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationEvent;
@@ -254,6 +256,25 @@ class EnvironmentReactorFlowManagerTest {
                 .returns(ENVIRONMENT_NAME, EnableEncryptionProfileEvent::getResourceName)
                 .returns(ENVIRONMENT_CRN, EnableEncryptionProfileEvent::getResourceCrn)
                 .returns(encryptionProfileCrn, EnableEncryptionProfileEvent::getEncryptionProfileCrn);
+        verifyHeaders();
+    }
+
+    @Test
+    void testTriggerDisableEncryptionProfile() {
+        when(eventSender.sendEvent(any(DisableEncryptionProfileEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerDisableEncryptionProfile(ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN));
+
+        assertThat(result).isSameAs(flowIdentifier);
+        ArgumentCaptor<DisableEncryptionProfileEvent> argumentCaptor = ArgumentCaptor.forClass(DisableEncryptionProfileEvent.class);
+        verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
+        DisableEncryptionProfileEvent event = argumentCaptor.getValue();
+        assertThat(event)
+                .returns(DisableEncryptionProfileStateSelectors.UNSET_ENCRYPTION_PROFILE_EVENT.selector(), BaseFlowEvent::selector)
+                .returns(ENVIRONMENT_ID, DisableEncryptionProfileEvent::getResourceId)
+                .returns(ENVIRONMENT_NAME, DisableEncryptionProfileEvent::getResourceName)
+                .returns(ENVIRONMENT_CRN, DisableEncryptionProfileEvent::getResourceCrn);
         verifyHeaders();
     }
 

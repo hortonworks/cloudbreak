@@ -1,9 +1,14 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.environment.api.v1.encryptionprofile.EncryptionProfileConstants.LEGACY_ENCRYPTION_PROFILE_NAME;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.Optional;
+import java.util.Set;
+
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,12 +16,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -29,8 +38,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 @Service
 public class EncryptionProfileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionProfileService.class);
-
-    private static final String LEGACY_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_v1";
 
     @Inject
     private EncryptionProfileEndpoint encryptionProfileEndpoint;
@@ -172,18 +179,36 @@ public class EncryptionProfileService {
     }
 
     public FlowIdentifier disableEncryptionProfile(String datalakeCrn) {
+        if (!entitlementService.isChangeEncryptionProfileEnabled(Crn.safeFromString(datalakeCrn).getAccountId())) {
+            throw new ForbiddenException("Disable encryption profile is not granted to the account");
+        }
         try {
-            if (!entitlementService.isChangeEncryptionProfileEnabled(Crn.safeFromString(datalakeCrn).getAccountId())) {
-                throw new BadRequestException("Disable encryption profile is not granted to the account");
-            }
-            return stackService.disableEncryptionProfile(datalakeCrn);
-        } catch (Exception e) {
-            String errorMessage = (e instanceof WebApplicationException wae)
-                    ? webApplicationExceptionMessageExtractor.getErrorMessage(wae)
-                    : e.getMessage();
+            SdxCluster sdxCluster = sdxService.getByCrn(datalakeCrn);
+            validateStackStatusForDisable(sdxCluster);
+            LOGGER.info("Triggering Disable Encryption Profile flow for Data Lake {}", datalakeCrn);
+            return sdxReactorFlowManager.triggerDisableEncryptionProfile(sdxCluster);
+        } catch (BadRequestException | NotFoundException | FlowsAlreadyRunningException e) {
+            throw e;
+        } catch (WebApplicationException wae) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(wae);
             String message = String.format("Failed to disable encryption profile for CRN: %s. Error: %s", datalakeCrn, errorMessage);
+            LOGGER.error(message, wae);
+            throw new CloudbreakServiceException(message, wae);
+        } catch (Exception e) {
+            String message = String.format("Failed to disable encryption profile for CRN: %s. Error: %s", datalakeCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    private void validateStackStatusForDisable(SdxCluster sdxCluster) {
+        Status stackStatus = Optional.ofNullable(stackService.getDetail(sdxCluster.getClusterName(), Set.of(), sdxCluster.getAccountId()))
+                .map(StackV4Response::getStatus)
+                .orElse(null);
+        LOGGER.info("Stack status of Data Lake {} before disabling encryption profile: {}", sdxCluster.getClusterName(), stackStatus);
+        if (stackStatus == null || !stackStatus.isEncryptionProfileDisableAllowed()) {
+            throw new BadRequestException(format("Data Lake '%s' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. "
+                    + "Current status: %s", sdxCluster.getClusterName(), stackStatus));
         }
     }
 }

@@ -26,6 +26,8 @@ public class EncryptionProfileValidator {
 
     private static final String MINIMUM_RUNTIME_VERSION = "7.3.2";
 
+    private static final String NOT_ENTITLED_MESSAGE = "Account not entitled for encryption profile. Please contact your CDP administrator to enable it.";
+
     @Inject
     private EntitlementService entitlementService;
 
@@ -38,10 +40,13 @@ public class EncryptionProfileValidator {
     @Inject
     private EncryptionProfileClusterResolver encryptionProfileClusterResolver;
 
+    public void validateDisable() {
+        validateChangeEntitlement();
+    }
+
     public void validate(String environmentCrn) {
-        if (!entitlementService.isConfigureEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new ForbiddenException("Account not entitled for encryption profile. Please contact your CDP administrator to enable it.");
-        }
+        validateChangeEntitlement();
+        validateConfigureEntitlement();
 
         Optional<DescribeFreeIpaResponse> freeIpaResponseOpt = freeIpaService.describe(environmentCrn);
         if (freeIpaUsingCentos7(freeIpaResponseOpt)) {
@@ -89,6 +94,18 @@ public class EncryptionProfileValidator {
 
     private boolean inheritsEnvironmentEncryptionProfile(StackViewV4Response stack) {
         return !encryptionProfileClusterResolver.hasOwnEncryptionProfile(stack);
+    }
+
+    private void validateChangeEntitlement() {
+        if (!entitlementService.isChangeEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw new ForbiddenException(NOT_ENTITLED_MESSAGE);
+        }
+    }
+
+    private void validateConfigureEntitlement() {
+        if (!entitlementService.isConfigureEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw new ForbiddenException(NOT_ENTITLED_MESSAGE);
+        }
     }
 
     private boolean freeIpaUsingCentos7(Optional<DescribeFreeIpaResponse> freeIpaResponseOpt) {

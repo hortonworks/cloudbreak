@@ -134,12 +134,6 @@ public class StackService {
                 initiatorUserCrn -> stackV4Endpoint.resetJvmParams(WORKSPACE_ID_DEFAULT, crn, request, initiatorUserCrn));
     }
 
-    public FlowIdentifier disableEncryptionProfile(String datalakeCrn) {
-        LOGGER.info("Disabling encryption profile for CRN {}", datalakeCrn);
-        return ThreadBasedUserCrnProvider.doAsInternalActor(
-                initiatorUserCrn -> stackV4Endpoint.disableEncryptionProfileByCrn(WORKSPACE_ID_DEFAULT, datalakeCrn));
-    }
-
     public ResourceUpdateResponse updateDatalakeVolumeResourcesByCrn(SdxResourceUpdateRequest request) {
         LOGGER.debug("Calling DistroX service for updating resource of Data Lake: '{}'", request.getCrn());
         StackResourceUpdateRequest stackResourceUpdateRequest = new StackResourceUpdateRequest(request);

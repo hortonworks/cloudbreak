@@ -85,6 +85,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartE
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
+import com.sequenceiq.datalake.flow.encryptionprofile.event.SdxDisableEncryptionProfileTriggerEvent;
 import com.sequenceiq.datalake.flow.encryptionprofile.event.SdxEnableEncryptionProfileTriggerEvent;
 import com.sequenceiq.datalake.flow.imdupdate.event.SdxInstanceMetadataUpdateEvent;
 import com.sequenceiq.datalake.flow.java.SetDatalakeDefaultJavaVersionTriggerEvent;
@@ -503,6 +504,14 @@ public class SdxReactorFlowManager {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxEnableEncryptionProfileTriggerEvent triggerEvent =
                 SdxEnableEncryptionProfileTriggerEvent.from(cluster.getId(), userId, encryptionProfileCrn);
+        return notify(triggerEvent.selector(), triggerEvent, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerDisableEncryptionProfile(SdxCluster cluster) {
+        LOGGER.info("Trigger Disable Encryption Profile flow for Data Lake: {}", cluster.getClusterName());
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxDisableEncryptionProfileTriggerEvent triggerEvent =
+                SdxDisableEncryptionProfileTriggerEvent.from(cluster.getId(), userId);
         return notify(triggerEvent.selector(), triggerEvent, cluster.getClusterName());
     }
 

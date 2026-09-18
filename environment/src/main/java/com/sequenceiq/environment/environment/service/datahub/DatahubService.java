@@ -169,4 +169,17 @@ public class DatahubService {
             throw new DatahubOperationFailedException(message, e);
         }
     }
+
+    public FlowIdentifier disableEncryptionProfile(String datahubCrn) {
+        try {
+            LOGGER.debug("Calling DistroX disable encryption profile by CRN {}", datahubCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> distroXV1Endpoint.disableEncryptionProfileByCrn(datahubCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to disable encryption profile for Data Hub CRN '%s' due to '%s'.", datahubCrn, errorMessage);
+            LOGGER.error(message, e);
+            throw new DatahubOperationFailedException(message, e);
+        }
+    }
 }

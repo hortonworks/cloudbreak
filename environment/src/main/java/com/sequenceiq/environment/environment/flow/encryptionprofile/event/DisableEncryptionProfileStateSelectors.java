@@ -1,0 +1,21 @@
+package com.sequenceiq.environment.environment.flow.encryptionprofile.event;
+
+import com.sequenceiq.flow.core.FlowEvent;
+
+public enum DisableEncryptionProfileStateSelectors implements FlowEvent {
+    UNSET_ENCRYPTION_PROFILE_EVENT,
+    UNSET_ENCRYPTION_PROFILE_HANDLER_EVENT,
+    DISABLE_ENCRYPTION_PROFILE_ON_FREEIPA_EVENT,
+    DISABLE_ENCRYPTION_PROFILE_ON_FREEIPA_HANDLER_EVENT,
+    DISABLE_ENCRYPTION_PROFILE_ON_STACKS_EVENT,
+    DISABLE_ENCRYPTION_PROFILE_ON_STACKS_HANDLER_EVENT,
+    FINISH_DISABLE_ENCRYPTION_PROFILE_EVENT,
+    FINALIZE_DISABLE_ENCRYPTION_PROFILE_EVENT,
+    HANDLED_FAILED_DISABLE_ENCRYPTION_PROFILE_EVENT,
+    FAILED_DISABLE_ENCRYPTION_PROFILE_EVENT;
+
+    @Override
+    public String event() {
+        return name();
+    }
+}

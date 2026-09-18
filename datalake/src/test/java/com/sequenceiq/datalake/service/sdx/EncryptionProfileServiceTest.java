@@ -7,23 +7,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
@@ -51,13 +59,13 @@ class EncryptionProfileServiceTest {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Mock
-    private StackService stackService;
-
-    @Mock
     private SdxService sdxService;
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
+
+    @Mock
+    private StackService stackService;
 
     @InjectMocks
     private EncryptionProfileService underTest;
@@ -287,13 +295,88 @@ class EncryptionProfileServiceTest {
         verify(sdxReactorFlowManager, times(1)).triggerEnableEncryptionProfile(sdxCluster, null);
     }
 
-    @Test
-    void testDisableEncryptionProfileByCrn() {
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"AVAILABLE", "UPDATE_FAILED"})
+    void testDisableEncryptionProfileByCrn(Status stackStatus) {
         when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        SdxCluster sdxCluster = sdxCluster();
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenReturn(sdxCluster);
+        stubStackStatus(stackStatus);
+        when(sdxReactorFlowManager.triggerDisableEncryptionProfile(sdxCluster))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
 
         underTest.disableEncryptionProfile(DATALAKE_CRN);
 
-        verify(stackService, times(1))
-                .disableEncryptionProfile(DATALAKE_CRN);
+        verify(sdxReactorFlowManager, times(1)).triggerDisableEncryptionProfile(sdxCluster);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"STOPPED", "STOP_IN_PROGRESS", "UPDATE_IN_PROGRESS"})
+    void testDisableEncryptionProfileByCrnRejectedWhenStackStatusIsNotAllowed(Status stackStatus) {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenReturn(sdxCluster());
+        stubStackStatus(stackStatus);
+
+        assertThatThrownBy(() -> underTest.disableEncryptionProfile(DATALAKE_CRN))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Data Lake 'dl-cluster' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. "
+                        + "Current status: " + stackStatus);
+        verify(sdxReactorFlowManager, never()).triggerDisableEncryptionProfile(any());
+    }
+
+    @Test
+    void testDisableEncryptionProfileByCrnRejectedWhenStackIsMissing() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenReturn(sdxCluster());
+        when(stackService.getDetail(eq("dl-cluster"), any(), eq("tenant"))).thenReturn(null);
+
+        assertThatThrownBy(() -> underTest.disableEncryptionProfile(DATALAKE_CRN))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Data Lake 'dl-cluster' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. "
+                        + "Current status: null");
+        verify(sdxReactorFlowManager, never()).triggerDisableEncryptionProfile(any());
+    }
+
+    @Test
+    void testDisableEncryptionProfileByCrnKeepsFlowsAlreadyRunningException() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        SdxCluster sdxCluster = sdxCluster();
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenReturn(sdxCluster);
+        stubStackStatus(Status.AVAILABLE);
+        when(sdxReactorFlowManager.triggerDisableEncryptionProfile(sdxCluster)).thenThrow(new FlowsAlreadyRunningException("running"));
+
+        assertThatThrownBy(() -> underTest.disableEncryptionProfile(DATALAKE_CRN))
+                .isInstanceOf(FlowsAlreadyRunningException.class);
+    }
+
+    @Test
+    void testDisableEncryptionProfileByCrnKeepsNotFoundException() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(sdxService.getByCrn(DATALAKE_CRN)).thenThrow(new NotFoundException("not found"));
+
+        assertThatThrownBy(() -> underTest.disableEncryptionProfile(DATALAKE_CRN))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void testDisableEncryptionProfileByCrnNotEntitled() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.disableEncryptionProfile(DATALAKE_CRN))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("Disable encryption profile is not granted to the account");
+    }
+
+    private SdxCluster sdxCluster() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("dl-cluster");
+        sdxCluster.setAccountId("tenant");
+        return sdxCluster;
+    }
+
+    private void stubStackStatus(Status stackStatus) {
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(stackStatus);
+        when(stackService.getDetail(eq("dl-cluster"), any(), eq("tenant"))).thenReturn(stackV4Response);
     }
 }

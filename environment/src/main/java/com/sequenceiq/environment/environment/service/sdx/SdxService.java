@@ -193,4 +193,16 @@ public class SdxService {
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
+
+    public FlowIdentifier disableEncryptionProfile(String datalakeCrn) {
+        try {
+            LOGGER.debug("Calling Data Lake disable encryption profile by Data Lake CRN {}", datalakeCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> sdxEncryptionProfileEndpoint.disableEncryptionProfileByCrn(datalakeCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to disable encryption profile on Data Lake cluster by crn '{}' due to '{}'.", datalakeCrn, errorMessage, e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
 }

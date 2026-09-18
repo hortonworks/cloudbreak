@@ -36,6 +36,8 @@ import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackC
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.DisableEncryptionProfileEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.DisableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationEvent;
@@ -354,6 +356,19 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(envName)
                 .withResourceCrn(resourceCrn)
                 .withEncryptionProfileCrn(encryptionProfileCrn)
+                .build();
+
+        return sendEvent(event, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    public FlowIdentifier triggerDisableEncryptionProfile(long envId, String envName, String resourceCrn) {
+        LOGGER.info("Disable encryption profile for environment {} started", envName);
+        DisableEncryptionProfileEvent event = DisableEncryptionProfileEvent.builder()
+                .withAccepted(new Promise<>())
+                .withSelector(DisableEncryptionProfileStateSelectors.UNSET_ENCRYPTION_PROFILE_EVENT.selector())
+                .withResourceId(envId)
+                .withResourceName(envName)
+                .withResourceCrn(resourceCrn)
                 .build();
 
         return sendEvent(event, ThreadBasedUserCrnProvider.getUserCrn());

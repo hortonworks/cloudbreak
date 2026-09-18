@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
+import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 public class EnableEncryptionProfileFailedEvent extends BaseFailedFlowEvent implements Selectable {
 
@@ -16,6 +17,10 @@ public class EnableEncryptionProfileFailedEvent extends BaseFailedFlowEvent impl
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("exception") Exception exception) {
         super(FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.name(), resourceId, resourceName, resourceCrn, exception);
+    }
+
+    public static EnableEncryptionProfileFailedEvent from(BaseNamedFlowEvent event, Exception exception) {
+        return new EnableEncryptionProfileFailedEvent(event.getResourceId(), event.getResourceName(), event.getResourceCrn(), exception);
     }
 
     @Override

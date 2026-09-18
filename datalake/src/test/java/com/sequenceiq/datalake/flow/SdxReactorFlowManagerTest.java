@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.preparation.DatalakeUpgradePreparationEvent.DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT;
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
+import static com.sequenceiq.datalake.flow.encryptionprofile.SdxDisableEncryptionProfileEvent.SDX_DISABLE_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesStateSelectors.DATALAKE_ADD_VOLUMES_TRIGGER_EVENT;
@@ -61,6 +62,7 @@ import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradePrepar
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.preparation.event.DatalakeUpgradePreparationStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.encryptionprofile.event.SdxDisableEncryptionProfileTriggerEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
@@ -385,6 +387,22 @@ class SdxReactorFlowManagerTest {
         assertEquals(encryptionProfileCrn, captor.getValue().getEncryptionProfileCrn());
         assertEquals(com.sequenceiq.datalake.flow.encryptionprofile.SdxEnableEncryptionProfileEvent
                 .SDX_ENABLE_ENCRYPTION_PROFILE_EVENT.event(), captor.getValue().getSelector());
+        assertEquals("flowId", result.getPollableId());
+    }
+
+    @Test
+    public void testTriggerDisableEncryptionProfile() {
+        ArgumentCaptor<SdxDisableEncryptionProfileTriggerEvent> captor = ArgumentCaptor.forClass(SdxDisableEncryptionProfileTriggerEvent.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        doReturn(1L).when(sdxCluster).getId();
+        doReturn("TEST").when(sdxCluster).getClusterName();
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDisableEncryptionProfile(sdxCluster));
+
+        verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
+        assertEquals(1L, captor.getValue().getResourceId());
+        assertEquals(USER_CRN, captor.getValue().getUserId());
+        assertEquals(SDX_DISABLE_ENCRYPTION_PROFILE_EVENT.event(), captor.getValue().getSelector());
         assertEquals("flowId", result.getPollableId());
     }
 

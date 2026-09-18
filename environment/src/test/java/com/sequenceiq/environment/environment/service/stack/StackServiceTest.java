@@ -179,15 +179,6 @@ class StackServiceTest {
     }
 
     @Test
-    void testUpdatePillarConfigurationByCrn() {
-        String resourceCrn = "resourceCrn";
-
-        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.updatePillarConfigurationByCrn(resourceCrn));
-
-        verify(stackV4Endpoint).updatePillarConfigurationByCrn(0L, resourceCrn);
-    }
-
-    @Test
     void testUpdateNetworkCidrsForEnvironment() {
         List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.encryptionprofile.model;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CRN;
+import static com.sequenceiq.environment.api.v1.encryptionprofile.EncryptionProfileConstants.LEGACY_ENCRYPTION_PROFILE_NAME;
 
 import java.util.HashSet;
 import java.util.List;
@@ -125,7 +126,7 @@ public class EncryptionProfileResponse {
 
     @JsonIgnore
     public boolean isLegacy() {
-        return "cdp_default_fips_v1".equals(name);
+        return LEGACY_ENCRYPTION_PROFILE_NAME.equals(name);
     }
 
     @Override

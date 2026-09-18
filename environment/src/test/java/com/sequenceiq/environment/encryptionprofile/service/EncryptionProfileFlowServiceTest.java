@@ -11,17 +11,18 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -29,9 +30,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.validator.EncryptionProfileValidator;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.sdx.SdxService;
-import com.sequenceiq.environment.environment.service.stack.StackService;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class EncryptionProfileFlowServiceTest {
@@ -39,6 +37,8 @@ public class EncryptionProfileFlowServiceTest {
     private static final String ENCRYPTION_PROFILE_NAME = "encryptionProfileName";
 
     private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
+
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:envCrn";
 
     @Mock
     private EnvironmentService environmentService;
@@ -50,15 +50,6 @@ public class EncryptionProfileFlowServiceTest {
     private EnvironmentReactorFlowManager reactorFlowManager;
 
     @Mock
-    private SdxService sdxService;
-
-    @Mock
-    private StackService stackService;
-
-    @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private EncryptionProfileValidator encryptionProfileValidator;
 
     @InjectMocks
@@ -66,21 +57,16 @@ public class EncryptionProfileFlowServiceTest {
 
     @Test
     void testeEnableEncryptionProfileByCrn() {
-        EnvironmentDto environmentDto = new EnvironmentDto();
-        environmentDto.setId(1L);
-        environmentDto.setName("envName");
-        environmentDto.setResourceCrn("crn:cdp:environments:us-west-1:tenant:environment:envCrn");
-        environmentDto.setStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentDto environmentDto = envDto();
         EncryptionProfile encryptionProfile = new EncryptionProfile();
         encryptionProfile.setName(ENCRYPTION_PROFILE_NAME);
         encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
 
-        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
-        when(environmentService.getByCrnAndAccountId(eq("crn:cdp:environments:us-west-1:tenant:environment:envCrn"), any())).thenReturn(environmentDto);
+        when(environmentService.getByCrnAndAccountId(eq(ENV_CRN), any())).thenReturn(environmentDto);
         when(encryptionProfileService.getByCrn(eq(ENCRYPTION_PROFILE_CRN), any())).thenReturn(encryptionProfile);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.enableEncryptionProfileByCrn(
-                NameOrCrn.ofCrn("crn:cdp:environments:us-west-1:tenant:environment:envCrn"), ENCRYPTION_PROFILE_CRN));
+                NameOrCrn.ofCrn(ENV_CRN), ENCRYPTION_PROFILE_CRN));
 
         verify(encryptionProfileValidator).validate(environmentDto.getResourceCrn());
         verify(reactorFlowManager).triggerEnableEncryptionProfile(eq(environmentDto.getId()), eq(environmentDto.getName()), eq(environmentDto.getResourceCrn()),
@@ -89,16 +75,11 @@ public class EncryptionProfileFlowServiceTest {
 
     @Test
     void testeEnableEncryptionProfileByName() {
-        EnvironmentDto environmentDto = new EnvironmentDto();
-        environmentDto.setId(1L);
-        environmentDto.setName("envName");
-        environmentDto.setResourceCrn("crn:cdp:environments:us-west-1:tenant:environment:envCrn");
-        environmentDto.setStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentDto environmentDto = envDto();
         EncryptionProfile encryptionProfile = new EncryptionProfile();
         encryptionProfile.setName(ENCRYPTION_PROFILE_NAME);
         encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
 
-        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
         when(encryptionProfileService.getByNameAndAccountId(eq(ENCRYPTION_PROFILE_NAME), any())).thenReturn(encryptionProfile);
 
@@ -120,7 +101,6 @@ public class EncryptionProfileFlowServiceTest {
         EncryptionProfile encryptionProfile = new EncryptionProfile();
         encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
 
-        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
         when(encryptionProfileService.getByNameAndAccountId(eq(ENCRYPTION_PROFILE_NAME), any())).thenReturn(encryptionProfile);
 
@@ -143,7 +123,6 @@ public class EncryptionProfileFlowServiceTest {
         EncryptionProfile encryptionProfile = new EncryptionProfile();
         encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
 
-        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
         when(encryptionProfileService.getByNameAndAccountId(eq(ENCRYPTION_PROFILE_NAME), any())).thenReturn(encryptionProfile);
         doThrow(new BadRequestException("dh1 not available")).when(encryptionProfileValidator).validate(environmentDto.getResourceCrn());
@@ -157,38 +136,65 @@ public class EncryptionProfileFlowServiceTest {
 
     @Test
     void testeDisableEncryptionProfileByCrn() {
-        EnvironmentDto environmentDto = new EnvironmentDto();
-        environmentDto.setId(1L);
-        environmentDto.setName("envName");
-        environmentDto.setResourceCrn("crn:cdp:environments:us-west-1:tenant:environment:envCrn");
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:cdp:datalake:us-west-1:Test:datalake:40231209-6037-4d4b-95b9-f3c30698ae98");
+        EnvironmentDto environmentDto = envDto();
 
-        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
-        when(environmentService.getByCrnAndAccountId(eq("crn:cdp:environments:us-west-1:tenant:environment:envCrn"), any())).thenReturn(environmentDto);
-        when(sdxService.list(eq(environmentDto.getName()))).thenReturn(List.of(sdxClusterResponse));
+        when(environmentService.getByCrnAndAccountId(eq(ENV_CRN), any())).thenReturn(environmentDto);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.disableEncryptionProfile(
-                NameOrCrn.ofCrn("crn:cdp:environments:us-west-1:tenant:environment:envCrn")));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.disableEncryptionProfile(NameOrCrn.ofCrn(ENV_CRN)));
 
-        verify(stackService).updatePillarConfigurationByCrn(eq(sdxClusterResponse.getCrn()));
+        verify(encryptionProfileValidator).validateDisable();
+        verify(reactorFlowManager).triggerDisableEncryptionProfile(
+                eq(environmentDto.getId()), eq(environmentDto.getName()), eq(environmentDto.getResourceCrn()));
     }
 
-    @Test
-    void testeDisableEncryptionProfileByName() {
-        EnvironmentDto environmentDto = new EnvironmentDto();
-        environmentDto.setId(1L);
-        environmentDto.setName("envName");
-        environmentDto.setResourceCrn("crn:cdp:environments:us-west-1:tenant:environment:envCrn");
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:cdp:datalake:us-west-1:Test:datalake:40231209-6037-4d4b-95b9-f3c30698ae98");
+    @ParameterizedTest
+    @EnumSource(value = EnvironmentStatus.class, names = {"AVAILABLE", "UPDATE_FAILED"})
+    void testeDisableEncryptionProfileByNameInAllowedStatus(EnvironmentStatus status) {
+        EnvironmentDto environmentDto = envDto();
+        environmentDto.setStatus(status);
 
-        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
-        when(sdxService.list(eq(environmentDto.getName()))).thenReturn(List.of(sdxClusterResponse));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.disableEncryptionProfile(NameOrCrn.ofName("envName")));
 
-        verify(stackService).updatePillarConfigurationByCrn(eq(sdxClusterResponse.getCrn()));
+        verify(reactorFlowManager).triggerDisableEncryptionProfile(
+                eq(environmentDto.getId()), eq(environmentDto.getName()), eq(environmentDto.getResourceCrn()));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EnvironmentStatus.class, names = {"ENV_STOPPED", "STOP_DATAHUB_STARTED", "DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS",
+            "ENABLE_ENCRYPTION_PROFILE_FAILED"})
+    void testDisableEncryptionProfileWhenEnvironmentStatusIsNotAllowed(EnvironmentStatus status) {
+        EnvironmentDto environmentDto = envDto();
+        environmentDto.setStatus(status);
+
+        when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.disableEncryptionProfile(NameOrCrn.ofName("envName"))));
+
+        assertEquals("Environment 'envName' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. Current status: " + status,
+                ex.getMessage());
+        verify(reactorFlowManager, never()).triggerDisableEncryptionProfile(anyLong(), any(), any());
+    }
+
+    @Test
+    void testDisableEncryptionProfileWhenNotEntitled() {
+        doThrow(new ForbiddenException("not entitled")).when(encryptionProfileValidator).validateDisable();
+
+        assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.disableEncryptionProfile(NameOrCrn.ofName("envName"))));
+
+        verify(environmentService, never()).getByNameAndAccountId(any(), any());
+        verify(reactorFlowManager, never()).triggerDisableEncryptionProfile(anyLong(), any(), any());
+    }
+
+    private EnvironmentDto envDto() {
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setId(1L);
+        environmentDto.setName("envName");
+        environmentDto.setResourceCrn(ENV_CRN);
+        environmentDto.setStatus(EnvironmentStatus.AVAILABLE);
+        return environmentDto;
     }
 }

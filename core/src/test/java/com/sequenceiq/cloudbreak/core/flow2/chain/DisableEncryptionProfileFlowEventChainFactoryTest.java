@@ -16,6 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.DisableEncryptionProfileOnClusterState;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.DisableEncryptionProfileOnClusterStateSelectors;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.DisableEncryptionProfileOnClusterEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restartcm.RestartClusterManagerFlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restartcm.RestartClusterManagerFlowState;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -46,6 +49,12 @@ class DisableEncryptionProfileFlowEventChainFactoryTest {
                 .returns(EVENT, FlowTriggerEventQueue::getTriggerEvent);
 
         assertThat(result.getQueue().poll())
+                .isInstanceOf(DisableEncryptionProfileOnClusterEvent.class)
+                .extracting(DisableEncryptionProfileOnClusterEvent.class::cast)
+                .returns(DisableEncryptionProfileOnClusterStateSelectors.DISABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT.event(), StackEvent::selector)
+                .returns(STACK_ID, StackEvent::getResourceId);
+
+        assertThat(result.getQueue().poll())
                 .isInstanceOf(StackEvent.class)
                 .extracting(StackEvent.class::cast)
                 .returns(PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_EVENT.event(), StackEvent::selector)
@@ -60,14 +69,32 @@ class DisableEncryptionProfileFlowEventChainFactoryTest {
         assertThat(result.getQueue()).isEmpty();
     }
 
+    @Test
+    void testCreateFlowTriggerEventQueuePropagatesTriggerAcceptPromiseToEveryElement() {
+        StackEvent triggerEvent = new StackEvent(FlowChainTriggers.DISABLE_ENCRYPTION_PROFILE_CHAIN_TRIGGER_EVENT, STACK_ID, new Promise<>());
+
+        FlowTriggerEventQueue result = underTest.createFlowTriggerEventQueue(triggerEvent);
+
+        assertThat(result.getQueue())
+                .isNotEmpty()
+                .allSatisfy(selectable -> assertThat(((StackEvent) selectable).accepted()).isSameAs(triggerEvent.accepted()));
+    }
+
+    @ParameterizedTest(name = "Use case for disable encryption profile on cluster flow state: {0}")
+    @EnumSource(DisableEncryptionProfileOnClusterState.class)
+    void testGetUseCaseForDisableEncryptionProfileOnClusterState(DisableEncryptionProfileOnClusterState flowState) {
+        Value expected = switch (flowState) {
+            case INIT_STATE -> DISABLE_ENCRYPTION_PROFILE_STARTED;
+            case DISABLE_ENCRYPTION_PROFILE_ON_CLUSTER_FAILED_STATE -> DISABLE_ENCRYPTION_PROFILE_FAILED;
+            default -> UNSET;
+        };
+        assertThat(underTest.getUseCaseForFlowState(flowState)).isEqualTo(expected);
+    }
+
     @ParameterizedTest(name = "Use case for pillar config update flow state: {0}")
     @EnumSource(PillarConfigUpdateState.class)
     void testGetUseCaseForPillarConfigUpdateState(PillarConfigUpdateState flowState) {
-        Value expected = switch (flowState) {
-            case INIT_STATE -> DISABLE_ENCRYPTION_PROFILE_STARTED;
-            case PILLAR_CONFIG_UPDATE_FAILED_STATE -> DISABLE_ENCRYPTION_PROFILE_FAILED;
-            default -> UNSET;
-        };
+        Value expected = PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FAILED_STATE == flowState ? DISABLE_ENCRYPTION_PROFILE_FAILED : UNSET;
         assertThat(underTest.getUseCaseForFlowState(flowState)).isEqualTo(expected);
     }
 

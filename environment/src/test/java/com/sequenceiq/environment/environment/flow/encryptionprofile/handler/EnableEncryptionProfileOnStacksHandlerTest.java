@@ -20,7 +20,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -37,6 +36,7 @@ import com.sequenceiq.environment.environment.flow.DatalakeMultipleFlowsResultEv
 import com.sequenceiq.environment.environment.flow.MultipleFlowsResultEvaluator;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.service.EncryptionProfileStackService;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.validator.EncryptionProfileClusterResolver;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.poller.SdxPollerProvider;
@@ -101,7 +101,6 @@ class EnableEncryptionProfileOnStacksHandlerTest {
     @Mock
     private MultipleFlowsResultEvaluator datahubMultipleFlowsResultEvaluator;
 
-    @InjectMocks
     private EnableEncryptionProfileOnStacksHandler underTest;
 
     private EnableEncryptionProfileEvent event;
@@ -114,8 +113,12 @@ class EnableEncryptionProfileOnStacksHandlerTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(underTest, "maxTime", 1);
-        ReflectionTestUtils.setField(underTest, "sleepTime", 1);
+        EncryptionProfileStackService encryptionProfileStackService = new EncryptionProfileStackService(stackService, sdxService, datahubService,
+                encryptionProfileClusterResolver, sdxPollerProvider, datalakeMultipleFlowsResultEvaluator, datahubPollerProvider,
+                datahubMultipleFlowsResultEvaluator);
+        ReflectionTestUtils.setField(encryptionProfileStackService, "maxTime", 1);
+        ReflectionTestUtils.setField(encryptionProfileStackService, "sleepTime", 1);
+        underTest = new EnableEncryptionProfileOnStacksHandler(encryptionProfileStackService);
         event = new EnableEncryptionProfileEvent(ENABLE_ENCRYPTION_PROFILE_ON_STACKS_HANDLER_EVENT.name(),
                 ENV_ID, ENV_NAME, ENV_CRN, ENCRYPTION_PROFILE_CRN);
         datalake = stack("dl", DATALAKE_CRN, true);

@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.flow.encryptionprofile.validator;
 
+import static com.sequenceiq.environment.api.v1.encryptionprofile.EncryptionProfileConstants.LEGACY_ENCRYPTION_PROFILE_NAME;
+
 import java.util.Collections;
 import java.util.Optional;
 
@@ -21,8 +23,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 public class EncryptionProfileClusterResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionProfileClusterResolver.class);
-
-    private static final String LEGACY_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_v1";
 
     private final SdxService sdxService;
 

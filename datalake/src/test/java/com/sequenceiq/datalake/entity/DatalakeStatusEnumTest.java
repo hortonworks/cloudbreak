@@ -5,6 +5,8 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_IN
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ADD_VOLUMES_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ADD_VOLUMES_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_DISABLE_ENCRYPTION_PROFILE_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_DISK_UPDATE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_DISK_UPDATE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ENABLE_ENCRYPTION_PROFILE_FAILED;
@@ -89,7 +91,8 @@ class DatalakeStatusEnumTest {
                     entry(DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_FAILED),
                     entry(DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_FAILED),
                     entry(DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS, DATALAKE_UPDATE_TRUSTED_REALM_FAILED),
-                    entry(DATALAKE_ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS, DATALAKE_ENABLE_ENCRYPTION_PROFILE_FAILED))
+                    entry(DATALAKE_ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS, DATALAKE_ENABLE_ENCRYPTION_PROFILE_FAILED),
+                    entry(DATALAKE_DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS, DATALAKE_DISABLE_ENCRYPTION_PROFILE_FAILED))
     );
 
     private static final Set<DatalakeStatusEnum> STOP_STATE_SET = EnumSet.of(STOPPED, STOP_IN_PROGRESS);

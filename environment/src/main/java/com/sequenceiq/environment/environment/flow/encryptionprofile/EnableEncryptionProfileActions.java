@@ -15,32 +15,24 @@ import static com.sequenceiq.environment.environment.flow.encryptionprofile.even
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
-import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class EnableEncryptionProfileActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnableEncryptionProfileActions.class);
-
-    private static final String UNKNOWN_ERROR = "Unknown error";
 
     private final EnvironmentStatusUpdateService environmentStatusUpdateService;
 
@@ -118,14 +110,6 @@ public class EnableEncryptionProfileActions {
         return new AbstractEnableEncryptionProfileActions<>(EnableEncryptionProfileFailedEvent.class) {
 
             @Override
-            protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<EnabledEncryptionProfileState,
-                    EnableEncryptionProfileStateSelectors> stateContext, EnableEncryptionProfileFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
-
-            @Override
             protected void doExecute(CommonContext context, EnableEncryptionProfileFailedEvent payload, Map<Object, Object> variables) {
                 String reason = getFailureReason(payload.getException());
                 LOGGER.error("Failed to enable encryption profile: {}", reason, payload.getException());
@@ -140,12 +124,5 @@ public class EnableEncryptionProfileActions {
                 sendEvent(context, HANDLED_FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.event(), payload);
             }
         };
-    }
-
-    private String getFailureReason(Exception exception) {
-        return Optional.ofNullable(exception)
-                .map(Exception::getMessage)
-                .filter(StringUtils::isNotBlank)
-                .orElse(UNKNOWN_ERROR);
     }
 }

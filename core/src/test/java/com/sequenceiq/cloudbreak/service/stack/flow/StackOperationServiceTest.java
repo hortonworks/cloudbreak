@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,12 +44,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -124,7 +127,6 @@ import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationVal
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.tag.UserDefinedTagValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -1406,21 +1408,47 @@ class StackOperationServiceTest {
         verify(flowManager, times(1)).triggerEnableEncryptionProfileOnCluster(eq(STACK_ID), eq(encryptionProfileCrn));
     }
 
-    @Test
-    public void testDisableEncryptionProfile() {
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"AVAILABLE", "UPDATE_FAILED"})
+    public void testDisableEncryptionProfile(Status status) {
         StackDto stack = mock(StackDto.class);
-        ClusterView clusterView = mock(ClusterView.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
 
         when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getCluster()).thenReturn(clusterView);
-        when(clusterView.getId()).thenReturn(123L);
+        when(stack.getStatus()).thenReturn(status);
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
 
         underTest.disableEncryptionProfile(nameOrCrn, "accountId");
 
         verify(flowManager).triggerDisableEncryptionProfileChain(STACK_ID);
+        verify(clusterService, never()).disableEncryptionProfile(anyLong());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"STOPPED", "STOP_IN_PROGRESS", "UPDATE_IN_PROGRESS"})
+    public void testDisableEncryptionProfileWhenStackStatusIsNotAllowed(Status status) {
+        StackDto stack = mock(StackDto.class);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+        when(stack.getName()).thenReturn("Test");
+        when(stack.getStatus()).thenReturn(status);
+        when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
+
+        assertThatThrownBy(() -> underTest.disableEncryptionProfile(nameOrCrn, "accountId"))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Cluster 'Test' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. Current status: " + status);
+        verify(flowManager, never()).triggerDisableEncryptionProfileChain(anyLong());
+    }
+
+    @Test
+    public void testDisableEncryptionProfileWhenNotEntitled() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.disableEncryptionProfile(NameOrCrn.ofName("Test"), "accountId"))
+                .isInstanceOf(ForbiddenException.class);
+        verify(flowManager, never()).triggerDisableEncryptionProfileChain(anyLong());
     }
 
     @Test
