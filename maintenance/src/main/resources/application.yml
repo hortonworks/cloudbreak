@@ -51,6 +51,7 @@ maintenance:
       # Outbound HTTP to submitter execute callbacks (not bound by the 15-minute tick interval).
       connect-timeout-ms: 30000
       read-timeout-ms: 120000
+      internal-auth-enabled: true
   # Submitter service base URLs for dispatch execute callbacks (target services, not this service).
   cloudbreak:
     url: http://localhost:9091

@@ -14,6 +14,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
@@ -36,13 +37,11 @@ class MaintenanceTaskSubmitterHttpClientTest {
 
     @Test
     void dispatchReturnsFailedWhenSubmitterBaseUrlMissing() {
-        SubmitterServiceEndpointResolver resolver = new SubmitterServiceEndpointResolver(Map.of());
-        MaintenanceTaskSubmitterHttpClient client = client(resolver, mock(Client.class));
-        MaintenanceWindowTask task = task();
-        MaintenanceWindowRun run = run(task);
+        MaintenanceTaskSubmitterHttpClient client = client(new SubmitterServiceEndpointResolver(Map.of()), mock(Client.class));
+        MaintenanceWindowTask task = httpExecuteTask();
 
         MaintenanceTaskSubmitterDispatchResult result = client.invokeExecuteCallback(
-                task, run, schedule(), occurrence(), "42:v1");
+                task, run(task), schedule(), occurrence(), "42:v1");
 
         assertThat(result.outcome()).isEqualTo(MaintenanceTaskSubmitterOutcome.FAILED);
         assertThat(result.errorDetail()).contains("No submitter base URL");
@@ -50,10 +49,10 @@ class MaintenanceTaskSubmitterHttpClientTest {
 
     @Test
     void dispatchReturnsFailedWhenExecutePathMissing() {
-        SubmitterServiceEndpointResolver resolver = new SubmitterServiceEndpointResolver(
-                Map.of("datalake", "http://datalake:8080/dl"));
-        MaintenanceTaskSubmitterHttpClient client = client(resolver, mock(Client.class));
-        MaintenanceWindowTask task = task();
+        MaintenanceTaskSubmitterHttpClient client = client(
+                new SubmitterServiceEndpointResolver(Map.of("datalake", "http://datalake:8080/dl")),
+                mock(Client.class));
+        MaintenanceWindowTask task = httpExecuteTask();
         task.setExecutionRef(new Json(Map.of("submitter_service", "datalake")));
 
         MaintenanceTaskSubmitterDispatchResult result = client.invokeExecuteCallback(
@@ -68,7 +67,7 @@ class MaintenanceTaskSubmitterHttpClientTest {
         MaintenanceTaskSubmitterHttpClient client = clientWithResponse(Response.ok().build());
 
         MaintenanceTaskSubmitterDispatchResult result = client.invokeExecuteCallback(
-                task(), run(task()), schedule(), occurrence(), "42:v1");
+                httpExecuteTask(), run(httpExecuteTask()), schedule(), occurrence(), "42:v1");
 
         assertThat(result.outcome()).isEqualTo(MaintenanceTaskSubmitterOutcome.SYNC_COMPLETED);
         assertThat(result.errorDetail()).isNull();
@@ -79,7 +78,7 @@ class MaintenanceTaskSubmitterHttpClientTest {
         MaintenanceTaskSubmitterHttpClient client = clientWithResponse(Response.status(Response.Status.ACCEPTED).build());
 
         MaintenanceTaskSubmitterDispatchResult result = client.invokeExecuteCallback(
-                task(), run(task()), schedule(), occurrence(), "42:v1");
+                httpExecuteTask(), run(httpExecuteTask()), schedule(), occurrence(), "42:v1");
 
         assertThat(result.outcome()).isEqualTo(MaintenanceTaskSubmitterOutcome.ASYNC_ACCEPTED);
     }
@@ -90,10 +89,22 @@ class MaintenanceTaskSubmitterHttpClientTest {
                 Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("upstream failed").build());
 
         MaintenanceTaskSubmitterDispatchResult result = client.invokeExecuteCallback(
-                task(), run(task()), schedule(), occurrence(), "42:v1");
+                httpExecuteTask(), run(httpExecuteTask()), schedule(), occurrence(), "42:v1");
 
         assertThat(result.outcome()).isEqualTo(MaintenanceTaskSubmitterOutcome.FAILED);
         assertThat(result.errorDetail()).contains("HTTP 500");
+    }
+
+    @Test
+    void dispatchReturnsFailedOnHttp400() {
+        MaintenanceTaskSubmitterHttpClient client = clientWithResponse(
+                Response.status(Response.Status.BAD_REQUEST).entity("bad payload").build());
+
+        MaintenanceTaskSubmitterDispatchResult result = client.invokeExecuteCallback(
+                httpExecuteTask(), run(httpExecuteTask()), schedule(), occurrence(), "42:v1");
+
+        assertThat(result.outcome()).isEqualTo(MaintenanceTaskSubmitterOutcome.FAILED);
+        assertThat(result.errorDetail()).contains("HTTP 400");
     }
 
     @Test
@@ -103,15 +114,16 @@ class MaintenanceTaskSubmitterHttpClientTest {
         Client restClient = mock(Client.class);
         WebTarget webTarget = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
+        MaintenanceSubmitterOutboundRequestBuilder outbound = mock(MaintenanceSubmitterOutboundRequestBuilder.class);
         when(restClient.target("http://datalake:8080/dl/internal/maintenance-tasks/execute")).thenReturn(webTarget);
         when(webTarget.property(anyString(), any())).thenReturn(webTarget);
-        when(webTarget.request(anyString())).thenReturn(builder);
+        when(outbound.prepareJsonPost(webTarget)).thenReturn(builder);
         when(builder.header(anyString(), any())).thenReturn(builder);
         when(builder.post(any(Entity.class))).thenThrow(new ProcessingException("connection reset"));
-        MaintenanceTaskSubmitterHttpClient client = client(resolver, restClient);
+        MaintenanceTaskSubmitterHttpClient client = client(resolver, restClient, outbound);
 
         MaintenanceTaskSubmitterDispatchResult result = client.invokeExecuteCallback(
-                task(), run(task()), schedule(), occurrence(), "42:v1");
+                httpExecuteTask(), run(httpExecuteTask()), schedule(), occurrence(), "42:v1");
 
         assertThat(result.outcome()).isEqualTo(MaintenanceTaskSubmitterOutcome.FAILED);
         assertThat(result.errorDetail()).contains("connection reset");
@@ -125,7 +137,7 @@ class MaintenanceTaskSubmitterHttpClientTest {
 
     @Test
     void dispatchIdempotencyKeyUsesRunIdAndAttemptCount() {
-        MaintenanceWindowRun run = run(task());
+        MaintenanceWindowRun run = run(httpExecuteTask());
         run.setId(42L);
         run.setAttemptCount(3);
 
@@ -133,23 +145,26 @@ class MaintenanceTaskSubmitterHttpClientTest {
     }
 
     @Test
-    void dispatchIncludesIdempotencyKeyInRequestBody() {
+    void dispatchIncludesWindowBoundsAndPayloadInRequestBody() {
         SubmitterServiceEndpointResolver resolver = new SubmitterServiceEndpointResolver(
                 Map.of("datalake", "http://datalake:8080/dl"));
         Client restClient = mock(Client.class);
         WebTarget webTarget = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
+        MaintenanceSubmitterOutboundRequestBuilder outbound = mock(MaintenanceSubmitterOutboundRequestBuilder.class);
         when(restClient.target("http://datalake:8080/dl/internal/maintenance-tasks/execute")).thenReturn(webTarget);
         when(webTarget.property(anyString(), any())).thenReturn(webTarget);
-        when(webTarget.request(anyString())).thenReturn(builder);
+        when(outbound.prepareJsonPost(webTarget)).thenReturn(builder);
         when(builder.header(anyString(), any())).thenReturn(builder);
         when(builder.post(any(Entity.class))).thenReturn(Response.ok().build());
-        MaintenanceTaskSubmitterHttpClient client = client(resolver, restClient);
+        MaintenanceTaskSubmitterHttpClient client = client(resolver, restClient, outbound);
 
-        MaintenanceWindowRun run = run(task());
+        MaintenanceWindowTask task = httpExecuteTask();
+        task.setTaskPayload(new Json(Map.of("key", "value")));
+        MaintenanceWindowRun run = run(task);
         run.setId(99L);
         run.setAttemptCount(2);
-        client.invokeExecuteCallback(task(), run, schedule(), occurrence(), "42:v1");
+        client.invokeExecuteCallback(task, run, schedule(), occurrence(), "42:v1");
 
         ArgumentCaptor<Entity<?>> entityCaptor = ArgumentCaptor.forClass(Entity.class);
         verify(builder).header("Idempotency-Key", "99:2");
@@ -158,12 +173,22 @@ class MaintenanceTaskSubmitterHttpClientTest {
         assertThat(body.idempotencyKey()).isEqualTo("99:2");
         assertThat(body.taskId()).isEqualTo(7L);
         assertThat(body.runId()).isEqualTo(99L);
+        assertThat(body.windowStart()).isEqualTo(1L);
+        assertThat(body.windowEnd()).isEqualTo(2L);
+        assertThat(body.taskPayload()).containsEntry("key", "value");
     }
 
     private MaintenanceTaskSubmitterHttpClient client(SubmitterServiceEndpointResolver resolver, Client restClient) {
+        return client(resolver, restClient, passthroughOutboundBuilder());
+    }
+
+    private MaintenanceTaskSubmitterHttpClient client(
+            SubmitterServiceEndpointResolver resolver,
+            Client restClient,
+            MaintenanceSubmitterOutboundRequestBuilder outbound) {
         RestClientFactory restClientFactory = mock(RestClientFactory.class);
         when(restClientFactory.getOrCreateDefault()).thenReturn(restClient);
-        return new MaintenanceTaskSubmitterHttpClient(resolver, restClientFactory, 30_000, 120_000);
+        return new MaintenanceTaskSubmitterHttpClient(resolver, restClientFactory, outbound, 30_000, 120_000);
     }
 
     private MaintenanceTaskSubmitterHttpClient clientWithResponse(Response response) {
@@ -174,13 +199,23 @@ class MaintenanceTaskSubmitterHttpClientTest {
         Invocation.Builder builder = mock(Invocation.Builder.class);
         when(restClient.target("http://datalake:8080/dl/internal/maintenance-tasks/execute")).thenReturn(webTarget);
         when(webTarget.property(anyString(), any())).thenReturn(webTarget);
-        when(webTarget.request(anyString())).thenReturn(builder);
+        MaintenanceSubmitterOutboundRequestBuilder outbound = mock(MaintenanceSubmitterOutboundRequestBuilder.class);
+        when(outbound.prepareJsonPost(webTarget)).thenReturn(builder);
         when(builder.header(anyString(), any())).thenReturn(builder);
         when(builder.post(any(Entity.class))).thenReturn(response);
-        return client(resolver, restClient);
+        return client(resolver, restClient, outbound);
     }
 
-    private MaintenanceWindowTask task() {
+    private static MaintenanceSubmitterOutboundRequestBuilder passthroughOutboundBuilder() {
+        MaintenanceSubmitterOutboundRequestBuilder outbound = mock(MaintenanceSubmitterOutboundRequestBuilder.class);
+        when(outbound.prepareJsonPost(any(WebTarget.class))).thenAnswer(invocation -> {
+            WebTarget target = invocation.getArgument(0);
+            return target.request(MediaType.APPLICATION_JSON);
+        });
+        return outbound;
+    }
+
+    private MaintenanceWindowTask httpExecuteTask() {
         MaintenanceWindowTask entity = new MaintenanceWindowTask();
         entity.setId(7L);
         entity.setAccountId("acc-1");
