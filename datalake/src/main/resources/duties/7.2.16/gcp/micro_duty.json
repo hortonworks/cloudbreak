@@ -28,6 +28,7 @@
       "name": "master",
       "template": {
         "instanceType": "e2-standard-8",
+        "fallbackInstanceTypes": ["c3d-standard-8"],
         "attachedVolumes": [
           {
             "count": 1,

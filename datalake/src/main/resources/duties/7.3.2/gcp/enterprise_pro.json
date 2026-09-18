@@ -12,6 +12,7 @@
       "name": "gateway",
       "template": {
         "instanceType": "e2-standard-8",
+        "fallbackInstanceTypes": ["c3d-standard-8"],
         "attachedVolumes": [
           {
             "count": 1,
@@ -29,6 +30,7 @@
       "name": "core",
       "template": {
         "instanceType": "e2-standard-8",
+        "fallbackInstanceTypes": ["c3d-standard-8"],
         "attachedVolumes": [
           {
             "count": 1,
@@ -73,6 +75,7 @@
       "name": "solr_scale_out",
       "template": {
         "instanceType": "e2-standard-4",
+        "fallbackInstanceTypes": ["c3d-standard-4"],
         "attachedVolumes": [
           {
             "count": 1,
@@ -90,6 +93,7 @@
       "name": "kafka_scale_out",
       "template": {
         "instanceType": "e2-standard-4",
+        "fallbackInstanceTypes": ["c3d-standard-4"],
         "attachedVolumes": [
           {
             "count": 1,
@@ -107,6 +111,7 @@
       "name": "raz_scale_out",
       "template": {
         "instanceType": "e2-standard-4",
+        "fallbackInstanceTypes": ["c3d-standard-4"],
         "attachedVolumes": [
           {
             "count": 0,
@@ -124,6 +129,7 @@
       "name": "atlas_scale_out",
       "template": {
         "instanceType": "e2-standard-4",
+        "fallbackInstanceTypes": ["c3d-standard-4"],
         "attachedVolumes": [
           {
             "count": 0,
@@ -141,6 +147,7 @@
       "name": "hms_scale_out",
       "template": {
         "instanceType": "e2-standard-4",
+        "fallbackInstanceTypes": ["c3d-standard-4"],
         "attachedVolumes": [
           {
             "count": 0,
