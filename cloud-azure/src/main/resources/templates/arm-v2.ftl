@@ -537,7 +537,7 @@
                                     },
                                     "backendPort": ${rule.backendPort},
                                     "enableFloatingIP": <#if loadBalancer.type == "PRIVATE" && gatewayPrivateLbNeeded!false>true<#else>false</#if>,
-                                    "enableTcpReset": false,
+                                    "enableTcpReset": true,
                                     "frontendIPConfiguration": {
                                         "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend')]"
                                     },
@@ -561,7 +561,7 @@
                                 },
                                 "backendPort": ${rule.backendPort},
                                 "enableFloatingIP": true,
-                                "enableTcpReset": false,
+                                "enableTcpReset": true,
                                 "frontendIPConfiguration": {
                                     "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend-gateway')]"
                                 },
@@ -586,7 +586,7 @@
                                     "backendAddressPool": {
                                         "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', '${outboundRule.groupName}-pool')]"
                                     },
-                                    "enableTcpReset": false,
+                                    "enableTcpReset": true,
                                     "frontendIPConfigurations": [{
                                         "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend')]"
                                     }],

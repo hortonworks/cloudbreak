@@ -171,7 +171,7 @@
                              },
                              "backendPort": ${rule.backendPort},
                              "enableFloatingIP": <#if loadBalancer.type == "PRIVATE" && gatewayPrivateLbNeeded!false>true<#else>false</#if>,
-                             "enableTcpReset": false,
+                             "enableTcpReset": true,
                              "frontendIPConfiguration": {
                                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend')]"
                              },
