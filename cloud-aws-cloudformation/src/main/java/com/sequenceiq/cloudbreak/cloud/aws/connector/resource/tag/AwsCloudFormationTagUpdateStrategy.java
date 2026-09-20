@@ -103,23 +103,7 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
             return;
         }
 
-        Collection<Tag> cloudFormationTags = awsTaggingService.prepareCloudformationTags(authenticatedContext, mergeTags(existingTags, tags));
-
-        cloudFormationClient.updateStack(
-                UpdateStackRequest.builder()
-                        .stackName(stackName)
-                        .usePreviousTemplate(true)
-                        .parameters(stack.parameters()
-                                .stream()
-                                .map(p -> Parameter.builder()
-                                        .parameterKey(p.parameterKey())
-                                        .usePreviousValue(true)
-                                        .build())
-                                .toList())
-                        .tags(cloudFormationTags)
-                        .capabilities(stack.capabilities())
-                        .build()
-        );
+        updateStackTags(cloudFormationClient, authenticatedContext, stack, stackName, mergeTags(existingTags, tags));
 
         updateLaunchTemplateAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tags);
         updateAutoScalingGroupAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tags);
@@ -142,31 +126,35 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
 
         if (hasTagKeysToDelete(existingTags, tagKeys)) {
             Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
-            Collection<Tag> cloudFormationTags = awsTaggingService.prepareCloudformationTags(authenticatedContext, remainingTags);
-
             logTagDeletion(LOGGER, stackName, tagKeys, existingTags, remainingTags.keySet());
-
-            cloudFormationClient.updateStack(
-                    UpdateStackRequest.builder()
-                            .stackName(stackName)
-                            .usePreviousTemplate(true)
-                            .parameters(stack.parameters()
-                                    .stream()
-                                    .map(p -> Parameter.builder()
-                                            .parameterKey(p.parameterKey())
-                                            .usePreviousValue(true)
-                                            .build())
-                                    .toList())
-                            .tags(cloudFormationTags)
-                            .capabilities(stack.capabilities())
-                            .build()
-            );
+            updateStackTags(cloudFormationClient, authenticatedContext, stack, stackName, remainingTags);
         } else {
             LOGGER.info("No tags to delete for CloudFormation stack {}, skipping stack tag update.", stackName);
         }
 
         deleteLaunchTemplateAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tagKeys);
         deleteAutoScalingGroupAndInstanceTags(authenticatedContext, cloudFormationClient, stackName, tagKeys);
+    }
+
+    private void updateStackTags(AmazonCloudFormationClient cloudFormationClient, AuthenticatedContext authenticatedContext,
+            Stack stack, String stackName, Map<String, String> desiredTags) {
+        Collection<Tag> cloudFormationTags = awsTaggingService.prepareCloudformationTags(authenticatedContext, desiredTags);
+
+        cloudFormationClient.updateStack(
+                UpdateStackRequest.builder()
+                        .stackName(stackName)
+                        .usePreviousTemplate(true)
+                        .parameters(stack.parameters()
+                                .stream()
+                                .map(p -> Parameter.builder()
+                                        .parameterKey(p.parameterKey())
+                                        .usePreviousValue(true)
+                                        .build())
+                                .toList())
+                        .tags(cloudFormationTags)
+                        .capabilities(stack.capabilities())
+                        .build()
+        );
     }
 
     private Stack describeStackOrNull(AmazonCloudFormationClient cloudFormationClient, String stackName, String operation) {

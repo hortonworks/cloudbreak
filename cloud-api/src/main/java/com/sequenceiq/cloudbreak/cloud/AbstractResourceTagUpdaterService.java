@@ -27,23 +27,7 @@ public abstract class AbstractResourceTagUpdaterService {
     }
 
     public void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
-        List<CloudResource> taggableResources = cloudResources.stream()
-                .filter(r -> r.getType().isTaggable())
-                .toList();
-
-        Map<Boolean, List<CloudResource>> strategyExistenceMap = taggableResources.stream()
-                .collect(Collectors.partitioningBy(r -> tagUpdateStrategyMap.containsKey(r.getType())));
-
-        strategyExistenceMap.getOrDefault(false, List.of())
-                .forEach(r -> LOGGER.warn("Resource type {} is taggable but no tag update strategy is implemented.", r.getType()));
-
-        Map<TagUpdateStrategy, List<CloudResource>> resourcesByStrategy = strategyExistenceMap.getOrDefault(true, List.of()).stream()
-                .collect(Collectors.groupingBy(
-                        r -> tagUpdateStrategyMap.get(r.getType()),
-                        LinkedHashMap::new,
-                        Collectors.toList()));
-
-        resourcesByStrategy.forEach((strategy, resources) -> {
+        resourcesByStrategy(cloudResources).forEach((strategy, resources) -> {
             try {
                 Map<String, String> preparedTags = prepareTags(tags);
                 if (strategy.isBatchUpdateSupported()) {
@@ -67,27 +51,10 @@ public abstract class AbstractResourceTagUpdaterService {
         return tags;
     }
 
-    // EC2 batch delete to come in CB-34250
     public void deleteTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
-        List<CloudResource> taggableResources = cloudResources.stream()
-                .filter(r -> r.getType().isTaggable())
-                .toList();
-
-        Map<Boolean, List<CloudResource>> strategyExistenceMap = taggableResources.stream()
-                .collect(Collectors.partitioningBy(r -> tagUpdateStrategyMap.containsKey(r.getType())));
-
-        strategyExistenceMap.getOrDefault(false, List.of())
-                .forEach(r -> LOGGER.warn("Resource type {} is taggable but no tag update strategy is implemented.", r.getType()));
-
-        Map<TagUpdateStrategy, List<CloudResource>> resourcesByStrategy = strategyExistenceMap.getOrDefault(true, List.of()).stream()
-                .collect(Collectors.groupingBy(
-                        r -> tagUpdateStrategyMap.get(r.getType()),
-                        LinkedHashMap::new,
-                        Collectors.toList()));
-
         Set<String> preparedTagKeys = prepareTagKeys(tagKeys);
 
-        resourcesByStrategy.forEach((strategy, resources) -> {
+        resourcesByStrategy(cloudResources).forEach((strategy, resources) -> {
             try {
                 if (strategy.isBatchDeleteSupported()) {
                     LOGGER.info("Deleting tags in batch for {} resources using {} with tag keys: {}",
@@ -108,6 +75,21 @@ public abstract class AbstractResourceTagUpdaterService {
 
     protected Set<String> prepareTagKeys(Set<String> tagKeys) {
         return tagKeys;
+    }
+
+    private Map<TagUpdateStrategy, List<CloudResource>> resourcesByStrategy(List<CloudResource> cloudResources) {
+        Map<Boolean, List<CloudResource>> strategyExistenceMap = cloudResources.stream()
+                .filter(r -> r.getType().isTaggable())
+                .collect(Collectors.partitioningBy(r -> tagUpdateStrategyMap.containsKey(r.getType())));
+
+        strategyExistenceMap.getOrDefault(false, List.of())
+                .forEach(r -> LOGGER.warn("Resource type {} is taggable but no tag update strategy is implemented.", r.getType()));
+
+        return strategyExistenceMap.getOrDefault(true, List.of()).stream()
+                .collect(Collectors.groupingBy(
+                        r -> tagUpdateStrategyMap.get(r.getType()),
+                        LinkedHashMap::new,
+                        Collectors.toList()));
     }
 
     protected RuntimeException handleFailure(TagUpdateStrategy strategy, Exception e) {

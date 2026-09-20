@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.tag;
 
 import static com.sequenceiq.common.api.type.ResourceType.AWS_KMS_KEY;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,58 +44,39 @@ public class AwsKmsTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
-        AmazonKmsClient kmsClient = commonAwsClient.createAWSKMS(
-                new AwsCredentialView(authenticatedContext.getCloudCredential()),
-                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
-
+        AmazonKmsClient kmsClient = kmsClient(authenticatedContext);
         String keyId = cloudResource.getReference();
-
-        Map<String, String> existingTags = kmsClient.listResourceTags(
-                        ListResourceTagsRequest.builder()
-                                .keyId(keyId)
-                                .build())
-                .tags().stream()
-                .collect(Collectors.toMap(Tag::tagKey, Tag::tagValue));
-
-        if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.info("Tags for KMS key {} are already up to date, skipping update.", keyId);
-            return;
-        }
-
-        Collection<Tag> kmsTags = awsTaggingService.prepareKmsTags(tags);
-
-        kmsClient.tagResource(TagResourceRequest.builder()
-                .keyId(keyId)
-                .tags(kmsTags)
-                .build());
+        AwsTaggedResourceTagSupport.updateTags(this, LOGGER, "KMS key", keyId, tags,
+                () -> existingTags(kmsClient, keyId),
+                () -> kmsClient.tagResource(TagResourceRequest.builder()
+                        .keyId(keyId)
+                        .tags(awsTaggingService.prepareKmsTags(tags))
+                        .build()));
     }
 
     @Override
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
-        AmazonKmsClient kmsClient = commonAwsClient.createAWSKMS(
+        AmazonKmsClient kmsClient = kmsClient(authenticatedContext);
+        String keyId = cloudResource.getReference();
+        AwsTaggedResourceTagSupport.deleteTags(this, LOGGER, "KMS key", keyId, tagKeys,
+                () -> existingTags(kmsClient, keyId),
+                () -> kmsClient.untagResource(UntagResourceRequest.builder()
+                        .keyId(keyId)
+                        .tagKeys(tagKeys)
+                        .build()));
+    }
+
+    private AmazonKmsClient kmsClient(AuthenticatedContext authenticatedContext) {
+        return commonAwsClient.createAWSKMS(
                 new AwsCredentialView(authenticatedContext.getCloudCredential()),
                 authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+    }
 
-        String keyId = cloudResource.getReference();
-
-        Map<String, String> existingTags = kmsClient.listResourceTags(
-                        ListResourceTagsRequest.builder()
-                                .keyId(keyId)
-                                .build())
+    private Map<String, String> existingTags(AmazonKmsClient kmsClient, String keyId) {
+        return kmsClient.listResourceTags(ListResourceTagsRequest.builder()
+                        .keyId(keyId)
+                        .build())
                 .tags().stream()
                 .collect(Collectors.toMap(Tag::tagKey, Tag::tagValue));
-
-        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
-            LOGGER.info("No tags to delete for KMS key {}, skipping.", keyId);
-            return;
-        }
-
-        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
-        logTagDeletion(LOGGER, keyId, tagKeys, existingTags, remainingTags.keySet());
-
-        kmsClient.untagResource(UntagResourceRequest.builder()
-                .keyId(keyId)
-                .tagKeys(tagKeys)
-                .build());
     }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.tag;
 
 import static com.sequenceiq.common.api.type.ResourceType.AWS_SECRETSMANAGER_SECRET;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,58 +44,39 @@ public class AwsSecretsManagerTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
-        AmazonSecretsManagerClient secretsManagerClient = commonAwsClient.createSecretsManagerClient(
-                new AwsCredentialView(authenticatedContext.getCloudCredential()),
-                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
-
+        AmazonSecretsManagerClient secretsManagerClient = secretsManagerClient(authenticatedContext);
         String secretId = cloudResource.getReference();
-
-        Map<String, String> existingTags = secretsManagerClient.describeSecret(
-                        DescribeSecretRequest.builder()
-                                .secretId(secretId)
-                                .build())
-                .tags().stream()
-                .collect(Collectors.toMap(Tag::key, Tag::value));
-
-        if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.info("Tags for Secrets Manager secret {} are already up to date, skipping update.", secretId);
-            return;
-        }
-
-        Collection<Tag> secretsManagerTags = awsTaggingService.prepareSecretsManagerTags(tags);
-
-        secretsManagerClient.tagResource(TagResourceRequest.builder()
-                .secretId(secretId)
-                .tags(secretsManagerTags)
-                .build());
+        AwsTaggedResourceTagSupport.updateTags(this, LOGGER, "Secrets Manager secret", secretId, tags,
+                () -> existingTags(secretsManagerClient, secretId),
+                () -> secretsManagerClient.tagResource(TagResourceRequest.builder()
+                        .secretId(secretId)
+                        .tags(awsTaggingService.prepareSecretsManagerTags(tags))
+                        .build()));
     }
 
     @Override
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
-        AmazonSecretsManagerClient secretsManagerClient = commonAwsClient.createSecretsManagerClient(
+        AmazonSecretsManagerClient secretsManagerClient = secretsManagerClient(authenticatedContext);
+        String secretId = cloudResource.getReference();
+        AwsTaggedResourceTagSupport.deleteTags(this, LOGGER, "Secrets Manager secret", secretId, tagKeys,
+                () -> existingTags(secretsManagerClient, secretId),
+                () -> secretsManagerClient.untagResource(UntagResourceRequest.builder()
+                        .secretId(secretId)
+                        .tagKeys(tagKeys)
+                        .build()));
+    }
+
+    private AmazonSecretsManagerClient secretsManagerClient(AuthenticatedContext authenticatedContext) {
+        return commonAwsClient.createSecretsManagerClient(
                 new AwsCredentialView(authenticatedContext.getCloudCredential()),
                 authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+    }
 
-        String secretId = cloudResource.getReference();
-
-        Map<String, String> existingTags = secretsManagerClient.describeSecret(
-                        DescribeSecretRequest.builder()
-                                .secretId(secretId)
-                                .build())
+    private Map<String, String> existingTags(AmazonSecretsManagerClient secretsManagerClient, String secretId) {
+        return secretsManagerClient.describeSecret(DescribeSecretRequest.builder()
+                        .secretId(secretId)
+                        .build())
                 .tags().stream()
                 .collect(Collectors.toMap(Tag::key, Tag::value));
-
-        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
-            LOGGER.info("No tags to delete for Secrets Manager secret {}, skipping.", secretId);
-            return;
-        }
-
-        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
-        logTagDeletion(LOGGER, secretId, tagKeys, existingTags, remainingTags.keySet());
-
-        secretsManagerClient.untagResource(UntagResourceRequest.builder()
-                .secretId(secretId)
-                .tagKeys(tagKeys)
-                .build());
     }
 }

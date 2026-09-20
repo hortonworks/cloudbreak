@@ -4,7 +4,6 @@ import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER_LISTENER;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,66 +46,43 @@ public class AwsElbTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
-        AmazonElasticLoadBalancingClient elbClient = commonAwsClient.createElasticLoadBalancingClient(
-                new AwsCredentialView(authenticatedContext.getCloudCredential()),
-                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
-
+        AmazonElasticLoadBalancingClient elbClient = elbClient(authenticatedContext);
         String resourceArn = cloudResource.getReference();
-
-        Map<String, String> existingTags = elbClient.describeTags(
-                        DescribeTagsRequest.builder()
-                                .resourceArns(resourceArn)
-                                .build())
-                .tagDescriptions().stream()
-                .filter(td -> td.resourceArn().equals(resourceArn))
-                .findFirst()
-                .map(td -> td.tags().stream()
-                        .collect(Collectors.toMap(Tag::key, Tag::value)))
-                .orElse(Map.of());
-
-        if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.info("Tags for ELB resource {} are already up to date, skipping update.", resourceArn);
-            return;
-        }
-
-        Collection<Tag> elbTags = awsTaggingService.prepareElasticLoadBalancingTags(tags);
-
-        elbClient.addTags(AddTagsRequest.builder()
-                .resourceArns(resourceArn)
-                .tags(elbTags)
-                .build());
+        AwsTaggedResourceTagSupport.updateTags(this, LOGGER, "ELB resource", resourceArn, tags,
+                () -> existingTags(elbClient, resourceArn),
+                () -> elbClient.addTags(AddTagsRequest.builder()
+                        .resourceArns(resourceArn)
+                        .tags(awsTaggingService.prepareElasticLoadBalancingTags(tags))
+                        .build()));
     }
 
     @Override
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
-        AmazonElasticLoadBalancingClient elbClient = commonAwsClient.createElasticLoadBalancingClient(
+        AmazonElasticLoadBalancingClient elbClient = elbClient(authenticatedContext);
+        String resourceArn = cloudResource.getReference();
+        AwsTaggedResourceTagSupport.deleteTags(this, LOGGER, "ELB resource", resourceArn, tagKeys,
+                () -> existingTags(elbClient, resourceArn),
+                () -> elbClient.removeTags(RemoveTagsRequest.builder()
+                        .resourceArns(resourceArn)
+                        .tagKeys(tagKeys)
+                        .build()));
+    }
+
+    private AmazonElasticLoadBalancingClient elbClient(AuthenticatedContext authenticatedContext) {
+        return commonAwsClient.createElasticLoadBalancingClient(
                 new AwsCredentialView(authenticatedContext.getCloudCredential()),
                 authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+    }
 
-        String resourceArn = cloudResource.getReference();
-
-        Map<String, String> existingTags = elbClient.describeTags(
-                        DescribeTagsRequest.builder()
-                                .resourceArns(resourceArn)
-                                .build())
+    private Map<String, String> existingTags(AmazonElasticLoadBalancingClient elbClient, String resourceArn) {
+        return elbClient.describeTags(DescribeTagsRequest.builder()
+                        .resourceArns(resourceArn)
+                        .build())
                 .tagDescriptions().stream()
                 .filter(td -> td.resourceArn().equals(resourceArn))
                 .findFirst()
                 .map(td -> td.tags().stream()
                         .collect(Collectors.toMap(Tag::key, Tag::value)))
                 .orElse(Map.of());
-
-        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
-            LOGGER.info("No tags to delete for ELB resource {}, skipping.", resourceArn);
-            return;
-        }
-
-        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
-        logTagDeletion(LOGGER, resourceArn, tagKeys, existingTags, remainingTags.keySet());
-
-        elbClient.removeTags(RemoveTagsRequest.builder()
-                .resourceArns(resourceArn)
-                .tagKeys(tagKeys)
-                .build());
     }
 }

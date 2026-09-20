@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -69,12 +70,7 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
         AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
 
-        List<String> resourcesToUpdate = switch (cloudResource.getType()) {
-            case AWS_ROOT_DISK, AWS_VOLUMESET -> resolveVolumeIdsToUpdate(ec2Client, cloudResource.getInstanceId(), tags);
-            case AWS_INSTANCE                 -> filterResourcesToUpdate(ec2Client, List.of(cloudResource.getInstanceId()), tags);
-            case AWS_SECURITY_GROUP           -> filterResourcesToUpdate(ec2Client, List.of(cloudResource.getReference()), tags);
-            default                           -> filterResourcesToUpdate(ec2Client, List.of(cloudResource.getReference()), tags);
-        };
+        List<String> resourcesToUpdate = resolveResourceIds(ec2Client, List.of(cloudResource), needsUpdate(tags));
 
         if (resourcesToUpdate.isEmpty()) {
             LOGGER.info("Tags for resource {} of type {} are already up to date, skipping update.", cloudResource.getName(), cloudResource.getType());
@@ -98,27 +94,7 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
     public void batchUpdateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
 
-        List<String> resourcesToUpdate = new ArrayList<>();
-
-        Map<ResourceType, List<CloudResource>> cloudResourcesByType = cloudResources.stream()
-                .collect(Collectors.groupingBy(CloudResource::getType));
-
-        cloudResourcesByType.forEach((type, resources) -> {
-            switch (type) {
-                case AWS_ROOT_DISK, AWS_VOLUMESET -> {
-                    List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).distinct().toList();
-                    resourcesToUpdate.addAll(resolveVolumeIdsToUpdate(ec2Client, instanceIds, tags));
-                }
-                case AWS_INSTANCE -> {
-                    List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).toList();
-                    resourcesToUpdate.addAll(filterResourcesToUpdate(ec2Client, instanceIds, tags));
-                }
-                default -> {
-                    List<String> refs = resources.stream().map(CloudResource::getReference).toList();
-                    resourcesToUpdate.addAll(filterResourcesToUpdate(ec2Client, refs, tags));
-                }
-            }
-        });
+        List<String> resourcesToUpdate = resolveResourceIds(ec2Client, cloudResources, needsUpdate(tags));
 
         if (resourcesToUpdate.isEmpty()) {
             LOGGER.info("Tags for all {} EC2 resources are already up to date, skipping update.", cloudResources.size());
@@ -139,28 +115,19 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
         AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
 
-        List<String> resourcesToDeleteTagsFrom = switch (cloudResource.getType()) {
-            case AWS_ROOT_DISK, AWS_VOLUMESET -> resolveVolumeIdsWithTagsToDelete(ec2Client, cloudResource.getInstanceId(), tagKeys);
-            case AWS_INSTANCE                 -> filterResourcesWithTagsToDelete(ec2Client, List.of(cloudResource.getInstanceId()), tagKeys);
-            case AWS_SECURITY_GROUP           -> filterResourcesWithTagsToDelete(ec2Client, List.of(cloudResource.getReference()), tagKeys);
-            default                           -> filterResourcesWithTagsToDelete(ec2Client, List.of(cloudResource.getReference()), tagKeys);
-        };
+        List<String> resourcesToDeleteTagsFrom = resolveResourceIds(ec2Client, List.of(cloudResource), hasTagsToDelete(tagKeys));
 
         if (resourcesToDeleteTagsFrom.isEmpty()) {
             LOGGER.info("No tags to delete for resource {} of type {}, skipping.", cloudResource.getName(), cloudResource.getType());
             return;
         }
 
-        Collection<Tag> ec2Tags = tagKeys.stream()
-                .map(key -> Tag.builder().key(key).build())
-                .toList();
-
         logTagKeyDeletion(LOGGER, String.format("%s (%s), EC2 resources: %s",
                 cloudResource.getName(), cloudResource.getType(), resourcesToDeleteTagsFrom), tagKeys);
 
         ec2Client.deleteTags(DeleteTagsRequest.builder()
                 .resources(resourcesToDeleteTagsFrom)
-                .tags(ec2Tags)
+                .tags(tagKeysAsTags(tagKeys))
                 .build());
     }
 
@@ -173,7 +140,39 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
     public void batchDeleteTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
         AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
 
-        List<String> resourcesToUpdate = new ArrayList<>();
+        List<String> resourcesToDeleteTagsFrom = resolveResourceIds(ec2Client, cloudResources, hasTagsToDelete(tagKeys));
+
+        if (resourcesToDeleteTagsFrom.isEmpty()) {
+            LOGGER.info("No tags to delete for all {} EC2 resources, skipping.", cloudResources.size());
+            return;
+        }
+
+        Collection<Tag> ec2Tags = tagKeysAsTags(tagKeys);
+
+        Lists.partition(resourcesToDeleteTagsFrom, TAG_UPDATE_BATCH_SIZE).forEach(batch ->
+                ec2Client.deleteTags(DeleteTagsRequest.builder()
+                        .resources(batch)
+                        .tags(ec2Tags)
+                        .build())
+        );
+    }
+
+    private Predicate<Map<String, String>> needsUpdate(Map<String, String> newTags) {
+        return existingTags -> !tagsAlreadyUpToDate(existingTags, newTags);
+    }
+
+    private Predicate<Map<String, String>> hasTagsToDelete(Set<String> tagKeys) {
+        return existingTags -> hasTagKeysToDelete(existingTags, tagKeys);
+    }
+
+    private Collection<Tag> tagKeysAsTags(Set<String> tagKeys) {
+        return tagKeys.stream()
+                .map(key -> Tag.builder().key(key).build())
+                .toList();
+    }
+
+    private List<String> resolveResourceIds(AmazonEc2Client ec2Client, List<CloudResource> cloudResources, Predicate<Map<String, String>> tagPredicate) {
+        List<String> resourceIds = new ArrayList<>();
 
         Map<ResourceType, List<CloudResource>> cloudResourcesByType = cloudResources.stream()
                 .collect(Collectors.groupingBy(CloudResource::getType));
@@ -182,38 +181,23 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
             switch (type) {
                 case AWS_ROOT_DISK, AWS_VOLUMESET -> {
                     List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).distinct().toList();
-                    resourcesToUpdate.addAll(resolveVolumeIdsWithTagsToDelete(ec2Client, instanceIds, tagKeys));
+                    resourceIds.addAll(volumeIdsMatching(ec2Client, instanceIds, tagPredicate));
                 }
                 case AWS_INSTANCE -> {
                     List<String> instanceIds = resources.stream().map(CloudResource::getInstanceId).toList();
-                    resourcesToUpdate.addAll(filterResourcesWithTagsToDelete(ec2Client, instanceIds, tagKeys));
+                    resourceIds.addAll(resourceIdsMatching(ec2Client, instanceIds, tagPredicate));
                 }
                 default -> {
                     List<String> refs = resources.stream().map(CloudResource::getReference).toList();
-                    resourcesToUpdate.addAll(filterResourcesWithTagsToDelete(ec2Client, refs, tagKeys));
+                    resourceIds.addAll(resourceIdsMatching(ec2Client, refs, tagPredicate));
                 }
             }
         });
 
-        if (resourcesToUpdate.isEmpty()) {
-            LOGGER.info("No tags to delete for all {} EC2 resources, skipping.", cloudResources.size());
-            return;
-        }
-
-        Collection<Tag> ec2Tags = tagKeys.stream()
-                .map(key -> Tag.builder().key(key).build())
-                .toList();
-
-        Lists.partition(resourcesToUpdate, TAG_UPDATE_BATCH_SIZE).forEach(batch ->
-                ec2Client.deleteTags(DeleteTagsRequest.builder()
-                        .resources(batch)
-                        .tags(ec2Tags)
-                        .build())
-        );
+        return resourceIds;
     }
 
-    private List<String> resolveVolumeIdsToUpdate(AmazonEc2Client ec2Client,
-            List<String> instanceIds, Map<String, String> newTags) {
+    private List<String> volumeIdsMatching(AmazonEc2Client ec2Client, List<String> instanceIds, Predicate<Map<String, String>> tagPredicate) {
         return Lists.partition(instanceIds, DESCRIBE_BATCH_SIZE).stream()
                 .flatMap(batch -> {
                     DescribeVolumesResponse response = ec2Client.describeVolumes(
@@ -224,14 +208,13 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
                                             .build())
                                     .build());
                     return response.volumes().stream()
-                            .filter(volume -> !tagsAlreadyUpToDate(toTagMap(volume.tags()), newTags))
+                            .filter(volume -> tagPredicate.test(toTagMap(volume.tags())))
                             .map(Volume::volumeId);
                 })
                 .toList();
     }
 
-    private List<String> filterResourcesToUpdate(AmazonEc2Client ec2Client,
-            List<String> resourceIds, Map<String, String> newTags) {
+    private List<String> resourceIdsMatching(AmazonEc2Client ec2Client, List<String> resourceIds, Predicate<Map<String, String>> tagPredicate) {
         return Lists.partition(resourceIds, DESCRIBE_BATCH_SIZE).stream()
                 .flatMap(batch -> {
                     DescribeTagsResponse response = ec2Client.describeTags(
@@ -249,63 +232,7 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
                             ));
 
                     return batch.stream()
-                            .filter(resourceId -> {
-                                Map<String, String> existingTags = existingTagsByResource.getOrDefault(resourceId, Map.of());
-                                return !tagsAlreadyUpToDate(existingTags, newTags);
-                            });
-                })
-                .toList();
-    }
-
-    private List<String> resolveVolumeIdsToUpdate(AmazonEc2Client ec2Client,
-            String instanceId, Map<String, String> newTags) {
-        return resolveVolumeIdsToUpdate(ec2Client, List.of(instanceId), newTags);
-    }
-
-    private List<String> resolveVolumeIdsWithTagsToDelete(AmazonEc2Client ec2Client,
-            List<String> instanceIds, Set<String> tagKeys) {
-        return Lists.partition(instanceIds, DESCRIBE_BATCH_SIZE).stream()
-                .flatMap(batch -> {
-                    DescribeVolumesResponse response = ec2Client.describeVolumes(
-                            DescribeVolumesRequest.builder()
-                                    .filters(Filter.builder()
-                                            .name("attachment.instance-id")
-                                            .values(batch)
-                                            .build())
-                                    .build());
-                    return response.volumes().stream()
-                            .filter(volume -> hasTagKeysToDelete(toTagMap(volume.tags()), tagKeys))
-                            .map(Volume::volumeId);
-                })
-                .toList();
-    }
-
-    private List<String> resolveVolumeIdsWithTagsToDelete(AmazonEc2Client ec2Client,
-            String instanceId, Set<String> tagKeys) {
-        return resolveVolumeIdsWithTagsToDelete(ec2Client, List.of(instanceId), tagKeys);
-    }
-
-    private List<String> filterResourcesWithTagsToDelete(AmazonEc2Client ec2Client,
-            List<String> resourceIds, Set<String> tagKeys) {
-        return Lists.partition(resourceIds, DESCRIBE_BATCH_SIZE).stream()
-                .flatMap(batch -> {
-                    DescribeTagsResponse response = ec2Client.describeTags(
-                            DescribeTagsRequest.builder()
-                                .filters(Filter.builder()
-                                    .name("resource-id")
-                                    .values(batch)
-                                    .build())
-                                .build());
-
-                    Map<String, Map<String, String>> existingTagsByResource = response.tags().stream()
-                            .collect(Collectors.groupingBy(
-                                TagDescription::resourceId,
-                                Collectors.toMap(TagDescription::key, TagDescription::value)
-                            ));
-
-                    return batch.stream()
-                            .filter(resourceId -> hasTagKeysToDelete(
-                                    existingTagsByResource.getOrDefault(resourceId, Map.of()), tagKeys));
+                            .filter(resourceId -> tagPredicate.test(existingTagsByResource.getOrDefault(resourceId, Map.of())));
                 })
                 .toList();
     }

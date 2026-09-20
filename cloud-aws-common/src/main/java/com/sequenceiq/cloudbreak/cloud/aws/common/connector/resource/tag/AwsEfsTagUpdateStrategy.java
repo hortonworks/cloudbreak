@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.tag;
 
 import static com.sequenceiq.common.api.type.ResourceType.AWS_EFS;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,58 +44,39 @@ public class AwsEfsTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
-        AmazonEfsClient efsClient = commonAwsClient.createElasticFileSystemClient(
-                new AwsCredentialView(authenticatedContext.getCloudCredential()),
-                authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
-
+        AmazonEfsClient efsClient = efsClient(authenticatedContext);
         String resourceId = cloudResource.getReference();
-
-        Map<String, String> existingTags = efsClient.listTagsForResource(
-                        ListTagsForResourceRequest.builder()
-                                .resourceId(resourceId)
-                                .build())
-                .tags().stream()
-                .collect(Collectors.toMap(Tag::key, Tag::value));
-
-        if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.info("Tags for EFS resource {} are already up to date, skipping update.", resourceId);
-            return;
-        }
-
-        Collection<Tag> efsTags = awsTaggingService.prepareEfsTags(tags);
-
-        efsClient.tagResource(TagResourceRequest.builder()
-                .resourceId(resourceId)
-                .tags(efsTags)
-                .build());
+        AwsTaggedResourceTagSupport.updateTags(this, LOGGER, "EFS resource", resourceId, tags,
+                () -> existingTags(efsClient, resourceId),
+                () -> efsClient.tagResource(TagResourceRequest.builder()
+                        .resourceId(resourceId)
+                        .tags(awsTaggingService.prepareEfsTags(tags))
+                        .build()));
     }
 
     @Override
     public void deleteTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Set<String> tagKeys) {
-        AmazonEfsClient efsClient = commonAwsClient.createElasticFileSystemClient(
+        AmazonEfsClient efsClient = efsClient(authenticatedContext);
+        String resourceId = cloudResource.getReference();
+        AwsTaggedResourceTagSupport.deleteTags(this, LOGGER, "EFS resource", resourceId, tagKeys,
+                () -> existingTags(efsClient, resourceId),
+                () -> efsClient.untagResource(UntagResourceRequest.builder()
+                        .resourceId(resourceId)
+                        .tagKeys(tagKeys)
+                        .build()));
+    }
+
+    private AmazonEfsClient efsClient(AuthenticatedContext authenticatedContext) {
+        return commonAwsClient.createElasticFileSystemClient(
                 new AwsCredentialView(authenticatedContext.getCloudCredential()),
                 authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
+    }
 
-        String resourceId = cloudResource.getReference();
-
-        Map<String, String> existingTags = efsClient.listTagsForResource(
-                        ListTagsForResourceRequest.builder()
-                                .resourceId(resourceId)
-                                .build())
+    private Map<String, String> existingTags(AmazonEfsClient efsClient, String resourceId) {
+        return efsClient.listTagsForResource(ListTagsForResourceRequest.builder()
+                        .resourceId(resourceId)
+                        .build())
                 .tags().stream()
                 .collect(Collectors.toMap(Tag::key, Tag::value));
-
-        if (!hasTagKeysToDelete(existingTags, tagKeys)) {
-            LOGGER.info("No tags to delete for EFS resource {}, skipping.", resourceId);
-            return;
-        }
-
-        Map<String, String> remainingTags = removeTagKeys(existingTags, tagKeys);
-        logTagDeletion(LOGGER, resourceId, tagKeys, existingTags, remainingTags.keySet());
-
-        efsClient.untagResource(UntagResourceRequest.builder()
-                .resourceId(resourceId)
-                .tagKeys(tagKeys)
-                .build());
     }
 }
