@@ -44,6 +44,12 @@ class ZookeeperToKraftMigrationValidatorTest {
 
     private static final String LOWER_VERSION = "7.3.1";
 
+    private static final String VALID_BLUEPRINT_VERSION = "7.2.17";
+
+    private static final String HIGHER_BLUEPRINT_VERSION = "7.3.2";
+
+    private static final String LOWER_BLUEPRINT_VERSION = "7.2.16";
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -80,7 +86,7 @@ class ZookeeperToKraftMigrationValidatorTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
 
-        assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2",
+        assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2. Current CDP version is: " + HIGHER_VERSION,
                 exception.getMessage());
     }
 
@@ -117,6 +123,7 @@ class ZookeeperToKraftMigrationValidatorTest {
         when(mockBlueprintService.anyOfTheServiceTypesPresentOnBlueprint(TEST_BP_JSON_TEXT, List.of(KAFKA_SERVICE_TYPE))).thenReturn(true);
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(blueprint.getStackVersion()).thenReturn(VALID_BLUEPRINT_VERSION);
 
         assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
     }
@@ -132,7 +139,7 @@ class ZookeeperToKraftMigrationValidatorTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
 
-        assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2",
+        assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2. Current CDP version is: " + LOWER_VERSION,
                 exception.getMessage());
     }
 
@@ -142,6 +149,7 @@ class ZookeeperToKraftMigrationValidatorTest {
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(blueprint.getStackVersion()).thenReturn(VALID_BLUEPRINT_VERSION);
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
         when(mockBlueprintService.anyOfTheServiceTypesPresentOnBlueprint(TEST_BP_JSON_TEXT, List.of(KAFKA_SERVICE_TYPE))).thenReturn(true);
 
@@ -158,6 +166,49 @@ class ZookeeperToKraftMigrationValidatorTest {
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(blueprint.getStackVersion()).thenReturn(VALID_BLUEPRINT_VERSION);
+        when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(mockBlueprintService.anyOfTheServiceTypesPresentOnBlueprint(TEST_BP_JSON_TEXT, List.of(KAFKA_SERVICE_TYPE))).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationEligibilityWithLowerBlueprintVersion() {
+        when(stack.getStatus()).thenReturn(status);
+        when(status.isAvailable()).thenReturn(true);
+        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(blueprint.getStackVersion()).thenReturn(LOWER_BLUEPRINT_VERSION);
+        when(mockBlueprintService.anyOfTheServiceTypesPresentOnBlueprint(TEST_BP_JSON_TEXT, List.of(KAFKA_SERVICE_TYPE))).thenReturn(true);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
+
+        assertEquals("Zookeeper to KRaft migration is currently unavailable for clusters originally created with Runtime " + LOWER_BLUEPRINT_VERSION
+                + ". Please contact Cloudera Support for assistance.", exception.getMessage());
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationEligibilityWithMinimumBlueprintVersion() {
+        when(stack.getStatus()).thenReturn(status);
+        when(status.isAvailable()).thenReturn(true);
+        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(blueprint.getStackVersion()).thenReturn(VALID_BLUEPRINT_VERSION);
+        when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(mockBlueprintService.anyOfTheServiceTypesPresentOnBlueprint(TEST_BP_JSON_TEXT, List.of(KAFKA_SERVICE_TYPE))).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationEligibilityWithHigherBlueprintVersion() {
+        when(stack.getStatus()).thenReturn(status);
+        when(status.isAvailable()).thenReturn(true);
+        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(blueprint.getStackVersion()).thenReturn(HIGHER_BLUEPRINT_VERSION);
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         when(mockBlueprintService.anyOfTheServiceTypesPresentOnBlueprint(TEST_BP_JSON_TEXT, List.of(KAFKA_SERVICE_TYPE))).thenReturn(true);
 
@@ -185,6 +236,7 @@ class ZookeeperToKraftMigrationValidatorTest {
     void testIsMigrationFromZookeeperToKraftSupported() {
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(blueprint.getStackVersion()).thenReturn(VALID_BLUEPRINT_VERSION);
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         when(mockBlueprintService.anyOfTheServiceTypesPresentOnBlueprint(TEST_BP_JSON_TEXT, List.of(KAFKA_SERVICE_TYPE))).thenReturn(true);
 
@@ -193,9 +245,10 @@ class ZookeeperToKraftMigrationValidatorTest {
 
     @ParameterizedTest
     @MethodSource("testIsMigrationFromZookeeperToKraftNotSupportedParameters")
-    void testIsMigrationFromZookeeperToKraftNotSupported(Boolean available, String version, Boolean migrationEnabled) {
+    void testIsMigrationFromZookeeperToKraftNotSupported(Boolean available, String version, String blueprintVersion, Boolean migrationEnabled) {
         lenient().when(stack.getBlueprint()).thenReturn(blueprint);
         lenient().when(stack.getStackVersion()).thenReturn(version);
+        lenient().when(blueprint.getStackVersion()).thenReturn(blueprintVersion);
         lenient().when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(migrationEnabled);
 
         assertFalse(underTest.isMigrationFromZookeeperToKraftSupported(stack, ACCOUNT_ID));
@@ -203,11 +256,12 @@ class ZookeeperToKraftMigrationValidatorTest {
 
     private static Stream<Arguments> testIsMigrationFromZookeeperToKraftNotSupportedParameters() {
         return Stream.of(
-                Arguments.of(false, LOWER_VERSION, false),
-                Arguments.of(true, VALID_VERSION, false),
-                Arguments.of(true, LOWER_VERSION, true),
-                Arguments.of(false, VALID_VERSION, true),
-                Arguments.of(false, LOWER_VERSION, true)
+                Arguments.of(false, LOWER_VERSION, VALID_BLUEPRINT_VERSION, false),
+                Arguments.of(true, VALID_VERSION, VALID_BLUEPRINT_VERSION, false),
+                Arguments.of(true, LOWER_VERSION, VALID_BLUEPRINT_VERSION, true),
+                Arguments.of(false, VALID_VERSION, VALID_BLUEPRINT_VERSION, true),
+                Arguments.of(false, LOWER_VERSION, VALID_BLUEPRINT_VERSION, true),
+                Arguments.of(true, VALID_VERSION, LOWER_BLUEPRINT_VERSION, true)
         );
     }
 
