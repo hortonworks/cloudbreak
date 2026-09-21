@@ -134,15 +134,21 @@ public class DistributionListManagementService {
                         }
                     }
                     LOGGER.info("Distribution list already exists for resourceCrn: {}, updating it now!", targetResourceCrnAsString);
-                    Optional<DistributionList> resourceDistributionList = insertorUpdateDistributionListConfig(
-                            distributionLists,
-                            accountId,
-                            request.getParentResourceCrn(),
-                            request.getTargetResourceCrn(),
-                            request.getTargetResourceName(),
-                            eventChannelPreferences,
-                            request.getActionType()
-                    );
+                    Optional<DistributionList> resourceDistributionList = Optional.empty();
+                    if (!request.parentAndTargetIsTheSame()) {
+                        resourceDistributionList = insertorUpdateDistributionListConfig(
+                                distributionLists,
+                                accountId,
+                                request.getParentResourceCrn(),
+                                request.getTargetResourceCrn(),
+                                request.getTargetResourceName(),
+                                eventChannelPreferences,
+                                request.getActionType()
+                        );
+                    }
+                    if (environmentListCreation(request, resourceDistributionList, distributionLists)) {
+                        return getEnvironmentDistributionList(distributionLists);
+                    }
                     return resourceDistributionList.isPresent() && !noParentDistributionList(distributionLists) ?
                             getEnvironmentDistributionList(distributionLists) : resourceDistributionList;
                 }
@@ -151,6 +157,14 @@ public class DistributionListManagementService {
             }
         }
         return Optional.empty();
+    }
+
+    private boolean environmentListCreation(
+            CreateDistributionListRequest request,
+            Optional<DistributionList> resourceDistributionList,
+            List<DistributionList> distributionLists
+    ) {
+        return resourceDistributionList.isEmpty() && !noParentDistributionList(distributionLists) && request.parentAndTargetIsTheSame();
     }
 
     private Optional<DistributionList> getEnvironmentDistributionList(List<DistributionList> distributionLists) {

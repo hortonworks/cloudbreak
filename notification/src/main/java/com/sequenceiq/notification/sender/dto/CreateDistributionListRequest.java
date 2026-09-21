@@ -34,6 +34,10 @@ public class CreateDistributionListRequest {
         return parentResourceCrn;
     }
 
+    public boolean parentAndTargetIsTheSame() {
+        return Objects.equals(parentResourceCrn, targetResourceCrn);
+    }
+
     public String getParentResourceName() {
         return parentResourceName;
     }

@@ -58,6 +58,10 @@ class DistributionListManagementServiceTest {
 
     private static final String RESOURCE_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:env123";
 
+    private static final String RESOURCE_CRN_A = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:envA";
+
+    private static final String RESOURCE_CRN_B = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:envB";
+
     private static final String RESOURCE_NAME = "envName";
 
     @Mock
@@ -345,40 +349,112 @@ class DistributionListManagementServiceTest {
 
     @Test
     void createOrUpdateListsAggregatesResultsNotIncludingNull() {
+        // Two parent==target requests with distinct env CRNs: CRN_A yields a present environment list,
+        // CRN_B's parent create returns nothing so its result is absent and must be filtered out.
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
         when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), any())).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(any(List.class))).thenReturn(List.of(samplePreferenceDto));
         // All list calls return empty (no existing distribution lists)
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of()));
-        DistributionListDto responseDto1 = new DistributionListDto("dl-a", RESOURCE_CRN);
-        // First two calls succeed (parent create + insert), then next two return empty
-        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
-                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto1)))
-                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto1)))
-                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(responseDto1)))
+        // CRN_A parent create succeeds, CRN_B parent create returns an empty list -> absent result
+        when(grpcNotificationClient.createOrUpdateDistributionList(argThat(req -> req != null && RESOURCE_CRN_A.equals(req.getResourceCrn()))))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(new DistributionListDto("dl-a", RESOURCE_CRN_A))));
+        when(grpcNotificationClient.createOrUpdateDistributionList(argThat(req -> req != null && RESOURCE_CRN_B.equals(req.getResourceCrn()))))
                 .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of()));
 
         CreateDistributionListRequest req1 = new CreateDistributionListRequest.Builder()
-                .withParentResourceCrn(RESOURCE_CRN)
+                .withParentResourceCrn(RESOURCE_CRN_A)
                 .withParentResourceName(RESOURCE_NAME)
-                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN_A)
                 .withTargetResourceName(RESOURCE_NAME + "1")
                 .withEventChannelPreferences(List.of(samplePreference))
                 .build();
         CreateDistributionListRequest req2 = new CreateDistributionListRequest.Builder()
-                .withParentResourceCrn(RESOURCE_CRN)
+                .withParentResourceCrn(RESOURCE_CRN_B)
                 .withParentResourceName(RESOURCE_NAME)
-                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceCrn(RESOURCE_CRN_B)
                 .withTargetResourceName(RESOURCE_NAME + "2")
                 .withEventChannelPreferences(List.of(samplePreference))
                 .build();
         List<DistributionList> results = underTest.createOrUpdateLists(Set.of(req1, req2));
         assertEquals(1, results.size());
         assertTrue(results.stream().anyMatch(dl -> dl != null && "dl-a".equals(dl.getExternalId())));
+    }
+
+    @Test
+    void createOrUpdateListWhenParentEqualsTargetAndParentListExistsReturnsEnvironmentListWithoutUpsert() {
+        // No distribution list for the target, but the parent list already exists and parent == target:
+        // the redundant target upsert must be skipped and the existing environment list returned.
+        when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
+        DistributionListDetailsDto parentDto = new DistributionListDetailsDto(
+                "parent-dl",
+                RESOURCE_CRN,
+                RESOURCE_NAME,
+                null,
+                Set.of("slack-1"),
+                DistributionListManagementType.SYSTEM_MANAGED.name(),
+                List.of()
+        );
+        // First list call (target) empty, second list call (parent) returns the existing environment list
+        when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
+                .thenReturn(new ListDistributionListsResponseDto(List.of()))
+                .thenReturn(new ListDistributionListsResponseDto(List.of(parentDto)));
+
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN)
+                .withParentResourceName(RESOURCE_NAME)
+                .withTargetResourceCrn(RESOURCE_CRN)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
+        Optional<DistributionList> result = underTest.createOrUpdateList(request);
+
+        assertTrue(result.isPresent());
+        assertEquals("parent-dl", result.get().getExternalId());
+        assertEquals(RESOURCE_CRN, result.get().getResourceCrn());
+        verify(grpcNotificationClient, never()).createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class));
+    }
+
+    @Test
+    void createOrUpdateListWhenParentDiffersFromTargetRunsTargetUpsert() {
+        // Distinct parent and target CRNs: the parent list already exists, so the target upsert path runs.
+        when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
+        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
+        when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
+        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN_B))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
+        when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
+        DistributionListDetailsDto parentDto = new DistributionListDetailsDto(
+                "parent-dl",
+                RESOURCE_CRN_A,
+                RESOURCE_NAME,
+                null,
+                Set.of("slack-1"),
+                DistributionListManagementType.SYSTEM_MANAGED.name(),
+                List.of()
+        );
+        // First list call (target CRN_B) empty, second (parent CRN_A) returns the existing environment list
+        when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
+                .thenReturn(new ListDistributionListsResponseDto(List.of()))
+                .thenReturn(new ListDistributionListsResponseDto(List.of(parentDto)));
+        when(grpcNotificationClient.createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class)))
+                .thenReturn(new CreateOrUpdateDistributionListResponseDto(List.of(new DistributionListDto("dl-target", RESOURCE_CRN_A))));
+
+        CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
+                .withParentResourceCrn(RESOURCE_CRN_A)
+                .withParentResourceName(RESOURCE_NAME)
+                .withTargetResourceCrn(RESOURCE_CRN_B)
+                .withTargetResourceName(RESOURCE_NAME)
+                .withEventChannelPreferences(List.of(samplePreference))
+                .build();
+        Optional<DistributionList> result = underTest.createOrUpdateList(request);
+
+        assertTrue(result.isPresent());
+        verify(grpcNotificationClient).createOrUpdateDistributionList(any(CreateOrUpdateDistributionListRequestDto.class));
     }
 
     @Test
