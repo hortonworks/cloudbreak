@@ -755,15 +755,14 @@ public class AwsPlatformResources implements PlatformResources {
         return instanceClass.matches("db\\.[a-z][0-9]g\\..*");
     }
 
-    private boolean filterArmInstance(String instanceClass, Architecture architecture) {
-        switch (architecture) {
-            case ARM64 -> {
-                return isArmInstance(instanceClass);
-            }
-            default -> {
-                return !isArmInstance(instanceClass);
-            }
+    private boolean matchesArchitecture(String instanceClass, String architecture) {
+        if (Architecture.ALL_ARCHITECTURE.equalsIgnoreCase(architecture)) {
+            return true;
         }
+        return switch (getTargetArchitecture(architecture)) {
+            case ARM64 -> isArmInstance(instanceClass);
+            default -> !isArmInstance(instanceClass);
+        };
     }
 
     @Override
@@ -994,7 +993,7 @@ public class AwsPlatformResources implements PlatformResources {
                     .build();
             DescribeOrderableDBInstanceOptionsIterable paginator = rdsClient.describeOrderableDbInstanceOptionsResponse(request);
             List<String> dbInstanceClasses = paginator.orderableDBInstanceOptions().stream()
-                    .filter(e -> filterArmInstance(e.dbInstanceClass(), getTargetArchitecture(architecture)))
+                    .filter(e -> matchesArchitecture(e.dbInstanceClass(), architecture))
                     .map(option -> option.dbInstanceClass())
                     .distinct()
                     .collect(Collectors.toList());
@@ -1003,7 +1002,7 @@ public class AwsPlatformResources implements PlatformResources {
 
             paginator = rdsClient.describeOrderableDbInstanceOptionsResponse(request);
             paginator.orderableDBInstanceOptions().stream()
-                    .filter(e -> filterArmInstance(e.dbInstanceClass(), getTargetArchitecture(architecture)))
+                    .filter(e -> matchesArchitecture(e.dbInstanceClass(), architecture))
                     .forEach(option -> {
                         DatabaseVmTypeMetaBuilder databaseVmTypeMetaBuilder = DatabaseVmTypeMetaBuilder.builder()
                                 .withArchitecture(isArmInstance(option.dbInstanceClass()) ? ARM64 : Architecture.X86_64)

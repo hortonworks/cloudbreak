@@ -23,9 +23,11 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeCapabilityValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput.InstanceTypeSpecs;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
@@ -138,7 +140,8 @@ public class DatabaseInstanceTypeValidator {
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
         ExtendedCloudCredential cloudCredential = extendedCredentialConverter.convert(credential, cloudPlatform);
         Region region = Region.region(regionName);
-        return connector.platformResources().databaseCapabilities(cloudCredential, region, Map.of());
+        return connector.platformResources().databaseCapabilities(cloudCredential, region,
+                Map.of(AwsPlatformResourcesFilterConstants.ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
     }
 
     private Map<String, InstanceTypeSpecs> buildAvailableTypesMap(Set<DatabaseVmType> regionTypes) {

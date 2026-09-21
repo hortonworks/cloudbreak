@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,8 +32,10 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeCapabilityValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseInstanceTypeValidationInput;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
@@ -217,6 +220,40 @@ class DatabaseInstanceTypeValidatorTest {
         Optional<String> result = underTest.validate(PRIMARY_TYPE, fallbacks, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
         assertThat(result).isPresent();
         assertThat(result.get()).contains("Could not validate database instance type availability");
+    }
+
+    @Test
+    void armInstanceTypeAvailableInRegionPasses() {
+        setupCloudMocks();
+        setupAvailableTypes(Set.of("db.m7g.large", "db.m6i.large"));
+
+        Optional<String> result = underTest.validate("db.m7g.large", null, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
+        assertThat(result).isEmpty();
+        verify(capabilityValidator).validate(any(DatabaseInstanceTypeValidationInput.class));
+    }
+
+    @Test
+    void armInstanceTypeNotInRegionThrows() {
+        setupCloudMocks();
+        setupAvailableTypes(Set.of("db.m6i.large", "db.r5.large"));
+        doThrow(new BadRequestException("Database instance type 'db.m7g.large' is not available in region 'us-east-1'."))
+                .when(capabilityValidator).validate(any());
+
+        assertThatThrownBy(() -> underTest.validate("db.m7g.large", null, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("not available in region");
+    }
+
+    @Test
+    void fetchCapabilitiesRequestsAllArchitectures() {
+        setupCloudMocks();
+        setupAvailableTypes(Set.of(PRIMARY_TYPE));
+
+        underTest.validate(PRIMARY_TYPE, null, ENVIRONMENT_CRN, CLOUD_PLATFORM, REGION);
+
+        ArgumentCaptor<Map<String, String>> filtersCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(platformResources).databaseCapabilities(any(), any(), filtersCaptor.capture());
+        assertThat(filtersCaptor.getValue()).containsEntry(AwsPlatformResourcesFilterConstants.ARCHITECTURE, Architecture.ALL_ARCHITECTURE);
     }
 
     private void setupAvailableTypes(Set<String> types) {
