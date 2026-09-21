@@ -3,8 +3,12 @@ package com.sequenceiq.cloudbreak.domain;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -198,6 +202,16 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setFallbackInstanceTypes(Json fallbackInstanceTypes) {
         this.fallbackInstanceTypes = fallbackInstanceTypes;
+    }
+
+    public Set<String> getAllInstanceTypesLowerCase() {
+        if (instanceType == null) {
+            return Collections.emptySet();
+        }
+        return Stream.concat(Stream.of(instanceType), getFallbackInstanceTypesAsList().stream())
+                .filter(Objects::nonNull)
+                .map(type -> type.toLowerCase(Locale.ROOT))
+                .collect(Collectors.toSet());
     }
 
     public String getSecretAttributes() {

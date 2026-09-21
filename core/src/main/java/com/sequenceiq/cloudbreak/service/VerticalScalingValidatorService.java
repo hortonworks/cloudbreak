@@ -230,11 +230,7 @@ public class VerticalScalingValidatorService {
         if (!allProviderInstanceTypes.isEmpty()) {
             // Compare case-insensitively: provider casing may differ from the template (e.g. Azure may
             // surface "standard_d8_v3" while the template stores "Standard_D8_v3").
-            Set<String> templateInstanceTypesLowerSet =
-                    getAllInstanceTypes(templateInstanceType, instanceGroup.getTemplate().getFallbackInstanceTypesAsList()).stream()
-                            .filter(it -> it != null)
-                            .map(String::toLowerCase)
-                            .collect(Collectors.toSet());
+            Set<String> templateInstanceTypesLowerSet = instanceGroup.getTemplate().getAllInstanceTypesLowerCase();
             if (allProviderInstanceTypes.stream().map(String::toLowerCase).allMatch(templateInstanceTypesLowerSet::contains)) {
                 return allProviderInstanceTypes;
             } else {

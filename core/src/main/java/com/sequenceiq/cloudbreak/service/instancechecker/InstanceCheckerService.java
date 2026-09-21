@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.instancechecker;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -162,9 +163,10 @@ public class InstanceCheckerService {
                         instanceMetadata.setProviderInstanceType(providerInstanceType);
                         instanceMetaDataService.save(instanceMetadata);
                     }
-                    if (!instanceGroup.getTemplate().getInstanceType().equals(providerInstanceType)) {
-                        LOGGER.warn("Instance {} instance type {} does not match template {}",
-                                instanceMetadata.getInstanceId(), providerInstanceType, instanceGroup.getTemplate().getInstanceType());
+                    Set<String> allowedInstanceTypes = instanceGroup.getTemplate().getAllInstanceTypesLowerCase();
+                    if (!allowedInstanceTypes.contains(providerInstanceType.toLowerCase(Locale.ROOT))) {
+                        LOGGER.warn("Instance {} instance type {} does not match any template instance type {}",
+                                instanceMetadata.getInstanceId(), providerInstanceType, allowedInstanceTypes);
                         mismatchingInstanceIds.add(instanceMetadata.getInstanceId());
                     }
                 } else {

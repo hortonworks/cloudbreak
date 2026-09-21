@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.conf.InstanceCheckerConfig;
 import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -143,6 +146,82 @@ class InstanceCheckerServiceTest {
         }
     }
 
+    @Test
+    void testCheckInstancesWhenInstanceRunsFallbackInstanceTypeThenNoMismatchReported() {
+        assertNoInstanceTypeMismatchReported(stackWithFallbackInstanceTypes("small", List.of("medium", "large"), "large"));
+    }
+
+    @Test
+    void testCheckInstancesWhenProviderInstanceTypeCasingDiffersThenNoMismatchReported() {
+        assertNoInstanceTypeMismatchReported(stackWithFallbackInstanceTypes("Standard_D8_v3", List.of(), "standard_d8_v3"));
+    }
+
+    @Test
+    void testCheckInstancesWhenFallbackInstanceTypeCasingDiffersThenNoMismatchReported() {
+        assertNoInstanceTypeMismatchReported(stackWithFallbackInstanceTypes("Standard_D8_v3", List.of("Standard_D8_v5"), "standard_d8_v5"));
+    }
+
+    @Test
+    void testCheckInstancesWhenInstanceTypeIsNotInTemplateThenMismatchReported() {
+        Stack stack = stackWithFallbackInstanceTypes("small", List.of("medium"), "unexpected");
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        when(instanceCheckerConfig.isEnabled()).thenReturn(false);
+        when(meteringConfig.isEnabled()).thenReturn(true);
+        when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(true);
+        setupCommonMocks(stack, List.of(providerInstance(INSTANCE_ID1, "unexpected")), metadataCollector);
+
+        underTest.checkInstances(STACK_ID);
+
+        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "PROVIDER_INSTANCES_ARE_DIFFERENT",
+                ResourceEvent.STACK_PROVIDER_INSTANCE_TYPE_MISMATCH, Set.of(Set.of(INSTANCE_ID1).toString()));
+    }
+
+    private void assertNoInstanceTypeMismatchReported(Stack stack) {
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        String providerInstanceType = stack.getInstanceGroups().iterator().next()
+                .getNotDeletedAndNotZombieInstanceMetaDataSet().iterator().next().getProviderInstanceType();
+        when(instanceCheckerConfig.isEnabled()).thenReturn(false);
+        when(meteringConfig.isEnabled()).thenReturn(true);
+        when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(true);
+        setupCommonMocks(stack, List.of(providerInstance(INSTANCE_ID1, providerInstanceType)), metadataCollector);
+
+        underTest.checkInstances(STACK_ID);
+
+        verify(cloudbreakEventService, never()).fireCloudbreakEvent(eq(STACK_ID), eq("PROVIDER_INSTANCES_ARE_DIFFERENT"),
+                eq(ResourceEvent.STACK_PROVIDER_INSTANCE_TYPE_MISMATCH), any());
+    }
+
+    private static Stack stackWithFallbackInstanceTypes(String instanceType, List<String> fallbackInstanceTypes, String providerInstanceType) {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setResourceCrn(RESOURCE_CRN);
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        stack.setType(StackType.WORKLOAD);
+
+        InstanceMetaData instance = new InstanceMetaData();
+        instance.setDiscoveryFQDN("host1");
+        instance.setInstanceId(INSTANCE_ID1);
+        instance.setProviderInstanceType(providerInstanceType);
+
+        Template template = new Template();
+        template.setInstanceType(instanceType);
+        template.setFallbackInstanceTypes(new Json(fallbackInstanceTypes));
+
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setTemplate(template);
+        instanceGroup.setInstanceMetaData(Set.of(instance));
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        return stack;
+    }
+
+    private static InstanceCheckMetadata providerInstance(String instanceId, String instanceType) {
+        return InstanceCheckMetadata.builder()
+                .withInstanceId(instanceId)
+                .withInstanceType(instanceType)
+                .withStatus(InstanceStatus.CREATED)
+                .build();
+    }
+
     private void setupCommonMocks(Stack stack, List<InstanceCheckMetadata> providerInstances, MetadataCollector metadataCollectorMock) {
         CloudContext cloudContext = mock(CloudContext.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
@@ -161,7 +240,7 @@ class InstanceCheckerServiceTest {
         when(cloudConnector.metadata()).thenReturn(metadataCollectorMock);
         when(stackToCloudStackConverter.convert(stack)).thenReturn(cloudStack);
         when(metadataCollectorMock.collectCdpInstances(eq(ac), eq(RESOURCE_CRN), eq(cloudStack), anyList())).thenReturn(providerInstances);
-        when(cloudbreakEventService.cloudbreakLastEventsForStack(STACK_ID, "datahub", 2)).thenReturn(List.of());
+        lenient().when(cloudbreakEventService.cloudbreakLastEventsForStack(STACK_ID, "datahub", 2)).thenReturn(List.of());
     }
 
     private static Stack stack() {
