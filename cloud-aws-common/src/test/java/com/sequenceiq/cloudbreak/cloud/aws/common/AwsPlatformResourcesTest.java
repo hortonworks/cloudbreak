@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -60,6 +61,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseVmType;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -72,6 +74,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
+import com.sequenceiq.common.model.Architecture;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -735,6 +738,64 @@ public class AwsPlatformResourcesTest {
 
         assertEquals("17.5", requestCaptor.getValue().engineVersion());
         verify(dbOverrideConfig).findMaxEngineVersion();
+    }
+
+    @Test
+    void databaseCapabilitiesArchitectureAllReturnsBothArmAndX86Types() {
+        stubOrderableOptionsWithArmAndX86Classes();
+
+        PlatformDatabaseCapabilities result = underTest.databaseCapabilities(
+                cloudCredential, region, Map.of("architecture", Architecture.ALL_ARCHITECTURE));
+
+        assertThat(extractInstanceClasses(result)).containsExactlyInAnyOrder("db.m7g.large", "db.m5.large");
+    }
+
+    @Test
+    void databaseCapabilitiesArchitectureArm64ReturnsOnlyArmTypes() {
+        stubOrderableOptionsWithArmAndX86Classes();
+
+        PlatformDatabaseCapabilities result = underTest.databaseCapabilities(cloudCredential, region, Map.of("architecture", "arm64"));
+
+        assertThat(extractInstanceClasses(result)).containsExactly("db.m7g.large");
+    }
+
+    @Test
+    void databaseCapabilitiesArchitectureAbsentReturnsOnlyX86Types() {
+        stubOrderableOptionsWithArmAndX86Classes();
+
+        PlatformDatabaseCapabilities result = underTest.databaseCapabilities(cloudCredential, region, Map.of());
+
+        assertThat(extractInstanceClasses(result)).containsExactly("db.m5.large");
+    }
+
+    private Set<String> extractInstanceClasses(PlatformDatabaseCapabilities result) {
+        return result.getRegionAvailableInstanceTypes().get(region).stream()
+                .map(DatabaseVmType::value)
+                .collect(Collectors.toSet());
+    }
+
+    private void stubOrderableOptionsWithArmAndX86Classes() {
+        AmazonRdsClient amazonRdsClient = mock(AmazonRdsClient.class);
+        when(awsClient.createRdsClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonRdsClient);
+        DescribeDbEngineVersionsResponse engineVersionsResponse = DescribeDbEngineVersionsResponse.builder()
+                .dbEngineVersions(DBEngineVersion.builder().engineVersion("17.5").build())
+                .build();
+        when(amazonRdsClient.describeDBEngineVersions(any())).thenReturn(engineVersionsResponse);
+        when(dbOverrideConfig.findMaxEngineVersion()).thenReturn("17");
+
+        List<OrderableDBInstanceOption> options = List.of(
+                OrderableDBInstanceOption.builder().dbInstanceClass("db.m7g.large").availabilityZones(List.of()).build(),
+                OrderableDBInstanceOption.builder().dbInstanceClass("db.m5.large").availabilityZones(List.of()).build());
+        SdkIterable<OrderableDBInstanceOption> iterable = options::iterator;
+        DescribeOrderableDBInstanceOptionsIterable paginator = mock(DescribeOrderableDBInstanceOptionsIterable.class);
+        when(paginator.orderableDBInstanceOptions()).thenReturn(iterable);
+        when(amazonRdsClient.describeOrderableDbInstanceOptionsResponse(any())).thenReturn(paginator);
+
+        ReflectionTestUtils.setField(underTest, "awsDatabaseVmDefault", "db.m5.large");
+        ReflectionTestUtils.setField(underTest, "awsArmDatabaseVmDefault", "db.m6g.large");
+        Coordinate coordinate = mock(Coordinate.class);
+        when(coordinate.getDefaultDbVmTypes()).thenReturn(List.of("db.m5.large"));
+        ReflectionTestUtils.setField(underTest, "regionCoordinates", Map.of(region, coordinate));
     }
 
     private ArgumentCaptor<DescribeOrderableDbInstanceOptionsRequest> stubRdsForEngineVersionQuery() {

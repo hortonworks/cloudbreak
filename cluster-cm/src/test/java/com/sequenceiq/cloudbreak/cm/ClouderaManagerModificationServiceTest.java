@@ -356,12 +356,70 @@ class ClouderaManagerModificationServiceTest extends ClouderaManagerModification
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(CLUSTER_ID, ClusterCommandType.HOST_START_ROLES))
                 .thenReturn(Optional.of(startRoleClusterCommand));
 
+        when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, apiCommand.getId()))
+                .thenReturn(Optional.of(new ApiCommand().id(apiCommand.getId()).active(true)));
         when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, apiCommand.getId())).thenReturn(success);
         underTest.hostsStartRoles(List.of("fqdn1", "fqdn2"));
         verify(clouderaManagerResourceApi, times(0)).hostsStartRolesCommand(any());
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingStartRolesCommand(stack, v31Client, apiCommand.getId());
         verify(clusterCommandService, times(0)).save(any());
         verify(clusterCommandService).delete(startRoleClusterCommand);
+    }
+
+    @Test
+    void testHostsStartRolesReissuesFreshCommandWhenSavedCommandIsStale() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+
+        ClusterCommand staleClusterCommand = new ClusterCommand();
+        staleClusterCommand.setCommandId(1546934044L);
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(CLUSTER_ID, ClusterCommandType.HOST_START_ROLES))
+                .thenReturn(Optional.of(staleClusterCommand));
+        when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, staleClusterCommand.getCommandId()))
+                .thenReturn(Optional.of(new ApiCommand().id(staleClusterCommand.getCommandId()).active(false).success(false)));
+
+        ApiCommand freshApiCommand = new ApiCommand();
+        freshApiCommand.setId(2L);
+        when(clouderaManagerResourceApi.hostsStartRolesCommand(any())).thenReturn(freshApiCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, freshApiCommand.getId())).thenReturn(success);
+
+        underTest.hostsStartRoles(List.of("fqdn1", "fqdn2"));
+
+        verify(clusterCommandService).delete(staleClusterCommand);
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingStartRolesCommand(stack, v31Client, staleClusterCommand.getCommandId());
+        verify(clouderaManagerResourceApi, times(1)).hostsStartRolesCommand(any());
+        ArgumentCaptor<ClusterCommand> clusterCommandArgumentCaptor = ArgumentCaptor.forClass(ClusterCommand.class);
+        verify(clusterCommandService).save(clusterCommandArgumentCaptor.capture());
+        assertEquals(ClusterCommandType.HOST_START_ROLES, clusterCommandArgumentCaptor.getValue().getClusterCommandType());
+        assertEquals(freshApiCommand.getId(), clusterCommandArgumentCaptor.getValue().getCommandId());
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingStartRolesCommand(stack, v31Client, freshApiCommand.getId());
+    }
+
+    @Test
+    void testHostsStartRolesReissuesFreshCommandWhenSavedCommandMissingFromCm() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+
+        ClusterCommand staleClusterCommand = new ClusterCommand();
+        staleClusterCommand.setCommandId(1546934044L);
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(CLUSTER_ID, ClusterCommandType.HOST_START_ROLES))
+                .thenReturn(Optional.of(staleClusterCommand));
+        when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, staleClusterCommand.getCommandId())).thenReturn(Optional.empty());
+
+        ApiCommand freshApiCommand = new ApiCommand();
+        freshApiCommand.setId(2L);
+        when(clouderaManagerResourceApi.hostsStartRolesCommand(any())).thenReturn(freshApiCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, freshApiCommand.getId())).thenReturn(success);
+
+        underTest.hostsStartRoles(List.of("fqdn1", "fqdn2"));
+
+        verify(clusterCommandService).delete(staleClusterCommand);
+        verify(clouderaManagerResourceApi, times(1)).hostsStartRolesCommand(any());
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingStartRolesCommand(stack, v31Client, freshApiCommand.getId());
     }
 
     @Test
@@ -394,6 +452,8 @@ class ClouderaManagerModificationServiceTest extends ClouderaManagerModification
         startRoleClusterCommand.setCommandId(apiCommand.getId());
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(CLUSTER_ID, ClusterCommandType.HOST_START_ROLES))
                 .thenReturn(Optional.of(startRoleClusterCommand));
+        when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, apiCommand.getId()))
+                .thenReturn(Optional.of(new ApiCommand().id(apiCommand.getId()).active(true)));
         when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, apiCommand.getId()))
                 .thenThrow(new ClouderaManagerOperationFailedException("Start roles command failed"));
 
