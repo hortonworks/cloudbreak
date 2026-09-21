@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureInstanceTypeRetryExceptio
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -152,7 +154,7 @@ class AzureFallbackAwareDeploymentServiceTest {
         verify(azureClient).createTemplateDeployment(RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS);
         verify(azureClient).createTemplateDeployment(RG, STACK_NAME, REBUILT_TEMPLATE, PARAMETERS);
         verify(instanceTypeFallbackReporter).reportFallback(cloudContext, "master", "master-orig-flavor", "Standard_D8s_v5", "SkuNotAvailable");
-        verify(instanceTypeFallbackReporter, org.mockito.Mockito.never()).reportFallbackExhausted(any(), any(), any(), any());
+        verify(instanceTypeFallbackReporter, never()).reportFallbackExhausted(any(), any(), any(), any());
     }
 
     @Test
@@ -298,6 +300,94 @@ class AzureFallbackAwareDeploymentServiceTest {
         verify(azureClient, times(1)).getVmToSkuFamilies("westus2");
     }
 
+    @Test
+    void retriesWithFallbackFlavorWhenCapacityFailureIsWrappedInInsufficientCapacityException() {
+        // AzureExceptionHandler wraps ManagementExceptions with capacity codes (e.g. QuotaExceeded) in InsufficientCapacityException
+        // before they surface from AzureClient. The fallback loop must still recognise and act on the underlying cause.
+        when(entitlementService.isFallbackInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        Group gpu = group("gpu", List.of("Standard_NV4as_v4"));
+        when(cloudStack.getGroups()).thenReturn(List.of(gpu));
+        ManagementException underlying = quotaException();
+        InsufficientCapacityException wrapper = new InsufficientCapacityException(underlying);
+        when(azureClient.createTemplateDeployment(RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS)).thenThrow(wrapper);
+        when(azureClient.createTemplateDeployment(RG, STACK_NAME, REBUILT_TEMPLATE, PARAMETERS)).thenReturn(deployment);
+        when(retryExceptionMatcher.isInstanceTypeNotSupported(underlying)).thenReturn(true);
+        when(retryExceptionMatcher.findGroupsWithCapacityFailure(eq(RG), eq(STACK_NAME), eq(STACK_NAME), anyList(), eq(azureClient)))
+                .thenReturn(Set.of("gpu"));
+        when(azureTemplateBuilder.build(eq(STACK_NAME), any(), eq(credentialView), eq(azureStackView), eq(cloudContext), eq(cloudStack),
+                eq(AzureInstanceTemplateOperation.PROVISION), eq(marketplaceImage))).thenReturn(REBUILT_TEMPLATE);
+        when(retryExceptionMatcher.getAzureErrorCodeForNotification(underlying)).thenReturn("QuotaExceeded");
+
+        Deployment result = underTest.createTemplateDeploymentWithFallback(request());
+
+        assertSame(deployment, result);
+        ArgumentCaptor<Map<String, String>> overridesCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(azureStackView).applyFlavorOverrides(overridesCaptor.capture());
+        assertEquals("Standard_NV4as_v4", overridesCaptor.getValue().get("gpu"));
+        verify(instanceTypeFallbackReporter).reportFallback(cloudContext, "gpu", "gpu-orig-flavor", "Standard_NV4as_v4", "QuotaExceeded");
+        verify(instanceTypeFallbackReporter, never()).reportFallbackExhausted(any(), any(), any(), any());
+    }
+
+    @Test
+    void rethrowsInsufficientCapacityWrapperWhenFallbackChainIsExhausted() {
+        // When the whole chain is exhausted after receiving wrapped capacity errors, the wrapper (not the underlying ManagementException)
+        // is what bubbles up — matching how AzureExceptionHandler-routed callers see the exception in the fallback-disabled path.
+        when(entitlementService.isFallbackInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        Group gpu = group("gpu", List.of("Standard_NV4as_v4"));
+        when(cloudStack.getGroups()).thenReturn(List.of(gpu));
+        InsufficientCapacityException firstWrapper = new InsufficientCapacityException(quotaException());
+        InsufficientCapacityException secondWrapper = new InsufficientCapacityException(quotaException());
+        when(azureClient.createTemplateDeployment(RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS)).thenThrow(firstWrapper);
+        when(azureClient.createTemplateDeployment(RG, STACK_NAME, REBUILT_TEMPLATE, PARAMETERS)).thenThrow(secondWrapper);
+        when(retryExceptionMatcher.isInstanceTypeNotSupported(any(ManagementException.class))).thenReturn(true);
+        when(retryExceptionMatcher.findGroupsWithCapacityFailure(eq(RG), eq(STACK_NAME), eq(STACK_NAME), anyList(), eq(azureClient)))
+                .thenReturn(Set.of("gpu"));
+        when(azureTemplateBuilder.build(eq(STACK_NAME), any(), eq(credentialView), eq(azureStackView), eq(cloudContext), eq(cloudStack),
+                eq(AzureInstanceTemplateOperation.PROVISION), eq(marketplaceImage))).thenReturn(REBUILT_TEMPLATE);
+        when(retryExceptionMatcher.getAzureErrorCodeForNotification(any(ManagementException.class))).thenReturn("QuotaExceeded");
+
+        InsufficientCapacityException thrown = assertThrows(InsufficientCapacityException.class,
+                () -> underTest.createTemplateDeploymentWithFallback(request()));
+
+        assertSame(secondWrapper, thrown);
+        verify(instanceTypeFallbackReporter).reportFallback(cloudContext, "gpu", "gpu-orig-flavor", "Standard_NV4as_v4", "QuotaExceeded");
+        verify(instanceTypeFallbackReporter).reportFallbackExhausted(cloudContext, "gpu", "gpu-orig-flavor", "QuotaExceeded");
+    }
+
+    @Test
+    void rethrowsWrapperImmediatelyWhenUnderlyingIsNotCapacityException() {
+        when(entitlementService.isFallbackInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        List<Group> groups = List.of(group("master", List.of("Standard_D8s_v5")));
+        when(cloudStack.getGroups()).thenReturn(groups);
+        ManagementException unrelated = capacityException("AuthorizationFailed");
+        InsufficientCapacityException wrapper = new InsufficientCapacityException(unrelated);
+        when(azureClient.createTemplateDeployment(RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS)).thenThrow(wrapper);
+        when(retryExceptionMatcher.isInstanceTypeNotSupported(unrelated)).thenReturn(false);
+
+        InsufficientCapacityException thrown = assertThrows(InsufficientCapacityException.class,
+                () -> underTest.createTemplateDeploymentWithFallback(request()));
+
+        assertSame(wrapper, thrown);
+        verify(azureClient, times(1)).createTemplateDeployment(anyString(), anyString(), anyString(), anyString());
+        verify(azureStackView, never()).applyFlavorOverrides(any());
+    }
+
+    @Test
+    void rethrowsInsufficientCapacityWithoutUnwrappingWhenCauseIsNotManagementException() {
+        when(entitlementService.isFallbackInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        List<Group> groups = List.of(group("master", List.of("Standard_D8s_v5")));
+        when(cloudStack.getGroups()).thenReturn(groups);
+        InsufficientCapacityException wrapper = new InsufficientCapacityException(new RuntimeException("something else"));
+        when(azureClient.createTemplateDeployment(RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS)).thenThrow(wrapper);
+
+        InsufficientCapacityException thrown = assertThrows(InsufficientCapacityException.class,
+                () -> underTest.createTemplateDeploymentWithFallback(request()));
+
+        assertSame(wrapper, thrown);
+        verify(azureClient, times(1)).createTemplateDeployment(anyString(), anyString(), anyString(), anyString());
+        verify(azureStackView, never()).applyFlavorOverrides(any());
+    }
+
     private ManagementException quotaException() {
         ManagementError leaf = new ManagementError("QuotaExceeded",
                 "Operation could not be completed as it results in exceeding approved standardNVSv3Family Cores quota.");
@@ -316,12 +406,12 @@ class AzureFallbackAwareDeploymentServiceTest {
     }
 
     private Group group(String name, String originalFlavor, List<String> fallbackTypes) {
-        Group group = org.mockito.Mockito.mock(Group.class);
-        InstanceTemplate template = org.mockito.Mockito.mock(InstanceTemplate.class);
-        org.mockito.Mockito.doReturn(name).when(group).getName();
-        org.mockito.Mockito.doReturn(template).when(group).getReferenceInstanceTemplate();
-        org.mockito.Mockito.doReturn(fallbackTypes).when(template).getFallbackInstanceTypes();
-        org.mockito.Mockito.doReturn(originalFlavor).when(template).getFlavor();
+        Group group = mock(Group.class);
+        InstanceTemplate template = mock(InstanceTemplate.class);
+        when(group.getName()).thenReturn(name);
+        when(group.getReferenceInstanceTemplate()).thenReturn(template);
+        when(template.getFallbackInstanceTypes()).thenReturn(fallbackTypes);
+        when(template.getFlavor()).thenReturn(originalFlavor);
         return group;
     }
 

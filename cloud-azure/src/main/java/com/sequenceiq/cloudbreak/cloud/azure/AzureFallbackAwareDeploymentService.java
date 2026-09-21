@@ -17,6 +17,7 @@ import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureInstanceTypeRetryExceptionMatcher;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter;
@@ -55,7 +56,7 @@ public class AzureFallbackAwareDeploymentService {
         Map<String, String> originalFlavors = collectOriginalFlavors(request.cloudStack());
         Map<String, Integer> nextFallbackIndex = new HashMap<>();
         String template = request.initialTemplate();
-        ManagementException lastException = null;
+        RuntimeException lastException = null;
         Map<String, String> vmToSkuFamily = getVmToSkuFamilies(request);
         for (int attempt = 0; attempt < getMaxAttemptFromFallbackQueueLength(fallbackChains); attempt++) {
             try {
@@ -66,25 +67,47 @@ public class AzureFallbackAwareDeploymentService {
                 return deployment;
             } catch (ManagementException e) {
                 lastException = e;
-                Map<String, String> nextFlavors = resolveNextFallbackFlavorsOrThrow(e, request, fallbackChains, nextFallbackIndex, vmToSkuFamily);
-                LOGGER.info("Template deployment {}/{} failed with capacity-style error; retrying with fallback flavors {}.",
-                        resourceGroupName, stackName, nextFlavors);
-                String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(e);
-                nextFlavors.forEach((groupName, newFlavor) -> instanceTypeFallbackReporter.reportFallback(request.cloudContext(), groupName,
-                        originalFlavors.get(groupName), newFlavor, reasonSummary));
-                request.azureStackView().applyFlavorOverrides(nextFlavors);
-                template = azureTemplateBuilder.build(stackName, request.customImageId(), request.credentialView(), request.azureStackView(),
-                        request.cloudContext(), request.cloudStack(), request.operation(), request.azureMarketplaceImage());
+                template = handleDeploymentFailureAndRebuildTemplate(e, e, request, fallbackChains, nextFallbackIndex, vmToSkuFamily, originalFlavors);
+            } catch (InsufficientCapacityException ice) {
+                if (!(ice.getCause() instanceof ManagementException underlying)) {
+                    throw ice;
+                }
+                lastException = ice;
+                template = handleDeploymentFailureAndRebuildTemplate(underlying, ice, request, fallbackChains, nextFallbackIndex, vmToSkuFamily,
+                        originalFlavors);
             }
         }
         if (lastException != null) {
             LOGGER.info("Azure fallback deployment loop terminated with exception.", lastException);
-            String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(lastException);
+            ManagementException underlyingForNotification = underlyingManagementException(lastException);
+            String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(underlyingForNotification);
             fallbackChains.keySet().forEach(groupName -> instanceTypeFallbackReporter.reportFallbackExhausted(request.cloudContext(), groupName,
                     originalFlavors.get(groupName), reasonSummary));
             throw lastException;
         }
         throw new IllegalStateException("Azure fallback deployment loop terminated without a result");
+    }
+
+    private String handleDeploymentFailureAndRebuildTemplate(ManagementException underlying, RuntimeException toRethrow,
+            AzureTemplateDeploymentRequest request, Map<String, List<String>> fallbackChains, Map<String, Integer> nextFallbackIndex,
+            Map<String, String> vmToSkuFamily, Map<String, String> originalFlavors) {
+        Map<String, String> nextFlavors = resolveNextFallbackFlavorsOrThrow(underlying, toRethrow, request, fallbackChains, nextFallbackIndex,
+                vmToSkuFamily, originalFlavors);
+        LOGGER.info("Template deployment {}/{} failed with capacity-style error; retrying with fallback flavors {}.",
+                request.resourceGroupName(), request.stackName(), nextFlavors);
+        String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(underlying);
+        nextFlavors.forEach((groupName, newFlavor) -> instanceTypeFallbackReporter.reportFallback(request.cloudContext(), groupName,
+                originalFlavors.get(groupName), newFlavor, reasonSummary));
+        request.azureStackView().applyFlavorOverrides(nextFlavors);
+        return azureTemplateBuilder.build(request.stackName(), request.customImageId(), request.credentialView(), request.azureStackView(),
+                request.cloudContext(), request.cloudStack(), request.operation(), request.azureMarketplaceImage());
+    }
+
+    private ManagementException underlyingManagementException(RuntimeException exception) {
+        if (exception instanceof ManagementException me) {
+            return me;
+        }
+        return exception.getCause() instanceof ManagementException cause ? cause : null;
     }
 
     private Map<String, String> collectOriginalFlavors(CloudStack cloudStack) {
@@ -106,33 +129,33 @@ public class AzureFallbackAwareDeploymentService {
         return 1 + fallbackChains.values().stream().mapToInt(List::size).sum();
     }
 
-    private Map<String, String> resolveNextFallbackFlavorsOrThrow(ManagementException managementException, AzureTemplateDeploymentRequest request,
-            Map<String, List<String>> fallbackChains, Map<String, Integer> nextFallbackIndex, Map<String, String> vmToSkuFamily) {
+    private Map<String, String> resolveNextFallbackFlavorsOrThrow(ManagementException underlying, RuntimeException toRethrow,
+            AzureTemplateDeploymentRequest request, Map<String, List<String>> fallbackChains, Map<String, Integer> nextFallbackIndex,
+            Map<String, String> vmToSkuFamily, Map<String, String> originalFlavors) {
         String resourceGroupName = request.resourceGroupName();
         String stackName = request.stackName();
-        if (!retryExceptionMatcher.isInstanceTypeNotSupported(managementException)) {
+        if (!retryExceptionMatcher.isInstanceTypeNotSupported(underlying)) {
             LOGGER.debug("Template deployment {}/{} failed with non-capacity error, no fallback retry.", resourceGroupName, stackName);
-            throw managementException;
+            throw toRethrow;
         }
         Set<String> failingGroups = retryExceptionMatcher.findGroupsWithCapacityFailure(resourceGroupName, stackName, stackName,
                 request.azureStackView().getInstanceGroupNames(), request.client());
         if (failingGroups.isEmpty()) {
-            failingGroups = attributeQuotaFailure(managementException, request, fallbackChains, vmToSkuFamily);
+            failingGroups = attributeQuotaFailure(underlying, request, fallbackChains, vmToSkuFamily);
         }
         if (failingGroups.isEmpty()) {
             LOGGER.warn("Template deployment {}/{} failed with a capacity-style error but no failing VM operation was attributable to a group; "
                     + "rethrowing.", resourceGroupName, stackName);
-            throw managementException;
+            throw toRethrow;
         }
         Map<String, String> nextFlavors = pickNextFallbackFlavors(failingGroups, fallbackChains, nextFallbackIndex);
         if (nextFlavors.isEmpty()) {
             LOGGER.warn("Template deployment {}/{} failed and all fallback instance types are exhausted for failing groups {}; rethrowing.",
                     resourceGroupName, stackName, failingGroups);
-            String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(managementException);
-            Map<String, String> originalFlavors = collectOriginalFlavors(request.cloudStack());
+            String reasonSummary = retryExceptionMatcher.getAzureErrorCodeForNotification(underlying);
             failingGroups.forEach(groupName -> instanceTypeFallbackReporter.reportFallbackExhausted(request.cloudContext(), groupName,
                     originalFlavors.get(groupName), reasonSummary));
-            throw managementException;
+            throw toRethrow;
         }
         return nextFlavors;
     }
@@ -148,15 +171,14 @@ public class AzureFallbackAwareDeploymentService {
         return chains;
     }
 
-    private Set<String> attributeQuotaFailure(ManagementException managementException, AzureTemplateDeploymentRequest request,
+    private Set<String> attributeQuotaFailure(ManagementException underlying, AzureTemplateDeploymentRequest request,
             Map<String, List<String>> fallbackChains, Map<String, String> vmToSkuFamily) {
-        if (!retryExceptionMatcher.isQuotaCodePresent(managementException)) {
+        if (!retryExceptionMatcher.isQuotaCodePresent(underlying)) {
             return Set.of();
         }
-        CloudContext cloudContext = request.cloudContext();
         LOGGER.info("Template deployment {}/{} failed with quota error; no failed VM operations — attempting family-based group attribution for region {}.",
                 request.resourceGroupName(), request.stackName(), getRegion(request));
-        Set<String> groupsByFamily = retryExceptionMatcher.findGroupsWithQuotaFailure(managementException, vmToSkuFamily, request.cloudStack().getGroups());
+        Set<String> groupsByFamily = retryExceptionMatcher.findGroupsWithQuotaFailure(underlying, vmToSkuFamily, request.cloudStack().getGroups());
         if (!groupsByFamily.isEmpty()) {
             return groupsByFamily;
         }
