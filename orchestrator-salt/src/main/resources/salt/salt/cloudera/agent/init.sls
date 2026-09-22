@@ -1,5 +1,6 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
+{%- from 'nodes/settings.sls' import host with context %}
 {%- set manager_server_fqdn = salt['pillar.get']('hosts')[metadata.server_address]['fqdn'] %}
 {%- set internal_loadbalancer_san = salt['pillar.get']('cloudera-manager:communication:internal_loadbalancer_san') %}
 {%- set cpuarch = salt['grains.get']('cpuarch') %}
@@ -49,6 +50,16 @@ replace_server_host:
     - pattern: "server_host=.*"
     - repl: "server_host={{ manager_server_fqdn }}"
     - unless: grep 'server_host={{ manager_server_fqdn }}' /etc/cloudera-scm-agent/config.ini
+
+# Pin the agent's reported hostname to the Cloudbreak-authoritative FQDN so it never
+# self-reports a short name when FQDN resolution is not ready at agent start.
+pin_reported_hostname:
+  file.replace:
+    - name: /etc/cloudera-scm-agent/config.ini
+    - pattern: '^#*\s*reported_hostname=.*'
+    - repl: 'reported_hostname={{ host.fqdn }}'
+    - append_if_not_found: True
+    - backup: False
 
 {% if cloudera_manager.communication.autotls_enabled == True %}
 

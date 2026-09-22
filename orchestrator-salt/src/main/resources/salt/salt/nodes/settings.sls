@@ -4,11 +4,13 @@
 {% set has_public_address = host_details['public_address'] %}
 {% set instance_id = host_details['instance_id'] %}
 {% set instance_type = host_details['instance_type'] %}
+{% set fqdn = host_details['fqdn'] %}
 
 {% set host = {} %}
 {% do host.update({
     'has_public_address' : has_public_address,
     'private_address' : private_address,
     'instance_id' : instance_id,
-    'instance_type' : instance_type
+    'instance_type' : instance_type,
+    'fqdn' : fqdn
 }) %}
