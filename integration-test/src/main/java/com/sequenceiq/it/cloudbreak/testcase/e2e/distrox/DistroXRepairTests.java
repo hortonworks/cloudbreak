@@ -199,7 +199,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
 
     private void validateCustomDatabaseInstanceType(TestContext testContext) {
         testContext.given(DistroXTestDto.class)
-                .then(RedbeamsDatabaseTestAssertion.hasDatabaseInstanceType(
+                .then(RedbeamsDatabaseTestAssertion.hasEntitlementAwareDatabaseInstanceType(
                         dto -> dto.getResponse().getCluster().getDatabaseServerCrn(),
                         testContext.getCloudProvider().getCustomDatabaseInstanceType()))
                 .validate();

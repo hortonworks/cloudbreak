@@ -90,7 +90,8 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
-                .then(RedbeamsDatabaseTestAssertion.hasDatabaseInstanceType(dto -> dto.getResponse().getDatabaseServerCrn(), customDatabaseInstanceType),
+                .then(RedbeamsDatabaseTestAssertion.hasEntitlementAwareDatabaseInstanceType(dto -> dto.getResponse().getDatabaseServerCrn(),
+                                customDatabaseInstanceType),
                         key(sdx))
                 .given(SdxUpgradeDatabaseServerTestDto.class)
                 .withTargetMajorVersion(targetDatabaseMajorVersion)
