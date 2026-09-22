@@ -77,7 +77,7 @@ ext {
   accessorSmartVersion = '2.4.7'
   gsonVersion = '2.12.1'
   nimbusJoseJwt = '10.1'
-  jacksonVersion = '2.22.2'
+  jacksonVersion = '2.22.3'
   jsonSmartVersion = '2.4.9'
   snakeYamlVersion = '2.7'
   xerces = '2.12.2'
