@@ -1,0 +1,19 @@
+{
+  "task_id": 7,
+  "run_id": 99,
+  "idempotency_key": "99:2",
+  "account_id": "acc-12345",
+  "resource_crn": "crn:cdp:datahub:us-west-1:acc-12345:cluster:my-dh",
+  "task_type": "SECRET_ROTATION",
+  "work_item_id": "SALT_PASSWORD",
+  "task_kind": "ONE_SHOT",
+  "task_payload": {
+    "secretNames": [
+      "SALT_PASSWORD"
+    ]
+  },
+  "maintenance_schedule_id": 42,
+  "policy_revision": "42:v1",
+  "window_start": 1000,
+  "window_end": 2000
+}

@@ -15,10 +15,10 @@ class MaintenanceTaskExecutionRefTest {
     void parseResolvesSubmitterServiceAndExecutePath() {
         MaintenanceTaskExecutionRef ref = MaintenanceTaskExecutionRef.parse(new Json(Map.of(
                 "submitter_service", "datalake",
-                "execute_path", "/internal/maintenance-tasks/execute")), "core");
+                "execute_path", MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH)), "core");
 
         assertThat(ref.submitterService()).isEqualTo("datalake");
-        assertThat(ref.executePath()).isEqualTo("/internal/maintenance-tasks/execute");
+        assertThat(ref.executePath()).isEqualTo(MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH);
     }
 
     @Test

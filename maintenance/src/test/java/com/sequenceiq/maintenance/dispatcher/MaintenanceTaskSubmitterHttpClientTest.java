@@ -115,7 +115,7 @@ class MaintenanceTaskSubmitterHttpClientTest {
         WebTarget webTarget = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
         MaintenanceSubmitterOutboundRequestBuilder outbound = mock(MaintenanceSubmitterOutboundRequestBuilder.class);
-        when(restClient.target("http://datalake:8080/dl/internal/maintenance-tasks/execute")).thenReturn(webTarget);
+        when(restClient.target("http://datalake:8080/dl" + MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH)).thenReturn(webTarget);
         when(webTarget.property(anyString(), any())).thenReturn(webTarget);
         when(outbound.prepareJsonPost(webTarget)).thenReturn(builder);
         when(builder.header(anyString(), any())).thenReturn(builder);
@@ -152,7 +152,7 @@ class MaintenanceTaskSubmitterHttpClientTest {
         WebTarget webTarget = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
         MaintenanceSubmitterOutboundRequestBuilder outbound = mock(MaintenanceSubmitterOutboundRequestBuilder.class);
-        when(restClient.target("http://datalake:8080/dl/internal/maintenance-tasks/execute")).thenReturn(webTarget);
+        when(restClient.target("http://datalake:8080/dl" + MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH)).thenReturn(webTarget);
         when(webTarget.property(anyString(), any())).thenReturn(webTarget);
         when(outbound.prepareJsonPost(webTarget)).thenReturn(builder);
         when(builder.header(anyString(), any())).thenReturn(builder);
@@ -197,7 +197,7 @@ class MaintenanceTaskSubmitterHttpClientTest {
         Client restClient = mock(Client.class);
         WebTarget webTarget = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
-        when(restClient.target("http://datalake:8080/dl/internal/maintenance-tasks/execute")).thenReturn(webTarget);
+        when(restClient.target("http://datalake:8080/dl" + MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH)).thenReturn(webTarget);
         when(webTarget.property(anyString(), any())).thenReturn(webTarget);
         MaintenanceSubmitterOutboundRequestBuilder outbound = mock(MaintenanceSubmitterOutboundRequestBuilder.class);
         when(outbound.prepareJsonPost(webTarget)).thenReturn(builder);
@@ -227,7 +227,7 @@ class MaintenanceTaskSubmitterHttpClientTest {
         entity.setSubmitterService("datalake");
         entity.setExecutionRef(new Json(Map.of(
                 "submitter_service", "datalake",
-                "execute_path", "/internal/maintenance-tasks/execute")));
+                "execute_path", MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH)));
         return entity;
     }
 

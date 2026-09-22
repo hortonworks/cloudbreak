@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.WorkspaceAwareUtilV4Controller;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
+import com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowTaskExecuteController;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredEventFilter;
@@ -96,6 +97,7 @@ public class EndpointConfig extends ResourceConfig {
             DistroXKraftMigrationV1Controller.class,
             StackKraftMigrationV4Controller.class,
             DistroXInternalV1Controller.class,
+            MaintenanceWindowTaskExecuteController.class,
             DatalakeV4Controller.class,
             DiskUpdateController.class,
             DiagnosticsV4Controller.class,

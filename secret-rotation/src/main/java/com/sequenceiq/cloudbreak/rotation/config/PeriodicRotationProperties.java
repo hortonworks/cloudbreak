@@ -25,6 +25,12 @@ public class PeriodicRotationProperties {
 
     public static final String IGNORE_PREVALIDATE_ERRORS = "ignore-prevalidate-errors";
 
+    public static final String MAINTENANCE_WINDOW_TASK_ID = "maintenance-window-task-id";
+
+    public static final String MAINTENANCE_WINDOW_RUN_ID = "maintenance-window-run-id";
+
+    public static final String MAINTENANCE_WINDOW_ACCOUNT_ID = "maintenance-window-account-id";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodicRotationProperties.class);
 
     // 24 * 60 = daily

@@ -108,6 +108,7 @@ public class RestUrlParserTest {
             "internal/update_instance_type",
             "support/internal/defaults",
             "internal/get_clusters_names_by_encryption_profile",
+            "v1/internal/maintenance-tasks",
             "cluster_upgrade/reinitiable"
     };
 
