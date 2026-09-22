@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.util.VersionComparator;
 @Component
 public class ZookeeperToKraftMigrationValidator {
 
+    private static final String ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_BLUEPRINT_VERSION = "7.2.17";
+
     private static final String ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION = "7.3.2";
 
     private static final Set<KraftMigrationStatus> INVALID_KRAFT_MIGRATION_STATUSES = Set.of(BROKERS_IN_MIGRATION, NOT_APPLICABLE);
@@ -64,8 +66,16 @@ public class ZookeeperToKraftMigrationValidator {
             throw new BadRequestException("Zookeeper to KRaft migration is supported only for templates where Kafka is present.");
         }
 
-        if (!isZookeeperToKRaftMigrationSupportedForStackVersion(stack.getStackVersion())) {
-            throw new BadRequestException("Zookeeper to KRaft migration is supported only for CDP version " + ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION);
+        String stackVersion = stack.getStackVersion();
+        if (!isZookeeperToKRaftMigrationSupportedForStackVersion(stackVersion)) {
+            throw new BadRequestException("Zookeeper to KRaft migration is supported only for CDP version " + ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION
+                    + ". Current CDP version is: " + stackVersion);
+        }
+
+        String bluePrintStackVersion = stack.getBlueprint().getStackVersion();
+        if (!isZookeeperToKRaftMigrationSupportedForBluePrintVersion(bluePrintStackVersion)) {
+            throw new BadRequestException("Zookeeper to KRaft migration is currently unavailable for clusters originally created with Runtime "
+                    + bluePrintStackVersion + ". Please contact Cloudera Support for assistance.");
         }
 
         if (!entitlementService.isZookeeperToKRaftMigrationEnabled(accountId)) {
@@ -77,12 +87,17 @@ public class ZookeeperToKraftMigrationValidator {
     public boolean isMigrationFromZookeeperToKraftSupported(StackDto stack, String accountId) {
         boolean kraftMigrationEntitlementEnabled = entitlementService.isZookeeperToKRaftMigrationEnabled(accountId);
         return isKafkaServicePresent(stack) && isZookeeperToKRaftMigrationSupportedForStackVersion(stack.getStackVersion())
-                && kraftMigrationEntitlementEnabled;
+                && isZookeeperToKRaftMigrationSupportedForBluePrintVersion(stack.getBlueprint().getStackVersion()) && kraftMigrationEntitlementEnabled;
     }
 
     private boolean isZookeeperToKRaftMigrationSupportedForStackVersion(String version) {
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(() -> version, () -> ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION) == 0;
+    }
+
+    private boolean isZookeeperToKRaftMigrationSupportedForBluePrintVersion(String version) {
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(() -> version, () -> ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_BLUEPRINT_VERSION) >= 0;
     }
 
     private boolean isKafkaServicePresent(StackDto stack) {
