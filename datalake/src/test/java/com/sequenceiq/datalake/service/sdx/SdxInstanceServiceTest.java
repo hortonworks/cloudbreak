@@ -356,6 +356,116 @@ class SdxInstanceServiceTest {
         assertNotNull(volumeType, "Volume type should exist");
     }
 
+    @Test
+    void testOverrideDefaultInstanceTypeWithResizeKeepsFallbackInstanceTypesWhenInstanceTypeUnchanged() throws Exception {
+        StackV4Request stackV4Request = microDutyRequest();
+        List<InstanceGroupV4Request> originalInstanceGroups = List.of(withOriginalInstanceGroup("master", "sameinstancetype"));
+        List<InstanceGroupV4Response> currentInstanceGroups = List.of(
+                withCurrentInstanceGroup("master", "sameinstancetype", List.of("fallback1", "fallback2")));
+
+        underTest.overrideDefaultInstanceType(resizeEnvironment(), stackV4Request, Collections.emptyList(),
+                originalInstanceGroups, currentInstanceGroups, MICRO_DUTY);
+
+        InstanceTemplateV4Request masterTemplate = masterTemplate(stackV4Request);
+        assertEquals("sameinstancetype", masterTemplate.getInstanceType());
+        assertEquals(List.of("fallback1", "fallback2"), masterTemplate.getFallbackInstanceTypes());
+    }
+
+    @Test
+    void testOverrideDefaultInstanceTypeWithResizeCarriesFallbackInstanceTypesWhenInstanceTypeChanged() throws Exception {
+        StackV4Request stackV4Request = microDutyRequest();
+        List<InstanceGroupV4Request> originalInstanceGroups = List.of(withOriginalInstanceGroup("master", "oldinstancetype"));
+        List<InstanceGroupV4Response> currentInstanceGroups = List.of(
+                withCurrentInstanceGroup("master", "newinstancetype", List.of("fallback1")));
+
+        underTest.overrideDefaultInstanceType(resizeEnvironment(), stackV4Request, Collections.emptyList(),
+                originalInstanceGroups, currentInstanceGroups, MICRO_DUTY);
+
+        InstanceTemplateV4Request masterTemplate = masterTemplate(stackV4Request);
+        assertEquals("newinstancetype", masterTemplate.getInstanceType());
+        assertEquals(List.of("fallback1"), masterTemplate.getFallbackInstanceTypes());
+    }
+
+    @Test
+    void testOverrideDefaultInstanceTypeWithResizeWhenNothingChangedThenDefaultTemplateIsUntouched() throws Exception {
+        StackV4Request stackV4Request = microDutyRequest();
+        InstanceTemplateV4Request defaultMasterTemplate = masterTemplate(stackV4Request);
+        String defaultInstanceType = defaultMasterTemplate.getInstanceType();
+        List<String> defaultFallbackInstanceTypes = defaultMasterTemplate.getFallbackInstanceTypes();
+        List<InstanceGroupV4Request> originalInstanceGroups = List.of(withOriginalInstanceGroup("master", "sameinstancetype"));
+        List<InstanceGroupV4Response> currentInstanceGroups = List.of(withCurrentInstanceGroup("master", "sameinstancetype", null));
+
+        underTest.overrideDefaultInstanceType(resizeEnvironment(), stackV4Request, Collections.emptyList(),
+                originalInstanceGroups, currentInstanceGroups, MICRO_DUTY);
+
+        InstanceTemplateV4Request masterTemplate = masterTemplate(stackV4Request);
+        assertEquals(defaultInstanceType, masterTemplate.getInstanceType());
+        assertEquals(defaultFallbackInstanceTypes, masterTemplate.getFallbackInstanceTypes());
+    }
+
+    @Test
+    void testOverrideDefaultInstanceTypeWithResizeWhenCurrentInstanceTypeIsNullThenNoException() throws Exception {
+        StackV4Request stackV4Request = microDutyRequest();
+        List<InstanceGroupV4Request> originalInstanceGroups = List.of(withOriginalInstanceGroup("master", "oldinstancetype"));
+        List<InstanceGroupV4Response> currentInstanceGroups = List.of(withCurrentInstanceGroup("master", null, List.of("fallback1")));
+
+        underTest.overrideDefaultInstanceType(resizeEnvironment(), stackV4Request, Collections.emptyList(),
+                originalInstanceGroups, currentInstanceGroups, MICRO_DUTY);
+
+        InstanceTemplateV4Request masterTemplate = masterTemplate(stackV4Request);
+        assertEquals(List.of("fallback1"), masterTemplate.getFallbackInstanceTypes());
+    }
+
+    @Test
+    void testOverrideDefaultInstanceTypeWithCustomInstanceGroupSetsFallbackInstanceTypes() throws Exception {
+        StackV4Request stackV4Request = microDutyRequest();
+        SdxInstanceGroupRequest customInstanceGroup = withInstanceGroup("master", "verylarge");
+        customInstanceGroup.setFallbackInstanceTypes(List.of("fallback1", "fallback2"));
+
+        underTest.overrideDefaultInstanceType(resizeEnvironment(), stackV4Request, List.of(customInstanceGroup),
+                Collections.emptyList(), Collections.emptyList(), MICRO_DUTY);
+
+        InstanceTemplateV4Request masterTemplate = masterTemplate(stackV4Request);
+        assertEquals("verylarge", masterTemplate.getInstanceType());
+        assertEquals(List.of("fallback1", "fallback2"), masterTemplate.getFallbackInstanceTypes());
+    }
+
+    private StackV4Request microDutyRequest() throws Exception {
+        return JsonUtil.readValue(FileReaderUtils.readFileFromClasspath("/duties/7.2.14/aws/micro_duty.json"), StackV4Request.class);
+    }
+
+    private DetailedEnvironmentResponse resizeEnvironment() {
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AWS");
+        CredentialResponse credentialResponse = new CredentialResponse();
+        credentialResponse.setCrn("crn");
+        environmentResponse.setCredential(credentialResponse);
+        CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
+        compactRegionResponse.setNames(List.of("us-east-1"));
+        environmentResponse.setRegions(compactRegionResponse);
+        when(sdxRecommendationService.getAvailableVmTypes("crn", "AWS", "us-east-1", null, Architecture.ALL_ARCHITECTURE)).thenReturn(List.of());
+        return environmentResponse;
+    }
+
+    private static InstanceTemplateV4Request masterTemplate(StackV4Request stackV4Request) {
+        Optional<InstanceGroupV4Request> masterGroup = stackV4Request.getInstanceGroups()
+                .stream()
+                .filter(instanceGroup -> "master".equals(instanceGroup.getName()))
+                .findAny();
+        assertTrue(masterGroup.isPresent());
+        return masterGroup.get().getTemplate();
+    }
+
+    private static InstanceGroupV4Response withCurrentInstanceGroup(String name, String instanceType, List<String> fallbackInstanceTypes) {
+        InstanceTemplateV4Response template = new InstanceTemplateV4Response();
+        template.setInstanceType(instanceType);
+        template.setFallbackInstanceTypes(fallbackInstanceTypes);
+        InstanceGroupV4Response instanceGroup = new InstanceGroupV4Response();
+        instanceGroup.setName(name);
+        instanceGroup.setTemplate(template);
+        return instanceGroup;
+    }
+
     private SdxInstanceGroupRequest withInstanceGroup(String name, String instanceType) {
         SdxInstanceGroupRequest masterInstanceGroup = new SdxInstanceGroupRequest();
         masterInstanceGroup.setName(name);

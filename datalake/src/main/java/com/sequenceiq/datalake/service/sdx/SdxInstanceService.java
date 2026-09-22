@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,27 +125,45 @@ public class SdxInstanceService {
 
     private void overrideDefaultInstanceTypeFromPreviousDatalake(StackV4Request defaultTemplate, InstanceGroupV4Response currentInstanceGroup,
             InstanceGroupV4Request originalInstanceGroup, List<VmTypeResponse> availableVmTypes, Map<String, String> diskMappings) {
-        if (currentInstanceGroup != null && currentInstanceGroup.getTemplate() != null && originalInstanceGroup.getTemplate() != null &&
-                !currentInstanceGroup.getTemplate().getInstanceType().equals(originalInstanceGroup.getTemplate().getInstanceType())) {
+        if (currentInstanceGroup == null || currentInstanceGroup.getTemplate() == null || originalInstanceGroup.getTemplate() == null) {
+            return;
+        }
+        String currentInstanceType = currentInstanceGroup.getTemplate().getInstanceType();
+        List<String> currentFallbackInstanceTypes = currentInstanceGroup.getTemplate().getFallbackInstanceTypes();
+        boolean instanceTypeChanged = !Objects.equals(currentInstanceType, originalInstanceGroup.getTemplate().getInstanceType());
+        boolean fallbackInstanceTypesChanged = !Objects.equals(nullSafeInstanceTypes(currentFallbackInstanceTypes),
+                nullSafeInstanceTypes(originalInstanceGroup.getTemplate().getFallbackInstanceTypes()));
+        if (instanceTypeChanged || fallbackInstanceTypesChanged) {
             getTemplateInstanceGroup(defaultTemplate, currentInstanceGroup.getName())
-                    .ifPresent(templateIg -> overrideInstanceType(templateIg, currentInstanceGroup.getTemplate().getInstanceType(),
-                            currentInstanceGroup.getTemplate().getFallbackInstanceTypes(), availableVmTypes, diskMappings));
+                    .ifPresent(templateIg -> overrideInstanceType(templateIg, currentInstanceType, currentFallbackInstanceTypes,
+                            availableVmTypes, diskMappings));
         }
     }
 
     private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType, List<String> fallbackInstanceTypes,
             List<VmTypeResponse> availableVmTypes, Map<String, String> diskMappings) {
         InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
-        if (instanceTemplate != null && StringUtils.isNoneBlank(newInstanceType)) {
+        if (instanceTemplate == null) {
+            return;
+        }
+        if (fallbackInstanceTypes != null) {
+            LOGGER.info("Override instance group {} fallback instance types from {} to {}",
+                    templateGroup.getName(), instanceTemplate.getFallbackInstanceTypes(), fallbackInstanceTypes);
+            instanceTemplate.setFallbackInstanceTypes(fallbackInstanceTypes);
+        }
+        if (StringUtils.isNotBlank(newInstanceType)) {
             LOGGER.info("Override instance group {} instance type from {} to {}",
                     templateGroup.getName(), instanceTemplate.getInstanceType(), newInstanceType);
             instanceTemplate.setInstanceType(newInstanceType);
-            instanceTemplate.setFallbackInstanceTypes(fallbackInstanceTypes);
             availableVmTypes.stream()
                     .filter(vmType -> vmType.getValue().equals(newInstanceType))
                     .findFirst()
                     .ifPresent(vmType -> overrideVolumeTypeIfNeeded(instanceTemplate, vmType, diskMappings));
         }
+    }
+
+    private static List<String> nullSafeInstanceTypes(List<String> instanceTypes) {
+        return ListUtils.emptyIfNull(instanceTypes);
     }
 
     private void overrideVolumeTypeIfNeeded(InstanceTemplateV4Request instanceTemplate, VmTypeResponse vmType, Map<String, String> diskMappings) {
