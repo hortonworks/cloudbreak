@@ -8,6 +8,7 @@ repositories {
 
 dependencies {
     implementation project(":common")
+    implementation project(":auth-connector")
 
     implementation     group: 'io.swagger.core.v3',     name: 'swagger-jaxrs2-jakarta', version: "$swaggerCoreVersion"
     implementation     group: "jakarta.validation",     name: "jakarta.validation-api", version: "$jakartaValidationVersion"

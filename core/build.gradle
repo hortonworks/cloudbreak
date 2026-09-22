@@ -239,6 +239,7 @@ dependencies {
   implementation project(':common-model')
   implementation project(':workspace')
   implementation project(':environment-api')
+  implementation project(':maintenance-api')
   implementation project(':environment-common')
   implementation project(':authorization-common')
   implementation project(':freeipa-api')

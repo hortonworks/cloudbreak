@@ -12,12 +12,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
  */
 public record MaintenanceTaskExecutionRef(String submitterService, String executePath) {
 
-    /**
-     * Path joined onto submitter servlet context URLs (e.g. {@code /cb}, {@code /dl}).
-     * Includes the JAX-RS {@code @ApplicationPath} segment ({@code /api}) plus the execute endpoint path.
-     */
-    public static final String STANDARD_EXECUTE_PATH = "/api/v1/internal/maintenance-tasks/execute";
-
     private static final String SUBMITTER_SERVICE_KEY = "submitter_service";
 
     private static final String EXECUTE_PATH_KEY = "execute_path";

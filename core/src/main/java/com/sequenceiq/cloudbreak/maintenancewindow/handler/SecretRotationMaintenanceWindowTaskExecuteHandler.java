@@ -38,14 +38,14 @@ public class SecretRotationMaintenanceWindowTaskExecuteHandler implements Mainte
     @Override
     public FlowIdentifier execute(MaintenanceTaskDispatchRequest request) {
         validateAccountMatchesResourceCrn(request.getAccountId(), request.getResourceCrn());
-        List<String> secretNames = MaintenanceWindowSecretRotationSupport.resolveSecretNames(
+        String secretName = MaintenanceWindowSecretRotationSupport.resolveSecretName(
                 request.getWorkItemId(), request.getTaskPayload());
         Map<String, String> additionalProperties = MaintenanceWindowSecretRotationSupport.maintenanceWindowAdditionalProperties(
                 request.getAccountId(), request.getTaskId(), request.getRunId());
         FlowIdentifier flowIdentifier = stackRotationService.rotateSecrets(
-                request.getResourceCrn(), secretNames, null, additionalProperties);
-        LOGGER.info("Accepted maintenance window secret rotation taskId={} runId={} resourceCrn={} secrets={} flow={}",
-                request.getTaskId(), request.getRunId(), request.getResourceCrn(), secretNames, flowIdentifier);
+                request.getResourceCrn(), List.of(secretName), null, additionalProperties);
+        LOGGER.info("Accepted maintenance window secret rotation taskId={} runId={} resourceCrn={} secret={} flow={}",
+                request.getTaskId(), request.getRunId(), request.getResourceCrn(), secretName, flowIdentifier);
         return flowIdentifier;
     }
 

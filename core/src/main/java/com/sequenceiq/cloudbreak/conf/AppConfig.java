@@ -24,6 +24,7 @@ import jakarta.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.env.PropertySourceLoader;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -47,12 +48,14 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
+import com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceServiceConditions;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
+import com.sequenceiq.maintenance.client.internal.MaintenanceApiClientParams;
 import com.sequenceiq.periscope.client.internal.AutoscaleApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
@@ -129,6 +132,10 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     @Named("autoscaleServerUrl")
     private String autoscaleServerUrl;
+
+    @Inject
+    @Named("maintenanceServerUrl")
+    private String maintenanceServerUrl;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -217,6 +224,12 @@ public class AppConfig implements ResourceLoaderAware {
     public AutoscaleApiClientParams autoscaleApiClientParams() {
         return new AutoscaleApiClientParams(restDebug, certificateValidation, ignorePreValidation, autoscaleServerUrl,
                 periscopeConnectionTimeout, periscopeReadTimeout);
+    }
+
+    @Bean
+    @ConditionalOnExpression(MaintenanceServiceConditions.URL_CONFIGURED)
+    public MaintenanceApiClientParams maintenanceApiClientParams() {
+        return new MaintenanceApiClientParams(restDebug, certificateValidation, ignorePreValidation, maintenanceServerUrl);
     }
 
     @Bean

@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.conf;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceServiceConditions;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
 
@@ -57,6 +59,15 @@ public class ServiceEndpointConfig {
     @Value("${cb.periscope.serviceid:}")
     private String autoscaleServiceId;
 
+    @Value("${" + MaintenanceServiceConditions.URL_PROPERTY + ":}")
+    private String maintenanceServiceUrl;
+
+    @Value("${cb.maintenance.contextPath:/maintenance}")
+    private String maintenanceContextPath;
+
+    @Value("${cb.maintenance.serviceid:}")
+    private String maintenanceServiceId;
+
     @Inject
     private ServiceAddressResolver serviceAddressResolver;
 
@@ -83,5 +94,13 @@ public class ServiceEndpointConfig {
     @Bean
     public String autoscaleServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(autoscaleServiceUrl + autoscaleContextPath, "http", autoscaleServiceId);
+    }
+
+    @Bean
+    public String maintenanceServerUrl() throws ServiceAddressResolvingException {
+        if (StringUtils.isBlank(maintenanceServiceUrl)) {
+            return "";
+        }
+        return serviceAddressResolver.resolveUrl(maintenanceServiceUrl + maintenanceContextPath, "http", maintenanceServiceId);
     }
 }

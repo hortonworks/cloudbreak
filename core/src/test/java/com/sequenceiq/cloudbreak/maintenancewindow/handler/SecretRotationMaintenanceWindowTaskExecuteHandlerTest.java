@@ -126,37 +126,40 @@ class SecretRotationMaintenanceWindowTaskExecuteHandlerTest {
                 .build();
         assertThatThrownBy(() -> underTest.execute(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("must match work_item_id");
+                .hasMessageContaining("must contain only");
     }
 
     @Test
     void executeRejectsEmptySecretNamesListInPayload() {
         assertThatThrownBy(() -> underTest.execute(dispatchRequest(Map.of("secretNames", List.of()))))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("must not be empty");
+                .hasMessageContaining("list of one secret type name");
     }
 
     @Test
-    void executeAcceptsMatchingPayloadAndWorkItemIdWithDifferentOrdering() {
-        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollable-2");
-        List<String> secretsInWorkItemOrder = List.of("CM_ADMIN_PASSWORD", "SALT_PASSWORD");
-        when(stackRotationService.rotateSecrets(eq(RESOURCE_CRN), eq(secretsInWorkItemOrder), eq(null), anyMap()))
-                .thenReturn(flowIdentifier);
+    void executeRejectsMultiSecretWorkItemId() {
+        MaintenanceTaskDispatchRequest request = aDispatchRequest().build();
+        request.setWorkItemId("CM_ADMIN_PASSWORD,SALT_PASSWORD");
+        assertThatThrownBy(() -> underTest.execute(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("single secret type name");
+    }
+
+    @Test
+    void executeRejectsMultiSecretPayload() {
         MaintenanceTaskDispatchRequest request = aDispatchRequest()
                 .withTaskPayload(Map.of("secretNames", List.of("SALT_PASSWORD", "CM_ADMIN_PASSWORD")))
                 .build();
-        request.setWorkItemId("CM_ADMIN_PASSWORD,SALT_PASSWORD");
-
-        underTest.execute(request);
-
-        verify(stackRotationService).rotateSecrets(eq(RESOURCE_CRN), eq(secretsInWorkItemOrder), eq(null), anyMap());
+        assertThatThrownBy(() -> underTest.execute(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("list of one secret type name");
     }
 
     @Test
     void executeRejectsNonStringSecretNameEntries() {
         assertThatThrownBy(() -> underTest.execute(dispatchRequest(Map.of("secretNames", List.of(123)))))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("only string");
+                .hasMessageContaining("list of one secret type name");
     }
 
     private static MaintenanceTaskDispatchRequest dispatchRequest(Map<String, Object> payload) {

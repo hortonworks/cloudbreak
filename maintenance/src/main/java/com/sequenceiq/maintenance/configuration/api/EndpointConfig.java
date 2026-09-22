@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.maintenance.api.MaintenanceApi;
 import com.sequenceiq.maintenance.controller.MaintenanceWindowScheduleController;
+import com.sequenceiq.maintenance.controller.MaintenanceWindowScheduleInternalController;
 import com.sequenceiq.maintenance.controller.MaintenanceWindowTaskInternalController;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -30,6 +31,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(
             MaintenanceWindowScheduleController.class,
+            MaintenanceWindowScheduleInternalController.class,
             MaintenanceWindowTaskInternalController.class,
             AuthorizationInfoController.class,
             AuthorizationUtilEndpoint.class,

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.maintenance.api.execution.MaintenanceTaskExecutionRefConstants;
 
 class MaintenanceTaskExecutionRefTest {
 
@@ -15,10 +16,10 @@ class MaintenanceTaskExecutionRefTest {
     void parseResolvesSubmitterServiceAndExecutePath() {
         MaintenanceTaskExecutionRef ref = MaintenanceTaskExecutionRef.parse(new Json(Map.of(
                 "submitter_service", "datalake",
-                "execute_path", MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH)), "core");
+                "execute_path", MaintenanceTaskExecutionRefConstants.STANDARD_EXECUTE_PATH)), "core");
 
         assertThat(ref.submitterService()).isEqualTo("datalake");
-        assertThat(ref.executePath()).isEqualTo(MaintenanceTaskExecutionRef.STANDARD_EXECUTE_PATH);
+        assertThat(ref.executePath()).isEqualTo(MaintenanceTaskExecutionRefConstants.STANDARD_EXECUTE_PATH);
     }
 
     @Test
