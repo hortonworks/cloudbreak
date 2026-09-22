@@ -60,4 +60,16 @@ class EnableEncryptionProfileFlowEventChainFactoryTest {
 
         assertThat(result.getQueue()).isEmpty();
     }
+
+    @Test
+    void testCreateFlowTriggerEventQueuePropagatesTriggerAcceptPromiseToEveryElement() {
+        EnableEncryptionProfileTriggerEvent triggerEvent = new EnableEncryptionProfileTriggerEvent(
+                FlowChainTriggers.ENABLE_ENCRYPTION_PROFILE_CHAIN_TRIGGER_EVENT, STACK_ID, new Promise<>(), ENCRYPTION_PROFILE_CRN);
+
+        FlowTriggerEventQueue result = underTest.createFlowTriggerEventQueue(triggerEvent);
+
+        assertThat(result.getQueue())
+                .isNotEmpty()
+                .allSatisfy(selectable -> assertThat(((StackEvent) selectable).accepted()).isSameAs(triggerEvent.accepted()));
+    }
 }

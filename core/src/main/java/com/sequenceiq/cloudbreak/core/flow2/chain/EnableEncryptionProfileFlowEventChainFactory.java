@@ -29,7 +29,7 @@ public class EnableEncryptionProfileFlowEventChainFactory implements FlowEventCh
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
         flowEventChain.add(new EnableEncryptionProfileOnClusterEvent(ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_EVENT.event(), event.getResourceId(),
-                event.getEncryptionProfileCrn()));
+                event.accepted(), event.getEncryptionProfileCrn()));
 
         flowEventChain.add(new StackEvent(PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
 
