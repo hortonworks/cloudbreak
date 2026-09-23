@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -292,10 +291,6 @@ public class TrustManagementService {
     }
 
     public DirectionalTrustSetupCommandsResponse getDirectionalTrustCommands(String accountId, String environmentCrn) {
-        EnvironmentType environmentType = environmentService.getEnvironmentType(environmentCrn);
-        if (environmentType != EnvironmentType.PUBLIC_CLOUD) {
-            throw new BadRequestException("Directional trust commands are only available for PUBLIC_CLOUD environments.");
-        }
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stack.getId());
         if (!ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS.contains(crossRealmTrust.getTrustStatus())) {

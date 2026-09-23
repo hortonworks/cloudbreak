@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.DirectionalTrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -276,5 +277,27 @@ class TrustManagementServiceTest {
         TrustSetupCommandsResponse response = underTest.getTrustCommands(ACCOUNT_ID, ENV_CRN, TrustCommandType.VALIDATION);
 
         assertSame(expectedResponse, response);
+    }
+
+    @Test
+    void getDirectionalTrustCommandsDoesNotRejectNonPublicCloudEnvironments() {
+        DirectionalTrustSetupCommandsResponse expectedResponse = mock(DirectionalTrustSetupCommandsResponse.class);
+        crossRealmTrust.setTrustStatus(TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(adTrustProvider);
+        when(adTrustProvider.buildDirectionalTrustSetupCommandsResponse(ENV_CRN, stack, freeIpa, crossRealmTrust, loadBalancer))
+                .thenReturn(expectedResponse);
+
+        DirectionalTrustSetupCommandsResponse response = underTest.getDirectionalTrustCommands(ACCOUNT_ID, ENV_CRN);
+
+        assertSame(expectedResponse, response);
+    }
+
+    @Test
+    void getDirectionalTrustCommandsThrowsWhenTrustStatusNotAllowed() {
+        crossRealmTrust.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED);
+
+        BadRequestException ex = assertThrows(BadRequestException.class,
+                () -> underTest.getDirectionalTrustCommands(ACCOUNT_ID, ENV_CRN));
+        assertTrue(ex.getMessage().contains("trust is not in state, where trust setup commands can be generated"));
     }
 }

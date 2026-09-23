@@ -69,7 +69,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
-    implementation group: 'org.springframework.data', name: 'spring-data-jpa', version: springDataJpaFrameworkVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
     implementation group: 'org.springframework', name: 'spring-context-support', version: springFrameworkVersion
     implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: springSecurityJwtVersion
     implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
