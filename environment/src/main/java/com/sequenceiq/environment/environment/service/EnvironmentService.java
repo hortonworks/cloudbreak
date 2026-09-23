@@ -66,6 +66,7 @@ import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.resourcepersister.ResourceService;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.stackpatcher.service.StackPatchService;
 
 import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
@@ -96,6 +97,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final ExperienceConnectorService experienceConnectorService;
 
+    private final StackPatchService stackPatchService;
+
     @Value("${environment.admin.group.default.prefix:}")
     private String adminGroupNamePrefix;
 
@@ -110,7 +113,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             GrpcUmsClient grpcUmsClient,
             RoleCrnGenerator roleCrnGenerator,
             EnvironmentViewService environmentViewService,
-            ExperienceConnectorService experienceConnectorService) {
+            ExperienceConnectorService experienceConnectorService,
+            StackPatchService stackPatchService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.resourceService = resourceService;
@@ -121,6 +125,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.datahubClientService = datahubClientService;
         this.experienceConnectorService = experienceConnectorService;
         this.environmentViewService = environmentViewService;
+        this.stackPatchService = stackPatchService;
     }
 
     public Environment save(Environment environment) {
@@ -460,6 +465,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         return environmentRepository.findAllRunningAndStatusNotIn(EnvironmentStatus.skipFromStatusChecker());
     }
 
+    public JobResource getJobResource(Long id) {
+        return environmentRepository.getJobResource(id).orElseThrow(notFound("Environment", id));
+    }
+
     public List<JobResource> findAllAliveForAutoSync(Set<EnvironmentStatus> statusesNotIn) {
         return environmentRepository.findAllRunningAndStatusNotIn(statusesNotIn);
     }
@@ -548,6 +557,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
                 measure(() -> resourceService.deleteAllByEnvironmentId(environment.getId()),
                         LOGGER,
                         "Environment resources delete took {} ms for environment {}", crn
+                );
+                measure(() -> stackPatchService.deleteByResourceId(environment.getId()),
+                        LOGGER,
+                        "Environment stack patches delete took {} ms for environment {}", crn
                 );
             }
             measure(() -> environmentRepository.deleteByResourceCrn(crn),

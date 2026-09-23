@@ -60,6 +60,7 @@ import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.resourcepersister.ResourceService;
+import com.sequenceiq.stackpatcher.service.StackPatchService;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentServiceTest {
@@ -86,6 +87,9 @@ class EnvironmentServiceTest {
 
     @Mock
     private ResourceService resourceService;
+
+    @Mock
+    private StackPatchService stackPatchService;
 
     private Environment environment;
 
@@ -361,6 +365,7 @@ class EnvironmentServiceTest {
         assertNull(savedEnv.getProxyConfig());
         verify(environmentRepository).deleteEnvironmentNetwork(envId);
         verify(resourceService).deleteAllByEnvironmentId(envId);
+        verify(stackPatchService).deleteByResourceId(envId);
         verify(environmentRepository).deleteByResourceCrn(crn);
     }
 

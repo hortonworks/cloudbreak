@@ -24,6 +24,7 @@ import com.sequenceiq.notification.sender.LocalEmailProvider;
         "com.sequenceiq.cloudbreak.ha.domain",
         "com.sequenceiq.cloudbreak.structuredevent.domain",
         "com.sequenceiq.notification.domain",
+        "com.sequenceiq.stackpatcher.domain",
         "com.sequenceiq.cloudbreak.database"})
 @Profile("test")
 public class TestConfigurationForServiceIntegration {

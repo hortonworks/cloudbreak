@@ -260,6 +260,14 @@ clusterdns:
   host: localhost
   port: 8982
 
+existing-stack-patcher:
+  interval-in-hours: 24
+  max-initial-start-delay-in-hours: 12
+  initialization-chunk-size: 100
+  patch-configs:
+    gcp-environment-network-az-backfill:
+      enabled: true
+
 flow.trigger.node.heartbeat.validation.enabled: true
 
 wiam:

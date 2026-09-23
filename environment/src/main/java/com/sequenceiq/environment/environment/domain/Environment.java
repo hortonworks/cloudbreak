@@ -21,10 +21,12 @@ import jakarta.persistence.Table;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.domain.StackPatchResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -45,7 +47,7 @@ import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
 @Entity
 @Table
-public class Environment implements AuthResource, AccountAwareResource {
+public class Environment implements AuthResource, AccountAwareResource, MdcContextInfoProvider, StackPatchResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "environment_generator")
@@ -239,6 +241,26 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Override
     public String getResourceName() {
         return name;
+    }
+
+    @Override
+    public String getWorkspaceName() {
+        return null;
+    }
+
+    @Override
+    public String getEnvironmentCrn() {
+        return resourceCrn;
+    }
+
+    @Override
+    public String getResourceType() {
+        return "ENVIRONMENT";
+    }
+
+    @Override
+    public String getTenantName() {
+        return accountId;
     }
 
     public Long getId() {

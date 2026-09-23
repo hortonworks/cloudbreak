@@ -32,6 +32,7 @@ import org.springframework.data.repository.support.Repositories;
         "com.sequenceiq.notification",
         "com.sequenceiq.cloudbreak.ha.domain",
         "com.sequenceiq.notification.domain",
+        "com.sequenceiq.stackpatcher.domain",
         "com.sequenceiq.cloudbreak.structuredevent.domain"})
 @Import(SqlStatementInspector.class)
 public class JpaTest {

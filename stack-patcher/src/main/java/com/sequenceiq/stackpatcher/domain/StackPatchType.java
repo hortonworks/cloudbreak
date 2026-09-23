@@ -22,6 +22,7 @@ public enum StackPatchType {
     AWS_GP2_TO_GP3_MIGRATION,
     MINIFI_RETRY_CONFIG_FIX,
     GLOBAL_DEFAULT_BLUEPRINT_MIGRATION,
+    GCP_ENVIRONMENT_NETWORK_AZ_BACKFILL,
     UNKNOWN,
     // for UT we need sample values
     TEST_PATCH_1,

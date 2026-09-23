@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -37,6 +36,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.service.DefaultAvailabilityZoneService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.domain.PemBasedEnvironmentDomainProvider;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
@@ -82,9 +82,11 @@ class EnvironmentInitHandlerTest {
 
     private final PemBasedEnvironmentDomainProvider domainProvider = mock(PemBasedEnvironmentDomainProvider.class);
 
+    private final DefaultAvailabilityZoneService defaultAvailabilityZoneService = mock(DefaultAvailabilityZoneService.class);
+
     private final EnvironmentInitHandler environmentInitHandler
             = new EnvironmentInitHandler(eventSender, environmentService, environmentNetworkService,
-            eventBus, virtualGroupService, environmentNetworkConverterMap, domainProvider);
+            eventBus, virtualGroupService, environmentNetworkConverterMap, domainProvider, defaultAvailabilityZoneService);
 
     @ParameterizedTest
     @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
@@ -131,7 +133,6 @@ class EnvironmentInitHandlerTest {
                 true
         );
         when(environmentService.getRegionsByEnvironment(environment)).thenReturn(cloudRegions);
-        ReflectionTestUtils.setField(environmentInitHandler, "maxAvailabilityZones", 3);
 
         environmentInitHandler.accept(event);
 
@@ -142,19 +143,17 @@ class EnvironmentInitHandlerTest {
         verify(environmentService, times(1)).assignEnvironmentAdminRole(CREATOR, CRN);
         verify(environmentService, times(1)).setLocation(environment, environment.getRegionWrapper(), cloudRegions);
         verify(environmentService, times(1)).setRegions(environment, environment.getRegionWrapper().getRegions(), cloudRegions);
-        if (cloudPlatform == CloudPlatform.GCP) {
-            verify(environmentNetworkConverter, times(1)).updateAvailabilityZones(environment.getNetwork(), Set.of(availabilityZone));
-        }
+        verify(defaultAvailabilityZoneService, times(1)).populateIfMissing(environment, environment.getNetwork(), cloudRegions);
         verify(environmentService, times(1)).save(environment);
         verify(eventSender, times(1)).sendEvent(any(), any());
     }
 
     private EnvironmentDto getEnvironmentDto() {
         return EnvironmentDto.builder()
-                    .withId(ENV_ID)
-                    .withResourceCrn(CRN)
-                    .withName(ENV_NAME)
-                    .build();
+                .withId(ENV_ID)
+                .withResourceCrn(CRN)
+                .withName(ENV_NAME)
+                .build();
     }
 
     private Environment getEnvironment(CloudPlatform cloudPlatform) {

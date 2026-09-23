@@ -3,26 +3,18 @@ package com.sequenceiq.environment.environment.flow.creation.handler;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -33,6 +25,7 @@ import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
+import com.sequenceiq.environment.environment.service.DefaultAvailabilityZoneService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.domain.PemBasedEnvironmentDomainProvider;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
@@ -46,8 +39,6 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentInitHandler.class);
 
-    private static final List<CloudPlatform> POPULATE_DEFAULT_AZ_CLOUD_PLATFORMS = List.of(CloudPlatform.GCP);
-
     private final EnvironmentService environmentService;
 
     private final EventBus eventBus;
@@ -60,8 +51,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final PemBasedEnvironmentDomainProvider domainProvider;
 
-    @Value("${cb.multiaz.availabilityZones.max:3}")
-    private Integer maxAvailabilityZones;
+    private final DefaultAvailabilityZoneService defaultAvailabilityZoneService;
 
     protected EnvironmentInitHandler(
             EventSender eventSender,
@@ -69,7 +59,8 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
             EnvironmentNetworkService environmentNetworkService,
             EventBus eventBus, VirtualGroupService virtualGroupService,
             Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
-            PemBasedEnvironmentDomainProvider domainProvider) {
+            PemBasedEnvironmentDomainProvider domainProvider,
+            DefaultAvailabilityZoneService defaultAvailabilityZoneService) {
         super(eventSender);
         this.environmentService = environmentService;
         this.eventBus = eventBus;
@@ -77,6 +68,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
         this.environmentNetworkService = environmentNetworkService;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.domainProvider = domainProvider;
+        this.defaultAvailabilityZoneService = defaultAvailabilityZoneService;
     }
 
     @Override
@@ -151,9 +143,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
         if (cloudRegions.areRegionsSupported()) {
             environmentService.setRegions(environment, regionWrapper.getRegions(), cloudRegions);
         }
-        if (POPULATE_DEFAULT_AZ_CLOUD_PLATFORMS.contains(CloudPlatform.valueOf(environment.getCloudPlatform()))) {
-            setAvailabilityZones(environment, cloudRegions);
-        }
+        defaultAvailabilityZoneService.populateIfMissing(environment, environment.getNetwork(), cloudRegions);
     }
 
     private void goToValidationState(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
@@ -175,21 +165,6 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
                 environmentDto.getResourceCrn());
 
         eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
-    }
-
-    private void setAvailabilityZones(Environment environment, CloudRegions cloudRegions) {
-        EnvironmentNetworkConverter environmentNetworkConverter =
-                environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
-        if (environmentNetworkConverter != null && !CollectionUtils.isEmpty(environment.getRegionSet())) {
-            Set<String> existingAvailabilityZones = environmentNetworkConverter.getAvailabilityZones(environment.getNetwork());
-            com.sequenceiq.environment.environment.domain.Region region = environment.getRegionSet().stream().findFirst().orElse(null);
-            if (CollectionUtils.isEmpty(existingAvailabilityZones) && region != null) {
-                List<AvailabilityZone> availabilityZones = cloudRegions.getCloudRegions().getOrDefault(Region.region(region.getName()), new ArrayList<>());
-                LOGGER.info("Update Availability zones {} for environment {}", availabilityZones, environment.getName());
-                environmentNetworkConverter.updateAvailabilityZones(environment.getNetwork(),
-                        availabilityZones.stream().map(AvailabilityZone::getValue).sorted().limit(maxAvailabilityZones).collect(Collectors.toSet()));
-            }
-        }
     }
 
     @Override
