@@ -511,7 +511,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public int getFreeIpaDefaultNodeCount() {
-        return getGovCloud() ? 2 : 1;
+        return getGovCloud() ? 1 : 1;
     }
 
     @Override

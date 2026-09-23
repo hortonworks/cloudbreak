@@ -74,7 +74,7 @@ public class EnvironmentUtil {
 
     public int getFreeIpaInstanceCountByProdiver(TestContext testContext) {
         if (testContext.getCloudProvider().getGovCloud()) {
-            return 2;
+            return 1;
         } else {
             return 1;
         }
