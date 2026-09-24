@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -56,9 +55,6 @@ public class VerticalScaleServiceTest {
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
-
-    @Mock
-    private DiskUpdateEndpoint diskUpdateEndpoint;
 
     @InjectMocks
     private VerticalScaleService underTest;
@@ -103,14 +99,26 @@ public class VerticalScaleServiceTest {
         DiskUpdateRequest updateRequest = mock(DiskUpdateRequest.class);
         String userCrn = "TEST-CRN";
         underTest.updateDisksDatalake(sdxCluster, updateRequest, userCrn);
+        verify(stackV4Endpoint).validateDiskUpdateByCrnInternal(anyLong(), any(), eq(updateRequest));
         verify(sdxReactorFlowManager).triggerDatalakeDiskUpdate(sdxCluster, updateRequest, userCrn);
     }
 
     @Test
-    public void testGetDiskTypeChangeSupported() {
-        doReturn(true).when(diskUpdateEndpoint).isDiskTypeChangeSupported("AWS");
-        underTest.getDiskTypeChangeSupported("AWS");
-        verify(diskUpdateEndpoint).isDiskTypeChangeSupported("AWS");
+    public void testUpdateDisksDatalakeThrowsWhenValidationFails() {
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        when(sdxCluster.getClusterName()).thenReturn("test-cluster");
+        DiskUpdateRequest updateRequest = mock(DiskUpdateRequest.class);
+        String message = "Disk downsizing is not supported. Requested: 50GB, Current: 100GB.";
+        WebApplicationException webApplicationException = new BadRequestException(message);
+        doThrow(webApplicationException).when(stackV4Endpoint).validateDiskUpdateByCrnInternal(anyLong(), any(), eq(updateRequest));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(message);
+
+        com.sequenceiq.cloudbreak.common.exception.BadRequestException thrown = assertThrows(
+                com.sequenceiq.cloudbreak.common.exception.BadRequestException.class,
+                () -> underTest.updateDisksDatalake(sdxCluster, updateRequest, "TEST-CRN"));
+
+        assertEquals(message, thrown.getMessage());
+        verify(sdxReactorFlowManager, never()).triggerDatalakeDiskUpdate(any(), any(), anyString());
     }
 
     @Test
@@ -131,8 +139,27 @@ public class VerticalScaleServiceTest {
         doReturn("test-flow-identifier").when(flowIdentifier).getPollableId();
         doReturn(flowIdentifier).when(sdxReactorFlowManager).triggerDatalakeRootVolumeUpdate(sdxCluster, updateRequest, userCrn);
         FlowIdentifier result = underTest.updateRootVolumeDatalake(sdxCluster, updateRequest, userCrn);
+        verify(stackV4Endpoint).validateRootVolumeUpdateByCrnInternal(anyLong(), any(), eq(updateRequest));
         verify(sdxReactorFlowManager).triggerDatalakeRootVolumeUpdate(sdxCluster, updateRequest, userCrn);
         assertEquals(flowIdentifier, result);
         assertEquals("test-flow-identifier", result.getPollableId());
+    }
+
+    @Test
+    public void testUpdateRootVolumeDatalakeThrowsWhenValidationFails() {
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        when(sdxCluster.getClusterName()).thenReturn("test-cluster");
+        DiskUpdateRequest updateRequest = mock(DiskUpdateRequest.class);
+        String message = "Unknown Instance Group: Instance Group provided in the request is not present on Stack.";
+        WebApplicationException webApplicationException = new BadRequestException(message);
+        doThrow(webApplicationException).when(stackV4Endpoint).validateRootVolumeUpdateByCrnInternal(anyLong(), any(), eq(updateRequest));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(message);
+
+        com.sequenceiq.cloudbreak.common.exception.BadRequestException thrown = assertThrows(
+                com.sequenceiq.cloudbreak.common.exception.BadRequestException.class,
+                () -> underTest.updateRootVolumeDatalake(sdxCluster, updateRequest, "TEST-CRN"));
+
+        assertEquals(message, thrown.getMessage());
+        verify(sdxReactorFlowManager, never()).triggerDatalakeRootVolumeUpdate(any(), any(), anyString());
     }
 }

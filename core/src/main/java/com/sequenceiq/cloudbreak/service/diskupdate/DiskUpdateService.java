@@ -12,7 +12,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -21,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -31,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -115,6 +120,91 @@ public class DiskUpdateService {
 
     public boolean isDiskTypeChangeSupported(String platform) {
         return cloudParameterCache.isDiskTypeChangeSupported(platform);
+    }
+
+    public List<VolumeSetAttributes.Volume> getAttachedVolumesToUpdate(StackDto stack, String group, int size, String volumeType, String diskType) {
+        LOGGER.debug("Checking if the attached volumes have size less than the requested volumes.");
+        return groupVolumes(stack, group)
+                .filter(getVolumePredicate(size, volumeType, diskType))
+                .toList();
+    }
+
+    public List<Volume> getVolumesToUpdate(StackDto stack, String group, int size, String volumeType, String diskType) {
+        return toUpdatableVolumes(getAttachedVolumesToUpdate(stack, group, size, volumeType, diskType));
+    }
+
+    public List<Volume> toUpdatableVolumes(List<VolumeSetAttributes.Volume> attachedVolumesToUpdate) {
+        return attachedVolumesToUpdate.stream()
+                .filter(volume -> !EphemeralVolumeUtil.volumeIsEphemeral(volume.getType()))
+                .map(this::convertToVolume)
+                .toList();
+    }
+
+    public boolean hasDatabaseVolume(StackDto stack, String group) {
+        return groupVolumes(stack, group)
+                .anyMatch(volume -> volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE);
+    }
+
+    private Volume convertToVolume(VolumeSetAttributes.Volume volSetAttrVol) {
+        Volume volume = new Volume("", volSetAttrVol.getType(), volSetAttrVol.getSize(), volSetAttrVol.getCloudVolumeUsageType());
+        volume.setId(volSetAttrVol.getId());
+        return volume;
+    }
+
+    // Check the downsize against the volumes the flow would actually hand to the provider (the same selection as the update),
+    // and take the largest of those: a type change pulls in disks regardless of their current size, and asking the provider
+    // to shrink any of them fails mid-flow (on GCP the disk is silently floored at its current size - see applyVolumeUpdateResult).
+    public void validateDiskDownsize(DiskUpdateRequest updateRequest, List<VolumeSetAttributes.Volume> volumesToUpdate) {
+        int size = updateRequest.getSize();
+        if (size <= 0) {
+            return;
+        }
+        int currentSize = volumesToUpdate.stream()
+                .filter(volume -> !EphemeralVolumeUtil.volumeIsEphemeral(volume.getType()))
+                .map(VolumeSetAttributes.Volume::getSize)
+                .filter(Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+        if (currentSize > 0 && size < currentSize) {
+            LOGGER.warn("Rejecting disk downsize for group {}: requested {}GB is below the largest volume to update {}GB ({} volume(s) matched).",
+                    updateRequest.getGroup(), size, currentSize, volumesToUpdate.size());
+            throw new BadRequestException(String.format("Disk downsizing is not supported. Requested: %dGB, Current: %dGB.", size, currentSize));
+        }
+    }
+
+    private List<Resource> getGroupVolumeSetResources(StackDto stack, String group) {
+        return stack.getResources().stream()
+                .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(group)
+                        && isVolumeSetResourceForPlatform(stack.getCloudPlatform(), res.getResourceType()))
+                .toList();
+    }
+
+    private Stream<VolumeSetAttributes.Volume> groupVolumes(StackDto stack, String group) {
+        return getGroupVolumeSetResources(stack, group).stream()
+                .flatMap(resource -> resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class).stream())
+                .flatMap(volumeSetAttributes -> volumeSetAttributes.getVolumes().stream());
+    }
+
+    private Predicate<VolumeSetAttributes.Volume> getVolumePredicate(int size, String volumeType, String diskType) {
+        return volume ->
+                (isDataBaseDisk(diskType) && CloudVolumeUsageType.DATABASE == volume.getCloudVolumeUsageType() && sizeIsLessThan(volume, size))
+                || (!isDataBaseDisk(diskType) && CloudVolumeUsageType.DATABASE != volume.getCloudVolumeUsageType() && (sizeIsLessThan(volume, size)
+                    || EphemeralVolumeUtil.volumeIsEphemeral(volume.getType())
+                    || volumeTypeChangeRequested(volumeType, volume)));
+    }
+
+    private boolean sizeIsLessThan(VolumeSetAttributes.Volume volume, int size) {
+        return volume.getSize() != null && volume.getSize() < size;
+    }
+
+    private boolean isDataBaseDisk(String diskType) {
+        return DiskType.DATABASE_DISK.name().equalsIgnoreCase(diskType);
+    }
+
+    private boolean volumeTypeChangeRequested(String volumeType, VolumeSetAttributes.Volume volume) {
+        return null != volumeType
+                && !volumeType.equalsIgnoreCase(volume.getType());
     }
 
     public void updateDiskTypeAndSize(String group, String volumeType, int size, List<Volume> volumesToUpdate, Long stackId) throws Exception {

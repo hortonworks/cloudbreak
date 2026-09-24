@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
@@ -62,6 +63,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -84,6 +87,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.VerticalScalingValidatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterReallocateMemoryService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -92,6 +96,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -206,6 +211,12 @@ public class StackOperationService {
 
     @Inject
     private RootDiskValidationService rootDiskValidationService;
+
+    @Inject
+    private DiskUpdateService diskUpdateService;
+
+    @Inject
+    private VerticalScalingValidatorService verticalScalingValidatorService;
 
     @Inject
     private DefaultJavaVersionUpdateValidator defaultJavaVersionUpdateValidator;
@@ -620,8 +631,7 @@ public class StackOperationService {
     }
 
     private FlowIdentifier updateDisks(DiskUpdateRequest updateRequest, StackDto stack) {
-        boolean diskTypeChangeRequested = isDiskTypeChangeRequested(stack, updateRequest);
-        validatePlatformAndRequest(diskTypeChangeRequested, updateRequest.getVolumeType(), updateRequest.getSize(), stack.getCloudPlatform());
+        boolean diskTypeChangeRequested = validateDiskUpdate(updateRequest, stack);
         return flowManager.triggerStackUpdateDisks(stack, updateRequest, diskTypeChangeRequested);
     }
 
@@ -630,6 +640,59 @@ public class StackOperationService {
         convertInputGroupToLowerCase(updateRequest);
         StackDto stack = stackDtoService.getById(diskModificationRequest.getStackId());
         return updateDisks(updateRequest, stack);
+    }
+
+    public void validateStackDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
+        convertInputGroupToLowerCase(updateRequest);
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        validateDiskUpdate(updateRequest, stack);
+    }
+
+    private boolean validateDiskUpdate(DiskUpdateRequest updateRequest, StackDto stack) {
+        boolean diskTypeChangeRequested = isDiskTypeChangeRequested(stack, updateRequest);
+        validatePlatformAndRequest(diskTypeChangeRequested, updateRequest.getVolumeType(), updateRequest.getSize(), stack.getCloudPlatform());
+        rejectRequestsTheFlowWouldRejectLater(stack, updateRequest);
+        return diskTypeChangeRequested;
+    }
+
+    // Fail fast at the API on the same checks the disk-update flow used to run ~30s in (CB-32862).
+    private void rejectRequestsTheFlowWouldRejectLater(StackDto stack, DiskUpdateRequest updateRequest) {
+        String group = updateRequest.getGroup();
+        String cloudPlatform = stack.getCloudPlatform();
+        if (!diskUpdateService.isDiskTypeChangeSupported(cloudPlatform)) {
+            LOGGER.warn("Rejecting disk update for group {}: disk type change/resize is not supported on platform {}.", group, cloudPlatform);
+            throw new BadRequestException(String.format("Disk Type Change / Resize not supported for the %s platform", cloudPlatform));
+        }
+        rejectUnknownGroup(stack, group);
+        String diskType = updateRequest.getDiskType() == null ? null : updateRequest.getDiskType().name();
+        if (DiskType.DATABASE_DISK.name().equalsIgnoreCase(diskType) && !diskUpdateService.hasDatabaseVolume(stack, group)) {
+            LOGGER.warn("Rejecting database-disk update for group {}: the group has no database volume.", group);
+            throw new BadRequestException(String.format("No database disk found for instance group '%s'.", group));
+        }
+        List<VolumeSetAttributes.Volume> attachedVolumesToUpdate = diskUpdateService.getAttachedVolumesToUpdate(stack, group,
+                updateRequest.getSize(), updateRequest.getVolumeType(), diskType);
+        diskUpdateService.validateDiskDownsize(updateRequest, attachedVolumesToUpdate);
+        List<Volume> volumesToBeUpdated = diskUpdateService.toUpdatableVolumes(attachedVolumesToUpdate);
+        if (volumesToBeUpdated.isEmpty()) {
+            LOGGER.warn("Rejecting disk update for group {}: requested size {}GB resolves to no volume to update.", group, updateRequest.getSize());
+            throw new BadRequestException(String.format("Requested disk size for %s group is less than current size", group));
+        }
+        Stack stackEntity = stackService.getByIdWithLists(stack.getId());
+        ValidationResult validationResult = verticalScalingValidatorService.validateAddVolumesRequest(stackEntity, volumesToBeUpdated,
+                group, diskType, updateRequest.getVolumeType(), updateRequest.getSize());
+        if (validationResult.hasError()) {
+            LOGGER.warn("Rejecting disk update for group {}: vertical-scale validation failed: {}", group, validationResult.getFormattedErrors());
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    // Runs before the disk-type checks so a typo'd group name reports "unknown group" rather than being misreported
+    // as e.g. "no database disk found" by a check that cannot tell an absent group from one with no matching disk.
+    private void rejectUnknownGroup(StackDto stack, String group) {
+        if (stack.getInstanceGroupByInstanceGroupName(group) == null) {
+            LOGGER.warn("Rejecting disk update: unknown instance group {}.", group);
+            throw new BadRequestException("Unknown Instance Group: Instance Group provided in the request is not present on Stack.");
+        }
     }
 
     private void validatePlatformAndRequest(boolean diskTypeChangeRequested, String volumeType, int size, String cloudPlatform) {
@@ -751,22 +814,15 @@ public class StackOperationService {
     public FlowIdentifier rootVolumeDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
         convertInputGroupToLowerCase(updateRequest);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        InstanceGroupDto instanceGroupDto = stack.getInstanceGroupByInstanceGroupName(updateRequest.getGroup());
-        if (instanceGroupDto == null) {
-            throw new BadRequestException("Unknown Instance Group: Instance Group provided in the request is not present on Stack.");
-        }
+        InstanceGroupDto instanceGroupDto = validateRootVolumeDiskUpdateRequest(stack, updateRequest);
         Set<String> selectedNodes = instanceGroupDto.getInstanceMetadataViews().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toSet());
+        // clusterRepairService.validateRepair(...) runs only on the actual trigger, not in the shared validate-only path
+        // (validateRootVolumeDiskUpdate), because it mutates the stack status as a side effect and a dry-run validation must not.
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult = clusterRepairService.validateRepair(
                 ManualClusterRepairMode.NODE_ID, stack.getId(), selectedNodes, false);
         if (repairValidationResult.isError()) {
             throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
         }
-        rootDiskValidationService.validateRootDiskResourcesForGroup(
-                stack,
-                updateRequest.getGroup(),
-                updateRequest.getVolumeType(),
-                updateRequest.getSize()
-        );
         List<String> discoveryFqdnList = stack.getAllAvailableAndProviderDeletedInstances()
                 .stream()
                 .filter(instanceMetadataView -> instanceMetadataView.getInstanceGroupName().equals(updateRequest.getGroup()))
@@ -774,6 +830,26 @@ public class StackOperationService {
                 .toList();
         Map<String, List<String>> updatedNodesMap = Map.of(updateRequest.getGroup(), discoveryFqdnList);
         return flowManager.triggerRootVolumeUpdateFlow(stack.getId(), updatedNodesMap, updateRequest);
+    }
+
+    public void validateRootVolumeDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
+        convertInputGroupToLowerCase(updateRequest);
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        validateRootVolumeDiskUpdateRequest(stack, updateRequest);
+    }
+
+    private InstanceGroupDto validateRootVolumeDiskUpdateRequest(StackDto stack, DiskUpdateRequest updateRequest) {
+        InstanceGroupDto instanceGroupDto = stack.getInstanceGroupByInstanceGroupName(updateRequest.getGroup());
+        if (instanceGroupDto == null) {
+            throw new BadRequestException("Unknown Instance Group: Instance Group provided in the request is not present on Stack.");
+        }
+        rootDiskValidationService.validateRootDiskResourcesForGroup(
+                stack,
+                updateRequest.getGroup(),
+                updateRequest.getVolumeType(),
+                updateRequest.getSize()
+        );
+        return instanceGroupDto;
     }
 
     public FlowIdentifier triggerSetDefaultJavaVersion(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {

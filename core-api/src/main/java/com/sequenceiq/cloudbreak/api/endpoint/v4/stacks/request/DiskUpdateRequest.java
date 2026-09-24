@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import java.util.StringJoiner;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
@@ -19,7 +19,7 @@ public class DiskUpdateRequest implements JsonEntity {
     @Schema(description = "Size of disks in GB")
     private int size;
 
-    @NotNull
+    @NotBlank
     @Schema(description = "Group being updated", required = true)
     private String group;
 

@@ -59,7 +59,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
@@ -688,24 +687,68 @@ public class VerticalScalingValidatorServiceTest {
         );
         when(platformParameters.diskTypes()).thenReturn(diskTypes);
 
-        // Create disk update event
-        DistroXDiskUpdateEvent diskUpdateEvent = DistroXDiskUpdateEvent.builder()
-                .withResourceId(1L)
-                .withGroup(instanceGroupName)
-                .withDiskType(DiskType.ADDITIONAL_DISK.name())
-                .withSize(newSize)
-                .withVolumeType(volumeType)
-                .build();
+        List<Volume> volumesToBeUpdated = List.of(
+                new Volume("/dev/xvdb", "gp2", 100, null)
+        );
+
+        ValidationResult result = underTest.validateAddVolumesRequest(stack, volumesToBeUpdated, instanceGroupName,
+                DiskType.ADDITIONAL_DISK.name(), volumeType, newSize);
+
+        assertFalse(result.hasError());
+
+        verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
+        verify(templateValidatorAndUpdater, times(1)).validateGroupForVerticalScale(
+                any(Credential.class),
+                eq(instanceGroup),
+                eq(stack),
+                eq(CdpResourceType.DATAHUB),
+                any()
+        );
+    }
+
+    @Test
+    public void testValidateAddVolumesRequestForDiskUpdateWithRawFields() {
+        String instanceGroupName = "compute";
+        String volumeType = "gp3";
+        int newSize = 200;
+
+        Template template = new Template();
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType("gp2");
+        volumeTemplate.setVolumeSize(100);
+        volumeTemplate.setVolumeCount(2);
+        volumeTemplate.setUsageType(VolumeUsageType.GENERAL);
+        template.setVolumeTemplates(Set.of(volumeTemplate));
+
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupName, "m5.xlarge", template);
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+
+        Credential credential = credential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+
+        when(cloudPlatformConnectors.get(platform("AWS"), Variant.variant("AWS"))).thenReturn(cloudConnector);
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
+
+        DiskTypes diskTypes = new DiskTypes(
+                List.of(com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("gp2"), com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("gp3")),
+                com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("gp2"),
+                Map.of("gp2", VolumeParameterType.AUTO_ATTACHED, "gp3", VolumeParameterType.AUTO_ATTACHED),
+                Map.of()
+        );
+        when(platformParameters.diskTypes()).thenReturn(diskTypes);
 
         List<Volume> volumesToBeUpdated = List.of(
                 new Volume("/dev/xvdb", "gp2", 100, null)
         );
 
-        ValidationResult result = underTest.validateAddVolumesRequest(stack, volumesToBeUpdated, diskUpdateEvent);
+        ValidationResult result = underTest.validateAddVolumesRequest(stack, volumesToBeUpdated, instanceGroupName,
+                DiskType.ADDITIONAL_DISK.name(), volumeType, newSize);
 
         assertFalse(result.hasError());
-
-        verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
         verify(templateValidatorAndUpdater, times(1)).validateGroupForVerticalScale(
                 any(Credential.class),
                 eq(instanceGroup),
@@ -753,20 +796,12 @@ public class VerticalScalingValidatorServiceTest {
         );
         when(platformParameters.diskTypes()).thenReturn(diskTypes);
 
-        // Create disk update event for DATABASE_DISK
-        DistroXDiskUpdateEvent diskUpdateEvent = DistroXDiskUpdateEvent.builder()
-                .withResourceId(1L)
-                .withGroup(instanceGroupName)
-                .withDiskType(DiskType.DATABASE_DISK.name())
-                .withSize(newSize)
-                .withVolumeType(volumeType)
-                .build();
-
         List<Volume> volumesToBeUpdated = List.of(
                 new Volume("/dev/sdc", "Standard_LRS", 500, null)
         );
 
-        ValidationResult result = underTest.validateAddVolumesRequest(stack, volumesToBeUpdated, diskUpdateEvent);
+        ValidationResult result = underTest.validateAddVolumesRequest(stack, volumesToBeUpdated, instanceGroupName,
+                DiskType.DATABASE_DISK.name(), volumeType, newSize);
 
         assertFalse(result.hasError());
 

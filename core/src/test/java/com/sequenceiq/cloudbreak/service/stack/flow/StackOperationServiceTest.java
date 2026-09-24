@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,10 +67,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -86,6 +90,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.VerticalScalingValidatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -93,6 +98,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
@@ -109,6 +115,7 @@ import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -194,6 +201,9 @@ class StackOperationServiceTest {
     private RootDiskValidationService rootDiskValidationService;
 
     @Mock
+    private DiskUpdateService diskUpdateService;
+
+    @Mock
     private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
 
     @Mock
@@ -210,6 +220,9 @@ class StackOperationServiceTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private VerticalScalingValidatorService verticalScalingValidatorService;
 
     @Mock
     private NetworkService networkService;
@@ -636,6 +649,8 @@ class StackOperationServiceTest {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        stubDiskUpdateValidationPasses(stack, "TEST");
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
         verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
@@ -651,6 +666,7 @@ class StackOperationServiceTest {
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
         updateRequest.setVolumeType("gp3");
+        stubDiskUpdateValidationPasses(stack, "TEST");
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
         verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(true));
@@ -665,6 +681,7 @@ class StackOperationServiceTest {
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
         updateRequest.setVolumeType("GP2");
+        stubDiskUpdateValidationPasses(stack, "TEST");
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
         verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
@@ -680,6 +697,7 @@ class StackOperationServiceTest {
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
         updateRequest.setVolumeType("gp3");
+        stubDiskUpdateValidationPasses(stack, "TEST");
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
         verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(true));
@@ -689,11 +707,12 @@ class StackOperationServiceTest {
     void testStackUpdateDisksIsSizeOnlyWhenCurrentTypeCannotBeResolved() {
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
-        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(null);
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
         updateRequest.setVolumeType("gp3");
+        stubDiskUpdateValidationPasses(stack, "TEST");
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
         verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
@@ -740,6 +759,7 @@ class StackOperationServiceTest {
         updateRequest.setGroup("TEST");
         updateRequest.setVolumeType("pd-ssd");
         updateRequest.setSize(100);
+        stubDiskUpdateValidationPasses(stack, "TEST");
 
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
@@ -770,11 +790,225 @@ class StackOperationServiceTest {
         DiskModificationRequest diskModificationRequest = new DiskModificationRequest();
         diskModificationRequest.setStackId(1L);
         diskModificationRequest.setDiskUpdateRequest(updateRequest);
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        stubDiskUpdateValidationPasses(stack, "TEST");
 
         underTest.datalakeUpdateDisks(diskModificationRequest);
 
         verify(stackDtoService).getById(1L);
         verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
+    }
+
+    @Test
+    void testStackUpdateDisksInvokesDownsizeValidationBeforeTrigger() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        stubDiskUpdateValidationPasses(stack, "TEST");
+
+        underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
+
+        verify(diskUpdateService).validateDiskDownsize(eq(updateRequest), anyList());
+        verify(flowManager).triggerStackUpdateDisks(eq(stack), eq(updateRequest), eq(false));
+    }
+
+    private void stubDiskUpdateValidationPasses(StackDto stack, String group) {
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(diskUpdateService.isDiskTypeChangeSupported(any())).thenReturn(true);
+        when(diskUpdateService.getAttachedVolumesToUpdate(eq(stack), eq(group), anyInt(), any(), any())).thenReturn(List.of());
+        when(diskUpdateService.toUpdatableVolumes(anyList()))
+                .thenReturn(List.of(new Volume("", "gp2", 50, CloudVolumeUsageType.GENERAL)));
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(mock(Stack.class));
+        when(verticalScalingValidatorService.validateAddVolumesRequest(any(), anyList(), eq(group), any(), any(), anyInt()))
+                .thenReturn(ValidationResult.builder().build());
+    }
+
+    @Test
+    void testStackUpdateDisksThrowsAndDoesNotTriggerWhenDownsizeRejected() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
+        when(diskUpdateService.getAttachedVolumesToUpdate(eq(stack), eq("TEST"), anyInt(), any(), any())).thenReturn(List.of());
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        doThrow(new BadRequestException("Disk downsizing is not supported. Requested: 50GB, Current: 100GB."))
+                .when(diskUpdateService).validateDiskDownsize(eq(updateRequest), anyList());
+
+        assertThrows(BadRequestException.class, () -> underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST"));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateStackDiskUpdatePassesWithoutTriggeringFlow() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        stubDiskUpdateValidationPasses(stack, "TEST");
+
+        underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST");
+
+        verify(diskUpdateService).validateDiskDownsize(eq(updateRequest), anyList());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateStackDiskUpdateThrowsWhenPlatformDoesNotSupportDiskTypeChange() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getCloudPlatform()).thenReturn("MOCK");
+        when(diskUpdateService.isDiskTypeChangeSupported("MOCK")).thenReturn(false);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+
+        assertThrows(BadRequestException.class, () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
+        verify(diskUpdateService, never()).getAttachedVolumesToUpdate(any(), any(), anyInt(), any(), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateStackDiskUpdateThrowsWhenNoVolumeResolvesToUpdate() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
+        when(diskUpdateService.getAttachedVolumesToUpdate(eq(stack), eq("TEST"), anyInt(), any(), any())).thenReturn(List.of());
+        when(diskUpdateService.toUpdatableVolumes(anyList())).thenReturn(List.of());
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+
+        BadRequestException thrown = assertThrows(BadRequestException.class,
+                () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
+        assertEquals("Requested disk size for TEST group is less than current size", thrown.getMessage());
+        verify(verticalScalingValidatorService, never()).validateAddVolumesRequest(any(), anyList(), any(), any(), any(), anyInt());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateStackDiskUpdateThrowsUnknownInstanceGroupWhenGroupDoesNotExist() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(null);
+        when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        // DATABASE_DISK makes the ordering observable: the unknown-group check must win over the DB-disk check, which cannot
+        // tell an absent group from one with no database disk and would otherwise report the misleading "no database disk" error.
+        updateRequest.setDiskType(DiskType.DATABASE_DISK);
+
+        BadRequestException thrown = assertThrows(BadRequestException.class,
+                () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
+        assertEquals("Unknown Instance Group: Instance Group provided in the request is not present on Stack.", thrown.getMessage());
+        verify(diskUpdateService, never()).hasDatabaseVolume(any(), any());
+        verify(verticalScalingValidatorService, never()).validateAddVolumesRequest(any(), anyList(), any(), any(), any(), anyInt());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateStackDiskUpdateThrowsWhenDatabaseDiskRequestedButGroupHasNoDatabaseDisk() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
+        when(diskUpdateService.hasDatabaseVolume(stack, "TEST")).thenReturn(false);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        updateRequest.setDiskType(DiskType.DATABASE_DISK);
+
+        BadRequestException thrown = assertThrows(BadRequestException.class,
+                () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
+        assertEquals("No database disk found for instance group 'TEST'.", thrown.getMessage());
+        verify(diskUpdateService, never()).getAttachedVolumesToUpdate(any(), any(), anyInt(), any(), any());
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateStackDiskUpdateThrowsBadRequestWhenVerticalScaleValidationFails() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
+        when(diskUpdateService.getAttachedVolumesToUpdate(eq(stack), eq("TEST"), anyInt(), any(), any())).thenReturn(List.of());
+        when(diskUpdateService.toUpdatableVolumes(anyList()))
+                .thenReturn(List.of(new Volume("", "gp2", 50, CloudVolumeUsageType.GENERAL)));
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(mock(Stack.class));
+        when(verticalScalingValidatorService.validateAddVolumesRequest(any(), anyList(), eq("TEST"), any(), any(), anyInt()))
+                .thenReturn(ValidationResult.builder().error("instance type does not support the requested disk").build());
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+
+        assertThrows(BadRequestException.class, () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateStackDiskUpdateThrowsWhenDownsizeRejected() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
+        when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
+        when(diskUpdateService.getAttachedVolumesToUpdate(eq(stack), eq("TEST"), anyInt(), any(), any())).thenReturn(List.of());
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
+        doThrow(new BadRequestException("Disk downsizing is not supported. Requested: 50GB, Current: 100GB."))
+                .when(diskUpdateService).validateDiskDownsize(eq(updateRequest), anyList());
+
+        assertThrows(BadRequestException.class, () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testValidateRootVolumeDiskUpdateRunsRootDiskValidationWithoutRepair() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
+        when(stack.getInstanceGroupByInstanceGroupName("test")).thenReturn(instanceGroupDto);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("test");
+        updateRequest.setVolumeType("gp3");
+        updateRequest.setSize(200);
+
+        underTest.validateRootVolumeDiskUpdate(nameOrCrn, updateRequest, "TEST");
+
+        verify(rootDiskValidationService).validateRootDiskResourcesForGroup(stack, "test", "gp3", 200);
+        verifyNoInteractions(clusterRepairService, flowManager);
+    }
+
+    @Test
+    void testValidateRootVolumeDiskUpdateThrowsForUnknownInstanceGroup() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        when(stack.getInstanceGroupByInstanceGroupName("test")).thenReturn(null);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("test");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateRootVolumeDiskUpdate(nameOrCrn, updateRequest, "TEST"));
+
+        assertEquals("Unknown Instance Group: Instance Group provided in the request is not present on Stack.", exception.getMessage());
+        verifyNoInteractions(rootDiskValidationService, clusterRepairService);
     }
 
     private void mockCurrentVolumeType(StackDto stack, String group, String volumeType) {
