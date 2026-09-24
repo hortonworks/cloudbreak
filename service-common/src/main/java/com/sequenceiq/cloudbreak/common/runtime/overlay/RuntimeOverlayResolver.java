@@ -40,11 +40,15 @@ import com.sequenceiq.cloudbreak.util.VersionComparator;
  * at {@code <= V} in ascending version order (so a change introduced at one overlay version forward-propagates
  * into every newer version),
  * concatenating same-file patch op arrays (highest-anchor-wins on a conflicting path), then inject the {@code V}
- * version fields. Overlay deltas live under {@code classpath*:runtime-overlays/<version>/<subtree>/} in three
+ * version fields. Overlay deltas live under {@code classpath*:runtime-overlays/<version>/<subtree>/} in four
  * kinds: RFC 6902 {@code <path>.patch.json} files that modify a base file, whole-file {@code <path>.tombstone}
- * markers that drop a base file, and whole-file <em>additions</em> — a template that has no counterpart in the base,
- * shipped with the plain base file suffix ({@code <path>.json} / {@code <path>.bp}). Additions forward-propagate
- * (last-anchor-wins on the same path) and compose with patches and tombstones just like base files do.</p>
+ * markers that drop a base file, whole-file <em>additions</em> — a template that has no counterpart in the base,
+ * shipped with the plain base file suffix ({@code <path>.json} / {@code <path>.bp}) — and whole-file
+ * <em>replacements</em> ({@code <path>.replace.json} / {@code <path>.replace.bp}) that supersede a base file
+ * outright, for a template whose delta over the base is so structural that a reviewable patch is no longer
+ * practical. Additions and replacements forward-propagate (last-anchor-wins on the same path) and compose with
+ * patches and tombstones just like base files do; a whole-file delta also resets the file, so only patches anchored
+ * at or above it apply on top, and a tombstone from a lower anchor no longer drops it.</p>
  */
 public final class RuntimeOverlayResolver {
 
@@ -55,6 +59,8 @@ public final class RuntimeOverlayResolver {
     private static final String OVERLAY_ROOT = "runtime-overlays";
 
     private static final String PATCH_SUFFIX = ".patch.json";
+
+    private static final String REPLACE_MARKER = ".replace";
 
     private static final String TOMBSTONE_SUFFIX = ".tombstone";
 
@@ -125,24 +131,14 @@ public final class RuntimeOverlayResolver {
                 overlaysByVersion.put(version, new VersionOverlay(version,
                         loadPatches(resolver, overlaySubtree, version, baseFileSuffix),
                         loadTombstones(resolver, overlaySubtree, version, baseFileSuffix),
-                        loadAdditions(resolver, overlaySubtree, version, baseFileSuffix)));
+                        loadAdditions(resolver, overlaySubtree, version, baseFileSuffix),
+                        loadReplacements(resolver, overlaySubtree, version, baseFileSuffix)));
             }
 
             Map<String, Map<String, JsonNode>> result = new LinkedHashMap<>();
             for (String version : overlayVersions) {
                 Chain chain = resolveChain(version, overlaysByVersion.values());
-                // Fold whole-file additions into the base map so materialize emits them alongside base files; a patch
-                // keyed on an added path then applies, and a tombstone can drop an added path, exactly as for base files.
-                // An addition is by definition a template with no base counterpart, so a clash with a base path is an
-                // authoring error (the intent was a patch, not an addition) — fail loud rather than silently overwrite.
-                Set<String> clashingAdditions = new HashSet<>(chain.additions().keySet());
-                clashingAdditions.retainAll(baseTemplates.keySet());
-                if (!clashingAdditions.isEmpty()) {
-                    throw new IllegalStateException("Runtime overlay additions for version " + version + " in subtree " + overlaySubtree
-                            + " clash with base templates (use a .patch.json instead of a whole-file addition): " + clashingAdditions);
-                }
-                Map<String, JsonNode> effectiveBase = new LinkedHashMap<>(baseTemplates);
-                effectiveBase.putAll(chain.additions());
+                Map<String, JsonNode> effectiveBase = effectiveBase(baseTemplates, chain, version, overlaySubtree);
                 result.put(version, RuntimeOverlayMaterializer.materialize(baseVersion, version, effectiveBase, chain.patches(), chain.tombstones(),
                         injectionPointers));
             }
@@ -151,6 +147,37 @@ public final class RuntimeOverlayResolver {
         } catch (IOException e) {
             throw new IllegalStateException("Can't materialize runtime overlay templates for subtree " + overlaySubtree, e);
         }
+    }
+
+    /**
+     * Folds the whole-file deltas into the base map so {@link RuntimeOverlayMaterializer} emits them alongside base
+     * files: an <em>addition</em> contributes a path the base never had, a <em>replacement</em> supersedes a base file
+     * outright. A patch keyed on either then applies, and a tombstone can drop either, exactly as for a base file.
+     *
+     * <p>The two verbs are mirror images, and each is guarded: an addition is by definition a template with no base
+     * counterpart, so a clash with a base path is an authoring error (the intent was a patch or a replacement), while a
+     * replacement by definition supersedes an existing file, so a missing counterpart is one (the intent was an
+     * addition). Both fail loud rather than silently overwriting or dropping a file.</p>
+     */
+    private static Map<String, JsonNode> effectiveBase(Map<String, JsonNode> baseTemplates, Chain chain, String version, String overlaySubtree) {
+        Set<String> clashingAdditions = new HashSet<>(chain.additions().keySet());
+        clashingAdditions.retainAll(baseTemplates.keySet());
+        if (!clashingAdditions.isEmpty()) {
+            throw new IllegalStateException("Runtime overlay additions for version " + version + " in subtree " + overlaySubtree
+                    + " clash with base templates (use a " + PATCH_SUFFIX + " to modify a base file, or a whole-file " + REPLACE_MARKER
+                    + " to supersede it): " + clashingAdditions);
+        }
+        Map<String, JsonNode> effectiveBase = new LinkedHashMap<>(baseTemplates);
+        effectiveBase.putAll(chain.additions());
+
+        Set<String> danglingReplacements = new HashSet<>(chain.replacements().keySet());
+        danglingReplacements.removeAll(effectiveBase.keySet());
+        if (!danglingReplacements.isEmpty()) {
+            throw new IllegalStateException("Runtime overlay replacements for version " + version + " in subtree " + overlaySubtree
+                    + " have no base counterpart (ship a template the base never had as a whole-file addition instead): " + danglingReplacements);
+        }
+        effectiveBase.putAll(chain.replacements());
+        return effectiveBase;
     }
 
     private static Map<String, JsonNode> loadBaseTemplates(PathMatchingResourcePatternResolver resolver, String baseSubtree, String baseVersion,
@@ -196,7 +223,8 @@ public final class RuntimeOverlayResolver {
      * alongside patches under {@code runtime-overlays/<version>/<subtree>/} but carry the plain base file suffix
      * (for example {@code <path>.json} or {@code <path>.bp}), so their key already matches a base-relative path and
      * needs no reconstruction. A {@code .patch.json} file also ends in {@code .json}, so when the base suffix is
-     * {@code .json} it is filtered out here (it is picked up by {@link #loadPatches} instead); tombstones end in
+     * {@code .json} it is filtered out here (it is picked up by {@link #loadPatches} instead), and so does a
+     * {@code .replace<suffix>} replacement (picked up by {@link #loadReplacements}); tombstones end in
      * {@code .tombstone} and match neither glob.
      */
     private static Map<String, JsonNode> loadAdditions(PathMatchingResourcePatternResolver resolver, String subtree, String version, String baseFileSuffix)
@@ -206,11 +234,35 @@ public final class RuntimeOverlayResolver {
         Map<String, JsonNode> additions = new LinkedHashMap<>();
         for (Resource resource : resources) {
             String relativePath = relativePathAfter(resource.getURL().getPath(), marker);
-            if (relativePath != null && !relativePath.endsWith(PATCH_SUFFIX)) {
+            if (relativePath != null && !relativePath.endsWith(PATCH_SUFFIX) && !relativePath.endsWith(REPLACE_MARKER + baseFileSuffix)) {
                 additions.put(relativePath, readJson(resource));
             }
         }
         return additions;
+    }
+
+    /**
+     * Loads whole-file replacements: base templates a version rewrites wholesale, because their delta is so structural
+     * that a reviewable RFC 6902 patch is no longer practical. They live alongside patches under
+     * {@code runtime-overlays/<version>/<subtree>/} as {@code <path>.replace<baseFileSuffix>} (for example
+     * {@code aws/enterprise_pro.replace.json}, or {@code cdp-sdx-enterprise-pro.replace.bp} for a {@code .bp} tree), so
+     * the key is that path with the {@code .replace} marker stripped out. Unlike a patch, a replacement carries no
+     * {@code test} guard, so it neither detects base drift nor inherits later base changes for that file - it is the
+     * escape hatch for a rewrite, not the default verb.
+     */
+    private static Map<String, JsonNode> loadReplacements(PathMatchingResourcePatternResolver resolver, String subtree, String version,
+            String baseFileSuffix) throws IOException {
+        String replaceSuffix = REPLACE_MARKER + baseFileSuffix;
+        Resource[] resources = resolver.getResources("classpath*:" + OVERLAY_ROOT + "/" + version + "/" + subtree + "/**/*" + replaceSuffix);
+        String marker = "/" + version + "/" + subtree + "/";
+        Map<String, JsonNode> replacements = new LinkedHashMap<>();
+        for (Resource resource : resources) {
+            String relativePath = relativePathAfter(resource.getURL().getPath(), marker);
+            if (relativePath != null) {
+                replacements.put(stripSuffix(relativePath, replaceSuffix) + baseFileSuffix, readJson(resource));
+            }
+        }
+        return replacements;
     }
 
     private static Set<String> loadTombstones(PathMatchingResourcePatternResolver resolver, String subtree, String version, String baseFileSuffix)
@@ -228,27 +280,44 @@ public final class RuntimeOverlayResolver {
     }
 
     /**
-     * Resolves the effective patch/tombstone set for {@code targetVersion}: every overlay anchored at
-     * {@code <= targetVersion}, applied in ascending version order. Patches touching the same file are
+     * Resolves the effective patch/tombstone/addition/replacement set for {@code targetVersion}: every overlay
+     * anchored at {@code <= targetVersion}, applied in ascending version order. Patches touching the same file are
      * concatenated (ascending), so later versions' ops run after earlier ones (highest-anchor-wins on a
-     * conflicting path).
+     * conflicting path), while the whole-file verbs are last-anchor-wins on the same path.
      */
     private static Chain resolveChain(String targetVersion, Collection<VersionOverlay> overlays) {
-        List<VersionOverlay> applicable = overlays.stream()
-                .filter(overlay -> VERSION_COMPARATOR.compare(versioned(overlay.version()), versioned(targetVersion)) <= 0)
-                .sorted((left, right) -> VERSION_COMPARATOR.compare(versioned(left.version()), versioned(right.version())))
-                .toList();
         Map<String, JsonNode> mergedPatches = new LinkedHashMap<>();
         Set<String> tombstones = new HashSet<>();
         Map<String, JsonNode> additions = new LinkedHashMap<>();
-        for (VersionOverlay overlay : applicable) {
+        Map<String, JsonNode> replacements = new LinkedHashMap<>();
+        for (VersionOverlay overlay : applicableInAscendingOrder(targetVersion, overlays)) {
+            resetFilesRewrittenByWholeFileDeltas(overlay, mergedPatches, tombstones);
             overlay.patches().forEach((path, patch) -> mergePatch(mergedPatches, path, patch));
             tombstones.addAll(overlay.tombstones());
-            // A whole-file addition is last-anchor-wins: a later version re-adding the same path replaces it, and an
-            // addition introduced at version X forward-propagates into every higher version.
             additions.putAll(overlay.additions());
+            replacements.putAll(overlay.replacements());
         }
-        return new Chain(mergedPatches, tombstones, additions);
+        return new Chain(mergedPatches, tombstones, additions, replacements);
+    }
+
+    private static List<VersionOverlay> applicableInAscendingOrder(String targetVersion, Collection<VersionOverlay> overlays) {
+        return overlays.stream()
+                .filter(overlay -> VERSION_COMPARATOR.compare(versioned(overlay.version()), versioned(targetVersion)) <= 0)
+                .sorted((left, right) -> VERSION_COMPARATOR.compare(versioned(left.version()), versioned(right.version())))
+                .toList();
+    }
+
+    /**
+     * Clears what lower anchors had accumulated for a path this overlay ships whole: patches written against a body
+     * this version no longer ships would fail their own {@code test} ops, and a tombstone from a lower anchor would
+     * drop the file the overlay just re-introduced. The overlay's own patches and tombstone, applied by the caller
+     * right after, still take effect on the new body.
+     */
+    private static void resetFilesRewrittenByWholeFileDeltas(VersionOverlay overlay, Map<String, JsonNode> mergedPatches, Set<String> tombstones) {
+        Set<String> wholeFileDeltaPaths = new HashSet<>(overlay.additions().keySet());
+        wholeFileDeltaPaths.addAll(overlay.replacements().keySet());
+        wholeFileDeltaPaths.forEach(mergedPatches::remove);
+        wholeFileDeltaPaths.forEach(tombstones::remove);
     }
 
     private static void mergePatch(Map<String, JsonNode> mergedPatches, String path, JsonNode patch) {
@@ -279,9 +348,11 @@ public final class RuntimeOverlayResolver {
         }
     }
 
-    private record VersionOverlay(String version, Map<String, JsonNode> patches, Set<String> tombstones, Map<String, JsonNode> additions) {
+    private record VersionOverlay(String version, Map<String, JsonNode> patches, Set<String> tombstones, Map<String, JsonNode> additions,
+            Map<String, JsonNode> replacements) {
     }
 
-    private record Chain(Map<String, JsonNode> patches, Set<String> tombstones, Map<String, JsonNode> additions) {
+    private record Chain(Map<String, JsonNode> patches, Set<String> tombstones, Map<String, JsonNode> additions,
+            Map<String, JsonNode> replacements) {
     }
 }

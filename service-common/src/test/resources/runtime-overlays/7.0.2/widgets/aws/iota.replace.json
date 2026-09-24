@@ -1,0 +1,5 @@
+{
+  "name": "__RUNTIME_VERSION__ - Iota AWS",
+  "cluster": { "blueprintName": "__RUNTIME_VERSION__ - Iota" },
+  "shape": "revived"
+}

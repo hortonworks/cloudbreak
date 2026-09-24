@@ -1,0 +1,19 @@
+{
+  "tags": {
+    "shared_services_ready": true
+  },
+  "description": "__RUNTIME_VERSION__ - SDX template with Atlas, HMS, Ranger and other services they are dependent on",
+  "blueprint": {
+    "cdhVersion": "__RUNTIME_VERSION__",
+    "displayName": "datalake",
+    "blueprintName": "sdx-rewritten",
+    "hostTemplates": [
+      {
+        "cardinality": 1,
+        "refName": "master",
+        "roleConfigGroupsRefNames": [ "hdfs-NAMENODE-BASE" ]
+      }
+    ],
+    "services": []
+  }
+}

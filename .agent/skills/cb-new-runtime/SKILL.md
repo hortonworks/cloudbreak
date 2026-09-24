@@ -24,7 +24,7 @@ enum (external `thunderhead` repo); versions **≤ 7.3.3**, which stay frozen fu
 or convert them. Promoting a *newer* version to be the frozen base is a rare, separate operation, not
 this skill.
 
-> Underlying mechanics: the base+overlay engine (resolver, four flavors, version injection) is
+> Underlying mechanics: the base+overlay engine (resolver, five flavors, version injection) is
 > documented in `service-common/.../common/runtime/overlay/README.md`; the RFC 6902 patch rules and
 > the `name=value` selector in `common/.../common/json/patch/README.md`. Each module's adapter has its
 > own README next to the loader (`core/.../init/{blueprint,clustertemplate}/overlay/`,
@@ -85,7 +85,7 @@ Drop delta files under `runtime-overlays/<NEW_CR>/<subtree>/` in the owning modu
 | `clustertemplates`| **core**    | `<provider>/<template>` (aws/azure/gcp/yarn) | `clustertemplates/aws/dataengineering-spark3.*` |
 | `duties`          | **datalake**| `<platform>/<shape>`               | `duties/aws/medium_duty_ha.*`             |
 
-There are **four** delta kinds (see the README for the resolver rules):
+There are **five** delta kinds (see the README for the resolver rules):
 
 - **Patch** `<path>.patch.json` — an RFC 6902 array modifying a base file. **Every `replace`/`remove`
   must be immediately preceded by a `test` op on the same path** (enforced — base drift fails loud).
@@ -103,6 +103,15 @@ There are **four** delta kinds (see the README for the resolver rules):
   the loader swaps it for the actual runtime version. **For a new blueprint also add a `<stem>.name`
   sidecar** containing the display name with the same placeholder, e.g.
   `__RUNTIME_VERSION__ - Brand New: Foo`.
+- **Replacement** `<path>.replace.json` (cluster template / duty) or `<path>.replace.bp` (blueprint) —
+  supersedes a base file **whole**, for a template the version restructures so thoroughly that a patch
+  would be an unreviewable wall of guarded `test`+`replace` pairs. Weigh both: is the patch still readable
+  against intent, and how many files would the replacement multiply into — a per-provider shape (duty,
+  cluster template) turns one replacement into one wholesale base copy *per provider*, a blueprint into
+  one. Version-carrying fields use `__RUNTIME_VERSION__`, exactly as in an addition. **A patch is still the default**: a replacement loses base-drift detection (no `test`
+  ops) and stops inheriting later base changes for that file, so reach for it only when the patch is no
+  longer a delta. It must have a base counterpart (otherwise it is an addition — the resolver fails
+  loud), and needs no `<stem>.name` sidecar for a blueprint (the base block already names the stem).
 - **Nothing** — zero-patch; handled entirely by 1.1.
 
 **Never hand-author a concrete version** in `name`, `description`, `cdhVersion` or `blueprintName`:

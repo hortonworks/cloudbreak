@@ -44,14 +44,18 @@ overlay: list it and nothing else.
 ## Resolution algorithm (for a version V > base)
 
 1. Load the base files (filtered).
-2. Fold in any whole-file **additions** anchored at `≤ V`.
+2. Fold in any whole-file **additions** and **replacements** anchored at `≤ V`.
 3. Apply every **patch** anchored at `≤ V` in ascending version order — so a change introduced at one
    version forward-propagates into all higher ones. Patches on the same file are concatenated
-   (highest anchor wins on a conflicting path).
-4. Drop any file marked by a **tombstone** anchored at `≤ V`.
+   (highest anchor wins on a conflicting path). A whole-file delta **resets** its file: patches anchored
+   *below* an addition or replacement of that path are dropped rather than replayed against a body they
+   were never written for; same-anchor and higher-anchor patches still apply, on top of the new body.
+4. Drop any file marked by a **tombstone** anchored at `≤ V` — unless an addition or replacement of that
+   path is anchored *above* the tombstone, which revives the file with its new body (the reset in step 3
+   covers tombstones too, so a dropped file can be brought back by shipping it whole).
 5. Inject V into the caller-named version fields.
 
-## The four overlay flavors
+## The five overlay flavors
 
 Deltas live under `classpath*:runtime-overlays/<version>/<overlaySubtree>/`:
 
@@ -60,10 +64,45 @@ Deltas live under `classpath*:runtime-overlays/<version>/<overlaySubtree>/`:
 | `<path>.patch.json`      | RFC 6902 patch modifying a base file                                                          |
 | `<path>.tombstone`       | empty marker; drops that base file for this version                                           |
 | `<path><baseFileSuffix>` | **addition** — a whole new file the base never had (version fields use `__RUNTIME_VERSION__`) |
+| `<path>.replace<baseFileSuffix>` | **replacement** — supersedes a base file whole (version fields use `__RUNTIME_VERSION__`) |
 | *(nothing)*              | zero-delta: identical to base modulo the injected version string                              |
 
-Additions forward-propagate (last anchor wins) and compose with patches and tombstones exactly like
-base files — a patch can target an added file, a tombstone can drop one.
+Additions and replacements forward-propagate (last anchor wins) and compose with patches and tombstones
+exactly like base files — a patch can target either, a tombstone can drop either, and either verb anchored
+above a tombstone revives the file it dropped.
+
+The two whole-file verbs are mirror images, and each is guarded at resolution time: an **addition** must
+*not* collide with a base path (that is a patch or a replacement in disguise), and a **replacement** must
+have a base counterpart (otherwise it is an addition). Either mistake fails loud naming the path, rather
+than silently overwriting or introducing a file.
+
+### When to use a replacement
+
+A patch is the default verb: it is a reviewable delta, its mandatory `test` ops detect base drift, and
+the file keeps inheriting later base changes. A replacement is the **escape hatch for a structural
+rewrite** — when the version reorders, regroups or rebuilds a template so thoroughly that the patch is
+no longer a delta but an unreviewable wall of guarded `test`+`replace` pairs.
+
+Two questions decide it:
+
+- **Is the patch still a delta a reviewer can read against intent?** If yes, keep it, however long it is.
+  A blueprint that moves whole role-config-group sets between host templates yields a ~180-line patch of
+  guarded pairs over reordered arrays that nobody can check against intent; a duty that drops one instance
+  group and resizes two others yields three to five ops that read exactly like the change.
+- **How many files would the replacement multiply into?** A per-provider tree (duties, cluster templates)
+  costs one wholesale base copy *per provider* — that many files to hand-fix on every later base change,
+  with that many `test` guards lost. A single blueprint costs one.
+
+Note also that the whole file is usually *larger* than the patch, not smaller — 450 lines against 178 for
+that blueprint. The win is reviewability, never size.
+
+What it costs, and why it is not the default:
+
+- **no drift detection** — a replacement carries no `test` ops, so a change to the base underneath it
+  goes unnoticed instead of failing the build;
+- **no future base inheritance** — that file stops tracking the base from its anchor onward, so any
+  later base fix must be re-applied by hand (or by a patch anchored above the replacement);
+- **no visible delta** — a reviewer sees a whole file, not what changed.
 
 ## Version injection
 
@@ -87,6 +126,7 @@ caller names the pointers and the engine produces the correctly-versioned value.
 ## Tests
 
 `RuntimeOverlayResolverTest` and `RuntimeOverlayMaterializerTest` exercise the engine against a
-domain-neutral fixture tree (`widgets` / `gadgets`, base `7.0.0`, overlays `7.0.1`/`7.0.3`) under
-`src/test/resources/`, covering chain resolution, forward propagation, and all four flavors. The
-tree-diff assertions come from `common`'s `JsonTreeAssertions` test utility.
+domain-neutral fixture tree (`widgets` / `gadgets`, base `7.0.0`, overlays `7.0.1`–`7.0.3`, plus the
+tiny `orphans` / `clashes` trees for the two fail-loud guards) under `src/test/resources/`, covering
+chain resolution, forward propagation, and all five flavors. The tree-diff assertions come from
+`common`'s `JsonTreeAssertions` test utility.

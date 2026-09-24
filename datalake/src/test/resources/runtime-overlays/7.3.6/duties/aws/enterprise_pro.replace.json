@@ -1,0 +1,28 @@
+{
+  "cluster": {
+    "blueprintName": "__RUNTIME_VERSION__ - Enterprise SDX Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph"
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "instanceGroups": [
+    {
+      "name": "gateway",
+      "template": {
+        "instanceType": "r5d.4xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 512,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    }
+  ]
+}

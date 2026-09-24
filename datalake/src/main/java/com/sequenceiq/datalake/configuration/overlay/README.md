@@ -4,7 +4,7 @@
 ship as overlays, so `duties/<version>/` need not be copied per CR. It is a thin adapter over the
 shared engine `RuntimeOverlayResolver` (in `service-common`, package
 `com.sequenceiq.cloudbreak.common.runtime.overlay`) — see that engine's README for the resolution
-algorithm and the four overlay flavors. This file documents only what is specific to duties.
+algorithm and the five overlay flavors. This file documents only what is specific to duties.
 
 ## What this adapter supplies
 
@@ -26,7 +26,8 @@ nested duties (e.g. `..._with_profiler/...`), which are not loaded from disk tod
 ## Where deltas live
 
 `datalake/src/main/resources/runtime-overlays/<version>/duties/<platform>/<shape>.*` — e.g.
-`runtime-overlays/7.3.6/duties/aws/medium_duty_ha.patch.json`.
+`runtime-overlays/7.3.6/duties/aws/medium_duty_ha.patch.json`, or
+`runtime-overlays/7.3.6/duties/aws/enterprise_pro.replace.json` to supersede a base duty whole.
 
 ## Which versions are overlays
 

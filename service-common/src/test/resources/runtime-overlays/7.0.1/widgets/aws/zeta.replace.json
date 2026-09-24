@@ -1,0 +1,5 @@
+{
+  "name": "__RUNTIME_VERSION__ - Zeta AWS",
+  "cluster": { "blueprintName": "__RUNTIME_VERSION__ - Zeta" },
+  "shape": "rewritten"
+}

@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayConstants;
  *       prefix swapped (the guardrail for the DB-name-stable tree),</li>
  *   <li>a name-addressed instance-type patch (the test-only 7.3.6 fixture) changes exactly one field and
  *       forward-propagates into the empty 7.3.7 overlay above it, and</li>
- *   <li>a later version can tombstone a whole template or add a brand-new one.</li>
+ *   <li>a later version can tombstone a whole template, add a brand-new one, or replace a base one wholesale.</li>
  * </ul>
  * <p>Chain mechanics that need two patch anchors (highest-anchor-wins on a shared path) are proven generically
  * for the shared resolver in {@code RuntimeOverlayResolverTest}; this test focuses on cluster-template wiring.
@@ -157,6 +157,25 @@ class RuntimeClusterTemplateOverlayLoaderTest {
         assertEquals("7.3.6 - Streaming Analytics", MAPPER.readTree(raw).at(BLUEPRINT_NAME_POINTER).asText(),
                 "the addition's blueprintName must be version-injected too");
         assertFalse(materialized.containsKey("7.3.4 - Streaming Analytics for AWS"), "an addition anchored at 7.3.6 must not appear in earlier versions");
+    }
+
+    @Test
+    void replacedTemplateSupersedesTheBaseBodyUnderTheSameInjectedName() throws IOException {
+        Map<String, String> materialized = underTest.materializeOverlayClusterTemplates(PATCHED_WITH_736);
+
+        // aws/datamart is replaced whole at 7.3.6 (aws/datamart.replace.json) and keeps its DB-synced /name, so only
+        // the body changes - the escape hatch for a template whose restructuring is no longer a reviewable patch.
+        String raw = materialized.get("7.3.6 - Data Mart for AWS");
+        assertNotNull(raw, "a replaced cluster template must still be materialized under its injected name");
+        JsonNode replaced = MAPPER.readTree(raw);
+        assertEquals("7.3.6 - Data Mart: Apache Impala, Hue", replaced.at(BLUEPRINT_NAME_POINTER).asText(),
+                "the replacement's blueprintName must be version-injected too");
+        assertEquals("r5d.4xlarge", replaced.at(MASTER_INSTANCE_TYPE_POINTER).asText(), "the replacement's body must supersede the base body");
+        assertEquals(1, replaced.at("/distroXTemplate/instanceGroups").size(),
+                "nothing is merged in from the base: the replacement's group set is the whole file");
+        // Below the replacement's anchor the base body still applies.
+        assertEquals(3, MAPPER.readTree(materialized.get("7.3.5 - Data Mart for AWS")).at("/distroXTemplate/instanceGroups").size(),
+                "a version below the replacement's anchor must keep the base group set");
     }
 
     @Test

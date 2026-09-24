@@ -33,7 +33,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
  *       (as shipped) no overlay patch of their own, so they equal the base modulo version injection,</li>
  *   <li>a name-addressed instance-type patch (the test-only 7.3.6 fixture) changes only the {@code core}
  *       host group, and</li>
- *   <li>that change forward-propagates into the empty 7.3.7 overlay above it.</li>
+ *   <li>that change forward-propagates into the empty 7.3.7 overlay above it, and</li>
+ *   <li>a whole-file replacement supersedes a base duty under the same derived config key.</li>
  * </ul>
  * <p>Chain mechanics that need two patch anchors (highest-anchor-wins on a shared path) are proven generically
  * for the shared resolver in {@code RuntimeOverlayResolverTest}; this test focuses on the duty-specific wiring.
@@ -134,6 +135,25 @@ class RuntimeDutyOverlayLoaderTest {
         assertTrue(MAPPER.readTree(raw).at("/cluster/blueprintName").asText().startsWith("7.3.6 "),
                 "the addition's version field must be injected to the overlay version");
         assertFalse(materialized.containsKey(containerized734), "an addition anchored at 7.3.6 must not appear in earlier versions");
+    }
+
+    @Test
+    void replacedDutySupersedesTheBaseBodyUnderTheSameConfigKey() throws IOException {
+        Map<CDPConfigKey, String> materialized = underTest.materializeOverlayDuties(SUPPORTED_WITH_736);
+        CDPConfigKey enterprisePro736 = new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.ENTERPRISE_PRO, "7.3.6", Architecture.X86_64);
+        CDPConfigKey enterprisePro735 = new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.ENTERPRISE_PRO, "7.3.5", Architecture.X86_64);
+
+        // aws/enterprise_pro is replaced whole at 7.3.6 (aws/enterprise_pro.replace.json) - the escape hatch for a duty
+        // whose restructuring is no longer expressible as a reviewable patch.
+        String raw = materialized.get(enterprisePro736);
+        assertNotNull(raw, "a replaced duty must still materialize under its path-derived CDPConfigKey");
+        JsonNode replaced = MAPPER.readTree(raw);
+        assertTrue(replaced.at("/cluster/blueprintName").asText().startsWith("7.3.6 "),
+                "the replacement authors blueprintName with the placeholder, so it must come out version-injected");
+        assertEquals(1, replaced.path("instanceGroups").size(), "nothing is merged in from the base: the replacement's host groups are the whole file");
+        // Below the replacement's anchor the base body still applies.
+        assertTrue(MAPPER.readTree(materialized.get(enterprisePro735)).path("instanceGroups").size() > 1,
+                "a version below the replacement's anchor must keep the base host groups");
     }
 
     @Test

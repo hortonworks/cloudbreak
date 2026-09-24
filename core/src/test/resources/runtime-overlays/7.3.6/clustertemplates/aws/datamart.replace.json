@@ -1,0 +1,23 @@
+{
+  "name": "__RUNTIME_VERSION__ - Data Mart for AWS",
+  "description": "",
+  "type": "DATAMART",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "__RUNTIME_VERSION__ - Data Mart: Apache Impala, Hue"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "instanceType": "r5d.4xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

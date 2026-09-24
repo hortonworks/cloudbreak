@@ -4,7 +4,7 @@
 versions that ship as overlays, so `defaults/blueprints/<version>/` need not be copied per CR. It is a
 thin adapter over the shared engine `RuntimeOverlayResolver` (in `service-common`, package
 `com.sequenceiq.cloudbreak.common.runtime.overlay`) — see that engine's README for the resolution
-algorithm and the four overlay flavors. This file documents only what is specific to blueprints.
+algorithm and the five overlay flavors. This file documents only what is specific to blueprints.
 
 ## What this adapter supplies
 
@@ -32,7 +32,9 @@ name (never a blind rewrite). Two sources feed it:
   `__RUNTIME_VERSION__ - Brand New: Foo`), which is swapped to the target version.
 
 The base block wins on conflict. A `.bp` with neither a base registration nor a `.name` sidecar is
-skipped (there is no name to register it under). Each materialized blueprint carries its synthesized
+skipped (there is no name to register it under). A **replacement**
+(`<stem>.replace.bp`, which supersedes a base blueprint wholesale) needs no sidecar: its stem is
+already in the base block, so it keeps the base display name with the prefix swapped. Each materialized blueprint carries its synthesized
 name, its file stem (the key the gov-cloud exclusion filter uses), and the version-injected `.bp` JSON.
 
 ## Where deltas live

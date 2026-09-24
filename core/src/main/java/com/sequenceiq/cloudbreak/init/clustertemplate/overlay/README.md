@@ -4,7 +4,7 @@
 versions that ship as overlays, so `defaults/clustertemplates/<version>/` need not be copied per CR.
 It is a thin adapter over the shared engine `RuntimeOverlayResolver` (in `service-common`, package
 `com.sequenceiq.cloudbreak.common.runtime.overlay`) — see that engine's README for the resolution
-algorithm and the four overlay flavors. This file documents only what is specific to cluster
+algorithm and the five overlay flavors. This file documents only what is specific to cluster
 templates.
 
 ## What this adapter supplies
@@ -23,8 +23,9 @@ what `DefaultClusterTemplateCache` reads from disk — the cache merges the two 
 ## Where deltas live
 
 `core/src/main/resources/runtime-overlays/<version>/clustertemplates/<provider>/<template>.*`
-— e.g. `runtime-overlays/7.3.6/clustertemplates/aws/dataengineering-spark3.patch.json`. Providers are
-`aws` / `azure` / `gcp` / `yarn`.
+— e.g. `runtime-overlays/7.3.6/clustertemplates/aws/dataengineering-spark3.patch.json`, or
+`runtime-overlays/7.3.6/clustertemplates/aws/datamart.replace.json` to supersede a base template whole.
+Providers are `aws` / `azure` / `gcp` / `yarn`.
 
 ## Which versions are overlays
 

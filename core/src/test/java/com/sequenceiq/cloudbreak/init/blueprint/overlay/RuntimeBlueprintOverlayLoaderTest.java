@@ -37,7 +37,9 @@ import com.sequenceiq.cloudbreak.init.blueprint.overlay.RuntimeBlueprintOverlayL
  *   <li>the in-file version fields ({@code /description} and the bare {@code /blueprint/cdhVersion}) are injected,</li>
  *   <li>7.3.4 and 7.3.5 ship no overlay patch, so they equal the base modulo those injected version fields,</li>
  *   <li>a config patch (the test-only 7.3.6 fixture) changes exactly one field and forward-propagates into the
- *       empty 7.3.7 overlay above it, tombstones a whole blueprint, and adds a brand-new one, and</li>
+ *       empty 7.3.7 overlay above it, tombstones a whole blueprint, and adds a brand-new one,</li>
+ *   <li>a whole-file replacement supersedes a base blueprint while still taking its display name from the base
+ *       block (no {@code .name} sidecar), and</li>
  *   <li>only stems registered in the base block become overlays.</li>
  * </ul>
  * <p>Chain mechanics that need two patch anchors (highest-anchor-wins on a shared path) are proven generically
@@ -188,6 +190,26 @@ class RuntimeBlueprintOverlayLoaderTest {
         // display name to register it under - it must be skipped rather than materialized under a guessed name.
         assertFalse(byName.values().stream().anyMatch(blueprint -> "cdp-orphan".equals(blueprint.fileStem())),
                 "an addition with neither a base-block entry nor a name sidecar must be skipped");
+    }
+
+    @Test
+    void replacedBlueprintSupersedesTheBaseBodyUnderTheSameBaseBlockName() {
+        Map<String, MaterializedBlueprint> byName = byName(underTest.materializeOverlayBlueprints(PATCHED_WITH_736));
+
+        // cdp-sdx is replaced whole at 7.3.6 (cdp-sdx.replace.bp). Unlike an addition, a replacement needs no .name
+        // sidecar: the stem is already in the base block, so the DB display name is the base name, prefix-swapped.
+        MaterializedBlueprint replaced = byName.get(swapPrefix(SDX_NAME, "7.3.6"));
+        assertNotNull(replaced, "a replaced blueprint must register under the base-block name, version-injected");
+        assertEquals("cdp-sdx", replaced.fileStem(), "the replacement keeps the base file stem for the gov-cloud filter");
+        assertEquals("sdx-rewritten", replaced.fileJson().at("/blueprint/blueprintName").asText(),
+                "the replacement's body must supersede the base body");
+        assertEquals(0, replaced.fileJson().at("/blueprint/services").size(), "nothing is merged in from the base: the replacement's body is the whole file");
+        assertEquals("7.3.6", replaced.fileJson().at(CDH_VERSION_POINTER).asText(), "the replacement's in-file version fields are injected too");
+        assertTrue(replaced.fileJson().at(DESCRIPTION_POINTER).asText().startsWith("7.3.6 "),
+                "the replacement authors /description with the placeholder, so it must come out version-injected");
+        // Below the replacement's anchor the base body still applies.
+        assertTrue(byName.get(swapPrefix(SDX_NAME, "7.3.5")).fileJson().at("/blueprint/services").size() > 0,
+                "a version below the replacement's anchor must keep the base body");
     }
 
     @Test

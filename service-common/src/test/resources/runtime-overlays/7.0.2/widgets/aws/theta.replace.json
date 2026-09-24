@@ -1,0 +1,8 @@
+{
+  "name": "__RUNTIME_VERSION__ - Theta AWS",
+  "cluster": { "blueprintName": "__RUNTIME_VERSION__ - Theta" },
+  "shape": "rewritten",
+  "instanceGroups": [
+    { "name": "master", "template": { "instanceType": "c6.4xlarge" } }
+  ]
+}

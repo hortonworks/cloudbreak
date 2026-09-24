@@ -1,0 +1,5 @@
+{
+  "name": "7.0.0 - Iota AWS",
+  "cluster": { "blueprintName": "7.0.0 - Iota" },
+  "shape": "legacy"
+}

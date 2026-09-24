@@ -1,0 +1,8 @@
+{
+  "name": "__RUNTIME_VERSION__ - Epsilon AWS",
+  "cluster": { "blueprintName": "__RUNTIME_VERSION__ - Epsilon" },
+  "shape": "rewritten",
+  "instanceGroups": [
+    { "name": "master", "template": { "instanceType": "c6.4xlarge" } }
+  ]
+}
