@@ -59,6 +59,7 @@ import com.azure.resourcemanager.compute.models.DiskStorageAccountTypes;
 import com.azure.resourcemanager.compute.models.DiskUpdate;
 import com.azure.resourcemanager.compute.models.Encryption;
 import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.compute.models.KeyForDiskEncryptionSet;
 import com.azure.resourcemanager.compute.models.NetworkAccessPolicy;
 import com.azure.resourcemanager.compute.models.OperatingSystemStateTypes;
@@ -472,7 +473,8 @@ public class AzureClient {
                 .getByResourceGroup(resourceGroup, imageName));
     }
 
-    public Optional<VirtualMachineCustomImage> createImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
+    public Optional<VirtualMachineCustomImage> createImage(String imageName, String resourceGroup, String fromVhdUri, String region,
+            HyperVGenerationTypes hyperVGeneration) {
         return handleException(() -> {
             LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
             if (!azure.resourceGroups().contain(resourceGroup)) {
@@ -482,15 +484,19 @@ public class AzureClient {
                         .withRegion(region)
                         .create();
             }
-            LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
-                    fromVhdUri, imageName, resourceGroup, region);
-            return measure(() -> azure.virtualMachineCustomImages()
-                            .define(imageName)
-                            .withRegion(region)
-                            .withExistingResourceGroup(resourceGroup)
-                            .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
-                            .create(),
-                    LOGGER, "Custom image has been created under {} ms with name {}", imageName);
+            LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {}, HyperVGeneration: {})",
+                    fromVhdUri, imageName, resourceGroup, region, hyperVGeneration);
+            return measure(() -> {
+                VirtualMachineCustomImage.DefinitionStages.WithHyperVGeneration withHyperVGeneration = azure.virtualMachineCustomImages()
+                        .define(imageName)
+                        .withRegion(region)
+                        .withExistingResourceGroup(resourceGroup);
+                VirtualMachineCustomImage.DefinitionStages.WithOSDiskImageSourceAltVirtualMachineSource withOsDiskImageSource =
+                        hyperVGeneration == null ? withHyperVGeneration : withHyperVGeneration.withHyperVGeneration(hyperVGeneration);
+                return withOsDiskImageSource
+                        .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
+                        .create();
+            }, LOGGER, "Custom image has been created under {} ms with name {}", imageName);
         });
     }
 

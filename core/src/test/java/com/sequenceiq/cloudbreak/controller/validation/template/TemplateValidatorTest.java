@@ -152,7 +152,7 @@ public class TemplateValidatorTest {
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
         verifyIDBrokerVolume(instanceGroup);
     }
@@ -165,7 +165,7 @@ public class TemplateValidatorTest {
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -176,7 +176,7 @@ public class TemplateValidatorTest {
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -188,7 +188,7 @@ public class TemplateValidatorTest {
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(1)).error(anyString());
     }
 
@@ -198,7 +198,7 @@ public class TemplateValidatorTest {
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -208,7 +208,7 @@ public class TemplateValidatorTest {
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(1)).error(anyString());
     }
 
@@ -220,7 +220,7 @@ public class TemplateValidatorTest {
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -231,7 +231,7 @@ public class TemplateValidatorTest {
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(2)).error(anyString());
     }
 
@@ -241,7 +241,7 @@ public class TemplateValidatorTest {
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -251,7 +251,7 @@ public class TemplateValidatorTest {
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(2)).error(anyString());
     }
 
@@ -263,7 +263,7 @@ public class TemplateValidatorTest {
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(2)).error(anyString());
     }
 
@@ -276,7 +276,7 @@ public class TemplateValidatorTest {
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -289,7 +289,7 @@ public class TemplateValidatorTest {
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(1)).error(anyString());
     }
 
@@ -301,7 +301,7 @@ public class TemplateValidatorTest {
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -313,7 +313,7 @@ public class TemplateValidatorTest {
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(1)).error(anyString());
     }
 
@@ -329,7 +329,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -345,7 +345,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -361,7 +361,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(1)).error(anyString());
     }
 
@@ -377,7 +377,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(0)).error(anyString());
     }
 
@@ -393,7 +393,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(1)).error(anyString());
     }
 
@@ -410,22 +410,22 @@ public class TemplateValidatorTest {
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "hms_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, never()).error(anyString());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "atlas_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, never()).error(anyString());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "raz_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, never()).error(anyString());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "storage_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, builder);
         verify(builder, times(2)).error(anyString());
     }
 

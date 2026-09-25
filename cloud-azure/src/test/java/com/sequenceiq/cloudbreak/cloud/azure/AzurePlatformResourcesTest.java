@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATION_V1;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATION_V2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -27,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.azure.resourcemanager.compute.models.ResourceSkuCapabilities;
 import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
 import com.azure.resourcemanager.network.fluent.models.SubnetInner;
@@ -456,8 +458,8 @@ class AzurePlatformResourcesTest {
 
         // ARM_VM_DEFAULT = Standard_D4s_v5 — not deprecated, not gen2-only → kept, becomes default
         // Standard_D2_v2 — deprecated (Dsv2 family), kept in cloudVmResponses and tracked in deprecatedCloudVmResponses
-        // Standard_D2_v6 — not deprecated, but gen2-only (_v6 suffix) → removed
-        // Standard_D4s_v7 — not deprecated, but gen2-only (_v7 suffix) → removed
+        // Standard_D2_v6 — not deprecated, but gen2-only → removed
+        // Standard_D4s_v7 — not deprecated, but gen2-only → removed
         // Basic_A0 — no version suffix, not deprecated → kept
         // Standard_D1 — deprecated (D family without version), kept in cloudVmResponses and tracked in deprecatedCloudVmResponses
         // Standard_E16s_v5 — not deprecated, not gen2-only → kept
@@ -481,14 +483,12 @@ class AzurePlatformResourcesTest {
         azs.put("Standard_E16s_v5", Arrays.asList("1", "2"));
         when(azureClient.getAvailabilityZones(REGION)).thenReturn(azs);
 
-        AzureVmCapabilities gen2OnlyCaps = mock(AzureVmCapabilities.class);
-        when(gen2OnlyCaps.isGen1Supported()).thenReturn(false);
         Map<String, AzureVmCapabilities> capabilities = new HashMap<>();
-        capabilities.put(ARM_VM_DEFAULT, gen1SupportedCapabilities());
-        capabilities.put("Basic_A0", gen1SupportedCapabilities());
-        capabilities.put("Standard_E16s_v5", gen1SupportedCapabilities());
-        capabilities.put("Standard_D2_v6", gen2OnlyCaps);
-        capabilities.put("Standard_D4s_v7", gen2OnlyCaps);
+        capabilities.put(ARM_VM_DEFAULT, capabilitiesWithGenerations("V1,V2"));
+        capabilities.put("Basic_A0", capabilitiesWithGenerations("V1"));
+        capabilities.put("Standard_E16s_v5", capabilitiesWithGenerations("V1,V2"));
+        capabilities.put("Standard_D2_v6", capabilitiesWithGenerations("V2"));
+        capabilities.put("Standard_D4s_v7", capabilitiesWithGenerations("V2"));
         when(azureClient.getHostCapabilities(REGION)).thenReturn(capabilities);
         when(azureHostEncryptionValidator.isVmSupported(anyString(), anyMap())).thenReturn(true);
         when(azureAcceleratedNetworkValidator.isSupportedForVm(anyString(), anyMap())).thenReturn(true);
@@ -505,6 +505,39 @@ class AzurePlatformResourcesTest {
                 .extracting(VmType::value)
                 .containsExactlyInAnyOrder("Standard_D2_v2", "Standard_D1");
         assertThat(defaultType.value()).isEqualTo(ARM_VM_DEFAULT);
+    }
+
+    @Test
+    void testVirtualMachinesNonExtendedPopulatesHyperVGenerationsFromCapabilities() {
+        ReflectionTestUtils.setField(underTest, "armVmDefault", ARM_VM_DEFAULT);
+
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        VirtualMachineSize dualGenerationVm = mockVmSize(ARM_VM_DEFAULT);
+        VirtualMachineSize gen1OnlyVm = mockVmSize("Standard_D2_v2");
+        VirtualMachineSize noCapabilityVm = mockVmSize("Basic_A0");
+        when(azureClient.getVmTypes(REGION)).thenReturn(Optional.of(new HashSet<>(Arrays.asList(dualGenerationVm, gen1OnlyVm, noCapabilityVm))));
+        when(azureClient.getAvailabilityZones(REGION)).thenReturn(Map.of());
+
+        Map<String, AzureVmCapabilities> capabilities = new HashMap<>();
+        capabilities.put(ARM_VM_DEFAULT, capabilitiesWithGenerations("V1,V2"));
+        capabilities.put("Standard_D2_v2", capabilitiesWithGenerations("V1"));
+        // Basic_A0 intentionally has no capability entry -> no HyperVGenerations metadata at all.
+        when(azureClient.getHostCapabilities(REGION)).thenReturn(capabilities);
+        when(azureHostEncryptionValidator.isVmSupported(anyString(), anyMap())).thenReturn(true);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(anyString(), anyMap())).thenReturn(true);
+
+        CloudVmTypes result = underTest.virtualMachinesNonExtended(cloudCredential, region(REGION), Map.of());
+
+        Map<String, VmType> vmTypesByName = result.getCloudVmResponses().get(REGION).stream()
+                .collect(Collectors.toMap(VmType::value, vmType -> vmType));
+        assertEquals("V1,V2", vmTypesByName.get(ARM_VM_DEFAULT).getMetaData().getHyperVGenerations());
+        assertTrue(vmTypesByName.get(ARM_VM_DEFAULT).getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V1));
+        assertTrue(vmTypesByName.get(ARM_VM_DEFAULT).getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V2));
+        assertEquals("V1", vmTypesByName.get("Standard_D2_v2").getMetaData().getHyperVGenerations());
+        assertFalse(vmTypesByName.get("Standard_D2_v2").getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V2));
+        assertNull(vmTypesByName.get("Basic_A0").getMetaData().getHyperVGenerations());
+        assertTrue(vmTypesByName.get("Basic_A0").getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V1));
     }
 
     @Test
@@ -601,35 +634,6 @@ class AzurePlatformResourcesTest {
     }
 
     @Test
-    void testGen1UnsupportedFilterRemovesVm() {
-        AzureVmCapabilities gen2OnlyCaps = mock(AzureVmCapabilities.class);
-        when(gen2OnlyCaps.isGen1Supported()).thenReturn(false);
-        Map<String, AzureVmCapabilities> caps = Map.of("Standard_D2_v6", gen2OnlyCaps);
-
-        Predicate<VirtualMachineSize> filter = ReflectionTestUtils.invokeMethod(underTest, "filterOutGen1UnsupportedVms", caps);
-
-        assertThat(filter.test(mockVmSize("Standard_D2_v6"))).isFalse();
-    }
-
-    @Test
-    void testGen1UnsupportedFilterKeepsVmWhenGen1Supported() {
-        AzureVmCapabilities gen1AndGen2Caps = mock(AzureVmCapabilities.class);
-        when(gen1AndGen2Caps.isGen1Supported()).thenReturn(true);
-        Map<String, AzureVmCapabilities> caps = Map.of("Standard_D4s_v5", gen1AndGen2Caps);
-
-        Predicate<VirtualMachineSize> filter = ReflectionTestUtils.invokeMethod(underTest, "filterOutGen1UnsupportedVms", caps);
-
-        assertThat(filter.test(mockVmSize("Standard_D4s_v5"))).isTrue();
-    }
-
-    @Test
-    void testGen1UnsupportedFilterKeepsVmWhenCapabilitiesAbsent() {
-        Predicate<VirtualMachineSize> filter = ReflectionTestUtils.invokeMethod(underTest, "filterOutGen1UnsupportedVms", Map.of());
-
-        assertThat(filter.test(mockVmSize("Standard_D4s_v5"))).isTrue();
-    }
-
-    @Test
     void testVirtualMachinesForDistroXWithRestrictedInstanceTypesFiltersToAllowList() {
         ReflectionTestUtils.setField(underTest, "restrictInstanceTypes", true);
         // Standard_D8s_v5 is in the DistrоX allow-list; Standard_A2_v2 is not
@@ -684,10 +688,11 @@ class AzurePlatformResourcesTest {
         when(minimalHardwareFilter.suitableAsMinimumHardware(any(), any())).thenReturn(true);
     }
 
-    private AzureVmCapabilities gen1SupportedCapabilities() {
-        AzureVmCapabilities caps = mock(AzureVmCapabilities.class);
-        when(caps.isGen1Supported()).thenReturn(true);
-        return caps;
+    private AzureVmCapabilities capabilitiesWithGenerations(String hyperVGenerations) {
+        ResourceSkuCapabilities skuCapability = mock(ResourceSkuCapabilities.class);
+        when(skuCapability.name()).thenReturn("HyperVGenerations");
+        when(skuCapability.value()).thenReturn(hyperVGenerations);
+        return new AzureVmCapabilities(null, List.of(skuCapability));
     }
 
     private VirtualMachineSize mockVmSize(String name) {

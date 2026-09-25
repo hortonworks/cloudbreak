@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,12 +12,16 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.compute.fluent.models.ImageInner;
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
@@ -95,5 +100,72 @@ public class AzureManagedImageServiceTest {
 
         assertTrue(actual.isEmpty());
         verify(azureClient).findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"V1", "V2"})
+    public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenHyperVGenerationMatches(String generation) {
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(HyperVGenerationTypes.fromString(generation));
+        VirtualMachineCustomImage image = succeededImage();
+        when(image.hyperVGeneration()).thenReturn(HyperVGenerationTypes.fromString(generation));
+
+        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
+
+        assertTrue(actual.isPresent());
+        assertEquals(image, actual.get());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"V1, V2", "V2, V1"})
+    public void testGetVirtualMachineCustomImageShouldReturnEmptyWithoutCheckingStateWhenHyperVGenerationMismatches(String requiredGeneration,
+            String existingGeneration) {
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(HyperVGenerationTypes.fromString(requiredGeneration));
+        VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.of(image));
+        ImageInner imageInner = mock(ImageInner.class);
+        when(image.innerModel()).thenReturn(imageInner);
+        when(image.hyperVGeneration()).thenReturn(HyperVGenerationTypes.fromString(existingGeneration));
+
+        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
+
+        assertTrue(actual.isEmpty());
+        verify(imageInner, never()).provisioningState();
+    }
+
+    @Test
+    public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenExistingImageHasNoHyperVGeneration() {
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(HyperVGenerationTypes.V2);
+        VirtualMachineCustomImage image = succeededImage();
+        when(image.hyperVGeneration()).thenReturn(null);
+
+        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
+
+        assertTrue(actual.isPresent());
+        assertEquals(image, actual.get());
+    }
+
+    @Test
+    public void testGetVirtualMachineCustomImageShouldReturnTheImageWithoutCheckingGenerationWhenNoGenerationIsRequired() {
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(null);
+        VirtualMachineCustomImage image = succeededImage();
+
+        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
+
+        assertTrue(actual.isPresent());
+        assertEquals(image, actual.get());
+        verify(image, never()).hyperVGeneration();
+    }
+
+    private AzureImageInfo imageInfoWithGeneration(HyperVGenerationTypes hyperVGeneration) {
+        return new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP, hyperVGeneration);
+    }
+
+    private VirtualMachineCustomImage succeededImage() {
+        VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.of(image));
+        ImageInner imageInner = mock(ImageInner.class);
+        when(image.innerModel()).thenReturn(imageInner);
+        when(imageInner.provisioningState()).thenReturn("Succeeded");
+        return image;
     }
 }

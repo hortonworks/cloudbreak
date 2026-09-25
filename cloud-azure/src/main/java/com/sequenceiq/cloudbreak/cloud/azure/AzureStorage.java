@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.azure.core.management.ProxyResource;
 import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.HasId;
 import com.azure.resourcemanager.resources.models.Subscription;
 import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
@@ -30,6 +31,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAccountBuilderService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
+import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageHyperVGenerationResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfo;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfoService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageService;
@@ -79,6 +81,9 @@ public class AzureStorage {
     private AzureImageInfoService azureImageInfoService;
 
     @Inject
+    private AzureImageHyperVGenerationResolver azureImageHyperVGenerationResolver;
+
+    @Inject
     private AzureClientCachedOperations azureClientCachedOperations;
 
     public ArmAttachedStorageOption getArmAttachedStorageOption(Map<String, String> parameters) {
@@ -90,15 +95,16 @@ public class AzureStorage {
     }
 
     public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
-        return getCustomImage(client, ac, stack, stack.getImage().getImageName());
+        return getCustomImage(client, ac, stack, stack.getImage().getImageName(), azureImageHyperVGenerationResolver.resolve(stack.getImage()));
     }
 
-    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName) {
+    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName,
+            HyperVGenerationTypes hyperVGeneration) {
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
 
-        AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, imageName, ac, client);
+        AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, imageName, hyperVGeneration, ac, client);
         Optional<AzureImage> foundImage = azureImageService.findImage(azureImageInfo, client, ac);
         if (foundImage.isPresent()) {
             LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",

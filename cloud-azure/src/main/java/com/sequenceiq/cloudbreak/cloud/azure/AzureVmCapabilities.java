@@ -72,6 +72,10 @@ public class AzureVmCapabilities {
         return architecture;
     }
 
+    public String getHyperVGenerations() {
+        return hyperVGenerations;
+    }
+
     public boolean isGen1Supported() {
         return hyperVGenerations == null || hyperVGenerations.contains("V1");
     }

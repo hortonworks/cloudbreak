@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceVolumeConnect
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFileSystemValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageVmTypeCompatibilityValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureSubnetValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
@@ -57,6 +58,9 @@ public class AzureConnector implements CloudConnector {
 
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Inject
+    private AzureImageVmTypeCompatibilityValidator azureImageVmTypeCompatibilityValidator;
 
     @Inject
     private AzureFileSystemValidator azureFileSystemValidator;
@@ -119,10 +123,10 @@ public class AzureConnector implements CloudConnector {
     @Override
     public List<Validator> validators(ValidatorType validatorType) {
         if (ValidatorType.IMAGE.equals(validatorType)) {
-            return List.of(azureImageFormatValidator);
+            return List.of(azureImageFormatValidator, azureImageVmTypeCompatibilityValidator);
         }
-        return Arrays.asList(azureTagValidator, azureSubnetValidator, azureStorageValidator, azureImageFormatValidator, azureFileSystemValidator,
-                commonSecretEncryptionValidator);
+        return Arrays.asList(azureTagValidator, azureSubnetValidator, azureStorageValidator, azureImageFormatValidator,
+                azureImageVmTypeCompatibilityValidator, azureFileSystemValidator, commonSecretEncryptionValidator);
     }
 
     @Override

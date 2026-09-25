@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATION_TAG;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -1555,6 +1557,52 @@ public class StackToCloudStackConverterTest {
         assertThat(parameters.get(SUBNET_ID)).isEqualTo(subnetIdExpected);
         assertThat(parameters.get(CloudInstance.INSTANCE_NAME)).isEqualTo("worker3");
         assertThat(parameters.get(CloudInstance.FQDN)).isEqualTo("vm.empire.com");
+    }
+
+    @Test
+    void testBuildCloudInstanceParametersWhenAzureAndInstanceImageIsGen2() {
+        InstanceMetadataView instanceMetaData = instanceMetadataWithImageTags(Map.of(HYPER_V_GENERATION_TAG, "2"));
+
+        Map<String, Object> parameters = underTest.buildCloudInstanceParameters(new DetailedEnvironmentResponse(), stack, instanceMetaData,
+                CloudPlatform.AZURE, mock(Template.class));
+
+        assertEquals("V2", parameters.get(AzureInstanceTemplate.HYPER_V_GENERATION));
+    }
+
+    @Test
+    void testBuildCloudInstanceParametersWhenAzureAndInstanceImageHasNoGenerationTag() {
+        InstanceMetadataView instanceMetaData = instanceMetadataWithImageTags(Map.of());
+
+        Map<String, Object> parameters = underTest.buildCloudInstanceParameters(new DetailedEnvironmentResponse(), stack, instanceMetaData,
+                CloudPlatform.AZURE, mock(Template.class));
+
+        assertFalse(parameters.containsKey(AzureInstanceTemplate.HYPER_V_GENERATION));
+    }
+
+    @Test
+    void testBuildCloudInstanceParametersWhenAzureAndNoInstanceMetadata() {
+        Map<String, Object> parameters = underTest.buildCloudInstanceParameters(new DetailedEnvironmentResponse(), stack, null,
+                CloudPlatform.AZURE, mock(Template.class));
+
+        assertFalse(parameters.containsKey(AzureInstanceTemplate.HYPER_V_GENERATION));
+    }
+
+    @Test
+    void testBuildCloudInstanceParametersWhenNotAzureThenNoHyperVGeneration() {
+        InstanceMetadataView instanceMetaData = instanceMetadataWithImageTags(Map.of(HYPER_V_GENERATION_TAG, "2"));
+
+        Map<String, Object> parameters = underTest.buildCloudInstanceParameters(new DetailedEnvironmentResponse(), stack, instanceMetaData,
+                CloudPlatform.AWS, mock(Template.class));
+
+        assertFalse(parameters.containsKey(AzureInstanceTemplate.HYPER_V_GENERATION));
+    }
+
+    private InstanceMetadataView instanceMetadataWithImageTags(Map<String, String> tags) {
+        InstanceMetadataView instanceMetaData = mock(InstanceMetadataView.class);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
+        Image image = new Image("image-12", Map.of(), "redhat8", "redhat8", null, "http://catalog", "catalog", "imageId", Map.of(), null, 0L, tags);
+        when(instanceMetadataToImageIdConverter.convertToImage(instanceMetaData)).thenReturn(image);
+        return instanceMetaData;
     }
 
     @Test

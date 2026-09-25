@@ -134,12 +134,12 @@ public class AzureImageServiceTest {
 
         assertTrue(azureImageOptional.isEmpty());
         verify(azureManagedImageCreationPoller, never()).startPolling(any(), any());
-        verify(azureClient, never()).createImage(anyString(), anyString(), anyString(), anyString());
+        verify(azureClient, never()).createImage(anyString(), anyString(), anyString(), anyString(), any());
     }
 
     @Test
     public void testCreateCustomImageIfNotFoundAndSuccess() {
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(Optional.of(virtualMachineCustomImage));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Optional.of(virtualMachineCustomImage));
         when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
         when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
 
@@ -148,13 +148,13 @@ public class AzureImageServiceTest {
         assertImageProperties(azureImage);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.CREATED);
-        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME, null);
     }
 
     @Test
     public void testCreateCustomImageWhenTimeoutAndImageNotPresent() throws Exception {
         imagePresent(false);
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new ApiErrorException("cloud exception text", null));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString(), any())).thenThrow(new ApiErrorException("cloud exception text", null));
         doThrow(new TimeoutException("timeout text")).when(azureManagedImageCreationPoller).startPolling(any(), any());
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
@@ -167,14 +167,15 @@ public class AzureImageServiceTest {
         verifyPollingStarted();
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.FAILED);
-        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME, null);
         assertTrue(exception.getCause() instanceof ManagementException);
     }
 
     @Test
     public void testCreateCustomImageWhenErrorAndImageNotPresent() throws Exception {
         imagePresent(false);
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new ManagementException("cloud exception text", null));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString(), any()))
+                .thenThrow(new ManagementException("cloud exception text", null));
         doThrow(new Exception("Custom exception during polling")).when(azureManagedImageCreationPoller).startPolling(any(), any());
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
@@ -187,14 +188,14 @@ public class AzureImageServiceTest {
         verifyPollingStarted();
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.FAILED);
-        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME, null);
         assertEquals("Custom exception during polling", exception.getCause().getMessage());
     }
 
     @Test
     public void testCreateCustomImageWhenErrorButImagePresent() {
         imagePresent(true);
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new ManagementException("", null));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString(), any())).thenThrow(new ManagementException("", null));
         when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
         when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
 
@@ -203,14 +204,14 @@ public class AzureImageServiceTest {
         assertImageProperties(azureImage);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.CREATED);
-        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+        verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME, null);
     }
 
     @Test
     public void testCreateCustomImageWhenDataIntegrityViolationException() {
         imagePresent(true);
 
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(Optional.of(virtualMachineCustomImage));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Optional.of(virtualMachineCustomImage));
         when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
         when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), any()))
@@ -224,7 +225,7 @@ public class AzureImageServiceTest {
         } catch (DataIntegrityViolationException e) {
             verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
             verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.FAILED);
-            verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+            verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME, null);
             assertEquals("Unique constraint violated", e.getMessage());
             throw e;
         }

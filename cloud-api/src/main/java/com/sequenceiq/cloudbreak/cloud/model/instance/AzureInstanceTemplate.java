@@ -67,6 +67,12 @@ public class AzureInstanceTemplate extends InstanceTemplate {
 
     public static final String RESOURCE_DISK_ATTACHED = "resourceDiskAttached";
 
+    /**
+     * Key of the optional {@code String} dynamic parameter of a {@code CloudInstance} holding the Hyper-V generation ({@code "V1"} / {@code "V2"}) of the
+     * image the instance was provisioned from. It can differ from the stack image's generation, e.g. during a Gen1 to Gen2 image change.
+     */
+    public static final String HYPER_V_GENERATION = "hyperVGeneration";
+
     public AzureInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
             Map<String, Object> parameters, Long templateId, String imageId) {
         super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId, TemporaryStorage.ATTACHED_VOLUMES, 0L);

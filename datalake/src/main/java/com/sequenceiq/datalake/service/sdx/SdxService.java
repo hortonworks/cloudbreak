@@ -115,6 +115,7 @@ import com.sequenceiq.sdx.api.model.SdxAzureBase;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
+import com.sequenceiq.sdx.api.model.VmTypeResponse;
 
 @Service
 public class SdxService implements ResourceIdProvider, PayloadContextProvider, HierarchyAuthResourcePropertyProvider {
@@ -134,6 +135,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private DatabaseInstanceTypeRequestValidator databaseInstanceTypeRequestValidator;
+
+    @Inject
+    private SdxHyperVGenerationValidator sdxHyperVGenerationValidator;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -464,8 +468,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         String encryptionProfileCrn = encryptionProfileResponse != null ? encryptionProfileResponse.getCrn() : null;
         stackRequestHandler.setStackRequestParams(stackRequest, null, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(),
                 sdxClusterRequest.isEnableRangerRms(), encryptionProfileCrn);
-        sdxInstanceService.overrideDefaultInstanceType(environment, stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
-                Collections.emptyList(), sdxClusterRequest.getClusterShape());
+        Optional<List<VmTypeResponse>> availableVmTypes = sdxInstanceService.overrideDefaultInstanceType(environment, stackRequest,
+                sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(), Collections.emptyList(), sdxClusterRequest.getClusterShape());
+        sdxHyperVGenerationValidator.validate(environment, stackRequest, imageV4Response, availableVmTypes.orElse(null));
         recipeService.validateRecipes(sdxClusterRequest.getRecipes(), stackRequest);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         securityConfigService.prepareDefaultSecurityConfigs(sdxClusterRequest.getClusterShape(), stackRequest, cloudPlatform);

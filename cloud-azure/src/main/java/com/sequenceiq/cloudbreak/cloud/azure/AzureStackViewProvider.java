@@ -18,9 +18,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageHyperVGenerationResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
@@ -53,6 +56,9 @@ public class AzureStackViewProvider {
 
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Inject
+    private AzureImageHyperVGenerationResolver azureImageHyperVGenerationResolver;
 
     @Inject
     @Qualifier("DefaultRetryService")
@@ -85,7 +91,8 @@ public class AzureStackViewProvider {
                 String imageId = instance.getTemplate().getImageId();
                 if (StringUtils.isNotBlank(imageId) && !azureImageFormatValidator.isMarketplaceImageFormat(imageId)) {
                     String imageCustomName = imageNameMap.computeIfAbsent(
-                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId).getId());
+                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId, getHyperVGeneration(cloudStack, instance, imageId))
+                                    .getId());
                     customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
                     LOGGER.debug("Collect customImageName {} for instance {}", imageCustomName, instance.getInstanceId());
                 } else {
@@ -95,6 +102,14 @@ public class AzureStackViewProvider {
             }
         }
         return customImageNamePerInstance;
+    }
+
+    private HyperVGenerationTypes getHyperVGeneration(CloudStack cloudStack, CloudInstance instance, String imageId) {
+        Image stackImage = cloudStack.getImage();
+        if (stackImage != null && imageId.equals(stackImage.getImageName())) {
+            return azureImageHyperVGenerationResolver.resolve(stackImage);
+        }
+        return azureImageHyperVGenerationResolver.resolve(instance);
     }
 
     private Map<String, Long> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {

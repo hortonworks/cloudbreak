@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -26,8 +28,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageHyperVGenerationResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -39,10 +43,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
@@ -54,6 +60,8 @@ class AzureStackViewProviderTest {
     private static final String STACK_NAME = "Test Cluster";
 
     private static final String IMAGE_ID = "image-1";
+
+    private static final String OLD_IMAGE_ID = "image-0";
 
     private static final String RESOURCE_GROUP = "resource group";
 
@@ -92,6 +100,9 @@ class AzureStackViewProviderTest {
     @Mock
     private AzurePlatformParameters azurePlatformParameters;
 
+    @Mock
+    private AzureImageHyperVGenerationResolver azureImageHyperVGenerationResolver;
+
     @BeforeEach
     void before() {
         ReflectionTestUtils.setField(underTest, "stackNamePrefixLength", 255);
@@ -114,7 +125,7 @@ class AzureStackViewProviderTest {
         Network network = mock(Network.class);
         List<Group> groups = createScaledGroups();
         AzureImage image = new AzureImage("id", "name", true);
-        lenient().when(azureStorage.getCustomImage(any(), any(), any(), any())).thenReturn(image);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any(), any(), any())).thenReturn(image);
         when(cloudStack.getGroups()).thenReturn(groups);
         when(cloudStack.getParameters()).thenReturn(Collections.emptyMap());
         when(cloudStack.getNetwork()).thenReturn(network);
@@ -138,13 +149,41 @@ class AzureStackViewProviderTest {
     }
 
     @Test
+    void testGetAzureStackWhenInstanceUsesOlderImageThenItsOwnGenerationIsUsed() {
+        CloudCredential cloudCredential = createCloudCredential();
+        AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
+        CloudInstance oldImageInstance = createCloudInstance("instance-old", OLD_IMAGE_ID, Map.of(AzureInstanceTemplate.HYPER_V_GENERATION, "V1"));
+        CloudInstance newImageInstance = createCloudInstance("instance-new", IMAGE_ID, Map.of());
+        Group group = mock(Group.class);
+        when(group.getInstances()).thenReturn(List.of(oldImageInstance, newImageInstance));
+        when(group.getType()).thenReturn(InstanceGroupType.CORE);
+        when(group.getName()).thenReturn(GROUP_NAME);
+        when(azurePlatformParameters.defaultDiskType()).thenReturn(diskType(AzureDiskType.STANDARD_SSD_LRS.value()));
+        Image stackImage = mock(Image.class);
+        when(stackImage.getImageName()).thenReturn(IMAGE_ID);
+        setUpNetwork(List.of(group));
+        when(cloudStack.getImage()).thenReturn(stackImage);
+        when(azureImageHyperVGenerationResolver.resolve(stackImage)).thenReturn(HyperVGenerationTypes.V2);
+        when(azureImageHyperVGenerationResolver.resolve(oldImageInstance)).thenReturn(HyperVGenerationTypes.V1);
+        when(azureStorage.getCustomImage(client, ac, cloudStack, OLD_IMAGE_ID, HyperVGenerationTypes.V1)).thenReturn(new AzureImage("old", "old", true));
+        when(azureStorage.getCustomImage(client, ac, cloudStack, IMAGE_ID, HyperVGenerationTypes.V2)).thenReturn(new AzureImage("new", "new", true));
+        ac.putParameter(AzureClient.class, client);
+
+        underTest.getAzureStack(new AzureCredentialView(cloudCredential), cloudStack, client, ac);
+
+        verify(azureStorage).getCustomImage(client, ac, cloudStack, OLD_IMAGE_ID, HyperVGenerationTypes.V1);
+        verify(azureStorage).getCustomImage(client, ac, cloudStack, IMAGE_ID, HyperVGenerationTypes.V2);
+        verify(azureImageHyperVGenerationResolver, never()).resolve(newImageInstance);
+    }
+
+    @Test
     void testGetAzureStackShouldThrowConnectorExceptionWhenAddressPrefixCouldNotBeGathered() {
         CloudCredential cloudCredential = createCloudCredential();
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
         Network network = mock(Network.class);
         AzureImage image = new AzureImage("id", "name", true);
-        lenient().when(azureStorage.getCustomImage(any(), any(), any(), any())).thenReturn(image);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any(), any(), any())).thenReturn(image);
         when(cloudStack.getNetwork()).thenReturn(network);
         when(network.getStringParameter("resourceGroupName")).thenReturn(RESOURCE_GROUP);
         when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
@@ -167,7 +206,7 @@ class AzureStackViewProviderTest {
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
         Network network = mock(Network.class);
         AzureImage image = new AzureImage("id", "name", true);
-        lenient().when(azureStorage.getCustomImage(any(), any(), any(), any())).thenReturn(image);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any(), any(), any())).thenReturn(image);
         when(cloudStack.getNetwork()).thenReturn(network);
         when(network.getStringParameter("resourceGroupName")).thenReturn(RESOURCE_GROUP);
         when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
@@ -231,13 +270,27 @@ class AzureStackViewProviderTest {
     }
 
     private CloudInstance createCloudInstance() {
-        return new CloudInstance(INSTANCE_ID, createInstanceTemplate(), null, "subnet-1", "az1",
+        return new CloudInstance(INSTANCE_ID, createInstanceTemplate(IMAGE_ID), null, "subnet-1", "az1",
                 Collections.singletonMap(CloudInstance.ID, 1L));
     }
 
-    private InstanceTemplate createInstanceTemplate() {
+    private CloudInstance createCloudInstance(String instanceId, String imageId, Map<String, Object> parameters) {
+        return new CloudInstance(instanceId, createInstanceTemplate(imageId), null, "subnet-1", "az1", parameters);
+    }
+
+    private InstanceTemplate createInstanceTemplate(String imageId) {
         return new InstanceTemplate(null, INSTANCE_ID, 1L, Collections.emptyList(), null, Map.of("managedDisk", true), null,
-                IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, 0L);
+                imageId, TemporaryStorage.ATTACHED_VOLUMES, 0L);
+    }
+
+    private void setUpNetwork(List<Group> groups) {
+        Network network = mock(Network.class);
+        when(cloudStack.getGroups()).thenReturn(groups);
+        when(cloudStack.getParameters()).thenReturn(Collections.emptyMap());
+        when(cloudStack.getNetwork()).thenReturn(network);
+        when(network.getStringParameter("resourceGroupName")).thenReturn(RESOURCE_GROUP);
+        when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
+        when(azureUtils.getCustomSubnetIds(network)).thenReturn(Collections.emptyList());
     }
 
 }

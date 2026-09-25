@@ -64,7 +64,10 @@ public class SdxInstanceService {
         return result;
     }
 
-    public void overrideDefaultInstanceType(DetailedEnvironmentResponse environment, StackV4Request defaultTemplate,
+    /**
+     * @return the VM types fetched for the environment's region, or empty when no override was needed
+     */
+    public Optional<List<VmTypeResponse>> overrideDefaultInstanceType(DetailedEnvironmentResponse environment, StackV4Request defaultTemplate,
             List<SdxInstanceGroupRequest> customInstanceGroups, List<InstanceGroupV4Request> originalInstanceGroups,
             List<InstanceGroupV4Response> currentInstanceGroups, SdxClusterShape sdxClusterShape) {
         if (isOverrideNeeded(customInstanceGroups, originalInstanceGroups, currentInstanceGroups, sdxClusterShape)) {
@@ -97,7 +100,9 @@ public class SdxInstanceService {
                                     originalIGroup, availableVmTypes, diskTypes));
                 });
             }
+            return Optional.of(availableVmTypes);
         }
+        return Optional.empty();
     }
 
     private boolean isOverrideNeeded(List<SdxInstanceGroupRequest> customInstanceGroups, List<InstanceGroupV4Request> originalInstanceGroups,

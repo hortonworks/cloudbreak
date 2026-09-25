@@ -16,6 +16,11 @@ public class InstanceMetadataToImageIdConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetadataToImageIdConverter.class);
 
     public String convert(InstanceMetadataView source) {
+        Image image = convertToImage(source);
+        return image == null ? null : image.getImageName();
+    }
+
+    public Image convertToImage(InstanceMetadataView source) {
         Image image = null;
         if (source.getImage() != null && StringUtils.isNotBlank(source.getImage().getValue())) {
             try {
@@ -26,6 +31,6 @@ public class InstanceMetadataToImageIdConverter {
         } else if (StringUtils.isNotBlank(source.getInstanceId())) {
             LOGGER.debug("No image for instance [{}] in instancemetadata", source.getInstanceId());
         }
-        return image == null ? null : image.getImageName();
+        return image;
     }
 }

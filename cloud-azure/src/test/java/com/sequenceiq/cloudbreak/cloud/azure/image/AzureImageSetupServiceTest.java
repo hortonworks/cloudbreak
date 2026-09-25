@@ -89,11 +89,14 @@ public class AzureImageSetupServiceTest {
     @Mock
     private CustomVMImageNameProvider customVMImageNameProvider;
 
+    @Mock
+    private AzureImageHyperVGenerationResolver azureImageHyperVGenerationResolver;
+
     @BeforeEach
     public void setUp() {
         lenient().when(azureResourceGroupMetadataProvider.getResourceGroupName(any(), any(CloudStack.class))).thenReturn("resourceGroupName");
         lenient().when(azureResourceGroupMetadataProvider.getImageResourceGroupName(any(), any())).thenReturn("imageResourceGroupName");
-        lenient().when(azureImageInfoService.getImageInfo(any(), any(), any(), any())).thenReturn(getAzureImageInfo());
+        lenient().when(azureImageInfoService.getImageInfo(any(), any(), any(), any(), any())).thenReturn(getAzureImageInfo());
         lenient().when(ac.getCloudCredential()).thenReturn(mock(CloudCredential.class));
         lenient().when(azureMarketplaceValidatorService.validateMarketplaceImage(any(), any(), any(), any(), any(), any())).
                 thenReturn(new MarketplaceValidationResult(false, false));
@@ -126,7 +129,7 @@ public class AzureImageSetupServiceTest {
                 verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(), any(CloudStack.class));
                 verify(armStorage).getImageStorageName(any(), any(), any());
                 verify(azureResourceGroupMetadataProvider).getImageResourceGroupName(any(), any());
-                verify(azureImageInfoService).getImageInfo(any(), any(), any(), any());
+                verify(azureImageInfoService).getImageInfo(any(), any(), any(), any(), any());
                 verify(azureImageService).findImage(any(), any(), any());
                 verify(azureStorageAccountService).createStorageAccount(any(), any(), any(), any(), any(), any());
                 verify(azureStorageAccountService).createContainerInStorage(any(), any(), any());
@@ -157,7 +160,7 @@ public class AzureImageSetupServiceTest {
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(), any(CloudStack.class));
         verify(armStorage).getImageStorageName(any(), any(), any());
         verify(azureResourceGroupMetadataProvider).getImageResourceGroupName(any(), any());
-        verify(azureImageInfoService).getImageInfo(any(), any(), any(), any());
+        verify(azureImageInfoService).getImageInfo(any(), any(), any(), any(), any());
         verify(azureImageService).findImage(any(), any(), any());
         verify(azureStorageAccountService).createStorageAccount(any(), any(), any(), any(), any(), any());
         verify(azureStorageAccountService).createContainerInStorage(any(), any(), any());
@@ -177,7 +180,7 @@ public class AzureImageSetupServiceTest {
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(), any(CloudStack.class));
         verify(armStorage).getImageStorageName(any(), any(), any());
         verify(azureResourceGroupMetadataProvider).getImageResourceGroupName(any(), any());
-        verify(azureImageInfoService).getImageInfo(any(), any(), any(), any());
+        verify(azureImageInfoService).getImageInfo(any(), any(), any(), any(), any());
         verify(azureImageService).findImage(any(), any(), any());
         verify(azureStorageAccountService).createStorageAccount(any(), any(), any(), any(), any(), any());
         verify(azureStorageAccountService).createContainerInStorage(any(), any(), any());

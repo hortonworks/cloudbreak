@@ -62,6 +62,9 @@ public class AzureImageSetupService {
     private CustomVMImageNameProvider customVMImageNameProvider;
 
     @Inject
+    private AzureImageHyperVGenerationResolver azureImageHyperVGenerationResolver;
+
+    @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
 
     @Inject
@@ -77,7 +80,8 @@ public class AzureImageSetupService {
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(), ac, client);
+        AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(),
+                azureImageHyperVGenerationResolver.resolve(image), ac, client);
         Optional<VirtualMachineCustomImage> customImage = azureManagedImageService.findVirtualMachineCustomImage(azureImageInfo, client);
         if (customImage.isPresent()) {
             LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD copy check!", customImage.get().id(),
@@ -144,7 +148,8 @@ public class AzureImageSetupService {
             String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
             String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
 
-            AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(), ac, client);
+            AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(),
+                    azureImageHyperVGenerationResolver.resolve(image), ac, client);
             Optional<AzureImage> foundImage = azureImageService.findImage(azureImageInfo, client, ac);
             if (foundImage.isPresent()) {
                 LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",

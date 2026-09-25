@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
+
 @Component
 public class CustomVMImageNameProvider {
 
@@ -15,19 +17,24 @@ public class CustomVMImageNameProvider {
 
     private static final char DELIMITER = '-';
 
-    public String getImageNameWithRegion(String region, String vhdUri) {
+    private static final String GEN2_SUFFIX = "-g2";
+
+    public String getImageNameWithRegion(String region, String vhdUri, HyperVGenerationTypes hyperVGeneration) {
         String vhdName = getImageNameFromConnectionString(vhdUri);
-        String name = vhdName + DELIMITER + region.toLowerCase(Locale.ROOT)
-                .replaceAll("\\s", "");
+        String suffix = DELIMITER + region.toLowerCase(Locale.ROOT).replaceAll("\\s", "") + generationSuffix(hyperVGeneration);
+        String name = vhdName + suffix;
         if (name.length() > NAME_MAXIMUM_LENGTH) {
             int diff = name.length() - NAME_MAXIMUM_LENGTH;
-            int calculatedEndIndexOfVhdName = vhdName.length() - diff;
-            name = vhdName.substring(0, calculatedEndIndexOfVhdName) + '-' + region.toLowerCase(Locale.ROOT)
-                    .replaceAll("\\s", "");
+            name = vhdName.substring(0, vhdName.length() - diff) + suffix;
         }
 
-        LOGGER.debug("The following Azure image name obtained from the region [{}] and VHD URI [{}]: {}", region, vhdUri, name);
+        LOGGER.debug("The following Azure image name obtained from the region [{}], VHD URI [{}] and Hyper-V generation [{}]: {}",
+                region, vhdUri, hyperVGeneration, name);
         return name;
+    }
+
+    private String generationSuffix(HyperVGenerationTypes hyperVGeneration) {
+        return HyperVGenerationTypes.V2.equals(hyperVGeneration) ? GEN2_SUFFIX : "";
     }
 
     public String getImageNameFromConnectionString(String vhdUri) {

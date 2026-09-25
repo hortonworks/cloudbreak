@@ -110,8 +110,11 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
+    /**
+     * @param imageHyperVGeneration the Hyper-V generation of the stack's image, resolved once per stack by the caller; null skips the generation check
+     */
     public void validate(DetailedEnvironmentResponse environment, Credential credential, InstanceGroup instanceGroup, Stack stack,
-            CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
+            CdpResourceType stackType, String imageHyperVGeneration, ValidationResult.ValidationResultBuilder validationBuilder) {
         Template template = instanceGroup.getTemplate();
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
@@ -140,6 +143,7 @@ public class TemplateValidatorAndUpdater {
                     validationBuilder.error(getInvalidVmTypeErrorMessage(possibleInstanceTypes, platform.value(), stack.getRegion()));
                 } else {
                     validateArchitecture(vmType, stack, validationBuilder);
+                    validateHyperVGeneration(vmType, imageHyperVGeneration, validationBuilder);
                 }
             }
             template = emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(instanceGroup.getTemplate());
@@ -190,6 +194,14 @@ public class TemplateValidatorAndUpdater {
             validationBuilder.error(
                     String.format("The '%s' instance type's architecture '%s' is not matching requested architecture '%s'",
                             vmType.value(), vmArchitecture.getName(), stackArchitecture.getName()));
+        }
+    }
+
+    private void validateHyperVGeneration(VmType vmType, String imageGeneration, ValidationResult.ValidationResultBuilder validationBuilder) {
+        if (imageGeneration != null && !vmType.getMetaData().isHyperVGenerationSupported(imageGeneration)) {
+            validationBuilder.error(
+                    String.format("The '%s' instance type does not support the selected image's Hyper-V generation '%s'. Supported generation(s): '%s'",
+                            vmType.value(), imageGeneration, vmType.getMetaData().getHyperVGenerations()));
         }
     }
 

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
@@ -22,14 +23,16 @@ public class AzureImageInfoService {
     @Inject
     private CustomVMImageNameProvider customVMImageNameProvider;
 
-    public AzureImageInfo getImageInfo(String resourceGroup, String vhdUri, AuthenticatedContext ac, AzureClient client) {
-        LOGGER.debug("About to fetch Azure image info based on the resource group [{}] and name from VHD URI [{}].", resourceGroup, vhdUri);
+    public AzureImageInfo getImageInfo(String resourceGroup, String vhdUri, HyperVGenerationTypes hyperVGeneration, AuthenticatedContext ac,
+            AzureClient client) {
+        LOGGER.debug("About to fetch Azure image info based on the resource group [{}] and name from VHD URI [{}] with Hyper-V generation [{}].",
+                resourceGroup, vhdUri, hyperVGeneration);
         String region = getRegion(ac);
-        String imageNameWithRegion = customVMImageNameProvider.getImageNameWithRegion(region, vhdUri);
+        String imageNameWithRegion = customVMImageNameProvider.getImageNameWithRegion(region, vhdUri, hyperVGeneration);
         String imageName = customVMImageNameProvider.getImageNameFromConnectionString(vhdUri);
         String imageId = getImageId(resourceGroup, client, imageNameWithRegion);
 
-        AzureImageInfo imageInfo = new AzureImageInfo(imageNameWithRegion, imageName, imageId, region, resourceGroup);
+        AzureImageInfo imageInfo = new AzureImageInfo(imageNameWithRegion, imageName, imageId, region, resourceGroup, hyperVGeneration);
         LOGGER.debug(AzureImageInfo.class.getSimpleName() + " was created: {}", imageInfo);
         return imageInfo;
     }

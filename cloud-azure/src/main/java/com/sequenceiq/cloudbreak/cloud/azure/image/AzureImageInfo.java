@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
+
 public class AzureImageInfo {
 
     private final String imageNameWithRegion;
@@ -12,12 +14,20 @@ public class AzureImageInfo {
 
     private final String resourceGroup;
 
+    private final HyperVGenerationTypes hyperVGeneration;
+
     public AzureImageInfo(String imageNameWithRegion, String imageName, String imageId, String region, String resourceGroup) {
+        this(imageNameWithRegion, imageName, imageId, region, resourceGroup, null);
+    }
+
+    public AzureImageInfo(String imageNameWithRegion, String imageName, String imageId, String region, String resourceGroup,
+            HyperVGenerationTypes hyperVGeneration) {
         this.imageNameWithRegion = imageNameWithRegion;
         this.imageId = imageId;
         this.region = region;
         this.resourceGroup = resourceGroup;
         this.imageName = imageName;
+        this.hyperVGeneration = hyperVGeneration;
     }
 
     public String getImageNameWithRegion() {
@@ -40,6 +50,10 @@ public class AzureImageInfo {
         return resourceGroup;
     }
 
+    public HyperVGenerationTypes getHyperVGeneration() {
+        return hyperVGeneration;
+    }
+
     @Override
     public String toString() {
         return "AzureImageInfo{" +
@@ -48,6 +62,7 @@ public class AzureImageInfo {
                 ", imageId='" + imageId + '\'' +
                 ", region='" + region + '\'' +
                 ", resourceGroup='" + resourceGroup + '\'' +
+                ", hyperVGeneration=" + hyperVGeneration +
                 '}';
     }
 

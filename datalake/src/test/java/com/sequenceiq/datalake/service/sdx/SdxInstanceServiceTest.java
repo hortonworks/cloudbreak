@@ -4,6 +4,9 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -124,8 +127,10 @@ class SdxInstanceServiceTest {
         when(sdxRecommendationService.getAvailableVmTypes("crn", "AWS", "us-east-1", null, Architecture.ALL_ARCHITECTURE))
                 .thenReturn(List.of(vmTypeResponse));
 
-        underTest.overrideDefaultInstanceType(environmentResponse, stackV4Request, customInstanceGroups, Collections.emptyList(),
-                Collections.emptyList(), MICRO_DUTY);
+        Optional<List<VmTypeResponse>> availableVmTypes = underTest.overrideDefaultInstanceType(environmentResponse, stackV4Request,
+                customInstanceGroups, Collections.emptyList(), Collections.emptyList(), MICRO_DUTY);
+
+        assertEquals(Optional.of(List.of(vmTypeResponse)), availableVmTypes);
 
         Optional<InstanceGroupV4Request> masterGroup = stackV4Request.getInstanceGroups()
                 .stream()
@@ -428,6 +433,17 @@ class SdxInstanceServiceTest {
         InstanceTemplateV4Request masterTemplate = masterTemplate(stackV4Request);
         assertEquals("verylarge", masterTemplate.getInstanceType());
         assertEquals(List.of("fallback1", "fallback2"), masterTemplate.getFallbackInstanceTypes());
+    }
+
+    @Test
+    void testOverrideDefaultInstanceTypeWhenNoOverrideIsNeededThenNoVmTypesAreFetchedOrReturned() throws Exception {
+        StackV4Request stackV4Request = microDutyRequest();
+
+        Optional<List<VmTypeResponse>> availableVmTypes = underTest.overrideDefaultInstanceType(new DetailedEnvironmentResponse(), stackV4Request,
+                Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), MICRO_DUTY);
+
+        assertTrue(availableVmTypes.isEmpty());
+        verify(sdxRecommendationService, never()).getAvailableVmTypes(any(), any(), any(), any(), any());
     }
 
     private StackV4Request microDutyRequest() throws Exception {

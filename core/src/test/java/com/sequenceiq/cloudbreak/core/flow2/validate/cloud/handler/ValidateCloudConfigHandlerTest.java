@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreati
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.AzureHyperVGenerationProvider;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.event.ValidateCloudConfigRequest;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -75,6 +77,9 @@ class ValidateCloudConfigHandlerTest {
 
     @Mock
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
+
+    @Mock
+    private AzureHyperVGenerationProvider azureHyperVGenerationProvider;
 
     @Mock
     private ClusterCreationEnvironmentValidator environmentValidator;
@@ -135,7 +140,7 @@ class ValidateCloudConfigHandlerTest {
         assertEquals(RESOURCE_ID, ((StackEvent) result).getResourceId());
 
         verify(stackValidator).validate(eq(stack), any(ValidationResult.ValidationResultBuilder.class));
-        verify(templateValidatorAndUpdater).validate(eq(environment), eq(credential), eq(ig), eq(stack), any(), any());
+        verify(templateValidatorAndUpdater).validate(eq(environment), eq(credential), eq(ig), eq(stack), any(), any(), any());
         verify(multiAzValidator).validateMultiAzForStack(eq(stack), any());
         verify(parametersValidator).validate(any(), any(), eq(cloudCredential), any(), any());
         verify(parametersValidator).waitResult(eq(parametersValidationRequest), any());
@@ -161,13 +166,29 @@ class ValidateCloudConfigHandlerTest {
         assertEquals(RESOURCE_ID, ((StackEvent) result).getResourceId());
 
         verify(stackValidator).validate(eq(stack), any(ValidationResult.ValidationResultBuilder.class));
-        verify(templateValidatorAndUpdater).validate(eq(environment), eq(credential), eq(ig), eq(stack), any(), any());
+        verify(templateValidatorAndUpdater).validate(eq(environment), eq(credential), eq(ig), eq(stack), any(), any(), any());
         verify(multiAzValidator).validateMultiAzForStack(eq(stack), any());
         verify(parametersValidator).validate(any(), any(), eq(cloudCredential), any(), any());
         verify(parametersValidator).waitResult(eq(parametersValidationRequest), any());
         verify(environmentValidator).validate(eq(stack), eq(environment), eq(false), any());
         verify(parcelValidationAndFilteringService).validate(eq(stack), any());
         verifyNoInteractions(dataLakeValidator);
+    }
+
+    @Test
+    void testDoAcceptResolvesHyperVGenerationOncePerStack() {
+        InstanceGroup ig1 = mock(InstanceGroup.class);
+        InstanceGroup ig2 = mock(InstanceGroup.class);
+        when(stack.getInstanceGroups()).thenReturn(Set.of(ig1, ig2));
+        when(azureHyperVGenerationProvider.getImageHyperVGeneration(stack)).thenReturn("V2");
+        ParametersValidationRequest parametersValidationRequest = mock(ParametersValidationRequest.class);
+        when(parametersValidator.validate(any(), any(), any(), any(), anyLong())).thenReturn(parametersValidationRequest);
+
+        underTest.doAccept(new HandlerEvent<>(new Event<>(new ValidateCloudConfigRequest(RESOURCE_ID))));
+
+        verify(azureHyperVGenerationProvider, times(1)).getImageHyperVGeneration(stack);
+        verify(templateValidatorAndUpdater).validate(eq(environment), eq(credential), eq(ig1), eq(stack), any(), eq("V2"), any());
+        verify(templateValidatorAndUpdater).validate(eq(environment), eq(credential), eq(ig2), eq(stack), any(), eq("V2"), any());
     }
 
     @Test
@@ -197,12 +218,12 @@ class ValidateCloudConfigHandlerTest {
         ig2.setStack(stack);
         when(stack.getInstanceGroups()).thenReturn(Set.of(ig1, ig2));
         Answer<Void> errorAnswer = invocation -> {
-            ValidationResult.ValidationResultBuilder builder = invocation.getArgument(5, ValidationResult.ValidationResultBuilder.class);
+            ValidationResult.ValidationResultBuilder builder = invocation.getArgument(6, ValidationResult.ValidationResultBuilder.class);
             InstanceGroup instanceGroup = invocation.getArgument(2, InstanceGroup.class);
             builder.error("error at instance group: " + instanceGroup.getGroupName());
             return null;
         };
-        org.mockito.Mockito.doAnswer(errorAnswer).when(templateValidatorAndUpdater).validate(any(), any(), any(), any(), any(), any());
+        org.mockito.Mockito.doAnswer(errorAnswer).when(templateValidatorAndUpdater).validate(any(), any(), any(), any(), any(), any(), any());
 
         ValidateCloudConfigRequest request = new ValidateCloudConfigRequest(RESOURCE_ID);
         HandlerEvent<ValidateCloudConfigRequest> handlerEvent = new HandlerEvent<>(new Event<>(request));

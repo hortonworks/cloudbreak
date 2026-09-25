@@ -362,6 +362,7 @@ public class AzurePlatformResources implements PlatformResources {
                 builder.withAvailabilityZones(availabilityZonesForVm);
                 AzureVmCapabilities capability = azureVmCapabilities.get(virtualMachineSize.name());
                 builder.withArchitecture(capability == null ? Architecture.X86_64 : capability.getArchitecture());
+                builder.withHyperVGenerations(capability == null ? null : capability.getHyperVGenerations());
                 VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
                 types.add(vmType);
                 if (isDeprecatedVmType(virtualMachineSize)) {

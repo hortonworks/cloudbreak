@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
+import com.sequenceiq.cloudbreak.util.AzureHyperVGenerationUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -620,6 +621,7 @@ public class StackToCloudStackConverter {
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environment, platform);
         if (environment != null && platform.name().equalsIgnoreCase(CloudPlatform.AZURE.name())) {
             params.put(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, getResourceDiskAttached(template.getAttributes()));
+            putIfPresent(params, AzureInstanceTemplate.HYPER_V_GENERATION, getInstanceImageHyperVGeneration(instanceMetaData));
         }
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
             AzureResourceGroup resourceGroup = resourceGroupOptional.get();
@@ -634,6 +636,11 @@ public class StackToCloudStackConverter {
                     .ifPresent(yarnApplication -> params.put(CloudInstance.APPLICATION_NAME, yarnApplication.getResourceName()));
         }
         return params;
+    }
+
+    private String getInstanceImageHyperVGeneration(InstanceMetadataView instanceMetaData) {
+        Image instanceImage = getIfNotNull(instanceMetaData, instanceMetadataToImageIdConverter::convertToImage);
+        return getIfNotNull(instanceImage, image -> AzureHyperVGenerationUtil.toGeneration(image.getTags()));
     }
 
     private boolean getResourceDiskAttached(Json attributes) {

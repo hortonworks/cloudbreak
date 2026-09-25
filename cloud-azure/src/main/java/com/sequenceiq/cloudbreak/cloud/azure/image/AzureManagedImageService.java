@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.azure.resourcemanager.compute.models.ExecutionState;
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -24,11 +25,21 @@ public class AzureManagedImageService {
         String resourceGroup = azureImageInfo.getResourceGroup();
         Optional<VirtualMachineCustomImage> image = client.findImage(resourceGroup, imageName);
         if (image.isPresent() && image.get().innerModel() != null) {
+            if (hyperVGenerationMismatch(azureImageInfo, image.get())) {
+                LOGGER.info("Custom image {} in resource group {} has Hyper-V generation {} but {} is required, treating it as not found so it gets recreated.",
+                        imageName, resourceGroup, image.get().hyperVGeneration(), azureImageInfo.getHyperVGeneration());
+                return Optional.empty();
+            }
             return getImageByState(imageName, resourceGroup, image.get());
         } else {
             LOGGER.debug("Custom image {} is not present in resource group {}", imageName, resourceGroup);
             return Optional.empty();
         }
+    }
+
+    private boolean hyperVGenerationMismatch(AzureImageInfo azureImageInfo, VirtualMachineCustomImage image) {
+        HyperVGenerationTypes required = azureImageInfo.getHyperVGeneration();
+        return required != null && image.hyperVGeneration() != null && !required.equals(image.hyperVGeneration());
     }
 
     private Optional<VirtualMachineCustomImage> getImageByState(String imageName, String resourceGroup, VirtualMachineCustomImage image) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.resources.models.Subscription;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
@@ -59,16 +61,30 @@ public class AzureImageInfoServiceTest {
         setupAuthenticatedContext();
         setupAzureClient();
         when(azureResourceIdProviderService.generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, CUSTOM_IMAGE_NAME)).thenReturn(CUSTOM_IMAGE_ID);
-        when(customVMImageNameProvider.getImageNameWithRegion(REGION_NAME, FROM_VHD_URI)).thenReturn(CUSTOM_IMAGE_NAME);
+        when(customVMImageNameProvider.getImageNameWithRegion(REGION_NAME, FROM_VHD_URI, null)).thenReturn(CUSTOM_IMAGE_NAME);
 
-        AzureImageInfo azureImageInfo = underTest.getImageInfo(RESOURCE_GROUP_NAME, FROM_VHD_URI, authenticatedContext, azureClient);
+        AzureImageInfo azureImageInfo = underTest.getImageInfo(RESOURCE_GROUP_NAME, FROM_VHD_URI, null, authenticatedContext, azureClient);
 
         assertEquals(REGION_NAME, azureImageInfo.getRegion());
         assertEquals(CUSTOM_IMAGE_ID, azureImageInfo.getImageId());
         assertEquals(CUSTOM_IMAGE_NAME, azureImageInfo.getImageNameWithRegion());
         assertEquals(RESOURCE_GROUP_NAME, azureImageInfo.getResourceGroup());
+        assertNull(azureImageInfo.getHyperVGeneration());
         verify(azureResourceIdProviderService).generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, CUSTOM_IMAGE_NAME);
-        verify(customVMImageNameProvider).getImageNameWithRegion(REGION_NAME, FROM_VHD_URI);
+        verify(customVMImageNameProvider).getImageNameWithRegion(REGION_NAME, FROM_VHD_URI, null);
+    }
+
+    @Test
+    public void testGetImageDetailsWhenGen2Image() {
+        setupAuthenticatedContext();
+        setupAzureClient();
+        when(azureResourceIdProviderService.generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, CUSTOM_IMAGE_NAME)).thenReturn(CUSTOM_IMAGE_ID);
+        when(customVMImageNameProvider.getImageNameWithRegion(REGION_NAME, FROM_VHD_URI, HyperVGenerationTypes.V2)).thenReturn(CUSTOM_IMAGE_NAME);
+
+        AzureImageInfo azureImageInfo = underTest.getImageInfo(RESOURCE_GROUP_NAME, FROM_VHD_URI, HyperVGenerationTypes.V2, authenticatedContext, azureClient);
+
+        assertEquals(HyperVGenerationTypes.V2, azureImageInfo.getHyperVGeneration());
+        assertEquals(CUSTOM_IMAGE_NAME, azureImageInfo.getImageNameWithRegion());
     }
 
     private void setupAzureClient() {

@@ -88,6 +88,16 @@ class ImageToImageV4ResponseConverterTest extends AbstractEntityConverterTest<Im
         validateImageV4Response(result, true, "unknown");
     }
 
+    @Test
+    void testTagsAreConverted() {
+        Map<String, String> tags = Map.of("azure-hyper-v-generation", "2", "release-version", TEST_VERSION);
+        Image source = Image.builder().copy(getTestImageWithoutCollections(ARCHITECTURE)).withTags(tags).build();
+
+        ImageV4Response result = underTest.convert(source);
+
+        assertEquals(tags, result.getTags());
+    }
+
     private static Image getTestImage(String architecture) {
 
         Map<String, Map<String, String>> imageSetsByProvider =

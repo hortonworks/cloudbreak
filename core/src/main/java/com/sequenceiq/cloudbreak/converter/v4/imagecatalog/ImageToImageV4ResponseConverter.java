@@ -33,6 +33,7 @@ public class ImageToImageV4ResponseConverter {
         result.setPreWarmCsd(source.getPreWarmCsd());
         result.setPreWarmParcels(source.getPreWarmParcels());
         result.setAdvertised(source.isAdvertised());
+        result.setTags(source.getTags());
 
         ImageStackDetails stackDetails = source.getStackDetails();
         if (stackDetails != null) {

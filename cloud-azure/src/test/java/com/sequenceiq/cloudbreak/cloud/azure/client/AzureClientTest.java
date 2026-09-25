@@ -41,6 +41,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -81,10 +82,14 @@ import com.azure.resourcemanager.compute.models.DiskStorageAccountTypes;
 import com.azure.resourcemanager.compute.models.DiskUpdate;
 import com.azure.resourcemanager.compute.models.Disks;
 import com.azure.resourcemanager.compute.models.Encryption;
+import com.azure.resourcemanager.compute.models.HyperVGenerationTypes;
 import com.azure.resourcemanager.compute.models.NetworkAccessPolicy;
+import com.azure.resourcemanager.compute.models.OperatingSystemStateTypes;
 import com.azure.resourcemanager.compute.models.PublicNetworkAccess;
 import com.azure.resourcemanager.compute.models.ResourceSkuLocationInfo;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
+import com.azure.resourcemanager.compute.models.VirtualMachineCustomImages;
 import com.azure.resourcemanager.compute.models.VirtualMachines;
 import com.azure.resourcemanager.keyvault.models.AccessPolicy;
 import com.azure.resourcemanager.keyvault.models.AccessPolicyEntry;
@@ -153,6 +158,12 @@ class AzureClientTest {
     private static final String GATEWAY_PRIVATE_IP_ADDRESS1 = "110.111.112.113";
 
     private static final String TAG_NAME = "created-for";
+
+    private static final String IMAGE_NAME = "cb-image-name.vhd-westus2";
+
+    private static final String VHD_URI = "https://storageaccount.blob.core.windows.net/images/cb-image-name.vhd";
+
+    private static final String REGION = "westus2";
 
     @Mock
     private AzureClientFactory azureClientCredentials;
@@ -1138,5 +1149,57 @@ class AzureClientTest {
         Optional<Double> result = underTest.getLatestAverageMetricValue(resourceId, metricName, Duration.ofHours(1));
 
         assertTrue(result.isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"V1", "V2"})
+    void testCreateImageWhenHyperVGenerationIsRequestedThenItIsSetOnTheImageDefinition(String generation) {
+        HyperVGenerationTypes hyperVGeneration = HyperVGenerationTypes.fromString(generation);
+        CustomImageDefinition definition = mockCustomImageDefinition();
+        VirtualMachineCustomImage.DefinitionStages.WithOSDiskImageSourceAltVirtualMachineSource withGeneration =
+                mock(VirtualMachineCustomImage.DefinitionStages.WithOSDiskImageSourceAltVirtualMachineSource.class);
+        when(definition.withHyperVGeneration().withHyperVGeneration(hyperVGeneration)).thenReturn(withGeneration);
+        when(withGeneration.withLinuxFromVhd(VHD_URI, OperatingSystemStateTypes.GENERALIZED)).thenReturn(definition.withVhd());
+
+        Optional<VirtualMachineCustomImage> actual = underTest.createImage(IMAGE_NAME, RESOURCE_GROUP_NAME, VHD_URI, REGION, hyperVGeneration);
+
+        assertThat(actual).contains(definition.image());
+        verify(definition.withHyperVGeneration()).withHyperVGeneration(hyperVGeneration);
+        verify(definition.withHyperVGeneration(), never()).withLinuxFromVhd(any(), any());
+    }
+
+    @Test
+    void testCreateImageWhenHyperVGenerationIsNullThenSdkDefaultIsKept() {
+        CustomImageDefinition definition = mockCustomImageDefinition();
+        when(definition.withHyperVGeneration().withLinuxFromVhd(VHD_URI, OperatingSystemStateTypes.GENERALIZED)).thenReturn(definition.withVhd());
+
+        Optional<VirtualMachineCustomImage> actual = underTest.createImage(IMAGE_NAME, RESOURCE_GROUP_NAME, VHD_URI, REGION, null);
+
+        assertThat(actual).contains(definition.image());
+        verify(definition.withHyperVGeneration(), never()).withHyperVGeneration(any());
+    }
+
+    private CustomImageDefinition mockCustomImageDefinition() {
+        ResourceGroups resourceGroups = mock(ResourceGroups.class);
+        when(azureResourceManager.resourceGroups()).thenReturn(resourceGroups);
+        when(resourceGroups.contain(RESOURCE_GROUP_NAME)).thenReturn(true);
+        VirtualMachineCustomImages customImages = mock(VirtualMachineCustomImages.class);
+        VirtualMachineCustomImage.DefinitionStages.Blank blank = mock(VirtualMachineCustomImage.DefinitionStages.Blank.class);
+        VirtualMachineCustomImage.DefinitionStages.WithGroup withGroup = mock(VirtualMachineCustomImage.DefinitionStages.WithGroup.class);
+        VirtualMachineCustomImage.DefinitionStages.WithHyperVGeneration withHyperVGeneration =
+                mock(VirtualMachineCustomImage.DefinitionStages.WithHyperVGeneration.class);
+        VirtualMachineCustomImage.DefinitionStages.WithCreateAndDataDiskImageOSDiskSettings withVhd =
+                mock(VirtualMachineCustomImage.DefinitionStages.WithCreateAndDataDiskImageOSDiskSettings.class);
+        VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
+        when(azureResourceManager.virtualMachineCustomImages()).thenReturn(customImages);
+        when(customImages.define(IMAGE_NAME)).thenReturn(blank);
+        when(blank.withRegion(REGION)).thenReturn(withGroup);
+        when(withGroup.withExistingResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(withHyperVGeneration);
+        when(withVhd.create()).thenReturn(image);
+        return new CustomImageDefinition(withHyperVGeneration, withVhd, image);
+    }
+
+    private record CustomImageDefinition(VirtualMachineCustomImage.DefinitionStages.WithHyperVGeneration withHyperVGeneration,
+            VirtualMachineCustomImage.DefinitionStages.WithCreateAndDataDiskImageOSDiskSettings withVhd, VirtualMachineCustomImage image) {
     }
 }

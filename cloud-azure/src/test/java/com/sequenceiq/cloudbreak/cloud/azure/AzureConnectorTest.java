@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.CommonSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFileSystemValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageVmTypeCompatibilityValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureSubnetValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
@@ -32,6 +33,9 @@ class AzureConnectorTest {
     private AzureImageFormatValidator azureImageFormatValidator;
 
     @Mock
+    private AzureImageVmTypeCompatibilityValidator azureImageVmTypeCompatibilityValidator;
+
+    @Mock
     private AzureFileSystemValidator azureFileSystemValidator;
 
     @Mock
@@ -42,12 +46,12 @@ class AzureConnectorTest {
 
     @Test
     void testValidatorsImage() {
-        assertThat(underTest.validators(ValidatorType.IMAGE)).containsExactly(azureImageFormatValidator);
+        assertThat(underTest.validators(ValidatorType.IMAGE)).containsExactly(azureImageFormatValidator, azureImageVmTypeCompatibilityValidator);
     }
 
     @Test
     void testValidatorsAll() {
         assertThat(underTest.validators(ValidatorType.ALL)).containsExactly(azureTagValidator, azureSubnetValidator, azureStorageValidator,
-                azureImageFormatValidator, azureFileSystemValidator, commonSecretEncryptionValidator);
+                azureImageFormatValidator, azureImageVmTypeCompatibilityValidator, azureFileSystemValidator, commonSecretEncryptionValidator);
     }
 }

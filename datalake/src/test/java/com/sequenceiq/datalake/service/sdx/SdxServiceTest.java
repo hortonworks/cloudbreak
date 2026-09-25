@@ -131,6 +131,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
+import com.sequenceiq.sdx.api.model.VmTypeResponse;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Data Lake service tests")
@@ -241,6 +242,9 @@ class SdxServiceTest {
 
     @Mock
     private DatabaseInstanceTypeRequestValidator databaseInstanceTypeRequestValidator;
+
+    @Mock
+    private SdxHyperVGenerationValidator sdxHyperVGenerationValidator;
 
     @InjectMocks
     private SdxService underTest;
@@ -1081,6 +1085,30 @@ class SdxServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         assertEquals(MICRO_DUTY, capturedSdx.getClusterShape());
+    }
+
+    @Test
+    void testCreateSdxPassesVmTypesFetchedForInstanceTypeOverrideToHyperVGenerationValidator() throws IOException, TransactionExecutionException {
+        final String runtime = "7.2.12";
+        mockTransactionServiceRequired();
+        String microDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/micro_duty.json");
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(microDutyJson, StackV4Request.class));
+        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MICRO_DUTY);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        withCloudStorage(sdxClusterRequest);
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> invocation.getArgument(0, SdxCluster.class));
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
+        List<VmTypeResponse> availableVmTypes = List.of(new VmTypeResponse("verylarge", null));
+        when(sdxInstanceService.overrideDefaultInstanceType(any(), any(), any(), any(), any(), any())).thenReturn(Optional.of(availableVmTypes));
+
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+
+        verify(sdxHyperVGenerationValidator).validate(any(), any(), any(), eq(availableVmTypes));
     }
 
     @Test

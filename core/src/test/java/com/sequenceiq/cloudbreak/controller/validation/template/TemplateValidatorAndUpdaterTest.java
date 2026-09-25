@@ -124,13 +124,67 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
         assertTrue(validationResult.hasError());
         assertEquals(validationResult.getErrors().getFirst(),
                 "The 'm5xlarge' instance type's architecture 'x86_64' is not matching requested architecture 'arm64'");
+    }
+
+    @Test
+    void testValidateHyperVGenerationWhenGen2ImageAndGen1OnlyInstanceType() {
+        Credential credential = Credential.builder().build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        InstanceGroup instanceGroup = azureInstanceGroup("Standard_D2_v2");
+        VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder()
+                .withArchitecture(Architecture.X86_64)
+                .withHyperVGenerations("V1")
+                .create();
+        Stack stack = azureStack(vmTypeMeta, "Standard_D2_v2", instanceGroup);
+
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, "V2", validationBuilder);
+
+        ValidationResult validationResult = validationBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertEquals("The 'Standard_D2_v2' instance type does not support the selected image's Hyper-V generation 'V2'. Supported generation(s): 'V1'",
+                validationResult.getErrors().getFirst());
+    }
+
+    @Test
+    void testValidateHyperVGenerationWhenGen2ImageAndDualGenerationInstanceType() {
+        Credential credential = Credential.builder().build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        InstanceGroup instanceGroup = azureInstanceGroup("Standard_D2s_v5");
+        VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder()
+                .withArchitecture(Architecture.X86_64)
+                .withHyperVGenerations("V1,V2")
+                .create();
+        Stack stack = azureStack(vmTypeMeta, "Standard_D2s_v5", instanceGroup);
+
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, "V2", validationBuilder);
+
+        assertFalse(validationBuilder.build().hasError());
+    }
+
+    @Test
+    void testValidateHyperVGenerationWhenImageIsNotTaggedThenNoError() {
+        Credential credential = Credential.builder().build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        InstanceGroup instanceGroup = azureInstanceGroup("Standard_D2_v2");
+        VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder()
+                .withArchitecture(Architecture.X86_64)
+                .withHyperVGenerations("V1")
+                .create();
+        Stack stack = azureStack(vmTypeMeta, "Standard_D2_v2", instanceGroup);
+
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, null, validationBuilder);
+
+        assertFalse(validationBuilder.build().hasError());
     }
 
     @Test
@@ -173,7 +227,7 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -224,7 +278,7 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -266,7 +320,7 @@ class TemplateValidatorAndUpdaterTest {
         // Call the validate method
         Stack stack = new Stack();
         stack.setArchitecture(Architecture.X86_64);
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -309,7 +363,7 @@ class TemplateValidatorAndUpdaterTest {
         // Call the validate method
         Stack stack = new Stack();
         stack.setArchitecture(Architecture.X86_64);
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -352,7 +406,7 @@ class TemplateValidatorAndUpdaterTest {
         // Call the validate method
         Stack stack = new Stack();
         stack.setArchitecture(Architecture.X86_64);
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -396,7 +450,7 @@ class TemplateValidatorAndUpdaterTest {
         // Call the validate method
         Stack stack = new Stack();
         stack.setArchitecture(Architecture.X86_64);
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -468,7 +522,7 @@ class TemplateValidatorAndUpdaterTest {
 
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         ValidationResult validationResult = validationBuilder.build();
         assertFalse(validationResult.hasError());
@@ -538,11 +592,38 @@ class TemplateValidatorAndUpdaterTest {
 
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, null, validationBuilder);
 
         ValidationResult validationResult = validationBuilder.build();
         assertTrue(validationResult.hasError());
         assertEquals(validationResult.getErrors().get(0), "Max allowed volume size for 'm5xlarge': 100 " +
                 "GB in case of ephemeral volumes and the current size is 101 GB.");
+    }
+
+    private InstanceGroup azureInstanceGroup(String instanceType) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setAttributes(new Json(Map.of()));
+        template.setCloudPlatform(CloudPlatform.AZURE.name());
+        template.setInstanceType(instanceType);
+        template.setVolumeTemplates(Set.of());
+        instanceGroup.setTemplate(template);
+        return instanceGroup;
+    }
+
+    private Stack azureStack(VmTypeMeta vmTypeMeta, String instanceType, InstanceGroup instanceGroup) {
+        CloudVmTypes cloudVmTypes = new CloudVmTypes();
+        cloudVmTypes.setCloudVmResponses(Map.of("westus2", Set.of(vmTypeWithMeta(instanceType, vmTypeMeta, true))));
+        Stack stack = new Stack();
+        stack.setArchitecture(Architecture.X86_64);
+
+        when(extendedCloudCredentialConverter.convert(any()))
+                .thenReturn(new ExtendedCloudCredential(new CloudCredential(), "AZURE", "", "account", new ArrayList<>()));
+        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any())).thenReturn(cloudVmTypes);
+        when(locationService.location(any(), any())).thenReturn("westus2");
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(instanceGroup.getTemplate())).thenReturn(instanceGroup.getTemplate());
+        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        return stack;
     }
 }

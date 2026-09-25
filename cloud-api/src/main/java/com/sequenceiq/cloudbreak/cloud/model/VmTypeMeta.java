@@ -29,6 +29,8 @@ public class VmTypeMeta {
 
     public static final String ARCHITECTURE = "Architecture";
 
+    public static final String HYPER_V_GENERATIONS = "HyperVGenerations";
+
     public static final String DEFAULT_DISK_TYPE = "DefaultDiskType";
 
     private VolumeParameterConfig magneticConfig;
@@ -179,6 +181,22 @@ public class VmTypeMeta {
 
     public Architecture getArchitecture() {
         return (Architecture) properties.getOrDefault(ARCHITECTURE, Architecture.X86_64);
+    }
+
+    public String getHyperVGenerations() {
+        Object hyperVGenerations = properties.get(HYPER_V_GENERATIONS);
+        return hyperVGenerations == null ? null : hyperVGenerations.toString();
+    }
+
+    /**
+     * Returns true when the instance type is known to support the given Hyper-V generation, or when the provider did not report its supported generations
+     * at all - in that case we must not block provisioning on an unknown.
+     *
+     * @param generation "V1" or "V2"
+     */
+    public boolean isHyperVGenerationSupported(String generation) {
+        String hyperVGenerations = getHyperVGenerations();
+        return hyperVGenerations == null || hyperVGenerations.contains(generation);
     }
 
     public Optional<VolumeParameterType> getDefaultVolumeType() {
@@ -417,6 +435,13 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withArchitecture(Architecture architecture) {
             properties.put(ARCHITECTURE, architecture);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHyperVGenerations(String hyperVGenerations) {
+            if (hyperVGenerations != null) {
+                properties.put(HYPER_V_GENERATIONS, hyperVGenerations);
+            }
             return this;
         }
 

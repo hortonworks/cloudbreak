@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreati
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.AzureHyperVGenerationProvider;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.config.CloudConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.event.ValidateCloudConfigRequest;
@@ -68,6 +69,9 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
 
     @Inject
+    private AzureHyperVGenerationProvider azureHyperVGenerationProvider;
+
+    @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
 
     @Inject
@@ -94,6 +98,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
         stackValidator.validate(stack, validationBuilder);
 
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
+        String imageHyperVGeneration = azureHyperVGenerationProvider.getImageHyperVGeneration(stack);
         measure(() -> {
             for (InstanceGroup instanceGroup : instanceGroups) {
                 LOGGER.info("Validate template for {} name with {} instanceGroup.", name, instanceGroup.toString());
@@ -104,6 +109,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
                         instanceGroup,
                         stack,
                         fromStackType(type == null ? null : type.name()),
+                        imageHyperVGeneration,
                         validationBuilder);
 
             }

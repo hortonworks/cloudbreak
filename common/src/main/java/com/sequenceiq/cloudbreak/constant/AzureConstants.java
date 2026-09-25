@@ -23,6 +23,12 @@ public class AzureConstants {
 
     public static final String LUN_DEVICE_NAME_TEMPLATE = LUN_DEVICE_PATH_PREFIX + "%d";
 
+    public static final String HYPER_V_GENERATION_TAG = "azure-hyper-v-generation";
+
+    public static final String HYPER_V_GENERATION_V1 = "V1";
+
+    public static final String HYPER_V_GENERATION_V2 = "V2";
+
     private AzureConstants() {
     }
 }
