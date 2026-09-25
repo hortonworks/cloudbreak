@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
@@ -52,14 +53,17 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.parcel.SmartRouterParcelService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.model.Architecture;
@@ -107,6 +111,9 @@ public class ImageService {
 
     @Inject
     private StackTypeResolver stackTypeResolver;
+
+    @Inject
+    private SmartRouterParcelService smartRouterParcelService;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
@@ -391,11 +398,23 @@ public class ImageService {
         if (centralCDHVersionCoordinator.requestedComponentTypesContainsCdhComponentType(requestedComponents)) {
             addStackRepo(stack, components, catalogBasedImage);
             addPrewarmParcels(stack, statedImage, components);
+            addSmartRouterParcel(stack, components, catalogBasedImage);
         }
         if (requestedComponents.contains(CM_REPO_DETAILS)) {
             addCmRepo(stack, components, catalogBasedImage);
         }
         return components;
+    }
+
+    private void addSmartRouterParcel(Stack stack, Set<Component> components, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage) {
+        Optional.ofNullable(stack.getCluster())
+                .map(Cluster::getBlueprint)
+                .map(Blueprint::getHybridOption)
+                .filter(BlueprintHybridOption.ON_PREM_BASE::equals)
+                .ifPresent(b -> {
+                    ClouderaManagerProduct product = smartRouterParcelService.getProduct(catalogBasedImage.getOsType());
+                    components.add(new Component(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), stack));
+                });
     }
 
     public Optional<String> getSupportedImdsVersion(String cloudPlatform, StatedImage image) {

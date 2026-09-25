@@ -523,6 +523,8 @@ cb:
           7.3.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
           7.3.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
           7.3.1 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
+          7.3.1 - SDX On Premises Base cluster=cdp-sdx-onprem-base;
+          7.3.1 - SDX On Premises Base cluster HA=cdp-sdx-onprem-base-ha;
           7.3.1 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
           7.3.1 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
           7.3.1 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive=cdp-hybrid-data-engineering-spark3-ha;
@@ -553,6 +555,8 @@ cb:
           7.3.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
           7.3.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
           7.3.2 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
+          7.3.2 - SDX On Premises Base cluster=cdp-sdx-onprem-base;
+          7.3.2 - SDX On Premises Base cluster HA=cdp-sdx-onprem-base-ha;
           7.3.2 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
           7.3.2 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
           7.3.2 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive=cdp-hybrid-data-engineering-spark3-ha;
@@ -588,6 +592,8 @@ cb:
           7.3.3 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
           7.3.3 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
           7.3.3 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
+          7.3.3 - SDX On Premises Base cluster=cdp-sdx-onprem-base;
+          7.3.3 - SDX On Premises Base cluster HA=cdp-sdx-onprem-base-ha;
           7.3.3 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
           7.3.3 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
           7.3.3 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive=cdp-hybrid-data-engineering-spark3-ha;
@@ -855,7 +861,9 @@ cb:
   validation:
     max.content.size: 8388608
 
-
+  smartrouter:
+    latestCompiledBuildUrl: https://release.eng.cloudera.com/hwre-api/latestcompiledbuild
+    releaseVersion: 1.0.0
 
 cluster:
   monitoring:

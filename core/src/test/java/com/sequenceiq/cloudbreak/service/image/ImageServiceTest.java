@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -37,7 +38,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -50,6 +53,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
@@ -64,14 +68,18 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.parcel.SmartRouterParcelService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.Architecture;
@@ -104,6 +112,10 @@ public class ImageServiceTest {
     private static final String IMAGE_CATALOG_NAME = "aCatalog";
 
     private static final ImageCatalogPlatform IMAGE_CATALOG_PLATFORM = new ImageCatalogPlatform(PLATFORM);
+
+    private static final String SMART_ROUTER_VERSION = "1.0.0-b12";
+
+    private static final String OS_TYPE = "redhat8";
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -146,6 +158,9 @@ public class ImageServiceTest {
 
     @Mock
     private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+
+    @Mock
+    private SmartRouterParcelService smartRouterParcelService;
 
     @InjectMocks
     private ImageService underTest;
@@ -667,12 +682,86 @@ public class ImageServiceTest {
 
     @Test
     public void testGetComponents() throws CloudbreakImageCatalogException {
+        Stack stack = createStackWithHybridOption(null);
+
+        Set<Component> components = callGetComponents(stack, EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS));
+
+        assertEquals(3, components.size());
+        for (Component component : components) {
+            ComponentType componentType = component.getComponentType();
+            assertTrue(EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS).contains(componentType));
+            if (componentType == IMAGE) {
+                assertEquals(EXISTING_ID, component.getAttributes().getString("imageName"));
+            }
+        }
+        verifyNoInteractions(smartRouterParcelService);
+    }
+
+    @Test
+    public void testGetComponentsShouldAddTheSmartRouterParcelWhenTheBlueprintHybridOptionIsOnPremBase() throws CloudbreakImageCatalogException {
+        Stack stack = createStackWithHybridOption(BlueprintHybridOption.ON_PREM_BASE);
+        when(smartRouterParcelService.getProduct(OS_TYPE)).thenReturn(smartRouterProduct());
+
+        Set<Component> components = callGetComponents(stack, EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS));
+
+        assertEquals(4, components.size());
+        Component smartRouterComponent = components.stream()
+                .filter(component -> SmartRouterParcelService.COMPONENT_NAME.equals(component.getName()))
+                .findAny()
+                .orElseThrow(() -> new AssertionError("Smart Router component not found in " + components));
+        assertEquals(cdhProductDetails(), smartRouterComponent.getComponentType());
+        assertEquals(STACK_ID, smartRouterComponent.getStackId());
+        ClouderaManagerProduct storedProduct = smartRouterComponent.getAttributes().getUnchecked(ClouderaManagerProduct.class);
+        assertEquals(SmartRouterParcelService.COMPONENT_NAME, storedProduct.getName());
+        assertEquals(SMART_ROUTER_VERSION, storedProduct.getVersion());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = BlueprintHybridOption.class, names = {"NONE", "BURST_TO_CLOUD"})
+    public void testGetComponentsShouldNotAddTheSmartRouterParcelWhenTheBlueprintHybridOptionIsNotOnPremBase(BlueprintHybridOption hybridOption)
+            throws CloudbreakImageCatalogException {
+        Stack stack = createStackWithHybridOption(hybridOption);
+
+        Set<Component> components = callGetComponents(stack, EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS));
+
+        assertEquals(3, components.size());
+        verifyNoInteractions(smartRouterParcelService);
+    }
+
+    @Test
+    public void testGetComponentsShouldNotAddTheSmartRouterParcelWhenCdhComponentsAreNotRequested() throws CloudbreakImageCatalogException {
+        Stack stack = createStackWithHybridOption(BlueprintHybridOption.ON_PREM_BASE);
+        when(centralCDHVersionCoordinator.requestedComponentTypesContainsCdhComponentType(any())).thenReturn(false);
+
+        Set<Component> components = callGetComponents(stack, EnumSet.of(IMAGE, CM_REPO_DETAILS));
+
+        assertEquals(2, components.size());
+        verifyNoInteractions(smartRouterParcelService);
+    }
+
+    private Stack createStackWithHybridOption(BlueprintHybridOption hybridOption) {
         Stack stack = new Stack();
+        stack.setId(STACK_ID);
         stack.setCloudPlatform(PLATFORM);
         stack.setPlatformVariant("VARIANT");
         stack.setRegion(REGION);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setHybridOption(hybridOption);
+        Cluster cluster = new Cluster();
+        cluster.setBlueprint(blueprint);
+        stack.setCluster(cluster);
+        return stack;
+    }
 
+    private ClouderaManagerProduct smartRouterProduct() {
+        return new ClouderaManagerProduct()
+                .withName(SmartRouterParcelService.COMPONENT_NAME)
+                .withVersion(SMART_ROUTER_VERSION)
+                .withParcel("https://smartrouter.cloudera.com/parcels");
+    }
 
+    private Set<Component> callGetComponents(Stack stack, EnumSet<ComponentType> requestedComponents) throws CloudbreakImageCatalogException {
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
 
         CloudConnector connector = mock(CloudConnector.class);
@@ -685,29 +774,19 @@ public class ImageServiceTest {
         StackRepoDetails stackRepoDetails = new StackRepoDetails(Map.of(StackRepoDetails.REPO_ID_TAG, "CDH"), null);
         ImageStackDetails imageStackDetails = new ImageStackDetails("7.2.17", stackRepoDetails, "123");
         when(image.getStackDetails()).thenReturn(imageStackDetails);
-        when(image.getOsType()).thenReturn("redhat8");
+        when(image.getOsType()).thenReturn(OS_TYPE);
         when(stackTypeResolver.determineStackType(any())).thenReturn(StackType.CDH);
-
 
         StatedImage statedImage = StatedImage.statedImage(image, "https://url.com", "my-cayalog");
 
-        Set<Component> components = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> {
                     try {
-                        return underTest.getComponents(stack, statedImage, EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS));
+                        return underTest.getComponents(stack, statedImage, requestedComponents);
                     } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                         throw new RuntimeException(e);
                     }
                 });
-
-        assertEquals(3, components.size());
-        for (Component component : components) {
-            ComponentType componentType = component.getComponentType();
-            assertTrue(EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS).contains(componentType));
-            if (componentType == IMAGE) {
-                assertEquals(EXISTING_ID, component.getAttributes().getString("imageName"));
-            }
-        }
     }
 
     @Test

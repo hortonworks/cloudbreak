@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -159,16 +159,18 @@ public class ParcelService {
     }
 
     private Set<ClusterComponentView> getDataLakeClusterComponents(Set<ClusterComponentView> components) {
-        ClusterComponentView stackComponent = getCdhComponent(components);
-        LOGGER.debug("For datalake clusters only the CDH parcel is used in CM: {}", stackComponent);
-        return Collections.singleton(stackComponent);
+        Set<ClusterComponentView> dataLakeClusterComponents = new HashSet<>();
+        dataLakeClusterComponents.add(getComponent(components, StackType.CDH.name())
+                .orElseThrow(() -> new NotFoundException("Runtime component not found!")));
+        getComponent(components, SmartRouterParcelService.COMPONENT_NAME).ifPresent(dataLakeClusterComponents::add);
+        LOGGER.debug("For datalake clusters only the CDH and Smart Router parcel is used in CM: {}", dataLakeClusterComponents);
+        return dataLakeClusterComponents;
     }
 
-    private ClusterComponentView getCdhComponent(Set<ClusterComponentView> components) {
+    private Optional<ClusterComponentView> getComponent(Set<ClusterComponentView> components, String componentName) {
         return components.stream()
-                .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
+                .filter(clusterComponent -> clusterComponent.getName().equals(componentName))
+                .findFirst();
     }
 
     private Set<ClusterComponentView> getComponentsByRequiredProducts(Map<String, ClusterComponentView> cmProductMap, Set<ClouderaManagerProduct> cmProducts) {

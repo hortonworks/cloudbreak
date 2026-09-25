@@ -1,0 +1,32 @@
+{
+  "redhat8": {
+    "build": "1.0.0-b9",
+    "gbn": "83751218",
+    "dup_jar_report_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/ASSEMBLY_REPORT/redhat8/REPORTS/dup_jar_report.html",
+    "gbn_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/",
+    "gpl_repo_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/gplextras/1.x/redhat8/yum/smartrouterbn.gpl.repo",
+    "jar_report_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/ASSEMBLY_REPORT/redhat8/REPORTS/jar_report.html",
+    "logs_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/LOGS/redhat8/build/",
+    "patch_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/PATCH_FILES/redhat8/patch_files/",
+    "repo_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/smartrouter/1.x/redhat8/yum/smartrouterbn.repo",
+    "smartrouter_repo_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/smartrouter/1.x/redhat8/yum/smartrouterbn.repo",
+    "s3_base_url": "s3://cloudera-build-2/build/83751218/smartrouter/1.x/redhat8/yum",
+    "tar_loc_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/smartrouter/1.x/redhat8/yum/tars/"
+  },
+  "redhat9": {
+    "build": "1.0.0-b9",
+    "gbn": "83751218",
+    "dup_jar_report_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/ASSEMBLY_REPORT/redhat9/REPORTS/dup_jar_report.html",
+    "gbn_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/",
+    "gpl_repo_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/gplextras/1.x/redhat9/yum/smartrouterbn.gpl.repo",
+    "jar_report_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/ASSEMBLY_REPORT/redhat9/REPORTS/jar_report.html",
+    "logs_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/LOGS/redhat9/build/",
+    "patch_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/PATCH_FILES/redhat9/patch_files/",
+    "repo_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/smartrouter/1.x/redhat9/yum/smartrouterbn.repo",
+    "smartrouter_repo_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/smartrouter/1.x/redhat9/yum/smartrouterbn.repo",
+    "s3_base_url": "s3://cloudera-build-2/build/83751218/smartrouter/1.x/redhat9/yum",
+    "tar_loc_url": "http://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/83751218/smartrouter/1.x/redhat9/yum/tars/"
+  },
+  "build": "1.0.0-b9",
+  "gbn": "83751218"
+}

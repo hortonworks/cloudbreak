@@ -15,6 +15,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -26,10 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -54,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.service.parcel.SmartRouterParcelService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -84,6 +88,8 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     private static final long WORKSPACE_ID = 2L;
 
+    private static final String SMART_ROUTER_VERSION = "1.0.0-b12";
+
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
@@ -104,6 +110,9 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     @Mock
     private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+
+    @Mock
+    private SmartRouterParcelService smartRouterParcelService;
 
     @InjectMocks
     private ClouderaManagerClusterCreationSetupService underTest;
@@ -278,12 +287,104 @@ class ClouderaManagerClusterCreationSetupServiceTest {
                 .thenReturn(productClusterComponentList);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
         when(clouderaManagerProductsProvider.getCdhProduct(anySet())).thenReturn(Optional.of(cdhProduct));
+        when(smartRouterParcelService.getSmartRouter(anySet())).thenReturn(Optional.empty());
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent,
                 productComponentList, imageComponent);
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
         verify(clouderaManagerProductsProvider).getCdhProduct(anySet());
+        assertEquals(Set.of("CDH"), captureConvertedProductNames());
+    }
+
+    @Test
+    void testPrewarmedClouderaManagerClusterComponentsWhenTheStackTypeIsDataLakeAndSmartRouterIsAmongTheProducts()
+            throws IOException, CloudbreakImageCatalogException {
+        Component cmRepoComponent = spy(new Component(ComponentType.CM_REPO_DETAILS,
+                ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo(false)), stack));
+        ClouderaManagerProduct cdhProduct = clouderaManagerProduct("CDH", SOME_CDH_VERSION);
+        ClouderaManagerProduct smartRouterProduct = clouderaManagerProduct(SmartRouterParcelService.COMPONENT_NAME, SMART_ROUTER_VERSION);
+        List<Component> productComponentList = List.of(
+                new Component(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), stack),
+                new Component(cdhProductDetails(), SmartRouterParcelService.COMPONENT_NAME, new Json(smartRouterProduct), stack));
+        ClusterComponent productClusterComponent = spy(
+                new ClusterComponent(
+                        cdhProductDetails(),
+                        cdhProductDetails().name(),
+                        new Json(getClouderaManagerProductRepo()),
+                        stack.getCluster()
+                )
+        );
+        stack.setType(StackType.DATALAKE);
+
+        when(centralCDHVersionCoordinator.isCdhProductDetails(productClusterComponent)).thenReturn(true);
+        when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), anySet()))
+                .thenReturn(List.of(productClusterComponent));
+        when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
+        when(clouderaManagerProductsProvider.getCdhProduct(anySet())).thenReturn(Optional.of(cdhProduct));
+        when(smartRouterParcelService.getSmartRouter(anySet())).thenReturn(Optional.of(smartRouterProduct));
+
+        underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent, productComponentList, imageComponent);
+
+        assertEquals(Set.of("CDH", SmartRouterParcelService.COMPONENT_NAME), captureConvertedProductNames());
+    }
+
+    @Test
+    void testPrewarmedClouderaManagerClusterComponentsShouldLookUpSmartRouterAmongAllStackProductsWhenTheStackTypeIsDataLake()
+            throws IOException, CloudbreakImageCatalogException {
+        Component cmRepoComponent = spy(new Component(ComponentType.CM_REPO_DETAILS,
+                ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo(false)), stack));
+        ClouderaManagerProduct cdhProduct = clouderaManagerProduct("CDH", SOME_CDH_VERSION);
+        ClouderaManagerProduct smartRouterProduct = clouderaManagerProduct(SmartRouterParcelService.COMPONENT_NAME, SMART_ROUTER_VERSION);
+        List<Component> productComponentList = List.of(
+                new Component(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), stack),
+                new Component(cdhProductDetails(), SmartRouterParcelService.COMPONENT_NAME, new Json(smartRouterProduct), stack));
+        stack.setType(StackType.DATALAKE);
+
+        when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), anySet()))
+                .thenReturn(List.of(new ClusterComponent(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), cluster)));
+        when(centralCDHVersionCoordinator.isCdhProductDetails(any(ClusterComponent.class))).thenReturn(true);
+        when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
+        when(clouderaManagerProductsProvider.getCdhProduct(anySet())).thenReturn(Optional.of(cdhProduct));
+        when(smartRouterParcelService.getSmartRouter(anySet())).thenReturn(Optional.of(smartRouterProduct));
+
+        underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent, productComponentList, imageComponent);
+
+        ArgumentCaptor<Set<ClouderaManagerProduct>> lookupCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(smartRouterParcelService).getSmartRouter(lookupCaptor.capture());
+        assertEquals(Set.of("CDH", SmartRouterParcelService.COMPONENT_NAME), productNames(lookupCaptor.getValue()));
+    }
+
+    @Test
+    void testPrewarmedClouderaManagerClusterComponentsShouldNotLookUpSmartRouterWhenTheStackIsNotDataLake() throws IOException, CloudbreakImageCatalogException {
+        Component cmRepoComponent = spy(new Component(ComponentType.CM_REPO_DETAILS,
+                ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo(false)), stack));
+        ClouderaManagerProduct cdhProduct = clouderaManagerProduct("CDH", SOME_CDH_VERSION);
+        ClouderaManagerProduct smartRouterProduct = clouderaManagerProduct(SmartRouterParcelService.COMPONENT_NAME, SMART_ROUTER_VERSION);
+        List<Component> productComponentList = List.of(
+                new Component(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), stack),
+                new Component(cdhProductDetails(), SmartRouterParcelService.COMPONENT_NAME, new Json(smartRouterProduct), stack));
+        stack.setType(StackType.WORKLOAD);
+
+        when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), anySet()))
+                .thenReturn(List.of(new ClusterComponent(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), cluster)));
+        when(centralCDHVersionCoordinator.isCdhProductDetails(any(ClusterComponent.class))).thenReturn(true);
+        when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
+
+        underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent, productComponentList, imageComponent);
+
+        verifyNoInteractions(smartRouterParcelService, clouderaManagerProductsProvider);
+        assertEquals(Set.of("CDH", SmartRouterParcelService.COMPONENT_NAME), captureConvertedProductNames());
+    }
+
+    private Set<String> captureConvertedProductNames() {
+        ArgumentCaptor<Set<ClouderaManagerProduct>> productsCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(centralCDHVersionCoordinator).convertClouderaManagerProductsToClusterComponents(eq(cluster), productsCaptor.capture());
+        return productNames(productsCaptor.getValue());
+    }
+
+    private Set<String> productNames(Set<ClouderaManagerProduct> products) {
+        return products.stream().map(ClouderaManagerProduct::getName).collect(Collectors.toSet());
     }
 
     private void assertVersionsMatch(Collection<ClusterComponent> clusterComponents, String cmVersion, String cdhVersion) {

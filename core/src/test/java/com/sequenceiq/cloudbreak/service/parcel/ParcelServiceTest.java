@@ -2,13 +2,16 @@ package com.sequenceiq.cloudbreak.service.parcel;
 
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -157,6 +161,76 @@ public class ParcelServiceTest {
 
         assertEquals(1, actual.size());
         assertTrue(actual.contains(cdhParcel));
+    }
+
+    @Test
+    void testGetRequiredProductsFromProductsForDatalakeShouldReturnCdhAndSmartRouter() {
+        Stack stack = createStack(StackType.DATALAKE);
+        ClouderaManagerProduct cdhParcel = createClouderaManagerProduct("CDH");
+        ClouderaManagerProduct smartRouterParcel = createClouderaManagerProduct(SmartRouterParcelService.COMPONENT_NAME);
+        Set<ClouderaManagerProduct> targetProducts = Set.of(cdhParcel, smartRouterParcel, createClouderaManagerProduct("FLINK"));
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(datalakeClusterComponents());
+
+        Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsFromProducts(stack, targetProducts);
+
+        assertEquals(Set.of(cdhParcel, smartRouterParcel), actual);
+        verifyNoInteractions(parcelFilterService);
+    }
+
+    @Test
+    void testGetRequiredProductsFromImageForDatalakeShouldReturnCdhAndSmartRouter() {
+        Stack stack = createStack(StackType.DATALAKE);
+        ClouderaManagerProduct cdhParcel = createClouderaManagerProduct("CDH");
+        ClouderaManagerProduct smartRouterParcel = createClouderaManagerProduct(SmartRouterParcelService.COMPONENT_NAME);
+        when(clouderaManagerProductTransformer.transform(image, true, false))
+                .thenReturn(Set.of(cdhParcel, smartRouterParcel, createClouderaManagerProduct("FLINK")));
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(datalakeClusterComponents());
+
+        Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsFromImage(stack, image);
+
+        assertEquals(Set.of(cdhParcel, smartRouterParcel), actual);
+        verifyNoInteractions(parcelFilterService);
+    }
+
+    @Test
+    void testGetParcelComponentsByBlueprintForDatalakeShouldReturnCdhAndSmartRouter() {
+        Stack stack = createStack(StackType.DATALAKE);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(datalakeClusterComponents());
+
+        Set<ClusterComponentView> actual = underTest.getParcelComponentsByBlueprint(stack);
+
+        assertEquals(Set.of("CDH", SmartRouterParcelService.COMPONENT_NAME), componentNames(actual));
+        verifyNoInteractions(parcelFilterService);
+    }
+
+    @Test
+    void testGetParcelComponentsByBlueprintForDatalakeShouldReturnOnlyCdhWhenSmartRouterIsNotAvailable() {
+        Stack stack = createStack(StackType.DATALAKE);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID))
+                .thenReturn(Set.of(createClusterComponent("CDH"), createClusterComponent("FLINK")));
+
+        Set<ClusterComponentView> actual = underTest.getParcelComponentsByBlueprint(stack);
+
+        assertEquals(Set.of("CDH"), componentNames(actual));
+    }
+
+    @Test
+    void testGetParcelComponentsByBlueprintForDatalakeShouldThrowNotFoundExceptionWhenTheCdhComponentIsMissing() {
+        Stack stack = createStack(StackType.DATALAKE);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID))
+                .thenReturn(Set.of(createClusterComponent(SmartRouterParcelService.COMPONENT_NAME)));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.getParcelComponentsByBlueprint(stack));
+
+        assertEquals("Runtime component not found!", exception.getMessage());
+    }
+
+    private Set<ClusterComponentView> datalakeClusterComponents() {
+        return Set.of(createClusterComponent("CDH"), createClusterComponent(SmartRouterParcelService.COMPONENT_NAME), createClusterComponent("FLINK"));
+    }
+
+    private Set<String> componentNames(Set<ClusterComponentView> components) {
+        return components.stream().map(ClusterComponentView::getName).collect(Collectors.toSet());
     }
 
     private ClouderaManagerProduct createClouderaManagerProduct(String name) {

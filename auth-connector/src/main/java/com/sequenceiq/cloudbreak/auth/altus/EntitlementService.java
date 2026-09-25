@@ -686,4 +686,8 @@ public class EntitlementService {
     public boolean isAwsDelegatorRoleBasedCredentialEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AWS_DELEGATOR_ROLE_BASED_CREDENTIAL);
     }
+
+    public boolean isOnPremBaseDlShapeEnabled(String accountId) {
+        return internalTenant(accountId);
+    }
 }

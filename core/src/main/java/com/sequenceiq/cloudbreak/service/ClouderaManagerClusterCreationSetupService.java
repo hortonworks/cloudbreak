@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.service.parcel.SmartRouterParcelService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -74,6 +76,9 @@ public class ClouderaManagerClusterCreationSetupService {
 
     @Inject
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Inject
+    private SmartRouterParcelService smartRouterParcelService;
 
     public List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
             Component stackClouderaManagerRepoConfig,
@@ -217,8 +222,11 @@ public class ClouderaManagerClusterCreationSetupService {
     private Set<ClouderaManagerProduct> getSupportedClouderaManagerProducts(Cluster cluster, Set<ClouderaManagerProduct> products) {
         Stack stack = cluster.getStack();
         if (stack.isDatalake()) {
-            return Set.of(clouderaManagerProductsProvider.getCdhProduct(products)
+            Set<ClouderaManagerProduct> dlProducts = new HashSet<>();
+            dlProducts.add(clouderaManagerProductsProvider.getCdhProduct(products)
                     .orElseThrow(() -> new NotFoundException("Runtime component not found!")));
+            smartRouterParcelService.getSmartRouter(products).ifPresent(dlProducts::add);
+            return dlProducts;
         } else {
             LOGGER.debug("Parcel filtering logic has been moved to flow level. Product list by stack components: {}", products);
             return products;
