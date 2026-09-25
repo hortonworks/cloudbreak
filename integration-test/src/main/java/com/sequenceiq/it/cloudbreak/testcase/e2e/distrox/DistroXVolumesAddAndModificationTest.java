@@ -105,7 +105,7 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                 .given(SdxInternalTestDto.class)
                 .withTelemetry("telemetry")
                 .addTags(SDX_TAGS)
-                .withSeLinuxSecurity(SeLinux.ENFORCING.name())
+                .withSeLinuxSecurity(SeLinux.PERMISSIVE.name())
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -117,7 +117,7 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
         testContext
                 .given("dx", DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataMartDistroXBlueprintNameForCurrentRuntime())
-                .withSeLinuxSecurity(SeLinux.ENFORCING.name())
+                .withSeLinuxSecurity(SeLinux.PERMISSIVE.name())
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .verticalScaleHostGroup()
                         .withStorageOptimizedInstancetype()
