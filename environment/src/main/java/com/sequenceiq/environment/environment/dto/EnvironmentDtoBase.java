@@ -491,8 +491,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     public EnvironmentTelemetryDetails getTelemetryDetails() {
         return telemetry == null ? null : EnvironmentTelemetryDetails.builder()
-                .withStorageLocationBase(Optional.of(telemetry.getLogging()).map(EnvironmentLogging::getStorageLocation).orElse(null))
-                .withBackupStorageLocationBase(Optional.of(backup).map(EnvironmentBackup::getStorageLocation).orElse(null))
+                .withStorageLocationBase(Optional.ofNullable(telemetry.getLogging()).map(EnvironmentLogging::getStorageLocation).orElse(null))
+                .withBackupStorageLocationBase(Optional.ofNullable(backup).map(EnvironmentBackup::getStorageLocation).orElse(null))
                 .build();
     }
 

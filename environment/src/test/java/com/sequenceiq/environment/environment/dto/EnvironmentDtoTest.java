@@ -8,6 +8,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.telemetry.EnvironmentTelemetryDetails;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -15,6 +16,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -114,6 +116,49 @@ class EnvironmentDtoTest {
         assertThat(environmentDto.getCredential()).isSameAs(credential);
         assertThat(environmentDto.getProxyConfig()).isSameAs(proxyConfig);
         assertThat(environmentDto.getCredentialDetails()).isSameAs(credentialDetails);
+    }
+
+    @Test
+    void getTelemetryDetailsWhenTelemetryIsNull() {
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withBackup(new EnvironmentBackup())
+                .build();
+
+        assertThat(environmentDto.getTelemetryDetails()).isNull();
+    }
+
+    @Test
+    void getTelemetryDetailsWhenLoggingAndBackupAreNull() {
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withTelemetry(new EnvironmentTelemetry())
+                .build();
+
+        EnvironmentTelemetryDetails telemetryDetails = environmentDto.getTelemetryDetails();
+
+        assertThat(telemetryDetails).isNotNull();
+        assertThat(telemetryDetails.storageLocationBase()).isNull();
+        assertThat(telemetryDetails.backupStorageLocationBase()).isNull();
+    }
+
+    @Test
+    void getTelemetryDetailsWhenLoggingAndBackupArePresent() {
+        EnvironmentLogging logging = new EnvironmentLogging();
+        logging.setStorageLocation("logStorageLocation");
+        EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
+        telemetry.setLogging(logging);
+        EnvironmentBackup backup = new EnvironmentBackup();
+        backup.setStorageLocation("backupStorageLocation");
+
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withTelemetry(telemetry)
+                .withBackup(backup)
+                .build();
+
+        EnvironmentTelemetryDetails telemetryDetails = environmentDto.getTelemetryDetails();
+
+        assertThat(telemetryDetails).isNotNull();
+        assertThat(telemetryDetails.storageLocationBase()).isEqualTo("logStorageLocation");
+        assertThat(telemetryDetails.backupStorageLocationBase()).isEqualTo("backupStorageLocation");
     }
 
 }
