@@ -260,8 +260,7 @@ public class SshJClientActions {
 
     private Map<String, Pair<Integer, String>> getDeviceDiskTypeMappingsByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         String diskTypeListCmd =
-                "sudo nvme list | grep dev | awk '{print $1,$3,$4,$5,$6,$7}' | " +
-                        "sed -e \"s/\\([^ ]*\\) \\(.*\\)/\\\"\\1\\\":\\\"\\2\\\"/\" | paste -s -d ',' | sed 's/.*/{\\0}/'";
+                "sudo nvme list -o json | jq -c '[.Devices[] | {(.DevicePath): .ModelNumber}] | add // {}'";
         return getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, diskTypeListCmd)));
     }
