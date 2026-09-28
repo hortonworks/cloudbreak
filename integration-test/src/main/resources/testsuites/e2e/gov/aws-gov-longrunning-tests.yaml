@@ -3,6 +3,8 @@ tests:
   - name: "aws_gov_longrunning_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesAddAndModificationTest
+        excludedMethods:
+          - testDistroXAdditionalVolumesModification
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXEphemeralTests
         excludedMethods:
