@@ -9,28 +9,65 @@
   },
   "instanceGroups": [
     {
-      "name": "core",
+      "name": "gateway",
       "template": {
         "instanceType": "m5.2xlarge",
-        "fallbackInstanceTypes": [ "m5a.2xlarge", "m6i.2xlarge" ],
+        "fallbackInstanceTypes": [
+          "m5a.2xlarge",
+          "m6i.2xlarge"
+        ],
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 512,
+            "size": 128,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "core",
+      "template": {
+        "instanceType": "m5.2xlarge",
+        "fallbackInstanceTypes": [
+          "m5a.2xlarge",
+          "m6i.2xlarge"
+        ],
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "gp3"
           }
         ]
       },
       "nodeCount": 3,
-      "type": "GATEWAY",
+      "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": []
     },
     {
       "name": "auxiliary",
       "template": {
-        "instanceType": "m5.xlarge",
-        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "instanceType": "t3.large",
+        "fallbackInstanceTypes": [
+          "t3a.large",
+          "t2.large"
+        ],
         "attachedVolumes": [
           {
             "count": 1,
@@ -48,7 +85,10 @@
       "name": "solr_scale_out",
       "template": {
         "instanceType": "m5.xlarge",
-        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "fallbackInstanceTypes": [
+          "m5a.xlarge",
+          "m6i.xlarge"
+        ],
         "attachedVolumes": [
           {
             "count": 1,
@@ -66,7 +106,10 @@
       "name": "kafka_scale_out",
       "template": {
         "instanceType": "c5.large",
-        "fallbackInstanceTypes": [ "c5a.large", "c6i.large" ],
+        "fallbackInstanceTypes": [
+          "c5a.large",
+          "c6i.large"
+        ],
         "attachedVolumes": [
           {
             "count": 1,
@@ -84,7 +127,10 @@
       "name": "raz_scale_out",
       "template": {
         "instanceType": "c5.xlarge",
-        "fallbackInstanceTypes": [ "c5a.xlarge", "c6i.xlarge" ],
+        "fallbackInstanceTypes": [
+          "c5a.xlarge",
+          "c6i.xlarge"
+        ],
         "attachedVolumes": [
           {
             "count": 0,
@@ -102,7 +148,10 @@
       "name": "atlas_scale_out",
       "template": {
         "instanceType": "m5.xlarge",
-        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "fallbackInstanceTypes": [
+          "m5a.xlarge",
+          "m6i.xlarge"
+        ],
         "attachedVolumes": [
           {
             "count": 0,
@@ -120,7 +169,10 @@
       "name": "hms_scale_out",
       "template": {
         "instanceType": "m5.xlarge",
-        "fallbackInstanceTypes": [ "m5a.xlarge", "m6i.xlarge" ],
+        "fallbackInstanceTypes": [
+          "m5a.xlarge",
+          "m6i.xlarge"
+        ],
         "attachedVolumes": [
           {
             "count": 0,
@@ -138,7 +190,10 @@
       "name": "idbroker",
       "template": {
         "instanceType": "t3.medium",
-        "fallbackInstanceTypes": [ "t3a.medium", "t2.medium" ],
+        "fallbackInstanceTypes": [
+          "t3a.medium",
+          "t2.medium"
+        ],
         "attachedVolumes": [
           {
             "count": 0,
