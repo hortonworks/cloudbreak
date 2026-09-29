@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FAILED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -14,11 +15,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpgradeManagementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -53,5 +57,19 @@ class ClusterManagerUpgradeHandlerTest {
 
         assertEquals(CLUSTER_UPGRADE_FAILED_EVENT.event(), result.selector());
         verify(clusterManagerUpgradeManagementService).upgradeClusterManager(request);
+    }
+
+    @Test
+    void testDoAcceptShouldReturnFailureEventWithClusterManagerUpgradeFailedStatusWhenAPrerequisiteFails()
+            throws CloudbreakOrchestratorException, CloudbreakException {
+        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true, null, OsType.RHEL8);
+        CloudbreakServiceException exception = new CloudbreakServiceException("prerequisite failed");
+        doThrow(exception).when(clusterManagerUpgradeManagementService).upgradeClusterManager(request);
+
+        Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
+
+        assertEquals(CLUSTER_UPGRADE_FAILED_EVENT.event(), result.selector());
+        assertEquals(DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED, ((ClusterUpgradeFailedEvent) result).getDetailedStatus());
+        assertSame(exception, ((ClusterUpgradeFailedEvent) result).getException());
     }
 }
