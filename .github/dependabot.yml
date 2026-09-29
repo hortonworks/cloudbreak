@@ -1,7 +1,13 @@
+registries:
+  nexus-private:
+    type: maven-repository
+    url: https://nexus-private.eng.cloudera.com/repository/public
 updates:
 - directory: /
   open-pull-requests-limit: 25
   package-ecosystem: gradle
+  registries:
+    - nexus-private
   schedule:
     interval: daily
 version: 2
