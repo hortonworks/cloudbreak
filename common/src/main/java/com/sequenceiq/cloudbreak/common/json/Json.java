@@ -97,14 +97,12 @@ public class Json implements Serializable {
     @JsonIgnore
     public <T> T get(String path, Class<T> valueType) {
         if (value == null) {
-            LOGGER.warn("Json's value is null, cannot get object of type {} at path {}", valueType, path);
             return null;
         }
         Optional<JsonNode> jsonNode = traversePath(path);
         if (jsonNode.isPresent()) {
             return JsonUtil.readValue(jsonNode.get(), valueType);
         } else {
-            LOGGER.warn("Could not find object of type {} at path {}", valueType, path);
             return null;
         }
     }
@@ -112,14 +110,12 @@ public class Json implements Serializable {
     @JsonIgnore
     public String getString(String path) {
         if (value == null) {
-            LOGGER.warn("Json's value is null, cannot get String at path {}", path);
             return null;
         }
         Optional<JsonNode> jsonNode = traversePath(path);
         if (jsonNode.isPresent()) {
             return jsonNode.get().asText();
         } else {
-            LOGGER.warn("Could not find String at path {}", path);
             return null;
         }
     }
@@ -127,14 +123,12 @@ public class Json implements Serializable {
     @JsonIgnore
     public Integer getInt(String path) {
         if (value == null) {
-            LOGGER.warn("Json's value is null, cannot get Integer at path {}", path);
             return null;
         }
         Optional<JsonNode> jsonNode = traversePath(path);
         if (jsonNode.isPresent()) {
             return jsonNode.get().asInt();
         } else {
-            LOGGER.warn("Could not find Integer at path {}", path);
             return null;
         }
     }
@@ -142,14 +136,12 @@ public class Json implements Serializable {
     @JsonIgnore
     public Double getDouble(String path) {
         if (value == null) {
-            LOGGER.warn("Json's value is null, cannot get Double at path {}", path);
             return null;
         }
         Optional<JsonNode> jsonNode = traversePath(path);
         if (jsonNode.isPresent()) {
             return jsonNode.get().asDouble();
         } else {
-            LOGGER.warn("Could not find Double at path {}", path);
             return null;
         }
     }
@@ -157,14 +149,12 @@ public class Json implements Serializable {
     @JsonIgnore
     public Boolean getBoolean(String path) {
         if (value == null) {
-            LOGGER.warn("Json's value is null, cannot get Boolean at path {}", path);
             return null;
         }
         Optional<JsonNode> jsonNode = traversePath(path);
         if (jsonNode.isPresent()) {
             return jsonNode.get().asBoolean();
         } else {
-            LOGGER.warn("Could not find Boolean at path {}", path);
             return null;
         }
     }
@@ -172,14 +162,12 @@ public class Json implements Serializable {
     @JsonIgnore
     public JsonNode getJsonNode(String path) {
         if (value == null) {
-            LOGGER.warn("Json's value is null, cannot get JsonNode at path {}", path);
             return null;
         }
         Optional<JsonNode> jsonNode = traversePath(path);
         if (jsonNode.isPresent()) {
             return jsonNode.get();
         } else {
-            LOGGER.warn("Could not find JsonNode at path {}", path);
             return null;
         }
     }
@@ -187,13 +175,12 @@ public class Json implements Serializable {
     @JsonIgnore
     public Map<String, Object> getMap() {
         if (value == null) {
-            LOGGER.warn("Json's value is null, returning empty map");
             return new HashMap<>();
         }
         try {
             return get(Map.class);
         } catch (IOException e) {
-            LOGGER.warn("Failed to parse Json value as Map, returning empty map", e);
+            LOGGER.info("Failed to parse Json value as Map, returning empty map", e);
             return new HashMap<>();
         }
     }
