@@ -27,6 +27,7 @@ import org.testng.TestNG;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
+import com.sequenceiq.it.cloudbreak.preflight.DependencyPreflightService;
 import com.sequenceiq.it.config.ITProps;
 import com.sequenceiq.it.util.TestNGUtil;
 import com.sequenceiq.it.util.cleanup.CleanupUtil;
@@ -44,6 +45,10 @@ public class IntegrationTestApp implements CommandLineRunner {
     private static final String CLEANUP_COMMAND = "cleanup";
 
     private static final String IMAGE_VALIDATION_COMMAND = "imagevalidation";
+
+    private static final String SUITES_COMMAND = "suites";
+
+    private static final String SUITEURLS_COMMAND = "suiteurls";
 
     @Value("${integrationtest.testsuite.threadPoolSize:8}")
     private int suiteThreadPoolSize;
@@ -81,6 +86,9 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Inject
     private TestNGUtil testNGUtil;
 
+    @Inject
+    private DependencyPreflightService dependencyPreflightService;
+
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
@@ -105,6 +113,9 @@ public class IntegrationTestApp implements CommandLineRunner {
     public void run(String... args) throws Exception {
         testNGUtil.decorate(testng);
         setupSuites(testng);
+        if (SUITES_COMMAND.equals(itCommand) || SUITEURLS_COMMAND.equals(itCommand)) {
+            dependencyPreflightService.runPreflightChecksOrFail();
+        }
         if (!CLEANUP_COMMAND.equals(itCommand)) {
             testng.run();
             LOG.info("JUnit Xml results of test run: file://{}/test-output/xml/", Paths.get(outputDirectory).toAbsolutePath().normalize());
@@ -115,13 +126,13 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     private void setupSuites(TestNG testng) throws Exception {
         switch (itCommand) {
-            case "suites":
+            case SUITES_COMMAND:
                 List<String> suiteFiles = itProps.getSuiteFiles();
                 if (!CollectionUtils.isEmpty(suiteFiles)) {
                     testng.setTestSuites(suiteFiles);
                 }
                 break;
-            case "suiteurls":
+            case SUITEURLS_COMMAND:
                 List<String> suitePathes = itProps.getSuiteFiles();
                 testng.setXmlSuites(testNGUtil.loadSuites(suitePathes));
                 break;

@@ -26,10 +26,32 @@ integrationtest:
   command: suiteurls
   outputdir: .
   publicKeyFile:
+  preflight:
+    enabled: false
+    azure:
+      minQuotaHeadroom: 8
+    gcp:
+      minQuotaHeadroom: 10
+    aws:
+      minQuotaHeadroom: 25
+    endpoints:
+      aws:
+        - ec2.%s.amazonaws.com
+      azure:
+        - management.azure.com
+      gcp:
+        - oauth2.googleapis.com
   database:
     connectionUrl: jdbc:postgresql://localhost:5432/
     username: postgres
     password: postgres
+  ccm:
+    host:
+    port: 443
+  vault:
+    address: vault
+    port: 8200
+    scheme: http
   cloudbreak:
     server: http://localhost
     alternative:
