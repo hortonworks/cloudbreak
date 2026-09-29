@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.hybrid.HybridTrustAssertions;
@@ -29,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTrustCommandsDto;
 import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.DescribeRemoteEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -68,6 +70,22 @@ public class HybridTrustTests extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
+        testContext
+                .given(DescribeRemoteEnvironmentTestDto.class)
+                .when(remoteEnvironmentTestClient.describe())
+                .then((tc, testDto, client) -> {
+                    PrivateDatalakeDetails datalake = testDto.getResponse().getEnvironment()
+                            .getPvcEnvironmentDetails().getPrivateDatalakeDetails();
+                    if (datalake == null || datalake.getStatus() != PrivateDatalakeDetails.StatusEnum.AVAILABLE) {
+                        String status = datalake != null ? String.valueOf(datalake.getStatus()) : "null";
+                        throw new TestFailException(
+                                "Classic cluster CM is not available (status: " + status
+                                        + "). Trust setup will fail — check if Cloudera Manager is running on the on-prem cluster.");
+                    }
+                    LOGGER.info("Classic cluster CM healthcheck passed, datalake status: {}", datalake.getStatus());
+                    return testDto;
+                })
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
