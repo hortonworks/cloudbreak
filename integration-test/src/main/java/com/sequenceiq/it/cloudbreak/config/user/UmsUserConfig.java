@@ -61,6 +61,9 @@ class UmsUserConfig implements TestUserConfig {
     @Value("${integrationtest.user.workloadPassword:}")
     private String workloadPassword;
 
+    @Value("${integrationtest.user.govWorkloadPassword:}")
+    private String govWorkloadPassword;
+
     @PostConstruct
     private void initRealUmsUserCache() {
         UmsUserStoreConfig umsUserStore = findUmsStore();
@@ -89,7 +92,11 @@ class UmsUserConfig implements TestUserConfig {
                                 .flatMap(selectedAcc -> selectedAcc.getValue().stream())).collect(Collectors.toList());
                 cloudbreakUsers.forEach(user -> {
                     accountIds.add(Objects.requireNonNull(Crn.fromString(user.getCrn())).getAccountId());
-                    user.setWorkloadPassword(workloadPassword);
+                    if (user.getCrn().startsWith("crn:cdp-us-gov:iam")) {
+                        user.setWorkloadPassword(govWorkloadPassword);
+                    } else {
+                        user.setWorkloadPassword(workloadPassword);
+                    }
                 });
             } catch (Exception e) {
                 throw new TestFailException(" Can't read UMS user store! It's possible you did run 'make fetch-secrets'. ", e);

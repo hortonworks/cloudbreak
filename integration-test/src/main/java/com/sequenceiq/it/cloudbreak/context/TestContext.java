@@ -128,9 +128,6 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.cloudbreak.server}")
     private String defaultServer;
 
-    @Value("${integrationtest.user.workloadPassword:}")
-    private String workloadPassword;
-
     @Inject
     private CloudProviderProxy cloudProvider;
 

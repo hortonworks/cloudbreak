@@ -302,6 +302,8 @@ public class CommonCloudProperties {
 
         private String workloadPassword;
 
+        private String govWorkloadPassword;
+
         public String getAccessKey() {
             return accesskey;
         }
@@ -340,6 +342,14 @@ public class CommonCloudProperties {
 
         public void setWorkloadPassword(String workloadPassword) {
             this.workloadPassword = workloadPassword;
+        }
+
+        public String getGovWorkloadPassword() {
+            return govWorkloadPassword;
+        }
+
+        public void setGovWorkloadPassword(String govWorkloadPassword) {
+            this.govWorkloadPassword = govWorkloadPassword;
         }
     }
 
