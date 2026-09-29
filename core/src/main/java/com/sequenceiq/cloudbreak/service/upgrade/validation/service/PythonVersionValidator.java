@@ -42,20 +42,16 @@ public class PythonVersionValidator implements ServiceUpgradeValidator {
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         ClusterUpgradeProperties clusterUpgradeProperties = validationRequest.clusterUpgradeProperties();
-        // TODO CB-33421: Remove Image bridge methods once validators accept ClusterUpgradeProperties.
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = clusterUpgradeProperties.toCurrentCloudImage();
-        Image targetImage = clusterUpgradeProperties.toTargetCatalogImage();
-        if (isUpgradeDeniedForRuntime(validationRequest.stack(), clusterUpgradeProperties.getCurrentImageCatalogName(), currentImage, targetImage)) {
-            LOGGER.debug("Upgrade validation failed because the current image {} does not contains Python 3.8 and it's required for upgrade to the target"
-                    + "image {}", currentImage.getImageId(), targetImage.getUuid());
+        if (isUpgradeDeniedForRuntime(validationRequest.stack(), clusterUpgradeProperties.getCurrentImageCatalogName(), clusterUpgradeProperties)) {
+            LOGGER.debug("Upgrade validation failed because the current image {} does not contain Python 3.8 and it's required for upgrade to the target "
+                    + "image {}", clusterUpgradeProperties.getCurrentImageId(), clusterUpgradeProperties.getTargetImageId());
             throw new UpgradeValidationFailedException(ERROR_MESSAGE);
         }
     }
 
-    private boolean isUpgradeDeniedForRuntime(StackDto stack, String imageCatalogName, com.sequenceiq.cloudbreak.cloud.model.Image currentImage,
-            Image targetImage) {
+    private boolean isUpgradeDeniedForRuntime(StackDto stack, String imageCatalogName, ClusterUpgradeProperties clusterUpgradeProperties) {
         List<Image> cdhImagesFromCatalog = getAllCdhImagesFromCatalog(stack, imageCatalogName);
-        return !pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, cdhImagesFromCatalog, currentImage, targetImage);
+        return !pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, cdhImagesFromCatalog, clusterUpgradeProperties);
     }
 
     private List<Image> getAllCdhImagesFromCatalog(StackDto stack, String imageCatalogName) {

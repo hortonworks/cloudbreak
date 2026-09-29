@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
@@ -90,4 +91,32 @@ class StackVersionMatcherTest {
         assertFalse(result);
     }
 
+    @Test
+    void testTargetCdhParcelVersionMatches() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion("CDHVER");
+
+        assertTrue(underTest.isMatchingStackVersion(cdh, ACTIVATED_PARCELS));
+    }
+
+    @Test
+    void testTargetCdhParcelVersionDiffers() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion("OTHER");
+
+        assertFalse(underTest.isMatchingStackVersion(cdh, ACTIVATED_PARCELS));
+    }
+
+    @Test
+    void testTargetCdhParcelMissing() {
+        assertFalse(underTest.isMatchingStackVersion((ClouderaManagerProduct) null, ACTIVATED_PARCELS));
+    }
+
+    @Test
+    void testTargetCdhParcelVersionMissing() {
+        assertFalse(underTest.isMatchingStackVersion(new ClouderaManagerProduct().withName("CDH"), ACTIVATED_PARCELS));
+    }
+
+    @Test
+    void testNoActivatedCdhParcel() {
+        assertTrue(underTest.isMatchingStackVersion((ClouderaManagerProduct) null, Map.of()));
+    }
 }

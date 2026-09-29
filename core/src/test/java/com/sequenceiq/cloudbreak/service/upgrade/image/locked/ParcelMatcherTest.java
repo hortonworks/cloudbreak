@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,5 +123,33 @@ class ParcelMatcherTest {
     private Optional<ClouderaManagerProduct> createClouderaManagerProduct(String name, String version) {
         ClouderaManagerProduct product = new ClouderaManagerProduct().withName(name).withVersion(version);
         return Optional.of(product);
+    }
+
+    @Test
+    void testTargetProductsMatchIgnoringCaseAndCdhVersion() {
+        Set<ClouderaManagerProduct> products = Set.of(
+                new ClouderaManagerProduct().withName("SPARK3").withVersion("VERSION"),
+                new ClouderaManagerProduct().withName("CDH").withVersion("new"),
+                new ClouderaManagerProduct().withName("NIFI").withVersion("extra"));
+
+        assertTrue(underTest.isMatchingNonCdhParcels(products, Map.of("spark3", "version", "CDH", "old")));
+    }
+
+    @Test
+    void testTargetProductsMissingActivatedParcel() {
+        assertFalse(underTest.isMatchingNonCdhParcels(Set.of(), Map.of("SPARK3", "1.0")));
+    }
+
+    @Test
+    void testTargetProductVersionDiffers() {
+        Set<ClouderaManagerProduct> products = Set.of(new ClouderaManagerProduct().withName("SPARK3").withVersion("2.0"));
+
+        assertFalse(underTest.isMatchingNonCdhParcels(products, Map.of("SPARK3", "1.0")));
+    }
+
+    @Test
+    void testNoActivatedNonCdhParcels() {
+        assertTrue(underTest.isMatchingNonCdhParcels(Set.of(), Map.of()));
+        assertTrue(underTest.isMatchingNonCdhParcels(Set.of(), Map.of("CDH", "1.0")));
     }
 }

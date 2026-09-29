@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -33,6 +34,13 @@ public class ParcelMatcher {
                     .stream()
                     .allMatch(activatedParcelWithVersion -> isParcelVersionEqual(prewarmedParcels, activatedParcelWithVersion));
         }
+    }
+
+    public boolean isMatchingNonCdhParcels(Set<ClouderaManagerProduct> targetProducts, Map<String, String> activatedParcels) {
+        return activatedParcels.entrySet().stream()
+                .filter(parcel -> !StackType.CDH.name().equals(parcel.getKey()))
+                .allMatch(parcel -> targetProducts.stream().anyMatch(product ->
+                        parcel.getKey().equalsIgnoreCase(product.getName()) && parcel.getValue().equalsIgnoreCase(product.getVersion())));
     }
 
     private boolean isParcelVersionEqual(Map<String, String> prewarmedParcels, Entry<String, String> activatedParcelWithVersion) {

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
 
 @Service
@@ -44,6 +45,12 @@ public class LockedComponentService {
             LOGGER.warn(msg, ex);
             throw new CloudbreakRuntimeException(msg, ex);
         }
+    }
+
+    public boolean isComponentsLocked(StackDto stack, ClusterUpgradeProperties clusterUpgradeProperties) {
+        LOGGER.debug("Determining that the stack {} component versions are the same on the current image {} and the target image {}", stack.getName(),
+                clusterUpgradeProperties.getCurrentImageId(), clusterUpgradeProperties.getTargetImageId());
+        return lockedComponentChecker.isUpgradePermitted(clusterUpgradeProperties, imageFilterParamsFactory.getStackRelatedParcels(stack));
     }
 
     public boolean isComponentsLocked(StackDto stack, Image currentImage, com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage) {

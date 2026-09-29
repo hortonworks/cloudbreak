@@ -3,10 +3,17 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.locked;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
 @Component
 public class CmVersionMatcher {
+
+    public boolean isCmVersionMatching(String cmBuildNumber, ClouderaManagerRepo clouderaManagerRepo) {
+        String candidateCmBuildNumber = clouderaManagerRepo.getBuildNumber();
+        return StringUtils.isNoneBlank(cmBuildNumber, candidateCmBuildNumber)
+                && cmBuildNumber.equals(candidateCmBuildNumber);
+    }
 
     public boolean isCmVersionMatching(String cmBuildNumber, Image candidate) {
         String candidateCmBuildNumber = candidate.getCmBuildNumber();

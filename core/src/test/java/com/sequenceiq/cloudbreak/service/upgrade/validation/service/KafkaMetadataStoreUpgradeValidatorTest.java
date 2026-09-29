@@ -10,7 +10,9 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,14 +21,19 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.ServiceUpgradeValidationRequestTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 class KafkaMetadataStoreUpgradeValidatorTest {
@@ -146,6 +153,26 @@ class KafkaMetadataStoreUpgradeValidatorTest {
         }
     }
 
+    @ParameterizedTest
+    @CsvSource({"7.3.3, 7.2.18, true", "7.2.18, 7.3.3, false", ", 7.3.3, true", ", 7.2.18, false"})
+    void testLegacyTargetUsesRuntimeVersionWithImageVersionFallback(String runtimeVersion, String imageVersion, boolean shouldThrow) {
+        Image targetImage = Image.builder().withVersion(imageVersion)
+                .withPackageVersions(runtimeVersion == null ? Map.of() : Map.of("stack", runtimeVersion)).build();
+        ServiceUpgradeValidationRequest request = ServiceUpgradeValidationRequest.builder()
+                .withStack(mockStackDto)
+                .withUpgradeImageInfo(new UpgradeImageInfo(null, StatedImage.statedImage(targetImage, "catalog-url", "catalog-name")))
+                .build();
+        mockKafkaMetadataStore("ZOOKEEPER");
+
+        if (shouldThrow) {
+            UpgradeValidationFailedException exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
+            assertEquals(ZOOKEEPER_VALIDATION_MESSAGE, exception.getMessage());
+        } else {
+            underTest.validate(request);
+            verifyNoInteractions(clusterApiConnectors);
+        }
+    }
+
     // --- Helper methods ---
 
     private void mockKafkaMetadataStore(String value) {
@@ -162,5 +189,22 @@ class KafkaMetadataStoreUpgradeValidatorTest {
     private ServiceUpgradeValidationRequest createRequest(String currentRuntimeVersion, String targetRuntimeVersion) {
         return ServiceUpgradeValidationRequestTestUtils.of(mockStackDto,
                 ClusterUpgradePropertiesTestUtils.withCurrentAndTargetRuntime(currentRuntimeVersion, targetRuntimeVersion, false, true, false));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"7.3.3, 7.2.18, true", "7.2.18, 7.3.3, false", ", 7.3.3, true", ", 7.2.18, false"})
+    void testTargetUsesRuntimeVersionWithImageVersionFallback(String runtimeVersion, String imageVersion, boolean shouldThrow) {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                runtimeVersion, imageVersion, OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ServiceUpgradeValidationRequest request = ServiceUpgradeValidationRequestTestUtils.of(mockStackDto, properties);
+        mockKafkaMetadataStore("ZOOKEEPER");
+
+        if (shouldThrow) {
+            UpgradeValidationFailedException exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
+            assertEquals(ZOOKEEPER_VALIDATION_MESSAGE, exception.getMessage());
+        } else {
+            underTest.validate(request);
+            verifyNoInteractions(clusterApiConnectors);
+        }
     }
 }

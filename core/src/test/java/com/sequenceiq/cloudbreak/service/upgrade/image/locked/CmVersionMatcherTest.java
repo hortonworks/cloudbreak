@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
 class CmVersionMatcherTest {
@@ -37,5 +38,14 @@ class CmVersionMatcherTest {
         boolean result = underTest.isCmVersionMatching(currentVersion, candidate);
 
         assertEquals(expectedResult, result);
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameters")
+    void testRepoVersionMatcher(String name, Boolean expectedResult, String currentVersion, String candidateVersion) {
+        ClouderaManagerRepo repo = new ClouderaManagerRepo();
+        repo.setBuildNumber(candidateVersion);
+
+        assertEquals(expectedResult, underTest.isCmVersionMatching(currentVersion, repo));
     }
 }

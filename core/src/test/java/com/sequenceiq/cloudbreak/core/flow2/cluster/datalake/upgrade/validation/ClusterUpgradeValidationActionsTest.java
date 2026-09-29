@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
@@ -37,7 +39,10 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesFactory;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -135,5 +140,29 @@ class ClusterUpgradeValidationActionsTest {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
+    }
+
+    @Test
+    void imageValidationActionPassesPropertiesWithoutReconstructingCatalogImage() throws Exception {
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeS3guardValidationFinishedEvent> action =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeS3guardValidationFinishedEvent>) underTest.clusterUpgradeImageValidation();
+        initActionPrivateFields(action);
+        ClusterUpgradePropertiesResolver resolver = mock(ClusterUpgradePropertiesResolver.class);
+        ReflectionTestUtils.setField(action, "clusterUpgradePropertiesResolver", resolver);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                TARGET_RUNTIME_VERSION, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ClusterUpgradeS3guardValidationFinishedEvent payload =
+                new ClusterUpgradeS3guardValidationFinishedEvent(STACK_ID, properties.getTargetImageId(), properties);
+        when(resolver.resolve(payload)).thenReturn(properties);
+        context = new StackContext(flowParameters, stackDto, null, null, CloudStack.builder().build());
+        ArgumentCaptor<ClusterUpgradeImageValidationEvent> emittedPayload = ArgumentCaptor.forClass(ClusterUpgradeImageValidationEvent.class);
+        Event event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), emittedPayload.capture())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, new HashMap<>());
+
+        assertThat(emittedPayload.getValue().getTargetImage()).isNull();
+        assertThat(emittedPayload.getValue().getClusterUpgradeProperties()).isSameAs(properties);
+        assertThat(emittedPayload.getValue().getCloudStack().getImage().getImageId()).isEqualTo(properties.getTargetImageId());
     }
 }

@@ -1,17 +1,20 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.locked;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +27,8 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,15 +68,11 @@ public class LockedComponentServiceTest {
     @Mock
     private StackDto stack;
 
-    @BeforeEach
-    public void setup() {
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-    }
-
     @Test
     public void testIsComponentsLockedShouldReturnTrueWhenTheComponentVersionsAreNotMatches()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         Image currentImage = createCurrentImage();
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(currentImage);
 
@@ -91,6 +92,8 @@ public class LockedComponentServiceTest {
     @Test
     public void testIsComponentsLockedShouldReturnFalseWhenTheComponentVersionsAreMatches()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         Image currentImage = createCurrentImage();
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(currentImage);
 
@@ -117,5 +120,18 @@ public class LockedComponentServiceTest {
                 .withImageCatalogName(IMAGE_CATALOG_NAME)
                 .withImageId(CURRENT_IMAGE_ID)
                 .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), CM_BUILD_NUMBER)).build();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsComponentsLockedFromUpgradeProperties(boolean locked) {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.2.18");
+        when(imageFilterParamsFactory.getStackRelatedParcels(stack)).thenReturn(ACTIVATED_PARCELS);
+        when(lockedComponentChecker.isUpgradePermitted(properties, ACTIVATED_PARCELS)).thenReturn(locked);
+
+        assertEquals(locked, underTest.isComponentsLocked(stack, properties));
+
+        verify(lockedComponentChecker).isUpgradePermitted(properties, ACTIVATED_PARCELS);
+        verifyNoInteractions(imageCatalogService, componentConfigProviderService);
     }
 }

@@ -18,10 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.CmUrlProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelUrlProvider;
 
@@ -56,21 +57,21 @@ public class ParcelAvailabilityServiceTest {
     @Mock
     private StackDto stackDto;
 
-    private final Image image = createImage();
+    private final ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.2.18");
 
     @Test
     public void testValidateParcelAvailabilityShouldReturnTheAvailableParcels() {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
-        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(properties, stackDto)).thenReturn(requiredParcelsFromImage);
+        when(cmUrlProvider.getCmRpmUrl(properties)).thenReturn(CM_RPM);
 
         Response response1 = createMockResponse(200, PARCEL_1);
         Response response2 = createMockResponse(200, PARCEL_2);
         Response response3 = createMockResponse(200, ARCHIVE_PARCEL);
         Response response4 = createMockResponse(200, CM_RPM);
 
-        Set<Response> actual = underTest.validateAvailability(image, STACK_ID);
+        Set<Response> actual = underTest.validateAvailability(properties, STACK_ID);
 
         assertTrue(actual.contains(response1));
         assertTrue(actual.contains(response2));
@@ -83,15 +84,15 @@ public class ParcelAvailabilityServiceTest {
     public void testValidateParcelAvailabilityShouldNotThrowExceptionWhenANonArchiveParcelIsNotAvailable() {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
-        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(properties, stackDto)).thenReturn(requiredParcelsFromImage);
+        when(cmUrlProvider.getCmRpmUrl(properties)).thenReturn(CM_RPM);
 
         Response response1 = createMockResponse(404, PARCEL_1);
         Response response2 = createMockResponse(200, PARCEL_2);
         Response response3 = createMockResponse(200, ARCHIVE_PARCEL);
         Response response4 = createMockResponse(200, CM_RPM);
 
-        Set<Response> actual = underTest.validateAvailability(image, STACK_ID);
+        Set<Response> actual = underTest.validateAvailability(properties, STACK_ID);
 
         assertTrue(actual.contains(response1));
         assertTrue(actual.contains(response2));
@@ -104,38 +105,38 @@ public class ParcelAvailabilityServiceTest {
     public void testValidateParcelAvailabilityShouldThrowExceptionWhenAParcelIsNotAvailable() {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
-        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(properties, stackDto)).thenReturn(requiredParcelsFromImage);
+        when(cmUrlProvider.getCmRpmUrl(properties)).thenReturn(CM_RPM);
 
         createMockResponse(404, ARCHIVE_PARCEL);
         createMockResponse(200, PARCEL_1);
         createMockResponse(200, PARCEL_2);
         createMockResponse(200, CM_RPM);
 
-        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(image, STACK_ID));
+        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(properties, STACK_ID));
     }
 
     @Test
     public void testValidateParcelAvailabilityShouldThrowExceptionWhenCmRpmIsNotAvailable() {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
-        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(properties, stackDto)).thenReturn(requiredParcelsFromImage);
+        when(cmUrlProvider.getCmRpmUrl(properties)).thenReturn(CM_RPM);
 
         createMockResponse(200, ARCHIVE_PARCEL);
         createMockResponse(200, PARCEL_1);
         createMockResponse(200, PARCEL_2);
         createMockResponse(404, CM_RPM);
 
-        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(image, STACK_ID));
+        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(properties, STACK_ID));
     }
 
     @Test
     public void testValidateParcelAvailabilityShouldThrowExceptionWhenTheWebTargetThrowsAnException() {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
-        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(properties, stackDto)).thenReturn(requiredParcelsFromImage);
+        when(cmUrlProvider.getCmRpmUrl(properties)).thenReturn(CM_RPM);
 
         when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(ARCHIVE_PARCEL)).thenThrow(new BadRequestException());
 
@@ -143,15 +144,15 @@ public class ParcelAvailabilityServiceTest {
         createMockResponse(200, PARCEL_2);
         createMockResponse(200, CM_RPM);
 
-        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(image, STACK_ID));
+        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(properties, STACK_ID));
     }
 
     @Test
     public void testValidateParcelAvailabilityShouldNotThrowExceptionWhenTheWebTargetThrowsAnExceptionInCaseOfNonArchiveParcel() {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
-        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(properties, stackDto)).thenReturn(requiredParcelsFromImage);
+        when(cmUrlProvider.getCmRpmUrl(properties)).thenReturn(CM_RPM);
 
         when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(PARCEL_1)).thenThrow(new BadRequestException());
 
@@ -159,7 +160,7 @@ public class ParcelAvailabilityServiceTest {
         Response response2 = createMockResponse(200, PARCEL_2);
         Response response4 = createMockResponse(200, CM_RPM);
 
-        Set<Response> actual = underTest.validateAvailability(image, STACK_ID);
+        Set<Response> actual = underTest.validateAvailability(properties, STACK_ID);
 
         assertTrue(actual.contains(response2));
         assertTrue(actual.contains(response3));
@@ -171,10 +172,6 @@ public class ParcelAvailabilityServiceTest {
         Response response = Response.status(status).build();
         when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(url)).thenReturn(response);
         return response;
-    }
-
-    private Image createImage() {
-        return Image.builder().withUuid("image-id").build();
     }
 
     private Set<String> createRequiredParcelsSet() {

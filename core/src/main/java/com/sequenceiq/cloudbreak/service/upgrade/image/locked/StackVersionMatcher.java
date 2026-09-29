@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
@@ -19,6 +20,11 @@ public class StackVersionMatcher {
     public boolean isMatchingStackVersion(Image image, Map<String, String> activatedParcels) {
         String stackVersion = activatedParcels.get(StackType.CDH.name());
         return StringUtils.isEmpty(stackVersion) || isStackVersionEquals(image, stackVersion);
+    }
+
+    public boolean isMatchingStackVersion(ClouderaManagerProduct cdhParcel, Map<String, String> activatedParcels) {
+        String stackVersion = activatedParcels.get(StackType.CDH.name());
+        return StringUtils.isEmpty(stackVersion) || cdhParcel != null && stackVersion.equals(cdhParcel.getVersion());
     }
 
     private boolean isStackVersionEquals(Image image, String stackVersion) {

@@ -12,12 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 
 @Component
@@ -31,20 +30,17 @@ public class ParcelUrlProvider {
     @Inject
     private CmServerQueryService cmServerQueryService;
 
-    @Inject
-    private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
-
-    public Set<String> getRequiredParcelsFromImage(Image image, StackDto stackDto) {
-        LOGGER.debug("Retrieving parcel URLs from image {}", image.getUuid());
-        Set<String> requiredParcelNamesFromImage = parcelService.getComponentNamesByImage(stackDto, image);
-        Set<String> requiredParcelUrls = getRequiredParcelUrls(image, stackDto, requiredParcelNamesFromImage);
+    public Set<String> getRequiredParcelsFromImage(ClusterUpgradeProperties clusterUpgradeProperties, StackDto stackDto) {
+        LOGGER.debug("Retrieving parcel URLs from image {}", clusterUpgradeProperties.getTargetImageId());
+        Set<String> requiredParcelNamesFromImage = parcelService.getComponentNamesByProducts(stackDto, clusterUpgradeProperties.getAllTargetProducts());
+        Set<String> requiredParcelUrls = getRequiredParcelUrls(clusterUpgradeProperties, stackDto, requiredParcelNamesFromImage);
         LOGGER.debug("Required parcel URLs: {}", requiredParcelUrls);
         return requiredParcelUrls;
     }
 
-    private Set<String> getRequiredParcelUrls(Image image, StackDto stackDto, Set<String> requiredParcelNamesFromImage) {
+    private Set<String> getRequiredParcelUrls(ClusterUpgradeProperties clusterUpgradeProperties, StackDto stackDto, Set<String> requiredParcelNamesFromImage) {
         Set<ParcelInfo> activeAndDistributedParcels = getActiveAndDistributedParcels(stackDto);
-        return transformProducts(image, !stackDto.getStack().isDatalake()).stream()
+        return clusterUpgradeProperties.getAllTargetProducts().stream()
                 .filter(product -> isRequiredProduct(requiredParcelNamesFromImage, product) && isNotActiveProduct(activeAndDistributedParcels, product))
                 .map(this::getParcelAndCsdUrlsFromProduct)
                 .flatMap(Set::stream)
@@ -72,9 +68,5 @@ public class ParcelUrlProvider {
         Optional.of(product).map(ClouderaManagerProduct::getCsd).ifPresent(parcelAndCsdUrls::addAll);
         parcelAndCsdUrls.add(product.getParcelFileUrl());
         return parcelAndCsdUrls;
-    }
-
-    private Set<ClouderaManagerProduct> transformProducts(Image image, boolean getPreWarmParcels) {
-        return clouderaManagerProductTransformer.transform(image, true, getPreWarmParcels);
     }
 }

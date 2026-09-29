@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.common.model.OsType;
 
 public final class ClusterUpgradePropertiesTestUtils {
@@ -73,4 +77,15 @@ public final class ClusterUpgradePropertiesTestUtils {
                 null);
         return new ClusterUpgradeProperties(options, currentImage, targetImage);
     }
+
+    public static ClusterUpgradeProperties withTargetProducts(String runtimeVersion, String imageVersion, OsType osType, String architecture,
+            ClouderaManagerProduct cdhParcel, Set<ClouderaManagerProduct> parcels, ClouderaManagerRepo cmRepo) {
+        ClusterUpgradeProperties properties = withRuntimeVersion(runtimeVersion);
+        ClusterUpgradeProperties.TargetImageUpgradeContext targetImage = new ClusterUpgradeProperties.TargetImageUpgradeContext(
+                "targetImageId", "imageCatalogName", "imageCatalogUrl", runtimeVersion, imageVersion, null,
+                Map.of(), Map.of(), osType, osType.getOs(), architecture, "2024-01-01", 1L, "targetImageName",
+                null, Map.of(), null, null, cdhParcel, parcels, cmRepo);
+        return new ClusterUpgradeProperties(properties.options(), properties.currentImage(), targetImage);
+    }
+
 }

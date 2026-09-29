@@ -165,8 +165,7 @@ public class ClusterUpgradeValidationActions {
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(),
                         clusterUpgradeProperties.getTargetImageId(), cloudStack,
                         context.getCloudCredential(), context.getCloudContext(),
-                        // TODO CB-33362: Stop populating targetImage once ParcelAvailabilityService accepts ClusterUpgradeProperties.
-                        clusterUpgradeProperties.toTargetCatalogImage(),
+                        null,
                         clusterUpgradeProperties);
                 sendEvent(context, event.selector(), event);
             }

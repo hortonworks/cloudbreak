@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,7 +25,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 class PythonVersionBasedRuntimeVersionValidatorTest {
@@ -128,5 +132,25 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
             packageVersions.put(PYTHON38.getKey(), "3.8");
         }
         return packageVersions;
+    }
+
+    @ParameterizedTest
+    @MethodSource("testScenariosProvider")
+    void testUpgradeProperties(String currentRuntimeVersion, boolean currentImageContainsPython, boolean allInstanceContainsPython, StackType stackType,
+            String targetRuntimeVersion, boolean targetImageContainsPython, boolean osUpgrade, boolean expectedValue) {
+        ClusterUpgradeProperties initialProperties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                targetRuntimeVersion, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ClusterUpgradeProperties currentProperties = ClusterUpgradePropertiesTestUtils.withCurrentAndTargetRuntime(
+                currentRuntimeVersion, targetRuntimeVersion, false, true, false);
+        ClusterUpgradeProperties properties = new ClusterUpgradeProperties(initialProperties.options(), currentProperties.currentImage(),
+                initialProperties.targetImage());
+        properties.getCurrentPackageVersions().putAll(createPackageVersions(currentRuntimeVersion, currentImageContainsPython));
+        lenient().when(lockedComponentService.isComponentsLocked(stack, properties)).thenReturn(osUpgrade);
+        lenient().when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getType()).thenReturn(stackType);
+        lenient().when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, CDH_IMAGES_FROM_CATALOG, PYTHON38))
+                .thenReturn(allInstanceContainsPython);
+
+        assertEquals(expectedValue, underTest.isUpgradePermittedForRuntime(stack, CDH_IMAGES_FROM_CATALOG, properties));
     }
 }

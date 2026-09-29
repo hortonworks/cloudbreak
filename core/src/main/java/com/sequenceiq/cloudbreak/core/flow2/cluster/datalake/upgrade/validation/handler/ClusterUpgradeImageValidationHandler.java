@@ -70,12 +70,11 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
         ClusterUpgradeImageValidationEvent request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            // TODO CB-33362: Use clusterUpgradeProperties once ParcelAvailabilityService accepts it.
-            Set<Response> parcelsResponses = parcelAvailabilityService.validateAvailability(request.getTargetImage(), request.getResourceId());
+            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+            Set<Response> parcelsResponses = parcelAvailabilityService.validateAvailability(clusterUpgradeProperties, request.getResourceId());
             long requiredDiskSpaceForUpgrade = parcelSizeService.getRequiredFreeSpace(parcelsResponses);
             Set<String> warningMessages = executePlatformSpecificValidations(request, cloudContext);
             LOGGER.debug("Cluster upgrade image validation succeeded.");
-            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
             return new ClusterUpgradeImageValidationFinishedEvent(START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT.selector(), request.getResourceId(),
                     clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, requiredDiskSpaceForUpgrade, warningMessages);
         } catch (RuntimeException e) {

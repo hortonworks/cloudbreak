@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import jakarta.inject.Inject;
 
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
@@ -34,13 +37,26 @@ public class PythonVersionBasedRuntimeVersionValidator {
     @Inject
     private CurrentImagePackageProvider currentImagePackageProvider;
 
+    public boolean isUpgradePermittedForRuntime(StackDto stack, List<Image> cdhImagesFromCatalog, ClusterUpgradeProperties clusterUpgradeProperties) {
+        return isUpgradePermittedForRuntime(stack, cdhImagesFromCatalog, clusterUpgradeProperties.getCurrentImageId(),
+                clusterUpgradeProperties.getCurrentPackageVersions(), clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties.getRuntimeVersion(),
+                () -> clusterUpgradeProperties.getCurrentRuntimeVersion().equals(clusterUpgradeProperties.getRuntimeVersion())
+                        && lockedComponentService.isComponentsLocked(stack, clusterUpgradeProperties));
+    }
+
     public boolean isUpgradePermittedForRuntime(StackDto stack, List<Image> cdhImagesFromCatalog, com.sequenceiq.cloudbreak.cloud.model.Image currentImage,
             Image targetImage) {
-        String targetImageId = targetImage.getUuid();
-        if (isTargetRuntimeRequiresPython38(targetImage, stack)) {
-            if (isCurrentImageContainsPython38(stack, cdhImagesFromCatalog, currentImage) || isOsUpgrade(stack, currentImage, targetImage)) {
+        return isUpgradePermittedForRuntime(stack, cdhImagesFromCatalog, currentImage.getImageId(), currentImage.getPackageVersions(), targetImage.getUuid(),
+                targetImage.getPackageVersion(STACK), () -> currentImage.getPackageVersion(STACK).equals(targetImage.getPackageVersion(STACK))
+                        && lockedComponentService.isComponentsLocked(stack, currentImage, targetImage));
+    }
+
+    private boolean isUpgradePermittedForRuntime(StackDto stack, List<Image> cdhImagesFromCatalog, String currentImageId,
+            Map<String, String> currentPackageVersions, String targetImageId, String targetRuntimeVersion, BooleanSupplier osUpgrade) {
+        if (targetRuntimeRequiresPython38(targetRuntimeVersion, stack)) {
+            if (currentImageContainsPython38(stack, cdhImagesFromCatalog, currentPackageVersions) || osUpgrade.getAsBoolean()) {
                 LOGGER.debug("Permitting upgrade for image {} because the required Python version is present on the current image {}", targetImageId,
-                        currentImage.getImageId());
+                        currentImageId);
                 return true;
             } else {
                 LOGGER.debug("The upgrade is not possible for image {} because the target runtime requires Python 3.8 dependency", targetImageId);
@@ -51,13 +67,7 @@ public class PythonVersionBasedRuntimeVersionValidator {
         return true;
     }
 
-    private boolean isOsUpgrade(StackDto stack, com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image targetImage) {
-        return currentImage.getPackageVersion(STACK).equals(targetImage.getPackageVersion(STACK)) &&
-                lockedComponentService.isComponentsLocked(stack, currentImage, targetImage);
-    }
-
-    private boolean isTargetRuntimeRequiresPython38(Image targetImage, StackDto stack) {
-        String targetRuntimeVersion = targetImage.getPackageVersion(STACK);
+    private boolean targetRuntimeRequiresPython38(String targetRuntimeVersion, StackDto stack) {
         return new VersionComparator().compare(() -> targetRuntimeVersion, () -> getMinimumRuntimeVersion(stack)) >= 0
                 && !CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(() -> targetRuntimeVersion, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2);
     }
@@ -70,8 +80,8 @@ public class PythonVersionBasedRuntimeVersionValidator {
         return stack.getType().equals(StackType.WORKLOAD);
     }
 
-    private boolean isCurrentImageContainsPython38(StackDto stack, List<Image> cdhImagesFromCatalog, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
-        return currentImage.getPackageVersions().containsKey(PYTHON38.getKey())
+    private boolean currentImageContainsPython38(StackDto stack, List<Image> cdhImagesFromCatalog, Map<String, String> currentPackageVersions) {
+        return currentPackageVersions.containsKey(PYTHON38.getKey())
                 && currentImagePackageProvider.currentInstancesContainsPackage(stack.getId(), cdhImagesFromCatalog, PYTHON38);
     }
 }

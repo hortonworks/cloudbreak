@@ -19,7 +19,6 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
 
     private final CloudContext cloudContext;
 
-    // TODO CB-33362: Remove targetImage field once ParcelAvailabilityService accepts ClusterUpgradeProperties.
     // TODO CB-33421: Remove targetImage field once in-flight flow events no longer depend on it in JSON.
     private final Image targetImage;
 
@@ -52,7 +51,6 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
     }
 
     public Image getTargetImage() {
-        // TODO CB-33362: Remove targetImage getter once ParcelAvailabilityService accepts ClusterUpgradeProperties.
         // TODO CB-33421: Remove targetImage getter once in-flight flow events no longer depend on it in JSON.
         return targetImage;
     }

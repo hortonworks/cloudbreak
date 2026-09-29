@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
@@ -125,14 +126,13 @@ public class KafkaMetadataStoreUpgradeValidator implements ServiceUpgradeValidat
 
     private String getTargetVersion(ServiceUpgradeValidationRequest request) {
         if (request.clusterUpgradeProperties() != null) {
-            if (request.clusterUpgradeProperties().getTargetImageVersion() != null) {
-                return request.clusterUpgradeProperties().getTargetImageVersion();
-            }
-            return request.clusterUpgradeProperties().getRuntimeVersion();
+            return Optional.ofNullable(request.clusterUpgradeProperties().getRuntimeVersion())
+                    .orElse(request.clusterUpgradeProperties().getTargetImageVersion());
         }
         // TODO CB-33421: Remove upgradeImageInfo fallback once callers always pass clusterUpgradeProperties.
         if (request.upgradeImageInfo() != null && request.upgradeImageInfo().getTargetStatedImage() != null) {
-            return request.upgradeImageInfo().getTargetStatedImage().getImage().getVersion();
+            Image targetImage = request.upgradeImageInfo().getTargetStatedImage().getImage();
+            return targetImage.getStackVersion().orElse(targetImage.getVersion());
         }
         return null;
     }

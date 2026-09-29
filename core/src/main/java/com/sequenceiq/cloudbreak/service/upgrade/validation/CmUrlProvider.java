@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
-
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
@@ -20,10 +17,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.service.image.CustomImageProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.common.model.OsType;
 
 @Component
 public class CmUrlProvider {
@@ -39,20 +36,22 @@ public class CmUrlProvider {
     @Inject
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
-    @Cacheable(CmUrlCache.CM_URL_CACHE)
-    public String getCmRpmUrl(Image image) {
-        LOGGER.debug("Retrieving CM RPM package URL from image {}", image.getUuid());
-        return fetchUrlFromManifest(image).orElseGet(() -> concatRpmUrlLegacyWay(image));
+    @Cacheable(value = CmUrlCache.CM_URL_CACHE, key = "{#clusterUpgradeProperties.clouderaManagerRepo.baseUrl, "
+            + "#clusterUpgradeProperties.clouderaManagerRepo.version, #clusterUpgradeProperties.clouderaManagerRepo.buildNumber, "
+            + "#clusterUpgradeProperties.targetOsType, #clusterUpgradeProperties.targetImage.architecture}")
+    public String getCmRpmUrl(ClusterUpgradeProperties clusterUpgradeProperties) {
+        LOGGER.debug("Retrieving CM RPM package URL from image {}", clusterUpgradeProperties.targetImage().imageId());
+        return fetchUrlFromManifest(clusterUpgradeProperties).orElseGet(() -> concatRpmUrlLegacyWay(clusterUpgradeProperties));
     }
 
-    private Optional<String> fetchUrlFromManifest(Image image) {
-        String cmRepoUrlForOs = image.getRepo().get(image.getOsType());
+    private Optional<String> fetchUrlFromManifest(ClusterUpgradeProperties clusterUpgradeProperties) {
+        String cmRepoUrlForOs = clusterUpgradeProperties.targetImage().clouderaManagerRepo().getBaseUrl();
         if (cmRepoUrlForOs.startsWith(CustomImageProvider.INTERNAL_BASE_URL) && cmRepoUrlForOs.contains(CM_PUBLIC)) {
             try {
                 String manifestUrl = constructManifestUrl(cmRepoUrlForOs);
                 CmManifestFile response = getManifestFile(manifestUrl);
-                LOGGER.debug("Manifest file {} for image {}", response, image);
-                Optional<String> cmServerRpmUrlFromManifest = selectCmServerRpmUrl(image, response)
+                LOGGER.debug("Manifest file {} for URL {}", response, manifestUrl);
+                Optional<String> cmServerRpmUrlFromManifest = selectCmServerRpmUrl(clusterUpgradeProperties, response)
                         .map(cmServerRelativeUrl -> StringUtils.removeEnd(manifestUrl, RELEASE_MANIFEST_JSON) + cmServerRelativeUrl);
                 LOGGER.info("CM server RPM URL using manifest: {}", cmServerRpmUrlFromManifest);
                 return cmServerRpmUrlFromManifest;
@@ -66,13 +65,14 @@ public class CmUrlProvider {
         }
     }
 
-    private Optional<String> selectCmServerRpmUrl(Image image, CmManifestFile response) {
-        String architecture = Architecture.fromStringWithFallback(image.getArchitecture()).getRpmName();
+    private Optional<String> selectCmServerRpmUrl(ClusterUpgradeProperties clusterUpgradeProperties, CmManifestFile response) {
+        ClusterUpgradeProperties.TargetImageUpgradeContext targetImageProperties = clusterUpgradeProperties.targetImage();
+        String architecture = Architecture.fromStringWithFallback(targetImageProperties.architecture()).getRpmName();
         Set<String> cmPackages = response.getFiles().stream()
-                .filter(file -> file.contains("cloudera-manager-server-" + image.getPackageVersions().get(CM.getKey())))
-                .filter(file -> file.contains(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey())))
+                .filter(file -> file.contains("cloudera-manager-server-" + targetImageProperties.clouderaManagerRepo().getVersion()))
+                .filter(file -> file.contains(targetImageProperties.clouderaManagerRepo().getBuildNumber()))
                 .filter(file -> file.contains(architecture + ".rpm"))
-                .filter(file -> file.contains(image.getOsType()))
+                .filter(file -> file.contains(targetImageProperties.osType().getOsType()))
                 .collect(Collectors.toSet());
         LOGGER.info("Package candidate: {}, selecting first", cmPackages);
         return cmPackages.stream().findFirst();
@@ -98,18 +98,20 @@ public class CmUrlProvider {
         return manifestUrl;
     }
 
-    private String concatRpmUrlLegacyWay(Image image) {
-        LOGGER.info("Creating the CM rpm URL the legacy way for {}", image);
-        String architecture = Architecture.fromStringWithFallback(image.getArchitecture()).getRpmName();
-        return image.getRepo().get(image.getOsType())
+    private String concatRpmUrlLegacyWay(ClusterUpgradeProperties clusterUpgradeProperties) {
+        ClusterUpgradeProperties.TargetImageUpgradeContext targetImageUpgradeContext = clusterUpgradeProperties.targetImage();
+        LOGGER.info("Creating the CM rpm URL the legacy way for {}", targetImageUpgradeContext.imageId());
+        String architecture = Architecture.fromStringWithFallback(targetImageUpgradeContext.architecture()).getRpmName();
+        ClouderaManagerRepo clouderaManagerRepo = targetImageUpgradeContext.clouderaManagerRepo();
+        return clouderaManagerRepo.getBaseUrl()
                 .concat("RPMS/")
                 .concat(architecture)
                 .concat("/cloudera-manager-server-")
-                .concat(image.getPackageVersions().get(CM.getKey()))
+                .concat(clouderaManagerRepo.getVersion())
                 .concat("-")
-                .concat(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey()))
+                .concat(clouderaManagerRepo.getBuildNumber())
                 .concat(".")
-                .concat(OsType.getByOsTypeString(image.getOsType()).getParcelPostfix())
+                .concat(targetImageUpgradeContext.osType().getParcelPostfix())
                 .concat(".")
                 .concat(architecture)
                 .concat(".rpm");

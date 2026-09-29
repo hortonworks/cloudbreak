@@ -128,7 +128,7 @@ public class ParcelService {
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> getComponentNamesByProducts(StackDtoDelegate stack, Set<ClouderaManagerProduct> products) {
+    public Set<String> getComponentNamesByProducts(StackDtoDelegate stack, Set<ClouderaManagerProduct> products) {
         return getComponentsByProducts(stack.getStack(), stack.getCluster().getId(), stack.getBlueprint(), products)
                 .stream().map(ClusterComponentView::getName)
                 .collect(Collectors.toSet());

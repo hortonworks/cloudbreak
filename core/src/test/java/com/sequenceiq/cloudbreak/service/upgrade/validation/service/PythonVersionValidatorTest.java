@@ -76,8 +76,7 @@ class PythonVersionValidatorTest {
     void testValidateShouldThrowValidationExceptionWhenTheUpgradeIsNotPermittedForTheTargetImage() {
         ClusterUpgradeProperties properties = createProperties();
 
-        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, properties.toCurrentCloudImage(),
-                properties.toTargetCatalogImage())).thenReturn(false);
+        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, properties)).thenReturn(false);
 
         assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createValidationRequest(properties)));
     }
@@ -86,8 +85,7 @@ class PythonVersionValidatorTest {
     void testValidateShouldNotThrowValidationExceptionWhenTheUpgradeIsPermittedForTheTargetImage() {
         ClusterUpgradeProperties properties = createProperties();
 
-        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, properties.toCurrentCloudImage(),
-                properties.toTargetCatalogImage())).thenReturn(true);
+        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, properties)).thenReturn(true);
 
         underTest.validate(createValidationRequest(properties));
     }

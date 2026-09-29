@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.CmUrlProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelUrlProvider;
 
@@ -42,30 +42,30 @@ public class ParcelAvailabilityService {
     @Inject
     private ParcelAvailabilityRetrievalService parcelAvailabilityRetrievalService;
 
-    public Set<Response> validateAvailability(Image image, Long resourceId) {
+    public Set<Response> validateAvailability(ClusterUpgradeProperties clusterUpgradeProperties, Long resourceId) {
         StackDto stackDto = stackDtoService.getById(resourceId);
-        Set<String> requiredParcelUrlsFromImage = new HashSet<>(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto));
-        String cmRpmUrl = cmUrlProvider.getCmRpmUrl(image);
+        Set<String> requiredParcelUrlsFromImage = new HashSet<>(parcelUrlProvider.getRequiredParcelsFromImage(clusterUpgradeProperties, stackDto));
+        String cmRpmUrl = cmUrlProvider.getCmRpmUrl(clusterUpgradeProperties);
         requiredParcelUrlsFromImage.add(cmRpmUrl);
 
         Map<String, Optional<Response>> parcelsByResponse = getParcelsByResponse(requiredParcelUrlsFromImage);
         Set<String> unavailableParcels = getUnavailableParcels(parcelsByResponse);
 
         if (unavailableParcels.isEmpty()) {
-            LOGGER.debug("All required parcels are available on the image {}", image.getUuid());
+            LOGGER.debug("All required parcels are available on the image {}", clusterUpgradeProperties.getTargetImageId());
             return parcelsByResponse.entrySet().stream()
                     .filter(filterCmRpmFile(cmRpmUrl).and(entry -> entry.getValue().isPresent()))
                     .map(entry -> entry.getValue().get())
                     .collect(Collectors.toSet());
         } else {
             LOGGER.debug("Parcels by response status: {}", parcelsByResponse);
-            String errorMessage = buildErrorMessage(image, cmRpmUrl, unavailableParcels);
+            String errorMessage = buildErrorMessage(clusterUpgradeProperties.getTargetImageId(), cmRpmUrl, unavailableParcels);
             LOGGER.error(errorMessage);
             throw new UpgradeValidationFailedException(errorMessage);
         }
     }
 
-    private String buildErrorMessage(Image image, String cmRpmUrl, Set<String> unavailableParcels) {
+    private String buildErrorMessage(String imageId, String cmRpmUrl, Set<String> unavailableParcels) {
         StringBuilder errorMessageBuilder = new StringBuilder();
         if (unavailableParcels.contains(cmRpmUrl)) {
             errorMessageBuilder.append("Failed to access Cloudera Manager RPM: ").append(cmRpmUrl);
@@ -74,7 +74,7 @@ public class ParcelAvailabilityService {
         if (!unavailableParcels.isEmpty()) {
             errorMessageBuilder.append(" Failed to access the following parcels: ").append(unavailableParcels);
         }
-        errorMessageBuilder.append(" Image ID: ").append(image.getUuid());
+        errorMessageBuilder.append(" Image ID: ").append(imageId);
         return errorMessageBuilder.toString();
     }
 

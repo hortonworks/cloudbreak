@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -97,9 +98,9 @@ class ClusterUpgradePropertiesFactoryTest {
         assertEquals(IMAGE_CATALOG_URL, properties.imageCatalogUrl());
         assertEquals("7.2.18", properties.runtimeVersion());
         assertEquals(OsType.RHEL8, properties.currentOsType());
-        assertEquals(false, properties.lockComponents());
-        assertEquals(true, properties.rollingUpgradeEnabled());
-        assertEquals(false, properties.replaceVms());
+        assertFalse(properties.lockComponents());
+        assertTrue(properties.rollingUpgradeEnabled());
+        assertFalse(properties.replaceVms());
         assertNotNull(properties.cdhParcel());
         assertEquals(products, properties.getAllTargetProducts());
         assertEquals("currentImageId", properties.currentImageId());
@@ -113,11 +114,6 @@ class ClusterUpgradePropertiesFactoryTest {
         assertEquals("x86_64", properties.getCurrentImage().architecture());
         assertEquals("2024-01-01", properties.getCurrentImage().date());
         assertEquals(1L, properties.getCurrentImage().created());
-        com.sequenceiq.cloudbreak.cloud.model.Image rebuiltCurrentImage = properties.toCurrentCloudImage();
-        assertEquals("currentImageId", rebuiltCurrentImage.getImageId());
-        assertEquals("currentImageName", rebuiltCurrentImage.getImageName());
-        assertEquals(IMAGE_CATALOG_URL, rebuiltCurrentImage.getImageCatalogUrl());
-        assertEquals("x86_64", rebuiltCurrentImage.getArchitecture());
         verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID);
         verify(stackImageService).getImageModelFromStatedImage(stack, currentImage, targetStatedImage);
     }

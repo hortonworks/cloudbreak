@@ -241,12 +241,6 @@ public record ClusterUpgradeProperties(
     }
 
     @JsonIgnore
-    public com.sequenceiq.cloudbreak.cloud.model.catalog.Image toTargetCatalogImage() {
-        // TODO CB-33362: Remove once ParcelAvailabilityService accepts ClusterUpgradeProperties.
-        return targetImage.toCatalogImage();
-    }
-
-    @JsonIgnore
     public com.sequenceiq.cloudbreak.cloud.model.Image toCurrentCloudImage() {
         // TODO CB-33421: Remove once callers accept ClusterUpgradeProperties instead of cloud Image.
         return currentImage.toCloudImage();
@@ -421,7 +415,7 @@ public record ClusterUpgradeProperties(
             String date,
             Long created,
             String imageName,
-            // TODO CB-33362: Remove once ParcelAvailabilityService no longer needs catalog Image reconstruction.
+            // TODO CB-33421: Remove legacy catalog fields once catalog Image compatibility is no longer needed.
             ImageStackDetails stackDetails,
             Map<String, String> repo,
             List<List<String>> preWarmParcelEntries,
@@ -610,7 +604,6 @@ public record ClusterUpgradeProperties(
                     .build();
         }
 
-        // TODO CB-33362: Remove once ParcelAvailabilityService accepts ClusterUpgradeProperties.
         @JsonIgnore
         public com.sequenceiq.cloudbreak.cloud.model.catalog.Image toCatalogImage() {
             return com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()

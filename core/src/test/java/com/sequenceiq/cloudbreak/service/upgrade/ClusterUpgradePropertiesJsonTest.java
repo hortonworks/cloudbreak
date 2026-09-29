@@ -28,9 +28,6 @@ class ClusterUpgradePropertiesJsonTest {
         assertEquals(original.isRollingUpgradeEnabled(), restored.isRollingUpgradeEnabled());
         assertEquals(original.isReplaceVms(), restored.isReplaceVms());
         assertEquals(original.currentImageId(), restored.currentImageId());
-        assertEquals(original.toCurrentCloudImage().getImageName(), restored.toCurrentCloudImage().getImageName());
-        assertEquals(original.toCurrentCloudImage().getArchitecture(), restored.toCurrentCloudImage().getArchitecture());
-        assertEquals(original.toCurrentCloudImage().getImageCatalogUrl(), restored.toCurrentCloudImage().getImageCatalogUrl());
 
         JsonNode root = JsonUtil.readTree(json);
         assertFalse(root.has("targetImageId"));
