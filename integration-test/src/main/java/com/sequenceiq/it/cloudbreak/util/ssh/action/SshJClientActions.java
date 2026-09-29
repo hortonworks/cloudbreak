@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -57,6 +58,8 @@ public class SshJClientActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClientActions.class);
 
     private static final String NOT_AVAILABLE = "N/A";
+
+    private static final Set<String> AZURE_SKIPPED_FREEIPA_LOGGING_AGENT_STATUSES = Set.of("s3Accessible", "databusS3Accessible");
 
     @Inject
     private SshJClient sshJClient;
@@ -627,25 +630,55 @@ public class SshJClientActions {
     public FreeIpaTestDto checkLoggingAgentStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
         List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
                 testDto.getTestContext());
-        return checkLoggingAgentStatus(testDto, instanceIps);
+        return checkLoggingAgentStatus(testDto, instanceIps, true);
     }
 
     public <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
-        return checkLoggingAgentStatus(testDto, instanceIps);
+        return checkLoggingAgentStatus(testDto, instanceIps, false);
     }
 
-    private <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<String> instanceIps) {
-        String loggingAgentNokStatusCommand = "if sudo cdp-doctor service status --format json | " +
-                "jq -e '.infraServices[] | select(.name == \"minifi\")' > /dev/null 2>&1; " +
-                "then AGENT=minifi; else AGENT=fluentd; fi; " +
-                "sudo cdp-doctor $AGENT status --format json | tail -1 | " +
-                "jq -r '.. | objects | to_entries | map(select(.value == \"NOK\"))[] | \"\\(.key) \\(.value)\"'";
+    private <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<String> instanceIps, boolean freeIpaInstances) {
+        // CB-34702: cdp-doctor validates the hardcoded production DataBus endpoints instead of the ones configured on the node, so read the configured
+        // endpoints from the telemetry pillar and pass them explicitly.
+        String loggingAgentNokStatusCommand = """
+                DBUS=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusEndpoint" --output json' | jq -r '.local // empty'); \
+                DBUS_S3=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusS3Endpoint" --output json' | jq -r '.local // empty'); \
+                if [ -z "$DBUS" ] || [ -z "$DBUS_S3" ]; then \
+                    echo "The configured DataBus endpoints cannot be read from the telemetry pillar!"; \
+                    exit 1; \
+                fi; \
+                if sudo cdp-doctor service status --format json | jq -e '.infraServices[] | select(.name == "minifi")' > /dev/null 2>&1; then \
+                    AGENT=minifi; \
+                else \
+                    AGENT=fluentd; \
+                fi; \
+                STATUS=$(sudo cdp-doctor $AGENT status --format json --databus-url $DBUS --databus-s3-url $DBUS_S3 | tail -1); \
+                if ! echo "$STATUS" | jq -e . > /dev/null 2>&1; then \
+                    echo "The 'cdp-doctor $AGENT status' report is not a valid JSON: $STATUS"; \
+                    exit 1; \
+                fi; \
+                echo "$STATUS" | jq -r '.. | objects | to_entries | map(select(.value == "NOK"))[] | .key'\
+                """;
         Map<String, Pair<Integer, String>> loggingAgentNokStatusReportByIp = instanceIps.stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, loggingAgentNokStatusCommand)));
 
+        // CB-34157: the FreeIPA instances of our Azure E2E environments cannot reach public endpoints, so the S3 addresses that cdp-doctor probes for
+        // these two statuses are unreachable on them. The Data Lake and the Data Hub instances of the same environments do reach those addresses, so
+        // they keep asserting both statuses, and this needs to be revisited once the FreeIPA instances can reach public endpoints as well.
+        Set<String> skippedStatuses = freeIpaInstances && CloudPlatform.AZURE.name().equalsIgnoreCase(commonCloudProperties.getCloudProvider())
+                ? AZURE_SKIPPED_FREEIPA_LOGGING_AGENT_STATUSES
+                : Set.of();
         for (Entry<String, Pair<Integer, String>> statusReport : loggingAgentNokStatusReportByIp.entrySet()) {
-            String loggingAgentNotOkStatuses = StringUtils.trimToNull(statusReport.getValue().getValue());
+            if (statusReport.getValue().getKey() != 0) {
+                throw new TestFailException(format("Logging agent status cannot be checked on '%s' instance: %s", statusReport.getKey(),
+                        statusReport.getValue().getValue()));
+            }
+            String loggingAgentNotOkStatuses = StringUtils.defaultString(statusReport.getValue().getValue()).lines()
+                    .map(StringUtils::trimToEmpty)
+                    .filter(StringUtils::isNotEmpty)
+                    .filter(status -> !skippedStatuses.contains(status))
+                    .collect(Collectors.joining(", "));
             if (StringUtils.isNotBlank(loggingAgentNotOkStatuses)) {
                 Log.error(LOGGER, format(" There is 'Not OK' logging agent status %s is present on '%s' instance! ", loggingAgentNotOkStatuses,
                         statusReport.getKey()));
