@@ -3,8 +3,11 @@ package com.sequenceiq.freeipa.service.image.userdata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -50,6 +53,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
+import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -71,6 +75,9 @@ class UserDataBuilderTest {
 
     @Mock
     private StackEncryptionService stackEncryptionService;
+
+    @Mock
+    private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
 
     @InjectMocks
     private UserDataBuilder underTest;
@@ -225,12 +232,40 @@ class UserDataBuilderTest {
     @Test
     void testSaltbootHttpsOnlyIncludedWhenEnabled() throws IOException {
         ReflectionTestUtils.setField(underTest, "saltbootHttpsOnly", true);
+        when(saltBootstrapVersionChecker.isHttpsOnlySupported(stack)).thenReturn(true);
         PlatformParameters platformParameters = mockPlatformParameters();
 
         String userData = underTest.buildUserData(stack, environment, Platform.platform("AWS"), "priv-key".getBytes(),
                 "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
 
         assertTrue(userData.contains("SALTBOOT_HTTPS_ONLY=true"));
+    }
+
+    @Test
+    void testSaltbootHttpsOnlyOmittedWhenAnySaltBootstrapVersionInUseCannotReachHttpsOnlyPeer() throws IOException {
+        ReflectionTestUtils.setField(underTest, "saltbootHttpsOnly", true);
+        ReflectionTestUtils.setField(underTest, "saltbootTlsHardening", true);
+        when(saltBootstrapVersionChecker.isHttpsOnlySupported(stack)).thenReturn(false);
+        PlatformParameters platformParameters = mockPlatformParameters();
+
+        String userData = underTest.buildUserData(stack, environment, Platform.platform("AWS"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
+
+        assertFalse(userData.contains("SALTBOOT_HTTPS_ONLY"));
+        assertTrue(userData.contains("export SALTBOOT_MIN_TLS_VERSION=1.3"));
+        assertTrue(userData.contains("export SALTBOOT_FIPS_ONLY=true"));
+    }
+
+    @Test
+    void testSaltBootstrapVersionNotCheckedWhenHttpsOnlyIsDisabledByConfig() throws IOException {
+        ReflectionTestUtils.setField(underTest, "saltbootHttpsOnly", false);
+        PlatformParameters platformParameters = mockPlatformParameters();
+
+        String userData = underTest.buildUserData(stack, environment, Platform.platform("AWS"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
+
+        assertFalse(userData.contains("SALTBOOT_HTTPS_ONLY"));
+        verify(saltBootstrapVersionChecker, never()).isHttpsOnlySupported(any());
     }
 
     @Test

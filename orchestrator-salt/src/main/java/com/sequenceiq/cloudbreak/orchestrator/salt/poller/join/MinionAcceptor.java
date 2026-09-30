@@ -183,7 +183,8 @@ public class MinionAcceptor {
         Map<String, String> minionIdByAddress = minions.stream().collect(Collectors.toMap(Minion::getAddress, Minion::getId));
         List<Fingerprint> fingerprints = fingerprintsResponse.getFingerprints();
         return fingerprints.stream()
-                .filter(fp -> fp.getIpFromAddress() != null)
+                .filter(fp -> minionIdByAddress.containsKey(fp.getIpFromAddress()))
+                .filter(fp -> fp.getFingerprint() != null)
                 .collect(Collectors.toMap(fp -> minionIdByAddress.get(fp.getIpFromAddress()), Fingerprint::getFingerprint));
     }
 

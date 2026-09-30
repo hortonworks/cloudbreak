@@ -13,6 +13,9 @@
   {% set extra_params = extra_params + " --label " + " --label ".join(filecollector.labelFilter) %}
 {% endif %}
 
+include:
+  - telemetry.libgcc
+
 run_cdp_doctor:
   cmd.run:
     - name: "cdp-telemetry doctor commands create -c /opt/cdp-telemetry/conf/cdp-doctor-commands.yaml"
