@@ -45,4 +45,14 @@ public class Fingerprint {
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
     }
+
+    @Override
+    public String toString() {
+        return "Fingerprint{" +
+                "fingerprint='" + fingerprint + '\'' +
+                ", errorText='" + errorText + '\'' +
+                ", address='" + address + '\'' +
+                ", statusCode=" + statusCode +
+                '}';
+    }
 }

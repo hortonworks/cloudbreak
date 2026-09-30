@@ -3,10 +3,11 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 
-{% if filecollector.updatePackage %}
 include:
+{% if filecollector.updatePackage %}
   - telemetry.upgrade
 {% endif %}
+  - telemetry.libgcc
 
 /var/lib/filecollector:
   file.directory:

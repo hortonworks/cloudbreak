@@ -1,5 +1,12 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'filecollector/settings.sls' import filecollector with context %}
+
+{#- CB-34129: needed here on its own because CM diagnostics with destination=SUPPORT skips
+    filecollector.init (CmDiagnosticsInitHandler) and never applies filecollector.collect, so
+    upload is the first state to shell out to cdp-telemetry on the node. #}
+include:
+  - telemetry.libgcc
+
 {% if filecollector.mode == "CLOUDERA_MANAGER" %}
 move_support_bundle_to_filecollector:
   cmd.run:

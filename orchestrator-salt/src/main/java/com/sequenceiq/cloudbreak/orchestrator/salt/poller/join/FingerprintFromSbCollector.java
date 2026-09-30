@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,25 @@ public class FingerprintFromSbCollector implements FingerprintCollector {
 
     private void validateFingerprintResponse(List<Minion> minionsToAccept, FingerprintsResponse response) throws CloudbreakOrchestratorFailedException {
         validateHttpStatus(response, minionsToAccept);
+        validateNoMinionFailed(response, minionsToAccept);
         validateAllMinionsCollected(minionsToAccept, response);
+    }
+
+    private void validateNoMinionFailed(FingerprintsResponse response, List<Minion> minionsToAccept) throws CloudbreakOrchestratorFailedException {
+        List<Fingerprint> failedFingerprints = response.getFingerprints().stream()
+                .filter(fingerprint -> fingerprint.getFingerprint() == null)
+                .toList();
+        if (!failedFingerprints.isEmpty()) {
+            LOGGER.error("Fingerprint collection failed on some of the minions. Response: [{}] Minions: [{}]", response, minionsToAccept);
+            throw new CloudbreakOrchestratorFailedException("Couldn't collect fingerprints for minions: " + failedFingerprints.stream()
+                    .map(this::describeFailedFingerprint)
+                    .collect(Collectors.joining(", ")));
+        }
+    }
+
+    private String describeFailedFingerprint(Fingerprint fingerprint) {
+        return String.format("[address: %s, statuscode: %s, status reason: %s]",
+                fingerprint.getAddress(), fingerprint.getStatusCode(), fingerprint.getErrorText());
     }
 
     private void validateAllMinionsCollected(List<Minion> minionsToAccept, FingerprintsResponse response) throws CloudbreakOrchestratorFailedException {

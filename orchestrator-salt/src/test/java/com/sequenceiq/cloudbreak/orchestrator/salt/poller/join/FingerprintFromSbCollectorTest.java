@@ -62,6 +62,52 @@ class FingerprintFromSbCollectorTest {
         assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.collectFingerprintFromMinions(sc, List.of(m1, m2)));
     }
 
+    @Test
+    void testFailedMinionValidationReportsTheSaltbootError() {
+        FingerprintsResponse response = new FingerprintsResponse();
+        response.setStatusCode(HttpStatus.OK.value());
+        Fingerprint failed = new Fingerprint();
+        failed.setAddress("1.1.1.1");
+        failed.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        failed.setErrorText("Post \"http://1.1.1.1:7070/saltboot/salt/minion/fingerprint?index=0\": connection refused");
+        response.setFingerprints(List.of(failed));
+        when(sc.collectFingerPrints(any(FingerprintRequest.class))).thenReturn(response);
+
+        Minion m1 = new Minion();
+        m1.setAddress("1.1.1.1");
+        m1.setHostName("m1");
+        m1.setDomain("domain");
+
+        CloudbreakOrchestratorFailedException exception =
+                assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.collectFingerprintFromMinions(sc, List.of(m1)));
+
+        assertEquals("Couldn't collect fingerprints for minions: [address: 1.1.1.1, statuscode: 500, status reason: "
+                + "Post \"http://1.1.1.1:7070/saltboot/salt/minion/fingerprint?index=0\": connection refused]", exception.getMessage());
+    }
+
+    @Test
+    void testEveryFailedMinionIsReported() {
+        FingerprintsResponse response = new FingerprintsResponse();
+        response.setStatusCode(HttpStatus.OK.value());
+        Fingerprint firstFailed = new Fingerprint();
+        firstFailed.setAddress("1.1.1.1");
+        firstFailed.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        firstFailed.setErrorText("connection refused");
+        Fingerprint secondFailed = new Fingerprint();
+        secondFailed.setAddress("1.1.1.2");
+        secondFailed.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        secondFailed.setErrorText("no route to host");
+        response.setFingerprints(List.of(firstFailed, secondFailed));
+        when(sc.collectFingerPrints(any(FingerprintRequest.class))).thenReturn(response);
+
+        CloudbreakOrchestratorFailedException exception =
+                assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.collectFingerprintFromMinions(sc, List.of()));
+
+        assertEquals("Couldn't collect fingerprints for minions: "
+                + "[address: 1.1.1.1, statuscode: 500, status reason: connection refused], "
+                + "[address: 1.1.1.2, statuscode: 500, status reason: no route to host]", exception.getMessage());
+    }
+
     private static Stream<List<String>> testSuccessfulCollectionParams() {
         return Stream.of(
                 // Same saltboot https setting on all nodes

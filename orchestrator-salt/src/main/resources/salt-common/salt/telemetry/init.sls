@@ -26,6 +26,7 @@ check_databus_network_connectivity:
 {%- endif %}
 include:
   - telemetry.upgrade
+  - telemetry.libgcc
 
 {%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 8 %}
 remove_cdp_telemetry_libcrypto:
