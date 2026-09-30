@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
@@ -21,6 +23,7 @@ import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementResponse;
@@ -43,6 +46,7 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.entity.util.TrustRelationshipType;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
@@ -53,6 +57,10 @@ import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @Component
 public class StackToDescribeFreeIpaResponseConverter {
+
+    static final String MISSING_STATUS_REASON = "The status of the FreeIPA is unknown, because it is missing from the database.";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToDescribeFreeIpaResponseConverter.class);
 
     @Inject
     private StackAuthenticationToStackAuthenticationResponseConverter authenticationResponseConverter;
@@ -106,9 +114,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setTunnel(stack.getTunnel());
         describeFreeIpaResponse.setInstanceGroups(instanceGroupConverter.convert(stack.getInstanceGroups(), includeAllInstances));
         describeFreeIpaResponse.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(stack.getStackStatus()));
-        describeFreeIpaResponse.setStatus(stack.getStackStatus().getStatus());
-        describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
-        describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
+        decorateWithStatus(stack, describeFreeIpaResponse);
         describeFreeIpaResponse.setEnableMultiAz(stack.isMultiAz());
         decorateFreeIpaServerResponseWithIps(stack.getId(), describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
         decorateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
@@ -136,6 +142,20 @@ public class StackToDescribeFreeIpaResponseConverter {
         );
         createFreeIpaV1Response.setFlowIdentifier(flowIdentifier);
         return createFreeIpaV1Response;
+    }
+
+    private void decorateWithStatus(Stack stack, DescribeFreeIpaResponse describeFreeIpaResponse) {
+        StackStatus stackStatus = stack.getStackStatus();
+        if (stackStatus == null) {
+            LOGGER.warn("Stack {} has no stackStatus, reporting status as {}.", stack.getResourceCrn(), Status.UNKNOWN);
+            describeFreeIpaResponse.setStatus(Status.UNKNOWN);
+            describeFreeIpaResponse.setStatusString(Status.UNKNOWN.name());
+            describeFreeIpaResponse.setStatusReason(MISSING_STATUS_REASON);
+        } else {
+            describeFreeIpaResponse.setStatus(stackStatus.getStatus());
+            describeFreeIpaResponse.setStatusString(stackStatus.getStatusString());
+            describeFreeIpaResponse.setStatusReason(stackStatus.getStatusReason());
+        }
     }
 
     private void decorateFreeIpaServerResponseWithLoadBalancerInfo(Long stackId, DescribeFreeIpaResponse describeFreeIpaResponse) {

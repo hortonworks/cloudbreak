@@ -223,6 +223,29 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(null, TrustResponse::getFqdn);
     }
 
+    @Test
+    void convertTestWhenStackStatusIsNull() {
+        Stack stack = createStack(Tunnel.DIRECT);
+        stack.setStackStatus(null);
+        ImageEntity image = new ImageEntity();
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+
+        setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus, AvailabilityStatus.UNKNOWN);
+
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true, null);
+
+        assertThat(result)
+                .returns(Status.UNKNOWN, DescribeFreeIpaResponse::getStatus)
+                .returns(Status.UNKNOWN.name(), DescribeFreeIpaResponse::getStatusString)
+                .returns(StackToDescribeFreeIpaResponseConverter.MISSING_STATUS_REASON, DescribeFreeIpaResponse::getStatusReason)
+                .returns(AvailabilityStatus.UNKNOWN, DescribeFreeIpaResponse::getAvailabilityStatus);
+        validateResult(Tunnel.DIRECT, result, freeIpaServerResponse, Status.UNKNOWN, Status.UNKNOWN.name(),
+                StackToDescribeFreeIpaResponseConverter.MISSING_STATUS_REASON);
+    }
+
     private void validateLoadBalancerResponse(DescribeFreeIpaResponse result) {
         assertThat(result.getLoadBalancer())
                 .isNotNull()
@@ -252,17 +275,27 @@ class StackToDescribeFreeIpaResponseConverterTest {
     }
 
     private void setupMocks(Stack stack, ImageEntity image, FreeIpa freeIpa, FreeIpaServerResponse freeIpaServerResponse, UserSyncStatus userSyncStatus) {
+        setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus, AvailabilityStatus.AVAILABLE);
+    }
+
+    private void setupMocks(Stack stack, ImageEntity image, FreeIpa freeIpa, FreeIpaServerResponse freeIpaServerResponse, UserSyncStatus userSyncStatus,
+            AvailabilityStatus availabilityStatus) {
         when(authenticationResponseConverter.convert(stack.getStackAuthentication())).thenReturn(STACK_AUTHENTICATION_RESPONSE);
         when(imageSettingsResponseConverter.convert(image)).thenReturn(IMAGE_SETTINGS_RESPONSE);
         when(freeIpaServerResponseConverter.convert(freeIpa)).thenReturn(freeIpaServerResponse);
         when(instanceGroupConverter.convert(stack.getInstanceGroups(), true)).thenReturn(INSTANCE_GROUP_RESPONSES);
         when(userSyncStatusConverter.convert(userSyncStatus, ENV_CRN)).thenReturn(USERSYNC_STATUS_RESPONSE);
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
-        when(stackToAvailabilityStatusConverter.convert(stack.getStackStatus())).thenReturn(AvailabilityStatus.AVAILABLE);
+        when(stackToAvailabilityStatusConverter.convert(stack.getStackStatus())).thenReturn(availabilityStatus);
         when(freeIpaRecipeService.getRecipeNamesForStack(1L)).thenReturn(Set.of("recipe1", "recipe2"));
     }
 
     private static void validateResult(Tunnel tunnel, DescribeFreeIpaResponse result, FreeIpaServerResponse freeIpaServerResponse) {
+        validateResult(tunnel, result, freeIpaServerResponse, STATUS, STATUS_STRING, STATUS_REASON);
+    }
+
+    private static void validateResult(Tunnel tunnel, DescribeFreeIpaResponse result, FreeIpaServerResponse freeIpaServerResponse, Status status,
+            String statusString, String statusReason) {
         assertThat(result)
                 .returns(NAME, DescribeFreeIpaResponse::getName)
                 .returns(ENV_CRN, DescribeFreeIpaResponse::getEnvironmentCrn)
@@ -273,9 +306,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(freeIpaServerResponse, DescribeFreeIpaResponse::getFreeIpa)
                 // TODO placement
                 .returns(INSTANCE_GROUP_RESPONSES, DescribeFreeIpaResponse::getInstanceGroups)
-                .returns(STATUS, DescribeFreeIpaResponse::getStatus)
-                .returns(STATUS_REASON, DescribeFreeIpaResponse::getStatusReason)
-                .returns(STATUS_STRING, DescribeFreeIpaResponse::getStatusString)
+                .returns(status, DescribeFreeIpaResponse::getStatus)
+                .returns(statusReason, DescribeFreeIpaResponse::getStatusReason)
+                .returns(statusString, DescribeFreeIpaResponse::getStatusString)
                 // TODO decorateFreeIpaServerResponseWithIps
                 .returns(APP_VERSION, DescribeFreeIpaResponse::getAppVersion)
                 .returns(VARIANT, DescribeFreeIpaResponse::getVariant)
