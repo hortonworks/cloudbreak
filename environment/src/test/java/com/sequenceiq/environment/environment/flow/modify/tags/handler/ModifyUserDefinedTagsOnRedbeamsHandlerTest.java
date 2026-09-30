@@ -63,12 +63,13 @@ class ModifyUserDefinedTagsOnRedbeamsHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.name(), result.getSelector());
-        verify(redbeamsPollerService).updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
+        verify(redbeamsPollerService).modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, null);
     }
 
     @Test
     void testDoAcceptFailure() {
-        doThrow(new RuntimeException("error")).when(redbeamsPollerService).updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
+        doThrow(new RuntimeException("error")).when(redbeamsPollerService)
+                .modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, null);
 
         Selectable result = underTest.doAccept(event);
 
@@ -91,6 +92,6 @@ class ModifyUserDefinedTagsOnRedbeamsHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.name(), result.getSelector());
-        verify(redbeamsPollerService).deleteUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAG_KEYS_TO_REMOVE);
+        verify(redbeamsPollerService).modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, Map.of(), TAG_KEYS_TO_REMOVE);
     }
 }

@@ -21,12 +21,12 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -39,7 +39,7 @@ import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.poller.FlowResultPollerEvaluator;
-import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.environment.environment.poller.UserDefinedTagsPollerSupport;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -69,8 +69,12 @@ class RedbeamsPollerProviderTest {
     @Mock
     private FlowResultPollerEvaluator flowResultPollerEvaluator;
 
-    @InjectMocks
     private RedbeamsPollerProvider underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new RedbeamsPollerProvider(redbeamsService, new UserDefinedTagsPollerSupport(flowResultPollerEvaluator));
+    }
 
     @Test
     void testUserDefinedTagsUpdatePoller() throws Exception {
@@ -201,7 +205,8 @@ class RedbeamsPollerProviderTest {
         DatabaseServerV4Endpoint databaseServerV4Endpoint = mock(DatabaseServerV4Endpoint.class);
         RedBeamsService realRedbeamsService = new RedBeamsService(databaseServerV4Endpoint, mock(SupportV4Endpoint.class),
                 mock(RedBeamsFlowEndpoint.class), new WebApplicationExceptionMessageExtractor());
-        RedbeamsPollerProvider providerWithRealService = new RedbeamsPollerProvider(realRedbeamsService, flowResultPollerEvaluator, mock(StackService.class));
+        RedbeamsPollerProvider providerWithRealService = new RedbeamsPollerProvider(
+                realRedbeamsService, new UserDefinedTagsPollerSupport(flowResultPollerEvaluator));
         stubFlowResultPollerEvaluator();
         when(databaseServerV4Endpoint.deleteUserDefinedTags(eq(DB_CRN_1), any()))
                 .thenThrow(new WebApplicationException(Response.status(Response.Status.CONFLICT).build()));

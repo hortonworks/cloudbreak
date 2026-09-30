@@ -4,31 +4,17 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.USER_DEFI
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
-import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.service.stack.StackPollerService;
-import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
-import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEventHandler<EnvTagsModificationEvent> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModifyUserDefinedTagsOnDatahubsHandler.class);
-
-    private final StackPollerService stackPollerService;
+public class ModifyUserDefinedTagsOnDatahubsHandler extends ModifyUserDefinedTagsOnStacksHandler {
 
     public ModifyUserDefinedTagsOnDatahubsHandler(StackPollerService stackPollerService) {
-        this.stackPollerService = stackPollerService;
+        super(stackPollerService);
     }
 
     @Override
@@ -37,37 +23,22 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent<EnvTagsModificationEvent> event) {
-        Long resourceId = event.getData().getResourceId();
-        String resourceName = event.getData().getResourceName();
-        String resourceCrn = event.getData().getResourceCrn();
-        Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
-        Set<String> tagsToRemove = event.getData().getTagsToRemove();
-        try {
-            if (tagsToRemove == null || tagsToRemove.isEmpty()) {
-                stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.WORKLOAD);
-            } else {
-                stackPollerService.deleteUserDefinedTagsOnStacks(resourceId, resourceCrn, tagsToRemove, StackType.WORKLOAD);
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Modify user defined tags on Data Hubs failed.", e);
-            return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED, e);
-        }
-        return EnvTagsModificationEvent.builder()
-                .withSelector(START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.name())
-                .withResourceId(resourceId)
-                .withResourceName(resourceName)
-                .withResourceCrn(resourceCrn)
-                .withUserDefinedTags(userDefinedTags)
-                .withTagsToRemove(tagsToRemove)
-                .build();
+    protected StackType stackType() {
+        return StackType.WORKLOAD;
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnvTagsModificationEvent> event) {
-        LOGGER.warn("Modify user defined tags on Data Hubs failed.", e);
-        String resourceName = event.getData().getResourceName();
-        String resourceCrn = event.getData().getResourceCrn();
-        return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED, e);
+    protected EnvironmentStatus failureStatus() {
+        return USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED;
+    }
+
+    @Override
+    protected String nextSelector() {
+        return START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.name();
+    }
+
+    @Override
+    protected String failureLogMessage() {
+        return "Modify user defined tags on Data Hubs failed.";
     }
 }

@@ -17,6 +17,7 @@ import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationSupport;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -45,33 +46,41 @@ public class RedbeamsPollerService {
         this.redbeamsPollerProvider = redbeamsPollerProvider;
     }
 
-    public void updateUserDefinedTagsOnDatabases(Long envId, String envCrn, Map<String, String> tags) {
+    /**
+     * Applies user-defined tag updates or deletions on databases in the environment.
+     * Non-empty {@code tagsToRemove} selects deletion; otherwise tags are updated.
+     */
+    public void modifyUserDefinedTagsOnDatabases(
+            Long envId,
+            String envCrn,
+            Map<String, String> tags,
+            Set<String> tagsToRemove) {
+        if (EnvTagsModificationSupport.hasTagsToRemove(tagsToRemove)) {
+            doModifyUserDefinedTagsOnDatabases(envId, envCrn, null, tagsToRemove);
+        } else {
+            doModifyUserDefinedTagsOnDatabases(envId, envCrn, tags, null);
+        }
+    }
+
+    private void doModifyUserDefinedTagsOnDatabases(Long envId, String envCrn, Map<String, String> tags, Set<String> tagKeys) {
         DatabaseServerV4Responses databaseServerV4Responses = databaseServerV4Endpoint.list(envCrn);
         List<String> dbCrns = databaseServerV4Responses.getResponses().stream()
                 .map(DatabaseServerV4Response::getCrn)
                 .toList();
-        LOGGER.info("User defined tags will be updated on databases: {}", dbCrns);
+        if (tags != null) {
+            LOGGER.info("User defined tags will be updated on databases: {}", dbCrns);
+        } else {
+            LOGGER.info("User defined tag keys will be deleted on databases: {}", dbCrns);
+        }
 
-        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnDatabases(dbCrns,
-                redbeamsPollerProvider.userDefinedTagsUpdatePoller(dbCrns, envId, tags));
-
-        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
+        AttemptMaker<List<FlowIdentifier>> attemptMaker = tags != null
+                ? redbeamsPollerProvider.userDefinedTagsUpdatePoller(dbCrns, envId, tags)
+                : redbeamsPollerProvider.userDefinedTagsDeletePoller(dbCrns, envId, tagKeys);
+        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsModificationOnDatabases(dbCrns, attemptMaker);
+        awaitUserDefinedTagsModificationCompletion(flowIdentifiers, envId);
     }
 
-    public void deleteUserDefinedTagsOnDatabases(Long envId, String envCrn, Set<String> tagKeys) {
-        DatabaseServerV4Responses databaseServerV4Responses = databaseServerV4Endpoint.list(envCrn);
-        List<String> dbCrns = databaseServerV4Responses.getResponses().stream()
-                .map(DatabaseServerV4Response::getCrn)
-                .toList();
-        LOGGER.info("User defined tag keys will be deleted on databases: {}", dbCrns);
-
-        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnDatabases(dbCrns,
-                redbeamsPollerProvider.userDefinedTagsDeletePoller(dbCrns, envId, tagKeys));
-
-        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
-    }
-
-    private List<FlowIdentifier> triggerUserDefinedTagsUpdateOnDatabases(List<String> dbCrns, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
+    private List<FlowIdentifier> triggerUserDefinedTagsModificationOnDatabases(List<String> dbCrns, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
         if (CollectionUtils.isNotEmpty(dbCrns)) {
             try {
                 return Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
@@ -89,7 +98,7 @@ public class RedbeamsPollerService {
         return Collections.emptyList();
     }
 
-    private void awaitUserDefinedTagsUpdateCompletion(List<FlowIdentifier> flowIdentifiers, Long envId) {
+    private void awaitUserDefinedTagsModificationCompletion(List<FlowIdentifier> flowIdentifiers, Long envId) {
         if (CollectionUtils.isNotEmpty(flowIdentifiers)) {
             try {
                 Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)

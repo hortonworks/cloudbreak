@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationSupport;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
@@ -160,21 +161,48 @@ public class StackPollerService {
                 .collect(Collectors.toList());
     }
 
-    public void updateUserDefinedTagsOnStacks(Long envId, String envCrn, Map<String, String> tags, StackType stackType) {
+    /**
+     * Applies user-defined tag updates or deletions on stacks of the given type.
+     * Non-empty {@code tagsToRemove} selects deletion; otherwise tags are updated.
+     */
+    public void modifyUserDefinedTagsOnStacks(
+            Long envId,
+            String envCrn,
+            StackType stackType,
+            Map<String, String> tags,
+            Set<String> tagsToRemove) {
+        if (EnvTagsModificationSupport.hasTagsToRemove(tagsToRemove)) {
+            doModifyUserDefinedTagsOnStacks(envId, envCrn, stackType, null, tagsToRemove);
+        } else {
+            doModifyUserDefinedTagsOnStacks(envId, envCrn, stackType, tags, null);
+        }
+    }
+
+    private void doModifyUserDefinedTagsOnStacks(
+            Long envId,
+            String envCrn,
+            StackType stackType,
+            Map<String, String> tags,
+            Set<String> tagKeys) {
         StackViewV4Responses stackViews = stackV4Endpoint.list(0L, envCrn, false);
         List<String> stackCrns = stackViews.getResponses().stream()
                 .filter(v -> stackType.name().equals(v.getStackType()))
                 .map(StackViewV4Response::getCrn)
                 .toList();
-        LOGGER.info("User defined tags will be updated on stacks: {}", stackCrns);
+        if (tags != null) {
+            LOGGER.info("User defined tags will be updated on stacks: {}", stackCrns);
+        } else {
+            LOGGER.info("User defined tag keys will be deleted on stacks: {}", stackCrns);
+        }
 
-        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnStacks(stackCrns,
-                stackPollerProvider.userDefinedTagsUpdatePoller(stackCrns, envId, tags));
-
-        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
+        AttemptMaker<List<FlowIdentifier>> attemptMaker = tags != null
+                ? stackPollerProvider.userDefinedTagsUpdatePoller(stackCrns, envId, tags)
+                : stackPollerProvider.userDefinedTagsDeletePoller(stackCrns, envId, tagKeys);
+        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsModificationOnStacks(stackCrns, attemptMaker);
+        awaitUserDefinedTagsModificationCompletion(flowIdentifiers, envId);
     }
 
-    private List<FlowIdentifier> triggerUserDefinedTagsUpdateOnStacks(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
+    private List<FlowIdentifier> triggerUserDefinedTagsModificationOnStacks(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
         if (CollectionUtils.isNotEmpty(stackNames)) {
             try {
                 return Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
@@ -192,7 +220,7 @@ public class StackPollerService {
         return Collections.emptyList();
     }
 
-    private void awaitUserDefinedTagsUpdateCompletion(List<FlowIdentifier> flowIdentifiers, Long envId) {
+    private void awaitUserDefinedTagsModificationCompletion(List<FlowIdentifier> flowIdentifiers, Long envId) {
         if (CollectionUtils.isNotEmpty(flowIdentifiers)) {
             try {
                 Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
@@ -209,19 +237,5 @@ public class StackPollerService {
                 throw new CloudbreakServiceException(message);
             }
         }
-    }
-
-    public void deleteUserDefinedTagsOnStacks(Long envId, String envCrn, Set<String> tagKeys, StackType stackType) {
-        StackViewV4Responses stackViews = stackV4Endpoint.list(0L, envCrn, false);
-        List<String> stackCrns = stackViews.getResponses().stream()
-                .filter(v -> stackType.name().equals(v.getStackType()))
-                .map(StackViewV4Response::getCrn)
-                .toList();
-        LOGGER.info("User defined tag keys will be deleted on stacks: {}", stackCrns);
-
-        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsUpdateOnStacks(stackCrns,
-                stackPollerProvider.userDefinedTagsDeletePoller(stackCrns, envId, tagKeys));
-
-        awaitUserDefinedTagsUpdateCompletion(flowIdentifiers, envId);
     }
 }

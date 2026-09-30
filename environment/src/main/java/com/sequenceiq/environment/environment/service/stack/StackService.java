@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -138,27 +139,27 @@ public class StackService {
     }
 
     public FlowIdentifier triggerUserDefinedTagsUpdate(String crn, Map<String, String> userDefinedTags) {
-        try {
-            LOGGER.debug("Calling triggerUserDefinedTagsUpdateInternal endpoint for stack {} with tags {}", crn, userDefinedTags);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.triggerUserDefinedTagsUpdateInternal(0L, crn, userDefinedTags)
-            );
-        } catch (WebApplicationException e) {
-            String errorMessage = messageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to update user defined tags for stack: {} due to: {}", crn, errorMessage);
-            throw new StackOperationFailedException(errorMessage, e);
-        }
+        LOGGER.debug("Calling triggerUserDefinedTagsUpdateInternal endpoint for stack {} with tags {}", crn, userDefinedTags);
+        return triggerUserDefinedTagsAsInternalActor(
+                () -> stackV4Endpoint.triggerUserDefinedTagsUpdateInternal(0L, crn, userDefinedTags),
+                crn,
+                "update user defined tags");
     }
 
     public FlowIdentifier triggerUserDefinedTagsDelete(String crn, Set<String> tagKeys) {
+        LOGGER.debug("Calling triggerUserDefinedTagsDeleteInternal endpoint for stack {} with tag keys {}", crn, tagKeys);
+        return triggerUserDefinedTagsAsInternalActor(
+                () -> stackV4Endpoint.triggerUserDefinedTagsDeleteInternal(0L, crn, new DeleteUserDefinedTagsRequest(tagKeys)),
+                crn,
+                "delete user defined tags");
+    }
+
+    private FlowIdentifier triggerUserDefinedTagsAsInternalActor(Supplier<FlowIdentifier> action, String crn, String operation) {
         try {
-            LOGGER.debug("Calling triggerUserDefinedTagsDeleteInternal endpoint for stack {} with tag keys {}", crn, tagKeys);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.triggerUserDefinedTagsDeleteInternal(0L, crn, new DeleteUserDefinedTagsRequest(tagKeys))
-            );
+            return ThreadBasedUserCrnProvider.doAsInternalActor(action);
         } catch (WebApplicationException e) {
             String errorMessage = messageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to delete user defined tags for stack: {} due to: {}", crn, errorMessage);
+            LOGGER.error("Failed to {} for stack: {} due to: {}", operation, crn, errorMessage);
             throw new StackOperationFailedException(errorMessage, e);
         }
     }

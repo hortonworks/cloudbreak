@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service.database;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -70,28 +71,28 @@ public class RedBeamsService {
     }
 
     public FlowIdentifier triggerUserDefinedTagsUpdate(String crn, Map<String, String> userDefinedTags) {
-        try {
-            LOGGER.debug("Calling modifyUserDefinedTags endpoint for DB {} with tags {}", crn, userDefinedTags);
-            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> databaseServerV4Endpoint.modifyUserDefinedTags(crn, userDefinedTags, initiatorUserCrn)
-            );
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to update user defined tags for DB: {} due to: {}", crn, errorMessage);
-            throw new RedbeamsOperationFailedException(errorMessage, e);
-        }
+        LOGGER.debug("Calling modifyUserDefinedTags endpoint for DB {} with tags {}", crn, userDefinedTags);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return triggerUserDefinedTagsAsInternalActor(
+                () -> databaseServerV4Endpoint.modifyUserDefinedTags(crn, userDefinedTags, initiatorUserCrn),
+                crn,
+                "update user defined tags");
     }
 
     public FlowIdentifier triggerUserDefinedTagsDelete(String crn, Set<String> tagKeys) {
+        LOGGER.debug("Calling deleteUserDefinedTags endpoint for DB {} with tag keys {}", crn, tagKeys);
+        return triggerUserDefinedTagsAsInternalActor(
+                () -> databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys)),
+                crn,
+                "delete user defined tags");
+    }
+
+    private FlowIdentifier triggerUserDefinedTagsAsInternalActor(Supplier<FlowIdentifier> action, String crn, String operation) {
         try {
-            LOGGER.debug("Calling deleteUserDefinedTags endpoint for DB {} with tag keys {}", crn, tagKeys);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys))
-            );
+            return ThreadBasedUserCrnProvider.doAsInternalActor(action);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to delete user defined tags for DB: {} due to: {}", crn, errorMessage);
+            LOGGER.error("Failed to {} for DB: {} due to: {}", operation, crn, errorMessage);
             throw new RedbeamsOperationFailedException(errorMessage, e);
         }
     }

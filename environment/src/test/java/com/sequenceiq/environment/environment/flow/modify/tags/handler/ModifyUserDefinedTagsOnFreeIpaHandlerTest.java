@@ -64,12 +64,13 @@ class ModifyUserDefinedTagsOnFreeIpaHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT.name(), result.getSelector());
-        verify(freeIpaPollerService).waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
+        verify(freeIpaPollerService).waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, null);
     }
 
     @Test
     void testDoAcceptFailure() {
-        doThrow(new RuntimeException("error")).when(freeIpaPollerService).waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
+        doThrow(new RuntimeException("error")).when(freeIpaPollerService)
+                .waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, null);
 
         Selectable result = underTest.doAccept(event);
 
@@ -92,6 +93,6 @@ class ModifyUserDefinedTagsOnFreeIpaHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT.name(), result.getSelector());
-        verify(freeIpaPollerService).waitForDeleteUserDefinedTags(ENV_ID, ENV_CRN, TAG_KEYS_TO_REMOVE);
+        verify(freeIpaPollerService).waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, Map.of(), TAG_KEYS_TO_REMOVE);
     }
 }

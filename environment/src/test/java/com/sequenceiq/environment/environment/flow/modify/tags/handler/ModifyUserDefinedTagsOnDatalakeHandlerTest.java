@@ -64,12 +64,13 @@ class ModifyUserDefinedTagsOnDatalakeHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT.name(), result.getSelector());
-        verify(stackPollerService).updateUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, StackType.DATALAKE);
+        verify(stackPollerService).modifyUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, StackType.DATALAKE, USER_DEFINED_TAGS, null);
     }
 
     @Test
     void testDoAcceptFailure() {
-        doThrow(new RuntimeException("error")).when(stackPollerService).updateUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, StackType.DATALAKE);
+        doThrow(new RuntimeException("error")).when(stackPollerService)
+                .modifyUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, StackType.DATALAKE, USER_DEFINED_TAGS, null);
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(EnvTagsModificationFailureEvent.class, result);
@@ -91,6 +92,6 @@ class ModifyUserDefinedTagsOnDatalakeHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT.name(), result.getSelector());
-        verify(stackPollerService).deleteUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, TAG_KEYS_TO_REMOVE, StackType.DATALAKE);
+        verify(stackPollerService).modifyUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, StackType.DATALAKE, Map.of(), TAG_KEYS_TO_REMOVE);
     }
 }

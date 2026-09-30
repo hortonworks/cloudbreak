@@ -66,7 +66,7 @@ class RedbeamsPollerServiceTest {
         when(redbeamsPollerProvider.userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS)).thenReturn(triggerAttemptMaker);
         when(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID)).thenReturn(completionAttemptMaker);
 
-        underTest.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS);
+        underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS, null);
 
         verify(databaseServerV4Endpoint).list(ENV_CRN);
         verify(redbeamsPollerProvider).userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS);
@@ -90,7 +90,7 @@ class RedbeamsPollerServiceTest {
         when(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID)).thenReturn(completionAttemptMaker);
 
         assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS));
+                () -> underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS, null));
     }
 
     @Test
@@ -109,7 +109,7 @@ class RedbeamsPollerServiceTest {
         when(redbeamsPollerProvider.userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS)).thenReturn(attemptMaker);
 
         StackOperationFailedException exception = assertThrows(StackOperationFailedException.class,
-                () -> underTest.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS));
+                () -> underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS, null));
 
         assertEquals("DB stack user defined tags updating timed out", exception.getMessage());
     }
@@ -130,7 +130,7 @@ class RedbeamsPollerServiceTest {
         when(redbeamsPollerProvider.userDefinedTagsUpdatePoller(List.of(DB_CRN), ENV_ID, TAGS)).thenReturn(attemptMaker);
 
         StackOperationFailedException exception = assertThrows(StackOperationFailedException.class,
-                () -> underTest.updateUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS));
+                () -> underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS, null));
 
         assertEquals("DB stack user defined tags updating timed out", exception.getMessage());
     }
@@ -151,7 +151,7 @@ class RedbeamsPollerServiceTest {
         when(redbeamsPollerProvider.userDefinedTagsDeletePoller(List.of(DB_CRN), ENV_ID, TAG_KEYS)).thenReturn(triggerAttemptMaker);
         when(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID)).thenReturn(completionAttemptMaker);
 
-        underTest.deleteUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAG_KEYS);
+        underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, null, TAG_KEYS);
 
         verify(databaseServerV4Endpoint).list(ENV_CRN);
         verify(redbeamsPollerProvider).userDefinedTagsDeletePoller(List.of(DB_CRN), ENV_ID, TAG_KEYS);

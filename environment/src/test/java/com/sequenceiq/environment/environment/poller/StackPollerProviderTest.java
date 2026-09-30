@@ -52,7 +52,10 @@ public class StackPollerProviderTest {
 
     private final FlowResultPollerEvaluator flowResultPollerEvaluator = mock(FlowResultPollerEvaluator.class);
 
-    private final StackPollerProvider underTest = new StackPollerProvider(stackService, flowLogDBService, flowResultPollerEvaluator);
+    private final UserDefinedTagsPollerSupport userDefinedTagsPollerSupport = new UserDefinedTagsPollerSupport(flowResultPollerEvaluator);
+
+    private final StackPollerProvider underTest = new StackPollerProvider(
+            stackService, flowLogDBService, flowResultPollerEvaluator, userDefinedTagsPollerSupport);
 
     @ParameterizedTest
     @MethodSource("stackUpdateConfigStates")
@@ -221,7 +224,8 @@ public class StackPollerProviderTest {
         StackV4Endpoint stackV4Endpoint = mock(StackV4Endpoint.class);
         StackService realStackService = new StackService(stackV4Endpoint, mock(FlowCancelService.class), flowLogDBService,
                 new WebApplicationExceptionMessageExtractor(), mock(FlowEndpoint.class));
-        StackPollerProvider providerWithRealService = new StackPollerProvider(realStackService, flowLogDBService, flowResultPollerEvaluator);
+        StackPollerProvider providerWithRealService = new StackPollerProvider(
+                realStackService, flowLogDBService, flowResultPollerEvaluator, userDefinedTagsPollerSupport);
         Set<String> tagKeys = Set.of("key1");
         when(stackV4Endpoint.triggerUserDefinedTagsDeleteInternal(eq(0L), eq("crn1"), any()))
                 .thenThrow(new WebApplicationException(Response.status(Response.Status.CONFLICT).build()));

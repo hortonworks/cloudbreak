@@ -184,7 +184,7 @@ public class FreeIpaPollerServiceTest {
         when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
         when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
 
-        underTest.waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, userDefinedTags);
+        underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, userDefinedTags, null);
 
         verify(freeIpaService).triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags);
     }
@@ -195,7 +195,7 @@ public class FreeIpaPollerServiceTest {
         OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.COMPLETED, null, null, null, 0, null);
         when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
 
-        underTest.waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, userDefinedTags);
+        underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, userDefinedTags, null);
 
         verify(freeIpaService).triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags);
         verify(freeipaPollerProvider, never()).modifyUserDefinedTagsPoller(any(), any(), any());
@@ -208,7 +208,7 @@ public class FreeIpaPollerServiceTest {
         when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
         when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenThrow(new RuntimeException("error"));
 
-        assertThatThrownBy(() -> underTest.waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, userDefinedTags))
+        assertThatThrownBy(() -> underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, userDefinedTags, null))
                 .hasMessageContaining("FreeIPA user defined tags update timed out or error happened")
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
 
@@ -222,7 +222,7 @@ public class FreeIpaPollerServiceTest {
         when(freeIpaService.triggerUserDefinedTagsDelete(ENV_CRN, tagKeys)).thenReturn(status);
         when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
 
-        underTest.waitForDeleteUserDefinedTags(ENV_ID, ENV_CRN, tagKeys);
+        underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, Map.of(), tagKeys);
 
         verify(freeIpaService).triggerUserDefinedTagsDelete(ENV_CRN, tagKeys);
     }

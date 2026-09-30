@@ -37,12 +37,17 @@ public class StackPollerProvider {
 
     private final FlowResultPollerEvaluator flowResultPollerEvaluator;
 
+    private final UserDefinedTagsPollerSupport userDefinedTagsPollerSupport;
+
     public StackPollerProvider(
             StackService stackService,
-            FlowLogDBService flowLogDBService, FlowResultPollerEvaluator lowResultPollerEvaluator) {
+            FlowLogDBService flowLogDBService,
+            FlowResultPollerEvaluator lowResultPollerEvaluator,
+            UserDefinedTagsPollerSupport userDefinedTagsPollerSupport) {
         this.stackService = stackService;
         this.flowLogDBService = flowLogDBService;
         this.flowResultPollerEvaluator = lowResultPollerEvaluator;
+        this.userDefinedTagsPollerSupport = userDefinedTagsPollerSupport;
     }
 
     public AttemptMaker<List<FlowIdentifier>> saltUpdateOnStacksPoller(List<String> stackNames, Long envId) {
@@ -88,81 +93,23 @@ public class StackPollerProvider {
     }
 
     public AttemptMaker<List<FlowIdentifier>> userDefinedTagsUpdatePoller(List<String> stackCrns, Long envId, Map<String, String> tags) {
-        List<String> mutableCrnsList = new ArrayList<>(stackCrns);
-        return () -> {
-            LOGGER.info("Attempting to update user defined tags on {} clusters for environment with ID {}",
-                    mutableCrnsList.size(), envId);
-            List<String> remaining = new ArrayList<>();
-            List<AttemptResult<FlowIdentifier>> results = collectUserDefinedTagsUpdateResults(mutableCrnsList,
-                    remaining, tags);
-            mutableCrnsList.retainAll(remaining);
-            return evaluateResultWithFlowIdentifier(results);
-        };
-    }
-
-    private List<AttemptResult<FlowIdentifier>> collectUserDefinedTagsUpdateResults(List<String> stackCrns,
-            List<String> remaining, Map<String, String> tags) {
-        return stackCrns.stream()
-                .map(stackCrn -> fetchUserDefinedTagsUpdateResults(remaining, stackCrn, tags))
-                .collect(Collectors.toList());
-    }
-
-    private AttemptResult<FlowIdentifier> fetchUserDefinedTagsUpdateResults(List<String> remainingStacks, String stackCrn, Map<String, String> tags) {
-        try {
-            LOGGER.info("Calling cloudbreak to update user defined tags for cluster {}", stackCrn);
-            FlowIdentifier flowIdentifier = stackService.triggerUserDefinedTagsUpdate(stackCrn, tags);
-            return AttemptResults.finishWith(flowIdentifier);
-        } catch (BadRequestException e) {
-            LOGGER.info("Unable to start user defined tags update for {}. Cluster has flow running already. Retrying.",
-                    stackCrn);
-            remainingStacks.add(stackCrn);
-            return AttemptResults.justContinue();
-        } catch (Exception e) {
-            LOGGER.warn("Failure asking Cloudbreak for user defined tags update, error message is: {}",
-                    e.getMessage());
-            return AttemptResults.breakFor(e);
-        }
+        return userDefinedTagsPollerSupport.updatePoller(
+                stackCrns,
+                envId,
+                "clusters",
+                "Cloudbreak",
+                "cluster",
+                stackCrn -> stackService.triggerUserDefinedTagsUpdate(stackCrn, tags));
     }
 
     public AttemptMaker<List<FlowIdentifier>> userDefinedTagsDeletePoller(List<String> stackCrns, Long envId, Set<String> tagKeys) {
-        List<String> mutableCrnsList = new ArrayList<>(stackCrns);
-        List<FlowIdentifier> flowIdentifiers = new ArrayList<>();
-        return () -> {
-            LOGGER.info("Attempting to delete user defined tag keys on {} clusters for environment with ID {}",
-                    mutableCrnsList.size(), envId);
-            List<String> remaining = new ArrayList<>();
-            List<AttemptResult<FlowIdentifier>> results = mutableCrnsList.stream()
-                    .map(stackCrn -> fetchUserDefinedTagsDeleteResults(remaining, stackCrn, tagKeys))
-                    .collect(Collectors.toList());
-            AttemptResult<List<FlowIdentifier>> result = evaluateResultWithFlowIdentifier(results);
-            if (result.getState() == AttemptState.BREAK) {
-                return result;
-            }
-            flowIdentifiers.addAll(results.stream()
-                    .filter(attemptResult -> attemptResult.getState() == AttemptState.FINISH)
-                    .map(AttemptResult::getResult)
-                    .toList());
-            mutableCrnsList.retainAll(remaining);
-            return mutableCrnsList.isEmpty() ? AttemptResults.finishWith(flowIdentifiers) : AttemptResults.justContinue();
-        };
-    }
-
-    private AttemptResult<FlowIdentifier> fetchUserDefinedTagsDeleteResults(List<String> remainingStacks, String stackCrn, Set<String> tagKeys) {
-        try {
-            LOGGER.info("Calling cloudbreak to delete user defined tag keys for cluster {}", stackCrn);
-            FlowIdentifier flowIdentifier = stackService.triggerUserDefinedTagsDelete(stackCrn, tagKeys);
-            return AttemptResults.finishWith(flowIdentifier);
-        } catch (Exception e) {
-            if (FlowRunningConflictDetector.isFlowRunningConflict(e)) {
-                LOGGER.info("Unable to start user defined tag deletion for {}. Cluster has flow running already. Retrying.",
-                        stackCrn);
-                remainingStacks.add(stackCrn);
-                return AttemptResults.justContinue();
-            }
-            LOGGER.warn("Failure asking Cloudbreak for user defined tag deletion, error message is: {}",
-                    e.getMessage());
-            return AttemptResults.breakFor(e);
-        }
+        return userDefinedTagsPollerSupport.deletePoller(
+                stackCrns,
+                envId,
+                "clusters",
+                "Cloudbreak",
+                "cluster",
+                stackCrn -> stackService.triggerUserDefinedTagsDelete(stackCrn, tagKeys));
     }
 
     public AttemptMaker<Void> stackUpdateConfigPoller(List<String> stackCrns, Long envId, String flowId) {

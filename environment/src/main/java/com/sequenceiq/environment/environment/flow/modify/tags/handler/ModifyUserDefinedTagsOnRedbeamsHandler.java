@@ -4,17 +4,13 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.USER_DEFI
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT;
 
-import java.util.Map;
-import java.util.Set;
-
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationSupport;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
 import com.sequenceiq.environment.environment.service.database.RedbeamsPollerService;
@@ -26,8 +22,11 @@ public class ModifyUserDefinedTagsOnRedbeamsHandler extends ExceptionCatcherEven
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyUserDefinedTagsOnRedbeamsHandler.class);
 
-    @Inject
-    private RedbeamsPollerService redbeamsPollerService;
+    private final RedbeamsPollerService redbeamsPollerService;
+
+    public ModifyUserDefinedTagsOnRedbeamsHandler(RedbeamsPollerService redbeamsPollerService) {
+        this.redbeamsPollerService = redbeamsPollerService;
+    }
 
     @Override
     public String selector() {
@@ -36,36 +35,23 @@ public class ModifyUserDefinedTagsOnRedbeamsHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable doAccept(HandlerEvent<EnvTagsModificationEvent> event) {
-        Long resourceId = event.getData().getResourceId();
-        String resourceName = event.getData().getResourceName();
-        String resourceCrn = event.getData().getResourceCrn();
-        Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
-        Set<String> tagsToRemove = event.getData().getTagsToRemove();
+        EnvTagsModificationEvent data = event.getData();
         try {
-            if (tagsToRemove == null || tagsToRemove.isEmpty()) {
-                redbeamsPollerService.updateUserDefinedTagsOnDatabases(resourceId, resourceCrn, userDefinedTags);
-            } else {
-                redbeamsPollerService.deleteUserDefinedTagsOnDatabases(resourceId, resourceCrn, tagsToRemove);
-            }
+            redbeamsPollerService.modifyUserDefinedTagsOnDatabases(
+                    data.getResourceId(), data.getResourceCrn(), data.getUserDefinedTags(), data.getTagsToRemove());
         } catch (Exception e) {
             LOGGER.warn("Modify user defined tags on Redbeams failed.", e);
-            return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED, e);
+            return new EnvTagsModificationFailureEvent(
+                    data.getResourceId(), data.getResourceName(), data.getResourceCrn(), USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED, e);
         }
-        return EnvTagsModificationEvent.builder()
-                .withSelector(START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.name())
-                .withResourceId(resourceId)
-                .withResourceName(resourceName)
-                .withResourceCrn(resourceCrn)
-                .withUserDefinedTags(userDefinedTags)
-                .withTagsToRemove(tagsToRemove)
-                .build();
+        return EnvTagsModificationSupport.nextEvent(data, START_MODIFY_USER_DEFINED_TAGS_EXPERIENCES_EVENT.name());
     }
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnvTagsModificationEvent> event) {
         LOGGER.warn("Modify user defined tags on Redbeams failed.", e);
-        String resourceName = event.getData().getResourceName();
-        String resourceCrn = event.getData().getResourceCrn();
-        return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED, e);
+        EnvTagsModificationEvent data = event.getData();
+        return new EnvTagsModificationFailureEvent(
+                data.getResourceId(), data.getResourceName(), data.getResourceCrn(), USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED, e);
     }
 }

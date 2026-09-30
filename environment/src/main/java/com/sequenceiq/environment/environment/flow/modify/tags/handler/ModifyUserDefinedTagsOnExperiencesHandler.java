@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationSupport;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -71,7 +72,7 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
         Set<String> tagsToRemove = event.getData().getTagsToRemove();
 
-        if (tagsToRemove != null && !tagsToRemove.isEmpty()) {
+        if (EnvTagsModificationSupport.hasTagsToRemove(tagsToRemove)) {
             // CB-34078: propagate environment tag deletion to experiences
             LOGGER.debug("Experience tag deletion is skipped for environment {}.", resourceCrn);
         } else if (experienceScanEnabled) {

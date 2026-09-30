@@ -343,7 +343,7 @@ class StackPollerServiceTest {
         when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, List.of(expectedFlow)))
                 .thenReturn(() -> AttemptResults.finishWith(null));
 
-        underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.DATALAKE);
+        underTest.modifyUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, StackType.DATALAKE, userDefinedTags, null);
 
         verify(stackPollerProvider).userDefinedTagsUpdatePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, userDefinedTags);
         verify(stackPollerProvider).updateUserDefinedTags(ENVIRONMENT_ID, List.of(expectedFlow));
@@ -370,7 +370,7 @@ class StackPollerServiceTest {
         when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows))
                 .thenReturn(() -> AttemptResults.finishWith(null));
 
-        underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.WORKLOAD);
+        underTest.modifyUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, StackType.WORKLOAD, userDefinedTags, null);
 
         verify(stackPollerProvider).userDefinedTagsUpdatePoller(List.of(STACK_CRN_1, STACK_CRN_2), ENVIRONMENT_ID, userDefinedTags);
         verify(stackPollerProvider).updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows);
@@ -391,7 +391,7 @@ class StackPollerServiceTest {
                 .thenReturn(AttemptResults::justContinue);
 
         CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.DATALAKE));
+                () -> underTest.modifyUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, StackType.DATALAKE, userDefinedTags, null));
 
         assertThat(ex.getMessage()).contains("Update user defined tags on stack timed out or error happened");
     }
@@ -417,7 +417,7 @@ class StackPollerServiceTest {
         when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows))
                 .thenReturn(() -> AttemptResults.finishWith(null));
 
-        underTest.deleteUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, tagKeys, StackType.WORKLOAD);
+        underTest.modifyUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, StackType.WORKLOAD, null, tagKeys);
 
         verify(stackPollerProvider).userDefinedTagsDeletePoller(List.of(STACK_CRN_1, STACK_CRN_2), ENVIRONMENT_ID, tagKeys);
         verify(stackPollerProvider).updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows);

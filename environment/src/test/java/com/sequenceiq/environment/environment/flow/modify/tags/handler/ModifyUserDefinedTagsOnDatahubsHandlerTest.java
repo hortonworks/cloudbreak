@@ -64,12 +64,13 @@ class ModifyUserDefinedTagsOnDatahubsHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.name(), result.getSelector());
-        verify(stackPollerService).updateUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, StackType.WORKLOAD);
+        verify(stackPollerService).modifyUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, StackType.WORKLOAD, USER_DEFINED_TAGS, null);
     }
 
     @Test
     void testDoAcceptFailure() {
-        doThrow(new RuntimeException("error")).when(stackPollerService).updateUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, StackType.WORKLOAD);
+        doThrow(new RuntimeException("error")).when(stackPollerService)
+                .modifyUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, StackType.WORKLOAD, USER_DEFINED_TAGS, null);
 
         Selectable result = underTest.doAccept(event);
 
@@ -92,6 +93,6 @@ class ModifyUserDefinedTagsOnDatahubsHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.name(), result.getSelector());
-        verify(stackPollerService).deleteUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, TAG_KEYS_TO_REMOVE, StackType.WORKLOAD);
+        verify(stackPollerService).modifyUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, StackType.WORKLOAD, Map.of(), TAG_KEYS_TO_REMOVE);
     }
 }

@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
+import com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationSupport;
 import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -134,23 +136,26 @@ public class FreeIpaPollerService {
         }
     }
 
-    public void waitForModifyUserDefinedTags(Long envId, String envCrn, Map<String, String> tags) {
-        OperationStatus status = freeIpaService.triggerUserDefinedTagsUpdate(envCrn, tags);
-        if (status.getStatus() != OperationState.COMPLETED) {
-            try {
-                Polling.stopAfterAttempt(modifyUserDefinedTagsAttempt)
-                        .stopIfException(true)
-                        .waitPeriodly(modifyUserDefinedTagsSleeptime, TimeUnit.SECONDS)
-                        .run(() -> freeipaPollerProvider.modifyUserDefinedTagsPoller(envId, envCrn, status.getOperationId()));
-            } catch (PollerStoppedException e) {
-                LOGGER.warn("FreeIPA user defined tags update timed out or error happened.", e);
-                throw new FreeIpaOperationFailedException("FreeIPA user defined tags update timed out or error happened: " + e.getMessage());
-            }
+    /**
+     * Triggers and polls FreeIPA user-defined tag update or deletion for the environment.
+     * Non-empty {@code tagsToRemove} selects deletion; otherwise tags are updated.
+     */
+    public void waitForUserDefinedTagsModification(
+            Long envId,
+            String envCrn,
+            Map<String, String> tags,
+            Set<String> tagsToRemove) {
+        if (EnvTagsModificationSupport.hasTagsToRemove(tagsToRemove)) {
+            waitForUserDefinedTagsOperation(
+                    envId, envCrn, () -> freeIpaService.triggerUserDefinedTagsDelete(envCrn, tagsToRemove), "deletion");
+        } else {
+            waitForUserDefinedTagsOperation(
+                    envId, envCrn, () -> freeIpaService.triggerUserDefinedTagsUpdate(envCrn, tags), "update");
         }
     }
 
-    public void waitForDeleteUserDefinedTags(Long envId, String envCrn, Set<String> tagKeys) {
-        OperationStatus status = freeIpaService.triggerUserDefinedTagsDelete(envCrn, tagKeys);
+    private void waitForUserDefinedTagsOperation(Long envId, String envCrn, Supplier<OperationStatus> trigger, String operation) {
+        OperationStatus status = trigger.get();
         if (status.getStatus() != OperationState.COMPLETED) {
             try {
                 Polling.stopAfterAttempt(modifyUserDefinedTagsAttempt)
@@ -158,8 +163,9 @@ public class FreeIpaPollerService {
                         .waitPeriodly(modifyUserDefinedTagsSleeptime, TimeUnit.SECONDS)
                         .run(() -> freeipaPollerProvider.modifyUserDefinedTagsPoller(envId, envCrn, status.getOperationId()));
             } catch (PollerStoppedException e) {
-                LOGGER.warn("FreeIPA user defined tags deletion timed out or error happened.", e);
-                throw new FreeIpaOperationFailedException("FreeIPA user defined tags deletion timed out or error happened: " + e.getMessage());
+                LOGGER.warn("FreeIPA user defined tags {} timed out or error happened.", operation, e);
+                throw new FreeIpaOperationFailedException(
+                        "FreeIPA user defined tags " + operation + " timed out or error happened: " + e.getMessage());
             }
         }
     }
