@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -90,6 +91,8 @@ class ClusterTemplateServiceFilterTest {
     @BeforeEach
     void initTests() {
         ReflectionTestUtils.setField(supportedRuntimes, "imageCatalogService", imageCatalogService);
+        // An unconfigured policy leaves latest() blank, so these cases keep resolving it from the image catalog.
+        ReflectionTestUtils.setField(supportedRuntimes, "runtimeVersions", new RuntimeVersions());
     }
 
     // @formatter:off

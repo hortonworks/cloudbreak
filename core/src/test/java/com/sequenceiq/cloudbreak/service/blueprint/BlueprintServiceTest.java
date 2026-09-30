@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -159,6 +160,8 @@ class BlueprintServiceTest {
         SupportedRuntimes supportedRuntimes = new SupportedRuntimes();
         ReflectionTestUtils.setField(blueprintListFilters, "supportedRuntimes", supportedRuntimes);
         ReflectionTestUtils.setField(supportedRuntimes, "imageCatalogService", imageCatalogService);
+        // An unconfigured policy leaves latest() blank, so these cases keep resolving it from the image catalog.
+        ReflectionTestUtils.setField(supportedRuntimes, "runtimeVersions", new RuntimeVersions());
         lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         lenient().when(workspaceService.get(1L, user)).thenReturn(getWorkspace());

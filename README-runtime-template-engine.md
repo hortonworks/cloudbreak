@@ -15,7 +15,7 @@ tree grew by hundreds of near-identical files per CR.
 
 The engine replaces that with **one frozen base version plus sparse overlays**:
 
-- **One base** — `7.3.3` (`RuntimeOverlayConstants.BASE_VERSION`) — keeps its full template files on disk.
+- **One base** — `7.3.3` (`cb.runtimes.base` in `service-common-config.yml`) — keeps its full template files on disk.
 - **Every runtime newer than the base ships only its *delta*** against the base, under
   `runtime-overlays/<version>/…`. At startup the engine reconstructs each version's full template set
   in memory: base files + deltas + the version string injected into the right fields.
@@ -58,14 +58,14 @@ A delta is one of five things, chosen by **file name**:
 Confirm the base and which versions are overlays (these move — don't hard-code them):
 
 ```bash
-grep -n 'BASE_VERSION'  service-common/src/main/java/com/sequenceiq/cloudbreak/common/runtime/overlay/RuntimeOverlayConstants.java
-grep -n 'patched:'      core/src/main/resources/application.yml        # cb.runtimes.patched  (blueprints + cluster templates)
-grep -n 'supported:'    datalake/src/main/resources/application.yml     # datalake.runtimes.supported  (duties)
+grep -nE 'base:|supported:' service-common/src/main/resources/service-common-config.yml   # cb.runtimes.base / cb.runtimes.supported (THE canonical list)
 ```
 
 A version is materialized as an **overlay** only when it is listed, is **newer than the base**, and has
-**no** full on-disk directory of its own. Core and Data Lake own **two different lists** — a new
-version that needs both Data Hub and Data Lake templates must be listed in **both**.
+**no** full on-disk directory of its own. One canonical list — `cb.runtimes.supported` in
+`service-common/src/main/resources/service-common-config.yml` — drives both trees: Data Hub blueprints and
+cluster templates read the versions above the base (`cb.runtimes.patched`, derived from `supported`),
+and Data Lake duties default to the same list. Listing a version there once covers both.
 
 ---
 
@@ -85,16 +85,11 @@ The new runtime is the base with different version strings. Author **no files at
 the version.
 
 ```yaml
-# core/src/main/resources/application.yml
+# service-common/src/main/resources/service-common-config.yml
 cb:
   runtimes:
-    patched: "7.3.4"          # comma-separated if the list is non-empty
-```
-```yaml
-# datalake/src/main/resources/application.yml
-datalake:
-  runtimes:
-    supported: "...,7.3.3,7.3.4"
+    supported: "...,7.3.3,7.3.4"   # append to the one canonical list; drives both Data Hub and Data Lake
+    latest: "7.3.4"                # bump if 7.3.4 should become the newest version core serves
 ```
 
 The engine serves every base template with `7.3.3` swapped to `7.3.4` in the injected fields (e.g. a
@@ -266,7 +261,8 @@ number — a parcel URL, an embedded component version — is left untouched.
 1. Pick the flavor (table above). Default to `.patch.json`.
 2. Author the delta under `runtime-overlays/<version>/<tree>/…`; use `__RUNTIME_VERSION__` in
    additions/replacements; guard every `replace`/`remove` with a `test`.
-3. List the version — `cb.runtimes.patched` (core) and/or `datalake.runtimes.supported` (datalake).
+3. List the version — append it to `cb.runtimes.supported` in `service-common/src/main/resources/service-common-config.yml`
+   (one canonical list drives both Data Hub and Data Lake); bump `cb.runtimes.latest` if it should be the newest served version.
 4. Run the overlay + cache tests (see the `cb-runtime-template-change` skill for the exact set).
 
 For a step-by-step runbook, use the **`cb-runtime-template-change`** Claude skill

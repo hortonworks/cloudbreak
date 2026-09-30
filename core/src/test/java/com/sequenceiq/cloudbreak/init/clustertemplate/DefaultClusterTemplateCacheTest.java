@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -68,6 +69,9 @@ class DefaultClusterTemplateCacheTest {
     @Mock
     private RuntimeClusterTemplateOverlayLoader runtimeClusterTemplateOverlayLoader;
 
+    @Mock
+    private RuntimeVersions runtimeVersions;
+
     @BeforeEach
     void setUp() throws Exception {
         underTest.setDefaultTemplateDir("test/defaults/clustertemplates/");
@@ -78,7 +82,7 @@ class DefaultClusterTemplateCacheTest {
             when(blueprintFile.getStackVersion()).thenReturn("x.y.z");
             return Optional.of(blueprintFile);
         }).when(defaultBlueprintCache).getDefaultByName(anyString());
-        underTest.setRuntimeOverlayEnabled(true);
+        lenient().when(runtimeVersions.overlayEnabled()).thenReturn(true);
     }
 
     @Test
@@ -314,10 +318,10 @@ class DefaultClusterTemplateCacheTest {
                 .thenReturn(new ClusterTemplate());
         when(runtimeClusterTemplateOverlayLoader.materializeOverlayClusterTemplates(any()))
                 .thenReturn(Map.of("7.3.4 - overlay template", overlayTemplateJson("7.3.4 - overlay template")));
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.setClusterTemplates(Collections.emptyList());
         underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
@@ -332,9 +336,9 @@ class DefaultClusterTemplateCacheTest {
         // The overlay is keyed by a name that a real on-disk template already provides - putIfAbsent must keep the on-disk one.
         when(runtimeClusterTemplateOverlayLoader.materializeOverlayClusterTemplates(any()))
                 .thenReturn(Map.of("cluster-template2", overlayTemplateJson("cluster-template2")));
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.setClusterTemplates(Collections.emptyList());
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
         underTest.loadClusterTemplatesFromFile();
 
         // The retained raw JSON is the on-disk AZURE template, not the overlay body (which carries a different blueprintName):
@@ -346,10 +350,10 @@ class DefaultClusterTemplateCacheTest {
     @Test
     void testLoadOverlayClusterTemplatesDoesNothingWhenLoaderReturnsEmpty() {
         when(runtimeClusterTemplateOverlayLoader.materializeOverlayClusterTemplates(any())).thenReturn(Map.of());
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.setClusterTemplates(Collections.emptyList());
         underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
@@ -358,10 +362,9 @@ class DefaultClusterTemplateCacheTest {
 
     @Test
     void testLoadOverlayClusterTemplatesDoesNothingWhenKillSwitchIsOff() {
-        underTest.setRuntimeOverlayEnabled(false);
+        when(runtimeVersions.overlayEnabled()).thenReturn(false);
         underTest.setClusterTemplates(Collections.emptyList());
         underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
         underTest.loadClusterTemplatesFromFile();
 
         assertEquals(0, underTest.defaultClusterTemplates().size(), "with the overlay kill-switch off no overlay must be materialized");

@@ -19,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
@@ -34,7 +35,9 @@ class BlueprintListFiltersTest {
 
     @BeforeEach
     void setup() {
-        ReflectionTestUtils.setField(supportedRuntimes, "latestSupportedRuntime", "7.1.0");
+        RuntimeVersions runtimeVersions = new RuntimeVersions();
+        runtimeVersions.setLatest("7.1.0");
+        ReflectionTestUtils.setField(supportedRuntimes, "runtimeVersions", runtimeVersions);
     }
 
     @Test

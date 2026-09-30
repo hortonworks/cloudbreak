@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.support.SupportedVersionSe
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.GeneratedCmTemplateService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -786,6 +787,7 @@ public class DistroXUpgradeRetrievalComponentTest {
             UpgradeMatrixService.class,
             UpgradeMatrixDefinition.class,
             SupportedRuntimes.class,
+            RuntimeVersions.class,
             PythonVersionBasedRuntimeVersionValidator.class,
             LockedComponentService.class,
             CmTemplateGeneratorService.class,

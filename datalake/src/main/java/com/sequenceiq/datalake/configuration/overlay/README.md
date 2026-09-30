@@ -31,12 +31,14 @@ nested duties (e.g. `..._with_profiler/...`), which are not loaded from disk tod
 
 ## Which versions are overlays
 
-Driven by `datalake.runtimes.supported` in `datalake/src/main/resources/application.yml`. A supported
-version newer than the base with no on-disk `duties/<version>/` directory is an overlay. (Note this is
-a *different* property from the one the core blueprint/cluster-template loaders use — both modules must
-list a new version.) The whole model is gated by `cb.runtimes.overlay.enabled` (default `false`): when
-off, `CDPConfigService` skips overlay materialization entirely. The frozen base is
-`RuntimeOverlayConstants.BASE_VERSION` (7.3.3), overridable with `cb.runtimes.base` — but only to a
+Driven by `datalake.runtimes.supported`, which defaults to the canonical `cb.runtimes.supported` list in
+`service-common-config.yml` (`service-common`) — the same single list core reads, so a new version is listed
+**once** for both modules. The `datalake.runtimes.*` keys survive only as the per-deployment override
+channel (`DATALAKE_RUNTIMES_SUPPORTED` and friends); do not list versions in them. A supported version
+newer than the base with no on-disk `duties/<version>/` directory is an overlay. The whole model is
+gated by `cb.runtimes.overlay.enabled` (default `false`): when off, `CDPConfigService` skips overlay
+materialization entirely. The frozen base is `cb.runtimes.base`
+(7.3.3, in `service-common-config.yml`) — but only re-point it at a
 version whose full on-disk `duties/<base>/` dir already ships.
 
 > Do not hand-author a concrete version in `/cluster/blueprintName` in overlay additions — write

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
@@ -56,6 +57,10 @@ class DefaulBlueprintCacheTest {
 
     @Mock
     private CrnGeneratorService crnGeneratorService;
+
+    // Leaving the overlay kill-switch at its default false, so these cases cover the on-disk path only.
+    @Mock
+    private RuntimeVersions runtimeVersions;
 
     @InjectMocks
     private DefaultBlueprintCache underTest;

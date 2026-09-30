@@ -1,0 +1,32 @@
+# Canonical runtime-version policy, shared by every service that ships Cloudera Runtime templates
+# (currently core and datalake). Introducing a new runtime is a single edit here: append it to
+# `supported` and bump `latest`.
+#
+#   base       the frozen runtime whose full templates live on disk; newer runtimes are sparse
+#              overlays on top of it. This is the single source of truth for the base version.
+#   supported  THE canonical list. Drives which duty directories load, and `advertised`/`patched`.
+#   default    the runtime offered by default in the UI / API. Lags `supported` deliberately: it is
+#              promoted only once a prewarmed production image exists.
+#   advertised versions offered in the UI. Empty means "same as supported".
+#   latest     newest version core will serve blueprints for.
+#   patched    NOT configurable: always derived as the supported versions above `base`.
+#
+# `latest` and `default` are never derived from `supported`, because blank is a meaningful value for
+# both: it asks for the dynamic image-catalog-driven behaviour, and stage/prod rely on that. Deriving
+# them would silently pin those deployments. A deployment that wants the dynamic behaviour overrides
+# the value to empty (CB_RUNTIMES_LATEST="", or a mounted override of this file).
+#
+# This policy lives in its own file - rather than in common-config.yml - so that a deployment can
+# override the whole policy, and nothing else, by mounting a single file under cb.etc.config.dir.
+# Individual deployments still override any of these through the environment
+# (CB_RUNTIMES_LATEST, DATALAKE_RUNTIMES_SUPPORTED, ...) or by mounting a service-common-config.yml under
+# cb.etc.config.dir; both take precedence over the values below.
+cb:
+  runtimes:
+    base: "7.3.3"
+    supported: "7.2.7,7.2.10,7.2.12,7.2.14,7.2.15,7.2.16,7.2.17,7.2.18,7.3.1,7.3.2,7.3.3"
+    default: "7.3.2"
+    advertised: ""
+    latest: "7.3.3"
+    overlay:
+      enabled: false

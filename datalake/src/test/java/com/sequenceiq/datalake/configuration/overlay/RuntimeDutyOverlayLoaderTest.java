@@ -12,14 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.common.json.JsonTreeAssertions;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayConstants;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -43,6 +45,8 @@ class RuntimeDutyOverlayLoaderTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private static final String BASE_VERSION = "7.3.3";
+
     private static final Set<String> SUPPORTED = Set.of("7.3.2", "7.3.3", "7.3.4", "7.3.5");
 
     // Adds 7.3.6, which exists only as a test-only overlay under src/test/resources/runtime-overlays/7.3.6:
@@ -52,7 +56,15 @@ class RuntimeDutyOverlayLoaderTest {
     // Adds an empty 7.3.7 overlay (no dir at all) above 7.3.6 to prove the 7.3.6 patch forward-propagates.
     private static final Set<String> SUPPORTED_WITH_737 = Set.of("7.3.2", "7.3.3", "7.3.4", "7.3.5", "7.3.6", "7.3.7");
 
+    private final RuntimeVersions runtimeVersions = new RuntimeVersions();
+
     private final RuntimeDutyOverlayLoader underTest = new RuntimeDutyOverlayLoader();
+
+    @BeforeEach
+    void setUp() {
+        runtimeVersions.setBase(BASE_VERSION);
+        ReflectionTestUtils.setField(underTest, "runtimeVersions", runtimeVersions);
+    }
 
     @Test
     void materializesOnlyTheOverlayVersionsAboveTheBase() {
@@ -62,7 +74,7 @@ class RuntimeDutyOverlayLoaderTest {
         // The base and everything on disk are served by CDPConfigService's own scan, not the overlay loader.
         assertTrue(materialized.keySet().stream().noneMatch(key -> "7.3.2".equals(key.getRuntimeVersion())),
                 "on-disk 7.3.2 must not be materialized as an overlay");
-        assertTrue(materialized.keySet().stream().noneMatch(key -> RuntimeOverlayConstants.BASE_VERSION.equals(key.getRuntimeVersion())),
+        assertTrue(materialized.keySet().stream().noneMatch(key -> BASE_VERSION.equals(key.getRuntimeVersion())),
                 "the base 7.3.3 (full dir on disk) must not be materialized as an overlay");
         assertTrue(materialized.keySet().stream().anyMatch(key -> "7.3.4".equals(key.getRuntimeVersion())), "7.3.4 should be materialized");
         assertTrue(materialized.keySet().stream().anyMatch(key -> "7.3.5".equals(key.getRuntimeVersion())), "7.3.5 should be materialized");
@@ -104,10 +116,10 @@ class RuntimeDutyOverlayLoaderTest {
     }
 
     @Test
-    void setConfiguredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoDutiesOnDisk() {
-        // cb.runtimes.base is injected via the setter; re-pointing it to a version with no on-disk duty dir must
-        // reach the resolver and fail loud, proving the configured base is actually consulted (not hard-wired).
-        underTest.setConfiguredBaseVersion("9.9.9");
+    void configuredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoDutiesOnDisk() {
+        // The base comes from RuntimeVersions; re-pointing it to a version with no on-disk duty dir must reach the
+        // resolver and fail loud, proving the configured base is actually consulted (not hard-wired).
+        runtimeVersions.setBase("9.9.9");
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> underTest.materializeOverlayDuties(Set.of("9.9.10")));
         assertTrue(thrown.getMessage().contains("9.9.9"), "the failure must name the re-pointed base version, got: " + thrown.getMessage());
@@ -185,7 +197,7 @@ class RuntimeDutyOverlayLoaderTest {
     }
 
     private JsonNode baseDuty(String relativePath) throws IOException {
-        try (InputStream inputStream = new ClassPathResource("duties/" + RuntimeOverlayConstants.BASE_VERSION + "/" + relativePath).getInputStream()) {
+        try (InputStream inputStream = new ClassPathResource("duties/" + BASE_VERSION + "/" + relativePath).getInputStream()) {
             return MAPPER.readTree(inputStream);
         }
     }

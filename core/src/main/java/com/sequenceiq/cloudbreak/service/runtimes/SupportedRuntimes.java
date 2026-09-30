@@ -7,10 +7,10 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
@@ -20,9 +20,8 @@ public class SupportedRuntimes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SupportedRuntimes.class);
 
-    // Defines what is the latest version what is supported, every former version shall just work
-    @Value("${cb.runtimes.latest}")
-    private String latestSupportedRuntime;
+    @Inject
+    private RuntimeVersions runtimeVersions;
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -40,7 +39,12 @@ public class SupportedRuntimes {
         return ret;
     }
 
+    /**
+     * @return the latest version that is supported - every former version shall just work. When the configured policy
+     *         leaves it blank, it is derived from the default image catalog instead.
+     */
     private String getLatestSupportedRuntime() {
+        String latestSupportedRuntime = runtimeVersions.latest();
         try {
             if (Strings.isNullOrEmpty(latestSupportedRuntime)) {
                 List<String> defaultImageCatalogRuntimeVersions = imageCatalogService.getRuntimeVersionsFromDefault();

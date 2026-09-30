@@ -2,8 +2,8 @@
 
 A version-agnostic engine for reconstructing a set of Cloudera Runtime templates from **one frozen
 base version plus sparse overlays**, instead of shipping a full copy of every file for every runtime.
-The base is a single policy value, `RuntimeOverlayConstants.BASE_VERSION` — its full templates live on
-disk; every runtime newer than it is expressed as a small delta on top and materialized in memory.
+The base is a single policy value, `cb.runtimes.base` (in `service-common-config.yml`) — its full templates
+live on disk; every runtime newer than it is expressed as a small delta on top and materialized in memory.
 
 The engine carries **no knowledge of any particular template tree**. A caller supplies where the base
 lives, where its overlays live, which files participate, and which fields carry the version string;
@@ -12,7 +12,7 @@ patch engine in `common` (`com.sequenceiq.cloudbreak.common.json.patch`).
 
 - `RuntimeOverlayResolver` — resolves the overlay chain for every supported version and materializes it.
 - `RuntimeOverlayMaterializer` — reconstructs one version's templates from the base (patch + inject).
-- `RuntimeOverlayConstants` — the shared frozen base version.
+- `RuntimeOverlayConstants` — the shared `__RUNTIME_VERSION__` placeholder token for overlay version injection.
 
 Both classes are `final` with static methods; nothing is written to disk.
 

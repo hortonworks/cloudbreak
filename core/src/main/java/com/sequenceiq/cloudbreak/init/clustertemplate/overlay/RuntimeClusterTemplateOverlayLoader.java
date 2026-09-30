@@ -7,24 +7,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayConstants;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayResolver;
 
 /**
  * Materializes the {@code core} default cluster templates for runtime versions that ship as sparse
  * <em>overlays</em> on top of a frozen base version, instead of a full copy of every template file.
  *
- * <p>The set of overlay versions is declared in {@code application.yml} ({@code cb.runtimes.patched}), not
- * in the overlay tree — a version that changes nothing structurally is introduced purely by adding it to
- * that list. A version is treated as an overlay when it is listed, is newer than the base, and has
+ * <p>The set of overlay versions is derived from the canonical {@code cb.runtimes.supported} list in the shared
+ * {@code service-common-config.yml} ({@link com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions#patched()}), not
+ * from the overlay tree — a version that changes nothing structurally is introduced purely by adding it to
+ * that list. A version is treated as an overlay when it is supported, is newer than the base, and has
  * <em>no</em> on-disk full cluster-template directory ({@code defaults/clustertemplates/<version>/});
  * everything else is served from disk by {@link com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache}
  * exactly as before.</p>
@@ -61,20 +62,20 @@ public class RuntimeClusterTemplateOverlayLoader {
     // lower-case letters, digits, hyphens and underscores (e.g. azure/lakehouse_optimizer_ha.json).
     private static final Pattern TEMPLATE_RELATIVE_PATTERN = Pattern.compile("^(aws|azure|gcp|yarn)/[a-z0-9_-]+\\.json$");
 
-    @Value("${cb.runtimes.base:}")
-    private String configuredBaseVersion;
+    @Inject
+    private RuntimeVersions runtimeVersions;
 
     /**
      * Materializes the cluster templates for every patched runtime version that is an overlay (newer than
      * the base and without an on-disk full cluster-template directory).
      *
-     * @param patchedVersions the overlay runtime versions (from {@code cb.runtimes.patched}); an empty set
+     * @param patchedVersions the overlay runtime versions ({@link RuntimeVersions#patched()}); an empty set
      *                        yields no overlays, since overlay versions must be enumerated
      * @return the materialized cluster templates keyed by their {@code /name}; values are raw JSON strings
      */
     public Map<String, String> materializeOverlayClusterTemplates(Set<String> patchedVersions) {
         Map<String, Map<String, JsonNode>> overlaysByVersion = RuntimeOverlayResolver.resolveOverlays(
-                baseVersion(),
+                runtimeVersions.base(),
                 BASE_SUBTREE,
                 OVERLAY_SUBTREE,
                 patchedVersions,
@@ -91,14 +92,6 @@ public class RuntimeClusterTemplateOverlayLoader {
         }
         LOGGER.info("Materialized {} overlay cluster template(s) for runtime versions {}.", result.size(), overlaysByVersion.keySet());
         return result;
-    }
-
-    private String baseVersion() {
-        return StringUtils.isNotBlank(configuredBaseVersion) ? configuredBaseVersion.trim() : RuntimeOverlayConstants.BASE_VERSION;
-    }
-
-    protected void setConfiguredBaseVersion(String configuredBaseVersion) {
-        this.configuredBaseVersion = configuredBaseVersion;
     }
 
     private void registerMaterialized(Map<String, String> result, Map<String, JsonNode> materialized) throws IOException {

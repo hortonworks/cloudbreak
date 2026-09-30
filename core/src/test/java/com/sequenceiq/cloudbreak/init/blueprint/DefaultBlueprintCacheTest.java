@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4R
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
@@ -77,6 +79,9 @@ class DefaultBlueprintCacheTest {
     @Mock
     private RuntimeBlueprintOverlayLoader runtimeBlueprintOverlayLoader;
 
+    @Mock
+    private RuntimeVersions runtimeVersions;
+
     @BeforeEach
     void setUp() throws IOException {
         // Empty on-disk block: blueprints() filters out the blank value, so the disk loop is a no-op and only the
@@ -94,13 +99,13 @@ class DefaultBlueprintCacheTest {
             blueprint.setStackVersion("7.3.4");
             return blueprint;
         });
-        underTest.setRuntimeOverlayEnabled(true);
+        lenient().when(runtimeVersions.overlayEnabled()).thenReturn(true);
     }
 
     @Test
     void registersOverlayWhenNoOnDiskBlueprintOfThatName() {
         when(runtimeBlueprintOverlayLoader.materializeOverlayBlueprints(any())).thenReturn(List.of(overlay(OVERLAY_NAME, OVERLAY_STEM)));
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.loadBlueprintsFromFile();
 
@@ -115,7 +120,7 @@ class DefaultBlueprintCacheTest {
                 .stackVersion("7.3.4").stackType("CDH").resourceCrn(OVERLAY_NAME).build();
         underTest.defaultBlueprints().put(OVERLAY_NAME, onDisk);
         when(runtimeBlueprintOverlayLoader.materializeOverlayBlueprints(any())).thenReturn(List.of(overlay(OVERLAY_NAME, OVERLAY_STEM)));
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.loadBlueprintsFromFile();
 
@@ -126,7 +131,7 @@ class DefaultBlueprintCacheTest {
     @Test
     void addsNothingWhenNoOverlaysAreMaterialized() {
         when(runtimeBlueprintOverlayLoader.materializeOverlayBlueprints(any())).thenReturn(List.of());
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.loadBlueprintsFromFile();
 
@@ -138,7 +143,7 @@ class DefaultBlueprintCacheTest {
         when(commonGovService.govCloudDeployment(any(), any())).thenReturn(true);
         when(govCloudExculsionFilter.shouldAddBlueprint(eq("7.3.4"), eq(OVERLAY_STEM))).thenReturn(false);
         when(runtimeBlueprintOverlayLoader.materializeOverlayBlueprints(any())).thenReturn(List.of(overlay(OVERLAY_NAME, OVERLAY_STEM)));
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.loadBlueprintsFromFile();
 
@@ -150,7 +155,7 @@ class DefaultBlueprintCacheTest {
         when(commonGovService.govCloudDeployment(any(), any())).thenReturn(true);
         when(govCloudExculsionFilter.shouldAddBlueprint(eq("7.3.4"), eq(OVERLAY_STEM))).thenReturn(true);
         when(runtimeBlueprintOverlayLoader.materializeOverlayBlueprints(any())).thenReturn(List.of(overlay(OVERLAY_NAME, OVERLAY_STEM)));
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        when(runtimeVersions.patched()).thenReturn(Set.of("7.3.4"));
 
         underTest.loadBlueprintsFromFile();
 
@@ -159,8 +164,7 @@ class DefaultBlueprintCacheTest {
 
     @Test
     void addsNoOverlayWhenTheKillSwitchIsOff() {
-        underTest.setRuntimeOverlayEnabled(false);
-        underTest.setPatchedRuntimes(List.of("7.3.4"));
+        when(runtimeVersions.overlayEnabled()).thenReturn(false);
 
         underTest.loadBlueprintsFromFile();
 

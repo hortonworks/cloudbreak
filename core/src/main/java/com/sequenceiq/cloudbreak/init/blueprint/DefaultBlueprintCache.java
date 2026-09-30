@@ -15,7 +15,6 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
@@ -44,11 +44,8 @@ public class DefaultBlueprintCache {
 
     private final Map<String, BlueprintFile> defaultBlueprints = new HashMap<>();
 
-    @Value("${cb.runtimes.overlay.enabled:false}")
-    private boolean runtimeOverlayEnabled;
-
-    @Value("#{'${cb.runtimes.patched:}'.split(',')}")
-    private List<String> patchedRuntimes = List.of();
+    @Inject
+    private RuntimeVersions runtimeVersions;
 
     @Inject
     private BlueprintEntities blueprintEntities;
@@ -100,20 +97,17 @@ public class DefaultBlueprintCache {
     }
 
     /**
-     * Reconstructs the blueprints for the patched runtime versions ({@code cb.runtimes.patched}) that ship as
-     * sparse overlays on top of the frozen base version, and merges them into the cache. A real on-disk
+     * Reconstructs the blueprints for the patched runtime versions ({@link RuntimeVersions#patched()}) that ship
+     * as sparse overlays on top of the frozen base version, and merges them into the cache. A real on-disk
      * blueprint of the same name always wins: overlays are skipped when the name is already present, so this
      * must run <em>after</em> the disk scan above. Overlay names never collide with the base's in practice
      * (they carry a different version prefix), so this is a safety net rather than a live conflict.
      */
     private void loadOverlayBlueprints(boolean govCloudDeployment, Set<String> generatedCrns) {
-        if (!runtimeOverlayEnabled) {
+        if (!runtimeVersions.overlayEnabled()) {
             return;
         }
-        Set<String> patchedVersions = patchedRuntimes.stream()
-                .filter(StringUtils::isNotBlank)
-                .map(String::trim)
-                .collect(Collectors.toSet());
+        Set<String> patchedVersions = runtimeVersions.patched();
         if (patchedVersions.isEmpty()) {
             return;
         }
@@ -213,14 +207,6 @@ public class DefaultBlueprintCache {
 
     public Map<String, BlueprintFile> defaultBlueprints() {
         return defaultBlueprints;
-    }
-
-    protected void setPatchedRuntimes(List<String> patchedRuntimes) {
-        this.patchedRuntimes = patchedRuntimes;
-    }
-
-    protected void setRuntimeOverlayEnabled(boolean runtimeOverlayEnabled) {
-        this.runtimeOverlayEnabled = runtimeOverlayEnabled;
     }
 
     private Map<String, Set<String>> blueprints() {

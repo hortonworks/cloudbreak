@@ -15,12 +15,12 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayConstants;
 import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayResolver;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintEntities;
@@ -29,8 +29,9 @@ import com.sequenceiq.cloudbreak.init.blueprint.BlueprintEntities;
  * Materializes the {@code core} default blueprints for runtime versions that ship as sparse <em>overlays</em>
  * on top of a frozen base version, instead of a full copy of every {@code .bp} file.
  *
- * <p>The set of overlay versions is declared in {@code application.yml} ({@code cb.runtimes.patched}), the same
- * property that drives the cluster-template overlays. A version is treated as an overlay when it is listed, is
+ * <p>The set of overlay versions is derived from the canonical {@code cb.runtimes.supported} list in the shared
+ * {@code service-common-config.yml} ({@link com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions#patched()}), the same
+ * list that drives the cluster-template overlays. A version is treated as an overlay when it is supported, is
  * newer than the base, and has <em>no</em> on-disk full blueprint directory
  * ({@code defaults/blueprints/<version>/}); everything else is served from disk by
  * {@link com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache} exactly as before.</p>
@@ -72,8 +73,8 @@ public class RuntimeBlueprintOverlayLoader {
     // A flat <stem>.bp file; stems use lower-case letters, digits and hyphens (e.g. cdp-data-engineering-spark3.bp).
     private static final Pattern BLUEPRINT_RELATIVE_PATTERN = Pattern.compile("^[a-z0-9-]+\\.bp$");
 
-    @Value("${cb.runtimes.base:}")
-    private String configuredBaseVersion;
+    @Inject
+    private RuntimeVersions runtimeVersions;
 
     @Inject
     private BlueprintEntities blueprintEntities;
@@ -82,7 +83,7 @@ public class RuntimeBlueprintOverlayLoader {
      * Materializes the blueprints for every patched runtime version that is an overlay (newer than the base and
      * without an on-disk full blueprint directory).
      *
-     * @param patchedVersions the overlay runtime versions (from {@code cb.runtimes.patched}); an empty set yields
+     * @param patchedVersions the overlay runtime versions ({@link RuntimeVersions#patched()}); an empty set yields
      *                        no overlays, since overlay versions must be enumerated
      * @return the materialized blueprints; each carries its synthesized display name, its file stem (for the
      *         gov-cloud exclusion filter, which is keyed by stem), and the full {@code .bp} JSON document
@@ -98,12 +99,12 @@ public class RuntimeBlueprintOverlayLoader {
         stemToName.putAll(baseStemToNameMapping());
         if (stemToName.isEmpty()) {
             LOGGER.warn("No base blueprint registration or overlay name sidecar found for version {}; skipping blueprint overlay materialization.",
-                    baseVersion());
+                    runtimeVersions.base());
             return List.of();
         }
 
         Map<String, Map<String, JsonNode>> overlaysByVersion = RuntimeOverlayResolver.resolveOverlays(
-                baseVersion(),
+                runtimeVersions.base(),
                 BASE_SUBTREE,
                 OVERLAY_SUBTREE,
                 patchedVersions,
@@ -119,17 +120,10 @@ public class RuntimeBlueprintOverlayLoader {
         return result;
     }
 
-    private String baseVersion() {
-        return StringUtils.isNotBlank(configuredBaseVersion) ? configuredBaseVersion.trim() : RuntimeOverlayConstants.BASE_VERSION;
-    }
-
-    protected void setConfiguredBaseVersion(String configuredBaseVersion) {
-        this.configuredBaseVersion = configuredBaseVersion;
-    }
-
     private void registerMaterialized(List<MaterializedBlueprint> result, String version, Map<String, JsonNode> materialized,
             Map<String, String> stemToName) {
-        String basePrefix = baseVersion() + " ";
+        String baseVersion = runtimeVersions.base();
+        String basePrefix = baseVersion + " ";
         for (Map.Entry<String, JsonNode> entry : materialized.entrySet()) {
             String stem = stripSuffix(entry.getKey());
             String baseName = stemToName.get(stem);
@@ -147,7 +141,7 @@ public class RuntimeBlueprintOverlayLoader {
                 overlayName = baseName.replace(RuntimeOverlayConstants.RUNTIME_VERSION_PLACEHOLDER, version);
             } else if (baseName.startsWith(basePrefix)) {
                 // An existing base blueprint's name carries the literal base version; swap only the leading prefix.
-                overlayName = version + baseName.substring(baseVersion().length());
+                overlayName = version + baseName.substring(baseVersion.length());
             } else {
                 LOGGER.warn("Blueprint name '{}' neither starts with the base version prefix nor contains the runtime "
                         + "version placeholder; skipping overlay for version {}.", baseName, version);
@@ -162,7 +156,7 @@ public class RuntimeBlueprintOverlayLoader {
      * {@code cb.blueprint.cm.defaults.<baseVersion>} YAML block (each entry is {@code displayName=fileStem}).
      */
     private Map<String, String> baseStemToNameMapping() {
-        String baseBlock = blueprintEntities.getDefaults().get(baseVersion());
+        String baseBlock = blueprintEntities.getDefaults().get(runtimeVersions.base());
         Map<String, String> stemToName = new LinkedHashMap<>();
         if (StringUtils.isBlank(baseBlock)) {
             return stemToName;

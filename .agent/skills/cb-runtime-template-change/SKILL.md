@@ -7,7 +7,7 @@ description: Change a Cloudbreak runtime template (Data Hub blueprint, Data Hub 
 
 Cloudbreak reconstructs the blueprint / cluster-template / duty set for every runtime **newer than the
 base** in memory, from the frozen base plus a sparse **overlay** of deltas, plus automatic version-string
-injection. One runtime — **`7.3.3`** (`RuntimeOverlayConstants.BASE_VERSION`) — is the frozen base: full
+injection. One runtime — **`7.3.3`** (`cb.runtimes.base` in `service-common-config.yml`) — is the frozen base: full
 files on disk. Versions `≤ 7.3.3` are frozen full dirs; **never** touch or convert them.
 
 So "change template X for runtime Y" means **author a delta under `runtime-overlays/<Y>/…`**, not edit a
@@ -26,9 +26,7 @@ registered yet, do cb-new-runtime's Phase 1 registration first, then come back h
 Confirm the base and which versions are overlays (do **not** hard-code — they move):
 
 ```bash
-grep -n 'BASE_VERSION' service-common/src/main/java/com/sequenceiq/cloudbreak/common/runtime/overlay/RuntimeOverlayConstants.java
-grep -n 'patched:' core/src/main/resources/application.yml            # Data Hub overlay versions
-grep -n 'supported:' datalake/src/main/resources/application.yml      # Data Lake overlay versions
+grep -nE 'base:|supported:' service-common/src/main/resources/service-common-config.yml   # cb.runtimes.base / cb.runtimes.supported (THE canonical list, drives both Data Hub and Data Lake overlays)
 ```
 
 The three template trees and where their deltas go:

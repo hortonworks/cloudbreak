@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -64,13 +65,10 @@ public class DefaultClusterTemplateCache {
     @Value("#{'${cb.clustertemplate.defaults:}'.split(',')}")
     private List<String> clusterTemplates;
 
-    @Value("${cb.runtimes.overlay.enabled:false}")
-    private boolean runtimeOverlayEnabled;
-
-    @Value("#{'${cb.runtimes.patched:}'.split(',')}")
-    private List<String> patchedRuntimes = List.of();
-
     private String defaultTemplateDir = "defaults/clustertemplates";
+
+    @Inject
+    private RuntimeVersions runtimeVersions;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -117,19 +115,16 @@ public class DefaultClusterTemplateCache {
     }
 
     /**
-     * Reconstructs the cluster templates for the patched runtime versions ({@code cb.runtimes.patched}) that
-     * ship as sparse overlays on top of the frozen base version, and merges them into the cache. A real
+     * Reconstructs the cluster templates for the patched runtime versions ({@link RuntimeVersions#patched()})
+     * that ship as sparse overlays on top of the frozen base version, and merges them into the cache. A real
      * on-disk template of the same {@code /name} always wins: overlays are applied with putIfAbsent
      * semantics, so this must run <em>after</em> the disk scan above.
      */
     private void loadOverlayClusterTemplates() {
-        if (!runtimeOverlayEnabled) {
+        if (!runtimeVersions.overlayEnabled()) {
             return;
         }
-        Set<String> patchedVersions = patchedRuntimes.stream()
-                .filter(StringUtils::isNotBlank)
-                .map(String::trim)
-                .collect(Collectors.toSet());
+        Set<String> patchedVersions = runtimeVersions.patched();
         if (patchedVersions.isEmpty()) {
             return;
         }
@@ -395,14 +390,6 @@ public class DefaultClusterTemplateCache {
 
     protected void setDefaultTemplateDir(String defaultTemplateDir) {
         this.defaultTemplateDir = defaultTemplateDir;
-    }
-
-    protected void setPatchedRuntimes(List<String> patchedRuntimes) {
-        this.patchedRuntimes = patchedRuntimes;
-    }
-
-    protected void setRuntimeOverlayEnabled(boolean runtimeOverlayEnabled) {
-        this.runtimeOverlayEnabled = runtimeOverlayEnabled;
     }
 
     public String getByName(String name) {

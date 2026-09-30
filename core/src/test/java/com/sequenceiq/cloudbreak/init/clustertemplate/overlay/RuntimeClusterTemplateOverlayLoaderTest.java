@@ -14,14 +14,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.common.json.JsonTreeAssertions;
-import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayConstants;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 
 /**
  * Exercises {@link RuntimeClusterTemplateOverlayLoader} against the real overlay resources committed under
@@ -43,7 +45,7 @@ class RuntimeClusterTemplateOverlayLoaderTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final String BASE_VERSION = RuntimeOverlayConstants.BASE_VERSION;
+    private static final String BASE_VERSION = "7.3.3";
 
     private static final String NAME_POINTER = "/name";
 
@@ -62,7 +64,15 @@ class RuntimeClusterTemplateOverlayLoaderTest {
 
     private static final String DATAENGINEERING_SPARK3 = "aws/dataengineering-spark3.json";
 
+    private final RuntimeVersions runtimeVersions = new RuntimeVersions();
+
     private final RuntimeClusterTemplateOverlayLoader underTest = new RuntimeClusterTemplateOverlayLoader();
+
+    @BeforeEach
+    void setUp() {
+        runtimeVersions.setBase(BASE_VERSION);
+        ReflectionTestUtils.setField(underTest, "runtimeVersions", runtimeVersions);
+    }
 
     @Test
     void materializesTheOverlayVersionsWithVersionFieldsInjected() throws IOException {
@@ -179,10 +189,10 @@ class RuntimeClusterTemplateOverlayLoaderTest {
     }
 
     @Test
-    void setConfiguredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoTemplatesOnDisk() {
-        // cb.runtimes.base is injected via the setter; re-pointing it to a version with no on-disk template dir must
-        // reach the resolver and fail loud, proving the configured base is actually consulted (not hard-wired).
-        underTest.setConfiguredBaseVersion("9.9.9");
+    void configuredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoTemplatesOnDisk() {
+        // The base comes from RuntimeVersions; re-pointing it to a version with no on-disk template dir must reach the
+        // resolver and fail loud, proving the configured base is actually consulted (not hard-wired).
+        runtimeVersions.setBase("9.9.9");
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
                 () -> underTest.materializeOverlayClusterTemplates(Set.of("9.9.10")));

@@ -29,12 +29,14 @@ Providers are `aws` / `azure` / `gcp` / `yarn`.
 
 ## Which versions are overlays
 
-Driven by `cb.runtimes.patched` in `core/src/main/resources/application.yml` (shared with the
-blueprint overlay loader). A listed version newer than the base with no on-disk
-`defaults/clustertemplates/<version>/` directory is an overlay; everything else is served from disk.
+Derived from the canonical `cb.runtimes.supported` list in `service-common-config.yml` (`service-common`,
+shared by core and datalake): `RuntimeVersions.patched()` is every supported version above the base,
+which is what `DefaultClusterTemplateCache` feeds this loader (the blueprint loader uses the same
+list). Such a version with no on-disk `defaults/clustertemplates/<version>/` directory is an overlay;
+everything else is served from disk.
 The whole model is gated by `cb.runtimes.overlay.enabled` (default `false`): when off,
-`DefaultClusterTemplateCache` skips overlay materialization entirely. The frozen base is
-`RuntimeOverlayConstants.BASE_VERSION` (7.3.3), overridable with `cb.runtimes.base` — but only to a
+`DefaultClusterTemplateCache` skips overlay materialization entirely. The frozen base is `cb.runtimes.base`
+(7.3.3, in `service-common-config.yml`) — but only re-point it at a
 version whose full on-disk `defaults/clustertemplates/<base>/` dir already ships.
 
 > Do not hand-author a concrete version in `/name` or `/distroXTemplate/cluster/blueprintName` in

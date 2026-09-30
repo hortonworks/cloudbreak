@@ -9,16 +9,16 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayConstants;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayResolver;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
@@ -28,8 +28,9 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
  * Materializes the Data Lake "duties" templates for runtime versions that ship as sparse
  * <em>overlays</em> on top of a frozen base version, instead of a full copy of every duty file.
  *
- * <p>The set of runtime versions is declared in {@code application.yml} ({@code datalake.runtimes.supported}),
- * not in the overlay tree — so a version that changes nothing structurally is introduced purely by adding
+ * <p>The set of runtime versions comes from {@code datalake.runtimes.supported}, which defaults to the canonical
+ * {@code cb.runtimes.supported} list in the shared {@code service-common-config.yml} — the very same list core reads —
+ * and not from the overlay tree, so a version that changes nothing structurally is introduced purely by adding
  * it to that list. A version is treated as an overlay when it is supported, is newer than the base, and has
  * <em>no</em> on-disk full duty directory ({@code duties/<version>/}); everything else is served from disk
  * by {@code CDPConfigService} exactly as before.</p>
@@ -63,8 +64,8 @@ public class RuntimeDutyOverlayLoader {
     // does not load today either.
     private static final Pattern DUTY_RELATIVE_PATTERN = Pattern.compile("^(aws|azure|gcp|yarn|mock|openstack)/([a-z0-9_-]+)\\.json$");
 
-    @Value("${cb.runtimes.base:}")
-    private String configuredBaseVersion;
+    @Inject
+    private RuntimeVersions runtimeVersions;
 
     /**
      * Materializes the duty templates for every supported runtime version that is an overlay (newer than
@@ -76,7 +77,7 @@ public class RuntimeDutyOverlayLoader {
      */
     public Map<CDPConfigKey, String> materializeOverlayDuties(Set<String> supportedRuntimes) {
         Map<String, Map<String, JsonNode>> overlaysByVersion = RuntimeOverlayResolver.resolveOverlays(
-                baseVersion(),
+                runtimeVersions.base(),
                 DUTIES_SUBTREE,
                 DUTIES_SUBTREE,
                 supportedRuntimes,
@@ -103,14 +104,6 @@ public class RuntimeDutyOverlayLoader {
                 result.put(key, JsonUtil.writeValueAsString(entry.getValue()));
             }
         }
-    }
-
-    private String baseVersion() {
-        return StringUtils.isNotBlank(configuredBaseVersion) ? configuredBaseVersion.trim() : RuntimeOverlayConstants.BASE_VERSION;
-    }
-
-    protected void setConfiguredBaseVersion(String configuredBaseVersion) {
-        this.configuredBaseVersion = configuredBaseVersion;
     }
 
     private CDPConfigKey toConfigKey(String relativePath, String version) {

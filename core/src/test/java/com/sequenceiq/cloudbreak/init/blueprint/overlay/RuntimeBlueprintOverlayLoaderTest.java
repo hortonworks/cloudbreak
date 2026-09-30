@@ -22,7 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.common.json.JsonTreeAssertions;
-import com.sequenceiq.cloudbreak.common.runtime.overlay.RuntimeOverlayConstants;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintEntities;
 import com.sequenceiq.cloudbreak.init.blueprint.overlay.RuntimeBlueprintOverlayLoader.MaterializedBlueprint;
 
@@ -49,7 +49,7 @@ class RuntimeBlueprintOverlayLoaderTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final String BASE_VERSION = RuntimeOverlayConstants.BASE_VERSION;
+    private static final String BASE_VERSION = "7.3.3";
 
     private static final String DESCRIPTION_POINTER = "/description";
 
@@ -77,10 +77,14 @@ class RuntimeBlueprintOverlayLoaderTest {
 
     private static final String SDX_NAME = "7.3.3 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
 
+    private final RuntimeVersions runtimeVersions = new RuntimeVersions();
+
     private final RuntimeBlueprintOverlayLoader underTest = new RuntimeBlueprintOverlayLoader();
 
     @BeforeEach
     void setUp() {
+        runtimeVersions.setBase(BASE_VERSION);
+        ReflectionTestUtils.setField(underTest, "runtimeVersions", runtimeVersions);
         BlueprintEntities entities = new BlueprintEntities();
         // Only three stems are registered here; the resolver globs all 34 base .bp files, so this also proves that
         // an unregistered stem (every other .bp on disk) is deliberately not surfaced as an overlay.
@@ -218,14 +222,14 @@ class RuntimeBlueprintOverlayLoaderTest {
     }
 
     @Test
-    void setConfiguredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoBlueprintsOnDisk() {
+    void configuredBaseVersionRePointsTheBaseAndFailsLoudWhenItHasNoBlueprintsOnDisk() {
         // Register the base block under the re-pointed version so stemToName is non-empty and the resolver is actually
-        // reached; cb.runtimes.base is injected via the setter, so re-pointing it to a version with no on-disk blueprint
-        // dir must fail loud - proving the configured base is consulted (not hard-wired to the constant).
+        // reached; the base comes from RuntimeVersions, so re-pointing it to a version with no on-disk blueprint dir
+        // must fail loud - proving the configured base is consulted (not hard-wired to the constant).
         BlueprintEntities entities = new BlueprintEntities();
         entities.getDefaults().put("9.9.9", DE_SPARK3_NAME + "=" + DE_SPARK3_STEM);
         ReflectionTestUtils.setField(underTest, "blueprintEntities", entities);
-        underTest.setConfiguredBaseVersion("9.9.9");
+        runtimeVersions.setBase("9.9.9");
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
                 () -> underTest.materializeOverlayBlueprints(Set.of("9.9.10")));

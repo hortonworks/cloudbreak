@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -39,6 +40,8 @@ import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
+import com.sequenceiq.cloudbreak.conf.ServiceCommonConfig;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
@@ -116,6 +119,8 @@ class AllowedInstanceTypeTest {
     @Configuration
     @ComponentScan(basePackageClasses = {DefaultClusterTemplateCache.class,
             ConversionConfig.class})
+    // The canonical runtime-version policy lives in service-common's service-common-config.yml, outside the scanned packages.
+    @Import({ServiceCommonConfig.class, RuntimeVersions.class})
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
 

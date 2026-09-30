@@ -11,8 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.common.runtime.RuntimeVersions;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
@@ -31,6 +31,9 @@ class SupportedRuntimesTest {
     private SupportedRuntimes underTest;
 
     @Mock
+    private RuntimeVersions runtimeVersions;
+
+    @Mock
     private ImageCatalogService imageCatalogService;
 
     @Test
@@ -40,7 +43,7 @@ class SupportedRuntimesTest {
 
     @Test
     void testSupported() {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", RUNTIME_710);
+        when(runtimeVersions.latest()).thenReturn(RUNTIME_710);
         // Older or equal versions shall be supported
         assertTrue(underTest.isSupported(RUNTIME_710));
         assertTrue(underTest.isSupported("7.1.0.0"));
@@ -51,14 +54,14 @@ class SupportedRuntimesTest {
 
     @Test
     void testNotSupported() {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", RUNTIME_710);
+        when(runtimeVersions.latest()).thenReturn(RUNTIME_710);
         // Newer versions shall not be supported
         assertFalse(underTest.isSupported(RUNTIME_720));
     }
 
     @Test
     void testInvalidVersions() {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", RUNTIME_710);
+        when(runtimeVersions.latest()).thenReturn(RUNTIME_710);
         // Invalid versions shall not be supported, but at least they shall not throw exception
         assertFalse(underTest.isSupported("blah"));
         assertFalse(underTest.isSupported("8"));
@@ -66,7 +69,7 @@ class SupportedRuntimesTest {
 
     @Test
     void testSupportedByFirstDefaultImageCatalogRuntime() throws CloudbreakImageCatalogException {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", "");
+        when(runtimeVersions.latest()).thenReturn("");
         when(imageCatalogService.getRuntimeVersionsFromDefault()).thenReturn(List.of(RUNTIME_7210, RUNTIME_700));
 
         assertTrue(underTest.isSupported(RUNTIME_710));
@@ -75,7 +78,7 @@ class SupportedRuntimesTest {
 
     @Test
     void testNotSupportedByFirstDefaultImageCatalogRuntime() throws CloudbreakImageCatalogException {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", "");
+        when(runtimeVersions.latest()).thenReturn("");
         when(imageCatalogService.getRuntimeVersionsFromDefault()).thenReturn(List.of(RUNTIME_700, RUNTIME_7210));
 
         assertFalse(underTest.isSupported(RUNTIME_710));
@@ -84,7 +87,7 @@ class SupportedRuntimesTest {
 
     @Test
     void testNotSupportedByDefaultImageCatalogRuntimes() throws CloudbreakImageCatalogException {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", "");
+        when(runtimeVersions.latest()).thenReturn("");
         when(imageCatalogService.getRuntimeVersionsFromDefault()).thenReturn(List.of(RUNTIME_710));
 
         assertFalse(underTest.isSupported(RUNTIME_720));
@@ -92,7 +95,7 @@ class SupportedRuntimesTest {
 
     @Test
     void testSupportInCaseOfEmptyImageCatalogResponse() throws CloudbreakImageCatalogException {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", "");
+        when(runtimeVersions.latest()).thenReturn("");
         when(imageCatalogService.getRuntimeVersionsFromDefault()).thenReturn(List.of());
 
         assertTrue(underTest.isSupported(RUNTIME_720));
@@ -100,7 +103,7 @@ class SupportedRuntimesTest {
 
     @Test
     void testSupportInCaseOfImageCatalogException() throws CloudbreakImageCatalogException {
-        ReflectionTestUtils.setField(underTest, "latestSupportedRuntime", "");
+        when(runtimeVersions.latest()).thenReturn("");
         when(imageCatalogService.getRuntimeVersionsFromDefault()).thenThrow(new CloudbreakImageCatalogException(""));
 
         assertTrue(underTest.isSupported(RUNTIME_720));

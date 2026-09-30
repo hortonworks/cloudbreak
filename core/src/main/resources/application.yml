@@ -173,9 +173,6 @@ cb:
     connection.timeout: 2000
     read.timeout: 10000
     skipEntitlementCheckPlatforms: MOCK
-  runtimes:
-    latest: "7.3.3"
-    gov: "7.2.18"
 
   host.discovery.custom.hostname.enabled: false
 

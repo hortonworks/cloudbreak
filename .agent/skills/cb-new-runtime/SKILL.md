@@ -1,19 +1,21 @@
 ---
 name: cb-new-runtime
-description: Introduce a new Cloudera Runtime (CR) version in Cloudbreak and later make it the default — Data Lake + Data Hub blueprints, cluster templates, application.yml runtime properties, upgrade matrix, and the tests that must be bumped. Use when Release Engineering asks to add a new CR (e.g. 7.3.6) or to promote it to default.
+description: Introduce a new Cloudera Runtime (CR) version in Cloudbreak and later make it the default — Data Lake + Data Hub blueprints, cluster templates, the shared service-common-config.yml runtime-version policy, upgrade matrix, and the tests that must be bumped. Use when Release Engineering asks to add a new CR (e.g. 7.3.6) or to promote it to default.
 ---
 
 # Introduce a new Cloudera Runtime version in Cloudbreak
 
 Cloudbreak uses a **base + overlay** model for runtime templates. One runtime — **7.3.3**
-(`RuntimeOverlayConstants.BASE_VERSION`) — is frozen as full files on disk. Every runtime **newer
+(`cb.runtimes.base` in `service-common-config.yml`) — is frozen as full files on disk. Every runtime **newer
 than the base ships as a sparse overlay**: the full blueprint / cluster-template / duty set is
 reconstructed at startup from the base + any deltas + automatic version-string injection. Nothing is
 copied per CR and nothing is generated to disk.
 
-So adding a CR is usually **a few config-line edits, not a directory copy.** In the common case where
-the new CR is identical to the base except for the version strings, you author **zero** template
-files.
+So adding a CR is usually **two config lines in one file, not a directory copy**: append the version to
+`cb.runtimes.supported` and bump `cb.runtimes.latest` in the single shared
+`service-common/src/main/resources/service-common-config.yml`, which both core and datalake read. In the common
+case where the new CR is identical to the base except for the version strings, you author **zero**
+template files.
 
 - **Phase 1 — Introduce the runtime** (land as soon as RE raises the Jira). Section 1.
 - **Phase 2 — Make it the default** (only after a prewarmed prod image exists and the CR is stable,
@@ -36,9 +38,7 @@ this skill.
 current top before editing (do not hard-code — they move):
 
 ```bash
-grep -n 'BASE_VERSION' common/src/main/java/com/sequenceiq/cloudbreak/common/runtime/overlay/RuntimeOverlayConstants.java
-grep -n 'latest:\|patched:' core/src/main/resources/application.yml       # cb.runtimes.latest / patched
-grep -n 'supported:\|advertised:' datalake/src/main/resources/application.yml
+grep -n -A8 'runtimes:' service-common/src/main/resources/service-common-config.yml   # the one canonical cb.runtimes policy (base + supported)
 ```
 
 ---
@@ -48,25 +48,37 @@ grep -n 'supported:\|advertised:' datalake/src/main/resources/application.yml
 ### 1.1 Register `<NEW_CR>` as an overlay version (always required)
 
 The whole overlay model ships behind a kill-switch that is **off by default**: set
-`cb.runtimes.overlay.enabled: true` in **both** `core` and `datalake` `application.yml` — otherwise the
-loaders never run and `<NEW_CR>` will not materialize regardless of the lists below. (The switch exists so
+`cb.runtimes.overlay.enabled: true` in `service-common/src/main/resources/service-common-config.yml` — otherwise the
+loaders never run and `<NEW_CR>` will not materialize regardless of the list below. (The switch exists so
 the model can be disabled in production without a code rollback; leave it off only when reverting.)
 
-Two modules own two different property sets — **both** must list `<NEW_CR>`:
+**There is one canonical list, in one file, read by both core and datalake**:
+`service-common/src/main/resources/service-common-config.yml` under `cb.runtimes:`.
 
-1. **`core/src/main/resources/application.yml`** under `cb.runtimes:`
-   - Append `<NEW_CR>` to `patched` (e.g. `patched: "<NEW_CR>"`, comma-separated if the list is non-empty). This drives the
-     **blueprint** and **cluster-template** overlays (`DefaultBlueprintCache` /
-     `DefaultClusterTemplateCache`).
-   - Set `latest: "<NEW_CR>"` to the newest advertised version. **This is mandatory** — see the
-     gotcha below; skip it and the runtime materializes but is invisible in the UI.
-2. **`datalake/src/main/resources/application.yml`** under `datalake.runtimes:`
-   - Append `<NEW_CR>` to **`supported`** (drives the **duty** overlays) **and** to **`advertised`**
-     (makes it selectable in the UI).
-   - Do **not** touch `datalake.runtimes.default` — that is Phase 2.
+- **Append `<NEW_CR>` to `supported`.** This one list drives the **duty** overlays
+  (`CDPConfigService`), the **blueprint** and **cluster-template** overlays via
+  `RuntimeVersions.patched()` (= supported versions above the base), and — chaining through
+  `datalake.runtimes.supported` — the datalake versions offered in the UI, which fall back to
+  `supported` when `datalake.runtimes.advertised` (chained to `cb.runtimes.advertised`) is left blank.
+- **Set `latest: "<NEW_CR>"`.** Mandatory, and deliberately **not** derived from `supported` — see the
+  UI-invisibility gotcha. Same for `default`, which stays put: promoting it is Phase 2.
+- **`advertised` is a pin, not a list to maintain** — leave it blank. Set it only
+  for a staged rollout (materialize `<NEW_CR>` but keep the UI on the previous version).
+- **`base` is already set in the canonical config** (7.3.3) — leave it alone; promoting the base is a
+  rare, separate operation (see below).
 
-The frozen base version is `RuntimeOverlayConstants.BASE_VERSION` (7.3.3). It can be overridden with
-`cb.runtimes.base` (all overlay loaders read it), but only re-point it at a version whose **full** on-disk
+`RuntimeVersions` (`service-common/.../common/runtime/RuntimeVersions.java`) owns those derivations,
+and `ServiceCommonConfig` (`service-common/.../conf/ServiceCommonConfig.java`) loads the file — both from the classpath and,
+overridably, from `${cb.etc.config.dir}/service-common-config.yml`, which is how an operator or a k8s ConfigMap
+narrows the policy per environment without a code change.
+
+Datalake still reads `datalake.runtimes.{supported,advertised,default}`, but those keys only **chain**
+to the canonical values (`supported: "${cb.runtimes.supported:}"`) so that the `DATALAKE_RUNTIMES_*`
+environment variables per-region deployments already set keep overriding them. **Never list a version
+there** — the chaining is a compatibility channel, not a second policy.
+
+The frozen base version is `cb.runtimes.base` (7.3.3, in `service-common-config.yml`; all overlay loaders
+read it). Only re-point it at a version whose **full** on-disk
 template dirs already ship (`defaults/blueprints/<base>/`, `defaults/clustertemplates/<base>/`,
 `duties/<base>/`) — a base with no on-disk dir fails every cache at startup. Promoting the base is a rare,
 deliberate step, separate from adding `<NEW_CR>`.
@@ -142,7 +154,7 @@ report the exact number rather than eyeballing it.
 **Precondition:** a prewarmed image with `<NEW_CR>` exists in the **prod** image catalog and the CR
 is stable. Earlier makes e2e extremely flaky.
 
-1. Set `datalake.runtimes.default: "<NEW_CR>"` in `datalake/src/main/resources/application.yml`.
+1. Set `cb.runtimes.default: "<NEW_CR>"` in `service-common/src/main/resources/service-common-config.yml`.
 2. In `integration-test/src/main/resources/application.yml` set the **target/default** ones to `<NEW_CR>`:
    - `integrationtest.runtimeVersion`
    - `integrationtest.upgrade.targetRuntimeVersion`
@@ -157,7 +169,8 @@ The image-burn-trigger removal that pairs with promotion is not a CB-repo change
 
 ```bash
 # Overlay engine + adapters (unit)
-./gradlew :common:test --tests '*RuntimeOverlay*' --tests '*JsonPatch*'
+./gradlew :common:test --tests '*JsonPatch*'
+./gradlew :service-common:test --tests '*RuntimeOverlay*' --tests '*RuntimeVersionsTest'
 ./gradlew :core:test   --tests '*RuntimeBlueprintOverlayLoaderTest' --tests '*RuntimeClusterTemplateOverlayLoaderTest' \
                        --tests '*RuntimeUpgradeMatrixDefinitionProviderTest'
 ./gradlew :datalake:test --tests '*RuntimeDutyOverlayLoaderTest' --tests '*CDPConfigServiceTest'
@@ -169,16 +182,19 @@ Then load **cb-testing** (coverage gates + authorization-compliance) and **cb-ji
 
 ## Gotchas
 
-- **UI-invisibility (the big one):** a patched runtime materializes, caches, and persists correctly
-  but the DataHub blueprint **list API returns 0** for it unless `cb.runtimes.latest` is bumped to the
-  newest advertised version. `SupportedRuntimes.isSupported` filters out anything newer than `latest`.
-  Bumping `cb.runtimes.latest` in `core` `application.yml` is **not optional**.
+- **UI-invisibility (the big one):** a patched runtime materializes, caches and persists correctly but
+  the DataHub blueprint **list API returns 0** for it unless `cb.runtimes.latest` is bumped to the newest
+  advertised version — `SupportedRuntimes.isSupported` filters out anything newer than `latest`. Bumping
+  it is **not optional**, and it is not derived from `supported` on purpose: blank means "use the default
+  image catalog", which `stage` and `prod` rely on. If the runtime materializes but the UI shows nothing,
+  check `latest` first — including a `CB_RUNTIMES_LATEST` pin in the k8s config.
+- **A pin overrides the whole environment, not just the jar.** `latest` arrives as `CB_RUNTIMES_*` and
+  the datalake lists as `DATALAKE_RUNTIMES_*` in deployed environments (gov narrows `supported`
+  deliberately). An env that pins those will not see a new version until that config is updated too —
+  the jar edit alone is not enough there.
 - **Kill-switch off by default:** `cb.runtimes.overlay.enabled` defaults to `false`, so the loaders are
-  dormant until you flip it to `true` (in **both** `core` and `datalake`). List a version but leave the
-  switch off and nothing materializes — no error, just an empty overlay.
-- **Two modules, two property sets:** core `cb.runtimes.patched` (blueprints + cluster templates) vs
-  datalake `runtimes.supported` + `advertised` (duties + UI). List the new version in **both** or you
-  get a half-populated runtime.
+  dormant until you flip it to `true` in `service-common-config.yml`. List a version but leave the switch off
+  and nothing materializes — no error, just an empty overlay.
 - **Base drift fails loud:** editing a base 7.3.3 file that an overlay patches makes that patch's
   guarding `test` op throw at startup. That's the safety net working — re-anchor the patch.
 - **Don't author version strings** in overlay files — injection owns `name` / `description` /

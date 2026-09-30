@@ -46,10 +46,12 @@ fields).
 
 ## Which versions are overlays
 
-Driven by `cb.runtimes.patched` in `core/src/main/resources/application.yml` (shared with the
-cluster-template overlay loader). The whole model is gated by `cb.runtimes.overlay.enabled` (default
-`false`): when off, `DefaultBlueprintCache` skips overlay materialization entirely. The frozen base is
-`RuntimeOverlayConstants.BASE_VERSION` (7.3.3), overridable with `cb.runtimes.base` — but only to a
+Derived from the canonical `cb.runtimes.supported` list in `service-common-config.yml` (`service-common`,
+shared by core and datalake): `RuntimeVersions.patched()` is every supported version above the base,
+which is what `DefaultBlueprintCache` feeds this loader (the cluster-template loader uses the same
+list). The whole model is gated by `cb.runtimes.overlay.enabled` (default `false`): when off,
+`DefaultBlueprintCache` skips overlay materialization entirely. The frozen base is `cb.runtimes.base`
+(7.3.3, in `service-common-config.yml`) — but only re-point it at a
 version whose full on-disk `defaults/blueprints/<base>/` dir and YAML block already ship.
 
 > Do not hand-author a concrete version in `/description` or `/blueprint/cdhVersion` in overlay
