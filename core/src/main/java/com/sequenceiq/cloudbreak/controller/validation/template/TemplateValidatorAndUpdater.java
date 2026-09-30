@@ -1,24 +1,36 @@
 package com.sequenceiq.cloudbreak.controller.validation.template;
 
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_DEFAULT_CHANGED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_FALLBACK_DISK_INCOMPATIBLE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_FILTERED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_ROOT_VOLUME_TYPE_CHANGED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_VOLUME_SIZE_INCREASED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_VOLUME_TYPE_CHANGED;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +52,9 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.controller.validation.template.azure.HostEncryptionProvider;
 import com.sequenceiq.cloudbreak.controller.validation.template.azure.ResourceDiskPropertyCalculator;
@@ -49,6 +64,8 @@ import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
@@ -93,6 +110,9 @@ public class TemplateValidatorAndUpdater {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
+
     @Value("${cb.doc.urls.supportedInstanceTypes:https://www.cloudera.com/products/pricing/cdp-public-cloud-service-rates.html}")
     private String supportedVmTypesDocPageLink;
 
@@ -110,9 +130,6 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
-    /**
-     * @param imageHyperVGeneration the Hyper-V generation of the stack's image, resolved once per stack by the caller; null skips the generation check
-     */
     public void validate(DetailedEnvironmentResponse environment, Credential credential, InstanceGroup instanceGroup, Stack stack,
             CdpResourceType stackType, String imageHyperVGeneration, ValidationResult.ValidationResultBuilder validationBuilder) {
         Template template = instanceGroup.getTemplate();
@@ -130,20 +147,35 @@ public class TemplateValidatorAndUpdater {
             Platform platform = Platform.platform(template.getCloudPlatform());
             Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
             String locationString = locationService.location(stack.getRegion(), stack.getAvailabilityZone());
+            boolean fallbackEnabled = entitlementService.isFallbackInstanceTypeEnabled(credential.getAccount());
             List<String> possibleInstanceTypes = new ArrayList<>();
             possibleInstanceTypes.add(template.getInstanceType());
-            if (entitlementService.isFallbackInstanceTypeEnabled(credential.getAccount())) {
+            if (fallbackEnabled) {
                 possibleInstanceTypes.addAll(template.getFallbackInstanceTypesAsList());
             }
             if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
-                vmType = selectVmTypeOrNull(possibleInstanceTypes, machines, locationString, vmType);
+                InstanceTypeAvailability availability = getInstanceTypeAvailability(environment, instanceGroup, stack, machines, locationString,
+                        fallbackEnabled);
+                Set<VmType> availableVmTypes = availability.vmTypes();
+                String availabilityLocation = availability.location();
+                if (fallbackEnabled) {
+                    possibleInstanceTypes = filterInstanceTypesByAvailability(possibleInstanceTypes, availableVmTypes, template, instanceGroup,
+                            availabilityLocation);
+                }
+                vmType = selectVmTypeOrNull(possibleInstanceTypes, availableVmTypes, machines.get(locationString));
                 if (vmType == null) {
                     LOGGER.info("Instance type not found {} at location {}. Available instances: {}", possibleInstanceTypes, locationString,
                             machines.get(locationString).stream().map(StringType::value).toList());
                     validationBuilder.error(getInvalidVmTypeErrorMessage(possibleInstanceTypes, platform.value(), stack.getRegion()));
                 } else {
-                    validateArchitecture(vmType, stack, validationBuilder);
-                    validateHyperVGeneration(vmType, imageHyperVGeneration, validationBuilder);
+                    boolean architectureMatching = isArchitectureMatching(vmType, stack, validationBuilder);
+                    boolean hyperVGenerationSupported = isHyperVGenerationSupported(vmType, imageHyperVGeneration, validationBuilder);
+                    if (architectureMatching && hyperVGenerationSupported) {
+                        setRootVolumeTypeIfEmpty(template, vmType, possibleInstanceTypes.subList(1, possibleInstanceTypes.size()), instanceGroup);
+                        if (fallbackEnabled) {
+                            updateInstanceTypes(possibleInstanceTypes, availableVmTypes, template, instanceGroup, stack, availabilityLocation);
+                        }
+                    }
                 }
             }
             template = emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(instanceGroup.getTemplate());
@@ -154,9 +186,356 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
-    private VmType selectVmTypeOrNull(List<String> possibleInstanceTypes, Map<String, Set<VmType>> machines, String locationString, VmType vmType) {
+    private InstanceTypeAvailability getInstanceTypeAvailability(DetailedEnvironmentResponse environment, InstanceGroup instanceGroup, Stack stack,
+            Map<String, Set<VmType>> machines, String locationString, boolean zoneAware) {
+        Set<String> availabilityZones = zoneAware ? getAvailabilityZonesOfGroup(environment, instanceGroup, stack) : Set.of();
+        if (availabilityZones.isEmpty()) {
+            return new InstanceTypeAvailability(machines.get(locationString), locationString);
+        }
+        return new InstanceTypeAvailability(getVmTypesAvailableInAnyZone(machines, machines.get(locationString), availabilityZones),
+                String.join(", ", new TreeSet<>(availabilityZones)));
+    }
+
+    private Set<String> getAvailabilityZonesOfGroup(DetailedEnvironmentResponse environment, InstanceGroup instanceGroup, Stack stack) {
+        Set<String> groupZones = filterBlankZones(instanceGroup.getAvailabilityZones());
+        if (!groupZones.isEmpty()) {
+            return groupZones;
+        }
+        if (stack.isMultiAz()) {
+            CloudPlatform cloudPlatform = CloudPlatform.fromName(instanceGroup.getTemplate().getCloudPlatform());
+            if (cloudPlatform != null && environment != null && environment.getNetwork() != null) {
+                return filterBlankZones(environment.getNetwork().getAvailabilityZones(cloudPlatform));
+            }
+        }
+        return Set.of();
+    }
+
+    private Set<String> filterBlankZones(Set<String> zones) {
+        if (zones == null) {
+            return Set.of();
+        }
+        return zones.stream()
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<VmType> getVmTypesAvailableInAnyZone(Map<String, Set<VmType>> machines, Set<VmType> vmTypesOfLocation, Set<String> availabilityZones) {
+        Set<VmType> vmTypes = new HashSet<>(vmTypesOfLocation);
+        availabilityZones.stream()
+                .map(machines::get)
+                .filter(Objects::nonNull)
+                .forEach(vmTypes::addAll);
+        return vmTypes.stream()
+                .filter(vmType -> isAvailableInAnyZone(vmType, availabilityZones))
+                .collect(Collectors.toSet());
+    }
+
+    private boolean isAvailableInAnyZone(VmType vmType, Set<String> availabilityZones) {
+        if (!vmType.isMetaSet() || CollectionUtils.isEmpty(vmType.getMetaData().getAvailabilityZones())) {
+            return true;
+        }
+        return vmType.getMetaData().getAvailabilityZones().stream().anyMatch(availabilityZones::contains);
+    }
+
+    private List<String> filterInstanceTypesByAvailability(List<String> possibleInstanceTypes, Set<VmType> availableVmTypes, Template template,
+            InstanceGroup instanceGroup, String availabilityLocation) {
+        Map<String, VmType> availableVmTypesByName = availableVmTypes.stream()
+                .collect(Collectors.toMap(StringType::value, Function.identity(), (first, second) -> first));
+        List<String> filteredInstanceTypes = possibleInstanceTypes.stream().filter(availableVmTypesByName::containsKey).distinct().toList();
+        if (filteredInstanceTypes.isEmpty()) {
+            LOGGER.info("None of the requested instance types {} are available at location {} for group {}, leaving the template untouched.",
+                    possibleInstanceTypes, availabilityLocation, instanceGroup.getGroupName());
+            return possibleInstanceTypes;
+        }
+        if (!filteredInstanceTypes.getFirst().equals(template.getInstanceType())) {
+            return promoteFirstVolumeCompatibleInstanceType(filteredInstanceTypes, availableVmTypesByName, template, instanceGroup);
+        }
+        return filteredInstanceTypes;
+    }
+
+    private List<String> promoteFirstVolumeCompatibleInstanceType(List<String> instanceTypes, Map<String, VmType> vmTypesByName, Template template,
+            InstanceGroup instanceGroup) {
+        Optional<String> compatibleInstanceType = instanceTypes.stream()
+                .filter(instanceType -> supportsVolumes(vmTypesByName.get(instanceType), template, true))
+                .findFirst();
+        if (compatibleInstanceType.isEmpty()) {
+            LOGGER.info("None of the available instance types {} of group {} support the volumes of the group, {} will be the new default instance type.",
+                    instanceTypes, instanceGroup.getGroupName(), instanceTypes.getFirst());
+            return instanceTypes;
+        }
+        String newDefaultInstanceType = compatibleInstanceType.get();
+        if (newDefaultInstanceType.equals(instanceTypes.getFirst())) {
+            return instanceTypes;
+        }
+        LOGGER.info("Instance types {} of group {} do not support the volumes of the group, {} will be the new default instance type.",
+                instanceTypes.subList(0, instanceTypes.indexOf(newDefaultInstanceType)), instanceGroup.getGroupName(), newDefaultInstanceType);
+        List<String> reorderedInstanceTypes = new ArrayList<>();
+        reorderedInstanceTypes.add(newDefaultInstanceType);
+        instanceTypes.stream().filter(instanceType -> !instanceType.equals(newDefaultInstanceType)).forEach(reorderedInstanceTypes::add);
+        return reorderedInstanceTypes;
+    }
+
+    private void updateInstanceTypes(List<String> filteredInstanceTypes, Set<VmType> availableVmTypes, Template template,
+            InstanceGroup instanceGroup, Stack stack, String locationString) {
+        String newInstanceType = filteredInstanceTypes.getFirst();
+        List<String> originalFallbackInstanceTypes = template.getFallbackInstanceTypesAsList();
+        List<String> droppedFallbacks = originalFallbackInstanceTypes.stream()
+                .filter(type -> !filteredInstanceTypes.contains(type))
+                .distinct()
+                .toList();
+        if (!droppedFallbacks.isEmpty()) {
+            LOGGER.info("Fallback instance types {} are not available at location {} for group {}, dropping them from the template.",
+                    droppedFallbacks, locationString, instanceGroup.getGroupName());
+            fireInstanceGroupEvent(stack, instanceGroup, STACK_INSTANCE_TYPE_VALIDATION_FILTERED, instanceGroup.getGroupName(), locationString,
+                    String.join(", ", droppedFallbacks));
+        }
+
+        if (!newInstanceType.equals(template.getInstanceType())) {
+            changeDefaultInstanceTypeAndAlignVolumeTypes(newInstanceType, availableVmTypes, template, instanceGroup, stack, locationString);
+        }
+
+        List<String> newFallbackInstanceTypes = filterFallbacksByVolumeTypeSupport(filteredInstanceTypes.subList(1, filteredInstanceTypes.size()),
+                availableVmTypes, template, instanceGroup, stack);
+        if (!newFallbackInstanceTypes.equals(originalFallbackInstanceTypes)) {
+            template.setFallbackInstanceTypes(new Json(newFallbackInstanceTypes));
+        }
+    }
+
+    private void changeDefaultInstanceTypeAndAlignVolumeTypes(String newInstanceType, Set<VmType> availableVmTypes, Template template,
+            InstanceGroup instanceGroup, Stack stack, String locationString) {
+        LOGGER.info("Changing the default instance type of group {} from {} to {} at location {}.",
+                instanceGroup.getGroupName(), template.getInstanceType(), newInstanceType, locationString);
+        fireInstanceGroupEvent(stack, instanceGroup, STACK_INSTANCE_TYPE_VALIDATION_DEFAULT_CHANGED, instanceGroup.getGroupName(),
+                template.getInstanceType(), locationString, newInstanceType);
+        VmType newVmType = availableVmTypes.stream().filter(type -> type.value().equals(newInstanceType)).findFirst().orElseThrow();
+        template.setInstanceType(newInstanceType);
+        alignRootVolumeTypeWithInstanceType(template, newVmType, instanceGroup, stack);
+        alignVolumeTypesWithInstanceType(template, newVmType, instanceGroup, stack);
+    }
+
+    private List<String> filterFallbacksByVolumeTypeSupport(List<String> fallbackInstanceTypes, Set<VmType> availableVmTypes, Template template,
+            InstanceGroup instanceGroup, Stack stack) {
+        if (fallbackInstanceTypes.isEmpty()) {
+            return fallbackInstanceTypes;
+        }
+        Map<String, VmType> vmTypesByName = availableVmTypes.stream()
+                .collect(Collectors.toMap(StringType::value, Function.identity(), (first, second) -> first));
+        List<String> supportedFallbacks = fallbackInstanceTypes.stream()
+                .filter(instanceType -> supportsVolumes(vmTypesByName.get(instanceType), template, false))
+                .toList();
+        List<String> droppedFallbacks = fallbackInstanceTypes.stream().filter(type -> !supportedFallbacks.contains(type)).toList();
+        if (!droppedFallbacks.isEmpty()) {
+            String volumeTypes = getVolumeTypesOfTemplate(template);
+            LOGGER.info("Fallback instance types {} of group {} do not support the volumes ({}) of instance type {}, dropping them from the template.",
+                    droppedFallbacks, instanceGroup.getGroupName(), volumeTypes, template.getInstanceType());
+            fireInstanceGroupEvent(stack, instanceGroup, STACK_INSTANCE_TYPE_VALIDATION_FALLBACK_DISK_INCOMPATIBLE, instanceGroup.getGroupName(),
+                    template.getInstanceType(), volumeTypes, String.join(", ", droppedFallbacks));
+        }
+        return supportedFallbacks;
+    }
+
+    private String getVolumeTypesOfTemplate(Template template) {
+        List<String> volumeTypes = new ArrayList<>();
+        if (!isEmpty(template.getRootVolumeType())) {
+            volumeTypes.add(template.getRootVolumeType() + " (root)");
+        }
+        Optional.ofNullable(template.getVolumeTemplates()).orElse(Set.of()).stream()
+                .filter(this::isNotEmptyVolumeSet)
+                .map(VolumeTemplate::getVolumeType)
+                .distinct()
+                .forEach(volumeTypes::add);
+        return String.join(", ", volumeTypes);
+    }
+
+    private boolean supportsVolumes(VmType vmType, Template template, boolean exchangeable) {
+        boolean rootVolumeToCheck = !exchangeable && !isEmpty(template.getRootVolumeType());
+        boolean dataVolumesToCheck = Optional.ofNullable(template.getVolumeTemplates()).orElse(Set.of()).stream().anyMatch(this::isNotEmptyVolumeSet);
+        if (isVolumeSupportUnknown(vmType) || !(rootVolumeToCheck || dataVolumesToCheck)) {
+            return true;
+        }
+        Map<String, VolumeParameterType> platformDiskMappings = diskMappings.get().getOrDefault(Platform.platform(template.getCloudPlatform()), Map.of());
+        return (!rootVolumeToCheck || supportsRootVolumeType(vmType, template, platformDiskMappings))
+                && supportsDataVolumes(vmType, template, platformDiskMappings, exchangeable);
+    }
+
+    private boolean supportsRootVolumeType(VmType vmType, Template template, Map<String, VolumeParameterType> platformDiskMappings) {
+        VolumeParameterType rootVolumeParameterType = volumeParameterType(platformDiskMappings, template.getRootVolumeType());
+        return rootVolumeParameterType == null || vmType.getVolumeParameterbyVolumeParameterType(rootVolumeParameterType) != null;
+    }
+
+    private boolean supportsDataVolumes(VmType vmType, Template template, Map<String, VolumeParameterType> platformDiskMappings, boolean exchangeable) {
+        Set<VolumeTemplate> volumeTemplates = Optional.ofNullable(template.getVolumeTemplates()).orElse(Set.of()).stream()
+                .filter(this::isNotEmptyVolumeSet)
+                .collect(Collectors.toSet());
+        int persistentVolumeSize = 0;
+        for (VolumeTemplate volumeTemplate : volumeTemplates) {
+            VolumeParameterType volumeParameterType = volumeParameterType(platformDiskMappings, volumeTemplate.getVolumeType());
+            if (volumeParameterType == null) {
+                continue;
+            }
+            VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
+            if (config == null && exchangeable && isExchangeablePersistentVolumeType(volumeParameterType)) {
+                config = Optional.ofNullable(volumeParameterType(platformDiskMappings, defaultVolumeType(vmType)))
+                        .map(vmType::getVolumeParameterbyVolumeParameterType)
+                        .orElse(null);
+            }
+            if (config == null || !isWithinVolumeLimits(volumeTemplate, config)) {
+                return false;
+            }
+            if (!volumeParameterType.in(VolumeParameterType.EPHEMERAL, VolumeParameterType.LOCAL_SSD)) {
+                persistentVolumeSize += volumeTemplate.getVolumeSize() * volumeTemplate.getVolumeCount();
+            }
+        }
+        Object maximumPersistentVolumeSize = vmType.getMetaDataValue(VmTypeMeta.MAXIMUM_PERSISTENT_DISKS_SIZE_GB);
+        return maximumPersistentVolumeSize == null || persistentVolumeSize <= Integer.parseInt(maximumPersistentVolumeSize.toString());
+    }
+
+    private boolean isWithinVolumeLimits(VolumeTemplate volumeTemplate, VolumeParameterConfig config) {
+        boolean countSupported = CollectionUtils.isNotEmpty(config.possibleNumberValues())
+                ? config.possibleNumberValues().contains(volumeTemplate.getVolumeCount())
+                : config.maximumNumber() == null || volumeTemplate.getVolumeCount() <= config.maximumNumber();
+        boolean sizeSupported = CollectionUtils.isNotEmpty(config.possibleSizeValues())
+                ? config.possibleSizeValues().contains(volumeTemplate.getVolumeSize())
+                : config.maximumSize() == null || volumeTemplate.getVolumeSize() <= config.maximumSize();
+        return countSupported && sizeSupported;
+    }
+
+    private VolumeParameterType volumeParameterType(Map<String, VolumeParameterType> platformDiskMappings, String volumeType) {
+        return isEmpty(volumeType) ? null : platformDiskMappings.get(volumeType);
+    }
+
+    private boolean isNotEmptyVolumeSet(VolumeTemplate volumeTemplate) {
+        return volumeTemplate.getVolumeCount() != null && volumeTemplate.getVolumeCount() != 0
+                && volumeTemplate.getVolumeSize() != null && volumeTemplate.getVolumeSize() != 0;
+    }
+
+    private boolean isVolumeSupportUnknown(VmType vmType) {
+        return vmType == null || !vmType.isMetaSet();
+    }
+
+    private void alignRootVolumeTypeWithInstanceType(Template template, VmType newVmType, InstanceGroup instanceGroup, Stack stack) {
+        if (isEmpty(template.getRootVolumeType()) || isVolumeSupportUnknown(newVmType)) {
+            return;
+        }
+        Map<String, VolumeParameterType> platformDiskMappings = diskMappings.get().getOrDefault(Platform.platform(template.getCloudPlatform()), Map.of());
+        if (supportsRootVolumeType(newVmType, template, platformDiskMappings)) {
+            return;
+        }
+        String defaultRootVolumeType = defaultRootVolumeType(template, newVmType.value(), List.of());
+        if (isEmpty(defaultRootVolumeType) || defaultRootVolumeType.equals(template.getRootVolumeType())) {
+            LOGGER.debug("Instance type {} does not define a different default root volume type, leaving the root volume type of group {} untouched.",
+                    newVmType.value(), instanceGroup.getGroupName());
+            return;
+        }
+        LOGGER.info("Root volume type {} is not supported by instance type {}, changing it to {} in group {}.",
+                template.getRootVolumeType(), newVmType.value(), defaultRootVolumeType, instanceGroup.getGroupName());
+        fireInstanceGroupEvent(stack, instanceGroup, STACK_INSTANCE_TYPE_VALIDATION_ROOT_VOLUME_TYPE_CHANGED, instanceGroup.getGroupName(),
+                template.getRootVolumeType(), newVmType.value(), defaultRootVolumeType);
+        template.setRootVolumeType(defaultRootVolumeType);
+    }
+
+    private void alignVolumeTypesWithInstanceType(Template template, VmType newVmType, InstanceGroup instanceGroup, Stack stack) {
+        if (CollectionUtils.isEmpty(template.getVolumeTemplates())) {
+            return;
+        }
+        String defaultVolumeType = defaultVolumeType(newVmType);
+        if (isEmpty(defaultVolumeType)) {
+            LOGGER.debug("Instance type {} does not define a default volume type, leaving the volume types of group {} untouched.",
+                    newVmType.value(), instanceGroup.getGroupName());
+            return;
+        }
+        Map<String, VolumeParameterType> platformDiskMappings = diskMappings.get().getOrDefault(Platform.platform(template.getCloudPlatform()), Map.of());
+        for (VolumeTemplate volumeTemplate : template.getVolumeTemplates()) {
+            VolumeParameterType volumeParameterType = platformDiskMappings.get(volumeTemplate.getVolumeType());
+            if (!isExchangeablePersistentVolumeType(volumeParameterType)) {
+                continue;
+            }
+            if (newVmType.getVolumeParameterbyVolumeParameterType(volumeParameterType) == null) {
+                LOGGER.info("Volume type {} is not supported by instance type {}, changing it to {} in group {}.",
+                        volumeTemplate.getVolumeType(), newVmType.value(), defaultVolumeType, instanceGroup.getGroupName());
+                fireInstanceGroupEvent(stack, instanceGroup, STACK_INSTANCE_TYPE_VALIDATION_VOLUME_TYPE_CHANGED, instanceGroup.getGroupName(),
+                        volumeTemplate.getVolumeType(), newVmType.value(), defaultVolumeType);
+                volumeTemplate.setVolumeType(defaultVolumeType);
+                increaseVolumeSizeToMinimum(volumeTemplate, newVmType, platformDiskMappings, instanceGroup, stack);
+            }
+        }
+    }
+
+    private boolean isExchangeablePersistentVolumeType(VolumeParameterType volumeParameterType) {
+        return volumeParameterType != null && !volumeParameterType.in(VolumeParameterType.LOCAL_SSD, VolumeParameterType.EPHEMERAL);
+    }
+
+    private void setRootVolumeTypeIfEmpty(Template template, VmType vmType, List<String> fallbackInstanceTypes, InstanceGroup instanceGroup) {
+        if (isEmpty(template.getRootVolumeType())) {
+            String defaultRootVolumeType = defaultRootVolumeType(template, vmType.value(), fallbackInstanceTypes);
+            if (!isEmpty(defaultRootVolumeType)) {
+                LOGGER.info("Setting the root volume type of group {} to {} based on instance type {} and fallback instance types {}.",
+                        instanceGroup.getGroupName(), defaultRootVolumeType, vmType.value(), fallbackInstanceTypes);
+                template.setRootVolumeType(defaultRootVolumeType);
+            }
+        }
+    }
+
+    private String defaultRootVolumeType(Template template, String instanceType, List<String> fallbackInstanceTypes) {
+        PlatformParameters pps = Optional.ofNullable(platformParameters.get())
+                .map(parameters -> parameters.get(Platform.platform(template.getCloudPlatform())))
+                .orElse(null);
+        if (pps == null) {
+            return null;
+        }
+        DiskType rootDiskType;
+        try {
+            rootDiskType = pps.defaultRootDiskType(instanceType, fallbackInstanceTypes);
+        } catch (CloudbreakServiceException e) {
+            LOGGER.info("Instance type {} and fallback instance types {} do not have a common root volume type, using the one of {}. Reason: {}",
+                    instanceType, fallbackInstanceTypes, instanceType, e.getMessage());
+            rootDiskType = pps.defaultRootDiskType(instanceType);
+        }
+        return rootDiskType == null ? null : rootDiskType.value();
+    }
+
+    private String defaultVolumeType(VmType vmType) {
+        if (!vmType.isMetaSet()) {
+            return null;
+        }
+        return readDefaultDiskTypeAsString(vmType.getMetaData());
+    }
+
+    private String readDefaultDiskTypeAsString(VmTypeMeta vmTypeMeta) {
+        return (String) vmTypeMeta.getProperties().get(VmTypeMeta.DEFAULT_DISK_TYPE);
+    }
+
+    private void increaseVolumeSizeToMinimum(VolumeTemplate volumeTemplate, VmType vmType, Map<String, VolumeParameterType> platformDiskMappings,
+            InstanceGroup instanceGroup, Stack stack) {
+        VolumeParameterType newVolumeParameterType = platformDiskMappings.get(volumeTemplate.getVolumeType());
+        if (newVolumeParameterType == null) {
+            return;
+        }
+        VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(newVolumeParameterType);
+        if (config != null && config.minimumSize() != null && volumeTemplate.getVolumeSize() != null
+                && volumeTemplate.getVolumeSize() < config.minimumSize()) {
+            LOGGER.info("Increasing the volume size of group {} from {} GB to the minimum {} GB required by volume type {}.",
+                    instanceGroup.getGroupName(), volumeTemplate.getVolumeSize(), config.minimumSize(), volumeTemplate.getVolumeType());
+            fireInstanceGroupEvent(stack, instanceGroup, STACK_INSTANCE_TYPE_VALIDATION_VOLUME_SIZE_INCREASED, instanceGroup.getGroupName(),
+                    volumeTemplate.getVolumeType(), String.valueOf(volumeTemplate.getVolumeSize()), String.valueOf(config.minimumSize()));
+            volumeTemplate.setVolumeSize(config.minimumSize());
+        }
+    }
+
+    private void fireInstanceGroupEvent(Stack stack, InstanceGroup instanceGroup, ResourceEvent resourceEvent, String... eventMessageArgs) {
+        String eventType = stack.getStatus() == null ? "UNKNOWN" : stack.getStatus().name();
+        cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stack.getId(), eventType, instanceGroup.getGroupName(), resourceEvent,
+                Arrays.asList(eventMessageArgs));
+    }
+
+    private VmType selectVmTypeOrNull(List<String> possibleInstanceTypes, Set<VmType> availableVmTypes, Set<VmType> vmTypesOfLocation) {
+        VmType vmType = selectVmTypeOrNull(possibleInstanceTypes, availableVmTypes);
+        return vmType == null ? selectVmTypeOrNull(possibleInstanceTypes, vmTypesOfLocation) : vmType;
+    }
+
+    private VmType selectVmTypeOrNull(List<String> possibleInstanceTypes, Set<VmType> availableVmTypes) {
         for (String instanceType : possibleInstanceTypes) {
-            for (VmType type : machines.get(locationString)) {
+            for (VmType type : availableVmTypes) {
                 if (type.value().equals(instanceType)) {
                     return type;
                 }
@@ -187,22 +566,26 @@ public class TemplateValidatorAndUpdater {
         validateMaximumVolumeSize(template, vmType, validationBuilder);
     }
 
-    private void validateArchitecture(VmType vmType, Stack stack, ValidationResult.ValidationResultBuilder validationBuilder) {
+    private boolean isArchitectureMatching(VmType vmType, Stack stack, ValidationResult.ValidationResultBuilder validationBuilder) {
         Architecture vmArchitecture = vmType.getMetaData().getArchitecture();
         Architecture stackArchitecture = stack.getArchitecture();
         if (vmArchitecture != stackArchitecture) {
             validationBuilder.error(
                     String.format("The '%s' instance type's architecture '%s' is not matching requested architecture '%s'",
                             vmType.value(), vmArchitecture.getName(), stackArchitecture.getName()));
+            return false;
         }
+        return true;
     }
 
-    private void validateHyperVGeneration(VmType vmType, String imageGeneration, ValidationResult.ValidationResultBuilder validationBuilder) {
+    private boolean isHyperVGenerationSupported(VmType vmType, String imageGeneration, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (imageGeneration != null && !vmType.getMetaData().isHyperVGenerationSupported(imageGeneration)) {
             validationBuilder.error(
                     String.format("The '%s' instance type does not support the selected image's Hyper-V generation '%s'. Supported generation(s): '%s'",
                             vmType.value(), imageGeneration, vmType.getMetaData().getHyperVGenerations().orElse("unknown")));
+            return false;
         }
+        return true;
     }
 
     private void validateVolumeTemplates(Template value, VmType vmType, Platform platform,
@@ -385,4 +768,6 @@ public class TemplateValidatorAndUpdater {
                 " You can find the supported types here: %s", instanceTypes, platform, region, supportedVmTypesDocPageLink);
     }
 
+    private record InstanceTypeAvailability(Set<VmType> vmTypes, String location) {
+    }
 }

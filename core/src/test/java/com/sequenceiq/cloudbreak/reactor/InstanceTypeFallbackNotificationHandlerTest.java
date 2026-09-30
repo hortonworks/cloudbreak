@@ -108,6 +108,18 @@ class InstanceTypeFallbackNotificationHandlerTest {
     }
 
     @Test
+    void fallsBackToUnknownStatusWhenStackIsNotFound() {
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(null);
+        Event<InstanceTypeFallbackEvent> event = new Event<>(new InstanceTypeFallbackEvent(cloudContext, "master", "m5.xlarge", "m5.large",
+                "InsufficientInstanceCapacity", false));
+
+        underTest.accept(event);
+
+        verify(cloudbreakEventService).fireCloudbreakInstanceGroupEvent(eq(STACK_ID), eq("UNKNOWN"), eq("master"),
+                eq(STACK_INSTANCE_TYPE_FALLBACK), any());
+    }
+
+    @Test
     void skipsWhenStackIdMissing() {
         CloudContext noId = org.mockito.Mockito.mock(CloudContext.class);
         when(noId.getId()).thenReturn(null);

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -229,6 +230,27 @@ public class TemplateDecoratorTest {
         assertEquals(1, actual.getVolumeTemplates().iterator().next().getVolumeSize());
         assertEquals(1, actual.getVolumeTemplates().iterator().next().getVolumeCount());
         verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testDecoratorWhenRootVolumeTypeCannotBeDeterminedThenItIsLeftEmpty() {
+        Template template = initTemplate();
+        template.setInstanceType(VM_TYPE);
+        template.setCloudPlatform(PLATFORM_1);
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(VOLUME_TYPE);
+        volumeTemplate.setVolumeSize(1);
+        volumeTemplate.setVolumeCount(1);
+        template.setVolumeTemplates(Sets.newHashSet(volumeTemplate));
+        when(cloudCredential.cloudPlatform()).thenReturn(PLATFORM_1);
+        when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(any(), eq(false))).thenReturn(100);
+        when(cloudParameterCache.getDefaultRootVolumeType(eq(PLATFORM_1), eq(VM_TYPE), any()))
+                .thenThrow(new CloudbreakServiceException("Cannot determine root disk type. Some instances support only hyperdisk, others normal disk"));
+
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB, false);
+
+        assertNull(actual.getRootVolumeType());
+        assertEquals(100L, (long) actual.getRootVolumeSize());
     }
 
     private Template initTemplate() {

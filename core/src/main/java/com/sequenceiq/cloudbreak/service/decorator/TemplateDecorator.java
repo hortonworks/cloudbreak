@@ -114,8 +114,14 @@ public class TemplateDecorator {
     private void setRootVolumeType(Template template, String cloudPlatform) {
         if (isEmpty(template.getRootVolumeType())) {
             LOGGER.debug("Setting root volume type with default value for platform '{}'", template.getCloudPlatform());
-            template.setRootVolumeType(cloudParameterCache.getDefaultRootVolumeType(cloudPlatform, template.getInstanceType(),
-                    template.getFallbackInstanceTypesAsList()));
+            try {
+                template.setRootVolumeType(cloudParameterCache.getDefaultRootVolumeType(cloudPlatform, template.getInstanceType(),
+                        template.getFallbackInstanceTypesAsList()));
+            } catch (CloudbreakServiceException e) {
+                LOGGER.info("Could not determine the root volume type for instance type '{}' with fallback instance types {}, it will be determined later " +
+                        "based on the available instance types. Reason: {}", template.getInstanceType(), template.getFallbackInstanceTypesAsList(),
+                        e.getMessage());
+            }
         }
     }
 }
