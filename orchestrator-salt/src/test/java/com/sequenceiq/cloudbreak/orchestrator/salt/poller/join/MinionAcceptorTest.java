@@ -28,6 +28,7 @@ import com.dyngr.core.AttemptState;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorMinionRestartRequiredException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Fingerprint;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintsResponse;
@@ -367,7 +368,8 @@ class MinionAcceptorTest {
         MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2, m3), List.of(m1, m2, m3),
                 new EqualMinionFpMatcher(), new FingerprintFromSbCollector(), saltStateService);
 
-        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        CloudbreakOrchestratorMinionRestartRequiredException exception =
+                assertThrows(CloudbreakOrchestratorMinionRestartRequiredException.class, underTest::acceptMinions);
         assertEquals("Minion(s) were removed, restart bootstrap to ensure all minion present", exception.getMessage());
         verify(sc).wheel(eq("key.delete"), argThat(arg -> arg.containsAll(List.of("m2.d", "m3.d"))), eq(Object.class));
     }
@@ -397,7 +399,8 @@ class MinionAcceptorTest {
                 new EqualMinionFpMatcher(), new FingerprintFromSbCollector(), saltStateService));
         when(underTest.getMinionDeletionPollingTimeoutInMinutes()).thenReturn(0L);
 
-        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        CloudbreakOrchestratorMinionRestartRequiredException exception =
+                assertThrows(CloudbreakOrchestratorMinionRestartRequiredException.class, underTest::acceptMinions);
         assertEquals("Failed while polling deleted minion keys", exception.getMessage());
     }
 
@@ -524,7 +527,8 @@ class MinionAcceptorTest {
         MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), List.of(m1, m2), new EqualMinionFpMatcher(),
                 new FingerprintFromSbCollector(), saltStateService);
 
-        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        CloudbreakOrchestratorMinionRestartRequiredException exception =
+                assertThrows(CloudbreakOrchestratorMinionRestartRequiredException.class, underTest::acceptMinions);
         assertEquals("Minion(s) were removed, restart bootstrap to ensure all minion present", exception.getMessage());
     }
 }

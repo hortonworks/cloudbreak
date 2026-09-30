@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -32,6 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorMinionRestartRequiredException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -87,7 +91,7 @@ class SaltBootstrapTest {
         GenericResponses genericResponses = new GenericResponses();
         genericResponses.setResponses(Collections.singletonList(response));
 
-        when(saltStateService.bootstrap(eq(saltConnector), any(), any(), any())).thenReturn(genericResponses);
+        lenient().when(saltStateService.bootstrap(eq(saltConnector), any(), any(), any())).thenReturn(genericResponses);
 
         minionIpAddressesResponse = new MinionIpAddressesResponse();
         lenient().when(saltStateService.collectMinionIpAddresses(eq(List.of(saltConnector)))).thenReturn(List.of(minionIpAddressesResponse));
@@ -229,5 +233,109 @@ class SaltBootstrapTest {
                 .isInstanceOf(CloudbreakOrchestratorFailedException.class);
 
         verify(saltStateService, times(1)).collectMinionIpAddresses(saltConnectors);
+    }
+
+    @Test
+    void callWhenAcceptMinionsRequestsRestartShouldSetRestartNeededAndRetryOnlyRemovedMinion() throws Exception {
+        Node node1 = new Node("10.0.0.1", null, null, "instanceType", "node-1", "example.com", "hg");
+        Node node2 = new Node("10.0.0.2", null, null, "instanceType", "node-2", "example.com", "hg");
+        Set<Node> targets = new HashSet<>(Set.of(node1, node2));
+        BootstrapParams params = new BootstrapParams();
+
+        MinionAcceptor minionAcceptor = mock(MinionAcceptor.class);
+        // Production reports the removed minion id(s) on the exception, so handleMinionAcceptingError scopes the
+        // retry to exactly those nodes (resolved against knownNodes) instead of restarting every original target.
+        doThrow(new CloudbreakOrchestratorMinionRestartRequiredException("restart minion", Set.of("node-1.example.com")))
+                .when(minionAcceptor).acceptMinions();
+
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, List.of(saltConnector), gatewayConfigs, targets,
+                targets, params));
+        doReturn(minionAcceptor).when(saltBootstrap).createMinionAcceptor();
+
+        CloudbreakOrchestratorMinionRestartRequiredException exception = catchThrowableOfType(saltBootstrap::call,
+                CloudbreakOrchestratorMinionRestartRequiredException.class);
+
+        assertThat(exception).isNotNull();
+        assertThat(exception).hasMessageContaining("restart minion");
+        assertThat(params.isRestartNeeded()).isTrue();
+        // Assert on the retained targets through toString() instead of reaching into the private field.
+        String bootstrapState = saltBootstrap.toString();
+        String targetsState = bootstrapState.substring(bootstrapState.lastIndexOf("targets="));
+        assertThat(targetsState).contains("node-1").doesNotContain("node-2");
+        verify(saltStateService, times(0)).collectMinionIpAddresses(List.of(saltConnector));
+    }
+
+    @Test
+    void callWhenAcceptMinionsRequestsRestartWithoutNodeDetailsShouldRetryAllTargets() throws Exception {
+        Node node1 = new Node("10.0.0.1", null, null, "instanceType", "node-1", "example.com", "hg");
+        Node node2 = new Node("10.0.0.2", null, null, "instanceType", "node-2", "example.com", "hg");
+        Set<Node> targets = new HashSet<>(Set.of(node1, node2));
+        BootstrapParams params = new BootstrapParams();
+
+        MinionAcceptor minionAcceptor = mock(MinionAcceptor.class);
+        // Safety fallback: when the exception carries no resolvable node, every original target is retried.
+        doThrow(new CloudbreakOrchestratorMinionRestartRequiredException("restart minion", Set.of())).when(minionAcceptor).acceptMinions();
+
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, List.of(saltConnector), gatewayConfigs, targets,
+                targets, params));
+        doReturn(minionAcceptor).when(saltBootstrap).createMinionAcceptor();
+
+        CloudbreakOrchestratorMinionRestartRequiredException exception = catchThrowableOfType(saltBootstrap::call,
+                CloudbreakOrchestratorMinionRestartRequiredException.class);
+
+        assertThat(exception).isNotNull();
+        assertThat(exception).hasMessageContaining("restart minion");
+        assertThat(params.isRestartNeeded()).isTrue();
+        String bootstrapState = saltBootstrap.toString();
+        String targetsState = bootstrapState.substring(bootstrapState.lastIndexOf("targets="));
+        assertThat(targetsState).contains("node-1").contains("node-2");
+        verify(saltStateService, times(0)).collectMinionIpAddresses(List.of(saltConnector));
+    }
+
+    @Test
+    void callShouldDistributeBootstrapWithRestartNeededOnRetryThenResetTheFlag() throws Exception {
+        List<Map<String, JsonNode>> result = new ArrayList<>();
+        Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
+        ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
+        ipAddressesForMinions.put("10-0-0-2.example.com", JsonUtil.readTree("[\"10.0.0.2\"]"));
+        result.add(ipAddressesForMinions);
+        minionIpAddressesResponse.setResult(result);
+
+        Node node1 = new Node("10.0.0.1", null, null, "instanceType", "node-1", "example.com", "hg");
+        Node node2 = new Node("10.0.0.2", null, null, "instanceType", "node-2", "example.com", "hg");
+        Set<Node> targets = new HashSet<>(Set.of(node1, node2));
+        BootstrapParams params = new BootstrapParams();
+
+        // Record the restartNeeded flag exactly when each bootstrap distribution is triggered. The flag is only
+        // live between distributing the bootstrap and the reset that immediately follows it.
+        List<Boolean> restartNeededAtBootstrap = new ArrayList<>();
+        GenericResponse response = new GenericResponse();
+        response.setStatusCode(HttpStatus.OK.value());
+        GenericResponses genericResponses = new GenericResponses();
+        genericResponses.setResponses(List.of(response));
+        when(saltStateService.bootstrap(eq(saltConnector), any(), any(), any())).thenAnswer(invocation -> {
+            restartNeededAtBootstrap.add(params.isRestartNeeded());
+            return genericResponses;
+        });
+
+        MinionAcceptor minionAcceptor = mock(MinionAcceptor.class);
+        doThrow(new CloudbreakOrchestratorMinionRestartRequiredException("restart minion", Set.of()))
+                .doNothing()
+                .when(minionAcceptor).acceptMinions();
+
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, List.of(saltConnector), gatewayConfigs, targets,
+                targets, params));
+        doReturn(minionAcceptor).when(saltBootstrap).createMinionAcceptor();
+
+        // First iteration requests a restart and fails.
+        assertThatThrownBy(saltBootstrap::call).isInstanceOf(CloudbreakOrchestratorMinionRestartRequiredException.class);
+        assertThat(params.isRestartNeeded()).isTrue();
+
+        // Second iteration succeeds: it must distribute the bootstrap while restartNeeded is still true, then clear it.
+        saltBootstrap.call();
+
+        assertThat(restartNeededAtBootstrap).containsExactly(false, true);
+        assertThat(params.isRestartNeeded()).isFalse();
+        verify(saltStateService, times(2)).bootstrap(eq(saltConnector), eq(params), eq(gatewayConfigs), any());
     }
 }

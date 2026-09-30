@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.dyngr.Polling;
 import com.dyngr.exception.PollerException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorMinionRestartRequiredException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Fingerprint;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintsResponse;
@@ -62,27 +63,42 @@ public class MinionAcceptor {
 
     public void acceptMinions() throws CloudbreakOrchestratorFailedException {
         boolean removedConflictingMinion = false;
-        for (SaltConnector sc : saltConnectors) {
-            LOGGER.info("Running for master: [{}]", sc.getHostname());
-            MinionKeysOnMasterResponse minionKeysOnMaster = fetchMinionsFromMaster(sc, requiredMinions);
-            List<String> unacceptedMinions = new ArrayList<>(minionKeysOnMaster.getUnacceptedMinions());
-            List<String> deniedMinions = minionKeysOnMaster.getDeniedMinions();
-            List<String> conflictingMinions = removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions);
-            List<String> deniedOnlyMinions = removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
-            List<String> unexpectedMinions = removeMinionIdsThatAreNotExpected(sc, unacceptedMinions);
-            removedConflictingMinion = removedConflictingMinion || !conflictingMinions.isEmpty() || !deniedOnlyMinions.isEmpty();
-            unacceptedMinions = unacceptedMinions.stream()
-                    .filter(not(conflictingMinions::contains))
-                    .filter(not(unexpectedMinions::contains))
-                    .collect(Collectors.toList());
-            if (!unacceptedMinions.isEmpty()) {
-                proceedWithAcceptingMinions(sc, unacceptedMinions);
+        Set<String> minionIdToRestart = new HashSet<>();
+        try {
+            for (SaltConnector sc : saltConnectors) {
+                LOGGER.info("Running for master: [{}]", sc.getHostname());
+                MinionKeysOnMasterResponse minionKeysOnMaster = fetchMinionsFromMaster(sc, requiredMinions);
+                List<String> unacceptedMinions = new ArrayList<>(minionKeysOnMaster.getUnacceptedMinions());
+                List<String> deniedMinions = minionKeysOnMaster.getDeniedMinions();
+                List<String> conflictingMinions = removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions);
+                minionIdToRestart.addAll(conflictingMinions);
+                List<String> deniedOnlyMinions = removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
+                minionIdToRestart.addAll(deniedOnlyMinions);
+                List<String> unexpectedMinions = removeMinionIdsThatAreNotExpected(sc, unacceptedMinions);
+                minionIdToRestart.addAll(unexpectedMinions);
+                removedConflictingMinion = removedConflictingMinion || !conflictingMinions.isEmpty() || !deniedOnlyMinions.isEmpty();
+                unacceptedMinions = unacceptedMinions.stream()
+                        .filter(not(conflictingMinions::contains))
+                        .filter(not(unexpectedMinions::contains))
+                        .collect(Collectors.toList());
+                if (!unacceptedMinions.isEmpty()) {
+                    proceedWithAcceptingMinions(sc, unacceptedMinions);
+                } else {
+                    LOGGER.info("No unaccepted minions found on master: [{}]", sc.getHostname());
+                }
+            }
+        } catch (CloudbreakOrchestratorMinionRestartRequiredException e) {
+            throw e;
+        } catch (CloudbreakOrchestratorFailedException e) {
+            if (removedConflictingMinion) {
+                throw new CloudbreakOrchestratorMinionRestartRequiredException(e.getMessage(), e, minionIdToRestart);
             } else {
-                LOGGER.info("No unaccepted minions found on master: [{}]", sc.getHostname());
+                throw e;
             }
         }
         if (removedConflictingMinion) {
-            throw new CloudbreakOrchestratorFailedException("Minion(s) were removed, restart bootstrap to ensure all minion present");
+            throw new CloudbreakOrchestratorMinionRestartRequiredException("Minion(s) were removed, restart bootstrap to ensure all minion present",
+                    minionIdToRestart);
         }
     }
 
@@ -116,10 +132,10 @@ public class MinionAcceptor {
             Set<String> remainingMinions = minionDeletionPoller.getRemainingReachableMinions();
             LOGGER.error("Failed while polling deleted minion keys on master [{}], minions: {}, remaining: {}",
                     sc.getHostname(), minionIdsToDelete, remainingMinions, e);
-            throw new CloudbreakOrchestratorFailedException("Failed while polling deleted minion keys", e);
+            throw new CloudbreakOrchestratorMinionRestartRequiredException("Failed while polling deleted minion keys", e, new HashSet<>(minionIdsToDelete));
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected failure while polling deleted minion keys on master [{}], minions: {}", sc.getHostname(), minionIdsToDelete, e);
-            throw new CloudbreakOrchestratorFailedException("Failed while polling deleted minion keys", e);
+            throw new CloudbreakOrchestratorMinionRestartRequiredException("Failed while polling deleted minion keys", e, new HashSet<>(minionIdsToDelete));
         }
     }
 
@@ -141,7 +157,7 @@ public class MinionAcceptor {
 
     private List<String> removeMinionIdsThatAreNotExpected(SaltConnector sc, List<String> unacceptedMinions)
             throws CloudbreakOrchestratorFailedException {
-        List<String> expectedMinionIds = knownMinions.stream().map(Minion::getId).collect(Collectors.toList());
+        List<String> expectedMinionIds = knownMinions.stream().map(Minion::getId).toList();
         List<String> unexpectedMinionIds = unacceptedMinions.stream()
                 .filter(not(expectedMinionIds::contains))
                 .collect(Collectors.toList());

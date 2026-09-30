@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorMinionRestartRequiredException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -105,11 +106,21 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
             try {
                 createMinionAcceptor().acceptMinions();
+            } catch (CloudbreakOrchestratorMinionRestartRequiredException e) {
+                LOGGER.info("Minion(s) were removed from a master, minions will be restarted in the next bootstrap iteration.");
+                params.setRestartNeeded(true);
+                handleMinionAcceptingError(e);
             } catch (CloudbreakOrchestratorFailedException e) {
                 handleMinionAcceptingError(e);
             }
         }
 
+        verifyAllMinionsConnectedToAllMasters();
+        LOGGER.debug("Bootstrapping of nodes completed: {}", originalTargets.size());
+        return true;
+    }
+
+    private void verifyAllMinionsConnectedToAllMasters() throws CloudbreakOrchestratorFailedException {
         List<MinionIpAddressesResponse> minionIpAddressesResponses = saltStateService.collectMinionIpAddresses(saltConnectors);
         if (minionIpAddressesResponses != null) {
             if (minionIpAddressesResponses.stream().anyMatch(Objects::isNull)) {
@@ -124,8 +135,6 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         if (!targets.isEmpty()) {
             throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt network response: " + targets);
         }
-        LOGGER.debug("Bootstrapping of nodes completed: {}", originalTargets.size());
-        return true;
     }
 
     private void addMissingMinionsToTarget(List<MinionIpAddressesResponse> minionIpAddressesResponses) {
@@ -148,7 +157,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             Set<Node> nodesWithError = e.getNodesWithErrors().keySet().stream()
                     .filter(StringUtils::isNotBlank)
                     .map(nodeName ->
-                            originalTargets.stream()
+                            knownNodes.stream()
                                     .filter(node -> nodeName.equalsIgnoreCase(node.getHostname() + "." + node.getDomain()))
                                     .findFirst())
                     .filter(Optional::isPresent)
