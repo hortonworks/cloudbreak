@@ -9,6 +9,12 @@ public final class MaintenanceWindowScheduleOpDescription {
     public static final String NOTES = "Account scope is derived from the authenticated user CRN. "
             + "Schedules are keyed by scopeType and scopeId (for example TENANT/accountId, ENVIRONMENT/environmentCrn).";
 
+    public static final String AUTH_NOTES = "Authorization is as follows - TENANT schedules: read requires power user or "
+            + "environment creator; write requires power user (tenant admin). ENVIRONMENT schedules: describe/edit environment on "
+            + "scopeId. DATAHUB/DATALAKE schedules: describe/write on the resource CRN (datahub/write, modifyDatalake). "
+            + "FREEIPA schedules: repair/admin/describe environment rights on scopeId. Internal task/register/run APIs are "
+            + "@InternalOnly (service identity). See maintenance-api AUTH.md for the full matrix.";
+
     public static final String SCOPE_TYPE = "Scope type (TENANT, ENVIRONMENT, DATAHUB, DATALAKE, FREEIPA)";
 
     public static final String SCOPE_ID = "Scope identifier (account id for TENANT, resource CRN for other scopes)";

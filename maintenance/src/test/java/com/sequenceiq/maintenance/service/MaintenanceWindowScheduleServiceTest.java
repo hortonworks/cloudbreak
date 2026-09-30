@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,6 +48,9 @@ class MaintenanceWindowScheduleServiceTest {
     private MaintenanceWindowScheduleValidator scheduleValidator;
 
     @Mock
+    private MaintenanceWindowScheduleScopeValidator scopeValidator;
+
+    @Mock
     private Clock clock;
 
     private MaintenanceOccurrenceCalculator occurrenceCalculator;
@@ -59,7 +63,8 @@ class MaintenanceWindowScheduleServiceTest {
     void setUp() {
         occurrenceCalculator = new MaintenanceOccurrenceCalculator();
         scheduleConverter = new MaintenanceWindowScheduleConverter(occurrenceCalculator, clock);
-        scheduleService = new MaintenanceWindowScheduleService(scheduleRepository, scheduleValidator, scheduleConverter, clock);
+        scheduleService = new MaintenanceWindowScheduleService(
+                scheduleRepository, scheduleValidator, scopeValidator, scheduleConverter, clock);
     }
 
     @Test
@@ -137,11 +142,12 @@ class MaintenanceWindowScheduleServiceTest {
         MaintenanceWindowScheduleService serviceWithRealValidator = new MaintenanceWindowScheduleService(
                 scheduleRepository,
                 new MaintenanceWindowScheduleValidator(scheduleRepository, occurrenceCalculator, clock),
+                new MaintenanceWindowScheduleScopeValidator(),
                 scheduleConverter,
                 clock);
         MaintenanceWindowScheduleRequest request = request("tenant-default");
         request.setScopeType(null);
-        when(scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(any(), any(), any()))
+        lenient().when(scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(any(), any(), any()))
                 .thenReturn(Optional.empty());
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> serviceWithRealValidator.create(request, ACCOUNT_ID, USER_CRN));

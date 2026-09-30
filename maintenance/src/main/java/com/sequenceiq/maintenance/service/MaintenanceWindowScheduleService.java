@@ -31,6 +31,8 @@ public class MaintenanceWindowScheduleService {
 
     private final MaintenanceWindowScheduleValidator scheduleValidator;
 
+    private final MaintenanceWindowScheduleScopeValidator scopeValidator;
+
     private final MaintenanceWindowScheduleConverter scheduleConverter;
 
     private final Clock clock;
@@ -39,17 +41,27 @@ public class MaintenanceWindowScheduleService {
     public MaintenanceWindowScheduleService(
             MaintenanceWindowScheduleRepository scheduleRepository,
             MaintenanceWindowScheduleValidator scheduleValidator,
+            MaintenanceWindowScheduleScopeValidator scopeValidator,
             MaintenanceWindowScheduleConverter scheduleConverter,
             Clock clock) {
         this.scheduleRepository = scheduleRepository;
         this.scheduleValidator = scheduleValidator;
+        this.scopeValidator = scopeValidator;
         this.scheduleConverter = scheduleConverter;
         this.clock = clock;
+    }
+
+    /**
+     * Validates {@code scopeType}/{@code scopeId} for the caller's account. Must run before UMS authorization.
+     */
+    public void validateScope(MaintenanceScopeType scopeType, String scopeId, String accountId) {
+        scopeValidator.validate(scopeType, scopeId, accountId);
     }
 
     @Transactional(TxType.REQUIRED)
     public MaintenanceWindowScheduleResponse create(MaintenanceWindowScheduleRequest request, String accountId, String userCrn) {
         MaintenanceWindowSchedule schedule = scheduleConverter.toEntity(request);
+        validateScope(schedule.getScopeType(), schedule.getScopeId(), accountId);
         schedule.setAccountId(accountId);
         if (scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(
                 schedule.getAccountId(), schedule.getScopeType(), schedule.getScopeId()).isPresent()) {
@@ -75,6 +87,7 @@ public class MaintenanceWindowScheduleService {
     public MaintenanceWindowScheduleResponse update(
             String accountId, MaintenanceScopeType scopeType, String scopeId,
             UpdateMaintenanceWindowScheduleRequest request, String userCrn) {
+        validateScope(scopeType, scopeId, accountId);
         MaintenanceWindowSchedule schedule = findRequired(accountId, scopeType, scopeId);
         scheduleConverter.applyUpdateRequest(schedule, request);
         scheduleValidator.validate(schedule, schedule.getId());
@@ -84,10 +97,14 @@ public class MaintenanceWindowScheduleService {
     }
 
     public MaintenanceWindowScheduleResponse get(String accountId, MaintenanceScopeType scopeType, String scopeId) {
+        validateScope(scopeType, scopeId, accountId);
         return scheduleConverter.toResponse(findRequired(accountId, scopeType, scopeId));
     }
 
     public MaintenanceWindowScheduleListResponse list(String accountId, MaintenanceScopeType scopeType, String scopeId) {
+        if (scopeType != null) {
+            validateScope(scopeType, scopeId, accountId);
+        }
         List<MaintenanceWindowSchedule> schedules = scopeType != null
                 ? scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(accountId, scopeType, scopeId)
                         .stream().toList()
@@ -98,6 +115,7 @@ public class MaintenanceWindowScheduleService {
     }
 
     public void delete(String accountId, MaintenanceScopeType scopeType, String scopeId, String userCrn) {
+        validateScope(scopeType, scopeId, accountId);
         MaintenanceWindowSchedule schedule = findRequired(accountId, scopeType, scopeId);
         schedule.setArchived(true);
         schedule.setUpdatedAt(clock.getCurrentTimeMillis());

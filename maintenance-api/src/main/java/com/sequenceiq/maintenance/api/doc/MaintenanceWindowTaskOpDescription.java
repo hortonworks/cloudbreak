@@ -6,7 +6,8 @@ public final class MaintenanceWindowTaskOpDescription {
 
     public static final String TAG_DESCRIPTION = "Internal maintenance window task registration for submitter services";
 
-    public static final String NOTES = "Account scope is derived from the authenticated caller. "
+    public static final String NOTES = "Internal-only: callable with service identity (internal actor CRN), not by end users. "
+            + "Account scope is derived from the authenticated caller. "
             + "At most one ACTIVE task may exist per (resourceCrn, taskType, workItemId); "
             + "re-registration returns the existing ACTIVE row when the request payload matches, otherwise 409 Conflict. "
             + "On re-registration, omitted optional fields (priority, retry settings) are not compared against the stored task.";

@@ -39,7 +39,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public interface MaintenanceWindowScheduleEndpoint {
 
     @GET
-    @Operation(summary = MaintenanceWindowScheduleOpDescription.LIST, description = MaintenanceWindowScheduleOpDescription.NOTES,
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.LIST,
+            description = MaintenanceWindowScheduleOpDescription.NOTES + " " + MaintenanceWindowScheduleOpDescription.AUTH_NOTES,
             operationId = "listMaintenanceWindowSchedulesV1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Schedules returned", useReturnTypeSchema = true),
