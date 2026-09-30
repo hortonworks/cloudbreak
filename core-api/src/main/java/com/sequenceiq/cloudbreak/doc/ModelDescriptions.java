@@ -435,6 +435,7 @@ public class ModelDescriptions {
         public static final String AZURE_PARAMETERS = "azure specific parameters for instance group";
         public static final String GCP_PARAMETERS = "gcp specific parameters for instance group";
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for instance group";
+        public static final String INSTANCE_GROUP_PURCHASE_MODEL = "purchase model for the instance group, default value is ON-DEMAND";
     }
 
     public static class InstanceGroupAdjustmentModelDescription {

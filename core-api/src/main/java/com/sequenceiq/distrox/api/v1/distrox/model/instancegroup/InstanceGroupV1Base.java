@@ -54,6 +54,9 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE)
     private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_PURCHASE_MODEL)
+    private PurshaseModelV1Parameters purchaseModel;
+
     public int getNodeCount() {
         return nodeCount;
     }
@@ -137,4 +140,13 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     public void setScalabilityOption(ScalabilityOption scalabilityOption) {
         this.scalabilityOption = scalabilityOption;
     }
+
+    public PurshaseModelV1Parameters getPurchaseModel() {
+        return purchaseModel;
+    }
+
+    public void setPurchaseModel(PurshaseModelV1Parameters purchaseModel) {
+        this.purchaseModel = purchaseModel;
+    }
+
 }
