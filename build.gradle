@@ -82,6 +82,7 @@ allprojects {
   ext['httpcore5.version'] = httpCoreVersion
   ext['log4j2.version'] = log4jVersion
   ext['tomcat.version'] = tomcatVersion
+  ext['freemarker.version'] = freemarkerVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
