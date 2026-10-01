@@ -82,6 +82,7 @@ redbeams:
   rds-provider-sync:
     enabled: true
     update: true
+    update-version: true
     enabled-providers: AWS,AZURE
     interval-in-minutes: 1440
 spring:

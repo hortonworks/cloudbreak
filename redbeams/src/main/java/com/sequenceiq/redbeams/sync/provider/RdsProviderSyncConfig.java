@@ -14,22 +14,26 @@ public class RdsProviderSyncConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsProviderSyncConfig.class);
 
-    @Value("${redbeams.rds-provider-sync.enabled:true}")
+    @Value("${redbeams.rds-provider-sync.enabled}")
     private boolean enabled;
 
-    @Value("${redbeams.rds-provider-sync.update:true}")
+    @Value("${redbeams.rds-provider-sync.update}")
     private boolean updateInstanceType;
 
-    @Value("${redbeams.rds-provider-sync.interval-in-minutes:1440}")
+    @Value("${redbeams.rds-provider-sync.update-version}")
+    private boolean updateVersion;
+
+    @Value("${redbeams.rds-provider-sync.interval-in-minutes}")
     private int intervalInMinutes;
 
-    @Value("#{'${redbeams.rds-provider-sync.enabled-providers:AWS,AZURE}'.split(',')}")
+    @Value("#{'${redbeams.rds-provider-sync.enabled-providers}'.split(',')}")
     private Set<String> enabledProviders;
 
     @PostConstruct
     void logStatus() {
-        LOGGER.info("RDS provider sync is {}, instance type update is {}, interval is {} minutes, enabled providers: {}",
-                enabled ? "enabled" : "disabled", updateInstanceType ? "enabled" : "disabled", intervalInMinutes, enabledProviders);
+        LOGGER.info("RDS provider sync is {}, instance type update is {}, version update is {}, interval is {} minutes, enabled providers: {}",
+                enabled ? "enabled" : "disabled", updateInstanceType ? "enabled" : "disabled", updateVersion ? "enabled" : "disabled",
+                intervalInMinutes, enabledProviders);
     }
 
     public boolean isEnabled() {
@@ -38,6 +42,10 @@ public class RdsProviderSyncConfig {
 
     public boolean isUpdateInstanceType() {
         return updateInstanceType;
+    }
+
+    public boolean isUpdateVersion() {
+        return updateVersion;
     }
 
     public int getIntervalInMinutes() {

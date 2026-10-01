@@ -68,6 +68,7 @@ class RdsProviderSyncServiceTest {
         lenient().when(dbStackConnector.connect(dbStack)).thenReturn(new ConnectedDatabaseStack(cloudConnector, authenticatedContext, databaseStack));
         lenient().when(cloudConnector.resources()).thenReturn(resourceConnector);
         lenient().when(config.isUpdateInstanceType()).thenReturn(true);
+        lenient().when(config.isUpdateVersion()).thenReturn(true);
         lenient().when(dbStack.getMajorVersion()).thenReturn(MajorVersion.VERSION_10);
     }
 
@@ -121,7 +122,20 @@ class RdsProviderSyncServiceTest {
     }
 
     @Test
-    void shouldNotWriteWhenOnlyVersionDrifts() throws Exception {
+    void shouldSkipInstanceTypeButSyncVersionWhenDatabaseServerNull() throws Exception {
+        when(dbStack.getDatabaseServer()).thenReturn(null);
+        when(dbStack.getMajorVersion()).thenReturn(MajorVersion.VERSION_10);
+        stubParameters("db.r5.large", "14.8");
+
+        underTest.syncInstanceTypeAndVersion(dbStack);
+
+        verify(databaseServer, never()).setInstanceType(any());
+        verify(dbStack).setMajorVersion(MajorVersion.VERSION_14);
+        verify(dbStackService).save(dbStack);
+    }
+
+    @Test
+    void shouldUpdateVersionWhenDrifted() throws Exception {
         when(databaseServer.getInstanceType()).thenReturn("db.t3.medium");
         when(dbStack.getMajorVersion()).thenReturn(MajorVersion.VERSION_10);
         stubParameters("db.t3.medium", "14.8");
@@ -129,7 +143,46 @@ class RdsProviderSyncServiceTest {
         underTest.syncInstanceTypeAndVersion(dbStack);
 
         verify(databaseServer, never()).setInstanceType(any());
+        verify(dbStack).setMajorVersion(MajorVersion.VERSION_14);
+        verify(dbStackService).save(dbStack);
+    }
+
+    @Test
+    void shouldNotUpdateVersionWhenUpdateDisabled() throws Exception {
+        when(config.isUpdateVersion()).thenReturn(false);
+        when(databaseServer.getInstanceType()).thenReturn("db.t3.medium");
+        when(dbStack.getMajorVersion()).thenReturn(MajorVersion.VERSION_10);
+        stubParameters("db.t3.medium", "14.8");
+
+        underTest.syncInstanceTypeAndVersion(dbStack);
+
+        verify(dbStack, never()).setMajorVersion(any());
         verify(dbStackService, never()).save(any());
+    }
+
+    @Test
+    void shouldNotUpdateVersionWhenProviderValueUnrecognized() throws Exception {
+        when(databaseServer.getInstanceType()).thenReturn("db.t3.medium");
+        when(dbStack.getMajorVersion()).thenReturn(MajorVersion.VERSION_10);
+        stubParameters("db.t3.medium", "bogus");
+
+        underTest.syncInstanceTypeAndVersion(dbStack);
+
+        verify(dbStack, never()).setMajorVersion(any());
+        verify(dbStackService, never()).save(any());
+    }
+
+    @Test
+    void shouldSaveOnceWhenBothInstanceTypeAndVersionDrift() throws Exception {
+        when(databaseServer.getInstanceType()).thenReturn("db.t3.medium");
+        when(dbStack.getMajorVersion()).thenReturn(MajorVersion.VERSION_10);
+        stubParameters("db.r5.large", "14.8");
+
+        underTest.syncInstanceTypeAndVersion(dbStack);
+
+        verify(databaseServer).setInstanceType("db.r5.large");
+        verify(dbStack).setMajorVersion(MajorVersion.VERSION_14);
+        verify(dbStackService).save(dbStack);
     }
 
     @Test

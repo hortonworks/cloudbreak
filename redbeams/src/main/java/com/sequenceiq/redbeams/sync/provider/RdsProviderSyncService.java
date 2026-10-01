@@ -12,13 +12,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.sync.DBStackConnector;
 import com.sequenceiq.redbeams.sync.DBStackConnector.ConnectedDatabaseStack;
 
 /**
  * Reconciles the instance type and DB engine version stored on the CB side with the actual values reported by the cloud provider.
- * Instance type drift is persisted; version drift is logged only (a version change requires the manual upgrade flow to run).
+ * Both instance type and version drift are persisted back to Redbeams (each gated by its own config flag) so the stored state
+ * reflects the provider reality after an out-of-band change.
  */
 @Component
 public class RdsProviderSyncService {
@@ -43,52 +45,66 @@ public class RdsProviderSyncService {
                 LOGGER.warn(":::RDS provider sync::: No provider parameters returned for DB stack {}, skipping.", dbStack.getResourceCrn());
                 return;
             }
-            syncInstanceType(dbStack, parameters.instanceType());
-            logVersionDrift(dbStack, parameters.engineVersion());
+            boolean instanceChanged = syncInstanceType(dbStack, parameters.instanceType());
+            boolean versionChanged = syncVersion(dbStack, parameters.engineVersion());
+            if (instanceChanged || versionChanged) {
+                dbStackService.save(dbStack);
+            }
         } catch (Exception e) {
             LOGGER.warn(":::RDS provider sync::: Failed to sync provider metadata for DB stack {}: {}", dbStack.getResourceCrn(), e.getMessage(), e);
         }
     }
 
-    private void syncInstanceType(DBStack dbStack, String providerInstanceType) {
+    private boolean syncInstanceType(DBStack dbStack, String providerInstanceType) {
         if (StringUtils.isBlank(providerInstanceType)) {
             LOGGER.debug(":::RDS provider sync::: Provider did not report an instance type for DB stack {}, skipping.", dbStack.getResourceCrn());
-            return;
+            return false;
         }
-        String storedInstanceType = dbStack.getDatabaseServer() == null ? null : dbStack.getDatabaseServer().getInstanceType();
+        DatabaseServer databaseServer = dbStack.getDatabaseServer();
+        if (databaseServer == null) {
+            LOGGER.debug(":::RDS provider sync::: DB stack {} has no database server, skipping instance type sync.", dbStack.getResourceCrn());
+            return false;
+        }
+        String storedInstanceType = databaseServer.getInstanceType();
         if (providerInstanceType.equals(storedInstanceType)) {
             LOGGER.debug(":::RDS provider sync::: Instance type for DB stack {} is up to date: {}", dbStack.getResourceCrn(), storedInstanceType);
-            return;
+            return false;
         }
         if (!config.isUpdateInstanceType()) {
             LOGGER.info(":::RDS provider sync::: Instance type drift detected for DB stack {} (CB: '{}', provider: '{}'), but update is disabled.",
                     dbStack.getResourceCrn(), storedInstanceType, providerInstanceType);
-            return;
+            return false;
         }
         LOGGER.info(":::RDS provider sync::: Updating instance type for DB stack {} from '{}' to provider value '{}'.",
                 dbStack.getResourceCrn(), storedInstanceType, providerInstanceType);
-        dbStack.getDatabaseServer().setInstanceType(providerInstanceType);
-        dbStackService.save(dbStack);
+        databaseServer.setInstanceType(providerInstanceType);
+        return true;
     }
 
-    private void logVersionDrift(DBStack dbStack, String providerEngineVersion) {
+    private boolean syncVersion(DBStack dbStack, String providerEngineVersion) {
         if (StringUtils.isBlank(providerEngineVersion)) {
             LOGGER.debug(":::RDS provider sync::: Provider did not report an engine version for DB stack {}, skipping.", dbStack.getResourceCrn());
-            return;
+            return false;
         }
         MajorVersion storedMajorVersion = dbStack.getMajorVersion();
         Optional<MajorVersion> providerMajorVersion = MajorVersion.get(providerEngineVersion);
         if (providerMajorVersion.isEmpty()) {
             LOGGER.warn(":::RDS provider sync::: Provider reported unrecognized engine version '{}' for DB stack {} (CB major version: {}).",
                     providerEngineVersion, dbStack.getResourceCrn(), storedMajorVersion);
-            return;
+            return false;
         }
-        if (providerMajorVersion.get() != storedMajorVersion) {
-            LOGGER.warn(":::RDS provider sync::: DB engine version drift detected for DB stack {}: CB major version is {} but provider reports {} ('{}'). "
-                    + "Not updating automatically; a manual database upgrade flow is required to reconcile the version.",
-                    dbStack.getResourceCrn(), storedMajorVersion, providerMajorVersion.get(), providerEngineVersion);
-        } else {
+        if (providerMajorVersion.get() == storedMajorVersion) {
             LOGGER.debug(":::RDS provider sync::: DB engine version for DB stack {} is up to date: {}", dbStack.getResourceCrn(), storedMajorVersion);
+            return false;
         }
+        if (!config.isUpdateVersion()) {
+            LOGGER.info(":::RDS provider sync::: DB engine version drift detected for DB stack {} (CB: {}, provider: {} ('{}')), but update is disabled.",
+                    dbStack.getResourceCrn(), storedMajorVersion, providerMajorVersion.get(), providerEngineVersion);
+            return false;
+        }
+        LOGGER.info(":::RDS provider sync::: Updating DB engine version for DB stack {} from {} to provider value {} ('{}').",
+                dbStack.getResourceCrn(), storedMajorVersion, providerMajorVersion.get(), providerEngineVersion);
+        dbStack.setMajorVersion(providerMajorVersion.get());
+        return true;
     }
 }
