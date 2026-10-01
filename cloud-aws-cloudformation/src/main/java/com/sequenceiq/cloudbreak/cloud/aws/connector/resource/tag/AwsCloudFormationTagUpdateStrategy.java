@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.tag;
 
 import static com.sequenceiq.common.api.type.ResourceType.CLOUDFORMATION_STACK;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesRequest;
@@ -46,6 +45,7 @@ import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricR
 import software.amazon.awssdk.services.cloudwatch.model.Dimension;
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
+import software.amazon.awssdk.services.cloudwatch.model.UntagResourceRequest;
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 
@@ -178,21 +178,25 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
 
     private void updateLaunchTemplateAndInstanceTags(AuthenticatedContext authenticatedContext,
             AmazonCloudFormationClient cloudFormationClient, String stackName, Map<String, String> tags) {
+        cascadeLaunchTemplateTags(authenticatedContext, cloudFormationClient, stackName, "update", (ec2Client, launchTemplateIds) -> {
+            Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = awsTaggingService.prepareEc2Tags(tags);
+            ec2Client.createTags(CreateTagsRequest.builder()
+                    .resources(launchTemplateIds)
+                    .tags(ec2Tags)
+                    .build());
+            LOGGER.debug("Updated tags for {} launch templates of stack {}", launchTemplateIds.size(), stackName);
+        });
+    }
+
+    private void cascadeLaunchTemplateTags(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cloudFormationClient,
+            String stackName, String operation, BiConsumer<AmazonEc2Client, List<String>> tagOperation) {
         List<String> launchTemplateIds = resolveLaunchTemplateIds(cloudFormationClient, stackName);
-
         if (launchTemplateIds.isEmpty()) {
-            LOGGER.debug("No launch templates found for stack {}, skipping launch template and instance tag update.", stackName);
-            return;
+            LOGGER.debug("No launch templates found for stack {}, skipping launch template tag {}.", stackName, operation);
+        } else {
+            AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
+            tagOperation.accept(ec2Client, launchTemplateIds);
         }
-
-        AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
-        Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = awsTaggingService.prepareEc2Tags(tags);
-
-        ec2Client.createTags(CreateTagsRequest.builder()
-                .resources(launchTemplateIds)
-                .tags(ec2Tags)
-                .build());
-        LOGGER.debug("Updated tags for {} launch templates of stack {}", launchTemplateIds.size(), stackName);
     }
 
     private List<String> resolveLaunchTemplateIds(AmazonCloudFormationClient cloudFormationClient, String stackName) {
@@ -209,41 +213,45 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
 
     private void updateAutoScalingGroupAndInstanceTags(AuthenticatedContext authenticatedContext,
             AmazonCloudFormationClient cloudFormationClient, String stackName, Map<String, String> tags) {
+        cascadeAutoScalingGroupTags(authenticatedContext, cloudFormationClient, stackName, "update",
+                (ec2Client, cloudWatchClient, asgNames, instanceIds) -> {
+                    updateAutoScalingGroupInstanceTags(ec2Client, instanceIds, awsTaggingService.prepareEc2Tags(tags));
+                    LOGGER.debug("Updated tags for {} existing instances across {} Auto Scaling Groups",
+                            instanceIds.size(), asgNames.size());
+                    updateAutoScalingGroupCloudWatchAlarmTags(cloudWatchClient, instanceIds, tags);
+                });
+    }
 
+    private void cascadeAutoScalingGroupTags(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cloudFormationClient,
+            String stackName, String operation, AutoScalingGroupInstanceTagOperation tagOperation) {
         List<String> asgNames = resolveAutoScalingGroupNames(cloudFormationClient, stackName);
         if (asgNames.isEmpty()) {
-            LOGGER.debug("No Auto Scaling Groups found for stack {}, skipping ASG tag update.", stackName);
+            LOGGER.debug("No Auto Scaling Groups found for stack {}, skipping ASG tag {}.", stackName, operation);
             return;
         }
 
         String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         AwsCredentialView awsCredential = new AwsCredentialView(authenticatedContext.getCloudCredential());
-        AmazonAutoScalingClient asgClient = awsCloudFormationClient.createAutoScalingClient(
-                awsCredential, regionName);
+        AmazonAutoScalingClient asgClient = awsCloudFormationClient.createAutoScalingClient(awsCredential, regionName);
         AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
         AmazonCloudWatchClient cloudWatchClient = commonAwsClient.createCloudWatchClient(awsCredential, regionName);
-        Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = awsTaggingService.prepareEc2Tags(tags);
 
+        List<String> allInstanceIds = collectAutoScalingGroupInstanceIds(asgClient, asgNames);
+        if (!allInstanceIds.isEmpty()) {
+            tagOperation.apply(ec2Client, cloudWatchClient, asgNames, allInstanceIds);
+        }
+    }
+
+    private List<String> collectAutoScalingGroupInstanceIds(AmazonAutoScalingClient asgClient, List<String> asgNames) {
         DescribeAutoScalingGroupsResponse describeResponse = asgClient.describeAutoScalingGroups(
                 DescribeAutoScalingGroupsRequest.builder()
                         .autoScalingGroupNames(asgNames)
                         .build());
 
-        List<String> allInstanceIds = new ArrayList<>();
-
-        for (AutoScalingGroup asg : describeResponse.autoScalingGroups()) {
-            List<String> instanceIds = asg.instances().stream()
-                    .map(software.amazon.awssdk.services.autoscaling.model.Instance::instanceId)
-                    .toList();
-            allInstanceIds.addAll(instanceIds);
-        }
-
-        if (!allInstanceIds.isEmpty()) {
-            updateAutoScalingGroupInstanceTags(ec2Client, allInstanceIds, ec2Tags);
-            LOGGER.debug("Updated tags for {} existing instances across {} Auto Scaling Groups",
-                    allInstanceIds.size(), asgNames.size());
-            updateAutoScalingGroupCloudWatchAlarmTags(cloudWatchClient, allInstanceIds, tags);
-        }
+        return describeResponse.autoScalingGroups().stream()
+                .flatMap(asg -> asg.instances().stream())
+                .map(software.amazon.awssdk.services.autoscaling.model.Instance::instanceId)
+                .toList();
     }
 
     private List<String> resolveAutoScalingGroupNames(AmazonCloudFormationClient cloudFormationClient, String stackName) {
@@ -289,6 +297,27 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
         LOGGER.debug("Updated tags for {} CloudWatch alarms", alarmArns.size());
     }
 
+    private void deleteAutoScalingGroupCloudWatchAlarmTags(AmazonCloudWatchClient cloudWatchClient,
+            List<String> instanceIds, Set<String> tagKeys) {
+
+        List<String> alarmArns = resolveAlarmArnsForInstances(cloudWatchClient, instanceIds);
+
+        if (alarmArns.isEmpty()) {
+            LOGGER.debug("No CloudWatch alarms found for {} instances, skipping alarm tag deletion.", instanceIds.size());
+            return;
+        }
+
+        alarmArns.forEach(arn -> {
+            cloudWatchClient.untagResource(UntagResourceRequest.builder()
+                    .resourceARN(arn)
+                    .tagKeys(tagKeys)
+                    .build());
+            LOGGER.debug("Deleted tags for CloudWatch alarm: {}", arn);
+        });
+
+        LOGGER.debug("Deleted tags for {} CloudWatch alarms", alarmArns.size());
+    }
+
     private List<String> resolveAlarmArnsForInstances(AmazonCloudWatchClient cloudWatchClient,
             List<String> instanceIds) {
         return instanceIds.stream()
@@ -312,65 +341,39 @@ public class AwsCloudFormationTagUpdateStrategy implements TagUpdateStrategy {
 
     private void deleteLaunchTemplateAndInstanceTags(AuthenticatedContext authenticatedContext,
             AmazonCloudFormationClient cloudFormationClient, String stackName, Set<String> tagKeys) {
-        List<String> launchTemplateIds = resolveLaunchTemplateIds(cloudFormationClient, stackName);
-
-        if (launchTemplateIds.isEmpty()) {
-            LOGGER.debug("No launch templates found for stack {}, skipping launch template tag deletion.", stackName);
-            return;
-        }
-
-        AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
-        Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = tagKeys.stream()
-                .map(key -> software.amazon.awssdk.services.ec2.model.Tag.builder().key(key).build())
-                .toList();
-
-        logTagKeyDeletion(LOGGER, String.format("launch templates %s of stack %s", launchTemplateIds, stackName), tagKeys);
-
-        ec2Client.deleteTags(DeleteTagsRequest.builder()
-                .resources(launchTemplateIds)
-                .tags(ec2Tags)
-                .build());
-        LOGGER.debug("Deleted tags for {} launch templates of stack {}", launchTemplateIds.size(), stackName);
+        cascadeLaunchTemplateTags(authenticatedContext, cloudFormationClient, stackName, "deletion", (ec2Client, launchTemplateIds) -> {
+            logTagKeyDeletion(LOGGER, String.format("launch templates %s of stack %s", launchTemplateIds, stackName), tagKeys);
+            ec2Client.deleteTags(DeleteTagsRequest.builder()
+                    .resources(launchTemplateIds)
+                    .tags(toEc2TagKeys(tagKeys))
+                    .build());
+            LOGGER.debug("Deleted tags for {} launch templates of stack {}", launchTemplateIds.size(), stackName);
+        });
     }
 
     private void deleteAutoScalingGroupAndInstanceTags(AuthenticatedContext authenticatedContext,
             AmazonCloudFormationClient cloudFormationClient, String stackName, Set<String> tagKeys) {
-        List<String> asgNames = resolveAutoScalingGroupNames(cloudFormationClient, stackName);
-        if (asgNames.isEmpty()) {
-            LOGGER.debug("No Auto Scaling Groups found for stack {}, skipping ASG tag deletion.", stackName);
-            return;
-        }
+        cascadeAutoScalingGroupTags(authenticatedContext, cloudFormationClient, stackName, "deletion",
+                (ec2Client, cloudWatchClient, asgNames, instanceIds) -> {
+                    logTagKeyDeletion(LOGGER, String.format("instances %s of stack %s", instanceIds, stackName), tagKeys);
+                    ec2Client.deleteTags(DeleteTagsRequest.builder()
+                            .resources(instanceIds)
+                            .tags(toEc2TagKeys(tagKeys))
+                            .build());
+                    LOGGER.debug("Deleted tags for {} existing instances across {} Auto Scaling Groups",
+                            instanceIds.size(), asgNames.size());
+                    deleteAutoScalingGroupCloudWatchAlarmTags(cloudWatchClient, instanceIds, tagKeys);
+                });
+    }
 
-        String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
-        AmazonAutoScalingClient asgClient = awsCloudFormationClient.createAutoScalingClient(
-                new AwsCredentialView(authenticatedContext.getCloudCredential()), regionName);
-        AmazonEc2Client ec2Client = commonAwsClient.createEc2Client(authenticatedContext);
-        Collection<software.amazon.awssdk.services.ec2.model.Tag> ec2Tags = tagKeys.stream()
+    private Collection<software.amazon.awssdk.services.ec2.model.Tag> toEc2TagKeys(Set<String> tagKeys) {
+        return tagKeys.stream()
                 .map(key -> software.amazon.awssdk.services.ec2.model.Tag.builder().key(key).build())
                 .toList();
+    }
 
-        DescribeAutoScalingGroupsResponse describeResponse = asgClient.describeAutoScalingGroups(
-                DescribeAutoScalingGroupsRequest.builder()
-                        .autoScalingGroupNames(asgNames)
-                        .build());
-
-        List<String> allInstanceIds = new ArrayList<>();
-
-        for (AutoScalingGroup asg : describeResponse.autoScalingGroups()) {
-            List<String> instanceIds = asg.instances().stream()
-                    .map(software.amazon.awssdk.services.autoscaling.model.Instance::instanceId)
-                    .toList();
-            allInstanceIds.addAll(instanceIds);
-        }
-
-        if (!allInstanceIds.isEmpty()) {
-            logTagKeyDeletion(LOGGER, String.format("instances %s of stack %s", allInstanceIds, stackName), tagKeys);
-            ec2Client.deleteTags(DeleteTagsRequest.builder()
-                    .resources(allInstanceIds)
-                    .tags(ec2Tags)
-                    .build());
-            LOGGER.debug("Deleted tags for {} existing instances across {} Auto Scaling Groups",
-                    allInstanceIds.size(), asgNames.size());
-        }
+    @FunctionalInterface
+    private interface AutoScalingGroupInstanceTagOperation {
+        void apply(AmazonEc2Client ec2Client, AmazonCloudWatchClient cloudWatchClient, List<String> asgNames, List<String> instanceIds);
     }
 }

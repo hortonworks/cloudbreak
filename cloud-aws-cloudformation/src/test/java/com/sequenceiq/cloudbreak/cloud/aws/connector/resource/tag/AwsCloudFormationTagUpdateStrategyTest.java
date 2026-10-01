@@ -50,7 +50,9 @@ import software.amazon.awssdk.services.cloudformation.model.UpdateStackRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsForMetricResponse;
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
+import software.amazon.awssdk.services.cloudwatch.model.UntagResourceRequest;
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AwsCloudFormationTagUpdateStrategyTest {
@@ -375,6 +377,82 @@ class AwsCloudFormationTagUpdateStrategyTest {
 
         verify(amazonCloudWatchClient).tagResource(argThat(req ->
                 req.resourceARN().equals(alarmArn1) && req.tags().equals(cloudWatchTags)));
+    }
+
+    @Test
+    void testDeleteTagsRemovesTagsFromInstancesAndCloudWatchAlarms() {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName(STACK_NAME)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .build();
+
+        Stack stack = Stack.builder().tags(List.of(Tag.builder()
+                .key("otherKey")
+                .value("otherValue")
+                .build())).build();
+
+        DescribeStacksResponse describeStacksResponse = DescribeStacksResponse.builder().stacks(stack).build();
+
+        DescribeStackResourcesResponse stackResourcesResponse = DescribeStackResourcesResponse.builder()
+                .stackResources(
+                        StackResource.builder().resourceType("AWS::AutoScaling::AutoScalingGroup").physicalResourceId(ASG_NAME_1).build(),
+                        StackResource.builder().resourceType("AWS::AutoScaling::AutoScalingGroup").physicalResourceId(ASG_NAME_2).build()
+                )
+                .build();
+        when(awsCloudFormationClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
+        when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(describeStacksResponse);
+        when(cloudFormationClient.describeStackResources(any(DescribeStackResourcesRequest.class)))
+                .thenReturn(stackResourcesResponse);
+
+        when(awsCloudFormationClient.createAutoScalingClient(any(AwsCredentialView.class), anyString()))
+                .thenReturn(autoScalingClient);
+
+        DescribeAutoScalingGroupsResponse asgResponse = DescribeAutoScalingGroupsResponse.builder()
+                .autoScalingGroups(
+                        AutoScalingGroup.builder()
+                                .autoScalingGroupName(ASG_NAME_1)
+                                .instances(
+                                        software.amazon.awssdk.services.autoscaling.model.Instance.builder()
+                                                .instanceId(INSTANCE_ID_1).build(),
+                                        software.amazon.awssdk.services.autoscaling.model.Instance.builder()
+                                                .instanceId(INSTANCE_ID_2).build()
+                                )
+                                .build(),
+                        AutoScalingGroup.builder()
+                                .autoScalingGroupName(ASG_NAME_2)
+                                .instances(
+                                        software.amazon.awssdk.services.autoscaling.model.Instance.builder()
+                                                .instanceId(INSTANCE_ID_3).build()
+                                )
+                                .build()
+                )
+                .build();
+        when(autoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class)))
+                .thenReturn(asgResponse);
+
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(commonAwsClient.createCloudWatchClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudWatchClient);
+
+        String alarmArn1 = "arn:aws:cloudwatch:us-east-1:123:alarm:alarm-i1";
+        when(amazonCloudWatchClient.describeAlarmsForMetric(any(DescribeAlarmsForMetricRequest.class)))
+                .thenReturn(DescribeAlarmsForMetricResponse.builder().metricAlarms(List.of()).build());
+        when(amazonCloudWatchClient.describeAlarmsForMetric(argThat(req ->
+                req.dimensions().stream().anyMatch(d -> INSTANCE_ID_1.equals(d.value()))
+                        && "StatusCheckFailed_System".equals(req.metricName()))))
+                .thenReturn(DescribeAlarmsForMetricResponse.builder()
+                        .metricAlarms(MetricAlarm.builder().alarmArn(alarmArn1).build())
+                        .build());
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of("custom"));
+
+        verify(ec2Client).deleteTags(argThat((DeleteTagsRequest req) ->
+                req.resources().containsAll(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3))
+                        && req.tags().size() == 1
+                        && req.tags().get(0).key().equals("custom")
+        ));
+
+        verify(amazonCloudWatchClient).untagResource(argThat((UntagResourceRequest req) ->
+                req.resourceARN().equals(alarmArn1) && req.tagKeys().equals(List.of("custom"))));
     }
 
     @Test
