@@ -17,7 +17,7 @@ apply plugin: 'com.google.protobuf'
 
 dependencies {
   api project(':grpc-common')
-  implementation group: 'org.bouncycastle',                   name: 'bc-fips',                        version: bouncycastleFipsVersion
+  implementation group: 'org.bouncycastle',                   name: 'bc-fips',                        version: "$bouncycastleFipsVersion"
   implementation group: 'org.bouncycastle',                   name: 'bcpkix-fips',                    version: bouncycastlePkixFipsVersion
   implementation group: 'org.bouncycastle',                   name: 'bcutil-fips',                    version: bouncycastleUtilFipsVersion
   implementation group: 'javax.annotation',                   name: 'javax.annotation-api',           version: javaxAnnotationApiVersion

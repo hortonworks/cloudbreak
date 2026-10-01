@@ -36,6 +36,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
+import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -69,6 +70,9 @@ public class UserDataBuilder {
     @Inject
     private StackEncryptionService stackEncryptionService;
 
+    @Inject
+    private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
+
     public String buildUserData(Stack stack, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert,
             CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
@@ -96,13 +100,20 @@ public class UserDataBuilder {
         extendModelWithCcmConnectivity(InstanceGroupType.GATEWAY, ccmConnectivityParameters, stack.getAccountId(), environment, model);
         extendModelWithProxyParams(proxyConfig, model);
         extendModelWithSecretEncryptionParams(environment, stack.getId(), model);
-        if (saltbootHttpsOnly) {
+        extendModelWithSaltbootHardeningParams(stack, model);
+        return build(model);
+    }
+
+    private void extendModelWithSaltbootHardeningParams(Stack stack, Map<String, Object> model) {
+        if (saltbootHttpsOnly && saltBootstrapVersionChecker.isHttpsOnlySupported(stack)) {
             model.put("saltbootHttpsOnly", Boolean.TRUE);
+        } else if (saltbootHttpsOnly) {
+            LOGGER.info("Salt-bootstrap HTTPS only communication is disabled in the user data of stack {}, because not every salt-bootstrap version in use " +
+                    "is able to reach a HTTPS only peer", stack.getResourceCrn());
         }
         if (saltbootTlsHardening) {
             model.put("saltbootTlsHardening", Boolean.TRUE);
         }
-        return build(model);
     }
 
     private void extendModelWithCcmConnectivity(InstanceGroupType type, CcmConnectivityParameters ccmConnectivityParameters,

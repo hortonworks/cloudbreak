@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -218,6 +219,72 @@ class MinionAcceptorTest {
                 saltStateService);
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+    }
+
+    @Test
+    void testMissingFingerprintFailsWithoutNullPointerException() throws CloudbreakOrchestratorFailedException {
+        MinionKeysOnMasterResponse keysOnMasterResponse = mock(MinionKeysOnMasterResponse.class);
+        MinionFingersOnMasterResponse fingersOnMasterResponse = mock(MinionFingersOnMasterResponse.class);
+        FingerprintFromSbCollector fingerprintCollector = mock(FingerprintFromSbCollector.class);
+        FingerprintsResponse fingerprintsResponse = mock(FingerprintsResponse.class);
+
+        Minion m1 = new Minion();
+        m1.setHostName("m1");
+        m1.setDomain("d");
+        m1.setAddress("1.2.3.4");
+
+        when(keysOnMasterResponse.getAllMinions()).thenReturn(List.of("m1.d"));
+        when(keysOnMasterResponse.getUnacceptedMinions()).thenReturn(List.of("m1.d"));
+        when(fingersOnMasterResponse.getUnacceptedMinions()).thenReturn(Map.of("m1.d", "finger1"));
+        when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(keysOnMasterResponse);
+        when(sc.wheel(eq("key.finger"), anyCollection(), eq(MinionFingersOnMasterResponse.class))).thenReturn(fingersOnMasterResponse);
+        Fingerprint fingerprintWithoutValue = new Fingerprint();
+        fingerprintWithoutValue.setAddress("1.2.3.4");
+        fingerprintWithoutValue.setErrorText("connection refused");
+        fingerprintWithoutValue.setStatusCode(500);
+        when(fingerprintsResponse.getFingerprints()).thenReturn(List.of(fingerprintWithoutValue));
+        when(fingerprintCollector.collectFingerprintFromMinions(eq(sc), argThat(arg -> arg.containsAll(List.of(m1))))).thenReturn(fingerprintsResponse);
+
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1), List.of(m1), new EqualMinionFpMatcher(), fingerprintCollector,
+                saltStateService);
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        assertTrue(exception.getMessage().startsWith("Not all minions can be accepted, as their fingerprint is different"));
+    }
+
+    @Test
+    void testFingerprintOfANodeThatIsNotAmongTheMinionsToAcceptIsIgnored() throws CloudbreakOrchestratorFailedException {
+        MinionKeysOnMasterResponse keysOnMasterResponse = mock(MinionKeysOnMasterResponse.class);
+        MinionFingersOnMasterResponse fingersOnMasterResponse = mock(MinionFingersOnMasterResponse.class);
+        FingerprintFromSbCollector fingerprintCollector = mock(FingerprintFromSbCollector.class);
+        FingerprintsResponse fingerprintsResponse = mock(FingerprintsResponse.class);
+
+        Minion m1 = new Minion();
+        m1.setHostName("m1");
+        m1.setDomain("d");
+        m1.setAddress("1.1.1.1");
+
+        Fingerprint fingerprintOfM1 = new Fingerprint();
+        fingerprintOfM1.setFingerprint("finger1");
+        fingerprintOfM1.setAddress("1.1.1.1:7071");
+        Fingerprint fingerprintOfUnknownNode = new Fingerprint();
+        fingerprintOfUnknownNode.setFingerprint("finger2");
+        fingerprintOfUnknownNode.setAddress("9.9.9.9:7070");
+
+        when(keysOnMasterResponse.getAllMinions()).thenReturn(List.of("m1.d"));
+        when(keysOnMasterResponse.getUnacceptedMinions()).thenReturn(List.of("m1.d"));
+        when(fingersOnMasterResponse.getUnacceptedMinions()).thenReturn(Map.of("m1.d", "finger1"));
+        when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(keysOnMasterResponse);
+        when(sc.wheel(eq("key.finger"), anyCollection(), eq(MinionFingersOnMasterResponse.class))).thenReturn(fingersOnMasterResponse);
+        when(fingerprintsResponse.getFingerprints()).thenReturn(List.of(fingerprintOfM1, fingerprintOfUnknownNode));
+        when(fingerprintCollector.collectFingerprintFromMinions(eq(sc), argThat(arg -> arg.containsAll(List.of(m1))))).thenReturn(fingerprintsResponse);
+
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1), List.of(m1), new EqualMinionFpMatcher(), fingerprintCollector,
+                saltStateService);
+
+        underTest.acceptMinions();
+
+        verify(sc).wheel(eq("key.accept"), argThat(arg -> arg.containsAll(List.of("m1.d"))), eq(Object.class));
     }
 
     private static List<List<String>> testAllMinionsAcceptedWithMatchingFingerprintParams() {
