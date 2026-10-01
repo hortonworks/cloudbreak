@@ -212,6 +212,63 @@ peer_agmt_has_decoding_error() {
   | grep -qiE 'nsds5replicaLastUpdateStatus:.*(error \(4\)|replication is aborting|decoding error)'
 }
 
+# The local LDAPI socket for this instance (EXTERNAL bind, no password) -- same path the
+# health gate uses.
+local_ldapi_uri() {
+  echo "ldapi://%2Frun%2Fslapd-$(echo "$REALM" | tr '.' '-').socket"
+}
+
+# DN of this replica's DOMAIN-suffix replica node under cn=mapping tree,cn=config. The
+# domain "meTo<seed>" agreements live directly beneath it. Scoping searches here (rather than
+# the whole mapping tree) is required: the CA-suffix agreement under
+# cn=replica,cn=o\=ipaca,... also carries nsDS5ReplicaHost=<seed>, so a host-only filter over
+# the whole tree would match it too. The suffix's '=' and ',' are backslash-escaped so the
+# suffix forms a single RDN value.
+domain_replica_base_dn() {
+  local suffix esc
+  suffix="dc=${DOMAIN//./,dc=}"
+  esc="${suffix//=/\\=}"
+  esc="${esc//,/\\,}"
+  echo "cn=replica,cn=${esc},cn=mapping tree,cn=config"
+}
+
+# True when THIS replica's own domain-suffix agreement to the seed ($FREEIPA_TO_REPLICATE)
+# is wedged on "Can't acquire busy replica": the seed's domain replica is being held by
+# ANOTHER supplier's connection (an orphaned/held exclusive-access lock -- the CB-34105
+# family), so this replica can never acquire it to push its own updates. The lock lives on
+# the seed, not on this node. Read locally over LDAPI/EXTERNAL (no password); scoped to the
+# domain-suffix replica node so only the domain (not the CA) agreement to the seed is matched.
+# Any busy status matches on purpose, without also requiring nsds5replicaLastUpdateEnd=1970 or
+# nsds5replicaUpdateInProgress: 389-ds only writes those once the replica is acquired (a busy
+# attempt never touches them), so they don't mark the busy state itself. This runs only after
+# the health gate has failed for its whole window, so the busy state has persisted, and the
+# remedy (no local restart, fail and retry) is the same whatever the last update end time is.
+# See CB-34766.
+local_agmt_busy_to_seed_locked() {
+  ldapsearch -o ldif-wrap=no -LLL -Y EXTERNAL -H "$(local_ldapi_uri)" \
+    -b "$(domain_replica_base_dn)" \
+    "(&(objectclass=nsds5replicationagreement)(nsDS5ReplicaHost=$FREEIPA_TO_REPLICATE))" \
+    nsds5replicaLastUpdateStatus 2>/dev/null \
+  | grep -qiE 'nsds5replicaLastUpdateStatus:.*acquire busy replica'
+}
+
+# Engineer-facing dump of this replica's domain-suffix agreement(s) to the seed, with live
+# replication status, for troubleshooting the busy-lock case.
+print_local_agmt_to_seed() {
+  ldapsearch -o ldif-wrap=no -LLL -Y EXTERNAL -H "$(local_ldapi_uri)" \
+    -b "$(domain_replica_base_dn)" \
+    "(&(objectclass=nsds5replicationagreement)(nsDS5ReplicaHost=$FREEIPA_TO_REPLICATE))" \
+    cn nsds5replicaLastUpdateStatus nsds5replicaLastUpdateStart nsds5replicaLastUpdateEnd nsds5replicaUpdateInProgress 2>/dev/null \
+  | awk '
+      /^dn:/ { if (st) printf "agmt=%s status=\x27%s\x27 start=%s end=%s inProgress=%s; ", cn, st, start, end, inp; cn=st=start=end=inp="" }
+      /^cn:/ { cn=$2 }
+      /^nsds5replicaLastUpdateStatus:/ { sub(/^[^:]+: /,""); st=$0 }
+      /^nsds5replicaLastUpdateStart:/ { start=$2 }
+      /^nsds5replicaLastUpdateEnd:/   { end=$2 }
+      /^nsds5replicaUpdateInProgress:/ { inp=$2 }
+      END { if (st) printf "agmt=%s status=\x27%s\x27 start=%s end=%s inProgress=%s", cn, st, start, end, inp }'
+}
+
 if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
   if ! /opt/salt/scripts/freeipa_verify_replica_health.sh; then
     if peer_agmt_has_decoding_error; then
@@ -226,6 +283,23 @@ if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
       echo "Replication health gate failed with a startReplication decoding error on the peer->${FQDN} agreement; re-initializing the domain suffix from $FREEIPA_TO_REPLICATE"
       ipa-replica-manage re-initialize --from "$FREEIPA_TO_REPLICATE" -p "$FPW" \
         || echo "ipa-replica-manage re-initialize returned non-zero; re-verifying replication health before deciding"
+    elif local_agmt_busy_to_seed_locked; then
+      # This replica's domain-suffix agreement to the seed ($FREEIPA_TO_REPLICATE) is wedged
+      # on "Can't acquire busy replica": the seed's domain replica is held by ANOTHER supplier's
+      # connection -- an orphaned exclusive-access lock (CB-34105 family; typically seen with
+      # nsds5replicaLastUpdateEnd=19700101000000Z, i.e. no successful session since the agreement
+      # was loaded -- the actual values are logged below). The lock lives on the seed, not on
+      # this node, so neither a re-initialization nor the local IPA-stack restart below can
+      # release it; a local restart would only burn the health-gate window. We deliberately do
+      # NOT restart a healthy in-service master to force the release. Fail now so the operation
+      # retries; by then the holder's session should be gone (clean replication teardown on node
+      # removal) or reaped by TCP keepalive. The stderr message below is surfaced to the end user
+      # as the failure reason, so it must stay free of internal ticket IDs and low-level
+      # replication jargon; the engineer-facing detail goes to stdout for the collected node
+      # logs. See CB-34766 / CB-34105.
+      echo "Replica ${FQDN} domain-suffix agreement to seed ${FREEIPA_TO_REPLICATE} is stuck on 'Can't acquire busy replica'; the exclusive-access lock is held on the seed and cannot be cleared from here, and a local IPA-stack restart would not help, so the in-service master is not being restarted. Agreement: $(print_local_agmt_to_seed)"
+      echo "FreeIPA replication with another FreeIPA server could not be established because it is temporarily busy. The operation will be retried." >&2
+      exit 1
     else
       echo "Replication health gate failed; breaking stale dirsrv ccache latch and restarting the IPA stack"
       # A plain 'ipactl restart' re-reads the poisoned external ccache. Stop the

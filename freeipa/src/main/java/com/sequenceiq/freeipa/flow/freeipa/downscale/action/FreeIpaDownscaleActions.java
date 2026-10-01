@@ -69,6 +69,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveSe
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.replicationcleanup.VerifyReplicationCleanupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stophealthagent.StopHealthAgentRequest;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stopreplication.StopFreeIpaReplicationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsRequest;
@@ -224,6 +225,25 @@ public class FreeIpaDownscaleActions {
                     sendEvent(context, stopHealthAgentRequest);
                 } else {
                     sendEvent(context, new StackEvent(DownscaleFlowEvent.STOP_HEALTH_AGENT_FINISHED.event(), stack.getId()));
+                }
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_STOP_FREEIPA_REPLICATION_STATE")
+    public Action<?, ?> stopFreeIpaReplicationAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                List<String> downscaleInstanceIds = getInstanceIds(variables);
+                if (downscaleInstanceIds == null || downscaleInstanceIds.isEmpty()) {
+                    LOGGER.debug("No departing instances to stop FreeIPA replication on; skipping the stop step");
+                    sendEvent(context, new StackEvent(DownscaleFlowEvent.STOP_FREEIPA_REPLICATION_FINISHED.event(), stack.getId()));
+                } else {
+                    stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Stopping FreeIPA replication on departing nodes");
+                    StopFreeIpaReplicationRequest request = new StopFreeIpaReplicationRequest(stack.getId(), downscaleInstanceIds);
+                    sendEvent(context, request);
                 }
             }
         };

@@ -35,6 +35,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.R
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REVOKE_CERTS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REVOKE_CERTS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STARTING_DOWNSCALE_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STOP_FREEIPA_REPLICATION_FINISHED;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STOP_HEALTH_AGENT_FINISHED;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STOP_TELEMETRY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FINISHED_EVENT;
@@ -54,6 +55,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNS
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_SERVERS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REVOKE_CERTS_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_STOP_FREEIPA_REPLICATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_STOP_HEALTH_AGENT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_STOP_TELEMETRY_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_STATE;
@@ -107,8 +109,12 @@ public class DownscaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<
                     .event(DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(DOWNSCALE_STOP_HEALTH_AGENT_STATE).to(DOWNSCALE_STOP_TELEMETRY_STATE)
+                    .from(DOWNSCALE_STOP_HEALTH_AGENT_STATE).to(DOWNSCALE_STOP_FREEIPA_REPLICATION_STATE)
                     .event(STOP_HEALTH_AGENT_FINISHED)
+                    .defaultFailureEvent()
+
+                    .from(DOWNSCALE_STOP_FREEIPA_REPLICATION_STATE).to(DOWNSCALE_STOP_TELEMETRY_STATE)
+                    .event(STOP_FREEIPA_REPLICATION_FINISHED)
                     .defaultFailureEvent()
 
                     .from(DOWNSCALE_STOP_TELEMETRY_STATE).to(DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE)

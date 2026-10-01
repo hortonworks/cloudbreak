@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -62,6 +63,7 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
@@ -69,6 +71,7 @@ import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
@@ -83,6 +86,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.CollectAdditionalHo
 import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.RemoveHostsHandler;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.RemoveReplicationAgreementsHandler;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.ServerRemoveHandler;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.StopFreeIpaReplicationHandler;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.StopTelemetryHandler;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.UpdateDnsSoaRecordsHandler;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.handler.VerifyReplicationCleanupHandler;
@@ -101,6 +105,7 @@ import com.sequenceiq.freeipa.service.freeipa.cleanup.VerifyReplicationCleanupSe
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsSoaRecordService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaServicesStopService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaTopologyService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -249,6 +254,9 @@ class FreeIpaDownscaleFlowIntegrationTest {
     @MockBean
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
+    @MockBean
+    private FreeIpaServicesStopService freeIpaServicesStopService;
+
     @Inject
     private FlowRegister flowRegister;
 
@@ -258,9 +266,11 @@ class FreeIpaDownscaleFlowIntegrationTest {
     @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
 
+    private Stack stack;
+
     @BeforeEach
     public void setup() throws Exception {
-        Stack stack = new Stack();
+        stack = new Stack();
         stack.setId(STACK_ID);
         stack.setAccountId(ACCOUNT_ID);
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
@@ -311,7 +321,7 @@ class FreeIpaDownscaleFlowIntegrationTest {
 
     @Test
     public void testDownscaleFlowCompletesWithReplicationCleanupState() throws Exception {
-        FlowIdentifier flowIdentifier = triggerFlow();
+        FlowIdentifier flowIdentifier = triggerFlow(List.of());
         letItFlow(flowIdentifier);
 
         assertTrue(flowRegister.getRunningFlowIds().isEmpty(), "Flow should have finished");
@@ -322,12 +332,31 @@ class FreeIpaDownscaleFlowIntegrationTest {
         verify(stackUpdater).updateStackStatus(any(Stack.class), eq(DetailedStackStatus.DOWNSCALE_COMPLETED), eq("Downscale complete"));
     }
 
-    private FlowIdentifier triggerFlow() {
+    @Test
+    public void testDownscaleFlowStopsReplicationOnDepartingHosts() throws Exception {
+        InstanceMetaData instance = new InstanceMetaData();
+        instance.setInstanceId("i-departing");
+        instance.setDiscoveryFQDN("departing.example.com");
+        instance.setInstanceStatus(InstanceStatus.CREATED);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceMetaData(Set.of(instance));
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        when(instanceMetaDataToCloudInstanceConverter.convert(any())).thenReturn(mock(CloudInstance.class));
+
+        FlowIdentifier flowIdentifier = triggerFlow(List.of("i-departing"));
+        letItFlow(flowIdentifier);
+
+        assertTrue(flowRegister.getRunningFlowIds().isEmpty(), "Flow should have finished");
+        verify(freeIpaServicesStopService).stopServicesOnInstances(eq(STACK_ID), eq(List.of("i-departing")));
+        verify(verifyReplicationCleanupService).verifyOnSurvivingMasters(eq(STACK_ID), any());
+    }
+
+    private FlowIdentifier triggerFlow(List<String> instanceIds) {
         String selector = DownscaleFlowEvent.DOWNSCALE_EVENT.event();
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(selector,
-                        new DownscaleEvent(selector, STACK_ID, List.of(), 1, false, false, false, OPERATION_ID)));
+                        new DownscaleEvent(selector, STACK_ID, instanceIds, 1, false, false, false, OPERATION_ID)));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {
@@ -359,6 +388,7 @@ class FreeIpaDownscaleFlowIntegrationTest {
             DownscaleStackCollectResourcesHandler.class,
             DownscaleStackHandler.class,
             ServerRemoveHandler.class,
+            StopFreeIpaReplicationHandler.class,
             RemoveReplicationAgreementsHandler.class,
             CertRevokeHandler.class,
             DnsRemoveHandler.class,
