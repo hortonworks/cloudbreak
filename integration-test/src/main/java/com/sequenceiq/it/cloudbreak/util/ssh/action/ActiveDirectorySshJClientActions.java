@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.config.TrustProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 import com.sequenceiq.it.util.SimpleRetryWrapper;
 
 import net.schmizz.sshj.SSHClient;
@@ -44,13 +45,16 @@ public class ActiveDirectorySshJClientActions {
     private TrustProperties trustProperties;
 
     @Inject
+    private SshJClientFactory sshJClientFactory;
+
+    @Inject
     private SshJClient sshJClient;
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
     public void executeActiveDirectoryCommands(String name, String commands, boolean validateError) {
-        try (SSHClient sshClient = sshJClient.createSshClient(
+        try (SSHClient sshClient = sshJClientFactory.createSshClient(
                 trustProperties.getActiveDirectoryIp(), trustProperties.getActiveDirectoryUser(), null, commonCloudProperties.getDefaultPrivateKeyFile())) {
             String batchCommands = Arrays.stream(commands.split("\n"))
                     .map(command -> '\'' + command + '\'')

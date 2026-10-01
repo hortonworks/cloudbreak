@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.assertion.selinux;
 
+import static java.util.function.Predicate.not;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,13 +9,13 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSudoCommandActions;
 
 @Component
@@ -157,21 +160,32 @@ public class SELinuxAssertions {
             String stackType, List<String> instanceIps, SeLinux expectedSelinuxMode, boolean generateDenyReports) {
         ValidationResult.ValidationResultBuilder builder = validationBuilder == null ? ValidationResult.builder() : validationBuilder;
 
-        Map<String, String> instancesWithUnexpectedMode = getInstancesWithUnexpectedMode(instanceIps, expectedSelinuxMode);
+        List<SshCommandOutcome> modeOutcomes = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, CHECK_SELINUX_MODE_COMMAND);
+        List<SshCommandOutcome> moduleOutcomes = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, CHECK_CDP_MODULE_COUNT_COMMAND);
+        List<SshCommandOutcome> denyOutcomes = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, CHECK_ANY_DENIES_COMMAND);
+
+        Map<String, String> unreachableInstances = getUnreachableInstances(List.of(modeOutcomes, moduleOutcomes, denyOutcomes));
+        if (!unreachableInstances.isEmpty()) {
+            builder.error(
+                    String.format("The SELinux validation could not be executed on some %s instances because the SSH connection failed. " +
+                            "Unreachable instances: %s", stackType, unreachableInstances));
+        }
+
+        Map<String, String> instancesWithUnexpectedMode = getInstancesWithUnexpectedMode(modeOutcomes, expectedSelinuxMode);
         if (!instancesWithUnexpectedMode.isEmpty()) {
             builder.error(
                     String.format("The SELinux validation found %s instances with unexpected SELinux mode. Expected: %s. Instances with unexpected mode: %s",
                             stackType, expectedSelinuxMode.name(), instancesWithUnexpectedMode));
         }
 
-        Map<String, String> instancesWithMissingModules = getInstancesWithMissingModules(instanceIps);
+        Map<String, String> instancesWithMissingModules = getInstancesWithMissingModules(moduleOutcomes);
         if (!instancesWithMissingModules.isEmpty()) {
             builder.error(
                     String.format("The SELinux validation found %s instances with missing CDP modules. Instances with missing modules: %s",
                             stackType, instancesWithMissingModules));
         }
 
-        Map<String, String> instancesWithAuditedDenies = getInstancesWithAuditedDenies(instanceIps);
+        Map<String, String> instancesWithAuditedDenies = getInstancesWithAuditedDenies(denyOutcomes);
         if (!instancesWithAuditedDenies.isEmpty()) {
             if (generateDenyReports) {
                 generateReportFromDenies(testContext, stackType, instancesWithAuditedDenies);
@@ -184,25 +198,35 @@ public class SELinuxAssertions {
         return builder;
     }
 
-    private Map<String, String> getInstancesWithUnexpectedMode(List<String> instanceIps, SeLinux expectedSELinuxMode) {
-        Map<String, Pair<Integer, String>> commandOutputs = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, CHECK_SELINUX_MODE_COMMAND);
-        return commandOutputs.entrySet().stream()
-                .filter(entry -> !expectedSELinuxMode.equals(SeLinux.fromStringWithFallback(entry.getValue().getRight())))
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getRight()));
+    private Map<String, String> getUnreachableInstances(List<List<SshCommandOutcome>> allOutcomes) {
+        Map<String, String> unreachableInstances = new LinkedHashMap<>();
+        allOutcomes.stream()
+                .flatMap(List::stream)
+                .filter(outcome -> !outcome.executed())
+                .forEach(outcome -> unreachableInstances.putIfAbsent(outcome.instanceIp(),
+                        outcome.result() + ": " + outcome.exceptionMessage().orElse(null)));
+        return unreachableInstances;
     }
 
-    private Map<String, String> getInstancesWithMissingModules(List<String> instanceIps) {
-        Map<String, Pair<Integer, String>> commandOutputs = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, CHECK_CDP_MODULE_COUNT_COMMAND);
-        return commandOutputs.entrySet().stream()
-                .filter(entry -> entry.getValue().getLeft() != 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getRight()));
+    private Map<String, String> getInstancesWithUnexpectedMode(List<SshCommandOutcome> outcomes, SeLinux expectedSELinuxMode) {
+        return outcomes.stream()
+                .filter(SshCommandOutcome::executed)
+                .filter(outcome -> !expectedSELinuxMode.equals(SeLinux.fromStringWithFallback(outcome.commandOutput())))
+                .collect(Collectors.toMap(SshCommandOutcome::instanceIp, SshCommandOutcome::commandOutput));
     }
 
-    private Map<String, String> getInstancesWithAuditedDenies(List<String> instanceIps) {
-        Map<String, Pair<Integer, String>> commandOutputs = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, CHECK_ANY_DENIES_COMMAND);
-        return commandOutputs.entrySet().stream()
-                .filter(entry -> entry.getValue().getLeft() != 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getRight()));
+    private Map<String, String> getInstancesWithMissingModules(List<SshCommandOutcome> outcomes) {
+        return outcomes.stream()
+                .filter(SshCommandOutcome::executed)
+                .filter(not(SshCommandOutcome::returnCodeSuccess))
+                .collect(Collectors.toMap(SshCommandOutcome::instanceIp, SshCommandOutcome::commandOutput));
+    }
+
+    private Map<String, String> getInstancesWithAuditedDenies(List<SshCommandOutcome> outcomes) {
+        return outcomes.stream()
+                .filter(SshCommandOutcome::executed)
+                .filter(not(SshCommandOutcome::returnCodeSuccess))
+                .collect(Collectors.toMap(SshCommandOutcome::instanceIp, SshCommandOutcome::commandOutput));
     }
 
     private void generateReportFromDenies(TestContext testContext, String stackType, Map<String, String> instancesWithAuditedDenies) {

@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 
 @Component
 public class SshProxyActions {
@@ -23,11 +22,11 @@ public class SshProxyActions {
     private static final String PROXY_SETTINGS_COMMAND = "sudo cat /etc/cdp/proxy.env";
 
     @Inject
-    private SshJClient sshJClient;
+    private SshJClientActions sshJClientActions;
 
     public Optional<String> getProxySettings(Set<String> ipAddresses) {
         LOGGER.info("Getting proxy settings on instances {}", ipAddresses);
-        Map<String, Pair<Integer, String>> results = sshJClient.executeCommands(ipAddresses, PROXY_SETTINGS_COMMAND);
+        Map<String, Pair<Integer, String>> results = sshJClientActions.executeCommands(ipAddresses, PROXY_SETTINGS_COMMAND);
         LOGGER.info("Proxy settings output on instances: {}", results);
         Set<String> proxySettings = results.values().stream()
                 .filter(result -> result.getKey() == 0)

@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
 import net.schmizz.sshj.SSHClient;
 
@@ -37,6 +38,9 @@ public class ScpDownloadClusterLogsActions {
 
     @Inject
     private SshJClientActions sshJClientActions;
+
+    @Inject
+    private SshJClientFactory sshJClientFactory;
 
     @Inject
     private SshJClient sshJClient;
@@ -81,7 +85,7 @@ public class ScpDownloadClusterLogsActions {
     }
 
     private void download(String instanceIp, String user, String password, String privateKeyFilePath, String sourceFilePath, String destinationPath) {
-        try (SSHClient sshClient = sshJClient.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
+        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
             sshJClient.download(sshClient, sourceFilePath, destinationPath);
             Log.log(LOGGER, format("File download [%s] from host [%s] has been done.", sourceFilePath, instanceIp));
         } catch (Exception e) {

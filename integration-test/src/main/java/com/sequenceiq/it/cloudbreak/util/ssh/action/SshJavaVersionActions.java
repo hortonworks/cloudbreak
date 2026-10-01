@@ -17,15 +17,19 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
 import net.schmizz.sshj.SSHClient;
 
 @Component
-public class SshJavaVersionActions  {
+public class SshJavaVersionActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJavaVersionActions.class);
 
     private static final String JAVA_MAJOR_VERSION_COMMAND = "java -version 2>&1 | grep -oP \"version [^0-9]?(1\\.)?\\K\\d+\"";
+
+    @Inject
+    private SshJClientFactory sshJClientFactory;
 
     @Inject
     private SshJClient sshJClient;
@@ -49,8 +53,8 @@ public class SshJavaVersionActions  {
     }
 
     private Pair<Integer, String> executeCommand(String instanceIP) {
-        try (SSHClient sshClient = sshJClient.createSshClient(instanceIP, null, null, null)) {
-            return sshJClient.execute(sshClient, JAVA_MAJOR_VERSION_COMMAND);
+        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIP, null, null, null)) {
+            return sshJClient.execute(sshClient, JAVA_MAJOR_VERSION_COMMAND, SshJClient.DEFAULT_COMMAND_TIMEOUT_SEC);
         } catch (Exception e) {
             throw new TestFailException(format("SSH fail on [%s] while looking for java version.", instanceIP), e);
         }

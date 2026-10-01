@@ -35,7 +35,7 @@ import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -63,7 +63,7 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private SshJClient sshJClient;
+    private SshJClientActions sshJClientActions;
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
@@ -196,7 +196,7 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
                 .filter(res -> instanceIpIdsMap.containsKey(res.getInstanceId()) && res.getResourceType().toString().contains("_VOLUMESET"))
                 .collect(Collectors.toMap(res -> instanceIpIdsMap.get(res.getInstanceId()),
                         ResourceV4Response::getAttributes));
-        Map<String, Pair<Integer, String>> fstabInfo = sshJClient.executeCommands(instanceIps, "sudo cat /etc/fstab");
+        Map<String, Pair<Integer, String>> fstabInfo = sshJClientActions.executeCommands(instanceIps, "sudo cat /etc/fstab");
         StringBuilder exceptionMessage = new StringBuilder();
         for (String instanceIp : fstabInfo.keySet()) {
             validateNoDuplicateMounts(fstabInfo.get(instanceIp).getRight());

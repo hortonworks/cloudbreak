@@ -55,7 +55,7 @@ import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.salt.SaltFunctionReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltHighstateReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltStateReport;
-import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
 import net.schmizz.sshj.SSHClient;
 
@@ -73,7 +73,7 @@ public class SshSaltExecutionMetricsActions {
     private SshJClientActions sshJClientActions;
 
     @Inject
-    private SshJClient sshJClient;
+    private SshJClientFactory sshJClientFactory;
 
     public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName,
             TestContext testContext) {
@@ -119,7 +119,7 @@ public class SshSaltExecutionMetricsActions {
     }
 
     private void downloadSaltExecutionMetrics(String instanceIp, String workingDirectoryLocation, String serviceName) throws IOException {
-        SSHClient sshClient = sshJClient.createSshClient(instanceIp, null, null, null);
+        SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, null, null, null);
         sshClient.newSCPFileTransfer().download(format("/home/cloudbreak/salt_execution_metrics_%s.zip", serviceName), workingDirectoryLocation);
 
         if (Files.exists(Path.of(format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName)))) {
@@ -248,7 +248,8 @@ public class SshSaltExecutionMetricsActions {
     private SaltHighstateReport getHighstateReport(String jid, Path jobResultPath) {
         try {
             String jsonString = Files.readString(jobResultPath);
-            Map<String, Map<String, SaltFunctionReport>> map = new ObjectMapper().readValue(jsonString, new TypeReference<>() { });
+            Map<String, Map<String, SaltFunctionReport>> map = new ObjectMapper().readValue(jsonString, new TypeReference<>() {
+            });
             Map<String, List<SaltStateReport>> stateReportListForInstances = new HashMap<>();
 
             for (Entry<String, Map<String, SaltFunctionReport>> host : map.entrySet()) {

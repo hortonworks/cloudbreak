@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -49,9 +50,12 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
 import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.userauth.UserAuthException;
 
 @Component
 public class SshJClientActions {
@@ -60,6 +64,9 @@ public class SshJClientActions {
     private static final String NOT_AVAILABLE = "N/A";
 
     private static final Set<String> AZURE_SKIPPED_FREEIPA_LOGGING_AGENT_STATUSES = Set.of("s3Accessible", "databusS3Accessible");
+
+    @Inject
+    private SshJClientFactory sshJClientFactory;
 
     @Inject
     private SshJClient sshJClient;
@@ -342,6 +349,36 @@ public class SshJClientActions {
         }
     }
 
+    public SshCommandOutcome executeCommand(String instanceIp, String user, String password, String privateKeyFilePath, String command) {
+        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
+            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command, SshJClient.DEFAULT_COMMAND_TIMEOUT_SEC);
+            return SshCommandOutcome.executed(instanceIp, cmdOut.getKey(), cmdOut.getValue());
+        } catch (UserAuthException e) {
+            LOGGER.warn("SSH authentication failed on [{}]. {}", instanceIp, e.getMessage());
+            return SshCommandOutcome.authFailure(instanceIp, e);
+        } catch (IOException e) {
+            LOGGER.warn("SSH interaction failed on [{}] while executing command [{}], treating host as unreachable. {}",
+                    instanceIp, command, e.getMessage());
+            return SshCommandOutcome.unreachable(instanceIp, e);
+        }
+    }
+
+    public Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
+        return ipAddresses.stream()
+                .collect(Collectors.toMap(Function.identity(), ip -> executeCommand(ip, command)));
+    }
+
+    public Pair<Integer, String> executeCommand(String instanceIP, String command) {
+        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIP, null, null, null)) {
+            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command, SshJClient.DEFAULT_COMMAND_TIMEOUT_SEC);
+            Log.log(LOGGER, format("Command exit status [%s] and result [%s].", cmdOut.getKey(), cmdOut.getValue()));
+            return cmdOut;
+        } catch (Exception e) {
+            LOGGER.error("SSH fail on [{}] while executing command [{}]. {}", instanceIP, command, e.getMessage());
+            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + command + "].", e);
+        }
+    }
+
     public Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
         return executeSshCommand(instanceIp, null, null, null, command);
     }
@@ -351,8 +388,8 @@ public class SshJClientActions {
     }
 
     private Pair<Integer, String> executeSshCommand(String instanceIp, String user, String password, String privateKeyFilePath, String command) {
-        try (SSHClient sshClient = sshJClient.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
-            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command);
+        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
+            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command, SshJClient.DEFAULT_COMMAND_TIMEOUT_SEC);
             Log.log(LOGGER, " Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue());
             return cmdOut;
         } catch (Exception e) {
@@ -817,8 +854,8 @@ public class SshJClientActions {
         List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
                 freeIpaTestDto.getTestContext());
 
-        for (String ip: instanceIps) {
-            for (String cmd: cmds) {
+        for (String ip : instanceIps) {
+            for (String cmd : cmds) {
                 Pair<Integer, String> results = executeSshCommand(ip, "cloudbreak", null, commonCloudProperties.getDefaultPrivateKeyFile(), cmd);
                 LOGGER.info("Result of ssh: {}", results);
                 if (results.getKey() != 0) {

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
 import net.schmizz.sshj.SSHClient;
 
@@ -59,6 +60,9 @@ public class LogCollectorUtil {
     private SshJClientActions sshJClientActions;
 
     @Inject
+    private SshJClientFactory sshJClientFactory;
+
+    @Inject
     private SshJClient sshJClient;
 
     public void collectLogFiles(String statusReason, List<String> ipAddresses) {
@@ -70,7 +74,7 @@ public class LogCollectorUtil {
                     for (String ipAddress : ipAddresses) {
                         sshJClientActions.executeSshCommand(ipAddress, "sudo mkdir -p " + TMP_LOGS
                                 + "; sudo rsync -aR " + logFilePath + " " + TMP_LOGS + "/" + "; sudo chown -R cloudbreak:cloudbreak " + TMP_LOGS);
-                        try (SSHClient sshClient = sshJClient.createSshClient(ipAddress, null, null, null)) {
+                        try (SSHClient sshClient = sshJClientFactory.createSshClient(ipAddress, null, null, null)) {
                             String downloadPath = workingDirectory + "/debug-logs/" + ipAddress + logFilePath;
                             FileUtils.createParentDirectories(new File(downloadPath));
                             sshJClient.download(sshClient, TMP_LOGS + logFilePath,

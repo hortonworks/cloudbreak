@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSudoCommandActions;
 
 @Component
@@ -126,9 +126,13 @@ public class SecretEncryptionAssertions {
     }
 
     private Map<String, String> getFailedInstancesWithCommandOutput(List<String> instanceIps) {
-        Map<String, Pair<Integer, String>> commandOutputs = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, ALL_COMMANDS);
-        return commandOutputs.entrySet().stream()
-                .filter(entry -> entry.getValue().getLeft() != 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getRight()));
+        List<SshCommandOutcome> outcomes = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, ALL_COMMANDS);
+        return outcomes.stream()
+                .filter(outcome -> !outcome.executed() || !outcome.returnCodeSuccess())
+                .collect(Collectors.toMap(SshCommandOutcome::instanceIp, SecretEncryptionAssertions::describeOutcome));
+    }
+
+    private static String describeOutcome(SshCommandOutcome outcome) {
+        return outcome.executed() ? outcome.commandOutput() : outcome.result() + ": " + outcome.exceptionMessage().orElse(null);
     }
 }

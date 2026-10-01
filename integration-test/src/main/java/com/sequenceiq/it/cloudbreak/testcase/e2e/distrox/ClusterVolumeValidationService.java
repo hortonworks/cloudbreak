@@ -39,7 +39,7 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Service
 public class ClusterVolumeValidationService {
@@ -60,7 +60,7 @@ public class ClusterVolumeValidationService {
     );
 
     @Inject
-    private SshJClient sshJClient;
+    private SshJClientActions sshJClientActions;
 
     public DistroXTestDto validateAttachedDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient cloudbreakClient) {
         doValidateAttachedDisks(distroXTestDto.getName(), distroXTestDto.getResponse().getInstanceGroups(), tc, cloudbreakClient);
@@ -172,7 +172,7 @@ public class ClusterVolumeValidationService {
 
     private Map<String, String> getUuidByDevicePathMap(String ip, List<VolumeSetAttributes.Volume> volumes, CloudFunctionality cloudFunctionality) {
         if (CollectionUtils.isNotEmpty(volumes)) {
-            Pair<Integer, String> blkidResult = sshJClient.executeCommand(ip, "sudo blkid -s UUID " + volumes.stream()
+            Pair<Integer, String> blkidResult = sshJClientActions.executeCommand(ip, "sudo blkid -s UUID " + volumes.stream()
                     .map(v -> getDevicePath(cloudFunctionality, v))
                     .collect(Collectors.joining(" ")));
             return blkidResult.getRight().lines()
@@ -190,7 +190,7 @@ public class ClusterVolumeValidationService {
     }
 
     private Map<String, Integer> getLsblkSizesByUuid(String ip) {
-        Pair<Integer, String> result = sshJClient.executeCommand(ip, "lsblk -b -n -o UUID,SIZE");
+        Pair<Integer, String> result = sshJClientActions.executeCommand(ip, "lsblk -b -n -o UUID,SIZE");
         return result.getRight().lines()
                 .map(String::trim)
                 .map(LSBLK_UUID_SIZE_PATTERN::matcher)
