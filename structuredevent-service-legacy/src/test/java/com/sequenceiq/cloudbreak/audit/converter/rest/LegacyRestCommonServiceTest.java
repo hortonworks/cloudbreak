@@ -25,6 +25,9 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyRestCommonService;
 @ExtendWith(MockitoExtension.class)
 public class LegacyRestCommonServiceTest {
 
+    // Body truncated at LoggingStream.MAX_CONTENT_LENGTH: unterminated string + "...more..." suffix -> not valid JSON
+    private static final String TRUNCATED_JSON = "{\"name\":\"name3\",\"blueprint\":\"eyJ0ZW1wbGF0ZSI6IjcuMi4xOCJ9...more...";
+
     @InjectMocks
     private LegacyRestCommonService legacyRestCommonService;
 
@@ -126,5 +129,67 @@ public class LegacyRestCommonServiceTest {
                 () -> legacyRestCommonService.addClusterCrnAndNameIfPresent(event));
         assertEquals(exception.getMessage(), "Cannot determine the resource crn or name, so we does not support for auditing for method: "
                 + "POST, uri: uri, body: null");
+    }
+
+    @Test
+    public void testWhenResponseBodyIsInvalidJsonThenNameAndCrnComeFromRequestBody() {
+        StructuredRestCallEvent event = new StructuredRestCallEvent();
+        OperationDetails operation = new OperationDetails();
+        RestCallDetails restCallDetails = new RestCallDetails();
+        RestRequestDetails request = new RestRequestDetails();
+        request.setBody(new Json(Map.of("name", "name2", "resourceCrn", "crn2")).getValue());
+        RestResponseDetails response = new RestResponseDetails();
+        response.setBody(TRUNCATED_JSON);
+        restCallDetails.setRestRequest(request);
+        restCallDetails.setRestResponse(response);
+        event.setRestCall(restCallDetails);
+        event.setOperation(operation);
+        Map<String, Object> expected = new HashMap<>();
+        expected.put(CLUSTER_NAME, "name2");
+        expected.put(CLUSTER_CRN, "crn2");
+        Map<String, Object> actual = legacyRestCommonService.addClusterCrnAndNameIfPresent(event);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testWhenRequestBodyIsInvalidJsonThenNameAndCrnComeFromResponseBody() {
+        StructuredRestCallEvent event = new StructuredRestCallEvent();
+        OperationDetails operation = new OperationDetails();
+        RestCallDetails restCallDetails = new RestCallDetails();
+        RestRequestDetails request = new RestRequestDetails();
+        request.setBody(TRUNCATED_JSON);
+        RestResponseDetails response = new RestResponseDetails();
+        response.setBody(new Json(Map.of("name", "name3", "resourceCrn", "crn3")).getValue());
+        restCallDetails.setRestRequest(request);
+        restCallDetails.setRestResponse(response);
+        event.setRestCall(restCallDetails);
+        event.setOperation(operation);
+        Map<String, Object> expected = new HashMap<>();
+        expected.put(CLUSTER_NAME, "name3");
+        expected.put(CLUSTER_CRN, "crn3");
+        Map<String, Object> actual = legacyRestCommonService.addClusterCrnAndNameIfPresent(event);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testWhenBothBodiesAreInvalidJsonThenNameAndCrnComeFromOperationWithoutThrowing() {
+        StructuredRestCallEvent event = new StructuredRestCallEvent();
+        OperationDetails operation = new OperationDetails();
+        operation.setResourceCrn("crn1");
+        operation.setResourceName("name1");
+        RestCallDetails restCallDetails = new RestCallDetails();
+        RestRequestDetails request = new RestRequestDetails();
+        request.setBody(TRUNCATED_JSON);
+        RestResponseDetails response = new RestResponseDetails();
+        response.setBody(TRUNCATED_JSON);
+        restCallDetails.setRestRequest(request);
+        restCallDetails.setRestResponse(response);
+        event.setRestCall(restCallDetails);
+        event.setOperation(operation);
+        Map<String, Object> expected = new HashMap<>();
+        expected.put(CLUSTER_NAME, "name1");
+        expected.put(CLUSTER_CRN, "crn1");
+        Map<String, Object> actual = legacyRestCommonService.addClusterCrnAndNameIfPresent(event);
+        assertEquals(expected, actual);
     }
 }

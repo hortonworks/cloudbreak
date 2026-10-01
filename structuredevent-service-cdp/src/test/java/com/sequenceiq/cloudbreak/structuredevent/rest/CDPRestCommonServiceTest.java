@@ -31,6 +31,9 @@ class CDPRestCommonServiceTest {
 
     public static final String CLUSTER_CRN = "clusterCrn";
 
+    // Body truncated at LoggingStream.MAX_CONTENT_LENGTH: unterminated string + "...more..." suffix -> not valid JSON
+    public static final String TRUNCATED_JSON = "{\"name\":\"name3\",\"blueprint\":\"eyJ0ZW1wbGF0ZSI6IjcuMi4xOCJ9...more...";
+
     @InjectMocks
     private CDPRestCommonService underTest;
 
@@ -178,6 +181,55 @@ class CDPRestCommonServiceTest {
         expected.put("names", "pName");
         expected.put("crns", "pCrn");
         Map<String, String> actual = underTest.collectCrnAndNameIfPresent(restCallDetails, operationDetails, restParams, "names", "crns");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testWhenResponseBodyIsInvalidJsonThenNameAndCrnComeFromRequestBody() {
+        RestCallDetails restCallDetails = new RestCallDetails();
+        RestRequestDetails request = new RestRequestDetails();
+        request.setBody(new Json(Map.of("name", "name2", "resourceCrn", "crn2")).getValue());
+        RestResponseDetails response = new RestResponseDetails();
+        response.setBody(TRUNCATED_JSON);
+        restCallDetails.setRestRequest(request);
+        restCallDetails.setRestResponse(response);
+        Map<String, String> expected = new HashMap<>();
+        expected.put(CLUSTER_NAME, "name2");
+        expected.put(CLUSTER_CRN, "crn2");
+        Map<String, String> actual = underTest.collectCrnAndNameIfPresent(restCallDetails, null, Collections.emptyMap(), CLUSTER_NAME, CLUSTER_CRN);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testWhenRequestBodyIsInvalidJsonThenNameAndCrnComeFromResponseBody() {
+        RestCallDetails restCallDetails = new RestCallDetails();
+        RestRequestDetails request = new RestRequestDetails();
+        request.setBody(TRUNCATED_JSON);
+        RestResponseDetails response = new RestResponseDetails();
+        response.setBody(new Json(Map.of("name", "name3", "resourceCrn", "crn3")).getValue());
+        restCallDetails.setRestRequest(request);
+        restCallDetails.setRestResponse(response);
+        Map<String, String> expected = new HashMap<>();
+        expected.put(CLUSTER_NAME, "name3");
+        expected.put(CLUSTER_CRN, "crn3");
+        Map<String, String> actual = underTest.collectCrnAndNameIfPresent(restCallDetails, null, Collections.emptyMap(), CLUSTER_NAME, CLUSTER_CRN);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testWhenBothBodiesAreInvalidJsonThenNameAndCrnComeFromRestParamsWithoutThrowing() {
+        Map<String, String> restParams = Map.of(CLUSTER_NAME, "name1", CLUSTER_CRN, "crn1");
+        RestCallDetails restCallDetails = new RestCallDetails();
+        RestRequestDetails request = new RestRequestDetails();
+        request.setBody(TRUNCATED_JSON);
+        RestResponseDetails response = new RestResponseDetails();
+        response.setBody(TRUNCATED_JSON);
+        restCallDetails.setRestRequest(request);
+        restCallDetails.setRestResponse(response);
+        Map<String, String> expected = new HashMap<>();
+        expected.put(CLUSTER_NAME, "name1");
+        expected.put(CLUSTER_CRN, "crn1");
+        Map<String, String> actual = underTest.collectCrnAndNameIfPresent(restCallDetails, null, restParams, CLUSTER_NAME, CLUSTER_CRN);
         assertEquals(expected, actual);
     }
 }
