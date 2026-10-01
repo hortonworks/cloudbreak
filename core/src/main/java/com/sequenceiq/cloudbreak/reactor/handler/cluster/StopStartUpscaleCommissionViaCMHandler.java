@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_CM_TIMEOUT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_EXCLUDE_LOST_NODES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART;
 
 import java.util.Collections;
@@ -17,13 +16,11 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -140,8 +137,6 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                         hostsToRecommission.size(), hostNames.size(), missingHostsInCm);
             }
 
-            excludeAndLogDisconnectedNMsForUpscale(stack, hostsToRecommission, request);
-
             // TODO CB-15132: Eventually ensure CM, relevant services (YARN RM) are in a functional state - or fail/delay the operation
 
             // TODO CB-15132: Potentially poll nodes for success. Don't fail the entire operation if a single node fails to commission.
@@ -177,19 +172,6 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
             String message = "Failed while attempting to commission nodes via CM";
             LOGGER.error(message);
             return new StopStartUpscaleCommissionViaCMResult(message, e, request);
-        }
-    }
-
-    private void excludeAndLogDisconnectedNMsForUpscale(Stack stack, Map<String, InstanceMetaData> hostsToRecommission,
-            StopStartUpscaleCommissionViaCMRequest request) {
-        ClusterHealthService clusterHealthService = clusterApiConnectors.getConnector(stack).clusterHealthService();
-        Set<String> disconnectedNMHostNames = clusterHealthService.getDisconnectedNodeManagers();
-        if (!disconnectedNMHostNames.isEmpty()) {
-            LOGGER.info("Found {} disconnected NodeManagers: {} in hostgroup: {}. Excluding them from recommission list", disconnectedNMHostNames.size(),
-                    disconnectedNMHostNames, request.getHostGroupName());
-            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_EXCLUDE_LOST_NODES,
-                    String.valueOf(disconnectedNMHostNames.size()), String.join(", ", disconnectedNMHostNames));
-            hostsToRecommission.entrySet().removeIf(e -> disconnectedNMHostNames.contains(StringUtils.lowerCase(e.getKey())));
         }
     }
 }

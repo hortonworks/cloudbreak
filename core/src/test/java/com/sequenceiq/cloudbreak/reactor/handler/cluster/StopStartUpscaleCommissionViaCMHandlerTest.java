@@ -1,14 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -33,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -43,7 +38,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
@@ -90,9 +84,6 @@ class StopStartUpscaleCommissionViaCMHandlerTest {
 
     @Mock
     private ClusterCommissionService clusterCommissionService;
-
-    @Mock
-    private ClusterHealthService clusterHealthService;
 
     @Mock
     private StackService stackService;
@@ -308,42 +299,40 @@ class StopStartUpscaleCommissionViaCMHandlerTest {
     }
 
     @Test
-    void testExcludeLostNodesFromCmCommission() throws ClusterClientInitException {
-        int commissionInstanceCount = 4;
-        int lostInstanceCount = 2;
-        List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
+    void testDecommissionedNodesAreNotExcludedFromRecommission() throws ClusterClientInitException {
+        // CB-34694: nodes in DECOMMISSIONED state after stop-start downscale must not be excluded
+        // from the recommission list during upscale. All nodes must be passed to recommissionClusterNodes().
+        int healthyInstanceCount = 4;
+        int decommissionedInstanceCount = 2;
+        List<InstanceMetaData> healthyInstances = createInstanceMetaDataWithStatus(healthyInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
-        List<InstanceMetaData> lostInstanceMetaDataToExclude = createInstanceMetaDataWithStatus(lostInstanceCount, "fqdn-l-",
-                InstanceStatus.SERVICES_UNHEALTHY);
+        List<InstanceMetaData> decommissionedInstances = createInstanceMetaDataWithStatus(decommissionedInstanceCount, "fqdn-d-",
+                InstanceStatus.SERVICES_RUNNING);
 
-        List<InstanceMetaData> combined = Stream.of(instancesToCommission, lostInstanceMetaDataToExclude).flatMap(Collection::stream).toList();
-        HostGroup hostGroup = createHostGroup(combined);
+        List<InstanceMetaData> allInstances = Stream.of(healthyInstances, decommissionedInstances).flatMap(Collection::stream).toList();
+        HostGroup hostGroup = createHostGroup(allInstances);
 
         ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
-        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(combined))).thenReturn(extendedPollingResult);
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(allInstances))).thenReturn(extendedPollingResult);
 
-        Set<String> hostNames = combined.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
-        Set<String> disconnectedNMHostNames = lostInstanceMetaDataToExclude.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
-        Map<String, InstanceMetaData> cmAvailableHosts = instancesToCommission.stream().collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN,
-                Function.identity()));
-        Map<String, InstanceMetaData> combinedCmHosts = combined.stream().collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, Function.identity()));
-        Set<String> recommissionedFqdns = cmAvailableHosts.keySet().stream().collect(Collectors.toUnmodifiableSet());
+        Set<String> allHostNames = allInstances.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        Map<String, InstanceMetaData> allCmHosts = allInstances.stream()
+                .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, Function.identity()));
+        Set<String> recommissionedFqdns = allCmHosts.keySet().stream().collect(Collectors.toUnmodifiableSet());
 
-        setupPerTestMocks(hostGroup, hostNames, combinedCmHosts, recommissionedFqdns);
-        when(clusterHealthService.getDisconnectedNodeManagers()).thenReturn(disconnectedNMHostNames);
+        setupPerTestMocks(hostGroup, allHostNames, allCmHosts, recommissionedFqdns);
 
         StopStartUpscaleCommissionViaCMRequest request =
-                new StopStartUpscaleCommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, new ArrayList<>(combined), emptyList());
+                new StopStartUpscaleCommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, new ArrayList<>(allInstances), emptyList());
 
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
         assertThat(selectable).isInstanceOf(StopStartUpscaleCommissionViaCMResult.class);
 
         StopStartUpscaleCommissionViaCMResult result = (StopStartUpscaleCommissionViaCMResult) selectable;
-        assertThat(result.getSuccessfullyCommissionedFqdns()).hasSize(instancesToCommission.size());
+        assertThat(result.getSuccessfullyCommissionedFqdns()).hasSize(healthyInstanceCount + decommissionedInstanceCount);
         assertThat(result.getNotRecommissionedFqdns()).isEmpty();
-        verify(flowMessageService, times(1)).fireEventAndLog(eq(100L), eq(UPDATE_IN_PROGRESS.name()),
-                eq(ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_EXCLUDE_LOST_NODES), anyString(), anyString());
+        assertThat(result.getStatus()).isEqualTo(EventStatus.OK);
     }
 
     private List<InstanceMetaData> createInstanceMetaDataWithStatus(int count, String fqdnPrefix, InstanceStatus status) {
@@ -380,7 +369,6 @@ class StopStartUpscaleCommissionViaCMHandlerTest {
         lenient().when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterSetupService()).thenReturn(clusterSetupService);
         lenient().when(clusterApi.clusterCommissionService()).thenReturn(clusterCommissionService);
-        lenient().when(clusterApi.clusterHealthService()).thenReturn(clusterHealthService);
     }
 
     private void setupPerTestMocks(HostGroup hostGroup, Set<String> hostnames,

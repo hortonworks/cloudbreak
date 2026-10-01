@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_EXCLUDE_LOST_NODES;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.CloudInstanceIdToInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -121,8 +119,6 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
                         missingHostsInCm);
             }
 
-            excludeAndLogDisconnectedNMsForDownscale(stack, hostsToRemove, request);
-
             // TODO CB-14929: Potentially put the nodes into maintenance mode before decommissioning?
 
             // TODO CB-15132: Eventually, try parsing the results of the CM decommission, and see if a partial decommission went through in the
@@ -214,19 +210,6 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
         boolean recoveryCandidate = additionalHostNamesToDecommission.contains(entry.getKey());
 
         return !(recommendedForDecommission || recoveryCandidate);
-    }
-
-    private void excludeAndLogDisconnectedNMsForDownscale(Stack stack, Map<String, InstanceMetadataView> hostsToRemove,
-            StopStartDownscaleDecommissionViaCMRequest request) {
-        ClusterHealthService clusterHealthService = clusterApiConnectors.getConnector(stack).clusterHealthService();
-        Set<String> disconnectedNMHostNames = clusterHealthService.getDisconnectedNodeManagers();
-        if (!disconnectedNMHostNames.isEmpty()) {
-            LOGGER.info("Found {} disconnected NodeManagers: {}, for hostgroup {}. Excluding them from de-commission list", disconnectedNMHostNames.size(),
-                    disconnectedNMHostNames, request.getHostGroupName());
-            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_EXCLUDE_LOST_NODES,
-                    String.valueOf(disconnectedNMHostNames.size()), String.join(", ", disconnectedNMHostNames));
-            hostsToRemove.entrySet().removeIf(e -> disconnectedNMHostNames.contains(StringUtils.lowerCase(e.getKey())));
-        }
     }
 
     private Set<String> getHostNamesForPrivateIds(Set<Long> hostIdsToRemove, Stack stack) {

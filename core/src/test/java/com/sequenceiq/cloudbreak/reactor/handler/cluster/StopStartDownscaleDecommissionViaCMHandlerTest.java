@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_EXCLUDE_LOST_NODES;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +46,6 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.CloudInstanceIdToInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -116,9 +114,6 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
 
     @Mock
     private ClusterDecomissionService clusterDecomissionService;
-
-    @Mock
-    private ClusterHealthService clusterHealthService;
 
     @BeforeEach
     void setUp() {
@@ -546,27 +541,25 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     @Test
-    void testExcludeLostNodesFromCmDecommission() throws Exception {
-        int instancesToDecommissionCount = 5;
-        int lostInstancesToExcludeCount = 2;
-        List<InstanceMetadataView> instancesToDecommission = getInstancesWithStatus(0, instancesToDecommissionCount, INSTANCE_ID_PREFIX, FQDN_PREFIX,
+    void testAllNodesDecommissionedRegardlessOfConnectivityState() throws Exception {
+        // CB-34694: nodes with bad connectivity should not be excluded from decommission.
+        // All nodes must be passed to decommissionClusterNodesStopStart() regardless of their state.
+        int healthyInstanceCount = 5;
+        int badConnectivityInstanceCount = 2;
+        List<InstanceMetadataView> healthyInstances = getInstancesWithStatus(0, healthyInstanceCount, INSTANCE_ID_PREFIX, FQDN_PREFIX,
                 InstanceStatus.SERVICES_HEALTHY);
-        List<InstanceMetadataView> lostInstances = getInstancesWithStatus(instancesToDecommissionCount, lostInstancesToExcludeCount, INSTANCE_ID_PREFIX,
+        List<InstanceMetadataView> badConnectivityInstances = getInstancesWithStatus(healthyInstanceCount, badConnectivityInstanceCount, INSTANCE_ID_PREFIX,
                 FQDN_PREFIX, InstanceStatus.SERVICES_UNHEALTHY);
-        List<InstanceMetadataView> combined = Stream.of(instancesToDecommission, lostInstances).flatMap(Collection::stream).toList();
+        List<InstanceMetadataView> combined = Stream.of(healthyInstances, badConnectivityInstances).flatMap(Collection::stream).toList();
 
-        Map<String, InstanceMetadataView> collected = combined.stream().collect(Collectors.toMap(InstanceMetadataView::getDiscoveryFQDN, Function.identity()));
-        Map<String, InstanceMetadataView> collectedInstanceDecommissioned = instancesToDecommission.stream()
-                .collect(Collectors.toMap(InstanceMetadataView::getDiscoveryFQDN, imv -> imv));
-        Set<String> fqdnsDecommissioned = instancesToDecommission.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
-        Set<String> lostHostNames = lostInstances.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
+        Map<String, InstanceMetadataView> allCollected = combined.stream()
+                .collect(Collectors.toMap(InstanceMetadataView::getDiscoveryFQDN, Function.identity()));
+        Set<String> allFqdnsDecommissioned = combined.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
 
-        setupAdditionalMocks(INSTANCE_GROUP_NAME, combined, collected, fqdnsDecommissioned);
-        when(clusterHealthService.getDisconnectedNodeManagers()).thenReturn(lostHostNames);
+        setupAdditionalMocks(INSTANCE_GROUP_NAME, combined, allCollected, allFqdnsDecommissioned);
         when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenThrow(new TimeoutException());
 
         Set<Long> instanceIdsToDecommission = combined.stream().map(InstanceMetadataView::getPrivateId).collect(Collectors.toSet());
-        Set<String> hostnamesToDecommission = combined.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
 
         StopStartDownscaleDecommissionViaCMRequest request =
                 new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission, emptyList());
@@ -577,26 +570,8 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         assertThat(selectable).isInstanceOf(StopStartDownscaleDecommissionViaCMResult.class);
 
         StopStartDownscaleDecommissionViaCMResult result = (StopStartDownscaleDecommissionViaCMResult) selectable;
-        assertThat(result.getDecommissionedHostFqdns()).hasSize(instancesToDecommission.size());
+        assertThat(result.getDecommissionedHostFqdns()).hasSize(healthyInstanceCount + badConnectivityInstanceCount);
         assertThat(result.getNotDecommissionedHostFqdns()).isEmpty();
-
-        List<Long> decomissionedInstanceIds = instancesToDecommission.stream().map(InstanceMetadataView::getPrivateId).sorted().toList();
-
-        ArgumentCaptor<List<Long>> captor = ArgumentCaptor.forClass(List.class);
-        verify(instanceMetaDataService).updateInstanceStatuses(captor.capture(), eq(InstanceStatus.DECOMMISSIONED), anyString());
-        assertThat(captor.getValue()).hasSameElementsAs(decomissionedInstanceIds);
-
-        verify(clusterDecomissionService).collectHostsToRemove(eq(INSTANCE_GROUP_NAME), eq(hostnamesToDecommission));
-        verify(clusterDecomissionService).decommissionClusterNodesStopStart(eq(collectedInstanceDecommissioned), anyLong());
-
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
-                eq(CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE), eq(String.valueOf(fqdnsDecommissioned.size())));
-        verify(clusterDecomissionService).enterMaintenanceMode(eq(fqdnsDecommissioned));
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
-                eq(CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE), eq(String.valueOf(fqdnsDecommissioned.size())));
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(CLUSTER_SCALING_STOPSTART_DOWNSCALE_EXCLUDE_LOST_NODES),
-                eq(String.valueOf(lostInstances.size())), eq(String.join(", ",
-                        lostInstances.stream().map(InstanceMetadataView::getDiscoveryFQDN).toList())));
     }
 
     private void testCollectDecommissionCombinationsInternal(int instancesToDecommissionCount, int expcetedInstanceToCollectCount,
@@ -713,7 +688,6 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
 
         lenient().when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);
-        lenient().when(clusterApi.clusterHealthService()).thenReturn(clusterHealthService);
     }
 
     private void setupAdditionalMocks(String hostGroupName, List<InstanceMetadataView> allInstanceMetadata,
