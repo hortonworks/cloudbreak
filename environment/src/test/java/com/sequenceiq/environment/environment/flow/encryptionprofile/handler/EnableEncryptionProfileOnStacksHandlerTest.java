@@ -135,8 +135,8 @@ class EnableEncryptionProfileOnStacksHandlerTest {
                 availableDatahub(DATAHUB_CRN_1), availableDatahub(DATAHUB_CRN_2))));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_1), anySet())).thenReturn(datahubDetail(null));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_2), anySet())).thenReturn(datahubDetail(null));
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_1, null)).thenReturn(datahubFlow1);
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_2, null)).thenReturn(datahubFlow2);
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_1, null)).thenReturn(datahubFlow1);
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_2, null)).thenReturn(datahubFlow2);
         when(sdxPollerProvider.flowListPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justFinish);
         when(datalakeMultipleFlowsResultEvaluator.anyFailed(anyList())).thenReturn(false);
         when(datahubPollerProvider.multipleFlowsPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justFinish);
@@ -145,8 +145,8 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         verify(sdxService, times(1)).enableEncryptionProfile(DATALAKE_CRN, null);
-        verify(datahubService, times(1)).updateSslConfigs(DATAHUB_CRN_1, null);
-        verify(datahubService, times(1)).updateSslConfigs(DATAHUB_CRN_2, null);
+        verify(datahubService, times(1)).enableEncryptionProfile(DATAHUB_CRN_1, null);
+        verify(datahubService, times(1)).enableEncryptionProfile(DATAHUB_CRN_2, null);
         verify(sdxPollerProvider, times(1)).flowListPoller(eq(ENV_ID), anyList());
         verify(datahubPollerProvider, times(1)).multipleFlowsPoller(eq(ENV_ID), anyList());
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
@@ -161,7 +161,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         when(sdxService.listByEnvironmentCrn(ENV_CRN)).thenReturn(List.of(stoppedSdx));
         when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(availableDatahub(DATAHUB_CRN_1))));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_1), anySet())).thenReturn(datahubDetail(null));
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_1, null))
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_1, null))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "dh-flow-1"));
         when(datahubPollerProvider.multipleFlowsPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justFinish);
         when(datahubMultipleFlowsResultEvaluator.collectFailed(anyList())).thenReturn(List.of());
@@ -171,7 +171,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         verify(sdxService, never()).enableEncryptionProfile(any(), any());
         verify(sdxService, never()).getDetailByCrn(any());
         verify(sdxPollerProvider, never()).flowListPoller(any(), any());
-        verify(datahubService, times(1)).updateSslConfigs(DATAHUB_CRN_1, null);
+        verify(datahubService, times(1)).enableEncryptionProfile(DATAHUB_CRN_1, null);
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
     }
 
@@ -182,7 +182,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
 
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
-        verify(datahubService, never()).updateSslConfigs(any(), any());
+        verify(datahubService, never()).enableEncryptionProfile(any(), any());
         verify(datahubService, never()).getByCrn(any(), anySet());
         verify(datahubPollerProvider, never()).multipleFlowsPoller(any(), any());
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
@@ -200,7 +200,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
 
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
-        verify(datahubService, never()).updateSslConfigs(any(), any());
+        verify(datahubService, never()).enableEncryptionProfile(any(), any());
         verify(datahubService, never()).getByCrn(any(), anySet());
         verify(datahubPollerProvider, never()).multipleFlowsPoller(any(), any());
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
@@ -226,15 +226,15 @@ class EnableEncryptionProfileOnStacksHandlerTest {
                 availableDatahub(DATAHUB_CRN_1), availableDatahub(DATAHUB_CRN_2))));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_1), anySet())).thenReturn(datahubDetail(null));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_2), anySet())).thenReturn(datahubDetail(OWN_ENCRYPTION_PROFILE_CRN));
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_1, null))
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_1, null))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "dh-flow-1"));
         when(datahubPollerProvider.multipleFlowsPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justFinish);
         when(datahubMultipleFlowsResultEvaluator.collectFailed(anyList())).thenReturn(List.of());
 
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
-        verify(datahubService, times(1)).updateSslConfigs(DATAHUB_CRN_1, null);
-        verify(datahubService, never()).updateSslConfigs(eq(DATAHUB_CRN_2), any());
+        verify(datahubService, times(1)).enableEncryptionProfile(DATAHUB_CRN_1, null);
+        verify(datahubService, never()).enableEncryptionProfile(eq(DATAHUB_CRN_2), any());
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
     }
 
@@ -246,7 +246,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         when(sdxService.enableEncryptionProfile(DATALAKE_CRN, null)).thenReturn(datalakeFlow);
         when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(availableDatahub(DATAHUB_CRN_1))));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_1), anySet())).thenReturn(datahubDetail(LEGACY_ENCRYPTION_PROFILE_CRN));
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_1, null))
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_1, null))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "dh-flow-1"));
         when(sdxPollerProvider.flowListPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justFinish);
         when(datalakeMultipleFlowsResultEvaluator.anyFailed(anyList())).thenReturn(false);
@@ -256,7 +256,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         verify(sdxService, times(1)).enableEncryptionProfile(DATALAKE_CRN, null);
-        verify(datahubService, times(1)).updateSslConfigs(DATAHUB_CRN_1, null);
+        verify(datahubService, times(1)).enableEncryptionProfile(DATAHUB_CRN_1, null);
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
     }
 
@@ -270,7 +270,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         verify(sdxService, never()).enableEncryptionProfile(any(), any());
-        verify(datahubService, never()).updateSslConfigs(any(), any());
+        verify(datahubService, never()).enableEncryptionProfile(any(), any());
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
     }
 
@@ -285,7 +285,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
 
         assertThatThrownBy(() -> underTest.doAccept(new HandlerEvent<>(new Event<>(event))))
                 .isInstanceOf(SdxOperationFailedException.class);
-        verify(datahubService, never()).updateSslConfigs(any(), any());
+        verify(datahubService, never()).enableEncryptionProfile(any(), any());
     }
 
     @Test
@@ -294,7 +294,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         when(sdxService.listByEnvironmentCrn(ENV_CRN)).thenReturn(List.of());
         when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(availableDatahub(DATAHUB_CRN_1))));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_1), anySet())).thenReturn(datahubDetail(null));
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_1, null)).thenReturn(datahubFlow);
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_1, null)).thenReturn(datahubFlow);
         when(datahubPollerProvider.multipleFlowsPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justFinish);
         when(datahubMultipleFlowsResultEvaluator.collectFailed(anyList())).thenReturn(List.of(datahubFlow));
 
@@ -312,7 +312,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
 
         assertThatThrownBy(() -> underTest.doAccept(new HandlerEvent<>(new Event<>(event))))
                 .isInstanceOf(CloudbreakServiceException.class);
-        verify(datahubService, never()).updateSslConfigs(any(), any());
+        verify(datahubService, never()).enableEncryptionProfile(any(), any());
     }
 
     @Test
@@ -320,7 +320,7 @@ class EnableEncryptionProfileOnStacksHandlerTest {
         when(sdxService.listByEnvironmentCrn(ENV_CRN)).thenReturn(List.of());
         when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(availableDatahub(DATAHUB_CRN_1))));
         lenient().when(datahubService.getByCrn(eq(DATAHUB_CRN_1), anySet())).thenReturn(datahubDetail(null));
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_1, null))
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_1, null))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "dh-flow-1"));
         when(datahubPollerProvider.multipleFlowsPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justContinue);
 
@@ -335,15 +335,15 @@ class EnableEncryptionProfileOnStacksHandlerTest {
                 availableDatahub(DATAHUB_CRN_1), availableDatahub(DATAHUB_CRN_2))));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_1), anySet())).thenThrow(new DatahubOperationFailedException("boom"));
         when(datahubService.getByCrn(eq(DATAHUB_CRN_2), anySet())).thenReturn(datahubDetail(null));
-        when(datahubService.updateSslConfigs(DATAHUB_CRN_2, null))
+        when(datahubService.enableEncryptionProfile(DATAHUB_CRN_2, null))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "dh-flow-2"));
         when(datahubPollerProvider.multipleFlowsPoller(eq(ENV_ID), anyList())).thenReturn(AttemptResults::justFinish);
         when(datahubMultipleFlowsResultEvaluator.collectFailed(anyList())).thenReturn(List.of());
 
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
-        verify(datahubService, never()).updateSslConfigs(eq(DATAHUB_CRN_1), any());
-        verify(datahubService, times(1)).updateSslConfigs(DATAHUB_CRN_2, null);
+        verify(datahubService, never()).enableEncryptionProfile(eq(DATAHUB_CRN_1), any());
+        verify(datahubService, times(1)).enableEncryptionProfile(DATAHUB_CRN_2, null);
         assertThat(response.getSelector()).isEqualTo(FINISH_ENABLE_ENCRYPTION_PROFILE_EVENT.selector());
     }
 

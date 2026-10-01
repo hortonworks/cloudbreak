@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteDisksAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDisableEncryptionProfileAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDiskAddAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDiskUpdateAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXEncryptionProfileEnableAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInstanceMetadataUpdateAction;
@@ -49,7 +50,6 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpdatePublicDnsEntriesAction;
-import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpdateSslConfigurationsAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXVerticalScaleAction;
@@ -246,7 +246,7 @@ public class DistroXTestClient {
         return new DistroXMigrationFromZookeeperToKraftStatusAction(desiredStatus);
     }
 
-    public Action<DistroXTestDto, CloudbreakClient> updateSslConfigurations() {
-        return new DistroXUpdateSslConfigurationsAction();
+    public Action<DistroXTestDto, CloudbreakClient> enableEncryptionProfile() {
+        return new DistroXEncryptionProfileEnableAction();
     }
 }

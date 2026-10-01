@@ -114,25 +114,25 @@ class DatahubServiceTest {
     }
 
     @Test
-    void updateSslConfigsSuccess() {
-        when(distroXV1Endpoint.updateSslConfigurationsByCrn(DH_CRN_1, ENCRYPTION_PROFILE_CRN)).thenReturn(flowIdentifier);
+    void enableEncryptionProfileSuccess() {
+        when(distroXV1Endpoint.enableEncryptionProfileByCrn(DH_CRN_1, ENCRYPTION_PROFILE_CRN)).thenReturn(flowIdentifier);
 
         FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN,
-                () -> underTest.updateSslConfigs(DH_CRN_1, ENCRYPTION_PROFILE_CRN));
+                () -> underTest.enableEncryptionProfile(DH_CRN_1, ENCRYPTION_PROFILE_CRN));
 
         assertThat(result).isEqualTo(flowIdentifier);
-        verify(distroXV1Endpoint).updateSslConfigurationsByCrn(DH_CRN_1, ENCRYPTION_PROFILE_CRN);
+        verify(distroXV1Endpoint).enableEncryptionProfileByCrn(DH_CRN_1, ENCRYPTION_PROFILE_CRN);
     }
 
     @Test
-    void updateSslConfigsFailure() {
+    void enableEncryptionProfileFailure() {
         WebApplicationException cause = new WebApplicationException("cause");
-        when(distroXV1Endpoint.updateSslConfigurationsByCrn(DH_CRN_1, ENCRYPTION_PROFILE_CRN)).thenThrow(cause);
+        when(distroXV1Endpoint.enableEncryptionProfileByCrn(DH_CRN_1, ENCRYPTION_PROFILE_CRN)).thenThrow(cause);
 
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN,
-                () -> underTest.updateSslConfigs(DH_CRN_1, ENCRYPTION_PROFILE_CRN)))
+                () -> underTest.enableEncryptionProfile(DH_CRN_1, ENCRYPTION_PROFILE_CRN)))
                 .isInstanceOf(DatahubOperationFailedException.class)
-                .hasMessage("Failed to update SSL configurations for Data Hub CRN '%s' due to '%s'.", DH_CRN_1, EXTRACTED_ERROR);
+                .hasMessage("Failed to enable encryption profile for Data Hub CRN '%s' due to '%s'.", DH_CRN_1, EXTRACTED_ERROR);
     }
 
 }

@@ -157,14 +157,14 @@ public class DatahubService {
         }
     }
 
-    public FlowIdentifier updateSslConfigs(String datahubCrn, String encryptionProfileCrn) {
+    public FlowIdentifier enableEncryptionProfile(String datahubCrn, String encryptionProfileCrn) {
         try {
-            LOGGER.debug("Calling DistroX update SSL configurations by CRN {}", datahubCrn);
+            LOGGER.debug("Calling DistroX enable encryption profile by CRN {}", datahubCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> distroXV1Endpoint.updateSslConfigurationsByCrn(datahubCrn, encryptionProfileCrn));
+                    () -> distroXV1Endpoint.enableEncryptionProfileByCrn(datahubCrn, encryptionProfileCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Failed to update SSL configurations for Data Hub CRN '%s' due to '%s'.", datahubCrn, errorMessage);
+            String message = String.format("Failed to enable encryption profile for Data Hub CRN '%s' due to '%s'.", datahubCrn, errorMessage);
             LOGGER.error(message, e);
             throw new DatahubOperationFailedException(message, e);
         }

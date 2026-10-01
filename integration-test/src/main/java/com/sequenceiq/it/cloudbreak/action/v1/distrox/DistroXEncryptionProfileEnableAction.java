@@ -10,20 +10,20 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
-public class DistroXUpdateSslConfigurationsAction implements Action<DistroXTestDto, CloudbreakClient> {
+public class DistroXEncryptionProfileEnableAction implements Action<DistroXTestDto, CloudbreakClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXUpdateSslConfigurationsAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXEncryptionProfileEnableAction.class);
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         String encryptionProfileNameOrCrn = testDto.getRequest().getCluster().getEncryptionProfileNameOrCrn();
-        Log.when(LOGGER, String.format("Updating SSL Configurations, dh name: %s encryption profile CRN: %s", testDto.getName(), encryptionProfileNameOrCrn));
+        Log.when(LOGGER, String.format("Enabling encryption profile, dh name: %s encryption profile CRN: %s", testDto.getName(), encryptionProfileNameOrCrn));
         FlowIdentifier flowIdentifier = client
                 .getDefaultClient(testContext)
                 .distroXV1Endpoint()
-                .updateSslConfigurationsByName(testDto.getName(), encryptionProfileNameOrCrn);
-        testDto.setFlow("Update SSL Configurations", flowIdentifier);
-        Log.when(LOGGER, "Updated SSL Configurations successfully");
+                .enableEncryptionProfileByName(testDto.getName(), encryptionProfileNameOrCrn);
+        testDto.setFlow("Enable Encryption Profile", flowIdentifier);
+        Log.when(LOGGER, "Encryption Profile was enabled successfully");
         return testDto;
     }
 

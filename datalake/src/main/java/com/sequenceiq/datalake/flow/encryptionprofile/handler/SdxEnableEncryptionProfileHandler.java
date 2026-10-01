@@ -70,7 +70,7 @@ public class SdxEnableEncryptionProfileHandler extends ExceptionCatcherEventHand
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         LOGGER.info("Triggering Enable Encryption Profile on stack for SDX: {}, encryptionProfileCrn: {}", sdxId, encryptionProfileCrn);
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> stackV4Endpoint.updateSslConfigurationsByCrn(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), encryptionProfileCrn));
+                () -> stackV4Endpoint.enableEncryptionProfileByCrn(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), encryptionProfileCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         LOGGER.info("Polling Enable Encryption Profile flow in core, flowIdentifier: {}", flowIdentifier);
         PollingConfig pollingConfig = new PollingConfig(SLEEP_INTERVAL_IN_SECONDS, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);

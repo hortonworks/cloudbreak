@@ -134,15 +134,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE)
     private String environmentType;
 
-    /**
-     * @deprecated Use encryptionProfileNameOrCrn instead
-     * To be removed after thunderhead change to encryptionProfileNameOrCrn (CB-32051)
-     * To be removed by CB-32052
-     **/
-    @Deprecated(forRemoval = true)
-    @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE_CRN)
-    private String encryptionProfileCrn;
-
     @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE_NAME_OR_CRN)
     private String encryptionProfileNameOrCrn;
 
@@ -373,14 +364,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setEnvironmentType(String environmentType) {
         this.environmentType = environmentType;
-    }
-
-    public String getEncryptionProfileCrn() {
-        return encryptionProfileCrn;
-    }
-
-    public void setEncryptionProfileCrn(String encryptionProfileCrn) {
-        this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
     public String getEncryptionProfileNameOrCrn() {

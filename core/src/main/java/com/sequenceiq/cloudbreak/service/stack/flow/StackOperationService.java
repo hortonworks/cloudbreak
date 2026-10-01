@@ -882,7 +882,7 @@ public class StackOperationService {
         updateRequest.getGroup().toLowerCase(Locale.ROOT);
     }
 
-    public FlowIdentifier updateSslConfigsOnCluster(NameOrCrn nameOrCrn, String accountId, String encryptionProfileNameOrCrn) {
+    public FlowIdentifier enableEncryptionProfileOnCluster(NameOrCrn nameOrCrn, String accountId, String encryptionProfileNameOrCrn) {
         LOGGER.info("Triggering enable encryption profile on stack ('{}')", nameOrCrn.getNameOrCrn());
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         String encryptionProfileCrn = null;

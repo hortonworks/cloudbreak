@@ -1036,7 +1036,7 @@ class StackOperationServiceTest {
     }
 
     @Test
-    public void testUpdateSslConfigsOnCluster() {
+    public void testEnableEncryptionProfileOnCluster() {
         StackDto stack = mock(StackDto.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         String encryptionProfileName = "epName";
@@ -1048,7 +1048,7 @@ class StackOperationServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(encryptionProfileService.getEncryptionProfileOrThrowException(encryptionProfileName)).thenReturn(encryptionProfileResponse);
 
-        underTest.updateSslConfigsOnCluster(nameOrCrn, "accountId", encryptionProfileName);
+        underTest.enableEncryptionProfileOnCluster(nameOrCrn, "accountId", encryptionProfileName);
 
         verify(encryptionProfileValidator, times(1)).validate(stack);
         verify(flowManager, times(1)).triggerEnableEncryptionProfileOnCluster(eq(STACK_ID), eq(encryptionProfileCrn));

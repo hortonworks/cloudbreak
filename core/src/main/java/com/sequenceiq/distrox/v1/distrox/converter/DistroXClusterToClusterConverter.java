@@ -84,7 +84,6 @@ public class DistroXClusterToClusterConverter {
         request.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
         request.setCloudStorage(source.getCloudStorage());
         request.setProxy(source.getProxyConfigCrn());
-        request.setEncryptionProfileCrn(source.getEncryptionProfileCrn());
         request.setEncryptionProfileNameOrCrn(source.getEncryptionProfileCrn());
         return request;
     }

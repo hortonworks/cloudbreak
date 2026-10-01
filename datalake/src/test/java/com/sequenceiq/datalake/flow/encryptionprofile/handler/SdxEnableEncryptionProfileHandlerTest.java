@@ -99,7 +99,7 @@ class SdxEnableEncryptionProfileHandlerTest {
         sdxCluster.setCrn(SDX_CRN);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "flowId");
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
-        when(stackV4Endpoint.updateSslConfigurationsByCrn(eq(0L), eq(SDX_CRN), eq(ENCRYPTION_PROFILE_CRN))).thenReturn(flowIdentifier);
+        when(stackV4Endpoint.enableEncryptionProfileByCrn(eq(0L), eq(SDX_CRN), eq(ENCRYPTION_PROFILE_CRN))).thenReturn(flowIdentifier);
 
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
@@ -120,7 +120,7 @@ class SdxEnableEncryptionProfileHandlerTest {
         sdxCluster.setCrn(SDX_CRN);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "flowId");
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
-        when(stackV4Endpoint.updateSslConfigurationsByCrn(eq(0L), eq(SDX_CRN), eq(ENCRYPTION_PROFILE_CRN))).thenReturn(flowIdentifier);
+        when(stackV4Endpoint.enableEncryptionProfileByCrn(eq(0L), eq(SDX_CRN), eq(ENCRYPTION_PROFILE_CRN))).thenReturn(flowIdentifier);
         SdxWaitException cause = new SdxWaitException("wait failed", new RuntimeException());
         doThrow(cause).when(sdxWaitService).waitForCloudbreakFlow(anyLong(), any(), any());
 

@@ -204,7 +204,7 @@ public class DistroXEnableEncryptionProfileTest extends AbstractE2ETest {
                 .then((tc, testDto, client) -> encryptionProfileAssertion.assertTls13EncryptionProfile(testDto))
                 .given(DistroXTestDto.class)
                 .withEncryptionProfile(distroXEncryptionProfileName)
-                .when(distroXTestClient.updateSslConfigurations())
+                .when(distroXTestClient.enableEncryptionProfile())
                 .awaitForFlow()
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()

@@ -944,6 +944,10 @@ public interface DistroXV1Endpoint {
     ResetJvmParamsV4Response resetJvmParamsByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @NotNull @Valid ResetJvmParamsRequest request);
 
+    /**
+     * @deprecated use {@link #enableEncryptionProfileByName(String, String)} instead
+     */
+    @Deprecated(forRemoval = true)
     @PUT
     @Path("{name}/update_ssl_configs")
     @Produces(MediaType.APPLICATION_JSON)
@@ -954,6 +958,10 @@ public interface DistroXV1Endpoint {
     FlowIdentifier updateSslConfigurationsByName(@NotEmpty @PathParam("name") String name,
             @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
 
+    /**
+     * @deprecated use {@link #enableEncryptionProfileByCrn(String, String)} instead
+     */
+    @Deprecated(forRemoval = true)
     @PUT
     @Path("crn/{crn}/update_ssl_configs")
     @Produces(MediaType.APPLICATION_JSON)
@@ -962,6 +970,26 @@ public interface DistroXV1Endpoint {
             operationId = "updateSslConfigsByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateSslConfigurationsByCrn(@NotEmpty @ValidCrn(resource = {DATAHUB}) @PathParam("crn") String crn,
+            @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
+
+    @PUT
+    @Path("name/{name}/enable_encryption_profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Enable encryption profile in the given cluster by name",
+            operationId = "enableEncryptionProfileByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableEncryptionProfileByName(@NotEmpty @PathParam("name") String name,
+            @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
+
+    @PUT
+    @Path("crn/{crn}/enable_encryption_profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Enable encryption profile in the given cluster by crn",
+            operationId = "enableEncryptionProfileByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableEncryptionProfileByCrn(@NotEmpty @ValidCrn(resource = {DATAHUB}) @PathParam("crn") String crn,
             @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
 
     @PUT

@@ -991,16 +991,30 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     @CheckPermissionByResourceName(action = UPGRADE_DATAHUB)
     public FlowIdentifier updateSslConfigurationsByName(@ResourceName String name, String encryptionProfileNameOrCrn) {
-        return stackOperationService.updateSslConfigsOnCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
+        return enableEncryptionProfileByName(name, encryptionProfileNameOrCrn);
+    }
+
+    @Override
+    @Deprecated(forRemoval = true)
+    @CheckPermissionByResourceCrn(action = UPGRADE_DATAHUB)
+    public FlowIdentifier updateSslConfigurationsByCrn(@ResourceCrn String crn, String encryptionProfileNameOrCrn) {
+        return enableEncryptionProfileByCrn(crn, encryptionProfileNameOrCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = UPGRADE_DATAHUB)
+    public FlowIdentifier enableEncryptionProfileByName(@ResourceName String name, String encryptionProfileNameOrCrn) {
+        return stackOperationService.enableEncryptionProfileOnCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
                 encryptionProfileNameOrCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = UPGRADE_DATAHUB)
-    public FlowIdentifier updateSslConfigurationsByCrn(@ResourceCrn String crn, String encryptionProfileNameOrCrn) {
-        return stackOperationService.updateSslConfigsOnCluster(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
+    public FlowIdentifier enableEncryptionProfileByCrn(@ResourceCrn String crn, String encryptionProfileNameOrCrn) {
+        return stackOperationService.enableEncryptionProfileOnCluster(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
                 encryptionProfileNameOrCrn);
     }
 

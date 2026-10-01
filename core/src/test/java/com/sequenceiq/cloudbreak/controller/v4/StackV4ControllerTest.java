@@ -292,12 +292,12 @@ class StackV4ControllerTest {
     }
 
     @Test
-    void testUpdateSslConfigurationsByCrn() {
+    void testEnableEncryptionProfileByCrn() {
         String encryptionProfileCrn = "epCrn";
         doAs(USER_CRN, () -> {
-            underTest.updateSslConfigurationsByCrn(WORKSPACE_ID, STACK_CRN, encryptionProfileCrn);
+            underTest.enableEncryptionProfileByCrn(WORKSPACE_ID, STACK_CRN, encryptionProfileCrn);
         });
-        verify(stackOperationService).updateSslConfigsOnCluster(NameOrCrn.ofCrn(STACK_CRN), "hortonworks", encryptionProfileCrn);
+        verify(stackOperationService).enableEncryptionProfileOnCluster(NameOrCrn.ofCrn(STACK_CRN), "hortonworks", encryptionProfileCrn);
     }
 
     @Test

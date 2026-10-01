@@ -482,7 +482,7 @@ class DistroXClusterToClusterConverterTest {
 
         DistroXClusterV1Request result = underTest.convert(clusterV4RequestInput);
 
-        assertEquals(clusterV4RequestInput.getEncryptionProfileCrn(), result.getEncryptionProfileCrn());
+        assertEquals(clusterV4RequestInput.getEncryptionProfileCrn(), result.getEncryptionProfileNameOrCrn());
     }
 
     private DistroXV1Request createDistroXV1Request() {

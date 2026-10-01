@@ -1093,6 +1093,10 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<String> getClustersNamesByEncryptionProfile(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String encryptionProfileCrn);
 
+    /**
+     * @deprecated use {@link #enableEncryptionProfileByCrn(Long, String, String)} instead
+     */
+    @Deprecated(forRemoval = true)
     @PUT
     @Path("internal/crn/{crn}/update_ssl_configs")
     @Produces(MediaType.APPLICATION_JSON)
@@ -1101,6 +1105,17 @@ public interface StackV4Endpoint {
             operationId = "updateSslConfigsByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateSslConfigurationsByCrn(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
+
+    @PUT
+    @Path("internal/crn/{crn}/enable_encryption_profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Enable encryption profile in the given cluster by crn",
+            operationId = "enableEncryptionProfileByCrnInWorkspaceV4Internal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableEncryptionProfileByCrn(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
 
@@ -1195,7 +1210,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Disable encryption profile in the given cluster by crn",
-            operationId = "disableEncryptionProfileByCrn",
+            operationId = "disableEncryptionProfileByCrnInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier disableEncryptionProfileByCrn(@PathParam("workspaceId") Long workspaceId, @NotEmpty @PathParam("crn") String crn);
 

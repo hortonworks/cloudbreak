@@ -844,8 +844,15 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @InternalOnly
     @Override
+    @Deprecated(forRemoval = true)
     public FlowIdentifier updateSslConfigurationsByCrn(Long workspaceId, @ResourceCrn String crn, String encryptionProfileNameOrCrn) {
-        return stackOperationService.updateSslConfigsOnCluster(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
+        return enableEncryptionProfileByCrn(workspaceId, crn, encryptionProfileNameOrCrn);
+    }
+
+    @InternalOnly
+    @Override
+    public FlowIdentifier enableEncryptionProfileByCrn(Long workspaceId, @ResourceCrn String crn, String encryptionProfileNameOrCrn) {
+        return stackOperationService.enableEncryptionProfileOnCluster(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
                 encryptionProfileNameOrCrn);
     }
 

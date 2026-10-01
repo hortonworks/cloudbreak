@@ -170,7 +170,7 @@ public class EnableEncryptionProfileOnStacksHandler extends ExceptionCatcherEven
         try {
             LOGGER.info("Triggering enable encryption profile on datahub {} for environment {} "
                     + "(env-level profile inherited, no cluster-level CRN forwarded)", dh.getCrn(), envCrn);
-            return Optional.of(datahubService.updateSslConfigs(dh.getCrn(), null));
+            return Optional.of(datahubService.enableEncryptionProfile(dh.getCrn(), null));
         } catch (Exception e) {
             LOGGER.warn("Failed to trigger enable-encryption-profile on datahub {}, skipping it", dh.getCrn(), e);
             return Optional.empty();
