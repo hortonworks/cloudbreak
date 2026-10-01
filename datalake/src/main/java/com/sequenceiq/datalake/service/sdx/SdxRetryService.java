@@ -90,6 +90,10 @@ public class SdxRetryService {
         }
         RetryableDatalakeFlowConfiguration<? extends FlowEvent> flowConfiguration = retryableDatalakeFlowConfigurationMap.get(flowType.getClassValue());
         Enum<? extends FlowEvent> flowEventEnum = FlowEnumUtil.getFlowEventEnum(flowConfiguration.getEventType(), retriedEvent);
-        return flowEventEnum != null && flowConfiguration.getStackRetryEvents().contains(flowEventEnum);
+        if (flowEventEnum != null) {
+            return flowConfiguration.getStackRetryEvents().contains(flowEventEnum);
+        } else {
+            return flowConfiguration.getStackRetryEvents().stream().anyMatch(flowEvent -> retriedEvent.equals(flowEvent.event()));
+        }
     }
 }

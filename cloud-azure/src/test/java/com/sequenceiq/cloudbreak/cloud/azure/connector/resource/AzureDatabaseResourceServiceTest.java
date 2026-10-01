@@ -69,6 +69,7 @@ import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.postgresql.models.StorageProfile;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Storage;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
@@ -763,6 +764,136 @@ class AzureDatabaseResourceServiceTest {
         verify(client).getFlexibleServerClient();
         verify(flexibleServerClientMock).upgrade(RESOURCE_GROUP_NAME, "name", targetMajorVersion.getMajorVersion());
         assertEquals("anError", exception.getMessage());
+    }
+
+    @Test
+    void testUpgradeFlexibleServerVersionVerifiedAfterUpgrade() {
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        Server serverMock = mock(Server.class);
+        when(serverMock.version()).thenReturn(ServerVersion.fromString("14"));
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name")).thenReturn(Optional.of(serverMock));
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(inv -> inv.getArgument(0, Supplier.class).get());
+
+        underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList);
+
+        verify(flexibleServerClientMock).upgrade(RESOURCE_GROUP_NAME, "name", "14");
+        verify(flexibleServerClientMock).getFlexibleServer(RESOURCE_GROUP_NAME, "name");
+    }
+
+    @Test
+    void testUpgradeFlexibleServerVersionMismatchAfterUpgradeThrowsException() {
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        Server serverMock = mock(Server.class);
+        when(serverMock.version()).thenReturn(ServerVersion.fromString("13"));
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name")).thenReturn(Optional.of(serverMock));
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(inv -> inv.getArgument(0, Supplier.class).get());
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList));
+
+        assertTrue(exception.getMessage().contains("name"));
+        assertTrue(exception.getMessage().contains("14"));
+        assertTrue(exception.getMessage().contains("13"));
+    }
+
+    @Test
+    void testUpgradeFlexibleServerNotFoundAfterUpgradeThrowsException() {
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name")).thenReturn(Optional.empty());
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(inv -> inv.getArgument(0, Supplier.class).get());
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList));
+
+        assertTrue(exception.getMessage().contains("name"));
+        assertTrue(exception.getMessage().contains("not found"));
+    }
+
+    @Test
+    void testUpgradeFlexibleServerVersionEventuallyMatchesAfterRetry() {
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        Server serverWithOldVersion = mock(Server.class);
+        when(serverWithOldVersion.version()).thenReturn(ServerVersion.fromString("13"));
+        Server serverWithNewVersion = mock(Server.class);
+        when(serverWithNewVersion.version()).thenReturn(ServerVersion.fromString("14"));
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name"))
+                .thenReturn(Optional.of(serverWithOldVersion))
+                .thenReturn(Optional.of(serverWithNewVersion));
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(inv -> {
+            Supplier<?> supplier = inv.getArgument(0, Supplier.class);
+            Retry.ActionFailedException lastException = null;
+            for (int attempt = 0; attempt < 5; attempt++) {
+                try {
+                    return supplier.get();
+                } catch (Retry.ActionFailedException e) {
+                    lastException = e;
+                }
+            }
+            throw lastException;
+        });
+
+        underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList);
+
+        verify(flexibleServerClientMock, times(2)).getFlexibleServer(RESOURCE_GROUP_NAME, "name");
+    }
+
+    @Test
+    void testUpgradeFlexibleServerVerificationManagementExceptionIsPropagatedToOuterHandler() {
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        ManagementException managementException = new ManagementException("sdkError", mock(HttpResponse.class), new ManagementError("someCode", "sdkError"));
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name")).thenThrow(managementException);
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(inv -> inv.getArgument(0, Supplier.class).get());
+        when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("sdkError"));
+
+        assertThrows(CloudConnectorException.class,
+                () -> underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList));
+
+        verify(azureUtils).convertToCloudConnectorException(managementException, "Database stack upgrade");
     }
 
     @Test

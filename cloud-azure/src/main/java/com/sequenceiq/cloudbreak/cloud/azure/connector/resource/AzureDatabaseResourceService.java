@@ -703,10 +703,13 @@ public class AzureDatabaseResourceService {
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
             Optional<CloudResource> databaseServer = getResources(resources, AZURE_DATABASE).stream().findFirst();
             databaseServer.ifPresentOrElse(
-                    databaseServerResource -> client.getFlexibleServerClient().upgrade(
-                            resourceGroupName,
-                            databaseServerResource.getName(),
-                            targetMajorVersion.getMajorVersion()),
+                    databaseServerResource -> {
+                        client.getFlexibleServerClient().upgrade(
+                                resourceGroupName,
+                                databaseServerResource.getName(),
+                                targetMajorVersion.getMajorVersion());
+                        verifyFlexibleServerVersion(client, resourceGroupName, databaseServerResource.getName(), targetMajorVersion);
+                    },
                     () -> {
                         String message = "Azure database server cloud resource does not exist for stack, this should not happen. " +
                                 "Please contact Cloudera support to get this resolved.";
@@ -719,6 +722,33 @@ public class AzureDatabaseResourceService {
             throw e;
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Error occurred in upgrading database stack: %s", e.getMessage()), e);
+        }
+    }
+
+    private void verifyFlexibleServerVersion(AzureClient client, String resourceGroupName, String serverName, TargetMajorVersion targetMajorVersion) {
+        String expectedVersion = targetMajorVersion.getMajorVersion();
+        try {
+            retryService.testWith1SecDelayMax5Times(() -> {
+                Optional<Server> server = client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, serverName);
+                if (server.isEmpty()) {
+                    String message = String.format("Azure PostgreSQL Flexible Server '%s' was not found when verifying version after upgrade.", serverName);
+                    LOGGER.warn(message);
+                    throw new Retry.ActionFailedException(message);
+                }
+                String actualVersion = getFlexibleServerVersion(server.get());
+                if (!expectedVersion.equals(actualVersion)) {
+                    String message = String.format(
+                            "Azure PostgreSQL Flexible Server '%s' upgrade verification failed: expected version %s but the server reports version %s.",
+                            serverName, expectedVersion, actualVersion);
+                    LOGGER.warn(message);
+                    throw new Retry.ActionFailedException(message);
+                }
+                LOGGER.info("Flexible Server '{}' version verified as {} after upgrade.", serverName, actualVersion);
+                return null;
+            });
+        } catch (Retry.ActionFailedException e) {
+            throw new CloudConnectorException(e.getMessage() +
+                    " Please 'Retry' the operation or check the Azure portal and contact Cloudera support if the issue persists.", e);
         }
     }
 
