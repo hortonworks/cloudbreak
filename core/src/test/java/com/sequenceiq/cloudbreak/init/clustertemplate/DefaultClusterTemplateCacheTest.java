@@ -289,10 +289,10 @@ class DefaultClusterTemplateCacheTest {
     }
 
     @Test
-    void testClusterTemplatesForGovOnlyPresentedFor7218AndNothingElse() throws IOException {
+    void testClusterTemplatesForGovOnlyPresentedFor7218Or732AndNothingElse() throws IOException {
         Set<String> actual = getFiles().stream()
                 .filter(e -> e.contains("aws_gov"))
-                .filter(e -> !e.contains("7.2.18"))
+                .filter(e -> !e.contains("7.2.18") && !e.contains("7.3.2"))
                 .collect(Collectors.toSet());
 
         assertEquals(0, actual.size());
