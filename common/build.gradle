@@ -48,7 +48,7 @@ dependencies {
   api group: 'org.glassfish.jersey.ext',                    name: 'jersey-proxy-client',            version: jerseyCoreVersion
   api group: 'org.glassfish.jersey.connectors',             name: 'jersey-apache-connector',        version: jerseyCoreVersion
   implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'org.bouncycastle',                 name: 'bc-fips',                        version: bouncycastleFipsVersion
+  implementation group: 'org.bouncycastle',                 name: 'bc-fips',                        version: "$bouncycastleFipsVersion"
   implementation group: 'org.bouncycastle',                 name: 'bcpkix-fips',                    version: bouncycastlePkixFipsVersion
   implementation group: 'org.bouncycastle',                 name: 'bcutil-fips',                    version: bouncycastleUtilFipsVersion
 

@@ -129,4 +129,80 @@ class SaltBootstrapVersionCheckerTest {
 
         assertFalse(result);
     }
+
+    @Test
+    void isHttpsOnlySupportedTrueWithMinVersion() {
+        setSaltBootstrapVersion("0.14.3-2025-07-02T16:29:51");
+        when(image.getUuid()).thenReturn("some-id");
+
+        boolean result = underTest.isHttpsOnlySupported(stack);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void isHttpsOnlySupportedFalseWithLowerVersion() {
+        setSaltBootstrapVersion("0.13.9-2022-05-31T16:13:05");
+
+        boolean result = underTest.isHttpsOnlySupported(stack);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void isHttpsOnlySupportedFalseWithoutImage() {
+        when(imageService.getImageForStack(stack)).thenReturn(null);
+
+        boolean result = underTest.isHttpsOnlySupported(stack);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void isHttpsOnlySupportedTrueWhenEveryInstanceImageSupportsIt() {
+        setSaltBootstrapVersion("0.14.5-2025-07-02T16:29:51");
+        when(image.getUuid()).thenReturn("current-image-id");
+        FreeIpaImageFilterSettings imageFilterSettings = mock(FreeIpaImageFilterSettings.class);
+        when(imageService.createImageFilterSettingsFromImageEntity(stack)).thenReturn(imageFilterSettings);
+        when(imageFilterSettings.withImageId("other-supported-image-id")).thenReturn(imageFilterSettings);
+        Image otherSupportedImage = mock(Image.class);
+        when(otherSupportedImage.getPackageVersions()).thenReturn(Map.of("salt-bootstrap", "0.14.3-2025-07-02T16:29:51"));
+        when(imageService.getImage(imageFilterSettings)).thenReturn(ImageWrapper.ofFreeipaImage(otherSupportedImage, ""));
+        InstanceMetaData instanceOnOtherImage = instanceWithImageId("other-supported-image-id");
+        InstanceMetaData instanceOnCurrentImage = instanceWithImageId("current-image-id");
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(instanceOnOtherImage, instanceOnCurrentImage));
+
+        boolean result = underTest.isHttpsOnlySupported(stack);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void isHttpsOnlySupportedFalseWhenAnyInstanceUsesLowerVersion() {
+        setSaltBootstrapVersion("0.14.5-2025-07-02T16:29:51");
+        when(image.getUuid()).thenReturn("current-image-id");
+        FreeIpaImageFilterSettings imageFilterSettings = mock(FreeIpaImageFilterSettings.class);
+        when(imageService.createImageFilterSettingsFromImageEntity(stack)).thenReturn(imageFilterSettings);
+        when(imageFilterSettings.withImageId("old-image-id")).thenReturn(imageFilterSettings);
+        Image oldImage = mock(Image.class);
+        when(oldImage.getPackageVersions()).thenReturn(Map.of("salt-bootstrap", "0.13.6-2022-05-31T16:13:05"));
+        when(imageService.getImage(imageFilterSettings)).thenReturn(ImageWrapper.ofFreeipaImage(oldImage, ""));
+        InstanceMetaData instanceOnOldImage = instanceWithImageId("old-image-id");
+        InstanceMetaData instanceOnCurrentImage = instanceWithImageId("current-image-id");
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(instanceOnOldImage, instanceOnCurrentImage));
+
+        boolean result = underTest.isHttpsOnlySupported(stack);
+
+        assertFalse(result);
+    }
+
+    private InstanceMetaData instanceWithImageId(String imageId) {
+        com.sequenceiq.cloudbreak.cloud.model.Image instanceImage = mock(com.sequenceiq.cloudbreak.cloud.model.Image.class);
+        when(instanceImage.getImageId()).thenReturn(imageId);
+        Json imageJson = mock(Json.class);
+        when(imageJson.getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class)).thenReturn(instanceImage);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setImage(imageJson);
+        return instanceMetaData;
+    }
 }
