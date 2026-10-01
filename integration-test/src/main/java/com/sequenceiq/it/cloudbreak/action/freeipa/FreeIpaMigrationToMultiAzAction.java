@@ -26,6 +26,7 @@ public class FreeIpaMigrationToMultiAzAction extends AbstractFreeIpaAction<FreeI
                 .getFreeIpaMigrationV1Endpoint()
                 .migrateToMultiAz(request);
         testDto.setOperationId(response.getOperationId());
+        testDto.setFlow("Freeipa MultiAz Migration", response.getFlowIdentifier());
         Log.whenJson(LOGGER, format(" FreeIPA migration started: %n"), response);
         LOGGER.info(" FreeIPA migration started for environment: {}, response: {}", environmentCrn, response);
         return testDto;

@@ -43,6 +43,7 @@ public class FreeIpaMultiAzMigrationTest extends AbstractFreeipaE2ETest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .when(freeIpaTestClient.migrateToMultiAz())
+                .awaitForFlow()
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .await(EnvironmentStatus.AVAILABLE)
