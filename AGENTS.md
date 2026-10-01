@@ -20,6 +20,7 @@ Assistant-oriented playbooks live under **`.agent/skills/`**. The files are **pl
 - **cdp-docs**: Official CDP Public Cloud documentation lookup and verification.
 - **cb-cloud-providers**: Read-first AWS/Azure/GCP CLI/MCP recipes for inspecting live cloud state.
 - **cb-new-runtime**: Introduce a new Cloudera Runtime (CR) version — Data Lake + Data Hub blueprints, cluster templates, `application.yml` runtime properties, upgrade matrix, and the count-assertion tests to bump; plus how to later make it the default. Load when RE raises a new-CR ticket.
+- **cb-runtime-template-change**: Change a runtime template (Data Hub blueprint, Data Hub cluster template, or Data Lake duty) for an overlay version by authoring a sparse delta against the frozen base — the five delta flavors, per-scenario runbook (patch, patches across commits, patch-then-replace, addition, tombstone, structural replace), and version injection. Load when a ticket asks to tweak/add/remove a template for a runtime newer than the base. See also `README-runtime-template-engine.md`.
 
 The end-to-end Jira-to-PR workflow (reproduction-first testing, PR quality bar) lives in **`.agent/WORKFLOW.md`**.
 

@@ -635,6 +635,10 @@ to use virtual threads.
 
 To profile a Cloudbreak service JVM running in a Kubernetes pod with JProfiler — including the workaround for the FIPS image that makes the normal GUI "Attach" fail with a `nanoxml` `NullPointerException` — see [docs/profiling-jprofiler-on-kubernetes.md](docs/profiling-jprofiler-on-kubernetes.md).
 
+## Runtime templates (base + overlay engine)
+
+Newer Cloudera Runtime versions no longer copy every blueprint, cluster template and Data Lake duty file — they ship only the *delta* against a frozen base version, which the engine reconstructs in memory at startup. When you add or change a runtime, author the overlay deltas (patches, additions, tombstones, replacements) instead of full copies. For a short overview of what the engine does plus a lot of worked examples covering the typical scenarios (single patch, patches across commits, patch-then-replace, additions, tombstones, structural replace) and the version-injection rules, see [README-runtime-template-engine.md](README-runtime-template-engine.md).
+
 ## Command Line
 
 ### Running Cloudbreak from the Command Line
