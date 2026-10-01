@@ -115,6 +115,8 @@ public class ModelDescriptions {
 
     public static final String RUNTIME_VERSION = "Runtime version.";
 
+    public static final String UPGRADE_COMPONENTS = "Cloudera Manager repository and parcel definitions for a runtime upgrade using a base image.";
+
     public static final String OS = "Operating system.";
 
     public static final String ARCHITECTURE = "Cpu architecture.";
