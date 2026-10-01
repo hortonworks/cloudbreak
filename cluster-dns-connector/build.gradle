@@ -16,7 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 dependencyManagement {
   dependencies {
-    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
+    dependencySet(group: 'org.springframework.boot', version: "$springBootVersion") {
       entry 'spring-boot-starter-test'
     }
   }
@@ -26,17 +26,17 @@ dependencies {
   implementation project(':grpc-common')
   implementation project(':auth-connector')
 
-  implementation     group: 'com.dyngr',                 name: 'polling',                         version: dyngrPollingVersion
+  implementation     group: 'com.dyngr',                 name: 'polling',                         version: "$dyngrPollingVersion"
 
-  implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
-  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: protobufVersion
-  implementation     group: 'org.bouncycastle',                    name: 'bcpkix-fips',                    version: bouncycastlePkixFipsVersion
+  implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
+  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: "$protobufVersion"
+  implementation     group: 'org.bouncycastle',                    name: 'bcpkix-fips',                    version: "$bouncycastlePkixFipsVersion"
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
     exclude group: 'junit', module: 'junit'
   }
 
-  testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+  testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockitoVersion"
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 }
 

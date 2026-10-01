@@ -27,47 +27,47 @@ dependencies {
   implementation project(':auth-connector')
   implementation project(':usage-collection')
 
-  implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
+  implementation group: 'com.dyngr', name: 'polling', version: "$dyngrPollingVersion"
 
-  api(group: 'software.amazon.awssdk', name: 'core', version: awsSdkVersion) {
+  api(group: 'software.amazon.awssdk', name: 'core', version: "$awsSdkVersion") {
     exclude group: 'commons-logging'
   }
-  api group: 'software.amazon.awssdk', name: 'ec2', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'dynamodb', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 's3', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'iam', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'kms', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'rds', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'sts', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'cloudwatch', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'elasticloadbalancingv2', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'efs', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'ebs', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'networkfirewall', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'pricing', version: awsSdkVersion
-  api (group: 'software.amazon.awssdk', name: 'test-utils', version: awsSdkVersion) {
+  api group: 'software.amazon.awssdk', name: 'ec2', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'dynamodb', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 's3', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'iam', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'kms', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'rds', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'sts', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'cloudwatch', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'elasticloadbalancingv2', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'efs', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'ebs', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'networkfirewall', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'pricing', version: "$awsSdkVersion"
+  api (group: 'software.amazon.awssdk', name: 'test-utils', version: "$awsSdkVersion") {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
   }
-  api group: 'software.amazon.awssdk', name: 'apache-client', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'secretsmanager', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'iam-policy-builder', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'apache-client', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'secretsmanager', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'iam-policy-builder', version: "$awsSdkVersion"
 
   // legacy
-  api group: 'software.amazon.awssdk', name: 'autoscaling', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'cloudformation', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'autoscaling', version: "$awsSdkVersion"
+  api group: 'software.amazon.awssdk', name: 'cloudformation', version: "$awsSdkVersion"
 
-  implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-aspects', version: "$springFrameworkVersion"
 
   testImplementation project(path: ':cloud-common', configuration: 'tests')
-  testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker', version: springBootVersion
-  testImplementation(group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
+  testImplementation group: 'org.hamcrest', name: 'hamcrest', version: "$hamcrestVersion"
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springBootVersion"
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker', version: "$springBootVersion"
+  testImplementation(group: 'org.mockito', name: 'mockito-core', version: "$mockitoVersion") {
     exclude group: 'org.hamcrest'
   }
-  testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertjVersion"
 }
 
 tasks.register('testJar', Jar) {

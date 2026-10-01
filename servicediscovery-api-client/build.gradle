@@ -49,9 +49,9 @@ openApiGenerate {
 
 dependencies {
   implementation project(':common')
-  implementation     group: 'org.glassfish.jersey.media',  name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.media',  name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
   implementation     group: 'org.openapitools',            name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
-  implementation     group: 'javax.annotation',            name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+  implementation     group: 'javax.annotation',            name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
 }
 
 compileJava.dependsOn tasks.openApiGenerate

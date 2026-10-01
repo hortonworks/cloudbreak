@@ -16,18 +16,18 @@ dependencies {
     implementation project(':structuredevent-model')
     implementation project(':flow')
 
-    implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
-    implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: byteBuddyVersion
+    implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: "$springBootVersion"
+    implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: "$byteBuddyVersion"
 
-    implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
-    implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: protobufVersion
+    implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
+    implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: "$protobufVersion"
 
     implementation ("io.grpc:grpc-all:$grpcVersion") {
         exclude group: 'org.mockito'
         exclude group: 'junit', module: 'junit'
     }
-    testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
-    testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion
+    testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: "$assertjVersion"
+    testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: "$mockitoVersion"
 }
 
 checkstyle {

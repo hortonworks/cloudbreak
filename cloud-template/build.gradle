@@ -19,12 +19,12 @@ dependencies {
     implementation project(':cloud-reactor')
     implementation project(':structuredevent-model')
 
-    implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+    implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: "$slf4jApiVersion"
 
-    testImplementation group: 'org.springframework',       name: 'spring-test',                    version: springFrameworkVersion
-    testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
-    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
+    testImplementation group: 'org.springframework',       name: 'spring-test',                    version: "$springFrameworkVersion"
+    testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: "$assertjVersion"
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: "$mockitoVersion") {
       exclude group: 'org.hamcrest'
     }
-    testImplementation group: 'net.bytebuddy',            name: 'byte-buddy',                     version: byteBuddyVersion
+    testImplementation group: 'net.bytebuddy',            name: 'byte-buddy',                     version: "$byteBuddyVersion"
 }

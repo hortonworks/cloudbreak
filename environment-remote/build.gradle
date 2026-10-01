@@ -65,9 +65,9 @@ ext {
 
 dependencyManagement {
     dependencies {
-        dependency group: 'org.apache.commons',       name: 'commons-lang3',      version: apacheCommonsLangVersion
-        dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
-        dependency group: 'org.postgresql',           name: 'postgresql',         version: postgreSQLVersion
+        dependency group: 'org.apache.commons',       name: 'commons-lang3',      version: "$apacheCommonsLangVersion"
+        dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: "$tomcatVersion"
+        dependency group: 'org.postgresql',           name: 'postgresql',         version: "$postgreSQLVersion"
     }
 }
 
@@ -85,34 +85,34 @@ dependencies {
     implementation project(':remote-cluster-connector')
     implementation project(':client-cm')
 
-    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter',            version: springBootVersion
-    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-web',        version: springBootVersion
-    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-actuator',   version: springBootVersion
-    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-jersey',     version: springBootVersion
-    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',         version: jerseyCoreVersion
-    implementation group: 'org.glassfish.jersey.ext',   name: 'jersey-micrometer',              version: jerseyMicrometerVersion
-    implementation group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
-    implementation group: 'javax.xml.bind',             name: 'jaxb-api',                       version: javaxXmlBindJaxbApiVersion
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter',            version: "$springBootVersion"
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-web',        version: "$springBootVersion"
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-actuator',   version: "$springBootVersion"
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-jersey',     version: "$springBootVersion"
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-data-jpa',   version: "$springBootVersion"
+    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
+    implementation group: 'org.glassfish.jersey.ext',   name: 'jersey-micrometer',              version: "$jerseyMicrometerVersion"
+    implementation group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2-jakarta',         version: "$swaggerCoreVersion"
+    implementation group: 'javax.xml.bind',             name: 'jaxb-api',                       version: "$javaxXmlBindJaxbApiVersion"
     implementation group: 'org.openapitools',           name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
-    implementation group: 'javax.annotation',           name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+    implementation group: 'javax.annotation',           name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
 
     testImplementation project(path: ':authorization-common', configuration: 'tests')
     testImplementation project(path: ':common', configuration: 'tests')
     testImplementation project(path: ':flow', configuration: 'tests')
     testImplementation project(':environment-public-api-client')
     testImplementation project(":servicediscovery-api-client")
-    testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
-    testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: springBootVersion) {
+    testImplementation group: "org.mockito",               name: "mockito-core",                             version: "$mockitoVersion"
+    testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: "$springBootVersion") {
         exclude group: "junit"
     }
-    testImplementation group: "com.openpojo",              name: "openpojo",                                 version: openPojoVersion
-    testImplementation group: "com.h2database",            name: "h2",                                       version: h2databaseVersion
-    testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
-    testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
-    testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
-    testRuntimeOnly    group: 'org.testcontainers',        name: 'postgresql',                               version: testContainersVersion
-    testRuntimeOnly    group: 'org.awaitility',            name: 'awaitility',                               version: awaitilityVersion
+    testImplementation group: "com.openpojo",              name: "openpojo",                                 version: "$openPojoVersion"
+    testImplementation group: "com.h2database",            name: "h2",                                       version: "$h2databaseVersion"
+    testImplementation group: "org.mockito",               name: "mockito-core",                             version: "$mockitoVersion"
+    testImplementation group: "com.google.guava",          name: "guava",                                    version: "$guavaVersion"
+    testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: "$assertjVersion"
+    testRuntimeOnly    group: 'org.testcontainers',        name: 'postgresql',                               version: "$testContainersVersion"
+    testRuntimeOnly    group: 'org.awaitility',            name: 'awaitility',                               version: "$awaitilityVersion"
 }
 
 

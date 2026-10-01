@@ -12,24 +12,24 @@ repositories {
 dependencies {
   implementation project(":common")
 
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
-  implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
-  implementation group: 'org.springframework', name: 'spring-web', version: springFrameworkVersion
-  implementation group: 'com.google.code.gson', name: 'gson', version: gsonVersion
-  implementation group: 'org.springframework', name: 'spring-context', version: springFrameworkVersion
-  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: httpClientVersion
-  implementation group: 'jakarta.persistence', name: 'jakarta.persistence-api', version: jakartaPersistenceApiVersion
-  implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
-  implementation group: 'com.google.code.gson', name: 'gson', version: gsonVersion
-  implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: jakartaValidationVersion
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: "$slf4jApiVersion"
+  implementation group: 'org.springframework', name: 'spring-aspects', version: "$springFrameworkVersion"
+  implementation group: 'org.springframework', name: 'spring-web', version: "$springFrameworkVersion"
+  implementation group: 'com.google.code.gson', name: 'gson', version: "$gsonVersion"
+  implementation group: 'org.springframework', name: 'spring-context', version: "$springFrameworkVersion"
+  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: "$httpClientVersion"
+  implementation group: 'jakarta.persistence', name: 'jakarta.persistence-api', version: "$jakartaPersistenceApiVersion"
+  implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-jakarta', version: "$swaggerCoreVersion"
+  implementation group: 'com.google.code.gson', name: 'gson', version: "$gsonVersion"
+  implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: "$jakartaValidationVersion"
   implementation group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
-  api (group: 'org.springframework.vault', name: 'spring-vault-core', version: springVaultCoreVersion) {
+  api (group: 'org.springframework.vault', name: 'spring-vault-core', version: "$springVaultCoreVersion") {
     exclude group: 'org.springframework'
   }
   implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind', version: { strictly jacksonVersion }
 
   testImplementation project(path: ':common', configuration: 'tests')
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springBootVersion"
 }
 
 tasks.register('testJar', Jar) {

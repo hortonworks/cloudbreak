@@ -12,9 +12,9 @@ jar {
 }
 
 dependencies {
-    implementation group: 'xerces',              name: 'xercesImpl',            version: xerces
+    implementation group: 'xerces',              name: 'xercesImpl',            version: "$xerces"
 
-    implementation group: 'com.github.jknack',             name: 'handlebars',                     version: handlebarsVersion
+    implementation group: 'com.github.jknack',             name: 'handlebars',                     version: "$handlebarsVersion"
 
     implementation project(':common')
     implementation project(':orchestrator-api')
@@ -26,14 +26,14 @@ dependencies {
     implementation project(':secret-engine')
 
     testImplementation project(':workspace')
-    testImplementation group: 'org.freemarker',            name: 'freemarker',                     version: freemarkerVersion
+    testImplementation group: 'org.freemarker',            name: 'freemarker',                     version: "$freemarkerVersion"
 
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: "$mockitoVersion") {
         exclude group: 'org.hamcrest'
     }
-    testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
+    testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: "$hamcrestVersion")
     testImplementation project(path: ':template-manager-core', configuration: 'tests')
     testImplementation project(path: ':core-model', configuration: 'tests')
 }
