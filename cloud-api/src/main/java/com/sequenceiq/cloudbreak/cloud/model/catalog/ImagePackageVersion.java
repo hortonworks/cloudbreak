@@ -17,7 +17,6 @@ public enum ImagePackageVersion {
     FREEIPA_LDAP_AGENT("freeipa-ldap-agent"),
     PROFILER("profiler", "Profiler Scheduler + Manager"),
     PYTHON38("python38", "Python 3.8"),
-    PYTHON312("python312", "Python 3.12"),
     SALT("salt"),
     SALT_BOOTSTRAP("salt-bootstrap"),
     SOURCE_IMAGE("source-image"),
