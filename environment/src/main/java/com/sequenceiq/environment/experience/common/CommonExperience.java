@@ -142,7 +142,7 @@ public final class CommonExperience {
         this.environmentTagsEndpoint = environmentTagsEndpoint;
     }
 
-    public boolean hasEnvironmentTagsDistribution() {
+    public boolean hasEnvironmentTagsPropagation() {
         return StringUtils.isNotEmpty(environmentTagsEndpoint);
     }
 

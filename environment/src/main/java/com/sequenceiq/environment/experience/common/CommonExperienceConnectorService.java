@@ -15,6 +15,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,15 @@ import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyRes
 public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     private static final String COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG = "Unable to resolve the experience's response!";
+
+    private static final String UNSUCCESSFUL_WORKSPACE_DELETE_MSG = "We are unable to delete connected experience(s), please retry or check "
+            + "your experiences manually.";
+
+    private static final String UNSUCCESSFUL_TAG_DISTRIBUTION_MSG = "We are unable to distribute the environment tags to the connected experience(s), "
+            + "please retry.";
+
+    private static final String UNSUCCESSFUL_TAG_REMOVAL_MSG = "We are unable to remove the environment tags from the connected experience(s), "
+            + "please retry.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceConnectorService.class);
 
@@ -87,7 +97,8 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         }
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))
-                .ifPresentOrElse(this::throwExceptionIfResultIsUnsuccessful, this::throwExperienceOperationFailedException);
+                .ifPresentOrElse(response -> throwExceptionIfResultIsUnsuccessful(response, UNSUCCESSFUL_WORKSPACE_DELETE_MSG),
+                        this::throwExperienceOperationFailedException);
     }
 
     @Override
@@ -109,14 +120,31 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         WebTarget webTarget = commonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
         executeCall(webTarget.getUri(), () -> retryableWebTarget.put(call, tags))
-                .ifPresentOrElse(this::throwExceptionIfResultIsUnsuccessful, this::throwExperienceOperationFailedException);
+                .ifPresentOrElse(response -> throwExceptionIfResultIsUnsuccessful(response, UNSUCCESSFUL_TAG_DISTRIBUTION_MSG),
+                        this::throwExperienceOperationFailedException);
     }
 
-    private void throwExceptionIfResultIsUnsuccessful(Response response) {
+    @Override
+    public void deleteEnvironmentTags(String experienceBasePath, String environmentCrn, Set<String> tagKeys) {
+        if (CollectionUtils.isEmpty(tagKeys)) {
+            LOGGER.debug("No tag keys were given, skipping environment tag removal for environment [crn: {}].", environmentCrn);
+            return;
+        }
+        LOGGER.debug("About to remove environment tags from experience for environment [crn: {}]", environmentCrn);
+        WebTarget webTarget = QueryParamInjectorUtil.setRepeatedQueryParam(
+                commonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(experienceBasePath, environmentCrn),
+                CommonExperienceApi.TAG_KEY_QUERY_PARAM, tagKeys);
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))
+                .ifPresentOrElse(response -> throwExceptionIfResultIsUnsuccessful(response, UNSUCCESSFUL_TAG_REMOVAL_MSG),
+                        this::throwExperienceOperationFailedException);
+    }
+
+    private void throwExceptionIfResultIsUnsuccessful(Response response, String failureMessage) {
         if (!response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
-            LOGGER.info("Experience deletion result was not {} but {} with the reason of: {}",
+            LOGGER.info("Experience operation result was not {} but {} with the reason of: {}",
                     SUCCESSFUL.name(), response.getStatusInfo().getFamily().name(), response.getStatusInfo().getReasonPhrase());
-            throw new ExperienceOperationFailedException("We are unable to delete connected experience(s), please retry or check your experiences manually.");
+            throw new ExperienceOperationFailedException(failureMessage);
         }
     }
 

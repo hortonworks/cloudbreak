@@ -10,6 +10,8 @@ import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyRes
 
 public interface CommonExperienceApi {
 
+    String TAG_KEY_QUERY_PARAM = "tagKey";
+
     @NotNull Set<CpInternalCluster> getExperienceClustersConnectedToEnv(String experienceBasePath, String environmentCrn);
 
     void deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn, boolean force);
@@ -17,5 +19,7 @@ public interface CommonExperienceApi {
     @NotNull ExperiencePolicyResponse collectPolicy(String experienceBasePath, String cloudPlatform);
 
     void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags);
+
+    void deleteEnvironmentTags(String experienceBasePath, String environmentCrn, Set<String> tagKeys);
 
 }

@@ -29,8 +29,8 @@ public class LiftiePathProvider {
         this.policyPath = policyPath;
         this.pathConfig = pathConfig;
         this.environmentTagsPath = environmentTagsPath;
-        LOGGER.debug("Liftie address has been set to: {}, environment tags distribution {}",
-                basePath, isEnvironmentTagsDistributionDisabled() ? "disabled" : "enabled");
+        LOGGER.debug("Liftie address has been set to: {}, environment tags propagation {}",
+                basePath, isEnvironmentTagsPropagationDisabled() ? "disabled" : "enabled");
     }
 
     public String getPathToPolicyEndpoint(String provider) {
@@ -41,7 +41,7 @@ public class LiftiePathProvider {
 
     public String getPathToEnvironmentTagsEndpoint() {
         String path = basePath + environmentTagsPath;
-        LOGGER.info("Path has created to liftie for environment tags distribution: {}", path);
+        LOGGER.info("Path has created to liftie for environment tags propagation: {}", path);
         return path;
     }
 
@@ -49,7 +49,7 @@ public class LiftiePathProvider {
         return StringUtils.isEmpty(policyPath);
     }
 
-    public boolean isEnvironmentTagsDistributionDisabled() {
+    public boolean isEnvironmentTagsPropagationDisabled() {
         return StringUtils.isEmpty(environmentTagsPath);
     }
 

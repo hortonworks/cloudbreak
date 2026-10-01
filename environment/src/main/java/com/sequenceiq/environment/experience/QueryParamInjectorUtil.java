@@ -3,10 +3,12 @@ package com.sequenceiq.environment.experience;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static org.apache.commons.collections4.MapUtils.isEmpty;
 
+import java.util.Collection;
 import java.util.Map;
 
 import jakarta.ws.rs.client.WebTarget;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,20 @@ public final class QueryParamInjectorUtil {
             String value = entry.getValue();
             if (value != null) {
                 webTarget = webTarget.queryParam(entry.getKey(), value);
+            }
+        }
+        return webTarget;
+    }
+
+    public static WebTarget setRepeatedQueryParam(WebTarget webTarget, String name, Collection<String> values) {
+        throwIfNull(webTarget, () -> new IllegalArgumentException("Input WebTarget should not be null!"));
+        if (CollectionUtils.isEmpty(values)) {
+            LOGGER.debug("The given value collection is empty hence no query param has been added to the provided WebTarget.");
+            return webTarget;
+        }
+        for (String value : values) {
+            if (value != null) {
+                webTarget = webTarget.queryParam(name, value);
             }
         }
         return webTarget;

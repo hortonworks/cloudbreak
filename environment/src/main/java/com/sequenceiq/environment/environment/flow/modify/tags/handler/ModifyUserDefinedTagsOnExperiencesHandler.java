@@ -66,40 +66,9 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
 
     @Override
     protected Selectable doAccept(HandlerEvent<EnvTagsModificationEvent> event) {
-        Long resourceId = event.getData().getResourceId();
-        String resourceName = event.getData().getResourceName();
-        String resourceCrn = event.getData().getResourceCrn();
-        Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
-        Set<String> tagsToRemove = event.getData().getTagsToRemove();
-
-        if (EnvTagsModificationSupport.hasTagsToRemove(tagsToRemove)) {
-            // CB-34078: propagate environment tag deletion to experiences
-            LOGGER.debug("Experience tag deletion is skipped for environment {}.", resourceCrn);
-        } else if (experienceScanEnabled) {
-            Optional<Environment> environmentOpt = environmentService.findEnvironmentById(resourceId);
-            if (environmentOpt.isEmpty()) {
-                LOGGER.warn("Environment not found with id: {}, skipping experience tag distribution.", resourceId);
-            } else {
-                String accountId = environmentOpt.get().getAccountId();
-                if (entitlementService.isExperienceDeletionEnabled(accountId)) {
-                    distributeTagsToLiftie(resourceCrn, userDefinedTags);
-                    distributeTagsToCommonExperiences(resourceCrn, userDefinedTags);
-                } else {
-                    LOGGER.debug("Experience tag distribution skipped: entitlement not enabled for account {}.", accountId);
-                }
-            }
-        } else {
-            LOGGER.debug("Experience tag distribution skipped: environment.experience.scan.enabled is false.");
-        }
-
-        return EnvTagsModificationEvent.builder()
-                .withSelector(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name())
-                .withResourceId(resourceId)
-                .withResourceName(resourceName)
-                .withResourceCrn(resourceCrn)
-                .withUserDefinedTags(userDefinedTags)
-                .withTagsToRemove(tagsToRemove)
-                .build();
+        EnvTagsModificationEvent data = event.getData();
+        propagateTagsToExperiences(data.getResourceId(), data.getResourceCrn(), data.getUserDefinedTags(), data.getTagsToRemove());
+        return EnvTagsModificationSupport.nextEvent(data, FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name());
     }
 
     @Override
@@ -109,6 +78,31 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
         String resourceCrn = event.getData().getResourceCrn();
         return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn,
                 EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_FAILED, e);
+    }
+
+    private void propagateTagsToExperiences(Long resourceId, String environmentCrn, Map<String, String> userDefinedTags, Set<String> tagsToRemove) {
+        if (!experienceScanEnabled) {
+            LOGGER.debug("Experience tag propagation skipped: environment.experience.scan.enabled is false.");
+            return;
+        }
+        Optional<Environment> environmentOpt = environmentService.findEnvironmentById(resourceId);
+        if (environmentOpt.isEmpty()) {
+            LOGGER.warn("Environment not found with ID: {}, skipping experience tag propagation.", resourceId);
+            return;
+        }
+        String accountId = environmentOpt.get().getAccountId();
+        // Tag add and remove share one rollout gate: the entitlement the distribution path already used since CB-32337.
+        if (!entitlementService.isExperienceDeletionEnabled(accountId)) {
+            LOGGER.debug("Experience tag propagation skipped: entitlement not enabled for account {}.", accountId);
+            return;
+        }
+        if (EnvTagsModificationSupport.hasTagsToRemove(tagsToRemove)) {
+            deleteTagsFromLiftie(environmentCrn, tagsToRemove);
+            deleteTagsFromCommonExperiences(environmentCrn, tagsToRemove);
+        } else {
+            distributeTagsToLiftie(environmentCrn, userDefinedTags);
+            distributeTagsToCommonExperiences(environmentCrn, userDefinedTags);
+        }
     }
 
     private void distributeTagsToLiftie(String environmentCrn, Map<String, String> tags) {
@@ -122,7 +116,7 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
 
     private void distributeTagsToCommonExperiences(String environmentCrn, Map<String, String> tags) {
         experienceServicesConfig.getConfigs().forEach(xp -> {
-            if (!xp.hasEnvironmentTagsDistribution()) {
+            if (!xp.hasEnvironmentTagsPropagation()) {
                 LOGGER.debug("Experience '{}' has no environmentTagsEndpoint configured, skipping tag distribution.", xp.getName());
                 return;
             }
@@ -132,6 +126,31 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
                 LOGGER.debug("Successfully distributed tags to experience '{}' for environment [crn: {}].", xp.getName(), environmentCrn);
             } catch (Exception e) {
                 LOGGER.warn("Failed to distribute tags to experience '{}' for environment [crn: {}]. Skipping.", xp.getName(), environmentCrn, e);
+            }
+        });
+    }
+
+    private void deleteTagsFromLiftie(String environmentCrn, Set<String> tagKeys) {
+        try {
+            liftieConnectorService.deleteEnvironmentTags(null, environmentCrn, tagKeys);
+            LOGGER.debug("Successfully removed tags {} from Liftie for environment [crn: {}].", tagKeys, environmentCrn);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to remove tags {} from Liftie for environment [crn: {}]. Skipping.", tagKeys, environmentCrn, e);
+        }
+    }
+
+    private void deleteTagsFromCommonExperiences(String environmentCrn, Set<String> tagKeys) {
+        experienceServicesConfig.getConfigs().forEach(xp -> {
+            if (!xp.hasEnvironmentTagsPropagation()) {
+                LOGGER.debug("Experience '{}' has no environmentTagsEndpoint configured, skipping tag removal.", xp.getName());
+                return;
+            }
+            try {
+                String path = commonExperiencePathCreator.createPathToEnvironmentTags(xp);
+                commonExperienceConnectorService.deleteEnvironmentTags(path, environmentCrn, tagKeys);
+                LOGGER.debug("Successfully removed tags {} from experience '{}' for environment [crn: {}].", tagKeys, xp.getName(), environmentCrn);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to remove tags {} from experience '{}' for environment [crn: {}]. Skipping.", tagKeys, xp.getName(), environmentCrn, e);
             }
         });
     }

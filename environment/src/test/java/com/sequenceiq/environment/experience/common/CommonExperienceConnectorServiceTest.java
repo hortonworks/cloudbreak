@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience.common;
 
+import static com.sequenceiq.environment.experience.api.CommonExperienceApi.TAG_KEY_QUERY_PARAM;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,12 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
@@ -52,6 +55,12 @@ class CommonExperienceConnectorServiceTest {
 
     private static final String NOT_SUCCESSFUL_EXPERIENCE_DELETE_MESSAGE = "We are unable to delete connected experience(s), please retry or check " +
             "your experiences manually.";
+
+    private static final String NOT_SUCCESSFUL_TAG_DISTRIBUTION_MESSAGE = "We are unable to distribute the environment tags to the connected experience(s), " +
+            "please retry.";
+
+    private static final String NOT_SUCCESSFUL_TAG_REMOVAL_MESSAGE = "We are unable to remove the environment tags from the connected experience(s), " +
+            "please retry.";
 
     private static final String TEST_XP_BASE_PATH = "someExperienceBasePath";
 
@@ -466,8 +475,10 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.put(eq(mockInvocationBuilder), any())).thenReturn(mockResponse);
         when(mockStatusType.getFamily()).thenReturn(family);
 
-        assertThrows(ExperienceOperationFailedException.class,
+        ExperienceOperationFailedException ex = assertThrows(ExperienceOperationFailedException.class,
                 () -> underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags));
+
+        assertEquals(NOT_SUCCESSFUL_TAG_DISTRIBUTION_MESSAGE, ex.getMessage());
     }
 
     @Test
@@ -496,6 +507,131 @@ class CommonExperienceConnectorServiceTest {
                 () -> underTest.distributeEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tags));
 
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("When environment tags are deleted, then the web target is created from the experience path and environment CRN")
+    void testWhenEnvironmentTagsAreDeletedThenWebTargetIsObtainedUsingBasePathAndCrn() {
+        Set<String> tagKeys = Set.of("key");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
+
+        underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys);
+
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+    }
+
+    @Test
+    @DisplayName("When environment tags are deleted, then an internal actor invocation builder is used for authentication")
+    void testWhenEnvironmentTagsAreDeletedThenInternalActorInvocationBuilderIsUsed() {
+        Set<String> tagKeys = Set.of("key");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
+
+        underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys);
+
+        verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilderForInternalActor(mockWebTarget);
+    }
+
+    @Test
+    @DisplayName("When environment tags are deleted, then each tag key is added as a repeated query parameter")
+    void testWhenEnvironmentTagsAreDeletedThenTagKeysAreAddedAsQueryParameters() {
+        Set<String> tagKeys = Set.of("key1", "key2");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
+
+        underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys);
+
+        verify(mockWebTarget, times(ONCE)).queryParam(TAG_KEY_QUERY_PARAM, "key1");
+        verify(mockWebTarget, times(ONCE)).queryParam(TAG_KEY_QUERY_PARAM, "key2");
+    }
+
+    @Test
+    @DisplayName("When environment tags are deleted, then a body-less retryable DELETE call is executed")
+    void testWhenEnvironmentTagsAreDeletedThenBodilessDeleteIsExecuted() {
+        Set<String> tagKeys = Set.of("key");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
+
+        underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys);
+
+        verify(mockRetryableWebTarget, times(ONCE)).delete(mockInvocationBuilder);
+    }
+
+    @Test
+    @DisplayName("When environment tag deletion returns a successful response, then the operation completes without an exception")
+    void testWhenEnvironmentTagDeletionResponseIsSuccessfulThenCallCompletesWithoutException() {
+        Set<String> tagKeys = Set.of("key");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
+
+        assertDoesNotThrow(() -> underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Family.class, names = "SUCCESSFUL", mode = EXCLUDE)
+    @DisplayName("When environment tag deletion returns a non-successful response, then an operation failure exception is thrown")
+    void testWhenEnvironmentTagDeletionResponseIsNotSuccessfulThenExperienceOperationFailedExceptionIsThrown(Family family) {
+        Set<String> tagKeys = Set.of("key");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockStatusType.getFamily()).thenReturn(family);
+
+        ExperienceOperationFailedException ex = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys));
+
+        assertEquals(NOT_SUCCESSFUL_TAG_REMOVAL_MESSAGE, ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("When environment tag deletion returns no response, then an operation failure exception is thrown")
+    void testWhenEnvironmentTagDeletionReturnsNullThenExperienceOperationFailedExceptionIsThrown() {
+        Set<String> tagKeys = Set.of("key");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(null);
+
+        ExperienceOperationFailedException ex = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys));
+
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("When the environment tag deletion call fails, then its error is wrapped in an operation failure exception")
+    void testWhenEnvironmentTagDeletionCallThrowsThenExperienceOperationFailedExceptionIsThrown() {
+        Set<String> tagKeys = Set.of("key");
+        when(mockCommonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenThrow(new RuntimeException("connection error"));
+
+        ExperienceOperationFailedException ex = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, tagKeys));
+
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, ex.getMessage());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    @DisplayName("When no tag keys are given, then tag deletion is skipped without calling the experience")
+    void testWhenNoTagKeysAreGivenThenDeletionIsSkipped() {
+        assertDoesNotThrow(() -> underTest.deleteEnvironmentTags(TEST_XP_BASE_PATH, TEST_ENV_CRN, Set.of()));
+
+        verifyNoInteractions(mockCommonExperienceWebTargetProvider, mockRetryableWebTarget);
     }
 
     @ParameterizedTest

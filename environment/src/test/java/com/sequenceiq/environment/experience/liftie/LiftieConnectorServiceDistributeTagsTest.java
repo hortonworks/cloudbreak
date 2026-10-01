@@ -2,8 +2,10 @@ package com.sequenceiq.environment.experience.liftie;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -103,5 +105,16 @@ class LiftieConnectorServiceDistributeTagsTest extends LiftieConnectorServiceTes
         getUnderTest().distributeEnvironmentTags("http://some-other-base-path:8080", ENV_CRN, TAGS);
 
         verify(getMockClient(), times(ONCE)).target(LIFTIE_TAGS_ENDPOINT_PATH);
+    }
+
+    @Test
+    @DisplayName("When environment tags propagation is not configured, then tag distribution is skipped without calling the endpoint")
+    void testWhenEnvironmentTagsPropagationIsDisabledThenDistributionIsSkipped() {
+        when(getMockLiftiePathProvider().isEnvironmentTagsPropagationDisabled()).thenReturn(true);
+
+        assertDoesNotThrow(() -> getUnderTest().distributeEnvironmentTags(null, ENV_CRN, TAGS));
+
+        verify(getMockLiftiePathProvider(), never()).getPathToEnvironmentTagsEndpoint();
+        verifyNoInteractions(getMockClient(), getMockRetryableWebTarget());
     }
 }

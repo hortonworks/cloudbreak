@@ -1,13 +1,16 @@
 package com.sequenceiq.environment.experience;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.ws.rs.client.WebTarget;
 
@@ -57,6 +60,39 @@ class QueryParamInjectorUtilTest {
 
         verify(webTarget, times(1)).queryParam(any(), any());
         verify(webTarget, times(1)).queryParam(key, value);
+    }
+
+    @Test
+    void testSetRepeatedQueryParamWhenWebTargetIsNullThenIllegalArgumentExceptionShouldCome() {
+        IllegalArgumentException expectedException = assertThrows(
+                IllegalArgumentException.class,
+                () -> QueryParamInjectorUtil.setRepeatedQueryParam(null, "tagKey", emptySet()));
+
+        assertEquals("Input WebTarget should not be null!", expectedException.getMessage());
+    }
+
+    @Test
+    void testSetRepeatedQueryParamWhenCollectionIsEmptyThenNoQueryParamShouldBeAdded() {
+        QueryParamInjectorUtil.setRepeatedQueryParam(webTarget, "tagKey", emptySet());
+
+        verify(webTarget, times(0)).queryParam(any(), any());
+    }
+
+    @Test
+    void testSetRepeatedQueryParamWhenCollectionIsNullThenNoQueryParamShouldBeAdded() {
+        QueryParamInjectorUtil.setRepeatedQueryParam(webTarget, "tagKey", null);
+
+        verify(webTarget, times(0)).queryParam(any(), any());
+    }
+
+    @Test
+    void testSetRepeatedQueryParamWhenCollectionIsNotEmptyThenEachValueShouldBeAddedUnderTheSameName() {
+        when(webTarget.queryParam(any(), any())).thenReturn(webTarget);
+
+        QueryParamInjectorUtil.setRepeatedQueryParam(webTarget, "tagKey", Set.of("key1", "key2"));
+
+        verify(webTarget, times(1)).queryParam("tagKey", "key1");
+        verify(webTarget, times(1)).queryParam("tagKey", "key2");
     }
 
 }

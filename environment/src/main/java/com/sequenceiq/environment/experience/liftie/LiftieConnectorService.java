@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import jakarta.ws.rs.client.Client;
@@ -12,6 +13,7 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.QueryParamInjectorUtil;
 import com.sequenceiq.environment.experience.ResponseReader;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
+import com.sequenceiq.environment.experience.api.CommonExperienceApi;
 import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
@@ -114,14 +117,37 @@ public class LiftieConnectorService implements LiftieApi {
 
     @Override
     public void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags) {
-        if (liftiePathProvider.isEnvironmentTagsDistributionDisabled()) {
-            LOGGER.info("Environment tags distribution for Liftie is not configured.");
+        if (liftiePathProvider.isEnvironmentTagsPropagationDisabled()) {
+            LOGGER.info("Environment tags propagation for Liftie is not configured.");
             return;
         }
         LOGGER.debug("About to distribute environment tags to Kubernetes Experience for environment [crn: {}]", environmentCrn);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.put(call, tags))) {
+            responseReader.read(webTarget.getUri().toString(), result, Void.class)
+                    .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+        } catch (RuntimeException e) {
+            LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
+            throw new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
+        }
+    }
+
+    @Override
+    public void deleteEnvironmentTags(String experienceBasePath, String environmentCrn, Set<String> tagKeys) {
+        if (liftiePathProvider.isEnvironmentTagsPropagationDisabled()) {
+            LOGGER.info("Environment tags propagation for Liftie is not configured.");
+            return;
+        }
+        if (CollectionUtils.isEmpty(tagKeys)) {
+            LOGGER.debug("No tag keys were given, skipping environment tag removal for environment [crn: {}].", environmentCrn);
+            return;
+        }
+        LOGGER.debug("About to remove environment tags from Kubernetes Experience for environment [crn: {}]", environmentCrn);
+        WebTarget webTarget = QueryParamInjectorUtil.setRepeatedQueryParam(
+                client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint()), CommonExperienceApi.TAG_KEY_QUERY_PARAM, tagKeys);
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))) {
             responseReader.read(webTarget.getUri().toString(), result, Void.class)
                     .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
         } catch (RuntimeException e) {

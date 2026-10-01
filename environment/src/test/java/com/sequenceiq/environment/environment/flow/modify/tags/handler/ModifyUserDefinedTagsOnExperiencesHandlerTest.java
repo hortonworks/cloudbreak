@@ -207,10 +207,93 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
         assertEquals(FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
     }
 
-    // CB-34078: propagate environment tag deletion to experiences
     @Test
-    @DisplayName("When environment tag deletion is cascaded, then experiences are skipped until CB-34078")
-    void testWhenDeletingTagsThenExperienceDistributionIsSkippedAndFinishEventIsReturned() {
+    @DisplayName("When environment tag deletion is cascaded, then both services remove the keys and a finish event is returned")
+    void testWhenDeletingTagsThenKeysAreRemovedFromExperiencesAndFinishEventIsReturned() {
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
+        when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        CommonExperience xp = new CommonExperience();
+        xp.setName("testXp");
+        xp.setEnvironmentTagsEndpoint("/env/{environmentCrn}/tags");
+        when(experienceServicesConfig.getConfigs()).thenReturn(List.of(xp));
+        when(commonExperiencePathCreator.createPathToEnvironmentTags(xp)).thenReturn(EXPERIENCE_PATH);
+
+        Selectable result = underTest.doAccept(deleteEvent());
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verify(liftieConnectorService).deleteEnvironmentTags(null, ENV_CRN, TAG_KEYS_TO_REMOVE);
+        verify(commonExperienceConnectorService).deleteEnvironmentTags(EXPERIENCE_PATH, ENV_CRN, TAG_KEYS_TO_REMOVE);
+    }
+
+    @Test
+    @DisplayName("When experience scanning is disabled, then tag deletion is skipped and a finish event is returned")
+    void testWhenExperienceScanIsDisabledThenDeletionIsSkippedAndFinishEventIsReturned() {
+        ReflectionTestUtils.setField(underTest, "experienceScanEnabled", false);
+
+        Selectable result = underTest.doAccept(deleteEvent());
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+    }
+
+    @Test
+    @DisplayName("When the experience deletion entitlement is disabled, then tag deletion is skipped and a finish event is returned")
+    void testWhenExperienceDeletionEntitlementIsDisabledThenDeletionIsSkippedAndFinishEventIsReturned() {
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
+        when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        Selectable result = underTest.doAccept(deleteEvent());
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+    }
+
+    @Test
+    @DisplayName("When Liftie tag deletion fails, then the best-effort operation still returns a finish event")
+    void testWhenLiftieTagDeletionFailsThenFinishEventIsReturned() {
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
+        when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        doThrow(new RuntimeException("Liftie unavailable")).when(liftieConnectorService)
+                .deleteEnvironmentTags(any(), anyString(), any());
+        when(experienceServicesConfig.getConfigs()).thenReturn(List.of());
+
+        Selectable result = underTest.doAccept(deleteEvent());
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+    }
+
+    @Test
+    @DisplayName("When common experience tag deletion fails, then the best-effort operation still returns a finish event")
+    void testWhenCommonExperienceTagDeletionFailsThenFinishEventIsReturned() {
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
+        when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        CommonExperience xp = new CommonExperience();
+        xp.setName("failingXp");
+        xp.setEnvironmentTagsEndpoint("/env/{environmentCrn}/tags");
+        when(experienceServicesConfig.getConfigs()).thenReturn(List.of(xp));
+        when(commonExperiencePathCreator.createPathToEnvironmentTags(xp)).thenReturn(EXPERIENCE_PATH);
+        doThrow(new RuntimeException("Connection refused")).when(commonExperienceConnectorService)
+                .deleteEnvironmentTags(anyString(), anyString(), any());
+
+        Selectable result = underTest.doAccept(deleteEvent());
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+    }
+
+    private HandlerEvent<EnvTagsModificationEvent> deleteEvent() {
         EnvTagsModificationEvent deleteRequest = EnvTagsModificationEvent.builder()
                 .withSelector(MODIFY_USER_DEFINED_TAGS_ON_EXPERIENCES_EVENT.selector())
                 .withResourceId(ENV_ID)
@@ -219,11 +302,6 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
                 .withUserDefinedTags(Map.of())
                 .withTagsToRemove(TAG_KEYS_TO_REMOVE)
                 .build();
-
-        Selectable result = underTest.doAccept(new HandlerEvent<>(new Event<>(deleteRequest)));
-
-        assertInstanceOf(EnvTagsModificationEvent.class, result);
-        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+        return new HandlerEvent<>(new Event<>(deleteRequest));
     }
 }
