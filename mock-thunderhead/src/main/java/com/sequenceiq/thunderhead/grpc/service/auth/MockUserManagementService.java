@@ -28,6 +28,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DISA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_EXTENDED_REPAIR_BATCH_SIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FREEIPA_MULTI_AZ_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
@@ -587,6 +588,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datahub.force.os.upgrade}")
     private boolean datahubForceOsUpgradeEnabled;
 
+    @Value("${auth.mock.extended.repair.batch.size.enabled}")
+    private boolean extendedRepairBatchSizeEnabled;
+
     @Value("${auth.mock.dev.telemetry.yum.repo.enabled}")
     private boolean devTelemetryYumRepoEnabled;
 
@@ -998,6 +1002,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, azureMultipleResourceGroupRejectEnabled, CDP_AZURE_MULTIPLE_RESOURCE_GROUP_REJECT);
         addEntitlement(builder, accountId, gcpSecureBootEnabled, CDP_CB_GCP_SECURE_BOOT);
         addEntitlement(builder, accountId, datahubForceOsUpgradeEnabled, CDP_DATAHUB_FORCE_OS_UPGRADE);
+        addEntitlement(builder, accountId, extendedRepairBatchSizeEnabled, CDP_CB_EXTENDED_REPAIR_BATCH_SIZE);
         addEntitlement(builder, accountId, tlsv13Enabled, CDP_CB_TLS_1_3);
         addEntitlement(builder, accountId, devTelemetryYumRepoEnabled, CDP_CB_USE_DEV_TELEMETRY_YUM_REPO);
         addEntitlement(builder, accountId, lakehouseOptimizerEnabled, CDP_LAKEHOUSE_OPTIMIZER_ENABLED);

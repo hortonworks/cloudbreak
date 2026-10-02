@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
-import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
@@ -70,6 +69,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
+import com.sequenceiq.cloudbreak.service.cluster.RepairBatchSizeService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.AwsRepairSecurityGroupValidationTriggerService;
 import com.sequenceiq.cloudbreak.service.stack.AwsVariantMigrationRepairTriggerService;
@@ -132,7 +132,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private AwsRepairSecurityGroupValidationTriggerService awsRepairSecurityGroupValidationTriggerService;
 
     @Inject
-    private ScalingHardLimitsService scalingHardLimitsService;
+    private RepairBatchSizeService repairBatchSizeService;
 
     @Inject
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
@@ -367,7 +367,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private void addBatchedRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
             LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackDto stackDto) {
-        int batchSize = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+        int batchSize = repairBatchSizeService.getBatchNodeCount(stackDto.getAccountId());
         LOGGER.info("Batch repair with batch size: {}", batchSize);
         while (!orderedHostMultimap.values().isEmpty()) {
             Map<String, Set<String>> repairableGroups = new HashMap<>();

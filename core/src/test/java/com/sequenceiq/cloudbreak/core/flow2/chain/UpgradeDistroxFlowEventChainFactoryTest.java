@@ -30,6 +30,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -70,6 +71,7 @@ import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTrig
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.CLOWorkaroundService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.RepairBatchSizeService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
@@ -90,6 +92,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     private static final String IMAGE_ID = "imageId";
 
+    private static final String ACCOUNT_ID = "accountId";
+
     private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, "imageCatalogName", "imageCatUrl");
 
     @InjectMocks
@@ -102,7 +106,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private ScalingHardLimitsService scalingHardLimitsService;
+    private RepairBatchSizeService repairBatchSizeService;
 
     @Mock
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
@@ -228,7 +232,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 
@@ -259,10 +262,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(repairBatchSizeService.getBatchNodeCount(any())).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
-        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         Set<InstanceMetaData> instances = new HashSet<>();
         for (int i = 0; i < 500; i++) {
@@ -287,6 +288,41 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.ALL), eq(STACK_ID), eq(Set.of()), eq(false));
     }
 
+    @ParameterizedTest(name = "{0} nodes with batch node count 1000 should result in {1} repair")
+    @CsvSource({
+            "500, ALL_AT_ONCE",
+            "1001, BATCH"
+    })
+    void testChainQueueForReplaceVmsWhenBatchNodeCountIsThousand(int nodeCount, RepairType expectedRepairType) throws CloudbreakImageNotFoundException {
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
+        lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
+        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(repairBatchSizeService.getBatchNodeCount(ACCOUNT_ID)).thenReturn(1000);
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        Set<InstanceMetaData> instances = new HashSet<>();
+        for (int i = 0; i < nodeCount; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setDiscoveryFQDN("compute-" + i);
+            instances.add(instanceMetaData);
+        }
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(Map.of(HostGroupName.hostGroupName("compute"), instances));
+        when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
+
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(6, flowChainQueue.getQueue().size());
+        assertSyncTriggerEvent(flowChainQueue);
+        assertClusterSyncTriggerEvent(flowChainQueue);
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertSaltUpdateEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
+        assertRepairEvent(flowChainQueue, expectedRepairType, nodeCount, "variant");
+    }
+
     @Test
     void testChainQueueForReplaceVmsWithHundredNodesWhenForceOsUpgradeAndRollingUpgradeEnabled() throws CloudbreakImageNotFoundException {
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
@@ -298,10 +334,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(master2.getInstanceId()).thenReturn("master-2");
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(master1, master2));
         when(clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(anyLong())).thenReturn(true);
-        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
-        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         Set<InstanceMetaData> instances = new HashSet<>();
         for (int i = 0; i < 2; i++) {
@@ -333,7 +366,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(repairBatchSizeService.getBatchNodeCount(any())).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 

@@ -39,7 +39,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
@@ -65,6 +64,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTr
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.CLOWorkaroundService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.RepairBatchSizeService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
@@ -94,7 +94,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private ScalingHardLimitsService scalingHardLimitsService;
+    private RepairBatchSizeService repairBatchSizeService;
 
     @Inject
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
@@ -253,7 +253,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
                 LOGGER.info("OS upgrade is not required, as replaceable node list is empty.");
                 return List.of();
             }
-            ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, variantMigrationFeasibleNodeMapPair.getRight());
+            ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, stack, variantMigrationFeasibleNodeMapPair.getRight());
             String triggeredStackVariant = calculateTriggeredStackVariant(event.getTriggeredStackVariant(),
                     variantMigrationFeasibleNodeMapPair.getLeft(), stack);
             LOGGER.info("Repair type: {}", repairType);
@@ -282,14 +282,15 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         }
     }
 
-    private ClusterRepairTriggerEvent.RepairType decideRepairType(DistroXUpgradeFlowChainTriggerEvent event, Map<String, List<String>> nodeMap) {
-        long nodeCount = nodeMap.values().stream().mapToLong(java.util.Collection::size).sum();
-        int maxUpscaleStepInNodeCount = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
-        LOGGER.info("Batch repair enabled: {}, node count: {}, max upscale step: {}",
-                batchRepairEnabled, nodeCount, maxUpscaleStepInNodeCount);
+    private ClusterRepairTriggerEvent.RepairType decideRepairType(DistroXUpgradeFlowChainTriggerEvent event, StackDto stack,
+            Map<String, List<String>> nodeMap) {
         if (event.isRollingUpgradeEnabled()) {
             return ONE_BY_ONE;
-        } else if (batchRepairEnabled && nodeCount > maxUpscaleStepInNodeCount) {
+        }
+        long nodeCount = nodeMap.values().stream().mapToLong(java.util.Collection::size).sum();
+        int batchNodeCount = repairBatchSizeService.getBatchNodeCount(stack.getAccountId());
+        LOGGER.info("Batch repair enabled: {}, node count: {}, batch node count: {}", batchRepairEnabled, nodeCount, batchNodeCount);
+        if (batchRepairEnabled && nodeCount > batchNodeCount) {
             return BATCH;
         } else {
             return ALL_AT_ONCE;

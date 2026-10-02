@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
-import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
@@ -67,6 +66,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
+import com.sequenceiq.cloudbreak.service.cluster.RepairBatchSizeService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.AwsRepairSecurityGroupValidationTriggerService;
 import com.sequenceiq.cloudbreak.service.stack.AwsVariantMigrationRepairTriggerService;
@@ -144,7 +144,7 @@ class ClusterRepairFlowEventChainFactoryTest {
     private ClusterView clusterView;
 
     @Mock
-    private ScalingHardLimitsService scalingHardLimitsService;
+    private RepairBatchSizeService repairBatchSizeService;
 
     @Mock
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
@@ -495,7 +495,7 @@ class ClusterRepairFlowEventChainFactoryTest {
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
-        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(repairBatchSizeService.getBatchNodeCount(any())).thenReturn(100);
         setupPrimaryGateway();
 
         ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)

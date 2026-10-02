@@ -25,6 +25,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENAB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_EXTENDED_REPAIR_BATCH_SIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FREEIPA_MULTI_AZ_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
@@ -680,5 +681,9 @@ public class EntitlementService {
 
     public boolean isGlobalDefaultTemplateEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_GLOBAL_DEFAULT_TEMPLATE);
+    }
+
+    public boolean isExtendedRepairBatchSizeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_EXTENDED_REPAIR_BATCH_SIZE);
     }
 }
