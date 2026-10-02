@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
+import com.sequenceiq.cloudbreak.util.InstanceMetadataDeduplicator;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -443,10 +444,11 @@ public class ClusterBootstrapper {
 
     private void collectNodes(Set<String> upscaleCandidateAddresses, StackDto stack,
             Set<Node> nodes, Set<Node> allNodes) {
-        Set<InstanceMetaData> metaDataSet = instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())
-                .stream()
-                .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null)
-                .collect(Collectors.toSet());
+        Set<InstanceMetaData> metaDataSet = InstanceMetadataDeduplicator.deduplicateByPrivateIp(
+                instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())
+                        .stream()
+                        .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null)
+                        .collect(Collectors.toSet()));
         String clusterDomain = getClusterDomain(metaDataSet, stack.getCustomDomain());
 
         LOGGER.info("Cluster domain: {}", clusterDomain);

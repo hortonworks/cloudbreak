@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
@@ -157,6 +159,12 @@ public class ClusterBootstrapperTest {
 
     @Captor
     private ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor;
+
+    @Captor
+    private ArgumentCaptor<Set<Node>> targetNodesCaptor;
+
+    @Captor
+    private ArgumentCaptor<Set<Node>> allNodesCaptor;
 
     @Test
     public void shouldUseReachableInstances() throws Exception {
@@ -403,6 +411,47 @@ public class ClusterBootstrapperTest {
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData, instanceMetaData2));
         verify(hostOrchestrator, never()).removeDeadSaltMinions(deadConfig1);
         verify(hostOrchestrator, never()).removeDeadSaltMinions(deadConfig2);
+    }
+
+    @Test
+    public void bootstrapNewNodesShouldBootstrapOnlyTheNewerInstanceWhenTwoInstancesShareTheSamePrivateIp() throws Exception {
+        when(stackDtoService.getById(1L)).thenReturn(stack);
+        InstanceGroup instanceGroup = newMasterInstanceGroup();
+        InstanceMetaData staleInstance = newInstanceMetaData("1.1.1.1", "2.2.2.2");
+        staleInstance.setInstanceGroup(instanceGroup);
+        staleInstance.setInstanceId("i-stale");
+        staleInstance.setDiscoveryFQDN("compute0." + DOMAIN);
+        staleInstance.setStartDate(1000L);
+        InstanceMetaData newInstance = newInstanceMetaData("1.1.1.1", "3.3.3.3");
+        newInstance.setInstanceGroup(instanceGroup);
+        newInstance.setInstanceId("i-new");
+        newInstance.setDiscoveryFQDN("worker4." + DOMAIN);
+        newInstance.setStartDate(2000L);
+
+        when(stack.getId()).thenReturn(1L);
+        when(instanceMetaDataService.getReachableInstanceMetadataByStackId(1L)).thenReturn(Set.of(staleInstance, newInstance));
+        when(stack.getCustomDomain()).thenReturn(DOMAIN);
+        Cluster cluster = new Cluster();
+        cluster.setGateway(new Gateway());
+        when(stack.getCluster()).thenReturn(cluster);
+        when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build()));
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
+
+        underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
+
+        verify(hostOrchestrator).bootstrapNewNodes(any(), targetNodesCaptor.capture(), allNodesCaptor.capture(), any(), any(), any(), anyBoolean());
+        assertThat(targetNodesCaptor.getValue()).extracting(Node::getInstanceId).containsExactly("i-new");
+        assertThat(allNodesCaptor.getValue()).extracting(Node::getInstanceId).containsExactly("i-new");
+        verify(instanceMetaDataService).saveAll(Set.of(newInstance));
     }
 
     private InstanceMetaData newInstanceMetaData() {

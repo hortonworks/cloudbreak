@@ -80,4 +80,43 @@ class StackDtoTest {
         assertThat(allNotDeletedNodes, hasItem(hasProperty("hostname", equalTo("fqdn3"))));
         assertThat(allNotDeletedNodes, hasItem(hasProperty("hostname", equalTo("fqdn6"))));
     }
+
+    @Test
+    void getNodesShouldKeepEveryInstanceWithoutPrivateIpBecauseTheyCannotBeDeduplicatedByIp() {
+        Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
+        ArrayList<InstanceMetadataView> workerInstanceMetadataViews = new ArrayList<>();
+        InstanceMetaData stoppedWithoutIp1 = new InstanceMetaData();
+        stoppedWithoutIp1.setInstanceStatus(InstanceStatus.STOPPED);
+        stoppedWithoutIp1.setStartDate(1L);
+        stoppedWithoutIp1.setDiscoveryFQDN("fqdn1");
+        workerInstanceMetadataViews.add(stoppedWithoutIp1);
+        InstanceMetaData stoppedWithoutIp2 = new InstanceMetaData();
+        stoppedWithoutIp2.setInstanceStatus(InstanceStatus.STOPPED);
+        stoppedWithoutIp2.setStartDate(2L);
+        stoppedWithoutIp2.setDiscoveryFQDN("fqdn2");
+        workerInstanceMetadataViews.add(stoppedWithoutIp2);
+        InstanceMetaData healthyWithIp = new InstanceMetaData();
+        healthyWithIp.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        healthyWithIp.setPrivateIp("192.168.1.1");
+        healthyWithIp.setStartDate(3L);
+        healthyWithIp.setDiscoveryFQDN("fqdn3");
+        workerInstanceMetadataViews.add(healthyWithIp);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        when(instanceGroupView.getTemplate()).thenReturn(mock(Template.class));
+        instanceGroups.put("worker", new InstanceGroupDto(instanceGroupView, workerInstanceMetadataViews));
+        StackDto stackDto = new StackDto(null, null, null, null, null, null,
+                instanceGroups, null, null, null, null, null, null, null, null, null, null, null, NotificationState.DISABLED);
+
+        Set<Node> allFunctioningNodes = stackDto.getAllFunctioningNodes();
+        assertEquals(3, allFunctioningNodes.size());
+        assertThat(allFunctioningNodes, hasItem(hasProperty("hostname", equalTo("fqdn1"))));
+        assertThat(allFunctioningNodes, hasItem(hasProperty("hostname", equalTo("fqdn2"))));
+        assertThat(allFunctioningNodes, hasItem(hasProperty("hostname", equalTo("fqdn3"))));
+
+        Set<Node> allNotDeletedNodes = stackDto.getAllNotDeletedNodes();
+        assertEquals(3, allNotDeletedNodes.size());
+        assertThat(allNotDeletedNodes, hasItem(hasProperty("hostname", equalTo("fqdn1"))));
+        assertThat(allNotDeletedNodes, hasItem(hasProperty("hostname", equalTo("fqdn2"))));
+        assertThat(allNotDeletedNodes, hasItem(hasProperty("hostname", equalTo("fqdn3"))));
+    }
 }

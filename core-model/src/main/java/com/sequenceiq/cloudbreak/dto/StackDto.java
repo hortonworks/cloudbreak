@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -39,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.StackParameters;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
+import com.sequenceiq.cloudbreak.util.InstanceMetadataDeduplicator;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -50,8 +49,6 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.Architecture;
 
 public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContextInfoProvider, IdAware {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackDto.class);
 
     private StackView stack;
 
@@ -381,10 +378,8 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     private Set<Node> getNodesByMetaDataFilter(Function<InstanceGroupDto, List<InstanceMetadataView>> metadataFilter) {
         Map<InstanceMetadataView, InstanceGroupView> instanceMetadataMap = mapFilteredInstanceMetadatasWithFQDNToGroup(metadataFilter);
-        Map<InstanceMetadataView, InstanceGroupView> deduplicatedByPrivateIp = deduplicateByPrivateIp(instanceMetadataMap);
-        return deduplicatedByPrivateIp.entrySet().stream().map(entry -> {
-            InstanceMetadataView im = entry.getKey();
-            InstanceGroupView instanceGroup = entry.getValue();
+        return InstanceMetadataDeduplicator.deduplicateByPrivateIp(instanceMetadataMap.keySet()).stream().map(im -> {
+            InstanceGroupView instanceGroup = instanceMetadataMap.get(im);
             return new Node(im.getPrivateIp(),
                     im.getPublicIp(),
                     im.getInstanceId(),
@@ -392,19 +387,6 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
                     im.getDiscoveryFQDN(),
                     instanceGroup.getGroupName());
         }).collect(Collectors.toSet());
-    }
-
-    private Map<InstanceMetadataView, InstanceGroupView> deduplicateByPrivateIp(Map<InstanceMetadataView, InstanceGroupView> instanceMetadataMap) {
-        return instanceMetadataMap.entrySet().stream()
-                .collect(Collectors.toMap(entry -> entry.getKey().getPrivateIp(), entry -> entry, (i1, i2) -> {
-                    LOGGER.warn("We have the same ip address for two nodes, we will return with the newer node! Affected nodes: {}, {}", i1, i2);
-                    if (i1.getKey().getStartDate().compareTo(i2.getKey().getStartDate()) < 0) {
-                        return i2;
-                    } else {
-                        return i1;
-                    }
-                })).entrySet().stream()
-                .collect(Collectors.toMap(entry -> entry.getValue().getKey(), entry -> entry.getValue().getValue()));
     }
 
     private Map<InstanceMetadataView, InstanceGroupView> mapFilteredInstanceMetadatasWithFQDNToGroup(
