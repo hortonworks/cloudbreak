@@ -591,6 +591,7 @@ public class ModelDescriptions {
     public static class UpgradeModelDescription {
         public static final String IMAGE_ID = "UUID of the image to upgrade";
         public static final String RUNTIME = "Cloudera Runtime version";
+        public static final String COMPONENTS = "Cloudera Manager repository and parcel definitions for a runtime upgrade using a base image.";
         public static final String LOCK_COMPONENTS = "Upgrades to image with the same version of stack and clustermanager, if available";
         public static final String DRY_RUN = "Checks the eligibility of an image to upgrade";
         public static final String SHOW_AVAILABLE_IMAGES = "Returns the list of images that are eligible for the upgrade";
