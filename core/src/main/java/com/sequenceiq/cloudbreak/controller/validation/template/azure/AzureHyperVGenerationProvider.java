@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.template.azure;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -21,19 +23,19 @@ public class AzureHyperVGenerationProvider {
     private ImageService imageService;
 
     /**
-     * @return "V1"/"V2" when the Azure image the stack was created from declares its Hyper-V generation, null when it does not (or the stack is not on Azure).
-     * A null result means "unknown", and callers must not block on it: untagged images keep the pre-existing implicit Gen1 behaviour.
+     * @return "V1"/"V2" when the Azure image the stack was created from declares its Hyper-V generation, empty when it does not (or the stack is not on
+     * Azure). An empty result means "unknown", and callers must not block on it: untagged images keep the pre-existing implicit Gen1 behaviour.
      */
-    public String getImageHyperVGeneration(Stack stack) {
+    public Optional<String> getImageHyperVGeneration(Stack stack) {
         if (!CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
-            return null;
+            return Optional.empty();
         }
         try {
             Image image = imageService.getImage(stack.getId());
             return AzureHyperVGenerationUtil.toGeneration(image.getTags());
         } catch (Exception e) {
             LOGGER.warn("Could not read the image of stack {}. Proceeding without Hyper-V generation validation.", stack.getId(), e);
-            return null;
+            return Optional.empty();
         }
     }
 }

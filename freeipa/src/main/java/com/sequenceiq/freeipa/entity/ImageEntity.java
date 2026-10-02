@@ -75,6 +75,8 @@ public class ImageEntity implements AccountIdAwareResource {
 
     private String architecture;
 
+    private String hyperVGenerationTag;
+
     public String getImageName() {
         return imageName;
     }
@@ -238,6 +240,14 @@ public class ImageEntity implements AccountIdAwareResource {
         this.architecture = architecture;
     }
 
+    public String getHyperVGenerationTag() {
+        return hyperVGenerationTag;
+    }
+
+    public void setHyperVGenerationTag(String hyperVGenerationTag) {
+        this.hyperVGenerationTag = hyperVGenerationTag;
+    }
+
     @Override
     public String toString() {
         return "ImageEntity{" +
@@ -256,6 +266,7 @@ public class ImageEntity implements AccountIdAwareResource {
                 ", imdsVersion='" + imdsVersion + '\'' +
                 ", saltVersion='" + saltVersion + '\'' +
                 ", architecture='" + architecture + '\'' +
+                ", hyperVGenerationTag='" + hyperVGenerationTag + '\'' +
                 '}';
     }
 
@@ -285,12 +296,13 @@ public class ImageEntity implements AccountIdAwareResource {
                 && Objects.equals(accountId, that.accountId)
                 && Objects.equals(sourceImage, that.sourceImage)
                 && Objects.equals(date, that.date)
-                && Objects.equals(architecture, that.architecture);
+                && Objects.equals(architecture, that.architecture)
+                && Objects.equals(hyperVGenerationTag, that.hyperVGenerationTag);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId,
-                imageCatalogName, date, ldapAgentVersion, accountId, sourceImage, architecture);
+                imageCatalogName, date, ldapAgentVersion, accountId, sourceImage, architecture, hyperVGenerationTag);
     }
 }

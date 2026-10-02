@@ -201,7 +201,7 @@ public class TemplateValidatorAndUpdater {
         if (imageGeneration != null && !vmType.getMetaData().isHyperVGenerationSupported(imageGeneration)) {
             validationBuilder.error(
                     String.format("The '%s' instance type does not support the selected image's Hyper-V generation '%s'. Supported generation(s): '%s'",
-                            vmType.value(), imageGeneration, vmType.getMetaData().getHyperVGenerations()));
+                            vmType.value(), imageGeneration, vmType.getMetaData().getHyperVGenerations().orElse("unknown")));
         }
     }
 

@@ -81,7 +81,7 @@ public class AzureImageSetupService {
         AzureClient client = ac.getParameter(AzureClient.class);
 
         AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(),
-                azureImageHyperVGenerationResolver.resolve(image), ac, client);
+                azureImageHyperVGenerationResolver.resolve(image).orElse(null), ac, client);
         Optional<VirtualMachineCustomImage> customImage = azureManagedImageService.findVirtualMachineCustomImage(azureImageInfo, client);
         if (customImage.isPresent()) {
             LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD copy check!", customImage.get().id(),
@@ -149,7 +149,7 @@ public class AzureImageSetupService {
             String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
 
             AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(),
-                    azureImageHyperVGenerationResolver.resolve(image), ac, client);
+                    azureImageHyperVGenerationResolver.resolve(image).orElse(null), ac, client);
             Optional<AzureImage> foundImage = azureImageService.findImage(azureImageInfo, client, ac);
             if (foundImage.isPresent()) {
                 LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",

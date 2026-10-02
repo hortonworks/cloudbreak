@@ -42,8 +42,8 @@ public class AzureImageVmTypeCompatibilityValidator implements Validator {
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         Image image = cloudStack.getImage();
-        HyperVGenerationTypes imageGeneration = azureImageHyperVGenerationResolver.resolve(image);
-        if (imageGeneration == null) {
+        Optional<HyperVGenerationTypes> imageGeneration = azureImageHyperVGenerationResolver.resolve(image);
+        if (imageGeneration.isEmpty()) {
             LOGGER.debug("Skipping image/VM Hyper-V generation compatibility check: image [{}] has no recognised hyperVGeneration tag.",
                     image == null ? null : image.getImageName());
             return;
@@ -71,7 +71,7 @@ public class AzureImageVmTypeCompatibilityValidator implements Validator {
             return;
         }
 
-        boolean gen2Image = HyperVGenerationTypes.V2.equals(imageGeneration);
+        boolean gen2Image = HyperVGenerationTypes.V2.equals(imageGeneration.get());
         boolean fallbackEnabled = entitlementService.isFallbackInstanceTypeEnabled(ac.getCloudContext().getAccountId());
         List<String> offenders = collectOffenders(cloudStack, capabilities, region, gen2Image, fallbackEnabled);
         if (!offenders.isEmpty()) {

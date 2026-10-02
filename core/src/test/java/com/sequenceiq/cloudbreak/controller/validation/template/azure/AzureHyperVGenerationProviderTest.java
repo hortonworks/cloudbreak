@@ -4,13 +4,14 @@ import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATI
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATION_V1;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATION_V2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,21 +39,21 @@ class AzureHyperVGenerationProviderTest {
     void testGetImageHyperVGenerationWhenGen2TaggedImage() throws Exception {
         setUpImage(Map.of(HYPER_V_GENERATION_TAG, "2"));
 
-        assertEquals(HYPER_V_GENERATION_V2, underTest.getImageHyperVGeneration(azureStack()));
+        assertEquals(Optional.of(HYPER_V_GENERATION_V2), underTest.getImageHyperVGeneration(azureStack()));
     }
 
     @Test
     void testGetImageHyperVGenerationWhenGen1TaggedImage() throws Exception {
         setUpImage(Map.of(HYPER_V_GENERATION_TAG, "1"));
 
-        assertEquals(HYPER_V_GENERATION_V1, underTest.getImageHyperVGeneration(azureStack()));
+        assertEquals(Optional.of(HYPER_V_GENERATION_V1), underTest.getImageHyperVGeneration(azureStack()));
     }
 
     @Test
     void testGetImageHyperVGenerationWhenImageIsNotTagged() throws Exception {
         setUpImage(Map.of("release-version", "7.3.1"));
 
-        assertNull(underTest.getImageHyperVGeneration(azureStack()));
+        assertTrue(underTest.getImageHyperVGeneration(azureStack()).isEmpty());
     }
 
     @Test
@@ -61,7 +62,7 @@ class AzureHyperVGenerationProviderTest {
         stack.setId(STACK_ID);
         stack.setCloudPlatform("AWS");
 
-        assertNull(underTest.getImageHyperVGeneration(stack));
+        assertTrue(underTest.getImageHyperVGeneration(stack).isEmpty());
 
         verify(imageService, never()).getImage(anyLong());
     }
@@ -70,7 +71,7 @@ class AzureHyperVGenerationProviderTest {
     void testGetImageHyperVGenerationWhenImageCannotBeReadThenNoValidation() throws Exception {
         when(imageService.getImage(STACK_ID)).thenThrow(new CloudbreakServiceException("No image found"));
 
-        assertNull(underTest.getImageHyperVGeneration(azureStack()));
+        assertTrue(underTest.getImageHyperVGeneration(azureStack()).isEmpty());
     }
 
     private void setUpImage(Map<String, String> tags) throws Exception {

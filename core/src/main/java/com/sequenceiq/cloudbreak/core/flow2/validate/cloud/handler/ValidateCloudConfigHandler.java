@@ -98,7 +98,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
         stackValidator.validate(stack, validationBuilder);
 
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
-        String imageHyperVGeneration = azureHyperVGenerationProvider.getImageHyperVGeneration(stack);
+        String imageHyperVGeneration = azureHyperVGenerationProvider.getImageHyperVGeneration(stack).orElse(null);
         measure(() -> {
             for (InstanceGroup instanceGroup : instanceGroups) {
                 LOGGER.info("Validate template for {} name with {} instanceGroup.", name, instanceGroup.toString());

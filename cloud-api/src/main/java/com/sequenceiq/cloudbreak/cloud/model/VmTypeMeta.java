@@ -183,9 +183,8 @@ public class VmTypeMeta {
         return (Architecture) properties.getOrDefault(ARCHITECTURE, Architecture.X86_64);
     }
 
-    public String getHyperVGenerations() {
-        Object hyperVGenerations = properties.get(HYPER_V_GENERATIONS);
-        return hyperVGenerations == null ? null : hyperVGenerations.toString();
+    public Optional<String> getHyperVGenerations() {
+        return Optional.ofNullable(properties.get(HYPER_V_GENERATIONS)).map(Object::toString);
     }
 
     /**
@@ -195,8 +194,9 @@ public class VmTypeMeta {
      * @param generation "V1" or "V2"
      */
     public boolean isHyperVGenerationSupported(String generation) {
-        String hyperVGenerations = getHyperVGenerations();
-        return hyperVGenerations == null || hyperVGenerations.contains(generation);
+        return getHyperVGenerations()
+                .map(hyperVGenerations -> hyperVGenerations.contains(generation))
+                .orElse(true);
     }
 
     public Optional<VolumeParameterType> getDefaultVolumeType() {

@@ -4,9 +4,10 @@ import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATI
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATION_V1;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.HYPER_V_GENERATION_V2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,27 +17,27 @@ class AzureHyperVGenerationUtilTest {
 
     @Test
     void testToGenerationWhenGen1Tag() {
-        assertEquals(HYPER_V_GENERATION_V1, AzureHyperVGenerationUtil.toGeneration(Map.of(HYPER_V_GENERATION_TAG, "1")));
+        assertEquals(Optional.of(HYPER_V_GENERATION_V1), AzureHyperVGenerationUtil.toGeneration(Map.of(HYPER_V_GENERATION_TAG, "1")));
     }
 
     @Test
     void testToGenerationWhenGen2Tag() {
-        assertEquals(HYPER_V_GENERATION_V2, AzureHyperVGenerationUtil.toGeneration(Map.of(HYPER_V_GENERATION_TAG, "2")));
+        assertEquals(Optional.of(HYPER_V_GENERATION_V2), AzureHyperVGenerationUtil.toGeneration(Map.of(HYPER_V_GENERATION_TAG, "2")));
     }
 
     @Test
     void testToGenerationWhenTagAbsent() {
-        assertNull(AzureHyperVGenerationUtil.toGeneration(Map.of("release-version", "7.3.1")));
+        assertTrue(AzureHyperVGenerationUtil.toGeneration(Map.of("release-version", "7.3.1")).isEmpty());
     }
 
     @Test
     void testToGenerationWhenNoTagsAtAll() {
-        assertNull(AzureHyperVGenerationUtil.toGeneration(null));
+        assertTrue(AzureHyperVGenerationUtil.toGeneration(null).isEmpty());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "3", "V2", "gen2", "two"})
     void testToGenerationWhenTagValueUnrecognised(String tagValue) {
-        assertNull(AzureHyperVGenerationUtil.toGeneration(Map.of(HYPER_V_GENERATION_TAG, tagValue)));
+        assertTrue(AzureHyperVGenerationUtil.toGeneration(Map.of(HYPER_V_GENERATION_TAG, tagValue)).isEmpty());
     }
 }

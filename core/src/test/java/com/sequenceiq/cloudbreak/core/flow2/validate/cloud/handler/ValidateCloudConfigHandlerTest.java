@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
@@ -180,7 +181,7 @@ class ValidateCloudConfigHandlerTest {
         InstanceGroup ig1 = mock(InstanceGroup.class);
         InstanceGroup ig2 = mock(InstanceGroup.class);
         when(stack.getInstanceGroups()).thenReturn(Set.of(ig1, ig2));
-        when(azureHyperVGenerationProvider.getImageHyperVGeneration(stack)).thenReturn("V2");
+        when(azureHyperVGenerationProvider.getImageHyperVGeneration(stack)).thenReturn(Optional.of("V2"));
         ParametersValidationRequest parametersValidationRequest = mock(ParametersValidationRequest.class);
         when(parametersValidator.validate(any(), any(), any(), any(), anyLong())).thenReturn(parametersValidationRequest);
 

@@ -16,10 +16,6 @@ public class AzureImageInfo {
 
     private final HyperVGenerationTypes hyperVGeneration;
 
-    public AzureImageInfo(String imageNameWithRegion, String imageName, String imageId, String region, String resourceGroup) {
-        this(imageNameWithRegion, imageName, imageId, region, resourceGroup, null);
-    }
-
     public AzureImageInfo(String imageNameWithRegion, String imageName, String imageId, String region, String resourceGroup,
             HyperVGenerationTypes hyperVGeneration) {
         this.imageNameWithRegion = imageNameWithRegion;

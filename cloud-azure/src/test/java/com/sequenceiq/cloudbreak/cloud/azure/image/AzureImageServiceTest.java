@@ -81,7 +81,7 @@ public class AzureImageServiceTest {
     private AzureImageService underTest;
 
     private final AzureImageInfo azureImageInfo =
-            new AzureImageInfo(CUSTOM_IMAGE_NAME_WITH_REGION, CUSTOM_IMAGE_NAME, CUSTOM_IMAGE_ID, REGION_NAME, RESOURCE_GROUP_NAME);
+            new AzureImageInfo(CUSTOM_IMAGE_NAME_WITH_REGION, CUSTOM_IMAGE_NAME, CUSTOM_IMAGE_ID, REGION_NAME, RESOURCE_GROUP_NAME, null);
 
     @BeforeEach
     public void setup() {

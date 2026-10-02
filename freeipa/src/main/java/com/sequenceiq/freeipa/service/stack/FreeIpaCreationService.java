@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import jakarta.inject.Inject;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -71,6 +73,7 @@ import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzValidator;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.telemetry.AccountTelemetryService;
+import com.sequenceiq.freeipa.service.validation.FreeIpaHyperVGenerationValidator;
 import com.sequenceiq.freeipa.service.validation.SeLinuxValidationService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -151,6 +154,9 @@ public class FreeIpaCreationService {
     @Inject
     private SeLinuxValidationService seLinuxValidationService;
 
+    @Inject
+    private FreeIpaHyperVGenerationValidator freeIpaHyperVGenerationValidator;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -189,9 +195,10 @@ public class FreeIpaCreationService {
         if (stack.getArchitecture() == null) {
             stack.setArchitecture(Architecture.fromStringWithFallback(imageWrapperStringPair.getKey().getImage().getArchitecture()));
         }
-        measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
+        Optional<Set<VmType>> availableVmTypes = measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
                 "Validating custom instance type took {} ms for {}", stack.getName());
         validateSeLinux(stack, imageWrapperStringPair.getLeft().getImage());
+        freeIpaHyperVGenerationValidator.validate(stack, credential, imageWrapperStringPair.getLeft().getImage(), availableVmTypes.orElse(Set.of()));
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 Stack savedStack = stackService.save(stack);

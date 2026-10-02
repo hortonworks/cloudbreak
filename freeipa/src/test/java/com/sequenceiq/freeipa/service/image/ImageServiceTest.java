@@ -77,6 +77,8 @@ class ImageServiceTest {
 
     private static final String SALT_VERSION = "3001.8";
 
+    private static final String HYPER_V_GENERATION_TAG_VALUE = "2";
+
     private static final String GATEWAY_USERDATA = "gateway userdata";
 
     @Mock
@@ -230,6 +232,7 @@ class ImageServiceTest {
         when(imageConverter.extractSourceImage(image)).thenReturn(SOURCE_IMAGE);
         when(imageConverter.extractImdsVersion(image)).thenReturn(IMDS_VERSION);
         when(imageConverter.extractSaltVersion(image)).thenReturn(SALT_VERSION);
+        when(imageConverter.extractHyperVGenerationTag(image)).thenReturn(HYPER_V_GENERATION_TAG_VALUE);
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImage(stack, imageRequest));
@@ -244,6 +247,7 @@ class ImageServiceTest {
         assertEquals("rhel8", imageEntity.getOsType());
         assertEquals(IMDS_VERSION, imageEntity.getImdsVersion());
         assertEquals(SALT_VERSION, imageEntity.getSaltVersion());
+        assertEquals(HYPER_V_GENERATION_TAG_VALUE, imageEntity.getHyperVGenerationTag());
     }
 
     @Test
@@ -296,6 +300,7 @@ class ImageServiceTest {
         originalImage.setSourceImage(SOURCE_IMAGE);
         originalImage.setImdsVersion(IMDS_VERSION);
         originalImage.setSaltVersion(SALT_VERSION);
+        originalImage.setHyperVGenerationTag(HYPER_V_GENERATION_TAG_VALUE);
         originalImage.setGatewayUserdata(GATEWAY_USERDATA);
 
         when(imageRevisionReaderService.find(2L, 3L)).thenReturn(originalImage);
@@ -319,6 +324,7 @@ class ImageServiceTest {
         assertEquals(SOURCE_IMAGE, revertedImage.getSourceImage());
         assertEquals(IMDS_VERSION, revertedImage.getImdsVersion());
         assertEquals(SALT_VERSION, revertedImage.getSaltVersion());
+        assertEquals(HYPER_V_GENERATION_TAG_VALUE, revertedImage.getHyperVGenerationTag());
         assertEquals(GATEWAY_USERDATA, revertedImage.getGatewayUserdata());
     }
 

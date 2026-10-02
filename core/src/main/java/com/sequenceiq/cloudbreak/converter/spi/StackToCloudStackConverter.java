@@ -640,7 +640,9 @@ public class StackToCloudStackConverter {
 
     private String getInstanceImageHyperVGeneration(InstanceMetadataView instanceMetaData) {
         Image instanceImage = getIfNotNull(instanceMetaData, instanceMetadataToImageIdConverter::convertToImage);
-        return getIfNotNull(instanceImage, image -> AzureHyperVGenerationUtil.toGeneration(image.getTags()));
+        return Optional.ofNullable(instanceImage)
+                .flatMap(image -> AzureHyperVGenerationUtil.toGeneration(image.getTags()))
+                .orElse(null);
     }
 
     private boolean getResourceDiskAttached(Json attributes) {

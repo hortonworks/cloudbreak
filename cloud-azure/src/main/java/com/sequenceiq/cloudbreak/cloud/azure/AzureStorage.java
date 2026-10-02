@@ -95,7 +95,7 @@ public class AzureStorage {
     }
 
     public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
-        return getCustomImage(client, ac, stack, stack.getImage().getImageName(), azureImageHyperVGenerationResolver.resolve(stack.getImage()));
+        return getCustomImage(client, ac, stack, stack.getImage().getImageName(), azureImageHyperVGenerationResolver.resolve(stack.getImage()).orElse(null));
     }
 
     public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName,

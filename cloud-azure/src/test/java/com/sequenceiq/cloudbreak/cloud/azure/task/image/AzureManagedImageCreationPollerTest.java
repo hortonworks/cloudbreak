@@ -36,7 +36,7 @@ public class AzureManagedImageCreationPollerTest {
     public void testWhenTimeoutExceptionThenIsNotCaught() throws Exception {
         AuthenticatedContext ac = mock(AuthenticatedContext.class);
         AzureManagedImageCreationCheckerContext checkerContext = mock(AzureManagedImageCreationCheckerContext.class);
-        when(checkerContext.getAzureImageInfo()).thenReturn(new AzureImageInfo("", "", "", "", ""));
+        when(checkerContext.getAzureImageInfo()).thenReturn(new AzureImageInfo("", "", "", "", "", null));
 
         when(syncPollingScheduler.schedule(any(), anyInt(), anyInt(), anyInt())).thenThrow(new TimeoutException("some text"));
 

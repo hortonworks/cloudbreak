@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 
@@ -22,7 +23,16 @@ public class ImageToImageEntityConverter {
         imageEntity.setImdsVersion(extractImdsVersion(source));
         imageEntity.setSaltVersion(extractSaltVersion(source));
         imageEntity.setSourceImage(extractSourceImage(source));
+        imageEntity.setHyperVGenerationTag(extractHyperVGenerationTag(source));
         return imageEntity;
+    }
+
+    public String extractHyperVGenerationTag(Image image) {
+        return extractHyperVGenerationTag(image.getTags());
+    }
+
+    private String extractHyperVGenerationTag(Map<String, String> tags) {
+        return tags == null ? null : tags.get(AzureConstants.HYPER_V_GENERATION_TAG);
     }
 
     public String extractImdsVersion(Image image) {

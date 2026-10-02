@@ -152,6 +152,7 @@ public class ImageService {
         imageEntity.setSourceImage(imageConverter.extractSourceImage(image));
         imageEntity.setImdsVersion(imageConverter.extractImdsVersion(image));
         imageEntity.setSaltVersion(imageConverter.extractSaltVersion(image));
+        imageEntity.setHyperVGenerationTag(imageConverter.extractHyperVGenerationTag(image));
         imageEntity.setOs(imageWrapper.getImage().getOs());
         imageEntity.setOsType(imageWrapper.getImage().getOsType());
         return imageEntity;
@@ -173,6 +174,7 @@ public class ImageService {
         imageEntity.setSourceImage(originalImageEntity.getSourceImage());
         imageEntity.setImdsVersion(originalImageEntity.getImdsVersion());
         imageEntity.setSaltVersion(originalImageEntity.getSaltVersion());
+        imageEntity.setHyperVGenerationTag(originalImageEntity.getHyperVGenerationTag());
         imageEntity.setGatewayUserdata(originalImageEntity.getGatewayUserdata());
         imageRepository.save(imageEntity);
         LOGGER.info("Image reverted");

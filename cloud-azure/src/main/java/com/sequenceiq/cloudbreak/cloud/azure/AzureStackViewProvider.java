@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_N
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -91,8 +92,8 @@ public class AzureStackViewProvider {
                 String imageId = instance.getTemplate().getImageId();
                 if (StringUtils.isNotBlank(imageId) && !azureImageFormatValidator.isMarketplaceImageFormat(imageId)) {
                     String imageCustomName = imageNameMap.computeIfAbsent(
-                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId, getHyperVGeneration(cloudStack, instance, imageId))
-                                    .getId());
+                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId,
+                                    getHyperVGeneration(cloudStack, instance, imageId).orElse(null)).getId());
                     customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
                     LOGGER.debug("Collect customImageName {} for instance {}", imageCustomName, instance.getInstanceId());
                 } else {
@@ -104,7 +105,7 @@ public class AzureStackViewProvider {
         return customImageNamePerInstance;
     }
 
-    private HyperVGenerationTypes getHyperVGeneration(CloudStack cloudStack, CloudInstance instance, String imageId) {
+    private Optional<HyperVGenerationTypes> getHyperVGeneration(CloudStack cloudStack, CloudInstance instance, String imageId) {
         Image stackImage = cloudStack.getImage();
         if (stackImage != null && imageId.equals(stackImage.getImageName())) {
             return azureImageHyperVGenerationResolver.resolve(stackImage);

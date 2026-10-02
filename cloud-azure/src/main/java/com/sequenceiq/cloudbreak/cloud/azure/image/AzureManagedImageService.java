@@ -26,9 +26,9 @@ public class AzureManagedImageService {
         Optional<VirtualMachineCustomImage> image = client.findImage(resourceGroup, imageName);
         if (image.isPresent() && image.get().innerModel() != null) {
             if (hyperVGenerationMismatch(azureImageInfo, image.get())) {
-                LOGGER.info("Custom image {} in resource group {} has Hyper-V generation {} but {} is required, treating it as not found so it gets recreated.",
-                        imageName, resourceGroup, image.get().hyperVGeneration(), azureImageInfo.getHyperVGeneration());
-                return Optional.empty();
+                throw new CloudConnectorException(String.format("Image (%s/%s) is Hyper-V generation %s, but %s is required. Azure does not allow changing "
+                                + "the generation of an existing image, please delete or rename it on Azure Portal!",
+                        resourceGroup, imageName, image.get().hyperVGeneration(), azureImageInfo.getHyperVGeneration()));
             }
             return getImageByState(imageName, resourceGroup, image.get());
         } else {

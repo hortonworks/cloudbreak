@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,53 +23,53 @@ class AzureImageHyperVGenerationResolverTest {
 
     @Test
     void testResolveWhenGen1Tag() {
-        assertEquals(HyperVGenerationTypes.V1, underTest.resolve(imageWithTags(Map.of("azure-hyper-v-generation", "1"))));
+        assertEquals(Optional.of(HyperVGenerationTypes.V1), underTest.resolve(imageWithTags(Map.of("azure-hyper-v-generation", "1"))));
     }
 
     @Test
     void testResolveWhenGen2Tag() {
-        assertEquals(HyperVGenerationTypes.V2, underTest.resolve(imageWithTags(Map.of("azure-hyper-v-generation", "2"))));
+        assertEquals(Optional.of(HyperVGenerationTypes.V2), underTest.resolve(imageWithTags(Map.of("azure-hyper-v-generation", "2"))));
     }
 
     @Test
     void testResolveWhenTagAbsent() {
-        assertNull(underTest.resolve(imageWithTags(Map.of("release-version", "7.2.18"))));
+        assertTrue(underTest.resolve(imageWithTags(Map.of("release-version", "7.2.18"))).isEmpty());
     }
 
     @Test
     void testResolveWhenNoTagsAtAll() {
-        assertNull(underTest.resolve(imageWithTags(null)));
+        assertTrue(underTest.resolve(imageWithTags(null)).isEmpty());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "3", "V2", "gen2", "two"})
     void testResolveWhenTagValueUnrecognised(String tagValue) {
-        assertNull(underTest.resolve(imageWithTags(Map.of("azure-hyper-v-generation", tagValue))));
+        assertTrue(underTest.resolve(imageWithTags(Map.of("azure-hyper-v-generation", tagValue))).isEmpty());
     }
 
     @Test
     void testResolveWhenImageIsNull() {
-        assertNull(underTest.resolve((Image) null));
+        assertTrue(underTest.resolve((Image) null).isEmpty());
     }
 
     @Test
     void testResolveInstanceWhenGen2Parameter() {
-        assertEquals(HyperVGenerationTypes.V2, underTest.resolve(instanceWithParameters(Map.of(AzureInstanceTemplate.HYPER_V_GENERATION, "V2"))));
+        assertEquals(Optional.of(HyperVGenerationTypes.V2), underTest.resolve(instanceWithParameters(Map.of(AzureInstanceTemplate.HYPER_V_GENERATION, "V2"))));
     }
 
     @Test
     void testResolveInstanceWhenGen1Parameter() {
-        assertEquals(HyperVGenerationTypes.V1, underTest.resolve(instanceWithParameters(Map.of(AzureInstanceTemplate.HYPER_V_GENERATION, "V1"))));
+        assertEquals(Optional.of(HyperVGenerationTypes.V1), underTest.resolve(instanceWithParameters(Map.of(AzureInstanceTemplate.HYPER_V_GENERATION, "V1"))));
     }
 
     @Test
     void testResolveInstanceWhenParameterAbsent() {
-        assertNull(underTest.resolve(instanceWithParameters(Map.of())));
+        assertTrue(underTest.resolve(instanceWithParameters(Map.of())).isEmpty());
     }
 
     @Test
     void testResolveInstanceWhenInstanceIsNull() {
-        assertNull(underTest.resolve((CloudInstance) null));
+        assertTrue(underTest.resolve((CloudInstance) null).isEmpty());
     }
 
     private CloudInstance instanceWithParameters(Map<String, Object> parameters) {

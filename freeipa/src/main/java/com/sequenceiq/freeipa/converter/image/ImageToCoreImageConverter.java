@@ -18,6 +18,7 @@ public class ImageToCoreImageConverter {
                 .withOsType(source.getOsType())
                 .withPackageVersions(source.getPackageVersions())
                 .withAdvertised(source.isAdvertised())
+                .withTags(source.getTags())
                 .build();
     }
 }

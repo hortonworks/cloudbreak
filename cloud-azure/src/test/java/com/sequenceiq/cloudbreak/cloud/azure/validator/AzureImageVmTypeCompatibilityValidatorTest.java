@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -133,7 +134,7 @@ class AzureImageVmTypeCompatibilityValidatorTest {
 
     @Test
     void testValidateWhenImageHasNoGenerationTagThenSkippedWithoutCallingAzure() {
-        when(azureImageHyperVGenerationResolver.resolve(image)).thenReturn(null);
+        when(azureImageHyperVGenerationResolver.resolve(image)).thenReturn(Optional.empty());
 
         underTest.validate(authenticatedContext, cloudStack);
 
@@ -262,7 +263,7 @@ class AzureImageVmTypeCompatibilityValidatorTest {
     }
 
     private void setUpImageGeneration(HyperVGenerationTypes generation) {
-        when(azureImageHyperVGenerationResolver.resolve(image)).thenReturn(generation);
+        when(azureImageHyperVGenerationResolver.resolve(image)).thenReturn(Optional.of(generation));
     }
 
     private void setUpAzureClient() {

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
@@ -54,6 +55,8 @@ class CoreImageProviderTest {
     private static final String SOURCE_IMAGE_ID = "source image id";
 
     private static final String VM_IMAGE_REFERENCE = "vm image";
+
+    private static final String HYPER_V_GENERATION_TAG_VALUE = "2";
 
     private static final Map<String, Map<String, String>> VM_IMAGES = Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, VM_IMAGE_REFERENCE));
 
@@ -127,6 +130,7 @@ class CoreImageProviderTest {
         assertEquals(OS_TYPE, image.getOsType());
         assertEquals(VM_IMAGE_REFERENCE, image.getImageSetsByProvider().get(PLATFORM).get(REGION));
         assertEquals(SOURCE_IMAGE_ID, image.getSourceImageId());
+        assertEquals(HYPER_V_GENERATION_TAG_VALUE, image.getTags().get(AzureConstants.HYPER_V_GENERATION_TAG));
     }
 
     @Test
@@ -193,6 +197,7 @@ class CoreImageProviderTest {
         response.setOsType(OS_TYPE);
         response.setImageSetsByProvider(VM_IMAGES);
         response.setSourceImageId(SOURCE_IMAGE_ID);
+        response.setTags(Map.of(AzureConstants.HYPER_V_GENERATION_TAG, HYPER_V_GENERATION_TAG_VALUE));
 
         return response;
     }

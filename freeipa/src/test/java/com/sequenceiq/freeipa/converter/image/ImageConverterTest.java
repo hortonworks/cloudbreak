@@ -6,12 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -61,6 +63,17 @@ class ImageConverterTest {
         assertEquals(2, converted.getUserdata().keySet().size());
         assertEquals(legacyUserData ? "userData" : "gwUserData", converted.getUserdata().get(InstanceGroupType.GATEWAY));
         assertEquals(legacyUserData ? "userData" : "gwUserData", converted.getUserdata().get(InstanceGroupType.CORE));
+        assertTrue(converted.getTags().isEmpty());
+    }
+
+    @Test
+    void testConvertWhenHyperVGenerationTagIsSetThenItIsCarriedInTags() {
+        ImageEntity imageEntity = new ImageEntity();
+        imageEntity.setHyperVGenerationTag("2");
+
+        Image converted = underTest.convert(imageEntity);
+
+        assertEquals(Map.of(AzureConstants.HYPER_V_GENERATION_TAG, "2"), converted.getTags());
     }
 
     @ParameterizedTest

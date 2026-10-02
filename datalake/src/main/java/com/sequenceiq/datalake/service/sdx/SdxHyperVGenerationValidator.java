@@ -53,18 +53,19 @@ public class SdxHyperVGenerationValidator {
         if (!CloudPlatform.AZURE.equalsIgnoreCase(environment.getCloudPlatform()) || imageV4Response == null) {
             return;
         }
-        String imageGeneration = AzureHyperVGenerationUtil.toGeneration(imageV4Response.getTags());
-        if (imageGeneration == null || CollectionUtils.isEmpty(stackRequest.getInstanceGroups())) {
+        Optional<String> imageGeneration = AzureHyperVGenerationUtil.toGeneration(imageV4Response.getTags());
+        if (imageGeneration.isEmpty() || CollectionUtils.isEmpty(stackRequest.getInstanceGroups())) {
             return;
         }
+        String generation = imageGeneration.get();
         try {
             Map<String, VmTypeResponse> vmTypesByName = getVmTypesByName(environment, availableVmTypes);
             boolean fallbackEnabled = entitlementService.isFallbackInstanceTypeEnabled(environment.getAccountId());
-            List<String> offenders = collectOffenders(stackRequest, imageGeneration, vmTypesByName, fallbackEnabled);
+            List<String> offenders = collectOffenders(stackRequest, generation, vmTypesByName, fallbackEnabled);
             if (!offenders.isEmpty()) {
                 throw new BadRequestException(String.format("The selected image is Hyper-V generation %s, but the following instance types do not support "
                         + "it: %s. Choose a %s compatible instance type or an image of the matching generation.",
-                        imageGeneration, String.join(", ", offenders), imageGeneration));
+                        generation, String.join(", ", offenders), generation));
             }
         } catch (BadRequestException e) {
             throw e;

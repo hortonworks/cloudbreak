@@ -47,7 +47,7 @@ public class AzureManagedImageServiceTest {
 
     @Test
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenSucceededOnProviderSide() {
-        AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(null);
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
         when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.ofNullable(image));
         ImageInner imageInner = mock(ImageInner.class);
@@ -63,7 +63,7 @@ public class AzureManagedImageServiceTest {
 
     @Test
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenUnknownOnProviderSide() {
-        AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(null);
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
         when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.ofNullable(image));
         ImageInner imageInner = mock(ImageInner.class);
@@ -78,7 +78,7 @@ public class AzureManagedImageServiceTest {
 
     @Test
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenFailedOnProviderSide() {
-        AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(null);
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
         when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.ofNullable(image));
         ImageInner imageInner = mock(ImageInner.class);
@@ -93,7 +93,7 @@ public class AzureManagedImageServiceTest {
 
     @Test
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenDoesNotExistOnProviderSide() {
-        AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
+        AzureImageInfo azureImageInfo = imageInfoWithGeneration(null);
         when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(Optional.empty());
 
         Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
@@ -117,7 +117,7 @@ public class AzureManagedImageServiceTest {
 
     @ParameterizedTest
     @CsvSource({"V1, V2", "V2, V1"})
-    public void testGetVirtualMachineCustomImageShouldReturnEmptyWithoutCheckingStateWhenHyperVGenerationMismatches(String requiredGeneration,
+    public void testGetVirtualMachineCustomImageShouldThrowWithoutCheckingStateWhenHyperVGenerationMismatches(String requiredGeneration,
             String existingGeneration) {
         AzureImageInfo azureImageInfo = imageInfoWithGeneration(HyperVGenerationTypes.fromString(requiredGeneration));
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
@@ -126,9 +126,11 @@ public class AzureManagedImageServiceTest {
         when(image.innerModel()).thenReturn(imageInner);
         when(image.hyperVGeneration()).thenReturn(HyperVGenerationTypes.fromString(existingGeneration));
 
-        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
+        CloudConnectorException actual = assertThrows(CloudConnectorException.class, () -> underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient));
 
-        assertTrue(actual.isEmpty());
+        assertEquals(String.format("Image (resource-group/image-name-with-region) is Hyper-V generation %s, but %s is required. Azure does not allow "
+                + "changing the generation of an existing image, please delete or rename it on Azure Portal!", existingGeneration, requiredGeneration),
+                actual.getMessage());
         verify(imageInner, never()).provisioningState();
     }
 

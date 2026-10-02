@@ -6,14 +6,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -166,7 +170,24 @@ class FreeIpaRecommendationServiceTest {
                 .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
-        assertDoesNotThrow(() -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
+        Optional<Set<VmType>> availableVmTypes = assertDoesNotThrow(
+                () -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
+
+        assertTrue(availableVmTypes.isPresent());
+        assertThat(availableVmTypes.get().stream().map(VmType::getValue).collect(Collectors.toSet()))
+                .containsExactlyInAnyOrder("large", "medium", "small");
+    }
+
+    @Test
+    void testValidateCustomInstanceTypeWhenDefaultInstanceTypeThenVmTypesAreNotFetched() {
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of("medium"));
+
+        Optional<Set<VmType>> availableVmTypes = underTest.validateCustomInstanceType(createStack("medium"),
+                new Credential("AWS", "Cred", null, "crn", "account"));
+
+        assertTrue(availableVmTypes.isEmpty());
+        verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());
     }
 
     @Test

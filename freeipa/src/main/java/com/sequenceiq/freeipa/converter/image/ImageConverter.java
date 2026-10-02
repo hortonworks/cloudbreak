@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
@@ -45,7 +46,7 @@ public class ImageConverter implements Converter<ImageEntity, Image> {
                                 ImagePackageVersion.SALT.getKey(), Strings.nullToEmpty(source.getSaltVersion())),
                 source.getDate(),
                 null,
-                null);
+                source.getHyperVGenerationTag() == null ? null : Map.of(AzureConstants.HYPER_V_GENERATION_TAG, source.getHyperVGenerationTag()));
     }
 
     public Image convertWithoutUserdata(ImageEntity source) {

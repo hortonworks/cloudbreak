@@ -1,12 +1,14 @@
 package com.sequenceiq.freeipa.converter.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 
@@ -35,6 +37,25 @@ class ImageToImageEntityConverterTest {
         assertEquals(SOURCE_IMAGE, result.getSourceImage());
         assertEquals("v2", result.getImdsVersion());
         assertEquals("3001.8", result.getSaltVersion());
+        assertNull(result.getHyperVGenerationTag());
+    }
+
+    @Test
+    void testConversionWhenHyperVGenerationTagged() {
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of(), false, "x86_64",
+                Map.of(AzureConstants.HYPER_V_GENERATION_TAG, "2"));
+
+        ImageEntity result = underTest.convert("accountId", source);
+
+        assertEquals("2", result.getHyperVGenerationTag());
+    }
+
+    @Test
+    void testExtractHyperVGenerationTagWhenNotTagged() {
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of(), false, "x86_64",
+                Map.of("release-version", "7.3.1"));
+
+        assertNull(underTest.extractHyperVGenerationTag(source));
     }
 
     @Test

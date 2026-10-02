@@ -86,6 +86,12 @@ public class FreeIpaRecommendationService {
         return new FreeIpaRecommendationResponse(availableVmTypes, deprecatedVmTypes, defaultInstanceTypesProviderForPlatform.getFirst());
     }
 
+    public Set<VmType> getAvailableVmTypes(Stack stack, Credential credential) {
+        CloudVmTypes cloudVmTypes = getCloudVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, Architecture.ALL_ARCHITECTURE);
+        Optional<String> selectedAz = resolveAvailabilityZone(stack.getAvailabilityZone(), cloudVmTypes);
+        return selectVmTypes(cloudVmTypes.getCloudVmResponses(), selectedAz);
+    }
+
     private CloudVmTypes getCloudVmTypes(String region, String availabilityZone, Credential credential, String architecture) {
         return cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
@@ -138,7 +144,10 @@ public class FreeIpaRecommendationService {
         return vmTypeMetaData.getCPU() >= defaultVmTypeMetaData.getCPU() && vmTypeMetaData.getMemoryInGb() >= defaultVmTypeMetaData.getMemoryInGb();
     }
 
-    public void validateCustomInstanceType(Stack stack, Credential credential) {
+    /**
+     * @return the VM types fetched for the stack's region, or empty when no custom instance type had to be validated
+     */
+    public Optional<Set<VmType>> validateCustomInstanceType(Stack stack, Credential credential) {
         List<String> defaultInstanceTypesProviderForPlatform = defaultInstanceTypeProvider.getForPlatform(
                 credential.getCrn(),
                 platform(stack.getCloudPlatform()),
@@ -147,9 +156,7 @@ public class FreeIpaRecommendationService {
         );
         Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceTypesProviderForPlatform.getFirst());
         if (!customInstanceTypes.isEmpty()) {
-            CloudVmTypes cloudVmTypes = getCloudVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, Architecture.ALL_ARCHITECTURE);
-            Optional<String> selectedAz = resolveAvailabilityZone(stack.getAvailabilityZone(), cloudVmTypes);
-            Set<VmType> availableAllVmTypes = selectVmTypes(cloudVmTypes.getCloudVmResponses(), selectedAz);
+            Set<VmType> availableAllVmTypes = getAvailableVmTypes(stack, credential);
             Set<VmTypeResponse> availableMinimumRequiredVmTypes = filterVmTypeLargerThanDefault(
                     defaultInstanceTypesProviderForPlatform.getFirst(),
                     availableAllVmTypes);
@@ -195,7 +202,9 @@ public class FreeIpaRecommendationService {
                     }
                 });
             });
+            return Optional.of(availableAllVmTypes);
         }
+        return Optional.empty();
     }
 
     private Map<String, String> getCustomInstanceTypes(Stack stack, String defaultInstanceType) {

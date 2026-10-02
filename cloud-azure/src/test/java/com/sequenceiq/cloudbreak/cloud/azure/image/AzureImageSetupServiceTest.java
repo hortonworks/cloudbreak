@@ -240,6 +240,6 @@ public class AzureImageSetupServiceTest {
     }
 
     private AzureImageInfo getAzureImageInfo() {
-        return new AzureImageInfo("", "anImageName", "", "", "");
+        return new AzureImageInfo("", "anImageName", "", "", "", null);
     }
 }

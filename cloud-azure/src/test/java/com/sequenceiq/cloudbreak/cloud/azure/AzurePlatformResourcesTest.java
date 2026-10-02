@@ -531,12 +531,12 @@ class AzurePlatformResourcesTest {
 
         Map<String, VmType> vmTypesByName = result.getCloudVmResponses().get(REGION).stream()
                 .collect(Collectors.toMap(VmType::value, vmType -> vmType));
-        assertEquals("V1,V2", vmTypesByName.get(ARM_VM_DEFAULT).getMetaData().getHyperVGenerations());
+        assertEquals(Optional.of("V1,V2"), vmTypesByName.get(ARM_VM_DEFAULT).getMetaData().getHyperVGenerations());
         assertTrue(vmTypesByName.get(ARM_VM_DEFAULT).getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V1));
         assertTrue(vmTypesByName.get(ARM_VM_DEFAULT).getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V2));
-        assertEquals("V1", vmTypesByName.get("Standard_D2_v2").getMetaData().getHyperVGenerations());
+        assertEquals(Optional.of("V1"), vmTypesByName.get("Standard_D2_v2").getMetaData().getHyperVGenerations());
         assertFalse(vmTypesByName.get("Standard_D2_v2").getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V2));
-        assertNull(vmTypesByName.get("Basic_A0").getMetaData().getHyperVGenerations());
+        assertTrue(vmTypesByName.get("Basic_A0").getMetaData().getHyperVGenerations().isEmpty());
         assertTrue(vmTypesByName.get("Basic_A0").getMetaData().isHyperVGenerationSupported(HYPER_V_GENERATION_V1));
     }
 

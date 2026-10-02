@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -163,8 +164,8 @@ class AzureStackViewProviderTest {
         when(stackImage.getImageName()).thenReturn(IMAGE_ID);
         setUpNetwork(List.of(group));
         when(cloudStack.getImage()).thenReturn(stackImage);
-        when(azureImageHyperVGenerationResolver.resolve(stackImage)).thenReturn(HyperVGenerationTypes.V2);
-        when(azureImageHyperVGenerationResolver.resolve(oldImageInstance)).thenReturn(HyperVGenerationTypes.V1);
+        when(azureImageHyperVGenerationResolver.resolve(stackImage)).thenReturn(Optional.of(HyperVGenerationTypes.V2));
+        when(azureImageHyperVGenerationResolver.resolve(oldImageInstance)).thenReturn(Optional.of(HyperVGenerationTypes.V1));
         when(azureStorage.getCustomImage(client, ac, cloudStack, OLD_IMAGE_ID, HyperVGenerationTypes.V1)).thenReturn(new AzureImage("old", "old", true));
         when(azureStorage.getCustomImage(client, ac, cloudStack, IMAGE_ID, HyperVGenerationTypes.V2)).thenReturn(new AzureImage("new", "new", true));
         ac.putParameter(AzureClient.class, client);
