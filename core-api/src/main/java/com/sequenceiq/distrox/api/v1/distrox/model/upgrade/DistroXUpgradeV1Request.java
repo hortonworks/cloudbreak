@@ -2,6 +2,11 @@ package com.sequenceiq.distrox.api.v1.distrox.model.upgrade;
 
 import java.util.Objects;
 
+import jakarta.validation.Valid;
+
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UpgradeModelDescription;
+import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @ValidUpgradeRequest
@@ -10,6 +15,10 @@ public class DistroXUpgradeV1Request {
     private String imageId;
 
     private String runtime;
+
+    @Valid
+    @Schema(description = UpgradeModelDescription.COMPONENTS)
+    private ClouderaManagerV1Request components;
 
     private Boolean lockComponents;
 
@@ -37,6 +46,14 @@ public class DistroXUpgradeV1Request {
 
     public void setRuntime(String runtime) {
         this.runtime = runtime;
+    }
+
+    public ClouderaManagerV1Request getComponents() {
+        return components;
+    }
+
+    public void setComponents(ClouderaManagerV1Request components) {
+        this.components = components;
     }
 
     public Boolean getLockComponents() {
@@ -126,6 +143,7 @@ public class DistroXUpgradeV1Request {
         return "DistroXUpgradeRequest{" +
                 "imageId='" + imageId + '\'' +
                 ", runtime='" + runtime + '\'' +
+                ", components=" + components +
                 ", lockComponents=" + lockComponents +
                 ", dryRun=" + dryRun +
                 ", replaceVms=" + replaceVms +
@@ -142,6 +160,7 @@ public class DistroXUpgradeV1Request {
         DistroXUpgradeV1Request that = (DistroXUpgradeV1Request) o;
         return Objects.equals(imageId, that.imageId)
                 && Objects.equals(runtime, that.runtime)
+                && Objects.equals(components, that.components)
                 && Objects.equals(lockComponents, that.lockComponents)
                 && Objects.equals(dryRun, that.dryRun)
                 && Objects.equals(rollingUpgradeEnabled, that.rollingUpgradeEnabled)
@@ -154,6 +173,7 @@ public class DistroXUpgradeV1Request {
     public int hashCode() {
         int result = imageId.hashCode();
         result = 31 * result + Objects.hashCode(runtime);
+        result = 31 * result + Objects.hashCode(components);
         result = 31 * result + Objects.hashCode(lockComponents);
         result = 31 * result + Objects.hashCode(dryRun);
         result = 31 * result + rollingUpgradeEnabled.hashCode();

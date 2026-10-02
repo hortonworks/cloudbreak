@@ -2,8 +2,11 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Objects;
 
+import jakarta.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.sdx.validation.ValidUpgradeRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +22,10 @@ public class SdxUpgradeRequest {
 
     @Schema(description = ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
+
+    @Valid
+    @Schema(description = ModelDescriptions.UPGRADE_COMPONENTS)
+    private ClouderaManagerV4Request components;
 
     @Schema(description = ModelDescriptions.LOCK_COMPONENTS)
     private Boolean lockComponents;
@@ -70,6 +77,14 @@ public class SdxUpgradeRequest {
 
     public void setRuntime(String runtime) {
         this.runtime = runtime;
+    }
+
+    public ClouderaManagerV4Request getComponents() {
+        return components;
+    }
+
+    public void setComponents(ClouderaManagerV4Request components) {
+        this.components = components;
     }
 
     public Boolean getLockComponents() {
@@ -201,6 +216,7 @@ public class SdxUpgradeRequest {
         return "SdxUpgradeRequest{"
                 + "imageId='" + imageId + '\''
                 + ", runtime='" + runtime + '\''
+                + ", components=" + components
                 + ", lockComponents=" + lockComponents
                 + ", dryRun=" + dryRun
                 + ", skipBackup=" + skipBackup
@@ -218,6 +234,7 @@ public class SdxUpgradeRequest {
         SdxUpgradeRequest that = (SdxUpgradeRequest) o;
         return Objects.equals(imageId, that.imageId)
                 && Objects.equals(runtime, that.runtime)
+                && Objects.equals(components, that.components)
                 && Objects.equals(lockComponents, that.lockComponents)
                 && Objects.equals(dryRun, that.dryRun)
                 && Objects.equals(skipBackup, that.skipBackup)
@@ -236,6 +253,7 @@ public class SdxUpgradeRequest {
     public int hashCode() {
         int result = Objects.hashCode(imageId);
         result = 31 * result + Objects.hashCode(runtime);
+        result = 31 * result + Objects.hashCode(components);
         result = 31 * result + Objects.hashCode(lockComponents);
         result = 31 * result + Objects.hashCode(dryRun);
         result = 31 * result + Objects.hashCode(skipBackup);

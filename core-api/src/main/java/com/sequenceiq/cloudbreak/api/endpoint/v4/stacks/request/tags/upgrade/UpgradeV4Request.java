@@ -3,8 +3,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import jakarta.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UpgradeModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidUpgradeRequest;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
@@ -21,6 +24,10 @@ public class UpgradeV4Request {
 
     @Schema(description = UpgradeModelDescription.RUNTIME)
     private String runtime;
+
+    @Valid
+    @Schema(description = UpgradeModelDescription.COMPONENTS)
+    private ClouderaManagerV4Request components;
 
     @Schema(description = UpgradeModelDescription.LOCK_COMPONENTS)
     private Boolean lockComponents;
@@ -56,6 +63,14 @@ public class UpgradeV4Request {
 
     public void setRuntime(String runtime) {
         this.runtime = runtime;
+    }
+
+    public ClouderaManagerV4Request getComponents() {
+        return components;
+    }
+
+    public void setComponents(ClouderaManagerV4Request components) {
+        this.components = components;
     }
 
     public Boolean getLockComponents() {
@@ -152,6 +167,7 @@ public class UpgradeV4Request {
         return new StringJoiner(", ", UpgradeV4Request.class.getSimpleName() + "[", "]")
                 .add("imageId='" + imageId + "'")
                 .add("runtime='" + runtime + "'")
+                .add("components=" + components)
                 .add("lockComponents=" + lockComponents)
                 .add("dryRun=" + dryRun)
                 .add("replaceVms=" + replaceVms)
