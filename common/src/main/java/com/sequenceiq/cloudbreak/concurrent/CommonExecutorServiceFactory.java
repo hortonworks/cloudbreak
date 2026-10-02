@@ -84,8 +84,6 @@ public class CommonExecutorServiceFactory {
                 .description("The approximate total number of tasks that have completed execution").baseUnit("tasks").register(meterRegistry);
         Gauge.builder(METRIC_PREFIX + "executor.active", taskCounterDecorator, TaskCounterDecorator::getActiveCount).tags(tags)
                 .description("The approximate number of threads that are actively executing tasks").baseUnit("threads").register(meterRegistry);
-        Gauge.builder(METRIC_PREFIX + "executor.queued", taskCounterDecorator, TaskCounterDecorator::getQueuedCount).tags(tags)
-                .description("The approximate number of tasks that are queued for execution").baseUnit("tasks").register(meterRegistry);
     }
 
     public void monitorForkJoinPool(ForkJoinPool fj, String executorServiceName) {
