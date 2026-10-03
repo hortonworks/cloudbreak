@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.template.init.SshKeyNameGenerator;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
@@ -94,10 +95,12 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceMetadataOptionsResponse;
 import software.amazon.awssdk.services.ec2.model.InstanceState;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.MarketType;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsResponse;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.SpotInstanceType;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
 
@@ -328,6 +331,112 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withGroup("groupName")
                 .withParameters(emptyMap())
                 .build();
+    }
+
+    @Test
+    void testBuildWithSpotInstance() throws Exception {
+        Instance instance = Instance.builder().instanceId(INSTANCE_ID).architecture(ArchitectureValues.X86_64).build();
+        RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
+        InstanceAuthentication authentication = mock(InstanceAuthentication.class);
+        String groupName = "compute";
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup(groupName)
+                .withParameters(emptyMap())
+                .build();
+
+        Image image = mock(Image.class);
+
+        long privateId = 0;
+        String instanceName = "instanceName1";
+        when(awsStackNameCommonUtil.getInstanceName(ac, groupName, privateId)).thenReturn(instanceName);
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).then(InvocationOnMock::callRealMethod);
+        when(amazonEc2Client.describeInstances(any())).thenReturn(DescribeInstancesResponse.builder().build());
+        when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResponse);
+
+        // Set spot to 100.
+        when(instanceTemplate.getParameter(eq(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE), any())).thenReturn(AwsInstanceView.HUNDRED_PERCENT);
+
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(group.getName()).thenReturn(groupName);
+        when(cloudStack.getImage()).thenReturn(image);
+        when(cloudStack.getTags()).thenReturn(Map.of("Name", "doNotOverride"));
+        when(image.getImageName()).thenReturn("img-name");
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+        ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
+        underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
+        RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
+        assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
+                .anyMatch(t -> "Name".equals(t.key()) && "doNotOverride".equals(t.value())));
+
+        assertThat(runInstancesRequest.instanceMarketOptions().marketType()).matches(ts -> ts.equals(MarketType.SPOT));
+        assertThat(runInstancesRequest.instanceMarketOptions().spotOptions().spotInstanceType())
+                .matches(ts -> ts.equals(SpotInstanceType.ONE_TIME));
+        assertThat(runInstancesRequest.instanceMarketOptions().spotOptions().instanceInterruptionBehavior()).isNull();
+
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
+        ArgumentCaptor<DescribeInstancesRequest> describeInstanceRequest = ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+        verify(amazonEc2Client, times(1)).describeInstances(describeInstanceRequest.capture());
+        DescribeInstancesRequest describeInstancesRequestFor = describeInstanceRequest.getValue();
+        assertEquals(instanceName, describeInstancesRequestFor.filters().get(0).values().get(0));
+    }
+
+    @Test
+    void testBuildWithNoSpotInstance() throws Exception {
+        Instance instance = Instance.builder().instanceId(INSTANCE_ID).architecture(ArchitectureValues.X86_64).build();
+        RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
+        InstanceAuthentication authentication = mock(InstanceAuthentication.class);
+        String groupName = "compute";
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup(groupName)
+                .withParameters(emptyMap())
+                .build();
+
+        Image image = mock(Image.class);
+
+        long privateId = 0;
+        String instanceName = "instanceName1";
+        when(awsStackNameCommonUtil.getInstanceName(ac, groupName, privateId)).thenReturn(instanceName);
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).then(InvocationOnMock::callRealMethod);
+        when(amazonEc2Client.describeInstances(any())).thenReturn(DescribeInstancesResponse.builder().build());
+        when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResponse);
+
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(group.getName()).thenReturn(groupName);
+        when(cloudStack.getImage()).thenReturn(image);
+        when(cloudStack.getTags()).thenReturn(Map.of("Name", "doNotOverride"));
+        when(image.getImageName()).thenReturn("img-name");
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+        ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
+        underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
+        RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
+        assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
+                .anyMatch(t -> "Name".equals(t.key()) && "doNotOverride".equals(t.value())));
+
+        assertThat(runInstancesRequest.instanceMarketOptions()).isNull();
+
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
+        ArgumentCaptor<DescribeInstancesRequest> describeInstanceRequest = ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+        verify(amazonEc2Client, times(1)).describeInstances(describeInstanceRequest.capture());
+        DescribeInstancesRequest describeInstancesRequestFor = describeInstanceRequest.getValue();
+        assertEquals(instanceName, describeInstancesRequestFor.filters().get(0).values().get(0));
     }
 
     @Test

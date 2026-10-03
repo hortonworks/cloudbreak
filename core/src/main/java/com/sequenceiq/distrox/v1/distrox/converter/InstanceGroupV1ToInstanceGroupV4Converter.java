@@ -1,6 +1,8 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView.HUNDRED_PERCENT;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
 
@@ -18,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.PurchaseModel;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -26,9 +31,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.SecurityRuleUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.PurchaseModelV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
@@ -42,6 +49,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 public class InstanceGroupV1ToInstanceGroupV4Converter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceGroupV1ToInstanceGroupV4Converter.class);
+
+    private static final String COMPUTE_HOST_GROUP_NAME = "compute";
 
     @Inject
     private InstanceTemplateV1ToInstanceTemplateV4Converter instanceTemplateConverter;
@@ -69,6 +78,31 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setCloudPlatform(source.getCloudPlatform());
         response.setName(source.getName());
         response.setTemplate(getTemplateV4(source.getTemplate(), environment, InstanceGroupType.isGateway(source.getType())));
+
+        PurchaseModelV1Parameters purchaseModelV1Parameters = source.getPurchaseModel();
+        if (purchaseModelV1Parameters != null
+                && PurchaseModel.SPOT == purchaseModelV1Parameters.getType()
+                && response.getTemplate() != null) {
+            if (!CloudPlatform.AWS.name().equalsIgnoreCase(environment.getCloudPlatform())) {
+                throw new BadRequestException("purchaseModel is only available for AWS");
+            }
+            if (!COMPUTE_HOST_GROUP_NAME.equalsIgnoreCase(source.getName())) {
+                throw new BadRequestException("purchaseModel is only available for compute host group");
+            }
+            AwsInstanceTemplateV4Parameters awsInstanceTemplateV4Parameters = getIfNotNullOtherwise(
+                    response.getTemplate().getAws(), new AwsInstanceTemplateV4Parameters());
+            AwsInstanceTemplateV4SpotParameters spotParameters = getIfNotNullOtherwise(
+                    awsInstanceTemplateV4Parameters.getSpot(), new AwsInstanceTemplateV4SpotParameters());
+
+            if ((spotParameters.getPercentage() != 0) && (spotParameters.getPercentage() != HUNDRED_PERCENT)) {
+                throw new BadRequestException("purchaseModel cannot be used with spot percentage configuration.");
+            }
+
+            spotParameters.setPercentage(HUNDRED_PERCENT);
+            awsInstanceTemplateV4Parameters.setSpot(spotParameters);
+            response.getTemplate().setAws(awsInstanceTemplateV4Parameters);
+        }
+
         response.setRecoveryMode(source.getRecoveryMode());
         response.setScalabilityOption(source.getScalabilityOption());
         response.setSecurityGroup(createSecurityGroupFromEnvironment(source.getType(), environment));

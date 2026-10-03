@@ -12,7 +12,7 @@ import com.sequenceiq.common.api.type.EncryptionType;
 
 public class AwsInstanceView {
 
-    private static final int HUNDRED_PERCENT = 100;
+    public static final int HUNDRED_PERCENT = 100;
 
     private final InstanceTemplate instanceTemplate;
 

@@ -1,11 +1,13 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -16,20 +18,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.PurchaseModel;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.aws.InstanceGroupAwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.PurchaseModelV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -39,6 +48,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     private static final String INSTANCE_GROUP_NAME = "ig1";
+
+    private static final String COMPUTE_INSTANCE_GROUP_NAME = "compute";
 
     private static final String SECURITY_GROUP1 = "sg1";
 
@@ -189,6 +200,148 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     }
 
     @Test
+    void convertToAwsWithEnvironmentWithSpotHappyPathTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment), eq(false))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+
+        InstanceGroupV1Request instanceGroup = prepareInstanceGroupV1RequestsWithSpot(InstanceGroupType.CORE, COMPUTE_INSTANCE_GROUP_NAME);
+        Set<InstanceGroupV1Request> instanceGroups = Set.of(instanceGroup);
+        List<InstanceGroupV4Request> results = underTest.convertTo(networkV4Request, instanceGroups, environment);
+
+        assertThat(results).hasSameSizeAs(instanceGroups);
+
+        InstanceGroupV4Request first = results.get(0);
+
+        assertThat(first.getTemplate().getAws().getSpot().getPercentage()).isEqualTo(100);
+
+        assertThat(first.getAws()).isEqualTo(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        assertThat(first.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
+        assertThat(first.getName()).isEqualTo(COMPUTE_INSTANCE_GROUP_NAME);
+        assertThat(first.getNodeCount()).isEqualTo(NODE_COUNT_1);
+        assertThat(first.getRecipeNames()).isEqualTo(RECIPE_NAMES);
+        assertThat(first.getRecoveryMode()).isEqualTo(RecoveryMode.AUTO);
+        assertThat(first.getType()).isEqualTo(InstanceGroupType.CORE);
+    }
+
+    @Test
+    void convertToAwsWithEnvironmentWithSpotOnNonComputeTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+
+        DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment), eq(false))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+
+        InstanceGroupV1Request instanceGroup = prepareInstanceGroupV1RequestsWithSpot(InstanceGroupType.CORE, INSTANCE_GROUP_NAME);
+        Set<InstanceGroupV1Request> instanceGroups = Set.of(instanceGroup);
+
+        assertThatThrownBy(() -> underTest.convertTo(networkV4Request, instanceGroups, environment))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("purchaseModel is only available for compute host group");
+    }
+
+    @Test
+    void convertToAwsWithEnvironmentWithSpotCaseTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment), eq(false))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+
+        InstanceGroupV1Request instanceGroup = prepareInstanceGroupV1RequestsWithSpot(InstanceGroupType.CORE,
+                COMPUTE_INSTANCE_GROUP_NAME.toUpperCase(Locale.ROOT));
+        Set<InstanceGroupV1Request> instanceGroups = Set.of(instanceGroup);
+        List<InstanceGroupV4Request> results = underTest.convertTo(networkV4Request, instanceGroups, environment);
+
+        assertThat(results).hasSameSizeAs(instanceGroups);
+
+        InstanceGroupV4Request first = results.get(0);
+
+        assertThat(first.getTemplate().getAws().getSpot().getPercentage()).isEqualTo(100);
+
+        assertThat(first.getAws()).isEqualTo(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        assertThat(first.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
+        assertThat(first.getName()).isEqualToIgnoringCase(COMPUTE_INSTANCE_GROUP_NAME);
+        assertThat(first.getNodeCount()).isEqualTo(NODE_COUNT_1);
+        assertThat(first.getRecipeNames()).isEqualTo(RECIPE_NAMES);
+        assertThat(first.getRecoveryMode()).isEqualTo(RecoveryMode.AUTO);
+        assertThat(first.getType()).isEqualTo(InstanceGroupType.CORE);
+    }
+
+    @Test
+    void convertToAwsWithEnvironmentWithSpotAndConflictingPercentageTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+
+        DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
+
+        InstanceGroupV1Request instanceGroup = prepareInstanceGroupV1RequestsWithSpot(InstanceGroupType.CORE, COMPUTE_INSTANCE_GROUP_NAME);
+
+        AwsInstanceTemplateV1SpotParameters spotParameters = new AwsInstanceTemplateV1SpotParameters();
+        spotParameters.setPercentage(50);
+
+        AwsInstanceTemplateV1Parameters templateV1Parameters = new AwsInstanceTemplateV1Parameters();
+        templateV1Parameters.setSpot(spotParameters);
+        instanceGroup.getTemplate().setAws(templateV1Parameters);
+
+        InstanceTemplateV4Request templateV4WithSpotPercentage = new InstanceTemplateV4Request();
+        AwsInstanceTemplateV4SpotParameters spotV4Parameters = new AwsInstanceTemplateV4SpotParameters();
+        spotV4Parameters.setPercentage(spotParameters.getPercentage());
+        AwsInstanceTemplateV4Parameters awsTemplateV4Parameters = new AwsInstanceTemplateV4Parameters();
+        awsTemplateV4Parameters.setSpot(spotV4Parameters);
+        templateV4WithSpotPercentage.setAws(awsTemplateV4Parameters);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment), eq(false)))
+                .thenReturn(templateV4WithSpotPercentage);
+
+        assertThatThrownBy(() -> underTest.convertTo(networkV4Request, Set.of(instanceGroup), environment))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("purchaseModel cannot be used with spot percentage configuration.");
+    }
+
+    @Test
+    void convertToAwsWithEnvironmentWithSpotNonAWSTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+
+        DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
+        environment.setCloudPlatform("AZURE");
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment), eq(false))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+
+        InstanceGroupV1Request instanceGroup = prepareInstanceGroupV1RequestsWithSpot(InstanceGroupType.CORE, COMPUTE_INSTANCE_GROUP_NAME);
+        assertThatThrownBy(() -> underTest.convertTo(networkV4Request, Set.of(instanceGroup), environment))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("purchaseModel is only available for AWS");
+    }
+
+    @Test
+    void convertToAwsWithEnvironmentWithOnDemandHappyPathTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment), eq(false))).thenReturn(instanceTemplateV4Request);
+
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
+
+        List<InstanceGroupV4Request> results = underTest.convertTo(networkV4Request, instanceGroups, environment);
+
+        assertThat(results).hasSameSizeAs(instanceGroups);
+
+        InstanceGroupV4Request first = results.get(0);
+
+        // There should be no AWS template information.
+        assertThat(first.getTemplate().getAws()).isNull();
+
+        assertThat(first.getAws()).isEqualTo(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        assertThat(first.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
+        assertThat(first.getName()).isEqualTo(INSTANCE_GROUP_NAME);
+        assertThat(first.getNodeCount()).isEqualTo(NODE_COUNT_1);
+        assertThat(first.getRecipeNames()).isEqualTo(RECIPE_NAMES);
+        assertThat(first.getRecoveryMode()).isEqualTo(RecoveryMode.AUTO);
+        assertThat(first.getType()).isEqualTo(InstanceGroupType.CORE);
+    }
+
+    @Test
     void convertFromAwsWithoutSecurityGroupsHappyPathTest() {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V4_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V1_PARAMETERS);
         when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class), any(), eq(false))).
@@ -280,6 +433,27 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         instanceGroup.setTemplate(new InstanceTemplateV1Request());
         instanceGroup.setType(instanceGroupType);
         return Set.of(instanceGroup);
+    }
+
+    private InstanceGroupV1Request prepareInstanceGroupV1RequestsWithSpot(InstanceGroupType instanceGroupType, String instanceGroupName) {
+        InstanceGroupV1Request instanceGroup = new InstanceGroupV1Request();
+        instanceGroup.setAws(AWS_INSTANCE_GROUP_V1_PARAMETERS);
+        instanceGroup.setName(instanceGroupName);
+        if (InstanceGroupType.GATEWAY.equals(instanceGroupType)) {
+            instanceGroup.setNodeCount(1);
+        } else {
+            instanceGroup.setNodeCount(NODE_COUNT_1);
+        }
+        instanceGroup.setRecipeNames(RECIPE_NAMES);
+        instanceGroup.setRecoveryMode(RecoveryMode.AUTO);
+        instanceGroup.setTemplate(new InstanceTemplateV1Request());
+        instanceGroup.setType(instanceGroupType);
+
+        PurchaseModelV1Parameters params = new PurchaseModelV1Parameters();
+        params.setType(PurchaseModel.SPOT);
+        instanceGroup.setPurchaseModel(params);
+
+        return instanceGroup;
     }
 
     private SecurityAccessResponse createSecurityAccessResponse(String cidr, String defaultSecurityGroupId, String securityGroupIdKnox) {

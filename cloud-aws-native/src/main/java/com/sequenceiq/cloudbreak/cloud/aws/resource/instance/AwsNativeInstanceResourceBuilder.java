@@ -74,12 +74,16 @@ import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 import software.amazon.awssdk.services.ec2.model.IamInstanceProfileSpecification;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceMarketOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.InstanceMetadataOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.InstanceState;
+import software.amazon.awssdk.services.ec2.model.MarketType;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.SpotInstanceType;
+import software.amazon.awssdk.services.ec2.model.SpotMarketOptions;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.TagSpecification;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
@@ -234,9 +238,18 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     private Instance createNewInstance(InstanceCreationContext ic, CloudInstance cloudInstance,
             Group group, CloudStack cloudStack, CloudResource cloudResource, String instanceName, String instanceType) {
-        Instance instance;
+        boolean useSpot = new AwsInstanceView(group.getReferenceInstanceTemplate()).getOnDemandPercentage() == 0;
+        LOGGER.info("Create new instance with name: {} spot: {} group: {}", cloudResource.getName(), useSpot, group.getName());
+        RunInstancesRequest request = buildRunInstancesRequest(ic, cloudInstance, group, cloudStack, instanceName, instanceType, useSpot);
+        RunInstancesResponse instanceResponse = ic.amazonEc2Client().createInstance(request);
+        Instance instance = instanceResponse.instances().get(0);
+        LOGGER.info("Instance creation initiated for resource: {} and instance id: {} group: {}", cloudResource, instance.instanceId(), group.getName());
+        return instance;
+    }
+
+    private RunInstancesRequest buildRunInstancesRequest(InstanceCreationContext ic, CloudInstance cloudInstance, Group group,
+            CloudStack cloudStack, String instanceName, String instanceType, boolean spotInstance) {
         AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
-        LOGGER.info("Create new instance with name: {}", cloudResource.getName());
         Map<String, String> tags = new HashMap<>(awsCloudStackView.getTags());
         tags.putIfAbsent("Name", instanceName);
         tags.putIfAbsent("instanceGroup", group.getName());
@@ -257,17 +270,20 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 .maxCount(1)
                 .blockDeviceMappings(blocks(group, cloudStack, ic.auth()))
                 .keyName(sshKeyNameGenerator.getKeyPairName(ic.auth(), cloudStack));
+        if (spotInstance) {
+            SpotMarketOptions.Builder spotOptionsBuilder = SpotMarketOptions.builder()
+                    .spotInstanceType(SpotInstanceType.ONE_TIME);
+            builder.instanceMarketOptions(InstanceMarketOptionsRequest.builder()
+                    .marketType(MarketType.SPOT)
+                    .spotOptions(spotOptionsBuilder.build())
+                    .build());
+        }
         if (StringUtils.equals(cloudStack.getSupportedImdsVersion(), AWS_IMDS_VERSION_V2)) {
             builder.metadataOptions(InstanceMetadataOptionsRequest.builder()
                     .httpTokens(HttpTokensState.REQUIRED)
                     .build());
         }
-        RunInstancesRequest request = builder.build();
-        RunInstancesResponse instanceResponse = ic.amazonEc2Client().createInstance(request);
-        instance = instanceResponse.instances().get(0);
-
-        LOGGER.info("Instance creation initiated for resource: {} and instance id: {}", cloudResource, instance.instanceId());
-        return instance;
+        return builder.build();
     }
 
     @Override

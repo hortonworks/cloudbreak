@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class PurshaseModelV1Parameters implements Serializable {
+public class PurchaseModelV1Parameters implements Serializable {
 
     @NotNull
     @Schema
