@@ -134,6 +134,7 @@ permissionGroups:
     permissions:
       "kms:ListAliases": "Cloudera platform resolves KMS aliases for environment encryption settings."
       "kms:ListKeys": "Cloudera platform lists KMS keys when configuring encryption for environment resources."
+      "kms:ListResourceTags": "Cloudera platform reads existing KMS key tags when propagating environment tag updates."
   rds:
     description: Required to provision, configure, start, stop, and remove external databases used by Cloudera clusters.
     permissions:

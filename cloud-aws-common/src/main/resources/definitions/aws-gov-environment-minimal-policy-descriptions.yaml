@@ -132,6 +132,7 @@ permissionGroups:
       "kms:DescribeKey": "Cloudera platform describes KMS keys for GovCloud encryption (tag-scoped where policy requires crn:cdp-us-gov:*)."
       "kms:ListAliases": "Cloudera platform resolves KMS aliases for environment encryption settings."
       "kms:ListKeys": "Cloudera platform lists KMS keys when configuring encryption for environment resources."
+      "kms:ListResourceTags": "Cloudera platform reads existing KMS key tags when propagating environment tag updates."
       "kms:TagResource": "Cloudera platform tags KMS keys with Cloudera-Resource-Name crn:cdp-us-gov:* when creating encryption keys."
   rds:
     description: Required to provision, configure, start, stop, and remove external databases used by Cloudera clusters.

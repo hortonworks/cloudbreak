@@ -94,6 +94,7 @@ permissionGroups:
       "kms:ListAliases": "Cloudera platform resolves key aliases configured in environment encryption settings."
       "kms:ListKeyPolicies": "Cloudera platform reads key policies while attaching stack roles to KMS keys."
       "kms:ListKeys": "Cloudera platform lists keys when selecting encryption for new environment resources."
+      "kms:ListResourceTags": "Cloudera platform reads existing KMS key tags when propagating environment tag updates."
       "kms:PutKeyPolicy": "Cloudera platform updates key policies so cluster roles can use encryption keys."
       "kms:ScheduleKeyDeletion": "Cloudera platform schedules key deletion when removing environment encryption assets."
       "kms:TagResource": "Cloudera platform tags KMS keys created for environment encryption."

@@ -170,6 +170,7 @@
         "rds:DescribeCertificates",
         "kms:ListKeys",
         "kms:ListAliases",
+        "kms:ListResourceTags",
         "ec2:ModifyInstanceAttribute",
         "ec2:CreateLaunchTemplateVersion",
         "ec2:ModifyLaunchTemplate",

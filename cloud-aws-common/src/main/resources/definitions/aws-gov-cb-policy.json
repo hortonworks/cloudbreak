@@ -222,6 +222,7 @@
         "kms:EnableKeyRotation",
         "kms:GenerateRandom",
         "kms:ListKeys",
+        "kms:ListResourceTags",
         "kms:ListKeyPolicies",
         "kms:DescribeKey",
         "kms:ListAliases",
