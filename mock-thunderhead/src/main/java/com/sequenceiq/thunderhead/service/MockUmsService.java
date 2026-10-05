@@ -3,12 +3,13 @@ package com.sequenceiq.thunderhead.service;
 import static java.lang.String.format;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static jakarta.servlet.http.HttpServletResponse.SC_FOUND;
-import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
-import static org.springframework.security.jwt.JwtHelper.encode;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.crypto.SecretKey;
 
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
@@ -19,7 +20,6 @@ import jakarta.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.thunderhead.model.AltusToken;
@@ -27,12 +27,16 @@ import com.sequenceiq.thunderhead.model.IntrospectResponse;
 import com.sequenceiq.thunderhead.util.CrnHelper;
 import com.sequenceiq.thunderhead.util.JsonUtil;
 
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 @Service
 public class MockUmsService {
 
     public static final String MAC_SIGNER_SECRET_KEY = "titokamisokkaldesokkaldesokkalhosszabbhogyfipscompliantlegyen";
 
-    public static final MacSigner SIGNATURE_VERIFIER = new MacSigner(MAC_SIGNER_SECRET_KEY);
+    public static final SecretKey SIGNATURE_VERIFIER = Keys.hmacShaKeyFor(MAC_SIGNER_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUmsService.class);
 
@@ -54,7 +58,8 @@ public class MockUmsService {
     public IntrospectResponse getIntrospectResponse(@Nonnull HttpServletRequest request) {
         for (Cookie cookie : request.getCookies()) {
             if (JWT_COOKIE_KEY.equals(cookie.getName())) {
-                String tokenClaims = decodeAndVerify(cookie.getValue(), SIGNATURE_VERIFIER).getClaims();
+                Jws<byte[]> jws = Jwts.parser().verifyWith(SIGNATURE_VERIFIER).build().parseSignedContent(cookie.getValue());
+                String tokenClaims = new String(jws.getPayload(), StandardCharsets.UTF_8);
                 return jsonUtil.toObject(tokenClaims, IntrospectResponse.class);
             }
         }
@@ -73,9 +78,9 @@ public class MockUmsService {
     }
 
     public void auth(@Nonnull HttpServletRequest httpServletRequest,
-        @Nonnull HttpServletResponse httpServletResponse,
-        @Nonnull Optional<String> tenant,
-        @Nonnull Optional<String> userName, String redirectUri, Boolean active) {
+            @Nonnull HttpServletResponse httpServletResponse,
+            @Nonnull Optional<String> tenant,
+            @Nonnull Optional<String> userName, String redirectUri, Boolean active) {
         if (tenant.isEmpty() || userName.isEmpty()) {
             LOGGER.info("redirect to sign in page");
             httpServletResponse.setHeader(LOCATION_HEADER_KEY, "../auth/sign-in.html?redirect_uri=" + redirectUri);
@@ -99,7 +104,10 @@ public class MockUmsService {
         altusToken.setExp(Instant.now().plus(PLUS_QUANTITY, DAYS).toEpochMilli());
         altusToken.setIat(Instant.now().toEpochMilli());
         altusToken.setSub(CrnHelper.generateCrn(tenant, user));
-        String token = encode(jsonUtil.toJsonString(altusToken), SIGNATURE_VERIFIER).getEncoded();
+        String token = Jwts.builder()
+                .content(jsonUtil.toJsonString(altusToken).getBytes(StandardCharsets.UTF_8), "json")
+                .signWith(SIGNATURE_VERIFIER, Jwts.SIG.HS256)
+                .compact();
         LOGGER.info(format("Token generated for Altus: %s", token));
         return token;
     }

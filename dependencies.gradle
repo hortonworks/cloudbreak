@@ -13,7 +13,6 @@ ext {
   springDataJpaFrameworkVersion = '3.2.3'
   springFrameworkVersion = '6.2.19'
   springRetryVersion = '2.0.13'
-  springSecurityJwtVersion = '1.1.1.RELEASE'
   springStateMachineCoreVersion = '2.5.0'
   springVaultCoreVersion = '3.0.4'
   aspectjVersion = '1.9.22.1'
@@ -76,6 +75,7 @@ ext {
   // Serialization
   accessorSmartVersion = '2.4.7'
   gsonVersion = '2.14.0'
+  jjwtVersion = '0.13.0'
   nimbusJoseJwt = '10.10'
   jacksonVersion = '2.22.3'
   jsonSmartVersion = '2.4.9'

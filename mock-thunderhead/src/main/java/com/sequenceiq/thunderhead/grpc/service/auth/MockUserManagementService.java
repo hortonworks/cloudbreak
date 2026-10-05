@@ -121,7 +121,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IA
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -145,6 +144,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.crypto.SecretKey;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
@@ -152,8 +153,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.jwt.Jwt;
-import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementImplBase;
@@ -277,6 +276,9 @@ import com.sequenceiq.thunderhead.util.JsonUtil;
 import io.grpc.Status;
 import io.grpc.internal.testing.StreamRecorder;
 import io.grpc.stub.StreamObserver;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class MockUserManagementService extends UserManagementImplBase {
@@ -293,7 +295,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String MOCK_CLOUDBREAKADMIN_ACCOUNT_ID = "cloudbreakadmin";
 
-    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner(MockUmsService.MAC_SIGNER_SECRET_KEY);
+    private static final SecretKey SIGNATURE_VERIFIER = Keys.hmacShaKeyFor(MockUmsService.MAC_SIGNER_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
 
@@ -1132,8 +1134,8 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<VerifyInteractiveUserSessionTokenResponse> responseObserver) {
         LOGGER.trace("Verify interactive user session token: {}", request.getSessionToken());
         String sessionToken = request.getSessionToken();
-        Jwt token = decodeAndVerify(sessionToken, SIGNATURE_VERIFIER);
-        AltusToken introspectResponse = jsonUtil.toObject(token.getClaims(), AltusToken.class);
+        Jws<byte[]> token = Jwts.parser().verifyWith(SIGNATURE_VERIFIER).build().parseSignedContent(sessionToken);
+        AltusToken introspectResponse = jsonUtil.toObject(new String(token.getPayload(), StandardCharsets.UTF_8), AltusToken.class);
         String userIdOrCrn = introspectResponse.getSub();
         String[] splitCrn = userIdOrCrn.split(CRN_COMPONENT_SEPARATOR_REGEX);
         responseObserver.onNext(

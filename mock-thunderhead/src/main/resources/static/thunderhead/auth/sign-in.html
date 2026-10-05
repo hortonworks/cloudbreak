@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="jquery-3.3.1.min.js"></script>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="pics/favicon.ico">
@@ -56,11 +55,12 @@
         }
         return urlparameter;
     }
-    $("#loginform").submit(function(event) {
-        var input = $("<input>")
-            .attr("type", "hidden")
-            .attr("name", "redirect_uri").val(getUrlParam("redirect_uri"));
-        $('#loginform').append(input);
+    document.getElementById("loginform").addEventListener("submit", function(event) {
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "redirect_uri";
+        input.value = getUrlParam("redirect_uri");
+        document.getElementById("loginform").appendChild(input);
     });
 </script>
 
