@@ -24,7 +24,7 @@ public abstract class AbstractUserCrnServiceEndpoint {
         this.crn = crn;
     }
 
-    protected <E> E getEndpoint(Class<E> clazz) {
+    public <E> E getEndpoint(Class<E> clazz) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add(ACTOR_CRN_HEADER, crn);
         return newEndpoint(clazz, headers);

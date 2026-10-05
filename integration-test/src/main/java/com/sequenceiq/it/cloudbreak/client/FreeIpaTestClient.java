@@ -19,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachChildEnvironmentAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachRecipeAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDirectionalTrustSetupCommandsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDiskUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDownscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindGroupsAction;
@@ -49,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaUsedImagesAction;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDirectionalTrustCommandsDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaHealthDetailsDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
@@ -209,6 +211,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTrustCommandsDto, FreeIpaClient> trustSetupCommands() {
         return new FreeIpaTrustSetupCommandsAction();
+    }
+
+    public Action<FreeIpaDirectionalTrustCommandsDto, FreeIpaClient> directionalTrustSetupCommands() {
+        return new FreeIpaDirectionalTrustSetupCommandsAction();
     }
 
     public Action<FreeIpaTrustCommandsDto, FreeIpaClient> trustCleanupCommands() {

@@ -9,7 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.hybrid.HybridTrustAssertions;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -17,18 +20,21 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RemoteEnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentDirectionalTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTrustSetupDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDirectionalTrustCommandsDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTrustCommandsDto;
 import com.sequenceiq.it.cloudbreak.dto.remoteenvironment.DescribeRemoteEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -36,6 +42,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.ActiveDirectorySshJClientActions;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class HybridTrustTests extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(HybridTrustTests.class);
@@ -67,9 +74,16 @@ public class HybridTrustTests extends AbstractE2ETest {
     @Inject
     private HybridTrustAssertions hybridTrustAssertions;
 
+    @Inject
+    private SdxTestClient sdxTestClient;
+
+    @Inject
+    private ResourcePropertyProvider resourcePropertyProvider;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
+        createDefaultCredential(testContext);
         testContext
                 .given(DescribeRemoteEnvironmentTestDto.class)
                 .when(remoteEnvironmentTestClient.describe())
@@ -98,8 +112,6 @@ public class HybridTrustTests extends AbstractE2ETest {
         AtomicReference<String> runtimeVersion = new AtomicReference<>();
 
         testContext
-                .given(CredentialTestDto.class)
-                .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
@@ -107,6 +119,7 @@ public class HybridTrustTests extends AbstractE2ETest {
                     .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withOneFreeIpaNode()
+                    .withEnvironmentType(EnvironmentType.HYBRID)
                     .withTrustSetup()
                 .when(environmentTestClient.create())
                 .awaitForHybridCreationFlow()
@@ -141,7 +154,56 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then(hybridTrustAssertions.validateTrustOnDistroX())
+                .then(hybridTrustAssertions.validateTwoWayTrustOnDistroX())
+                .given(FreeIpaTrustCommandsDto.class)
+                .when(freeIpaTestClient.trustCleanupCommands(), RunningParameter.force())
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.delete(), RunningParameter.force())
+                .await(EnvironmentStatus.ARCHIVED)
+                .given(FreeIpaTrustCommandsDto.class)
+                .then(cleanUpActiveDirectory(false), RunningParameter.force())
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "an existing public cloud environment",
+            when = "setup trust with the given active directory",
+            then = "trust setup successfully finished and the cluster configurations become stale, then up to date again after service restart")
+    public void testTrustSetupExistingEnv(TestContext testContext) {
+        // set a prefix so the domain's will not collide with the other trust test, allowing parallel runs with same Active Directory
+        testContext
+                .given(EnvironmentTestDto.class)
+                .withName(resourcePropertyProvider.getEnvironmentName("existingenv"))
+                .withTrustSetup();
+        createDefaultEnvironment(testContext);
+        createDatalakeWithoutDatabase(testContext);
+        testContext
+                .given(EnvironmentDirectionalTrustSetupDto.class)
+                .when(environmentTestClient.setupDirectionalTrust())
+                .awaitForFlow()
+                .given(FreeIpaTrustCommandsDto.class)
+                .when(freeIpaTestClient.trustCleanupCommands())
+                .then(cleanUpActiveDirectory(true))
+                .given(FreeIpaDirectionalTrustCommandsDto.class)
+                .when(freeIpaTestClient.directionalTrustSetupCommands())
+                .then(setupActiveDirectoryOneWay())
+                .given(SdxInternalTestDto.class)
+                .awaitConfigStalenessState(SdxClusterStatusResponse.RUNNING, ConfigStalenessState.STALE)
+                .when(sdxTestClient.restartClusterServices(false, true))
+                .awaitConfigStalenessState(SdxClusterStatusResponse.RUNNING, ConfigStalenessState.RESTART_IN_PROGRESS)
+                .awaitForFlow()
+                .awaitConfigStalenessState(SdxClusterStatusResponse.RUNNING, ConfigStalenessState.UP_TO_DATE)
+                .then(hybridTrustAssertions.validateOneWayTrustOnSdx())
+//                .given(EnvironmentTestDto.class)
+//                .when(environmentTestClient.finishTrustSetup())
+//                .await(EnvironmentStatus.AVAILABLE)
+//                .given(FreeIpaDirectionalTrustCommandsDto.class)
+//                .when(freeIpaTestClient.directionalTrustSetupCommands())
+//                .then(setupActiveDirectoryTwoWay())
+//                .given(SdxInternalTestDto.class)
+//                .then(hybridTrustAssertions.validateTwoWayTrustOnSdx())
                 .given(FreeIpaTrustCommandsDto.class)
                 .when(freeIpaTestClient.trustCleanupCommands(), RunningParameter.force())
                 .given(EnvironmentTestDto.class)
@@ -155,6 +217,22 @@ public class HybridTrustTests extends AbstractE2ETest {
     private Assertion<FreeIpaTrustCommandsDto, FreeIpaClient> setupActiveDirectory() {
         return (testContext, testDto, client) -> {
             String commands = testDto.getResponse().getActiveDirectoryCommands().getCommands();
+            activeDirectorySshJClientActions.executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-setup", commands, true);
+            return testDto;
+        };
+    }
+
+    private Assertion<FreeIpaDirectionalTrustCommandsDto, FreeIpaClient> setupActiveDirectoryOneWay() {
+        return (testContext, testDto, client) -> {
+            String commands = testDto.getResponse().getOneWay().getActiveDirectoryCommands().getCommands();
+            activeDirectorySshJClientActions.executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-setup", commands, true);
+            return testDto;
+        };
+    }
+
+    private Assertion<FreeIpaDirectionalTrustCommandsDto, FreeIpaClient> setupActiveDirectoryTwoWay() {
+        return (testContext, testDto, client) -> {
+            String commands = testDto.getResponse().getTwoWay().getActiveDirectoryCommands().getCommands();
             activeDirectorySshJClientActions.executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-setup", commands, true);
             return testDto;
         };

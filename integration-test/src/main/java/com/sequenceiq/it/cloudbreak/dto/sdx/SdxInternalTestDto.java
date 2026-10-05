@@ -47,10 +47,12 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.await.Await;
+import com.sequenceiq.it.cloudbreak.await.sdx.SdxConfigStalenessAwait;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -424,6 +426,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Await<SdxInternalTestDto, SdxClient> customAction) {
         return getTestContext().await(this, Map.of("status", status), runningParameter, customAction);
+    }
+
+    public SdxInternalTestDto awaitConfigStalenessState(SdxClusterStatusResponse status, ConfigStalenessState configStalenessState) {
+        return getTestContext().await(this, Map.of("status", status), emptyRunningParameter(), new SdxConfigStalenessAwait(configStalenessState));
     }
 
     public SdxInternalTestDto awaitForFlow() {

@@ -142,7 +142,7 @@ public class EnvironmentTestDto
                 .withEnvironmentType(EnvironmentType.PUBLIC_CLOUD);
     }
 
-    private EnvironmentTestDto withEnvironmentType(EnvironmentType environmentType) {
+    public EnvironmentTestDto withEnvironmentType(EnvironmentType environmentType) {
         getRequest().setEnvironmentType(environmentType.name());
         return this;
     }
@@ -427,7 +427,6 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withTrustSetup() {
-        getRequest().setEnvironmentType("HYBRID");
         EnvironmentNetworkTestDto environmentNetwork = getCloudProvider().trustSetupNetwork(given(EnvironmentNetworkTestDto.class));
         if (environmentNetwork == null) {
             throw new IllegalArgumentException("Environment Network does not exist!");

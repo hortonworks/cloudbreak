@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEven
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
+import com.sequenceiq.environment.api.v1.environment.endpoint.CrossRealmTrustEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentDefaultComputeClusterEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentHybridEndpoint;
@@ -16,31 +17,65 @@ import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
 public interface EnvironmentClient {
-    CredentialEndpoint credentialV1Endpoint();
+    <E> E getEndpoint(Class<E> clazz);
 
-    AuditCredentialEndpoint auditCredentialV1Endpoint();
+    default CredentialEndpoint credentialV1Endpoint() {
+        return getEndpoint(CredentialEndpoint.class);
+    }
 
-    ProxyEndpoint proxyV1Endpoint();
+    default AuditCredentialEndpoint auditCredentialV1Endpoint() {
+        return getEndpoint(AuditCredentialEndpoint.class);
+    }
 
-    EnvironmentEndpoint environmentV1Endpoint();
+    default ProxyEndpoint proxyV1Endpoint() {
+        return getEndpoint(ProxyEndpoint.class);
+    }
 
-    EnvironmentInternalEndpoint environmentInternalEndpoint();
+    default EnvironmentEndpoint environmentV1Endpoint() {
+        return getEndpoint(EnvironmentEndpoint.class);
+    }
 
-    EnvironmentDefaultComputeClusterEndpoint defaultComputeClusterEndpoint();
+    default EnvironmentInternalEndpoint environmentInternalEndpoint() {
+        return getEndpoint(EnvironmentInternalEndpoint.class);
+    }
 
-    FlowEndpoint flowEndpoint();
+    default EnvironmentDefaultComputeClusterEndpoint defaultComputeClusterEndpoint() {
+        return getEndpoint(EnvironmentDefaultComputeClusterEndpoint.class);
+    }
 
-    FlowPublicEndpoint flowPublicEndpoint();
+    default FlowEndpoint flowEndpoint() {
+        return getEndpoint(FlowEndpoint.class);
+    }
 
-    CDPStructuredEventV1Endpoint structuredEventsV1Endpoint();
+    default FlowPublicEndpoint flowPublicEndpoint() {
+        return getEndpoint(FlowPublicEndpoint.class);
+    }
 
-    AuthorizationUtilEndpoint authorizationUtilEndpoint();
+    default CDPStructuredEventV1Endpoint structuredEventsV1Endpoint() {
+        return getEndpoint(CDPStructuredEventV1Endpoint.class);
+    }
 
-    AzureMarketplaceTermsEndpoint azureMarketplaceTermsEndpoint();
+    default AuthorizationUtilEndpoint authorizationUtilEndpoint() {
+        return getEndpoint(AuthorizationUtilEndpoint.class);
+    }
 
-    TermsEndpoint termsEndpoint();
+    default AzureMarketplaceTermsEndpoint azureMarketplaceTermsEndpoint() {
+        return getEndpoint(AzureMarketplaceTermsEndpoint.class);
+    }
 
-    EncryptionProfileEndpoint encryptionProfileEndpoint();
+    default TermsEndpoint termsEndpoint() {
+        return getEndpoint(TermsEndpoint.class);
+    }
 
-    EnvironmentHybridEndpoint hybridEndpoint();
+    default EncryptionProfileEndpoint encryptionProfileEndpoint() {
+        return getEndpoint(EncryptionProfileEndpoint.class);
+    }
+
+    default EnvironmentHybridEndpoint hybridEndpoint() {
+        return getEndpoint(EnvironmentHybridEndpoint.class);
+    }
+
+    default CrossRealmTrustEndpoint crossRealmTrustEndpoint() {
+        return getEndpoint(CrossRealmTrustEndpoint.class);
+    }
 }

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
@@ -18,9 +19,11 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.config.TrustProperties;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.ActiveDirectorySshJClientActions;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
@@ -37,7 +40,12 @@ public class HybridTrustAssertions {
             KRB5_TRACE=/dev/stdout kvno ldap/%s@%s
             """;
 
-    private static final String DISTROX_TRUST_VALIDATE_COMMAND = """
+    private static final String REMOTE_USER_LOCAL_HDFS_VALIDATE_COMMAND = """
+            echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0@%s;
+            HADOOP_OPTS="-Dsun.security.krb5.debug=true" hdfs dfs -ls /
+            """;
+
+    private static final String LOCAL_USER_REMOTE_HDFS_VALIDATE_COMMAND = """
             echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0;
             HADOOP_OPTS="-Dsun.security.krb5.debug=true" hdfs dfs -ls hdfs://%s
             """;
@@ -82,20 +90,53 @@ public class HybridTrustAssertions {
         };
     }
 
-    public Assertion<DistroXTestDto, CloudbreakClient> validateTrustOnDistroX() {
+    public Assertion<SdxInternalTestDto, SdxClient> validateOneWayTrustOnSdx() {
         return (testContext, testDto, client) ->  {
-            String hdfsPath = trustProperties.getHdfsPath();
-            InstanceMetaDataV4Response gatewayInstance = testDto.getResponse().getInstanceGroups().stream()
-                    .filter(ig -> ig.getType().equals(InstanceGroupType.GATEWAY))
-                    .flatMap(ig -> ig.getMetadata().stream())
-                    .findFirst()
-                    .orElseThrow(() -> new TestFailException("The DistroX has no GATEWAY"));
-            Pair<Integer, String> result =
-                    sshJClientActions.executeSshCommand(gatewayInstance.getPrivateIp(), DISTROX_TRUST_VALIDATE_COMMAND.formatted(hdfsPath));
-            if (result.getKey() != 0) {
-                throw new TestFailException("Failed to list HDFS of %s with error: %s".formatted(hdfsPath, result.getValue()));
-            }
+            InstanceMetaDataV4Response gatewayInstance = getGatewayInstance(testDto.getResponse().getStackV4Response());
+            validateOneWayTrust(gatewayInstance);
             return testDto;
         };
+    }
+
+    private void validateOneWayTrust(InstanceMetaDataV4Response gatewayInstance) {
+        String realm = trustProperties.getActiveDirectoryRealm().toUpperCase(Locale.ROOT);
+        Pair<Integer, String> result =
+                sshJClientActions.executeSshCommand(gatewayInstance.getPrivateIp(), REMOTE_USER_LOCAL_HDFS_VALIDATE_COMMAND.formatted(realm));
+        if (result.getKey() != 0) {
+            throw new TestFailException("Failed to list HDFS of SDX with error: %s".formatted(result.getValue()));
+        }
+    }
+
+    public Assertion<SdxInternalTestDto, SdxClient> validateTwoWayTrustOnSdx() {
+        return (testContext, testDto, client) ->  {
+            InstanceMetaDataV4Response gatewayInstance = getGatewayInstance(testDto.getResponse().getStackV4Response());
+            validateTwoWayTrust(gatewayInstance);
+            return testDto;
+        };
+    }
+
+    public Assertion<DistroXTestDto, CloudbreakClient> validateTwoWayTrustOnDistroX() {
+        return (testContext, testDto, client) ->  {
+            InstanceMetaDataV4Response gatewayInstance = getGatewayInstance(testDto.getResponse());
+            validateTwoWayTrust(gatewayInstance);
+            return testDto;
+        };
+    }
+
+    private void validateTwoWayTrust(InstanceMetaDataV4Response gatewayInstance) {
+        String hdfsPath = trustProperties.getHdfsPath();
+        Pair<Integer, String> result =
+                sshJClientActions.executeSshCommand(gatewayInstance.getPrivateIp(), LOCAL_USER_REMOTE_HDFS_VALIDATE_COMMAND.formatted(hdfsPath));
+        if (result.getKey() != 0) {
+            throw new TestFailException("Failed to list HDFS of %s with error: %s".formatted(hdfsPath, result.getValue()));
+        }
+    }
+
+    private InstanceMetaDataV4Response getGatewayInstance(StackV4Response stackV4Response) {
+        return stackV4Response.getInstanceGroups().stream()
+                .filter(ig -> ig.getType().equals(InstanceGroupType.GATEWAY))
+                .flatMap(ig -> ig.getMetadata().stream())
+                .findFirst()
+                .orElseThrow(() -> new TestFailException("The stack has no GATEWAY"));
     }
 }

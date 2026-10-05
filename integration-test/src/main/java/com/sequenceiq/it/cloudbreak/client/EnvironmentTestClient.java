@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteActio
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByCrnsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByNamesAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDirectionalTrustSetupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEditByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEncryptionProfileEnableAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentFinishTrustSetupAction;
@@ -35,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartWithou
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentTrustSetupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentVerticalScaleAction;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentDirectionalTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
@@ -148,6 +150,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTrustSetupDto, EnvironmentClient> setupTrust() {
         return new EnvironmentTrustSetupAction();
+    }
+
+    public Action<EnvironmentDirectionalTrustSetupDto, EnvironmentClient> setupDirectionalTrust() {
+        return new EnvironmentDirectionalTrustSetupAction();
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> finishTrustSetup() {

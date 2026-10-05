@@ -25,7 +25,7 @@ public abstract class AbstractKeyBasedServiceEndpoint {
         this.secretKey = secretKey;
     }
 
-    protected <E> E getEndpoint(Class<E> clazz) {
+    public <E> E getEndpoint(Class<E> clazz) {
         return newEndpoint(clazz, new MultivaluedHashMap<>());
     }
 

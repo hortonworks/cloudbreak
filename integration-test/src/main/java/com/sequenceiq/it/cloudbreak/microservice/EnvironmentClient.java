@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.TermsPolicyDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EncryptionProfileTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentDirectionalTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
@@ -97,6 +98,7 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
                 CredentialTestDto.class.getSimpleName(),
                 TermsPolicyDto.class.getSimpleName(),
                 EnvironmentTrustSetupDto.class.getSimpleName(),
+                EnvironmentDirectionalTrustSetupDto.class.getSimpleName(),
                 EncryptionProfileTestDto.class.getSimpleName()
         );
     }

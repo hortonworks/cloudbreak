@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -69,6 +70,7 @@ public class DatalakeRestartServicesActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeRestartServicesStartEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Restart Data Lake services: {}", payload);
+                sdxService.updateConfigStalenessState(context.getSdxId(), ConfigStalenessState.RESTART_IN_PROGRESS, "Restart in progress");
                 SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
                 FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(initiatorUserCrn -> stackV4Endpoint.restartClusterServices(
                         WORKSPACE_ID, sdxCluster.getCrn(), payload.isRollingRestart(), payload.isStaleServicesOnly(), initiatorUserCrn));
@@ -117,6 +119,7 @@ public class DatalakeRestartServicesActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Data Lake restart services finished for: {}", payload.getResourceId());
+                sdxService.updateConfigStalenessState(context.getSdxId(), ConfigStalenessState.UP_TO_DATE, "");
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING, ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTART_SUCCESS,
                         "Data Lake restart services finished", payload.getResourceId()

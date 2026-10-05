@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -987,6 +988,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public void updateCertExpirationState(Long id, CertExpirationState state) {
         sdxClusterRepository.updateCertExpirationState(id, state, "");
+    }
+
+    public void updateConfigStalenessState(Long id, ConfigStalenessState configStalenessState, String configStalenessDetails) {
+        sdxClusterRepository.updateConfigStalenessState(id, configStalenessState, configStalenessDetails);
     }
 
     @Override
