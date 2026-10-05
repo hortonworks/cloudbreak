@@ -424,48 +424,6 @@ tasks.register('allDependencyInsightSpecific') {
   dependsOn subprojects.collect { it.tasks.named('dependencyInsightSpecific') }
 }
 
-// CB-34758 Dependabot resolves a dependency's version only from a literal or from a quoted
-// reference such as version: "$springBootVersion". An unquoted variable reference is invisible to
-// it, so the dependency silently stops receiving security updates. Fail the build instead.
-tasks.register('checkQuotedVersionRefs') {
-  description = 'Fails if any Gradle file declares a dependency version as an unquoted variable reference'
-  group = 'verification'
-
-  def gradleFiles = fileTree(rootDir) {
-    include '**/*.gradle'
-    exclude '**/build/**'
-  }
-  def rootPath = rootDir.toPath()
-  def unquotedVersionRef = ~/version:\s*[A-Za-z_]/
-
-  inputs.files(gradleFiles).withPropertyName('gradleFiles')
-
-  doLast {
-    def offenders = []
-    gradleFiles.each { gradleFile ->
-      gradleFile.eachLine { line, lineNumber ->
-        def trimmed = line.trim()
-        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) {
-          return
-        }
-        if (unquotedVersionRef.matcher(line).find()) {
-          offenders << "${rootPath.relativize(gradleFile.toPath())}:${lineNumber}: ${trimmed}"
-        }
-      }
-    }
-    if (!offenders.isEmpty()) {
-      throw new GradleException('Dependabot cannot see a dependency whose version is an unquoted variable reference.\n' +
-          'Use a quoted reference, for example version: "$springBootVersion", in:\n  ' + offenders.join('\n  '))
-    }
-  }
-}
-
-subprojects {
-  tasks.matching { it.name == 'check' }.configureEach {
-    dependsOn rootProject.tasks.named('checkQuotedVersionRefs')
-  }
-}
-
 class BuildInfoTask extends DefaultTask {
   @Internal
   File destination

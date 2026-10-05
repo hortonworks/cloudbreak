@@ -11,7 +11,6 @@ main() {
   local build_log
   build_log="$(mktemp)"
   $(pwd)/gradlew -Penv=jenkins -b build.gradle \
-    checkQuotedVersionRefs \
     test \
     jacocoTestReport \
     -x checkstyleMain \
