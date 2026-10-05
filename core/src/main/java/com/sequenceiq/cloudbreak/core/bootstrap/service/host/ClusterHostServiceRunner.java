@@ -442,10 +442,16 @@ public class ClusterHostServiceRunner {
                 .map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
         boolean candidatesContainGatewayNode = candidates.keySet().stream().anyMatch(gatewayHosts::contains);
         NodeReachabilityResult nodeReachabilityResult;
-        if (!repair && !candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stackDto.getStack())) {
+        if (!candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stackDto.getStack())) {
             nodeReachabilityResult = runTargetedClusterServices(stackDto, candidates);
         } else {
             nodeReachabilityResult = runClusterServices(stackDto, candidates, true);
+        }
+        if (repair && !nodeReachabilityResult.getUnreachableNodes().isEmpty()) {
+            String errorMessage = "Can not run cluster services on new nodes because the configuration management service is not responding on these nodes: "
+                    + nodeReachabilityResult.getUnreachableHosts();
+            LOGGER.error(errorMessage);
+            throw new CloudbreakServiceException(errorMessage);
         }
         return nodeReachabilityResult;
     }

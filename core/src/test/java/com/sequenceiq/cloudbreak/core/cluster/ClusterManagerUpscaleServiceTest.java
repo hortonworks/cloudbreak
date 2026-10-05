@@ -192,6 +192,32 @@ public class ClusterManagerUpscaleServiceTest {
     }
 
     @Test
+    public void testUpscaleClusterManagerWhenRepairAndTargetedUpscaleSupportedAndWaitForHostsTimedOutThenOrchestrationFailedAndNoZombie()
+            throws ClusterClientInitException {
+        StackDto stackDto = getStackDto();
+        when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
+        when(stackDto.getClusterManagerIp()).thenReturn("otherclusterIp");
+        when(clusterHostServiceRunner.addClusterServices(eq(stackDto), any(), anyBoolean()))
+                .thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+        doNothing().when(clusterService).updateInstancesToRunning(eq(STACK_ID), any());
+        when(clusterApiConnectors.getConnector(eq(stackDto), eq("otherclusterIp"))).thenReturn(clusterApi);
+        when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(eq(stackDto.getStack()))).thenReturn(Boolean.TRUE);
+        when(clusterApi.waitForHosts(any()))
+                .thenReturn(new ExtendedPollingResultBuilder().withFailedInstanceIds(Set.of(INSTANCE_METADATA_ID)).timeout().build());
+        String reason = "Upscaling in Cloudera Manager was not successful, waiting for hosts to be ready timed out.";
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_NODE_FAILURE_REASON_WAIT_FOR_HOSTS_TIMEOUT.getMessage())).thenReturn(reason);
+
+        assertThrows(CloudbreakServiceException.class,
+                () -> underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), false, true));
+
+        verify(clusterApi).waitForHosts(any());
+        verify(instanceMetaDataService, times(1)).updateInstanceStatuses(
+                eq(Set.of(INSTANCE_METADATA_ID)), eq(InstanceStatus.ORCHESTRATION_FAILED), eq(reason));
+        verify(instanceMetaDataService, times(0)).updateInstanceStatuses(any(), eq(InstanceStatus.ZOMBIE), any());
+        verifyNoInteractions(flowMessageService);
+    }
+
+    @Test
     public void testUpscaleClusterManagerWhenRepairAndWaitForHostsTimedOut() throws ClusterClientInitException {
         StackDto stackDto = getStackDto();
         when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);

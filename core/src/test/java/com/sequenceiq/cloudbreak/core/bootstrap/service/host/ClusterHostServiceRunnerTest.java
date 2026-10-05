@@ -14,10 +14,12 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -126,6 +128,7 @@ import com.sequenceiq.cloudbreak.service.paywall.PaywallConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -284,6 +287,9 @@ class ClusterHostServiceRunnerTest {
 
     @Mock
     private LoadBalancerSANProvider loadBalancerSANProvider;
+
+    @Mock
+    private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @InjectMocks
     private ClusterHostServiceRunner underTest;
@@ -560,6 +566,85 @@ class ClusterHostServiceRunnerTest {
         verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
         verify(stackUtil, times(1)).collectReachableAndUnreachableCandidateNodes(any(), any());
         verify(hostOrchestrator, never()).initServiceRun(any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void testAddClusterServicesWhenRepairAndTargetedReturnsUnreachableThenThrows() {
+        ClusterHostServiceRunner spyUnderTest = spy(underTest);
+        StackDto stackDto = mock(StackDto.class);
+        StackView localStackView = mock(StackView.class);
+        Map<String, Integer> hostGroupWithAdjustment = Map.of("compute", 1);
+        when(stackDto.getStack()).thenReturn(localStackView);
+        when(stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of());
+        doReturn(Map.of("fqdn3", "1.1.1.1")).when(spyUnderTest).collectUpscaleCandidates(stackDto, hostGroupWithAdjustment);
+        when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(localStackView)).thenReturn(true);
+        NodeReachabilityResult withUnreachable = new NodeReachabilityResult(Set.of(node("fqdn3")), Set.of(node("fqdn4")));
+        doReturn(withUnreachable).when(spyUnderTest).runTargetedClusterServices(eq(stackDto), any());
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> spyUnderTest.addClusterServices(stackDto, hostGroupWithAdjustment, true));
+
+        assertTrue(exception.getMessage().contains("the configuration management service is not responding on these nodes"));
+        verify(spyUnderTest).runTargetedClusterServices(eq(stackDto), any());
+        verify(spyUnderTest, never()).runClusterServices(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testAddClusterServicesWhenRepairAndTargetedAllReachableThenReturnsResult() {
+        ClusterHostServiceRunner spyUnderTest = spy(underTest);
+        StackDto stackDto = mock(StackDto.class);
+        StackView localStackView = mock(StackView.class);
+        Map<String, Integer> hostGroupWithAdjustment = Map.of("compute", 1);
+        when(stackDto.getStack()).thenReturn(localStackView);
+        when(stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of());
+        doReturn(Map.of("fqdn3", "1.1.1.1")).when(spyUnderTest).collectUpscaleCandidates(stackDto, hostGroupWithAdjustment);
+        when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(localStackView)).thenReturn(true);
+        NodeReachabilityResult allReachable = new NodeReachabilityResult(Set.of(node("fqdn3")), Set.of());
+        doReturn(allReachable).when(spyUnderTest).runTargetedClusterServices(eq(stackDto), any());
+
+        NodeReachabilityResult result = spyUnderTest.addClusterServices(stackDto, hostGroupWithAdjustment, true);
+
+        assertEquals(allReachable, result);
+        verify(spyUnderTest).runTargetedClusterServices(eq(stackDto), any());
+        verify(spyUnderTest, never()).runClusterServices(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testAddClusterServicesWhenCandidateContainsGatewayNodeThenRunsFullClusterServices() {
+        ClusterHostServiceRunner spyUnderTest = spy(underTest);
+        StackDto stackDto = mock(StackDto.class);
+        Map<String, Integer> hostGroupWithAdjustment = Map.of("gateway", 1);
+        when(stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata())
+                .thenReturn(List.<InstanceMetadataView>of(createInstanceMetadata("gateway1")));
+        doReturn(Map.of("gateway1", "1.1.1.1")).when(spyUnderTest).collectUpscaleCandidates(stackDto, hostGroupWithAdjustment);
+        NodeReachabilityResult result = new NodeReachabilityResult(Set.of(node("gateway1")), Set.of());
+        doReturn(result).when(spyUnderTest).runClusterServices(eq(stackDto), any(), eq(true));
+
+        NodeReachabilityResult actual = spyUnderTest.addClusterServices(stackDto, hostGroupWithAdjustment, true);
+
+        assertEquals(result, actual);
+        verify(spyUnderTest).runClusterServices(eq(stackDto), any(), eq(true));
+        verify(spyUnderTest, never()).runTargetedClusterServices(any(), any());
+        verifyNoInteractions(targetedUpscaleSupportService);
+    }
+
+    @Test
+    void testAddClusterServicesWhenNotRepairAndTargetedReturnsUnreachableThenReturnsWithoutThrow() {
+        ClusterHostServiceRunner spyUnderTest = spy(underTest);
+        StackDto stackDto = mock(StackDto.class);
+        StackView localStackView = mock(StackView.class);
+        Map<String, Integer> hostGroupWithAdjustment = Map.of("compute", 1);
+        when(stackDto.getStack()).thenReturn(localStackView);
+        when(stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of());
+        doReturn(Map.of("fqdn3", "1.1.1.1")).when(spyUnderTest).collectUpscaleCandidates(stackDto, hostGroupWithAdjustment);
+        when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(localStackView)).thenReturn(true);
+        NodeReachabilityResult withUnreachable = new NodeReachabilityResult(Set.of(node("fqdn3")), Set.of(node("fqdn4")));
+        doReturn(withUnreachable).when(spyUnderTest).runTargetedClusterServices(eq(stackDto), any());
+
+        NodeReachabilityResult actual = spyUnderTest.addClusterServices(stackDto, hostGroupWithAdjustment, false);
+
+        assertEquals(withUnreachable, actual);
+        verify(spyUnderTest).runTargetedClusterServices(eq(stackDto), any());
     }
 
     @Test

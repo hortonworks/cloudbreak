@@ -94,7 +94,7 @@ public class ClusterManagerUpscaleService {
 
         ClusterApi connector = clusterApiConnectors.getConnector(stackDto, clusterManagerIp);
         ExtendedPollingResult result;
-        boolean targetedUpscaleAvailable = isTargetedUpscaleAvailable(primaryGatewayChanged, repair, stack);
+        boolean targetedUpscaleAvailable = isTargetedUpscaleAvailable(primaryGatewayChanged, stack);
         if (targetedUpscaleAvailable) {
             Set<String> reachableHosts = nodeReachabilityResult.getReachableHosts();
             Set<InstanceMetadataView> reachableInstances = stackDto.getAllAvailableInstances().stream()
@@ -105,20 +105,21 @@ public class ClusterManagerUpscaleService {
             result = connector.waitForHosts(stackDto.getRunningInstanceMetaDataSet());
         }
         if (result != null && result.isTimeout()) {
-            handleWaitForHostsTimeout(targetedUpscaleAvailable, stack, result);
+            handleWaitForHostsTimeout(targetedUpscaleAvailable, repair, stack, result);
         }
     }
 
-    private boolean isTargetedUpscaleAvailable(boolean primaryGatewayChanged, boolean repair, StackView stack) {
-        return !repair && !primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack);
+    private boolean isTargetedUpscaleAvailable(boolean primaryGatewayChanged, StackView stack) {
+        return !primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack);
     }
 
-    private void handleWaitForHostsTimeout(boolean targetedUpscaleAvailable, StackView stack, ExtendedPollingResult result) {
+    private void handleWaitForHostsTimeout(boolean targetedUpscaleAvailable, boolean repair, StackView stack, ExtendedPollingResult result) {
         String errorMessage = getTimeoutResultMessage(result);
         LOGGER.warn(errorMessage);
         Set<Long> failedInstanceIds = collectFailedInstanceIds(stack, result);
         String statusReason = messagesService.getMessage(CLUSTER_NODE_FAILURE_REASON_WAIT_FOR_HOSTS_TIMEOUT.getMessage());
-        if (targetedUpscaleAvailable) {
+        boolean zombieTolerant = targetedUpscaleAvailable && !repair;
+        if (zombieTolerant) {
             instanceMetaDataService.updateInstanceStatuses(failedInstanceIds, InstanceStatus.ZOMBIE, statusReason);
             if (CollectionUtils.isNotEmpty(failedInstanceIds)) {
                 String zombieNodes = String.join(", ", collectFailedInstanceIdentifiers(stack, failedInstanceIds));
@@ -128,7 +129,7 @@ public class ClusterManagerUpscaleService {
             instanceMetaDataService.updateInstanceStatuses(failedInstanceIds, InstanceStatus.ORCHESTRATION_FAILED, statusReason);
         }
 
-        if (!targetedUpscaleAvailable || CollectionUtils.isEmpty(result.getFailedInstancePrivateIds())) {
+        if (!zombieTolerant || CollectionUtils.isEmpty(result.getFailedInstancePrivateIds())) {
             throw new CloudbreakServiceException(errorMessage, result.getException());
         }
     }
