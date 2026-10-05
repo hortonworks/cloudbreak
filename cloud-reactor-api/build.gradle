@@ -20,6 +20,6 @@ dependencies {
     api project(':cloud-api')
     api project(':cloud-common')
 
-    implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+    implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: "$slf4jApiVersion"
 
 }

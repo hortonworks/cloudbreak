@@ -22,29 +22,29 @@ dependencies {
   implementation project(':usage-collection')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy',                         name: 'byte-buddy',                     version: byteBuddyVersion
-  implementation group: 'javax.annotation',                      name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+  implementation group: 'net.bytebuddy',                         name: 'byte-buddy',                     version: "$byteBuddyVersion"
+  implementation group: 'javax.annotation',                      name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
   implementation group: 'javax.inject',                          name: 'javax.inject',                   version: '1'
-  implementation group: 'jakarta.transaction',                   name: 'jakarta.transaction-api',        version: jakartaTransactionApiVersion
-  implementation group: 'javax.xml.bind',                        name: 'jaxb-api',                       version: javaxXmlBindJaxbApiVersion
+  implementation group: 'jakarta.transaction',                   name: 'jakarta.transaction-api',        version: "$jakartaTransactionApiVersion"
+  implementation group: 'javax.xml.bind',                        name: 'jaxb-api',                       version: "$javaxXmlBindJaxbApiVersion"
 
-  implementation group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
-  implementation group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
-  implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-  api            group: 'org.springframework.statemachine',      name: 'spring-statemachine-core',       version: springStateMachineCoreVersion
-  implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: springBootVersion
+  implementation group: 'org.springframework',                   name: 'spring-beans',                   version: "$springFrameworkVersion"
+  implementation group: 'org.springframework',                   name: 'spring-context',                 version: "$springFrameworkVersion"
+  implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: "$springBootVersion"
+  api            group: 'org.springframework.statemachine',      name: 'spring-statemachine-core',       version: "$springStateMachineCoreVersion"
+  implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: "$springBootVersion"
 
-  implementation group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
-  implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: mybatisMigrationVersion
+  implementation group: 'commons-io',                            name: 'commons-io',                     version: "$apacheCommonsIoVersion"
+  implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: "$mybatisMigrationVersion"
 
   implementation group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
 
-  testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
-  testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
-  testImplementation group: 'com.h2database',                    name: 'h2',                             version: h2databaseVersion
-  testImplementation group: 'org.testcontainers',                name: 'postgresql',                     version: testContainersVersion
-  testImplementation group: 'org.testcontainers',                name: 'junit-jupiter',                  version: testContainersVersion
+  testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: "$mockitoVersion"
+  testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: "$springBootVersion"
+  testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: "$awaitilityVersion"
+  testImplementation group: 'com.h2database',                    name: 'h2',                             version: "$h2databaseVersion"
+  testImplementation group: 'org.testcontainers',                name: 'postgresql',                     version: "$testContainersVersion"
+  testImplementation group: 'org.testcontainers',                name: 'junit-jupiter',                  version: "$testContainersVersion"
   testImplementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                    version: '5.6.4'
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')

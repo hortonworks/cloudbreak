@@ -16,7 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 dependencyManagement {
   dependencies {
-    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
+    dependencySet(group: 'org.springframework.boot', version: "$springBootVersion") {
       entry 'spring-boot-starter-test'
     }
   }
@@ -25,15 +25,15 @@ dependencyManagement {
 dependencies {
   implementation project(':grpc-common')
 
-  implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
-  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: protobufVersion
+  implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
+  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: "$protobufVersion"
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
     exclude group: 'junit', module: 'junit'
   }
 
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                             version: mockitoVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                             version: "$mockitoVersion"
   testImplementation  ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }

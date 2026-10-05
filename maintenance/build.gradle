@@ -51,34 +51,34 @@ configurations.all {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
-    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
-    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: reactorNettyHttp
-    dependency group: 'org.postgresql',           name: 'postgresql',         version: postgreSQLVersion
-    dependency group: 'org.springframework.data', name: 'spring-data-jpa',    version: springDataJpaFrameworkVersion
-    dependency group: 'org.springframework.data', name: 'spring-data-commons', version: springDataJpaFrameworkVersion
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: "$tomcatVersion"
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: "$springFrameworkVersion"
+    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: "$reactorNettyHttp"
+    dependency group: 'org.postgresql',           name: 'postgresql',         version: "$postgreSQLVersion"
+    dependency group: 'org.springframework.data', name: 'spring-data-jpa',    version: "$springDataJpaFrameworkVersion"
+    dependency group: 'org.springframework.data', name: 'spring-data-commons', version: "$springDataJpaFrameworkVersion"
   }
 }
 
 dependencies {
-  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',     version: swaggerCoreVersion
-  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: javaxXmlBindJaxbApiVersion
-  implementation     group: 'com.google.code.gson',      name: 'gson',                       version: gsonVersion
-  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',            version: jerseyCoreVersion
-  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',          version: jerseyMicrometerVersion
-  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',         version: mybatisMigrationVersion
-  implementation     group: 'org.postgresql',            name: 'postgresql',                 version: postgreSQLVersion
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',        version: springBootVersion
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',    version: springBootVersion
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator', version: springBootVersion
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa', version: springBootVersion
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz', version: springBootVersion
-  implementation     group: 'org.springframework.data',  name: 'spring-data-jpa',              version: springDataJpaFrameworkVersion
-  implementation     group: 'org.springframework.data',  name: 'spring-data-commons',        version: springDataJpaFrameworkVersion
-  implementation     group: 'org.apache.commons',        name: 'commons-lang3',              version: apacheCommonsLangVersion
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',     version: "$swaggerCoreVersion"
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: "$javaxXmlBindJaxbApiVersion"
+  implementation     group: 'com.google.code.gson',      name: 'gson',                       version: "$gsonVersion"
+  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',            version: "$jerseyCoreVersion"
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',          version: "$jerseyMicrometerVersion"
+  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',         version: "$mybatisMigrationVersion"
+  implementation     group: 'org.postgresql',            name: 'postgresql',                 version: "$postgreSQLVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',        version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',    version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator', version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa', version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz', version: "$springBootVersion"
+  implementation     group: 'org.springframework.data',  name: 'spring-data-jpa',              version: "$springDataJpaFrameworkVersion"
+  implementation     group: 'org.springframework.data',  name: 'spring-data-commons',        version: "$springDataJpaFrameworkVersion"
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',              version: "$apacheCommonsLangVersion"
 
-  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: byteBuddyVersion
+  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: "$byteBuddyVersion"
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
@@ -94,17 +94,17 @@ dependencies {
   }
 
   constraints {
-    implementation     group: 'com.google.code.gson',      name: 'gson',                       version: gsonVersion
-    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',              version: jerseyCoreVersion
-    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',          version: jerseyMicrometerVersion
-    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',         version: mybatisMigrationVersion
-    implementation     group: 'org.postgresql',            name: 'postgresql',                 version: postgreSQLVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',        version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',    version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator', version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa', version: springBootVersion
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',   version: springBootVersion
+    implementation     group: 'com.google.code.gson',      name: 'gson',                       version: "$gsonVersion"
+    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',              version: "$jerseyCoreVersion"
+    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',          version: "$jerseyMicrometerVersion"
+    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',         version: "$mybatisMigrationVersion"
+    implementation     group: 'org.postgresql',            name: 'postgresql',                 version: "$postgreSQLVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',        version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',    version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator', version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa', version: "$springBootVersion"
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',   version: "$springBootVersion"
   }
 
   implementation project(':maintenance-api')

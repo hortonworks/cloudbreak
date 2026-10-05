@@ -12,28 +12,28 @@ jar {
 
 dependencies {
     // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-    implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: byteBuddyVersion
+    implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: "$byteBuddyVersion"
     implementation project(':orchestrator-api')
     implementation project(':common')
     implementation project(':cloud-common')
 
-    implementation group: 'org.yaml',                      name: 'snakeyaml',                      version: snakeYamlVersion
-    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
+    implementation group: 'org.yaml',                      name: 'snakeyaml',                      version: "$snakeYamlVersion"
+    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: "$springBootVersion"
+    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: "$springBootVersion"
 
-    implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-    implementation group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: jerseyCoreVersion
-    implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+    implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
+    implementation group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: "$jerseyCoreVersion"
+    implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: "$jacksonVersion"
     implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-    implementation group: 'com.dyngr',                     name: 'polling',                        version: dyngrPollingVersion
+    implementation group: 'com.dyngr',                     name: 'polling',                        version: "$dyngrPollingVersion"
 
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
 
-    testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
-    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
+    testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: "$hamcrestVersion"
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: "$mockitoVersion") {
       exclude group: 'org.hamcrest'
     }
 
-    testImplementation group: 'com.hubspot.jinjava', name: 'jinjava', version: jinjavaVersion
+    testImplementation group: 'com.hubspot.jinjava', name: 'jinjava', version: "$jinjavaVersion"
     testImplementation project(":telemetry-common")
 }

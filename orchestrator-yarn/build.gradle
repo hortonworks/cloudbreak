@@ -14,14 +14,14 @@ dependencies {
   implementation project(':orchestrator-api')
   implementation project(':core-api')
   implementation project(':cloud-common')
-  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: "$jerseyCoreVersion"
   //this is required by idea, otherwise in some cases the 2.1.2 version will be added to claspath
-  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: "$jacksonVersion"
+  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: "$springBootVersion"
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: "$jerseyCoreVersion"
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: "$jerseyCoreVersion"
 
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.hamcrest',       name: 'hamcrest',                       version: hamcrestVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: "$mockitoVersion"
+  testImplementation group: 'org.hamcrest',       name: 'hamcrest',                       version: "$hamcrestVersion"
 }

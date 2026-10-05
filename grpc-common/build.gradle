@@ -18,8 +18,8 @@ dependencies {
   api project(':common')
 
   implementation group: 'com.squareup.okhttp',          name: 'okhttp',               version: '2.7.5'
-  implementation group: 'org.slf4j',                    name: 'slf4j-api',            version: slf4jApiVersion
-  implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion
+  implementation group: 'org.slf4j',                    name: 'slf4j-api',            version: "$slf4jApiVersion"
+  implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: "$protobufVersion"
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
@@ -29,7 +29,7 @@ dependencies {
     exclude group: 'io.grpc', module: 'grpc-testing'
   }
 
-  testImplementation (group: 'org.mockito',  name: 'mockito-core', version: mockitoVersion) {
+  testImplementation (group: 'org.mockito',  name: 'mockito-core', version: "$mockitoVersion") {
     exclude group: 'org.hamcrest'
   }
 }

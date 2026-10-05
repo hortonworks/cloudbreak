@@ -13,25 +13,25 @@ jar {
 }
 
 dependencies {
-  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
-  implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: "$slf4jApiVersion"
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
+  implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: "$swaggerCoreVersion"
+  implementation group: 'commons-codec',                 name: 'commons-codec',                  version: "$commonsCodecVersion"
 
   implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.11'
-  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: "$jerseyCoreVersion"
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: "$jerseyCoreVersion"
+  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: "$jerseyCoreVersion"
 
-  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
-  implementation group: 'org.hibernate.validator',       name: 'hibernate-validator',            version: hibernateValidatorVersion
-  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                version: httpClientVersion
-  implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: "$jacksonVersion"
+  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: "$jacksonVersion"
+  implementation group: 'org.hibernate.validator',       name: 'hibernate-validator',            version: "$hibernateValidatorVersion"
+  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                version: "$httpClientVersion"
+  implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: "$jerseyCoreVersion"
 
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: "$mockitoVersion"
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
 
   implementation project(':authorization-common-api')
   implementation project(':core-api')

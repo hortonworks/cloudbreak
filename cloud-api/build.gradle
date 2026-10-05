@@ -17,16 +17,16 @@ dependencies {
   implementation project(':common-model')
   implementation project(':usage-collection')
 
-  implementation     group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
+  implementation     group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2-jakarta', version: "$swaggerCoreVersion"
 
-  testImplementation(group: 'org.mockito',                name: 'mockito-core',          version: mockitoVersion) {
+  testImplementation(group: 'org.mockito',                name: 'mockito-core',          version: "$mockitoVersion") {
     exclude          group: 'org.hamcrest'
   }
-  testImplementation group: 'org.hamcrest',               name: 'hamcrest',              version: hamcrestVersion
-  testImplementation group: 'org.assertj',                name: 'assertj-core',          version: assertjVersion
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.hamcrest',               name: 'hamcrest',              version: "$hamcrestVersion"
+  testImplementation group: 'org.assertj',                name: 'assertj-core',          version: "$assertjVersion"
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
 
-  runtimeOnly        group: 'org.glassfish.jersey.core',  name: 'jersey-common',         version: jerseyCoreVersion
+  runtimeOnly        group: 'org.glassfish.jersey.core',  name: 'jersey-common',         version: "$jerseyCoreVersion"
   implementation     group: 'com.fasterxml.jackson.core', name: 'jackson-databind',      version: { strictly jacksonVersion }
 
 }

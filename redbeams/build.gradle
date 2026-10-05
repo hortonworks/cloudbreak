@@ -43,24 +43,24 @@ sonar {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
-    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
-    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: reactorNettyHttp
-    dependency group: 'org.postgresql',           name: 'postgresql',         version: postgreSQLVersion
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: "$tomcatVersion"
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: "$springFrameworkVersion"
+    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: "$reactorNettyHttp"
+    dependency group: 'org.postgresql',           name: 'postgresql',         version: "$postgreSQLVersion"
   }
 }
 
 dependencies {
-  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                     version: okhttpVersion
-  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',     version: swaggerCoreVersion
-  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: javaxXmlBindJaxbApiVersion
+  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                     version: "$okhttpVersion"
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',     version: "$swaggerCoreVersion"
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: "$javaxXmlBindJaxbApiVersion"
 
-  implementation     group: 'org.yaml',                  name: 'snakeyaml', version: snakeYamlVersion
+  implementation     group: 'org.yaml',                  name: 'snakeyaml', version: "$snakeYamlVersion"
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: byteBuddyVersion
+  implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: "$byteBuddyVersion"
 
   implementation     group: 'com.google.guava',          name: 'guava'
-  implementation     group: 'com.google.code.gson',      name: 'gson',              version: gsonVersion
+  implementation     group: 'com.google.code.gson',      name: 'gson',              version: "$gsonVersion"
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
   implementation     group: 'org.postgresql',            name: 'postgresql'
@@ -69,9 +69,9 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
-  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                    version: jerseyMicrometerVersion
-  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                        version: apacheCommonsLangVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: "$springBootVersion"
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                    version: "$jerseyMicrometerVersion"
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                        version: "$apacheCommonsLangVersion"
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
@@ -97,18 +97,18 @@ dependencies {
   testImplementation project(path: ':cloud-aws-common', configuration: 'tests')
 
   constraints {
-    implementation     group: 'org.yaml',                  name: 'snakeyaml',                      version: snakeYamlVersion
-    implementation     group: 'com.google.guava',          name: 'guava',                          version: guavaVersion
-    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
-    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: jerseyCoreVersion
-    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
-    implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    implementation     group: 'org.yaml',                  name: 'snakeyaml',                      version: "$snakeYamlVersion"
+    implementation     group: 'com.google.guava',          name: 'guava',                          version: "$guavaVersion"
+    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: "$gsonVersion"
+    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: "$jerseyCoreVersion"
+    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: "$mybatisMigrationVersion"
+    implementation     group: 'org.postgresql',            name: 'postgresql',                     version: "$postgreSQLVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: "$springBootVersion"
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: "$springBootVersion"
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
   }
 
   implementation project(':secret-rotation')
@@ -140,8 +140,8 @@ dependencies {
   testImplementation project(':cloud-aws-native')
   testImplementation project(':cloud-aws-cloudformation')
 
-  testRuntimeOnly group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion
-  testRuntimeOnly group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
+  testRuntimeOnly group: 'org.testcontainers',        name: 'postgresql',                     version: "$testContainersVersion"
+  testRuntimeOnly group: 'org.awaitility',            name: 'awaitility',                     version: "$awaitilityVersion"
 }
 
 bootRun {

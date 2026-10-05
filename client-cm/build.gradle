@@ -18,15 +18,15 @@ jar {
 dependencies {
   implementation project(':common')
 
-  api group: 'com.cloudera.api.swagger',                name: 'cloudera-manager-api-swagger',             version: cmClientVersion
-  implementation group: 'org.springframework',                     name: 'spring-aspects',                           version: springFrameworkVersion
+  api group: 'com.cloudera.api.swagger',                name: 'cloudera-manager-api-swagger',             version: "$cmClientVersion"
+  implementation group: 'org.springframework',                     name: 'spring-aspects',                           version: "$springFrameworkVersion"
 
-  testImplementation (group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
+  testImplementation (group: 'org.mockito', name: 'mockito-core', version: "$mockitoVersion") {
     exclude group: 'org.hamcrest'
   }
-  implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
+  implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: "$okhttpVersion"
 
-  testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                                 version: hamcrestVersion
-  testImplementation group: 'org.springframework.boot',            name: 'spring-boot-starter-test',                 version: springBootVersion
+  testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                                 version: "$hamcrestVersion"
+  testImplementation group: 'org.springframework.boot',            name: 'spring-boot-starter-test',                 version: "$springBootVersion"
 }
 

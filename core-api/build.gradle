@@ -24,36 +24,36 @@ dependencies {
   implementation project(":notification-domain")
   api project(':flow-api')
 
-  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
-  implementation group: 'javax.xml.bind',                name: 'jaxb-api',                       version: javaxXmlBindJaxbApiVersion
-  implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: "$slf4jApiVersion"
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
+  implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: "$swaggerCoreVersion"
+  implementation group: 'javax.xml.bind',                name: 'jaxb-api',                       version: "$javaxXmlBindJaxbApiVersion"
+  implementation group: 'commons-codec',                 name: 'commons-codec',                  version: "$commonsCodecVersion"
   implementation group: 'commons-net',                   name: 'commons-net',                    version: '3.13.0'
 
   implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.11'
-  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: "$jerseyCoreVersion"
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: "$jerseyCoreVersion"
+  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: "$jerseyCoreVersion"
 
-  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: "$jacksonVersion"
   implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: {strictly jacksonVersion}
-  implementation group: 'org.hibernate.validator',       name: 'hibernate-validator',            version: hibernateValidatorVersion
-  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                version: httpClientVersion
-  implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+  implementation group: 'org.hibernate.validator',       name: 'hibernate-validator',            version: "$hibernateValidatorVersion"
+  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                version: "$httpClientVersion"
+  implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: "$jerseyCoreVersion"
   implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-  implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
-  implementation group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
-  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  implementation group: 'commons-validator',             name: 'commons-validator',              version: apacheCommonsValidatorVersion
+  implementation group: 'com.google.guava',              name: 'guava',                          version: "$guavaVersion"
+  implementation group: 'org.springframework',           name: 'spring-aspects',                 version: "$springFrameworkVersion"
+  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: "$apacheCommonsLangVersion"
+  implementation group: 'commons-validator',             name: 'commons-validator',              version: "$apacheCommonsValidatorVersion"
 
-  testImplementation group: 'org.assertj',                 name: 'assertj-core',                   version: assertjVersion
+  testImplementation group: 'org.assertj',                 name: 'assertj-core',                   version: "$assertjVersion"
 
-  testImplementation group: 'org.mockito',                 name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.springframework.boot',    name: 'spring-boot-starter',            version: springBootVersion
-  testImplementation group: 'org.springframework.boot',    name: 'spring-boot-starter-test',       version: springBootVersion
-  testImplementation group: 'org.apache.tomcat.embed',     name: 'tomcat-embed-el',                version: tomcatVersion
-  testImplementation group: 'com.openpojo',                name: 'openpojo',                       version: openPojoVersion
+  testImplementation group: 'org.mockito',                 name: 'mockito-core',                   version: "$mockitoVersion"
+  testImplementation group: 'org.springframework.boot',    name: 'spring-boot-starter',            version: "$springBootVersion"
+  testImplementation group: 'org.springframework.boot',    name: 'spring-boot-starter-test',       version: "$springBootVersion"
+  testImplementation group: 'org.apache.tomcat.embed',     name: 'tomcat-embed-el',                version: "$tomcatVersion"
+  testImplementation group: 'com.openpojo',                name: 'openpojo',                       version: "$openPojoVersion"
   testImplementation project(path: ':common', configuration: 'tests')
 }
 
