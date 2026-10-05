@@ -1,10 +1,10 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 {%- from 'metadata/settings.sls' import metadata with context %}
 {%- from 'java/settings.sls' import java with context %}
-{% set tlsVersionsCommaSeparated = salt['pillar.get']('cluster:tlsVersionsCommaSeparated')%}
-{% set tlsCipherSuitesJavaIntermediate = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate')%}
-{% set tlsCipherSuitesJavaIntermediateWithComma = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate') | replace(":", ",")%}
-{% set tlsAdvancedControl = salt['pillar.get']('cluster:tlsAdvancedControl')%}
+{% set tlsVersionsCommaSeparated = salt['pillar.get']('cluster:tlsVersionsCommaSeparated') %}
+{% set tlsCipherSuitesJavaIntermediate = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate') %}
+{% set tlsCipherSuitesJavaIntermediateWithComma = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate') | replace(":", ",") %}
+{% set tlsAdvancedControl = salt['pillar.get']('cluster:tlsAdvancedControl') %}
 {% set enableTlsAdvancedControl = salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True and salt['pillar.get']('cluster:tlsAdvancedControl', False) == True %}
 
 install-cloudera-manager-server:
@@ -61,14 +61,14 @@ encrypt_all_ports:
 setup_tls:
   file.replace:
     - name: /etc/cloudera-scm-server/cm.settings
-    - pattern: "setsettings SUPPORTED_TLS_VERSIONS.*"
+    - pattern: '(?m)^\s*(?:set|delete)settings SUPPORTED_TLS_VERSIONS.*$'
     - repl: 'setsettings SUPPORTED_TLS_VERSIONS {{ tlsVersionsCommaSeparated }}'
     - append_if_not_found: True
 
 setup_ciphers:
-   file.replace:
+  file.replace:
     - name: /etc/cloudera-scm-server/cm.settings
-    - pattern: "setsettings tls_ciphers.*"
+    - pattern: '(?m)^\s*(?:set|delete)settings tls_ciphers.*$'
     - repl: 'setsettings tls_ciphers {{ tlsCipherSuitesJavaIntermediateWithComma }}'
     - append_if_not_found: True
 
@@ -90,15 +90,15 @@ encrypt_all_ports_disable:
 setup_tls_disable:
   file.replace:
     - name: /etc/cloudera-scm-server/cm.settings
-    - pattern: "setsettings SUPPORTED_TLS_VERSIONS.*"
-    - repl: ''
+    - pattern: '(?m)^\s*setsettings SUPPORTED_TLS_VERSIONS.*$'
+    - repl: 'deletesettings SUPPORTED_TLS_VERSIONS'
     - append_if_not_found: False
 
 setup_ciphers_disable:
-   file.replace:
+  file.replace:
     - name: /etc/cloudera-scm-server/cm.settings
-    - pattern: "setsettings tls_ciphers.*"
-    - repl: ''
+    - pattern: '(?m)^\s*setsettings tls_ciphers.*$'
+    - repl: 'deletesettings tls_ciphers'
     - append_if_not_found: False
 {% endif %}
 
@@ -252,8 +252,8 @@ run_autotls_setup:
 {% endif %}
 {% endif %}
     - env:
-        - AUTO_TLS_KEYSTORE_PASSWORD: {{salt['pillar.get']('cloudera-manager:autotls:keystore_password')}}
-        - AUTO_TLS_TRUSTSTORE_PASSWORD: {{salt['pillar.get']('cloudera-manager:autotls:truststore_password')}}
+        - AUTO_TLS_KEYSTORE_PASSWORD: {{ salt['pillar.get']('cloudera-manager:autotls:keystore_password') }}
+        - AUTO_TLS_TRUSTSTORE_PASSWORD: {{ salt['pillar.get']('cloudera-manager:autotls:truststore_password') }}
     - unless: test -f /etc/cloudera-scm-server/certs/autotls_setup_success
 
 copy_autotls_setup_to_cm_settings:
