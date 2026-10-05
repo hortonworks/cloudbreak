@@ -36,6 +36,8 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 public class TestInvocationListener implements IInvokedMethodListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestInvocationListener.class);
 
+    private final ClusterShapeCollector clusterShapeCollector = new ClusterShapeCollector();
+
     @Override
     public void beforeInvocation(IInvokedMethod invokedMethod, ITestResult testResult) {
         LOGGER.info("Before Invocation of: " + invokedMethod.getTestMethod().getMethodName()
@@ -142,6 +144,11 @@ public class TestInvocationListener implements IInvokedMethodListener {
         } else {
             LOGGER.info("No resources found, no output file needs to be created.");
         }
+
+        // Emitted separately from the resource names: the shapes are what cloud spend is attributed
+        // from, and they are otherwise only recoverable from the suite logs for as long as Jenkins
+        // keeps them. Never allowed to affect the test outcome.
+        clusterShapeCollector.collectAndWrite(testContext);
     }
 
     private void removeOldResourceFile(TestContext testContext) {
