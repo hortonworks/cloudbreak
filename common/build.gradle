@@ -19,67 +19,67 @@ dependencies {
 
   api ("io.grpc:grpc-api:$grpcVersion")
 
-  implementation group: 'com.google.protobuf',              name: 'protobuf-java',                  version: "$protobufVersion"
+  implementation group: 'com.google.protobuf',              name: 'protobuf-java',                  version: protobufVersion
 
-  implementation group: 'org.slf4j',                        name: 'slf4j-api',                      version: "$slf4jApiVersion"
-  implementation group: 'ch.qos.logback.contrib',           name: 'logback-json-classic',           version: "$logbackJsonClassicVersion"
-  implementation group: 'io.micrometer',                    name: 'micrometer-core',                version: "$micrometerVersion"
-  implementation group: 'io.micrometer',                    name: 'micrometer-registry-prometheus', version: "$micrometerVersion"
-  implementation group: 'io.github.mweirauch',              name: 'micrometer-jvm-extras',          version: "$microMeterJvmExtrasVersion"
-  api group: 'commons-io',                                  name: 'commons-io',                     version: "$apacheCommonsIoVersion"
+  implementation group: 'org.slf4j',                        name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'ch.qos.logback.contrib',           name: 'logback-json-classic',           version: logbackJsonClassicVersion
+  implementation group: 'io.micrometer',                    name: 'micrometer-core',                version: micrometerVersion
+  implementation group: 'io.micrometer',                    name: 'micrometer-registry-prometheus', version: micrometerVersion
+  implementation group: 'io.github.mweirauch',              name: 'micrometer-jvm-extras',          version: microMeterJvmExtrasVersion
+  api group: 'commons-io',                                  name: 'commons-io',                     version: apacheCommonsIoVersion
   api group: 'commons-net',                                 name: 'commons-net',                    version: '3.13.0'
-  api group: 'org.apache.commons',                          name: 'commons-collections4',           version: "$commonsCollections4Version"
-  api group: 'com.google.guava',                            name: 'guava',                          version: "$guavaVersion"
-  api group: 'com.google.code.gson',                        name: 'gson',                           version: "$gsonVersion"
-  implementation group: 'org.freemarker',                   name: 'freemarker',                     version: "$freemarkerVersion"
-  implementation group: 'org.mybatis',                      name: 'mybatis-migrations',             version: "$mybatisMigrationVersion"
-  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: "$jacksonVersion"
-  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: "$jacksonVersion"
-  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: "$jacksonVersion"
-  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: "$jacksonVersion"
+  api group: 'org.apache.commons',                          name: 'commons-collections4',           version: commonsCollections4Version
+  api group: 'com.google.guava',                            name: 'guava',                          version: guavaVersion
+  api group: 'com.google.code.gson',                        name: 'gson',                           version: gsonVersion
+  implementation group: 'org.freemarker',                   name: 'freemarker',                     version: freemarkerVersion
+  implementation group: 'org.mybatis',                      name: 'mybatis-migrations',             version: mybatisMigrationVersion
+  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: jacksonVersion
   implementation group: 'org.openapitools',                 name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"
   api group: 'net.jcip',                                    name: 'jcip-annotations',               version: '1.0'
   api group: 'com.github.spotbugs',                         name: 'spotbugs-annotations',           version: '4.10.4'
   api group: 'org.reflections',                             name: 'reflections',                    version: '0.10.2'
 
-  implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: "$caffeineVersion"
-  implementation group: 'org.glassfish.jersey.core',        name: 'jersey-client',                  version: "$jerseyCoreVersion"
-  api group: 'org.glassfish.jersey.media',                  name: 'jersey-media-json-jackson',      version: "$jerseyCoreVersion"
-  api group: 'org.glassfish.jersey.ext',                    name: 'jersey-proxy-client',            version: "$jerseyCoreVersion"
-  api group: 'org.glassfish.jersey.connectors',             name: 'jersey-apache-connector',        version: "$jerseyCoreVersion"
-  implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
+  implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: caffeineVersion
+  implementation group: 'org.glassfish.jersey.core',        name: 'jersey-client',                  version: jerseyCoreVersion
+  api group: 'org.glassfish.jersey.media',                  name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  api group: 'org.glassfish.jersey.ext',                    name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  api group: 'org.glassfish.jersey.connectors',             name: 'jersey-apache-connector',        version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: jerseyCoreVersion
   implementation group: 'org.bouncycastle',                 name: 'bc-fips',                        version: "$bouncycastleFipsVersion"
-  implementation group: 'org.bouncycastle',                 name: 'bcpkix-fips',                    version: "$bouncycastlePkixFipsVersion"
-  implementation group: 'org.bouncycastle',                 name: 'bcutil-fips',                    version: "$bouncycastleUtilFipsVersion"
+  implementation group: 'org.bouncycastle',                 name: 'bcpkix-fips',                    version: bouncycastlePkixFipsVersion
+  implementation group: 'org.bouncycastle',                 name: 'bcutil-fips',                    version: bouncycastleUtilFipsVersion
 
-  api group: 'org.springframework.boot',                    name: 'spring-boot-autoconfigure',      version: "$springBootVersion"
-  api group: 'org.springframework.boot',                    name: 'spring-boot-starter-logging',    version: "$springBootVersion"
-  implementation group: 'org.springframework',              name: 'spring-beans',                   version: "$springFrameworkVersion"
-  implementation group: 'org.springframework',              name: 'spring-context',                 version: "$springFrameworkVersion"
-  implementation group: 'org.springframework',              name: 'spring-context-support',         version: "$springFrameworkVersion"
-  api group: 'org.springframework.data',                    name: 'spring-data-jpa',                version: "$springDataJpaFrameworkVersion"
-  api group: 'org.springframework',                         name: 'spring-jdbc',                    version: "$springFrameworkVersion"
-  api group: 'org.hibernate',                               name: 'hibernate-core',                 version: "$hibernateCoreVersion"
-  api group: 'org.hibernate',                               name: 'hibernate-micrometer',           version: "$hibernateCoreVersion"
-  api group: 'org.springframework',                         name: 'spring-web',                     version: "$springFrameworkVersion"
-  api group: 'org.springframework.boot',                    name: 'spring-boot-starter-quartz',     version: "$springBootVersion"
-  api group: 'org.springframework.retry',                   name: 'spring-retry',                   version: "$springRetryVersion"
-  api group: 'jakarta.servlet',                             name: 'jakarta.servlet-api',            version: "$jakartaServletApiVersion"
-  api group: 'jakarta.transaction',                         name: 'jakarta.transaction-api',        version: "$jakartaTransactionApiVersion"
-  api group: 'jakarta.persistence',                         name: 'jakarta.persistence-api',        version: "$jakartaPersistenceApiVersion"
-  implementation group: 'org.postgresql',                   name: 'postgresql',                     version: "$postgreSQLVersion"
-  api group: 'io.swagger.core.v3',                          name: 'swagger-annotations-jakarta',    version: "$swaggerCoreVersion"
-  api group: 'io.swagger.core.v3',                          name: 'swagger-jaxrs2-jakarta',         version: "$swaggerCoreVersion"
-  api group: 'org.springframework.boot',                    name: 'spring-boot-starter-actuator',   version: "$springBootVersion"
-  api group: 'com.zaxxer',                                  name: 'HikariCP',                       version: "$hikariCPVersion"
+  api group: 'org.springframework.boot',                    name: 'spring-boot-autoconfigure',      version: springBootVersion
+  api group: 'org.springframework.boot',                    name: 'spring-boot-starter-logging',    version: springBootVersion
+  implementation group: 'org.springframework',              name: 'spring-beans',                   version: springFrameworkVersion
+  implementation group: 'org.springframework',              name: 'spring-context',                 version: springFrameworkVersion
+  implementation group: 'org.springframework',              name: 'spring-context-support',         version: springFrameworkVersion
+  api group: 'org.springframework.data',                    name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
+  api group: 'org.springframework',                         name: 'spring-jdbc',                    version: springFrameworkVersion
+  api group: 'org.hibernate',                               name: 'hibernate-core',                 version: hibernateCoreVersion
+  api group: 'org.hibernate',                               name: 'hibernate-micrometer',           version: hibernateCoreVersion
+  api group: 'org.springframework',                         name: 'spring-web',                     version: springFrameworkVersion
+  api group: 'org.springframework.boot',                    name: 'spring-boot-starter-quartz',     version: springBootVersion
+  api group: 'org.springframework.retry',                   name: 'spring-retry',                   version: springRetryVersion
+  api group: 'jakarta.servlet',                             name: 'jakarta.servlet-api',            version: jakartaServletApiVersion
+  api group: 'jakarta.transaction',                         name: 'jakarta.transaction-api',        version: jakartaTransactionApiVersion
+  api group: 'jakarta.persistence',                         name: 'jakarta.persistence-api',        version: jakartaPersistenceApiVersion
+  implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
+  api group: 'io.swagger.core.v3',                          name: 'swagger-annotations-jakarta',    version: swaggerCoreVersion
+  api group: 'io.swagger.core.v3',                          name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
+  api group: 'org.springframework.boot',                    name: 'spring-boot-starter-actuator',   version: springBootVersion
+  api group: 'com.zaxxer',                                  name: 'HikariCP',                       version: hikariCPVersion
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }
-  implementation     group: 'org.aspectj',                  name: 'aspectjtools',                   version: "$aspectjVersion"
-  implementation     group: 'org.aspectj',                  name: 'aspectjweaver',                  version: "$aspectjVersion"
-  implementation     group: 'dnsjava',                      name: 'dnsjava',                        version: "$dnsjavaVersion"
+  implementation     group: 'org.aspectj',                  name: 'aspectjtools',                   version: aspectjVersion
+  implementation     group: 'org.aspectj',                  name: 'aspectjweaver',                  version: aspectjVersion
+  implementation     group: 'dnsjava',                      name: 'dnsjava',                        version: dnsjavaVersion
 
-  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: "$springBootVersion"
-  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-validation', version: "$springBootVersion"
-  testImplementation (group: 'org.testcontainers',           name: 'junit-jupiter',                  version: "$testContainersVersion") {
+  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-validation', version: springBootVersion
+  testImplementation (group: 'org.testcontainers',           name: 'junit-jupiter',                  version: testContainersVersion) {
     exclude group: 'junit', module: 'junit'
   }
 }

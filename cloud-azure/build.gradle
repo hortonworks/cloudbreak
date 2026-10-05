@@ -21,43 +21,43 @@ dependencies {
 
   implementation group: 'com.goldmansachs',              name: 'gs-collections',             version: '7.0.3'
 
-  implementation group: 'org.freemarker',                name: 'freemarker',                 version: "$freemarkerVersion"
+  implementation group: 'org.freemarker',                name: 'freemarker',                 version: freemarkerVersion
 
-  implementation group: 'com.squareup.okhttp3',          name: 'okhttp',                     version: "$okhttpVersion"
-  implementation group: 'com.squareup.okhttp3',          name: 'okhttp-urlconnection',       version: "$okhttpVersion"
-  implementation group: 'com.squareup.okhttp3',          name: 'logging-interceptor',        version: "$okhttpVersion"
+  implementation group: 'com.squareup.okhttp3',          name: 'okhttp',                     version: okhttpVersion
+  implementation group: 'com.squareup.okhttp3',          name: 'okhttp-urlconnection',       version: okhttpVersion
+  implementation group: 'com.squareup.okhttp3',          name: 'logging-interceptor',        version: okhttpVersion
 
-  implementation group: 'com.azure',                    name: 'azure-core-http-okhttp',                         version: "$azureSdkOkHttpVersion"
-  implementation group: 'com.azure',                    name: 'azure-core',                                     version: "$azureSdkCoreVersion"
-  implementation group: 'com.azure',                    name: 'azure-identity',                                 version: "$azureSdkIdentityVersion"
-  implementation group: 'com.azure',                    name: 'azure-storage-blob',                             version: "$azureSdkStorageBlobVersion"
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                          version: "$azureSdkResourceManagerVersion"
+  implementation group: 'com.azure',                    name: 'azure-core-http-okhttp',                         version: azureSdkOkHttpVersion
+  implementation group: 'com.azure',                    name: 'azure-core',                                     version: azureSdkCoreVersion
+  implementation group: 'com.azure',                    name: 'azure-identity',                                 version: azureSdkIdentityVersion
+  implementation group: 'com.azure',                    name: 'azure-storage-blob',                             version: azureSdkStorageBlobVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                          version: azureSdkResourceManagerVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-privatedns'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-sql'
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresql',               version: "$azureSdkResourceManagerPostgresqlVersion"
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresqlflexibleserver', version: "$azureSdkResourceManagerFlexiblePostgresqlVersion"
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',      version: "$azureSdkResourceManagerMarketplaceVersion"
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-datalakestore',            version: "$azureSdkResourceManagerDataLakeStoreVersion"
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresql',               version: azureSdkResourceManagerPostgresqlVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresqlflexibleserver', version: azureSdkResourceManagerFlexiblePostgresqlVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',      version: azureSdkResourceManagerMarketplaceVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-datalakestore',            version: azureSdkResourceManagerDataLakeStoreVersion
 
-  implementation group: 'org.springframework',          name: 'spring-aspects',                             version: "$springFrameworkVersion"
+  implementation group: 'org.springframework',          name: 'spring-aspects',                             version: springFrameworkVersion
 
-  implementation group: 'io.micrometer',                name: 'micrometer-core',                            version: "$micrometerVersion"
+  implementation group: 'io.micrometer',                name: 'micrometer-core',                            version: micrometerVersion
 
-  implementation group: 'javax.xml.bind',               name: 'jaxb-api',                                   version: "$javaxXmlBindJaxbApiVersion"
+  implementation group: 'javax.xml.bind',               name: 'jaxb-api',                                   version: javaxXmlBindJaxbApiVersion
 
   implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',                           version: { strictly jacksonVersion }
   constraints {
-    implementation group: 'com.nimbusds',   name: 'nimbus-jose-jwt', version: "$nimbusJoseJwt"
+    implementation group: 'com.nimbusds',   name: 'nimbus-jose-jwt', version: nimbusJoseJwt
   }
 
   testImplementation project(path: ':core-model', configuration: 'tests')
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
-  testImplementation group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: "$springBootVersion"
-  testImplementation (group: 'org.mockito',             name: 'mockito-core',          version: "$mockitoVersion") {
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: springBootVersion
+  testImplementation (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: "$hamcrestVersion")
+  testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
   testImplementation project(path: ':cloud-common', configuration: 'tests')
 }

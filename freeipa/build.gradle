@@ -44,53 +44,53 @@ sonar {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: "$tomcatVersion"
-    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: "$springFrameworkVersion"
-    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: "$reactorNettyHttp"
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
+    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: reactorNettyHttp
   }
 }
 
 dependencies {
-  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',               version: "$swaggerCoreVersion"
-  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                             version: "$javaxXmlBindJaxbApiVersion"
-  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                               version: "$okhttpVersion"
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',               version: swaggerCoreVersion
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                             version: javaxXmlBindJaxbApiVersion
+  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                               version: okhttpVersion
 
-  implementation     group: 'com.google.code.gson',      name: 'gson',                                 version: "$gsonVersion"
+  implementation     group: 'com.google.code.gson',      name: 'gson',                                 version: gsonVersion
   // apacheds-kerberos-codec using a pretty old mina-core and that library was not update since 2020
   implementation     group: 'org.apache.mina',           name: 'mina-core',                            version: '2.2.9'
   implementation     group: 'javax.activation',          name: 'activation',                           version: '1.1.1-redhat-2'
-  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                        version: "$jerseyCoreVersion"
-  implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',            version: "$jerseyCoreVersion"
-  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                    version: "$jerseyMicrometerVersion"
-  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',                   version: "$mybatisMigrationVersion"
-  implementation     group: 'org.postgresql',            name: 'postgresql',                           version: "$postgreSQLVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',                  version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',              version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',         version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',           version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',         version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: "$springBootVersion"
-  implementation     group: 'org.springframework',       name: 'spring-context-support',               version: "$springFrameworkVersion"
-  implementation     group: 'org.hibernate',             name: 'hibernate-envers',                     version: "$hibernateCoreVersion"
-  implementation    (group: 'org.springframework.data',  name: 'spring-data-envers',                   version: "$springDataJpaFrameworkVersion") {
+  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                        version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',            version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                    version: jerseyMicrometerVersion
+  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',                   version: mybatisMigrationVersion
+  implementation     group: 'org.postgresql',            name: 'postgresql',                           version: postgreSQLVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',                  version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',              version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',         version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',           version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',         version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
+  implementation     group: 'org.springframework',       name: 'spring-context-support',               version: springFrameworkVersion
+  implementation     group: 'org.hibernate',             name: 'hibernate-envers',                     version: hibernateCoreVersion
+  implementation    (group: 'org.springframework.data',  name: 'spring-data-envers',                   version: springDataJpaFrameworkVersion) {
     exclude group: 'org.hibernate', module: 'hibernate-envers'
   }
   implementation group: 'org.bouncycastle',                 name: 'bc-fips',                        version: "$bouncycastleFipsVersion"
-  implementation     group: 'com.google.guava',          name: 'guava',                                version: "$guavaVersion"
+  implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
   implementation     (group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',           version: '2.0.0.AM26') {
     exclude group: 'org.apache.mina', module: 'mina-core'
   }
-  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                        version: "$apacheCommonsLangVersion"
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                        version: apacheCommonsLangVersion
 
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.7'
-  implementation     group: 'com.dyngr',                        name: 'polling',                       version: "$dyngrPollingVersion"
-  implementation     group: 'org.freemarker',                   name: 'freemarker',                    version: "$freemarkerVersion"
+  implementation     group: 'com.dyngr',                        name: 'polling',                       version: dyngrPollingVersion
+  implementation     group: 'org.freemarker',                   name: 'freemarker',                    version: freemarkerVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: "$byteBuddyVersion"
+  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: byteBuddyVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
@@ -106,18 +106,18 @@ dependencies {
   }
 
   constraints {
-    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: "$gsonVersion"
-    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: "$jerseyCoreVersion"
-    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',              version: "$jerseyMicrometerVersion"
-    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: "$mybatisMigrationVersion"
-    implementation     group: 'org.postgresql',            name: 'postgresql',                     version: "$postgreSQLVersion"
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: "$springBootVersion"
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: "$springBootVersion"
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: "$springBootVersion"
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: "$springBootVersion"
-    implementation     group: 'org.hibernate',             name: 'hibernate-envers',               version: "$hibernateCoreVersion"
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
+    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
+    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: jerseyCoreVersion
+    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',              version: jerseyMicrometerVersion
+    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
+    implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    implementation     group: 'org.hibernate',             name: 'hibernate-envers',               version: hibernateCoreVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   }
 
   implementation project(':secret-rotation')
@@ -175,11 +175,11 @@ dependencies {
   testImplementation project(path: ':secret-engine', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')
 
-  testImplementation group: 'com.hubspot.jinjava',         name: 'jinjava',                        version: "$jinjavaVersion"
-  testImplementation group: 'com.fasterxml.jackson.core',  name: 'jackson-databind',               version: "$jacksonVersion"
+  testImplementation group: 'com.hubspot.jinjava',         name: 'jinjava',                        version: jinjavaVersion
+  testImplementation group: 'com.fasterxml.jackson.core',  name: 'jackson-databind',               version: jacksonVersion
 
-  testRuntimeOnly group: 'org.testcontainers',        name: 'postgresql',                     version: "$testContainersVersion"
-  testRuntimeOnly group: 'org.awaitility',            name: 'awaitility',                     version: "$awaitilityVersion"
+  testRuntimeOnly group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion
+  testRuntimeOnly group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 }
 
 bootRun {

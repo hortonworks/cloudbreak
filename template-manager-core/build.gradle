@@ -23,12 +23,12 @@ dependencies {
     implementation project(':secret-engine')
     implementation project(':workspace')
 
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
-    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: "$mockitoVersion") {
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
         exclude group: 'org.hamcrest'
     }
-    testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: "$hamcrestVersion")
+    testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
     testImplementation project(path: ':core-model', configuration: 'tests')
 }
 

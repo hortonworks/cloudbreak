@@ -53,8 +53,8 @@ configurations {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: "$tomcatVersion"
-    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: "$springFrameworkVersion"
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
   }
 }
 
@@ -83,29 +83,29 @@ dependencies {
   implementation     project(':service-common')
   implementation     project(':usage-collection')
 
-  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: "$okhttpVersion"
-  implementation     group: 'com.google.code.gson',      name: 'gson',                            version: "$gsonVersion"
-  implementation     group: 'com.dyngr',                 name: 'polling',                         version: "$dyngrPollingVersion"
-  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',          version: "$swaggerCoreVersion"
-  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: "$javaxXmlBindJaxbApiVersion"
-  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                   version: "$apacheCommonsLangVersion"
-  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: "$jerseyCoreVersion"
-  implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: "$jerseyCoreVersion"
-  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',               version: "$jerseyMicrometerVersion"
-  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: "$mybatisMigrationVersion"
-  implementation     group: 'org.postgresql',            name: 'postgresql',                      version: "$postgreSQLVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',         version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',    version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',      version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: "$springBootVersion"
+  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: okhttpVersion
+  implementation     group: 'com.google.code.gson',      name: 'gson',                            version: gsonVersion
+  implementation     group: 'com.dyngr',                 name: 'polling',                         version: dyngrPollingVersion
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',          version: swaggerCoreVersion
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: javaxXmlBindJaxbApiVersion
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                   version: apacheCommonsLangVersion
+  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',               version: jerseyMicrometerVersion
+  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: mybatisMigrationVersion
+  implementation     group: 'org.postgresql',            name: 'postgresql',                      version: postgreSQLVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',         version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',    version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',      version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: springBootVersion
 
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',      version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',      version: springBootVersion
 
-  implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',  version: "$cmClientVersion"
+  implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',  version: cmClientVersion
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: "$byteBuddyVersion"
+  implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: byteBuddyVersion
 
   testImplementation project(path: ':secret-rotation', configuration: 'tests')
   testImplementation project(path: ':secret-rotation-api', configuration: 'tests')
@@ -113,10 +113,10 @@ dependencies {
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: "$springBootVersion"
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
 
-  testRuntimeOnly group: 'org.testcontainers',      name: 'postgresql',                      version: "$testContainersVersion"
-  testRuntimeOnly group: 'org.awaitility',          name: 'awaitility',                      version: "$awaitilityVersion"
+  testRuntimeOnly group: 'org.testcontainers',      name: 'postgresql',                      version: testContainersVersion
+  testRuntimeOnly group: 'org.awaitility',          name: 'awaitility',                      version: awaitilityVersion
 
 }
 

@@ -11,8 +11,8 @@ buildscript {
 }
 
 dependencies {
-  implementation group: 'javax.annotation',             name: 'javax.annotation-api', version: "$javaxAnnotationApiVersion"
-  implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: "$protobufVersion"
+  implementation group: 'javax.annotation',             name: 'javax.annotation-api', version: javaxAnnotationApiVersion
+  implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion
 
   implementation project(':grpc-common')
 
@@ -21,9 +21,9 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
 
-  testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: "$mockitoVersion"
-  testImplementation group: 'org.hamcrest',                      name: 'hamcrest',                       version: "$hamcrestVersion"
-  testImplementation group: "org.assertj",                       name: "assertj-core",                   version: "$assertjVersion"
+  testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.hamcrest',                      name: 'hamcrest',                       version: hamcrestVersion
+  testImplementation group: "org.assertj",                       name: "assertj-core",                   version: assertjVersion
 }
 
 checkstyle {

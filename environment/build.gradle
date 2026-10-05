@@ -52,9 +52,9 @@ sonar {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.apache.commons',       name: 'commons-lang3',      version: "$apacheCommonsLangVersion"
-    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: "$tomcatVersion"
-    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: "$reactorNettyHttp"
+    dependency group: 'org.apache.commons',       name: 'commons-lang3',      version: apacheCommonsLangVersion
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: reactorNettyHttp
   }
 }
 
@@ -95,25 +95,25 @@ dependencies {
     implementation     project(':wiam-connector')
     implementation     project(':service-common')
 
-    implementation     group: "org.yaml",                  name: "snakeyaml",                                version: "$snakeYamlVersion"
-    implementation     group: "com.google.code.gson",      name: "gson",                                     version: "$gsonVersion"
-    implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',                   version: "$swaggerCoreVersion"
-    implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                                 version: "$javaxXmlBindJaxbApiVersion"
-    implementation     group: "org.glassfish.jersey.core", name: "jersey-server",                            version: "$jerseyCoreVersion"
-    implementation     group: "org.mybatis",               name: "mybatis-migrations",                       version: "$mybatisMigrationVersion"
-    implementation     group: "org.postgresql",            name: "postgresql",                               version: "$postgreSQLVersion"
-    implementation     group: "org.springframework.boot",  name: "spring-boot-starter",                      version: "$springBootVersion"
-    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-web",                  version: "$springBootVersion"
-    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-actuator",             version: "$springBootVersion"
-    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-jersey",               version: "$springBootVersion"
-    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-data-jpa",             version: "$springBootVersion"
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: "$springBootVersion"
-    implementation     group: 'com.dyngr',                 name: 'polling',                                  version: "$dyngrPollingVersion"
+    implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
+    implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion
+    implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',                   version: swaggerCoreVersion
+    implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                                 version: javaxXmlBindJaxbApiVersion
+    implementation     group: "org.glassfish.jersey.core", name: "jersey-server",                            version: jerseyCoreVersion
+    implementation     group: "org.mybatis",               name: "mybatis-migrations",                       version: mybatisMigrationVersion
+    implementation     group: "org.postgresql",            name: "postgresql",                               version: postgreSQLVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter",                      version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-web",                  version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-actuator",             version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-jersey",               version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-data-jpa",             version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
+    implementation     group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
     implementation     group: 'net.sourceforge.jregex',    name: 'jregex',                                   version: '1.2_01'
-    implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: "$jacksonVersion"
-    implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                                   version: "$okhttpVersion"
-    implementation     group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',                  version: "$jerseyCoreVersion"
-    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                        version: "$jerseyMicrometerVersion"
+    implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonVersion
+    implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                                   version: okhttpVersion
+    implementation     group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',                  version: jerseyCoreVersion
+    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                        version: jerseyMicrometerVersion
     implementation     group: 'org.openapitools',          name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"
 
     implementation(group: 'net.minidev', name: 'json-smart') {
@@ -132,19 +132,19 @@ dependencies {
     testImplementation project(path: ':authorization-common', configuration: 'tests')
     testImplementation project(path: ':common', configuration: 'tests')
     testImplementation project(path: ':flow', configuration: 'tests')
-    testImplementation group: "org.mockito",               name: "mockito-core",                             version: "$mockitoVersion"
-    testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: "$springBootVersion") {
+    testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
+    testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: springBootVersion) {
         exclude group: "junit"
     }
 
-    testImplementation group: "com.openpojo",              name: "openpojo",                                 version: "$openPojoVersion"
-    testImplementation group: "com.h2database",            name: "h2",                                       version: "$h2databaseVersion"
-    testImplementation group: "org.mockito",               name: "mockito-core",                             version: "$mockitoVersion"
-    testImplementation group: "com.google.guava",          name: "guava",                                    version: "$guavaVersion"
-    testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: "$assertjVersion"
+    testImplementation group: "com.openpojo",              name: "openpojo",                                 version: openPojoVersion
+    testImplementation group: "com.h2database",            name: "h2",                                       version: h2databaseVersion
+    testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
+    testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
+    testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
 
-    testRuntimeOnly group: 'org.testcontainers',      name: 'postgresql',                               version: "$testContainersVersion"
-    testRuntimeOnly group: 'org.awaitility',          name: 'awaitility',                               version: "$awaitilityVersion"
+    testRuntimeOnly group: 'org.testcontainers',      name: 'postgresql',                               version: testContainersVersion
+    testRuntimeOnly group: 'org.awaitility',          name: 'awaitility',                               version: awaitilityVersion
 }
 
 bootRun {

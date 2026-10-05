@@ -26,30 +26,30 @@ dependencies {
   api project(":authorization-common-api")
   implementation project(":auth-connector")
 
-  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: "$slf4jApiVersion"
-  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: "$apacheCommonsLangVersion"
-  implementation group: 'commons-beanutils',             name: 'commons-beanutils',              version: "$commonsBeanutilsVersion"
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  implementation group: 'commons-beanutils',             name: 'commons-beanutils',              version: commonsBeanutilsVersion
 
 
   testImplementation project(path: ':common', configuration: 'tests')
-  testImplementation(group: 'org.mockito',               name: 'mockito-core',                   version: "$mockitoVersion") {
+  testImplementation(group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
-  testImplementation group: 'org.awaitility',            name: 'awaitility',                     version: "$awaitilityVersion"
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 
   //this needs to stay as implementation as other module include EnforceAuthorizationTestUtil
-  implementation(group: 'uk.co.jemos.podam',             name: 'podam',                           version: "$podamVersion") {
+  implementation(group: 'uk.co.jemos.podam',             name: 'podam',                           version: podamVersion) {
     exclude group: 'javax.annotation',                   module: 'jsr250-api'
   }
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',         version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',    version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',      version: "$springBootVersion"
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: "$springBootVersion"
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',         version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',    version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',      version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: springBootVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
 
-  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: "$byteBuddyVersion"
+  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: byteBuddyVersion
 
 }
 

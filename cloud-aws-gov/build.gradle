@@ -20,7 +20,7 @@ dependencies {
     implementation project(':cloud-template')
     implementation project(':cloud-aws-native')
 
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertjVersion"
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
 }
 
 test {

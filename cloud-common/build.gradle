@@ -28,33 +28,33 @@ jar {
 dependencies {
     implementation project(':common')
 
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: "$slf4jApiVersion"
-    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: "$springBootVersion"
-    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-web',        version: "$springBootVersion"
-    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: "$springBootVersion"
-    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: "$springBootVersion"
-    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-freemarker', version: "$springBootVersion"
-    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-jersey',     version: "$springBootVersion"
-    implementation group: 'org.springframework',                   name: 'spring-context-support',         version: "$springFrameworkVersion"
-    implementation (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: "$springVaultCoreVersion") {
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-web',        version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-freemarker', version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-jersey',     version: springBootVersion
+    implementation group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
+    implementation (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: springVaultCoreVersion) {
         exclude group: 'org.springframework'
     }
-    implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: "$jacksonVersion"
-    implementation group: 'commons-io',                            name: 'commons-io',                     version: "$apacheCommonsIoVersion"
-    implementation group: 'com.google.guava',                      name: 'guava',                          version: "$guavaVersion"
-    implementation group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: "$jerseyCoreVersion"
-    implementation group: 'org.apache.httpcomponents.client5',     name: 'httpclient5',                    version: "$httpClientVersion"
-    implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: "$jerseyCoreVersion"
-    implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
-    implementation group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: "$jerseyCoreVersion"
-    implementation group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: "$jerseyCoreVersion"
-    implementation group: 'org.postgresql',                        name: 'postgresql',                     version: "$postgreSQLVersion"
-    implementation group: 'org.apache.commons',                    name: 'commons-lang3',                  version: "$apacheCommonsLangVersion"
-    implementation group: 'com.dyngr',                             name: 'polling',                        version: "$dyngrPollingVersion"
+    implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+    implementation group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
+    implementation group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
+    implementation group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
+    implementation group: 'org.apache.httpcomponents.client5',     name: 'httpclient5',                    version: httpClientVersion
+    implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+    implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-multipart',         version: jerseyCoreVersion
+    implementation group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
+    implementation group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
+    implementation group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
+    implementation group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
+    implementation group: 'com.dyngr',                             name: 'polling',                        version: dyngrPollingVersion
 
-    testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: "$mockitoVersion"
-    testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: "$springBootVersion"
-    testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: "$awaitilityVersion"
+    testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
+    testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
 }
 
 tasks.register('testJar', Jar) {

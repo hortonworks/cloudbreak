@@ -15,5 +15,5 @@ dependencies {
 
   testImplementation project(path: ':common', configuration: 'tests')
 
-  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: "$javaxXmlBindJaxbApiVersion"
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: javaxXmlBindJaxbApiVersion
 }

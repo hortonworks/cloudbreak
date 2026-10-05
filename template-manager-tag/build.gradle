@@ -16,9 +16,9 @@ dependencies {
     implementation project(':common')
     implementation project(':common-handlebar')
 
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
-    testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: "$hamcrestVersion"
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
 }
 
 tasks.register('testJar', Jar) {

@@ -171,10 +171,10 @@ subprojects {
   dependencies {
     checkstyle('com.puppycrawl.tools:checkstyle:14.3.0')
     deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.1.0.RELEASE")
-    testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: "$mockitoVersion"
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: "$junitJupiterVersion"
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: "$junitJupiterVersion"
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: "$junitJupiterVersion"
+    testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
+    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
+    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
+    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
     testRuntimeOnly    group: 'org.junit.platform',        name: 'junit-platform-launcher'
   }
 

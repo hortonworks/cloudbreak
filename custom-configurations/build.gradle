@@ -11,16 +11,16 @@ dependencies {
   implementation project(':secret-engine')
   implementation project(':custom-configurations-api')
 
-  implementation group: 'org.springframework.data',        name: 'spring-data-jpa',              version: "$springDataJpaFrameworkVersion"
-  implementation group: 'org.springframework.boot',        name: 'spring-boot-starter-web',      version: "$springBootVersion"
+  implementation group: 'org.springframework.data',        name: 'spring-data-jpa',              version: springDataJpaFrameworkVersion
+  implementation group: 'org.springframework.boot',        name: 'spring-boot-starter-web',      version: springBootVersion
 
-  runtimeOnly group: 'org.postgresql', name: 'postgresql', version: "$postgreSQLVersion"
+  runtimeOnly group: 'org.postgresql', name: 'postgresql', version: postgreSQLVersion
 
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter',      version: "$springBootVersion"
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springBootVersion"
-  testImplementation group: 'org.junit.jupiter',        name: 'junit-jupiter-api',        version: "$junitJupiterVersion"
-  testImplementation group: 'org.mockito',              name: 'mockito-core',             version: "$mockitoVersion"
-  testImplementation group: 'org.apache.commons',       name: 'commons-collections4',     version: "$commonsCollections4Version"
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter',      version: springBootVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+  testImplementation group: 'org.junit.jupiter',        name: 'junit-jupiter-api',        version: junitJupiterVersion
+  testImplementation group: 'org.mockito',              name: 'mockito-core',             version: mockitoVersion
+  testImplementation group: 'org.apache.commons',       name: 'commons-collections4',     version: commonsCollections4Version
 }
 
 test {

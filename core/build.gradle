@@ -108,7 +108,7 @@ configurations {
 
 dependencyManagement {
   dependencies {
-    dependencySet(group: 'org.springframework.boot', version: "$springBootVersion") {
+    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
       entry 'spring-boot-starter'
       entry ('spring-boot-starter-web') {
           exclude group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
@@ -132,30 +132,30 @@ dependencyManagement {
       entry 'json-path'
     }
 
-    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: "$jacksonVersion"
+    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.1.1'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '2.2.0'
 
-    dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: "$springRetryVersion"
-    dependency group: 'org.springframework',                name: 'spring-context-support',      version: "$springFrameworkVersion"
+    dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: springRetryVersion
+    dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
 
-    dependency group: 'com.google.code.gson',               name: 'gson',                        version: "$gsonVersion"
-    dependency group: 'org.freemarker',                     name: 'freemarker',                  version: "$freemarkerVersion"
-    dependency group: 'org.postgresql',                     name: 'postgresql',                  version: "$postgreSQLVersion"
-    dependency group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart',      version: "$jerseyCoreVersion"
-    dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: "$mybatisMigrationVersion"
-    dependency group: 'org.mockito',                        name: 'mockito-core',                version: "$mockitoVersion"
-    dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: "$commonsCollections4Version"
-    dependency group: 'org.apache.commons',                 name: 'commons-lang3',               version: "$apacheCommonsLangVersion"
-    dependency group: 'org.apache.tomcat.embed',            name: 'tomcat-embed-core',           version: "$tomcatVersion"
-    dependency group: 'io.projectreactor.netty',            name: 'reactor-netty-http',          version: "$reactorNettyHttp"
+    dependency group: 'com.google.code.gson',               name: 'gson',                        version: gsonVersion
+    dependency group: 'org.freemarker',                     name: 'freemarker',                  version: freemarkerVersion
+    dependency group: 'org.postgresql',                     name: 'postgresql',                  version: postgreSQLVersion
+    dependency group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart',      version: jerseyCoreVersion
+    dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: mybatisMigrationVersion
+    dependency group: 'org.mockito',                        name: 'mockito-core',                version: mockitoVersion
+    dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
+    dependency group: 'org.apache.commons',                 name: 'commons-lang3',               version: apacheCommonsLangVersion
+    dependency group: 'org.apache.tomcat.embed',            name: 'tomcat-embed-core',           version: tomcatVersion
+    dependency group: 'io.projectreactor.netty',            name: 'reactor-netty-http',          version: reactorNettyHttp
   }
 }
 
 dependencies {
-  implementation group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: "$okhttpVersion"
-  implementation group: 'com.google.code.gson',               name: 'gson',                       version: "$gsonVersion"
+  implementation group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
+  implementation group: 'com.google.code.gson',               name: 'gson',                       version: gsonVersion
   implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
 
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter'
@@ -168,26 +168,26 @@ dependencies {
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-quartz'
 
-  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: "$springDataJpaFrameworkVersion"
+  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: springDataJpaFrameworkVersion
 
   implementation group: 'org.springframework.retry',          name: 'spring-retry'
 
   implementation group: 'org.apache.commons',                 name: 'commons-collections4'
-  implementation group: 'org.apache.commons',                 name: 'commons-lang3',               version: "$apacheCommonsLangVersion"
+  implementation group: 'org.apache.commons',                 name: 'commons-lang3',               version: apacheCommonsLangVersion
   implementation group: 'org.freemarker',                     name: 'freemarker'
   implementation group: 'org.postgresql',                     name: 'postgresql'
   implementation group: 'org.bouncycastle',                   name: 'bc-fips',                     version: "$bouncycastleFipsVersion"
-  implementation group: 'org.bouncycastle',                   name: 'bcpkix-fips',                 version: "$bouncycastlePkixFipsVersion"
+  implementation group: 'org.bouncycastle',                   name: 'bcpkix-fips',                 version: bouncycastlePkixFipsVersion
   implementation group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart'
-  implementation group: 'org.glassfish.jersey.ext',           name: 'jersey-micrometer',           version: "$jerseyMicrometerVersion"
+  implementation group: 'org.glassfish.jersey.ext',           name: 'jersey-micrometer',           version: jerseyMicrometerVersion
   implementation group: 'org.mybatis',                        name: 'mybatis-migrations'
 
   implementation group: 'net.jcip',                           name: 'jcip-annotations'
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2'
 
 
-  implementation group: 'io.swagger.core.v3',                 name: 'swagger-jaxrs2-jakarta',      version: "$swaggerCoreVersion"
-  implementation group: 'javax.xml.bind',                     name: 'jaxb-api',                    version: "$javaxXmlBindJaxbApiVersion"
+  implementation group: 'io.swagger.core.v3',                 name: 'swagger-jaxrs2-jakarta',      version: swaggerCoreVersion
+  implementation group: 'javax.xml.bind',                     name: 'jaxb-api',                    version: javaxXmlBindJaxbApiVersion
 
   implementation (group: 'com.nimbusds',                      name: 'nimbus-jose-jwt') {
      version {
@@ -196,11 +196,11 @@ dependencies {
     because 'nimbus-jose-jwt 9.31 is vulnerable so we forcing everywhere'
   }
 
-  implementation group: 'com.dyngr',                          name: 'polling',                          version: "$dyngrPollingVersion"
-  implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: "$jacksonVersion"
+  implementation group: 'com.dyngr',                          name: 'polling',                          version: dyngrPollingVersion
+  implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonVersion
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '2.2.0'
   implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.53.0'
-  implementation group: 'com.google.guava',                   name: 'guava',                            version: "$guavaVersion"
+  implementation group: 'com.google.guava',                   name: 'guava',                            version: guavaVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
@@ -298,14 +298,14 @@ dependencies {
   testImplementation group: 'com.jayway.restassured',     name: 'rest-assured'
   testImplementation group: 'com.jayway.restassured',     name: 'json-path'
   testImplementation group: 'com.h2database',             name: 'h2'
-  testImplementation group: 'org.awaitility',             name: 'awaitility',          version: "$awaitilityVersion"
-  testImplementation group: 'org.testcontainers',         name: 'postgresql',          version: "$testContainersVersion"
-  testImplementation group: 'org.testcontainers',         name: 'junit-jupiter',       version: "$testContainersVersion"
-  testImplementation group: 'org.assertj',                name: 'assertj-core',        version: "$assertjVersion"
-  testImplementation group: 'org.yaml',                   name: 'snakeyaml',           version: "$snakeYamlVersion"
-  testImplementation group: 'org.hamcrest',               name: 'hamcrest',            version: "$hamcrestVersion"
-  testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: "$jacksonVersion"
-  testImplementation group: "com.openpojo",               name: "openpojo",            version: "$openPojoVersion"
+  testImplementation group: 'org.awaitility',             name: 'awaitility',          version: awaitilityVersion
+  testImplementation group: 'org.testcontainers',         name: 'postgresql',          version: testContainersVersion
+  testImplementation group: 'org.testcontainers',         name: 'junit-jupiter',       version: testContainersVersion
+  testImplementation group: 'org.assertj',                name: 'assertj-core',        version: assertjVersion
+  testImplementation group: 'org.yaml',                   name: 'snakeyaml',           version: snakeYamlVersion
+  testImplementation group: 'org.hamcrest',               name: 'hamcrest',            version: hamcrestVersion
+  testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonVersion
+  testImplementation group: "com.openpojo",               name: "openpojo",            version: openPojoVersion
 }
 
 sourceSets {

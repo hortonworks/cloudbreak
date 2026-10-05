@@ -14,15 +14,15 @@ dependencies {
     implementation project(':common')
     implementation project(':grpc-common')
 
-    implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
-    implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: "$protobufVersion"
+    implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+    implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: protobufVersion
 
     implementation ("io.grpc:grpc-all:$grpcVersion") {
         exclude group: 'org.mockito'
         exclude group: 'junit', module: 'junit'
     }
-    testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: "$assertjVersion"
-    testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                       version: "$hamcrestVersion"
+    testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
+    testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                       version: hamcrestVersion
 }
 
 checkstyle {

@@ -19,33 +19,33 @@ dependencies {
 
   api ("io.grpc:grpc-api:$grpcVersion")
 
-  implementation group: 'org.slf4j',                        name: 'slf4j-api',                      version: "$slf4jApiVersion"
-  implementation group: 'ch.qos.logback.contrib',           name: 'logback-json-classic',           version: "$logbackJsonClassicVersion"
-  implementation group: 'org.mybatis',                      name: 'mybatis-migrations',             version: "$mybatisMigrationVersion"
-  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: "$jacksonVersion"
-  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: "$jacksonVersion"
-  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: "$jacksonVersion"
-  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: "$jacksonVersion"
+  implementation group: 'org.slf4j',                        name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'ch.qos.logback.contrib',           name: 'logback-json-classic',           version: logbackJsonClassicVersion
+  implementation group: 'org.mybatis',                      name: 'mybatis-migrations',             version: mybatisMigrationVersion
+  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: jacksonVersion
 
-  implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: "$caffeineVersion"
-  implementation group: 'org.glassfish.jersey.core',        name: 'jersey-client',                  version: "$jerseyCoreVersion"
-  implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
+  implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: caffeineVersion
+  implementation group: 'org.glassfish.jersey.core',        name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: jerseyCoreVersion
 
-  implementation group: 'org.springframework',              name: 'spring-beans',                   version: "$springFrameworkVersion"
-  implementation group: 'org.springframework',              name: 'spring-context',                 version: "$springFrameworkVersion"
-  implementation group: 'org.springframework',              name: 'spring-context-support',         version: "$springFrameworkVersion"
-  implementation group: 'org.postgresql',                   name: 'postgresql',                     version: "$postgreSQLVersion"
+  implementation group: 'org.springframework',              name: 'spring-beans',                   version: springFrameworkVersion
+  implementation group: 'org.springframework',              name: 'spring-context',                 version: springFrameworkVersion
+  implementation group: 'org.springframework',              name: 'spring-context-support',         version: springFrameworkVersion
+  implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }
-  implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: "$aspectjVersion"
-  implementation group: 'org.aspectj',                      name: 'aspectjweaver',                  version: "$aspectjVersion"
-  implementation group: 'dnsjava',                          name: 'dnsjava',                        version: "$dnsjavaVersion"
-  implementation group: 'org.apache.tomcat.embed',          name: 'tomcat-embed-core',              version: "$tomcatVersion"
-  implementation group: 'software.amazon.awssdk',           name: 'rds',                            version: "$awsSdkVersion"
-  implementation group: 'software.amazon.awssdk',           name: 'sts',                            version: "$awsSdkVersion"
+  implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: aspectjVersion
+  implementation group: 'org.aspectj',                      name: 'aspectjweaver',                  version: aspectjVersion
+  implementation group: 'dnsjava',                          name: 'dnsjava',                        version: dnsjavaVersion
+  implementation group: 'org.apache.tomcat.embed',          name: 'tomcat-embed-core',              version: tomcatVersion
+  implementation group: 'software.amazon.awssdk',           name: 'rds',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',           name: 'sts',                            version: awsSdkVersion
 
-  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: "$springBootVersion"
-  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-validation', version: "$springBootVersion"
-  testImplementation (group: 'org.testcontainers',           name: 'junit-jupiter',                  version: "$testContainersVersion") {
+  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-validation', version: springBootVersion
+  testImplementation (group: 'org.testcontainers',           name: 'junit-jupiter',                  version: testContainersVersion) {
     exclude group: 'junit', module: 'junit'
   }
   testImplementation project(path: ':common', configuration: 'tests')

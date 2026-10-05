@@ -22,16 +22,16 @@ dependencies {
   implementation     project(":servicediscovery-api-client")
   implementation     project(':service-common')
 
-  implementation     group: 'org.springframework.boot',          name: 'spring-boot-starter-jersey',     version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',          name: 'spring-boot-starter-jersey',     version: springBootVersion
 
-  implementation     group: 'org.glassfish.jersey.core',         name: 'jersey-client',                  version: "$jerseyCoreVersion"
-  implementation     group: 'org.glassfish.jersey.media',        name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
-  implementation     group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                    version: "$httpClientVersion"
+  implementation     group: 'org.glassfish.jersey.core',         name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.media',        name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation     group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                    version: httpClientVersion
 
-  implementation     group: 'javax.annotation',                  name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
-  implementation     group: 'com.google.protobuf',               name: 'protobuf-java',                  version: "$protobufVersion"
-  implementation     group: 'com.dyngr',                         name: 'polling',                        version: "$dyngrPollingVersion"
-  implementation     (group: "com.cloudera.api.swagger",      name: "cloudera-manager-api-swagger",   version: "$cmClientVersion") {
+  implementation     group: 'javax.annotation',                  name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+  implementation     group: 'com.google.protobuf',               name: 'protobuf-java',                  version: protobufVersion
+  implementation     group: 'com.dyngr',                         name: 'polling',                        version: dyngrPollingVersion
+  implementation     (group: "com.cloudera.api.swagger",      name: "cloudera-manager-api-swagger",   version: cmClientVersion) {
     transitive = false
   }
 
@@ -39,11 +39,11 @@ dependencies {
     exclude group: 'org.mockito'
     exclude group: 'junit', module: 'junit'
   }
-  testImplementation group: 'org.mockito',              name: 'mockito-core',                   version: "$mockitoVersion"
-  testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: "$assertjVersion"
-  testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: "$hamcrestVersion"
-  testImplementation group: 'net.bytebuddy',            name: 'byte-buddy',                     version: "$byteBuddyVersion"
-  testImplementation group: 'org.springframework',               name: 'spring-test',                    version: "$springFrameworkVersion"
+  testImplementation group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: assertjVersion
+  testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: hamcrestVersion
+  testImplementation group: 'net.bytebuddy',            name: 'byte-buddy',                     version: byteBuddyVersion
+  testImplementation group: 'org.springframework',               name: 'spring-test',                    version: springFrameworkVersion
   testImplementation project(path: ':common', configuration: 'tests')
 
 }

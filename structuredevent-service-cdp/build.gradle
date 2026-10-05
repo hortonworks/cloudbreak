@@ -24,9 +24,9 @@ dependencies {
     implementation project(':flow')
     implementation project(':authorization-common')
 
-    implementation group: 'com.google.protobuf',                name: 'protobuf-java-util',          version: "$protobufVersion"
+    implementation group: 'com.google.protobuf',                name: 'protobuf-java-util',          version: protobufVersion
 
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
     testImplementation project(path: ':common', configuration: 'tests')
     testImplementation project(path: ':authorization-common', configuration: 'tests')
 }

@@ -21,16 +21,16 @@ jar {
 
 dependencies {
   implementation project(':common')
-  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: "$slf4jApiVersion"
-  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: "$apacheCommonsLangVersion"
-  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: "$jerseyCoreVersion"
-  implementation group: 'com.google.guava',              name: 'guava',                          version: "$guavaVersion"
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
 
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: "$mockitoVersion"
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: "$springBootVersion"
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: "$springBootVersion"
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
 
 }
 
