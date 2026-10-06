@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -21,6 +23,9 @@ import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 @Component
 public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterSyncHandler.class);
+
     @Inject
     private StackService stackService;
 
@@ -62,6 +67,7 @@ public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
             }
             result = new ClusterSyncResult(request);
         } catch (Exception e) {
+            LOGGER.warn("Error during cluster sync", e);
             result = new ClusterSyncResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

@@ -1,6 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.sync;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SYNC_FAILED;
+
 import java.util.Map;
+import java.util.Optional;
+
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +16,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -19,6 +26,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncResult;
 @Configuration
 public class ClusterSyncActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterSyncActions.class);
+
+    @Inject
+    private CloudbreakFlowMessageService flowMessageService;
 
     @Bean(name = "CLUSTER_SYNC_STATE")
     public Action<?, ?> syncCluster() {
@@ -55,7 +65,9 @@ public class ClusterSyncActions {
         return new AbstractStackFailureAction<ClusterSyncState, ClusterSyncEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Error during executing cluster sync.", payload.getException());
+                LOGGER.warn("Error during executing cluster sync.", payload.getException());
+                flowMessageService.fireEventAndLog(context.getStackId(), UPDATE_FAILED.name(), CLUSTER_SYNC_FAILED,
+                        Optional.ofNullable(payload.getException()).map(Throwable::getMessage).orElse(""));
                 sendEvent(context);
             }
 

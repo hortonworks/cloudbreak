@@ -438,6 +438,7 @@ public enum ResourceEvent {
     CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT("cluster.bootstrapper.error.invalid.nodecount"),
     CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC("cluster.ambari.cluster.could.not.sync"),
     CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED("cluster.ambari.cluster.synchronized"),
+    CLUSTER_SYNC_FAILED("cluster.sync.failed"),
     DATABASE_ARM_NOT_AVAILABLE("database.arm.not.available"),
     DATALAKE_UPGRADE("datalake.upgrade"),
     DATALAKE_ROLLING_UPGRADE("datalake.rolling.upgrade"),
