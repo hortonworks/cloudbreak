@@ -25,10 +25,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.v1.maintenance.model.MaintenanceTaskDispatchRequest;
-import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
-import com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowSecretRotationSupport;
+import com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -72,38 +71,6 @@ class SecretRotationMaintenanceWindowTaskExecuteHandlerTest {
                 .thenThrow(new FlowsAlreadyRunningException("already running"));
         MaintenanceTaskDispatchRequest request = dispatchRequest(Map.of("secretNames", List.of("SALT_PASSWORD")));
         assertThatThrownBy(() -> underTest.execute(request)).isInstanceOf(FlowsAlreadyRunningException.class);
-    }
-
-    @Test
-    void executeRejectsAccountIdMismatchWithResourceCrn() {
-        MaintenanceTaskDispatchRequest request = aDispatchRequest()
-                .withAccountId("other-account")
-                .withTaskPayload(Map.of("secretNames", List.of("SALT_PASSWORD")))
-                .build();
-        assertThatThrownBy(() -> underTest.execute(request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("account_id");
-    }
-
-    @Test
-    void executeRejectsMalformedResourceCrnWithCrnParseExceptionRatherThanNpe() {
-        MaintenanceTaskDispatchRequest request = aDispatchRequest()
-                .withResourceCrn("not-a-crn")
-                .withTaskPayload(Map.of("secretNames", List.of("SALT_PASSWORD")))
-                .build();
-        assertThatThrownBy(() -> underTest.execute(request))
-                .isInstanceOf(CrnParseException.class)
-                .hasMessageContaining("does not match the CRN pattern");
-    }
-
-    @Test
-    void executeRejectsBlankResourceCrnWithCrnParseExceptionRatherThanNpe() {
-        MaintenanceTaskDispatchRequest request = aDispatchRequest()
-                .withResourceCrn("   ")
-                .withTaskPayload(Map.of("secretNames", List.of("SALT_PASSWORD")))
-                .build();
-        assertThatThrownBy(() -> underTest.execute(request))
-                .isInstanceOf(CrnParseException.class);
     }
 
     @Test

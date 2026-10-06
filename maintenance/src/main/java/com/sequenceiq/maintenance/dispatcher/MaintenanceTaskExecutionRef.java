@@ -1,5 +1,8 @@
 package com.sequenceiq.maintenance.dispatcher;
 
+import static com.sequenceiq.maintenance.api.execution.MaintenanceTaskExecutionRefConstants.EXECUTE_PATH_KEY;
+import static com.sequenceiq.maintenance.api.execution.MaintenanceTaskExecutionRefConstants.SUBMITTER_SERVICE_KEY;
+
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,10 +14,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
  * for outbound HTTP execute callbacks ({@code execute_path}).
  */
 public record MaintenanceTaskExecutionRef(String submitterService, String executePath) {
-
-    private static final String SUBMITTER_SERVICE_KEY = "submitter_service";
-
-    private static final String EXECUTE_PATH_KEY = "execute_path";
 
     public static MaintenanceTaskExecutionRef parse(Json executionRef, String taskSubmitterService) {
         Map<String, Object> values = executionRefValues(executionRef);

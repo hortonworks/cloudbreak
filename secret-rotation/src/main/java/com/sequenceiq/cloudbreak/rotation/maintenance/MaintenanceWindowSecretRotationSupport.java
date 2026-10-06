@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.maintenancewindow;
+package com.sequenceiq.cloudbreak.rotation.maintenance;
 
 import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
 import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.MAINTENANCE_WINDOW_ACCOUNT_ID;
@@ -9,18 +9,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.maintenance.api.execution.MaintenanceTaskExecutionRefConstants;
 
 /**
- * {@code SECRET_ROTATION} maintenance tasks: one secret type per task; {@code work_item_id} is the secret name.
+ * Shared {@code SECRET_ROTATION} maintenance task semantics for Cloudbreak, Data Lake, and FreeIPA submitters.
+ * One secret type per task; {@code work_item_id} is the secret name.
+ * <p>
+ * Deliberately free of {@code maintenance-api} types: the dispatch contract ({@code execution_ref}, task kind)
+ * belongs to each submitter's registrar, so this rotation-side helper stays independent of the maintenance service.
  */
 public final class MaintenanceWindowSecretRotationSupport {
 
     public static final String TASK_TYPE = "SECRET_ROTATION";
-
-    public static final String TASK_KIND_ONE_SHOT = "ONE_SHOT";
-
-    public static final String SUBMITTER_SERVICE = "cloudbreak";
 
     public static final String PAYLOAD_SECRET_NAMES = "secretNames";
 
@@ -29,14 +28,6 @@ public final class MaintenanceWindowSecretRotationSupport {
 
     public static String workItemIdForSecretName(String secretName) {
         return requireSecretName(secretName, "secret name");
-    }
-
-    public static Map<String, Object> executionRef() {
-        return Map.of(
-                "submitter_service",
-                SUBMITTER_SERVICE,
-                "execute_path",
-                MaintenanceTaskExecutionRefConstants.STANDARD_EXECUTE_PATH);
     }
 
     public static Map<String, Object> taskPayload(String secretName) {
