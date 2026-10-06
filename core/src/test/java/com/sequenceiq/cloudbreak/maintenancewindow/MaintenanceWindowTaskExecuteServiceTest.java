@@ -18,16 +18,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.v1.maintenance.model.MaintenanceTaskDispatchRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.maintenancewindow.handler.MaintenanceWindowTaskExecuteHandler;
 import com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.maintenance.api.execution.MaintenanceWindowTaskExecuteHandler;
 
 @ExtendWith(MockitoExtension.class)
 class MaintenanceWindowTaskExecuteServiceTest {
 
     @Mock
-    private MaintenanceWindowTaskExecuteHandler secretRotationHandler;
+    private MaintenanceWindowTaskExecuteHandler<MaintenanceTaskDispatchRequest> secretRotationHandler;
 
     private MaintenanceWindowTaskExecuteService underTest;
 
@@ -57,7 +57,7 @@ class MaintenanceWindowTaskExecuteServiceTest {
 
     @Test
     void constructorRejectsDuplicateTaskTypeHandlers() {
-        MaintenanceWindowTaskExecuteHandler duplicate = mock(MaintenanceWindowTaskExecuteHandler.class);
+        MaintenanceWindowTaskExecuteHandler<MaintenanceTaskDispatchRequest> duplicate = mock(MaintenanceWindowTaskExecuteHandler.class);
         when(duplicate.taskType()).thenReturn(MaintenanceWindowSecretRotationSupport.TASK_TYPE);
         assertThatThrownBy(() -> new MaintenanceWindowTaskExecuteService(List.of(secretRotationHandler, duplicate)))
                 .isInstanceOf(IllegalStateException.class)

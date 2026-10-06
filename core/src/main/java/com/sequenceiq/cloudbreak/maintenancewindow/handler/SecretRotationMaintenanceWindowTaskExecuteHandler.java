@@ -15,9 +15,10 @@ import com.sequenceiq.cloudbreak.api.v1.maintenance.model.MaintenanceTaskDispatc
 import com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.maintenance.api.execution.MaintenanceWindowTaskExecuteHandler;
 
 @Service
-public class SecretRotationMaintenanceWindowTaskExecuteHandler implements MaintenanceWindowTaskExecuteHandler {
+public class SecretRotationMaintenanceWindowTaskExecuteHandler implements MaintenanceWindowTaskExecuteHandler<MaintenanceTaskDispatchRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationMaintenanceWindowTaskExecuteHandler.class);
 

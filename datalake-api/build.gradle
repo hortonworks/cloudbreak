@@ -8,6 +8,7 @@ repositories {
 
 dependencies {
   implementation project(':secret-rotation-api')
+  implementation project(':maintenance-api')
   implementation project(':core-api')
   implementation project(':authorization-common-api')
   implementation project(":structuredevent-api-cdp")

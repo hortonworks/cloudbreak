@@ -61,6 +61,7 @@ dependencyManagement {
 dependencies {
   implementation project(':secret-rotation')
   implementation project(':secret-rotation-api')
+  implementation project(':maintenance-api')
   implementation project(':authorization-common')
   implementation project(':common')
   implementation project(':flow')

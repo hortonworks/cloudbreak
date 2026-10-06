@@ -1,10 +1,10 @@
-package com.sequenceiq.cloudbreak.maintenancewindow.handler;
+package com.sequenceiq.datalake.maintenancewindow.handler;
 
-import com.sequenceiq.cloudbreak.api.v1.maintenance.model.MaintenanceTaskDispatchRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.v1.maintenance.model.MaintenanceTaskDispatchRequest;
 
 /**
- * Handles a single {@code task_type} dispatched from the maintenance window service to Cloudbreak.
+ * Handles a single {@code task_type} dispatched from the maintenance window service to Data Lake.
  */
 public interface MaintenanceWindowTaskExecuteHandler {
 
