@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -348,6 +349,20 @@ public interface ResourceConnector {
      */
     default ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Reads the current storage utilization of a database server from the cloud provider's monitoring metrics.
+     * Used to warn operators before an external database runs out of allocated storage. Providers that do not expose
+     * such metrics return {@link Optional#empty()}, and callers must skip the check rather than treat it as an error.
+     * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
+     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @return the storage metrics of the given database server, or {@link Optional#empty()} if unavailable
+     * @throws Exception in case of any error
+     */
+    default Optional<DatabaseServerStorageMetrics> getDatabaseServerStorageMetrics(AuthenticatedContext authenticatedContext, DatabaseStack stack)
+            throws Exception {
+        return Optional.empty();
     }
 
     /**

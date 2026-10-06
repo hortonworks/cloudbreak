@@ -139,6 +139,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         initDBStackStatus(dbStack);
         setDatabaseServer(dbStack, azureDatabaseType);
         dbStack.setCloudPlatform(cloudPlatform.name());
+        dbStack.setLowStorage(true);
         dbStack.setDatabaseResources(Set.of(createResource(true), createResource(false)));
         server.setDbStack(dbStack);
         when(stringToSecretResponseConverter.convert(anyString())).thenReturn(new SecretResponse());
@@ -173,6 +174,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getStatus()).isEqualTo(dbStack.getStatus());
         assertThat(response.getStatusReason()).isEqualTo(dbStack.getStatusReason());
         assertThat(response.getMajorVersion()).isEqualTo(dbStack.getMajorVersion());
+        assertThat(response.getStoragePropertiesV4Response()).isNotNull();
+        assertThat(response.getStoragePropertiesV4Response().isLowStorage()).isEqualTo(dbStack.isLowStorage());
         //assertThat(response.getDatabasePropertiesV4Response().getConnectionNameFormat()).isEqualTo(connectionNameFormat);
         assertThat(response.getSslConfig().getSslCertificatesStatus()).isEqualTo(SslCertStatus.UP_TO_DATE);
     }

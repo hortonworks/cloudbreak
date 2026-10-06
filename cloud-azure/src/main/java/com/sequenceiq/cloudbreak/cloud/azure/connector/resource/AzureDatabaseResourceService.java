@@ -16,6 +16,7 @@ import static com.sequenceiq.common.api.type.ResourceType.RDS_HOSTNAME_CANARY;
 import static com.sequenceiq.common.api.type.ResourceType.RDS_PORT;
 import static com.sequenceiq.common.model.PrivateEndpointType.USE_PRIVATE_ENDPOINT;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -106,6 +108,15 @@ public class AzureDatabaseResourceService {
             AzureSingleServerClient.UNKNOWN, ExternalDatabaseStatus.UNKNOWN);
 
     private static final long GB_TO_MB = 1024L;
+
+    private static final long MB_TO_BYTES = 1024L * 1024L;
+
+    // Azure Monitor metric reporting the percentage of provisioned storage currently used (same name for Flexible and Single Server).
+    private static final String STORAGE_PERCENT_METRIC = "storage_percent";
+
+    private static final Duration STORAGE_METRIC_LOOKBACK = Duration.ofHours(1);
+
+    private static final double HUNDRED_PERCENT = 100.0d;
 
     @Inject
     private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
@@ -553,6 +564,45 @@ public class AzureDatabaseResourceService {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         return getExternalDatabaseParameters(stack.getDatabaseServer(), client, resourceGroupName);
+    }
+
+    public Optional<DatabaseServerStorageMetrics> getDatabaseServerStorageMetrics(AuthenticatedContext ac, DatabaseStack stack) {
+        CloudContext cloudContext = ac.getCloudContext();
+        AzureClient client = ac.getParameter(AzureClient.class);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        DatabaseServer databaseServer = stack.getDatabaseServer();
+        try {
+            Optional<String> resourceId = getDatabaseServerResourceId(client, resourceGroupName, databaseServer);
+            if (resourceId.isEmpty()) {
+                return Optional.empty();
+            }
+            Optional<Double> usedStoragePercentage = client.getLatestAverageMetricValue(resourceId.get(), STORAGE_PERCENT_METRIC, STORAGE_METRIC_LOOKBACK);
+            if (usedStoragePercentage.isEmpty()) {
+                LOGGER.debug("No {} metric reported yet for Azure database server {}", STORAGE_PERCENT_METRIC, databaseServer.getServerId());
+                return Optional.empty();
+            }
+            Long allocatedBytes = toBytes(getExternalDatabaseParameters(ac, stack).storageSizeInMB());
+            double freeStoragePercentage = HUNDRED_PERCENT - usedStoragePercentage.get();
+            Long freeBytes = allocatedBytes == null ? null : Math.round(allocatedBytes * (freeStoragePercentage / HUNDRED_PERCENT));
+            return Optional.of(new DatabaseServerStorageMetrics(freeStoragePercentage, freeBytes, allocatedBytes));
+        } catch (Exception e) {
+            LOGGER.warn("Failed to read Azure storage metrics for database server {}: {}", databaseServer.getServerId(), e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> getDatabaseServerResourceId(AzureClient client, String resourceGroupName, DatabaseServer databaseServer) {
+        AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(databaseServer);
+        if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
+            return client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, databaseServer.getServerId()).map(Server::id);
+        } else {
+            return client.getSingleServerClient().getSingleServer(resourceGroupName, databaseServer.getServerId())
+                    .map(com.azure.resourcemanager.postgresql.models.Server::id);
+        }
+    }
+
+    private Long toBytes(Long storageSizeInMB) {
+        return storageSizeInMB == null ? null : storageSizeInMB * MB_TO_BYTES;
     }
 
     private ExternalDatabaseParameters getExternalDatabaseParameters(DatabaseServer databaseServer, AzureClient client, String resourceGroupName) {

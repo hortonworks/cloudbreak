@@ -10,8 +10,10 @@ import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +77,10 @@ import com.azure.resourcemanager.keyvault.models.KeyPermissions;
 import com.azure.resourcemanager.keyvault.models.Vault;
 import com.azure.resourcemanager.marketplaceordering.MarketplaceOrderingManager;
 import com.azure.resourcemanager.marketplaceordering.models.AgreementTerms;
+import com.azure.resourcemanager.monitor.MonitorManager;
+import com.azure.resourcemanager.monitor.models.MetricCollection;
+import com.azure.resourcemanager.monitor.models.MetricDefinition;
+import com.azure.resourcemanager.monitor.models.MetricValue;
 import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.network.models.LoadBalancer;
 import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
@@ -153,6 +159,8 @@ public class AzureClient {
     private static final int CREATE_MAX_RETRY = 3;
 
     private static final Duration CREATE_INITIAL_BACKOFF = Duration.ofSeconds(4);
+
+    private static final Duration METRIC_QUERY_INTERVAL = Duration.ofMinutes(5);
 
     private final AzureResourceManager azure;
 
@@ -1248,6 +1256,35 @@ public class AzureClient {
 
     public AzureSingleServerClient getSingleServerClient() {
         return new AzureSingleServerClient(postgreSqlManager, azureExceptionHandler, azureListResultFactory);
+    }
+
+    /**
+     * Returns the most recent average value of the named Azure Monitor metric for the given resource over the lookback window,
+     * or empty if the metric is not defined for the resource or has no datapoints yet.
+     */
+    public Optional<Double> getLatestAverageMetricValue(String resourceId, String metricName, Duration lookback) {
+        MonitorManager monitorManager = azureClientFactory.getMonitorManager();
+        OffsetDateTime end = OffsetDateTime.now();
+        OffsetDateTime start = end.minus(lookback);
+        Optional<MetricDefinition> definition = monitorManager.metricDefinitions().listByResource(resourceId).stream()
+                .filter(metricDefinition -> metricName.equals(metricDefinition.name().value()))
+                .findFirst();
+        if (definition.isEmpty()) {
+            LOGGER.warn("Azure Monitor metric '{}' is not defined for resource {}", metricName, resourceId);
+            return Optional.empty();
+        }
+        MetricCollection metricCollection = definition.get().defineQuery()
+                .startingFrom(start)
+                .endsBefore(end)
+                .withAggregation("Average")
+                .withInterval(METRIC_QUERY_INTERVAL)
+                .execute();
+        return metricCollection.metrics().stream()
+                .flatMap(metric -> metric.timeseries().stream())
+                .flatMap(timeSeries -> timeSeries.data().stream())
+                .filter(metricValue -> metricValue.average() != null)
+                .max(Comparator.comparing(MetricValue::timestamp))
+                .map(MetricValue::average);
     }
 
     public AzureFlexibleServerClient getFlexibleServerClient() {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -29,6 +32,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.events.RedbeamsEventV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
 @Service
@@ -36,8 +40,15 @@ public class RedbeamsClientService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsClientService.class);
 
+    private static final int STRUCTURED_EVENT_FIRST_PAGE = 0;
+
+    private static final int STRUCTURED_EVENT_MAX_COUNT = 50;
+
     @Inject
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
+
+    @Inject
+    private RedbeamsEventV4Endpoint redbeamsEventV4Endpoint;
 
     @Inject
     private RedBeamsFlowEndpoint redBeamsFlowEndpoint;
@@ -285,5 +296,21 @@ public class RedbeamsClientService {
             ClusterDatabaseServerCertificateStatusV4Request request, String userCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> redbeamsServerEndpoint.listDatabaseServersCertificateStatusByStackCrns(request, userCrn));
+    }
+
+    /**
+     * Fetches the most recent CDP structured events redbeams stored for the given database server CRN, capped at {@value #STRUCTURED_EVENT_MAX_COUNT}
+     * events per cluster (the endpoint returns them newest-first). A redbeams failure must not break the caller's event listing, so on error this logs
+     * a warning and returns an empty list.
+     */
+    public List<CDPStructuredEvent> getStructuredEventsByCrn(String dbServerCrn) {
+        try {
+            List<CDPStructuredEvent> events = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> redbeamsEventV4Endpoint.getAuditEvents(dbServerCrn, null, STRUCTURED_EVENT_FIRST_PAGE, STRUCTURED_EVENT_MAX_COUNT));
+            return events != null ? events : List.of();
+        } catch (WebApplicationException | ProcessingException e) {
+            LOGGER.warn("Failed to query redbeams structured events for database server CRN {}: {}", dbServerCrn, e.getMessage(), e);
+            return List.of();
+        }
     }
 }

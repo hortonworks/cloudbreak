@@ -2,8 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.INSTANCE_TYPE;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,11 +29,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 import software.amazon.awssdk.services.cloudwatch.model.CloudWatchException;
+import software.amazon.awssdk.services.cloudwatch.model.Datapoint;
 import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.Dimension;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse;
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmRequest;
+import software.amazon.awssdk.services.cloudwatch.model.Statistic;
 
 @Service
 public class AwsCloudWatchService {
@@ -59,6 +67,30 @@ public class AwsCloudWatchService {
 
     @Inject
     private AwsTaggingService awsTaggingService;
+
+    public Optional<Double> getLatestAverageMetricValue(AwsCredentialView credentialView, String regionName, String namespace, String metricName,
+            Dimension dimension, int lookbackMinutes, int periodSeconds) {
+        AmazonCloudWatchClient cloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
+        Instant endTime = Instant.now();
+        Instant startTime = endTime.minus(lookbackMinutes, ChronoUnit.MINUTES);
+        GetMetricStatisticsRequest request = GetMetricStatisticsRequest.builder()
+                .namespace(namespace)
+                .metricName(metricName)
+                .dimensions(dimension)
+                .startTime(startTime)
+                .endTime(endTime)
+                .period(periodSeconds)
+                .statistics(Statistic.AVERAGE)
+                .build();
+        GetMetricStatisticsResponse response = cloudWatchClient.getMetricStatisticsResponse(request);
+        List<Datapoint> datapoints = response.datapoints();
+        if (datapoints == null || datapoints.isEmpty()) {
+            return Optional.empty();
+        }
+        return datapoints.stream()
+                .max(Comparator.comparing(Datapoint::timestamp))
+                .map(Datapoint::average);
+    }
 
     public void addCloudWatchAlarmsForSystemFailures(List<CloudResource> instances, String regionName, AwsCredentialView credentialView,
             Map<String, String> userDefinedTags) {

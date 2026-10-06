@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -102,6 +103,9 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Inject
     private AwsRdsStatusLookupService awsRdsStatusLookupService;
+
+    @Inject
+    private AwsRdsStorageMetricService awsRdsStorageMetricService;
 
     @Inject
     private AwsLoadBalancerLaunchService awsLoadBalancerLaunchService;
@@ -225,6 +229,11 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
         return awsRdsStatusLookupService.getActiveSslRootCertificate(authenticatedContext, stack);
+    }
+
+    @Override
+    public Optional<DatabaseServerStorageMetrics> getDatabaseServerStorageMetrics(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return awsRdsStorageMetricService.getStorageMetrics(authenticatedContext, stack);
     }
 
     @Override

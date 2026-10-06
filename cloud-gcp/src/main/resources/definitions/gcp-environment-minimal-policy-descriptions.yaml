@@ -23,6 +23,10 @@ permissionGroups:
       "cloudsql.instances.stopReplica": "Cloudera platform stops read replicas during environment maintenance or teardown."
       "cloudsql.instances.update": "Cloudera platform updates Cloud SQL settings (tier, storage) for environment databases."
       "cloudsql.users.create": "Cloudera platform creates database users required by environment stack bootstrap."
+  monitoring:
+    description: Required to read Cloud Monitoring metrics so Cloudera can detect and alert on low storage of external databases.
+    permissions:
+      "monitoring.timeSeries.list": "Cloudera platform reads the cloudsql.googleapis.com/database/disk/utilization time series from Cloud Monitoring to detect low storage on external Cloud SQL databases and raise storage alerts."
   networking:
     description: Required to discover VPCs and subnets, manage IP addresses, and configure firewall access for Cloudera cluster hosts.
     permissions:

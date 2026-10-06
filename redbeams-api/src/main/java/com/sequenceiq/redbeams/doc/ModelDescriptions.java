@@ -37,6 +37,7 @@ public final class ModelDescriptions {
     public static final String DATABASE_PROPERTIES_RESPONSE = "Response for the database properties of a database server";
     public static final String AZURE_DATABASE_PROPERTIES_RESPONSE = "Response for Azure database server properties";
     public static final String CANARY_DATABASE_PROPERTIES_RESPONSE = "Response for the canary database properties";
+    public static final String STORAGE_PROPERTIES_RESPONSE = "Response for the storage properties of a database server";
 
 
     public static final String FLOW_IDENTIFIER = "The id of the flow or flow chain that was triggered as part of the process.";
@@ -126,6 +127,8 @@ public final class ModelDescriptions {
         public static final String INSTANCE_TYPE = "Instance type of the database server";
         public static final String FALLBACK_INSTANCE_TYPES = "Fallback instance types of the database server";
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";
+        public static final String STORAGE_PROPERTIES = "Storage properties of the database server";
+        public static final String LOW_STORAGE = "Whether the database server is currently low on storage";
     }
 
     public static class DatabaseServerTest {

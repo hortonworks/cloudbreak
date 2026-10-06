@@ -83,8 +83,10 @@ redbeams:
     enabled: true
     update: true
     update-version: true
-    enabled-providers: AWS,AZURE
+    enabled-providers: AWS,AZURE,GCP
     interval-in-minutes: 1440
+    storage-monitoring-enabled: true
+    storage-low-threshold-percentage: 10
 spring:
   application:
     name: RedbeamsService

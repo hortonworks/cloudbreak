@@ -21,6 +21,7 @@ permissionGroups:
     permissions:
       "cloudwatch:DeleteAlarms": "Cloudera platform deletes alarms created for environment stacks (crn:cdp-us-gov:* tag)."
       "cloudwatch:DescribeAlarms": "Cloudera platform lists alarms for environment stacks."
+      "cloudwatch:GetMetricStatistics": "Cloudera platform reads the FreeStorageSpace metric of external databases to warn before they run low on storage."
       "cloudwatch:ListTagsForResource": "Cloudera platform reads tags on CloudWatch alarms during environment tag sync."
       "cloudwatch:PutMetricAlarm": "Cloudera platform creates alarms for environment infrastructure health."
       "cloudwatch:TagResource": "Cloudera platform applies user-defined and Cloudera-Resource-Name tags to CloudWatch alarms (crn:cdp-us-gov:* tag)."

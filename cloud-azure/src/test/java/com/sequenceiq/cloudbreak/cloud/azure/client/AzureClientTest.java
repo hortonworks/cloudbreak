@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -18,6 +19,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Constructor;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,6 +90,12 @@ import com.azure.resourcemanager.keyvault.models.AccessPolicy;
 import com.azure.resourcemanager.keyvault.models.AccessPolicyEntry;
 import com.azure.resourcemanager.keyvault.models.KeyPermissions;
 import com.azure.resourcemanager.keyvault.models.Permissions;
+import com.azure.resourcemanager.monitor.MonitorManager;
+import com.azure.resourcemanager.monitor.models.Metric;
+import com.azure.resourcemanager.monitor.models.MetricCollection;
+import com.azure.resourcemanager.monitor.models.MetricDefinition;
+import com.azure.resourcemanager.monitor.models.MetricValue;
+import com.azure.resourcemanager.monitor.models.TimeSeriesElement;
 import com.azure.resourcemanager.network.fluent.models.FrontendIpConfigurationInner;
 import com.azure.resourcemanager.network.models.LoadBalancer;
 import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
@@ -1041,5 +1051,92 @@ class AzureClientTest {
         verify(server).update();
         verify(update).withTags(userDefinedTags);
         verify(update).apply();
+    }
+
+    @Test
+    void getLatestAverageMetricValueReturnsLatestDatapointAverage() {
+        String resourceId = "resourceId";
+        String metricName = "storage_percent";
+        MonitorManager monitorManager = mock(MonitorManager.class, RETURNS_DEEP_STUBS);
+        when(azureClientCredentials.getMonitorManager()).thenReturn(monitorManager);
+
+        MetricDefinition metricDefinition = mock(MetricDefinition.class, RETURNS_DEEP_STUBS);
+        when(metricDefinition.name().value()).thenReturn(metricName);
+        PagedIterable<MetricDefinition> definitions = mock(PagedIterable.class);
+        when(monitorManager.metricDefinitions().listByResource(resourceId)).thenReturn(definitions);
+        when(definitions.stream()).thenReturn(Stream.of(metricDefinition));
+
+        MetricCollection metricCollection = mock(MetricCollection.class);
+        when(metricDefinition.defineQuery()
+                .startingFrom(any(OffsetDateTime.class))
+                .endsBefore(any(OffsetDateTime.class))
+                .withAggregation(eq("Average"))
+                .withInterval(any(Duration.class))
+                .execute()).thenReturn(metricCollection);
+
+        Metric metric = mock(Metric.class);
+        TimeSeriesElement timeSeries = mock(TimeSeriesElement.class);
+        MetricValue olderValue = mock(MetricValue.class);
+        MetricValue latestValue = mock(MetricValue.class);
+        MetricValue latestButNullAverage = mock(MetricValue.class);
+        when(metricCollection.metrics()).thenReturn(List.of(metric));
+        when(metric.timeseries()).thenReturn(List.of(timeSeries));
+        when(timeSeries.data()).thenReturn(List.of(olderValue, latestValue, latestButNullAverage));
+        OffsetDateTime now = OffsetDateTime.now();
+        when(olderValue.average()).thenReturn(50.0);
+        when(olderValue.timestamp()).thenReturn(now.minusMinutes(10));
+        when(latestValue.average()).thenReturn(80.0);
+        when(latestValue.timestamp()).thenReturn(now.minusMinutes(5));
+        when(latestButNullAverage.average()).thenReturn(null);
+        lenient().when(latestButNullAverage.timestamp()).thenReturn(now);
+
+        Optional<Double> result = underTest.getLatestAverageMetricValue(resourceId, metricName, Duration.ofHours(1));
+
+        assertTrue(result.isPresent());
+        assertEquals(80.0, result.get());
+    }
+
+    @Test
+    void getLatestAverageMetricValueReturnsEmptyWhenMetricNotDefined() {
+        String resourceId = "resourceId";
+        MonitorManager monitorManager = mock(MonitorManager.class, RETURNS_DEEP_STUBS);
+        when(azureClientCredentials.getMonitorManager()).thenReturn(monitorManager);
+
+        MetricDefinition otherDefinition = mock(MetricDefinition.class, RETURNS_DEEP_STUBS);
+        when(otherDefinition.name().value()).thenReturn("cpu_percent");
+        PagedIterable<MetricDefinition> definitions = mock(PagedIterable.class);
+        when(monitorManager.metricDefinitions().listByResource(resourceId)).thenReturn(definitions);
+        when(definitions.stream()).thenReturn(Stream.of(otherDefinition));
+
+        Optional<Double> result = underTest.getLatestAverageMetricValue(resourceId, "storage_percent", Duration.ofHours(1));
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getLatestAverageMetricValueReturnsEmptyWhenNoDatapoints() {
+        String resourceId = "resourceId";
+        String metricName = "storage_percent";
+        MonitorManager monitorManager = mock(MonitorManager.class, RETURNS_DEEP_STUBS);
+        when(azureClientCredentials.getMonitorManager()).thenReturn(monitorManager);
+
+        MetricDefinition metricDefinition = mock(MetricDefinition.class, RETURNS_DEEP_STUBS);
+        when(metricDefinition.name().value()).thenReturn(metricName);
+        PagedIterable<MetricDefinition> definitions = mock(PagedIterable.class);
+        when(monitorManager.metricDefinitions().listByResource(resourceId)).thenReturn(definitions);
+        when(definitions.stream()).thenReturn(Stream.of(metricDefinition));
+
+        MetricCollection metricCollection = mock(MetricCollection.class);
+        when(metricDefinition.defineQuery()
+                .startingFrom(any(OffsetDateTime.class))
+                .endsBefore(any(OffsetDateTime.class))
+                .withAggregation(eq("Average"))
+                .withInterval(any(Duration.class))
+                .execute()).thenReturn(metricCollection);
+        when(metricCollection.metrics()).thenReturn(List.of());
+
+        Optional<Double> result = underTest.getLatestAverageMetricValue(resourceId, metricName, Duration.ofHours(1));
+
+        assertTrue(result.isEmpty());
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.INSTANCE_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,9 +10,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +40,12 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.services.cloudwatch.model.CloudWatchException;
+import software.amazon.awssdk.services.cloudwatch.model.Datapoint;
 import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.Dimension;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse;
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmRequest;
 
@@ -290,5 +297,37 @@ class AwsCloudWatchServiceTest {
         verify(cloudWatchClient, times(1)).deleteAlarms(captorDelete.capture());
         assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDescribe.getValue().alarmNames());
         assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDelete.getValue().alarmNames());
+    }
+
+    @Test
+    void testGetLatestAverageMetricValueReturnsLatestDatapointAverage() {
+        AwsCredentialView credentialView = mock(AwsCredentialView.class);
+        AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
+        when(awsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(cloudWatchClient);
+        Instant now = Instant.now();
+        GetMetricStatisticsResponse response = GetMetricStatisticsResponse.builder()
+                .datapoints(
+                        Datapoint.builder().average(10.0d).timestamp(now.minus(10, ChronoUnit.MINUTES)).build(),
+                        Datapoint.builder().average(42.0d).timestamp(now).build())
+                .build();
+        when(cloudWatchClient.getMetricStatisticsResponse(any())).thenReturn(response);
+        Dimension dimension = Dimension.builder().name("DBInstanceIdentifier").value("myrds").build();
+
+        Optional<Double> result = underTest.getLatestAverageMetricValue(credentialView, REGION, "AWS/RDS", "FreeStorageSpace", dimension, 60, 300);
+
+        assertThat(result).hasValue(42.0d);
+    }
+
+    @Test
+    void testGetLatestAverageMetricValueReturnsEmptyWhenNoDatapoints() {
+        AwsCredentialView credentialView = mock(AwsCredentialView.class);
+        AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
+        when(awsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(cloudWatchClient);
+        when(cloudWatchClient.getMetricStatisticsResponse(any())).thenReturn(GetMetricStatisticsResponse.builder().build());
+        Dimension dimension = Dimension.builder().name("DBInstanceIdentifier").value("myrds").build();
+
+        Optional<Double> result = underTest.getLatestAverageMetricValue(credentialView, REGION, "AWS/RDS", "FreeStorageSpace", dimension, 60, 300);
+
+        assertThat(result).isEmpty();
     }
 }

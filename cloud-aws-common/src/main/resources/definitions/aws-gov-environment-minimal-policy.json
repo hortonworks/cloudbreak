@@ -37,6 +37,7 @@
         "cloudwatch:TagResource",
         "cloudwatch:ListTagsForResource",
         "cloudwatch:UntagResource",
+        "cloudwatch:GetMetricStatistics",
         "elasticloadbalancing:DeleteListener",
         "elasticloadbalancing:DeleteTargetGroup",
         "elasticloadbalancing:DeleteLoadBalancer",

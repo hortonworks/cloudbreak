@@ -94,7 +94,8 @@
     "Microsoft.Network/loadBalancers/write",
     "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
     "Microsoft.Resources/deployments/cancel/action",
-    "Microsoft.Resources/deployments/whatIf/action"
+    "Microsoft.Resources/deployments/whatIf/action",
+    "Microsoft.Insights/metrics/read"
   ],
   "NotActions": [],
   "DataActions": [

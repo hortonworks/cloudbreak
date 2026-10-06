@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerCertificateService;
+import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerMetricService;
 import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerUpdateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.tag.GcpResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
@@ -49,6 +52,9 @@ public class GcpResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private GcpDatabaseServerCertificateService gcpDatabaseServerCertificateService;
+
+    @Inject
+    private GcpDatabaseServerMetricService gcpDatabaseServerMetricService;
 
     @Inject
     private ContextBuilders contextBuilders;
@@ -153,6 +159,11 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     public CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack)
             throws Exception {
         return gcpDatabaseServerCertificateService.getActiveSslRootCertificate(authenticatedContext, stack);
+    }
+
+    @Override
+    public Optional<DatabaseServerStorageMetrics> getDatabaseServerStorageMetrics(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return gcpDatabaseServerMetricService.getDatabaseServerStorageMetrics(authenticatedContext, stack);
     }
 
     @Override

@@ -1030,7 +1030,9 @@ public enum ResourceEvent {
     FREEIPA_REFRESH_ENTITLEMENT_FAILED("freeipa.refresh.entitlement.failed"),
     FREEIPA_MULTI_AZ_MIGRATION_STARTED("freeipa.multi.az.migration.started"),
     FREEIPA_MULTI_AZ_MIGRATION_FINISHED("freeipa.multi.az.migration.finished"),
-    FREEIPA_MULTI_AZ_MIGRATION_FAILED("freeipa.multi.az.migration.failed");
+    FREEIPA_MULTI_AZ_MIGRATION_FAILED("freeipa.multi.az.migration.failed"),
+
+    REDBEAMS_EXTERNAL_DATABASE_STORAGE_LOW("resource.redbeams.database.storage.low");
 
     private final String message;
 

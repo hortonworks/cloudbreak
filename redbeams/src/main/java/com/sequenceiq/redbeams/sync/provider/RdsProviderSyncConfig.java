@@ -29,11 +29,18 @@ public class RdsProviderSyncConfig {
     @Value("#{'${redbeams.rds-provider-sync.enabled-providers}'.split(',')}")
     private Set<String> enabledProviders;
 
+    @Value("${redbeams.rds-provider-sync.storage-monitoring-enabled:true}")
+    private boolean storageMonitoringEnabled;
+
+    @Value("${redbeams.rds-provider-sync.storage-low-threshold-percentage:10}")
+    private double storageLowThresholdPercentage;
+
     @PostConstruct
     void logStatus() {
-        LOGGER.info("RDS provider sync is {}, instance type update is {}, version update is {}, interval is {} minutes, enabled providers: {}",
+        LOGGER.info("RDS provider sync is {}, instance type update is {}, version update is {}, interval is {} minutes, enabled providers: {}"
+                        + "storage monitoring is {} with low threshold {}%",
                 enabled ? "enabled" : "disabled", updateInstanceType ? "enabled" : "disabled", updateVersion ? "enabled" : "disabled",
-                intervalInMinutes, enabledProviders);
+                intervalInMinutes, enabledProviders, storageMonitoringEnabled ? "enabled" : "disabled", storageLowThresholdPercentage);
     }
 
     public boolean isEnabled() {
@@ -54,5 +61,13 @@ public class RdsProviderSyncConfig {
 
     public Set<String> getEnabledProviders() {
         return enabledProviders;
+    }
+
+    public boolean isStorageMonitoringEnabled() {
+        return storageMonitoringEnabled;
+    }
+
+    public double getStorageLowThresholdPercentage() {
+        return storageLowThresholdPercentage;
     }
 }

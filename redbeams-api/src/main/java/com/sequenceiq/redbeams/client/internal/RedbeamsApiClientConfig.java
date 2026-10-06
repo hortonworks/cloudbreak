@@ -9,10 +9,12 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v1.RedBeamsFlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.events.RedbeamsEventV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
@@ -72,5 +74,17 @@ public class RedbeamsApiClientConfig {
     @ConditionalOnBean(RedbeamsApiClientParams.class)
     RedBeamsFlowEndpoint redBeamsV1FlowEndpoint(WebTarget redbeamsApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, RedBeamsFlowEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(RedbeamsApiClientParams.class)
+    CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint(WebTarget redbeamsApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, CDPStructuredEventV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(RedbeamsApiClientParams.class)
+    RedbeamsEventV4Endpoint redbeamsEventV4Endpoint(WebTarget redbeamsApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, RedbeamsEventV4Endpoint.class);
     }
 }

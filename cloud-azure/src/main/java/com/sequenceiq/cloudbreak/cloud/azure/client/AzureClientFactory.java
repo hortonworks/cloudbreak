@@ -24,6 +24,7 @@ import com.azure.identity.implementation.IdentityClientOptions;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.marketplaceordering.MarketplaceOrderingManager;
+import com.azure.resourcemanager.monitor.MonitorManager;
 import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.privatedns.PrivateDnsZoneManager;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -109,6 +110,10 @@ public class AzureClientFactory {
     public com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager getPostgreSqlFlexibleManager() {
         return azureHttpClientConfigurer.configureDefault(com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.configure())
                 .authenticate(azureCredential, azureProfile);
+    }
+
+    public MonitorManager getMonitorManager() {
+        return azureHttpClientConfigurer.configureDefault(MonitorManager.configure()).authenticate(azureCredential, azureProfile);
     }
 
     public Optional<String> getAccessToken() {

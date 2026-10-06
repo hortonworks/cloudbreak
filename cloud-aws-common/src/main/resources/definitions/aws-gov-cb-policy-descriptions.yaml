@@ -28,6 +28,7 @@ permissionGroups:
     permissions:
       "cloudwatch:DeleteAlarms": "Cloudera platform removes alarms it created when deleting environment or cluster stacks."
       "cloudwatch:DescribeAlarms": "Cloudera platform lists alarms while reconciling stack resources during provision and delete flows."
+      "cloudwatch:GetMetricStatistics": "Cloudera platform reads the FreeStorageSpace metric of external databases to warn before they run low on storage."
       "cloudwatch:ListTagsForResource": "Cloudera platform reads tags on CloudWatch alarms when reconciling user-defined tag updates."
       "cloudwatch:PutMetricAlarm": "Cloudera platform publishes CloudWatch alarms defined in its CloudFormation templates for stack health monitoring."
       "cloudwatch:TagResource": "Cloudera platform applies user-defined and Cloudera-Resource-Name tags to CloudWatch alarms created for stack health monitoring."

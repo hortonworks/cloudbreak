@@ -17,6 +17,7 @@ import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
+import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
@@ -24,6 +25,7 @@ import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.controller.mapper.WebApplicationExceptionMapper;
 import com.sequenceiq.redbeams.controller.v4.database.DatabaseV4Controller;
 import com.sequenceiq.redbeams.controller.v4.databaseserver.DatabaseServerV4Controller;
+import com.sequenceiq.redbeams.controller.v4.events.RedbeamsEventController;
 import com.sequenceiq.redbeams.controller.v4.operation.OperationV4Controller;
 import com.sequenceiq.redbeams.controller.v4.progress.ProgressV4Controller;
 import com.sequenceiq.redbeams.controller.v4.support.SupportController;
@@ -45,6 +47,8 @@ public class EndpointConfig extends ResourceConfig {
             SupportController.class,
             AuthorizationUtilEndpoint.class,
             SupportController.class,
+            CDPStructuredEventV1Controller.class,
+            RedbeamsEventController.class,
             OpenApiController.class
     );
 

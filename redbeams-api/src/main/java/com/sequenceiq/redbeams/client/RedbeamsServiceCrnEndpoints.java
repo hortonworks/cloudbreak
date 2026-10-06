@@ -3,9 +3,11 @@ package com.sequenceiq.redbeams.client;
 import jakarta.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.events.RedbeamsEventV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
@@ -44,5 +46,15 @@ public class RedbeamsServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint 
     @Override
     public SupportV4Endpoint supportV4Endpoint() {
         return getEndpoint(SupportV4Endpoint.class);
+    }
+
+    @Override
+    public CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint() {
+        return getEndpoint(CDPStructuredEventV1Endpoint.class);
+    }
+
+    @Override
+    public RedbeamsEventV4Endpoint redbeamsEventV4Endpoint() {
+        return getEndpoint(RedbeamsEventV4Endpoint.class);
     }
 }

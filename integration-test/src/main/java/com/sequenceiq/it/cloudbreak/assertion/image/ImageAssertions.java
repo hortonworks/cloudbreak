@@ -131,8 +131,6 @@ public class ImageAssertions {
     private AttemptMaker<Boolean> getImageSetupAttemptMaker(DistroXTestDto testDto, CloudbreakClient client) {
         DistroXV1Endpoint distroXV1Endpoint = client.getDefaultClient(testDto.getTestContext()).distroXV1Endpoint();
         DistroXV1EventEndpoint eventEndpoint = client.getDefaultClient(testDto.getTestContext()).distroXV1EventEndpoint();
-        String environmentCrn = testDto.getResponse().getEnvironmentCrn();
-        List<StructuredEventType> eventTypes = List.of(StructuredEventType.NOTIFICATION);
         return () -> {
             StackV4Response stackV4Response = distroXV1Endpoint.getByCrn(testDto.getCrn(), null);
             if (Status.CREATE_FAILED.equals(stackV4Response.getStatus())) {

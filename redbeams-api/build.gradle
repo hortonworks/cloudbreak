@@ -38,6 +38,8 @@ dependencies {
   // TODO please move to some common package instead of use whole core-api dep
   implementation project(':core-api')
   implementation project(':secret-rotation-api')
+  implementation project(':structuredevent-api-cdp')
+  implementation project(':structuredevent-model')
   implementation project(':flow-api')
   implementation project(':common')
   implementation project(':auth-connector')

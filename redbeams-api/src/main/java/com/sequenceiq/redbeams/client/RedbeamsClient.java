@@ -1,8 +1,10 @@
 package com.sequenceiq.redbeams.client;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.events.RedbeamsEventV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
@@ -20,4 +22,8 @@ public interface RedbeamsClient {
     FlowEndpoint flowEndpoint();
 
     SupportV4Endpoint supportV4Endpoint();
+
+    CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint();
+
+    RedbeamsEventV4Endpoint redbeamsEventV4Endpoint();
 }

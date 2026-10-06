@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -9,13 +10,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
@@ -35,6 +41,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -47,6 +55,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTa
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.events.RedbeamsEventV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,6 +80,9 @@ class RedbeamsClientServiceTest {
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
+    private RedbeamsEventV4Endpoint redbeamsEventV4Endpoint;
 
     @InjectMocks
     private RedbeamsClientService underTest;
@@ -306,5 +318,51 @@ class RedbeamsClientServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.migrateRdsToTls("crn"));
         verify(redbeamsServerEndpoint).migrateDatabaseToSslByCrnInternal(eq("crn"), any(String.class));
         assertEquals("Failed to migrate DatabaseServer with CRN crn", exception.getMessage());
+    }
+
+    @Test
+    void getStructuredEventsByCrnReturnsSinglePartialPage() {
+        List<CDPStructuredEvent> page = events(5);
+        when(redbeamsEventV4Endpoint.getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), eq(0), eq(50))).thenReturn(page);
+
+        List<CDPStructuredEvent> result = underTest.getStructuredEventsByCrn(DATABASE_SERVER_CRN);
+
+        assertThat(result).hasSize(5);
+        verify(redbeamsEventV4Endpoint, times(1)).getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), anyInt(), anyInt());
+    }
+
+    @Test
+    void getStructuredEventsByCrnFetchesAtMostFiftyEventsInSinglePage() {
+        when(redbeamsEventV4Endpoint.getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), eq(0), eq(50))).thenReturn(events(50));
+
+        List<CDPStructuredEvent> result = underTest.getStructuredEventsByCrn(DATABASE_SERVER_CRN);
+
+        assertThat(result).hasSize(50);
+        verify(redbeamsEventV4Endpoint, times(1)).getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), eq(0), eq(50));
+        verify(redbeamsEventV4Endpoint, never()).getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), eq(1), anyInt());
+    }
+
+    @Test
+    void getStructuredEventsByCrnReturnsEmptyListOnEndpointFailure() {
+        when(redbeamsEventV4Endpoint.getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), anyInt(), anyInt()))
+                .thenThrow(new WebApplicationException("redbeams down", Response.Status.INTERNAL_SERVER_ERROR));
+
+        List<CDPStructuredEvent> result = underTest.getStructuredEventsByCrn(DATABASE_SERVER_CRN);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getStructuredEventsByCrnTerminatesWhenEndpointReturnsNull() {
+        when(redbeamsEventV4Endpoint.getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), eq(0), eq(50))).thenReturn(null);
+
+        List<CDPStructuredEvent> result = underTest.getStructuredEventsByCrn(DATABASE_SERVER_CRN);
+
+        assertThat(result).isEmpty();
+        verify(redbeamsEventV4Endpoint, times(1)).getAuditEvents(eq(DATABASE_SERVER_CRN), isNull(), anyInt(), anyInt());
+    }
+
+    private static List<CDPStructuredEvent> events(int count) {
+        return new java.util.ArrayList<>(Collections.nCopies(count, new CDPStructuredNotificationEvent()));
     }
 }

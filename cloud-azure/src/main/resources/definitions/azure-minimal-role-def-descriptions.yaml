@@ -42,6 +42,10 @@ permissionGroups:
       "Microsoft.DBforPostgreSQL/servers/privateEndpointConnectionsApproval/action": "Cloudera platform approves private endpoint connections to single-server PostgreSQL instances."
       "Microsoft.DBforPostgreSQL/servers/read": "Cloudera platform reads single-server PostgreSQL metadata for environment databases."
       "Microsoft.DBforPostgreSQL/servers/write": "Cloudera platform creates and updates PostgreSQL servers for environment database workloads."
+  monitoring:
+    description: Required to read Azure Monitor metrics so Cloudera can detect and alert on low storage of external databases.
+    permissions:
+      "Microsoft.Insights/metrics/read": "Cloudera platform reads the storage_percent Azure Monitor metric on environment PostgreSQL servers to detect low storage and raise external database storage alerts."
   identities:
     description: Required to discover and assign managed identities that give cluster resources access to customer Azure services.
     permissions:

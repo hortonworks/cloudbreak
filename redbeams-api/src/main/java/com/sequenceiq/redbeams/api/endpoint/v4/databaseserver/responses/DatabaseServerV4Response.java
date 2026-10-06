@@ -73,6 +73,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     @Schema(description = DatabaseServer.CANARY_DATABASE_PROPERTIES)
     private CanaryDatabasePropertiesV4Response canaryDatabasePropertiesV4Response;
 
+    @Schema(description = DatabaseServer.STORAGE_PROPERTIES)
+    private StoragePropertiesV4Response storagePropertiesV4Response;
+
     public Long getId() {
         return id;
     }
@@ -217,6 +220,14 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
         this.canaryDatabasePropertiesV4Response = canaryDatabasePropertiesV4Response;
     }
 
+    public StoragePropertiesV4Response getStoragePropertiesV4Response() {
+        return storagePropertiesV4Response;
+    }
+
+    public void setStoragePropertiesV4Response(StoragePropertiesV4Response storagePropertiesV4Response) {
+        this.storagePropertiesV4Response = storagePropertiesV4Response;
+    }
+
     @Override
     public String toString() {
         return "DatabaseServerV4Response{" +
@@ -238,6 +249,7 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
                 ", fallbackInstanceTypes=" + fallbackInstanceTypes +
                 ", storageSize=" + storageSize +
                 ", canaryDatabasePropertiesV4Response=" + canaryDatabasePropertiesV4Response +
+                ", storagePropertiesV4Response=" + storagePropertiesV4Response +
                 "} " + super.toString();
     }
 }

@@ -34,6 +34,7 @@ dependencies {
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                          version: "$azureSdkResourceManagerVersion"
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-privatedns'
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-monitor'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-sql'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresql',               version: "$azureSdkResourceManagerPostgresqlVersion"
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresqlflexibleserver', version: "$azureSdkResourceManagerFlexiblePostgresqlVersion"

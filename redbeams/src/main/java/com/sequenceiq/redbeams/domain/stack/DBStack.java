@@ -104,8 +104,19 @@ public class DBStack {
     @Column(name = "sslconfig_id")
     private Long sslConfig;
 
+    @Column(name = "lowstorage", nullable = false, columnDefinition = "boolean default false")
+    private boolean lowStorage;
+
     public Long getId() {
         return id;
+    }
+
+    public boolean isLowStorage() {
+        return lowStorage;
+    }
+
+    public void setLowStorage(boolean lowStorage) {
+        this.lowStorage = lowStorage;
     }
 
     public void setId(Long id) {

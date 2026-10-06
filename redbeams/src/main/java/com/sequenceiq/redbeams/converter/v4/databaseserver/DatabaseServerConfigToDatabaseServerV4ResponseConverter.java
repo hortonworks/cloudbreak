@@ -22,6 +22,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.CanaryDatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.StoragePropertiesV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
@@ -79,6 +80,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
             response.setStatus(dbStack.getStatus());
             response.setStatusReason(dbStack.getStatusReason());
             response.setMajorVersion(dbStack.getMajorVersion());
+            response.setStoragePropertiesV4Response(createStorageProperties(dbStack));
             response.setCanaryDatabasePropertiesV4Response(createCanaryDatabaseProperties(dbStack.getCanaryDatabaseResources()));
             if (dbStack.getDatabaseServer() != null) {
                 response.setInstanceType(dbStack.getDatabaseServer().getInstanceType());
@@ -160,6 +162,12 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
         sslConfig.setSslCertificateExpirationDate(expirationedDate);
         sslConfigService.save(sslConfig);
         return expirationedDate;
+    }
+
+    private StoragePropertiesV4Response createStorageProperties(DBStack dbStack) {
+        StoragePropertiesV4Response storageProperties = new StoragePropertiesV4Response();
+        storageProperties.setLowStorage(dbStack.isLowStorage());
+        return storageProperties;
     }
 
     private CanaryDatabasePropertiesV4Response createCanaryDatabaseProperties(Set<DBResource> canaryDatabaseResources) {

@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
+import com.sequenceiq.redbeams.events.RedbeamsEventSenderService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.sync.DBStackConnector;
 import com.sequenceiq.redbeams.sync.DBStackConnector.ConnectedDatabaseStack;
@@ -36,22 +38,60 @@ public class RdsProviderSyncService {
     @Inject
     private RdsProviderSyncConfig config;
 
+    @Inject
+    private RedbeamsEventSenderService eventSenderService;
+
     public void syncInstanceTypeAndVersion(DBStack dbStack) {
+        ConnectedDatabaseStack connected;
         try {
-            ConnectedDatabaseStack connected = dbStackConnector.connect(dbStack);
+            connected = dbStackConnector.connect(dbStack);
             ExternalDatabaseParameters parameters = connected.connector().resources()
                     .getDatabaseServerParameters(connected.authenticatedContext(), connected.databaseStack());
             if (parameters == null) {
                 LOGGER.warn(":::RDS provider sync::: No provider parameters returned for DB stack {}, skipping.", dbStack.getResourceCrn());
-                return;
-            }
-            boolean instanceChanged = syncInstanceType(dbStack, parameters.instanceType());
-            boolean versionChanged = syncVersion(dbStack, parameters.engineVersion());
-            if (instanceChanged || versionChanged) {
-                dbStackService.save(dbStack);
+            } else {
+                boolean instanceChanged = syncInstanceType(dbStack, parameters.instanceType());
+                boolean versionChanged = syncVersion(dbStack, parameters.engineVersion());
+                boolean storageAlertChanged = checkStorageAndNotify(dbStack, connected);
+                if (instanceChanged || versionChanged || storageAlertChanged) {
+                    dbStackService.save(dbStack);
+                }
             }
         } catch (Exception e) {
             LOGGER.warn(":::RDS provider sync::: Failed to sync provider metadata for DB stack {}: {}", dbStack.getResourceCrn(), e.getMessage(), e);
+            return;
+        }
+    }
+
+    private boolean checkStorageAndNotify(DBStack dbStack, ConnectedDatabaseStack connected) {
+        if (!config.isStorageMonitoringEnabled()) {
+            return false;
+        }
+        try {
+            Optional<DatabaseServerStorageMetrics> metrics = connected.connector().resources()
+                    .getDatabaseServerStorageMetrics(connected.authenticatedContext(), connected.databaseStack());
+            if (metrics.isEmpty() || metrics.get().freeStoragePercentage() == null) {
+                LOGGER.debug(":::RDS provider sync::: No storage metrics reported for DB stack {}, skipping storage check.", dbStack.getResourceCrn());
+                return false;
+            }
+            double freePercentage = metrics.get().freeStoragePercentage();
+            boolean low = freePercentage < config.getStorageLowThresholdPercentage();
+            if (low && !dbStack.isLowStorage()) {
+                LOGGER.info(":::RDS provider sync::: DB stack {} is low on storage ({}% free, threshold {}%), notifying UI.",
+                        dbStack.getResourceCrn(), freePercentage, config.getStorageLowThresholdPercentage());
+                eventSenderService.sendStorageLowNotification(dbStack, freePercentage);
+                dbStack.setLowStorage(true);
+                return true;
+            } else if (!low && dbStack.isLowStorage()) {
+                LOGGER.info(":::RDS provider sync::: DB stack {} storage recovered ({}% free), re-arming low-storage alert.",
+                        dbStack.getResourceCrn(), freePercentage);
+                dbStack.setLowStorage(false);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            LOGGER.warn(":::RDS provider sync::: Failed to check storage for DB stack {}: {}", dbStack.getResourceCrn(), e.getMessage(), e);
+            return false;
         }
     }
 

@@ -73,6 +73,7 @@
     "compute.zoneOperations.get",
     "iam.serviceAccounts.actAs",
     "iam.serviceAccounts.list",
+    "monitoring.timeSeries.list",
     "storage.buckets.get",
     "storage.objects.create",
     "storage.objects.delete",
