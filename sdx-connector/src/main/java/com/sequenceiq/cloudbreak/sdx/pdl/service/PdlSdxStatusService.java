@@ -46,27 +46,13 @@ public class PdlSdxStatusService extends AbstractPdlSdxService implements Platfo
 
     @Override
     public List<DistroXOperationValidationView> validateDistroXOperations(String envCrn) {
-        Environment environment = getPrivateEnvForPublicEnv(envCrn);
-        boolean pvcDatalakeAvailable = environment != null
-                && environment.getPvcEnvironmentDetails() != null
-                && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null
-                && StatusEnum.AVAILABLE.equals(environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails().getStatus());
-
-        String reason;
-        if (environment == null || environment.getPvcEnvironmentDetails() == null
-                || environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() == null) {
-            reason = String.format("Could not find the datalake associated " +
-                    "with the environment with crn: '%s'", envCrn);
-        } else {
-            reason = "";
-        }
-
+        // TODO CB-32262 implement a more selective availability status check
         return DistroXOperations.getDistroxOperations().stream()
                 .map(distroXOperation -> {
                     DistroXOperationValidationView response = new DistroXOperationValidationView();
                     response.setOperation(distroXOperation);
-                    response.setAllowed(pvcDatalakeAvailable);
-                    response.setReason(reason);
+                    response.setAllowed(true);
+                    response.setReason("");
                     return response;
                 })
                 .toList();
