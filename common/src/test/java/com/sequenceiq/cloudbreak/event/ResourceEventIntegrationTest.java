@@ -26,6 +26,8 @@ public class ResourceEventIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceEventIntegrationTest.class);
 
+    private static final String CAUSE = "Gateway Timeout";
+
     @Named("resourceEventIntegrationTestMessageSource")
     @Inject
     private MessageSource messageSource;
@@ -39,6 +41,18 @@ public class ResourceEventIntegrationTest {
 
         assertThat(message).isNotBlank();
         LOGGER.info("ResourceEvent.{} message validation success: {}={}", underTest.name(), key, message);
+    }
+
+    @ParameterizedTest(name = "underTest={0}")
+    @EnumSource(value = ResourceEvent.class, names = {
+            "CLUSTER_SALT_UPDATE_FAILED"
+    })
+    void messageFiredWithCauseShouldInterpolateCauseTest(ResourceEvent underTest) {
+        String key = underTest.getMessage();
+
+        String message = messageSource.getMessage(key, new Object[]{CAUSE}, Locale.getDefault());
+
+        assertThat(message).contains(CAUSE);
     }
 
     @Configuration
