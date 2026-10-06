@@ -102,7 +102,7 @@ ext {
   h2databaseVersion = '2.2.224'
   jakartaPersistenceApiVersion = '3.1.0'
   jakartaTransactionApiVersion = '2.0.1'
-  mybatisMigrationVersion = '3.3.9'
+  mybatisMigrationVersion = '3.6.0'
   postgreSQLVersion = '42.7.13'
   hikariCPVersion = '6.3.3'
 
