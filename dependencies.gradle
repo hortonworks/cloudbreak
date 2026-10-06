@@ -27,7 +27,7 @@ ext {
   jakartaServletApiVersion = '6.1.0'
   jakartaValidationVersion = '3.0.2'
   jerseyCoreVersion = '3.1.11'
-  jerseyMicrometerVersion = '3.1.7'
+  jerseyMicrometerVersion = '4.0.3'
   swaggerCoreVersion = '2.2.20'
 
   // Network
