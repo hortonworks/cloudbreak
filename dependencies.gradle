@@ -104,7 +104,7 @@ ext {
   jakartaTransactionApiVersion = '2.0.1'
   mybatisMigrationVersion = '3.6.0'
   postgreSQLVersion = '42.7.13'
-  hikariCPVersion = '6.3.3'
+  hikariCPVersion = '7.1.0'
 
   // Crypto
   bouncycastleFipsVersion = '2.1.3'
