@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.core.cluster.prerequisite.ClouderaManagerUpgradePrerequisiteService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -49,9 +50,13 @@ public class ClusterManagerUpgradeManagementService {
     @Inject
     private ClouderaManagerCsdDownloaderService clouderaManagerCsdDownloaderService;
 
+    @Inject
+    private ClouderaManagerUpgradePrerequisiteService clouderaManagerUpgradePrerequisiteService;
+
     public void upgradeClusterManager(ClusterManagerUpgradeRequest request)
             throws CloudbreakOrchestratorException, CloudbreakException {
         StackDto stackDto = stackDtoService.getById(request.getResourceId());
+        clouderaManagerUpgradePrerequisiteService.executePrerequisites(stackDto);
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stackDto.getCluster().getId());
         boolean clusterManagerUpgradeNecessary = isClusterManagerUpgradeNecessary(clouderaManagerRepo.getFullVersion(), stackDto);
         clouderaManagerCsdDownloaderService.downloadCsdFiles(stackDto, clusterManagerUpgradeNecessary, request.getUpgradeCandidateProducts(), false);
