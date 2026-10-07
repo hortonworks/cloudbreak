@@ -25,7 +25,7 @@ ext {
   hibernateValidatorVersion = '8.0.1.Final'
   jakartaActivationVersion = '2.1.2'
   jakartaServletApiVersion = '6.1.0'
-  jakartaValidationVersion = '3.0.2'
+  jakartaValidationVersion = '3.1.1'
   jerseyCoreVersion = '3.1.11'
   jerseyMicrometerVersion = '4.0.3'
   swaggerCoreVersion = '2.2.20'
