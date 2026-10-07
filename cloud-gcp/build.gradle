@@ -40,7 +40,7 @@ dependencies {
     implementation (group: 'com.google.apis',               name: 'google-api-services-cloudkms',              version: 'v1-rev20260917-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-sqladmin',              version: 'v1-rev20260908-2.0.0'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-sqladmin',              version: 'v1-rev20260920-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
     implementation (group: 'com.google.apis',               name: 'google-api-services-cloudresourcemanager',  version: 'v3-rev20260917-2.0.0'){
