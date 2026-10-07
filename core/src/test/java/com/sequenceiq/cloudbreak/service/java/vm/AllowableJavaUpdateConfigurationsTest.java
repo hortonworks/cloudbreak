@@ -111,24 +111,30 @@ class AllowableJavaUpdateConfigurationsTest {
     }
 
     @Test
-    void testJava21AllowableFrom731() {
+    void testJava21AllowableFrom733() {
         JavaConfiguration java17Config = new JavaConfiguration();
         java17Config.setVersion(17);
         java17Config.setMinRuntimeVersion("7.3.1.500");
         JavaConfiguration java21Config = new JavaConfiguration();
         java21Config.setVersion(21);
-        java21Config.setMinRuntimeVersion("7.3.1");
+        java21Config.setMinRuntimeVersion("7.3.3");
         allowableJavaUpdateConfigurations.setJavaVersions(List.of(java17Config, java21Config));
 
-        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.1"));
-        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.1.600"));
-        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.2.30000"));
-        assertEquals(List.of("21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.1"));
-        assertEquals(List.of("17", "21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.2.30000"));
+        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.3"));
+        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.3.0"));
+        assertDoesNotThrow(() -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.4.0"));
+        assertEquals(List.of("17"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.1.600"));
+        assertEquals(List.of("17"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.2"));
+        assertEquals(List.of("17"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.2.30000"));
+        assertEquals(List.of("17", "21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.3.3"));
+        assertEquals(List.of("17", "21"), allowableJavaUpdateConfigurations.listValidJavaVersions("7.4.0"));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.2.18"));
-        assertEquals("The requested Java version 21 is not compatible with the runtime version 7.2.18", exception.getMessage());
+                () -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.2"));
+        assertEquals("The requested Java version 21 is not compatible with the runtime version 7.3.2", exception.getMessage());
+        exception = assertThrows(BadRequestException.class,
+                () -> allowableJavaUpdateConfigurations.checkValidConfiguration(21, "7.3.2.30000"));
+        assertEquals("The requested Java version 21 is not compatible with the runtime version 7.3.2.30000", exception.getMessage());
     }
 
     @Test
@@ -149,5 +155,25 @@ class AllowableJavaUpdateConfigurationsTest {
         assertEquals(17, allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.2"));
         assertEquals(17, allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.5.2"));
         assertNull(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.1.0"));
+    }
+
+    @Test
+    void testGetMinJavaVersionForRuntimeNeverReturnsJava21WhenJava21IsAllowable() {
+        JavaConfiguration java8Config = new JavaConfiguration();
+        java8Config.setVersion(8);
+        java8Config.setMinRuntimeVersion("7.1.0");
+        java8Config.setMaxRuntimeVersion("7.3.1.X");
+        JavaConfiguration java17Config = new JavaConfiguration();
+        java17Config.setVersion(17);
+        java17Config.setMinRuntimeVersion("7.3.1.500");
+        JavaConfiguration java21Config = new JavaConfiguration();
+        java21Config.setVersion(21);
+        java21Config.setMinRuntimeVersion("7.3.3");
+        allowableJavaUpdateConfigurations.setJavaVersions(List.of(java8Config, java17Config, java21Config));
+
+        assertEquals(17, allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.2"));
+        assertEquals(17, allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.3"));
+        assertEquals(17, allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.3.100"));
+        assertEquals(17, allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.4.0"));
     }
 }
