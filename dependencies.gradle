@@ -58,7 +58,7 @@ ext {
   // Apache Commons, Utils
   apacheCommonsIoVersion = '2.22.0'
   apacheCommonsLangVersion = '3.21.0'
-  apacheCommonsTextVersion = '1.10.0'
+  apacheCommonsTextVersion = '1.15.0'
   apacheCommonsValidatorVersion = '1.6'
   apacheCommonsCompressVersion = '1.28.0'
   commonsCodecVersion = '1.22.1'
