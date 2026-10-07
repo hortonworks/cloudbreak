@@ -990,9 +990,6 @@ vm:
         maxRuntimeVersion: 7.2.18.X
       - version: 17
         minRuntimeVersion: 7.3.1
-        maxRuntimeVersion: 7.3.2.29999
-      - version: 21
-        minRuntimeVersion: 7.3.2.30000
   update:
     allowable:
       javaVersions:
@@ -1002,7 +999,7 @@ vm:
         - version: 17
           minRuntimeVersion: 7.3.1.500
         - version: 21
-          minRuntimeVersion: 7.3.2.30000
+          minRuntimeVersion: 7.3.3
 
 retry:
   errors:

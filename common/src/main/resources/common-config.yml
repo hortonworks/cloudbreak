@@ -179,4 +179,5 @@ hikari:
 vm:
   supportedJavaVersions: 8,11,17,21
   supportedJavaVersionsByRuntime:
-      7.3.2: 17,21
+      7.3.2: 17
+      7.3.3: 17,21
