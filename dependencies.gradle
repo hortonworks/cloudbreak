@@ -86,7 +86,7 @@ ext {
   // Templating
   freemarkerVersion = '2.3.35'
   handlebarsVersion = '4.5.5'
-  jinjavaVersion = '2.5.2'
+  jinjavaVersion = '2.8.4'
 
   // Protobuf
   protobufVersion = '3.25.5'
