@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -170,6 +172,7 @@ public class DBStackStatusSyncServiceTest {
         ArgumentCaptor<DBResource> dbResourceArgumentCaptor = ArgumentCaptor.forClass(DBResource.class);
         verify(dbResourceService).save(dbResourceArgumentCaptor.capture());
         assertEquals(FLEXIBLE_SERVER_RES_ID, dbResourceArgumentCaptor.getValue().getResourceReference());
+        assertEquals(CommonStatus.CREATED, dbResourceArgumentCaptor.getValue().getResourceStatus());
         verifyNoMoreInteractions(dbStackStatusUpdater);
         verifyNoInteractions(dbStackJobService);
     }
@@ -292,6 +295,95 @@ public class DBStackStatusSyncServiceTest {
         victim.sync(dbStack);
 
         verifyNoInteractions(dbStackStatusUpdater);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldReconcileStaleFailedResourceStatusForLiveFlexibleServer()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name()));
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        DBResource dbResource = new DBResource.Builder().withReference(FLEXIBLE_SERVER_RES_ID).withStatus(CommonStatus.FAILED).build();
+        when(dbResourceService.findByStatusAndTypeAndStack(CommonStatus.FAILED, ResourceType.AZURE_DATABASE, DB_STACK_ID))
+                .thenReturn(Optional.of(dbResource));
+
+        victim.sync(dbStack);
+
+        ArgumentCaptor<DBResource> dbResourceArgumentCaptor = ArgumentCaptor.forClass(DBResource.class);
+        verify(dbResourceService).save(dbResourceArgumentCaptor.capture());
+        assertEquals(CommonStatus.CREATED, dbResourceArgumentCaptor.getValue().getResourceStatus());
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldNotSaveWhenNoFailedResourceForLiveFlexibleServer()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name()));
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(dbResourceService.findByStatusAndTypeAndStack(CommonStatus.FAILED, ResourceType.AZURE_DATABASE, DB_STACK_ID))
+                .thenReturn(Optional.empty());
+
+        victim.sync(dbStack);
+
+        verify(dbResourceService, never()).save(any());
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldNotReconcileWhenProviderStatusUnacceptableForFlexibleServer()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.UNKNOWN);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name()));
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+
+        victim.sync(dbStack);
+
+        verify(dbResourceService, never()).findByStatusAndTypeAndStack(any(), any(), any());
+        verify(dbResourceService, never()).save(any());
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldNotReconcileWhenProviderStatusUpdateInProgressForFlexibleServer()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.UPDATE_IN_PROGRESS);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name()));
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+
+        victim.sync(dbStack);
+
+        verify(dbResourceService, never()).findByStatusAndTypeAndStack(any(), any(), any());
+        verify(dbResourceService, never()).save(any());
+        verifyNoInteractions(dbStackStatusUpdater);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldNotReconcileResourceStatusForNonAzure()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        lenient().when(dbStack.getCloudPlatform()).thenReturn("AWS");
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+
+        victim.sync(dbStack);
+
+        verify(dbResourceService, never()).findByStatusAndTypeAndStack(any(), any(), any());
+        verify(dbResourceService, never()).save(any());
         verifyNoInteractions(dbStackJobService);
     }
 }

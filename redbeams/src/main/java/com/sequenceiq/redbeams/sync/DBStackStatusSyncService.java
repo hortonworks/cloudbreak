@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -38,6 +39,9 @@ public class DBStackStatusSyncService {
 
     private static final List<ExternalDatabaseStatus> UNACCEPTABLE_STATES =
             List.of(ExternalDatabaseStatus.DELETE_IN_PROGRESS, ExternalDatabaseStatus.DELETED, ExternalDatabaseStatus.UNKNOWN);
+
+    private static final List<ExternalDatabaseStatus> RECONCILABLE_RESOURCE_STATES =
+            List.of(ExternalDatabaseStatus.STARTED, ExternalDatabaseStatus.STOPPED);
 
     @Inject
     private DBStackConnector dbStackConnector;
@@ -110,6 +114,7 @@ public class DBStackStatusSyncService {
                 if (databaseType.isSingleServer() || externalDatabaseDeleted) {
                     return handleSingleServerAutoMigration(dbStack, databaseStatusOptional, databaseStack, connector, ac);
                 }
+                reconcileFailedResourceStatus(dbStack, databaseStatusOptional);
             }
             return databaseStatusOptional
                     .map(this::convert)
@@ -162,8 +167,22 @@ public class DBStackStatusSyncService {
         }
     }
 
+    private void reconcileFailedResourceStatus(DBStack dbStack, Optional<ExternalDatabaseStatus> statusOptional) {
+        if (statusOptional.isPresent() && RECONCILABLE_RESOURCE_STATES.contains(statusOptional.get())) {
+            dbResourceService.findByStatusAndTypeAndStack(CommonStatus.FAILED, ResourceType.AZURE_DATABASE, dbStack.getId())
+                    .ifPresent(resource -> {
+                        LOGGER.info(":::Auto sync::: Provider reports '{}' but Azure database resource with reference '{}' "
+                                        + "is stale FAILED; correcting to CREATED",
+                                statusOptional.get(), resource.getResourceReference());
+                        resource.setResourceStatus(CommonStatus.CREATED);
+                        dbResourceService.save(resource);
+                    });
+        }
+    }
+
     private void updateResourceReference(DBResource dbResource, String resourceReference) {
         dbResource.setResourceReference(resourceReference);
+        dbResource.setResourceStatus(CommonStatus.CREATED);
         dbResourceService.save(dbResource);
     }
 
