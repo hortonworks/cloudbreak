@@ -103,7 +103,7 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
     }
 
     private static DistroXInstanceGroupTestDto create(TestContext testContext, CloudPlatform cloudPlatform, HostGroupType hostGroupType) {
-        return create(testContext, cloudPlatform, hostGroupType, hostGroupType.determineInstanceCount());
+        return create(testContext, cloudPlatform, hostGroupType, calculateCostEffectiveNodeCount(testContext, hostGroupType));
     }
 
     private static DistroXInstanceGroupTestDto create(TestContext testContext, CloudPlatform cloudPlatform, HostGroupType hostGroupType, int nodeCount) {
@@ -118,6 +118,10 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
                 .withTemplate(testContext.given(DistroXInstanceTemplateTestDto.class, cloudPlatform));
     }
 
+    private static int calculateCostEffectiveNodeCount(TestContext testContext, HostGroupType hostGroupType) {
+        return HostGroupType.WORKER == hostGroupType ? testContext.getCostEffectiveWorkerNodeCount() : hostGroupType.determineInstanceCount();
+    }
+
     public DistroXInstanceGroupTestDto valid() {
         return withHostGroup(MASTER);
     }
@@ -126,7 +130,7 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
         DistroXInstanceTemplateTestDto template = getTestContext()
                 .given("DistroxInstanceGroupTestDto" + hostGroupType.getName(), DistroXInstanceTemplateTestDto.class, getCloudPlatform());
         return withRecoveryMode(RecoveryMode.MANUAL)
-                .withNodeCount(hostGroupType.determineInstanceCount())
+                .withNodeCount(calculateCostEffectiveNodeCount(getTestContext(), hostGroupType))
                 .withGroup(hostGroupType.getName())
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName())

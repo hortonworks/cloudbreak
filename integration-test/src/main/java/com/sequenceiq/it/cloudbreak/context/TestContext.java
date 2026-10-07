@@ -125,6 +125,9 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 3 : ${integrationtest.testsuite.maxRetryCount:5}}")
     private int maxRetryCount;
 
+    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 3 : ${integrationtest.distrox.worker.costEffectiveNodeCount:1}}")
+    private int costEffectiveWorkerNodeCount;
+
     @Value("${integrationtest.cloudbreak.server}")
     private String defaultServer;
 
@@ -172,6 +175,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public int getMaxRetryCount() {
         return maxRetryCount;
+    }
+
+    public int getCostEffectiveWorkerNodeCount() {
+        return costEffectiveWorkerNodeCount;
     }
 
     public long getPollingInterval() {
