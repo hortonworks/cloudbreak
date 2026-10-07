@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.assertion.stack;
 
+import java.util.function.BiConsumer;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -25,7 +27,11 @@ public class EncryptionProfileAssertion {
 
     private static final String TLS_1_2_CIPHER = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256";
 
+    private static final String TLS_1_2_AES256_CIPHER = "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384";
+
     private static final String TLS_1_2_OPENSSL_CIPHER = "ECDHE-RSA-AES128-GCM-SHA256";
+
+    private static final String TLS_1_2_AES256_OPENSSL_CIPHER = "ECDHE-RSA-AES256-GCM-SHA384";
 
     private static final String CM_SUPPORTED_TLS_1_3_REGEX = "SUPPORTED_TLS_VERSIONS\\s* TLSv1.3";
 
@@ -39,6 +45,8 @@ public class EncryptionProfileAssertion {
 
     private static final String CM_TLS_1_2_1_3_CIPHERS_REGEX = "tls_ciphers\\s* " + TLS_1_3_CIPHER + "," + TLS_1_2_CIPHER;
 
+    private static final String CM_TLS_1_2_AES256_1_3_CIPHERS_REGEX = "tls_ciphers\\s* " + TLS_1_3_CIPHER + "," + TLS_1_2_AES256_CIPHER + "," + TLS_1_2_CIPHER;
+
     private static final String NGINX_TLS_1_3_REGEX = "ssl_protocols\\s*TLSv1.3";
 
     private static final String NGINX_TLS_1_2_REGEX = "ssl_protocols\\s*TLSv1.2";
@@ -50,6 +58,8 @@ public class EncryptionProfileAssertion {
     private static final String NGINX_SSL_CIPHERS_TLS_1_2_REGEX = "ssl_ciphers\\s*" + TLS_1_2_OPENSSL_CIPHER;
 
     private static final String NGINX_SSL_CIPHERS_TLS_1_2_MIXED_REGEX = "ssl_ciphers\\s*" + TLS_1_2_OPENSSL_CIPHER;
+
+    private static final String NGINX_SSL_CIPHERS_TLS_1_2_AES256_REGEX = "ssl_ciphers\\s*" + TLS_1_2_AES256_OPENSSL_CIPHER + ":" + TLS_1_2_OPENSSL_CIPHER;
 
     private static final String POSTGRES_TLS_1_3_CIPHER_REGEX = "Ciphersuites\\s*=\\s*" + TLS_1_3_CIPHER;
 
@@ -124,19 +134,43 @@ public class EncryptionProfileAssertion {
         return testDto;
     }
 
-    public DistroXTestDto assertTls12Tls13EncryptionProfile(DistroXTestDto testDto) {
-        stackAssertion.validateFileContentExists(testDto, CM_SETTINGS, CM_SUPPORTED_TLS_1_2_1_3_REGEX);
-        stackAssertion.validateFileContentExists(testDto, CM_SETTINGS, CM_TLS_1_2_1_3_CIPHERS_REGEX);
+    public FreeIpaTestDto assertTls12Aes256Tls13EncryptionProfile(FreeIpaTestDto testDto) {
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_TLS_1_2_1_3_REGEX);
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_TLS_1_3_CIPHERSUITES_REGEX);
-        stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_SSL_CIPHERS_TLS_1_2_MIXED_REGEX);
-        stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_2_1_3_REGEX);
-        stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_3_CIPHERSUITES_REGEX);
-        stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_SSL_CIPHERS_TLS_1_2_MIXED_REGEX);
-        stackAssertion.validateFileContentExists(testDto, POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_3_CIPHER_REGEX);
-        stackAssertion.validateFileContentExists(testDto, POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_2_MIN_PROTOCOL_REGEX);
-        stackAssertion.validateFileContentExists(testDto, POSTGRES_SYSTEMD_DROPIN, POSTGRES_SYSTEMD_OPENSSL_CONF_REGEX);
+        stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_SSL_CIPHERS_TLS_1_2_AES256_REGEX);
         return testDto;
+    }
+
+    public SdxTestDto assertTls12Aes256Tls13EncryptionProfile(SdxTestDto testDto) {
+        assertTls12Tls13Stack((file, regex) -> stackAssertion.validateFileContentExists(testDto, file, regex),
+                CM_TLS_1_2_AES256_1_3_CIPHERS_REGEX, NGINX_SSL_CIPHERS_TLS_1_2_AES256_REGEX);
+        return testDto;
+    }
+
+    public DistroXTestDto assertTls12Aes256Tls13EncryptionProfile(DistroXTestDto testDto) {
+        assertTls12Tls13Stack((file, regex) -> stackAssertion.validateFileContentExists(testDto, file, regex),
+                CM_TLS_1_2_AES256_1_3_CIPHERS_REGEX, NGINX_SSL_CIPHERS_TLS_1_2_AES256_REGEX);
+        return testDto;
+    }
+
+    public DistroXTestDto assertTls12Tls13EncryptionProfile(DistroXTestDto testDto) {
+        assertTls12Tls13Stack((file, regex) -> stackAssertion.validateFileContentExists(testDto, file, regex),
+                CM_TLS_1_2_1_3_CIPHERS_REGEX, NGINX_SSL_CIPHERS_TLS_1_2_MIXED_REGEX);
+        return testDto;
+    }
+
+    private void assertTls12Tls13Stack(BiConsumer<String, String> fileContentValidator, String cmCiphersRegex, String nginxCiphersRegex) {
+        fileContentValidator.accept(CM_SETTINGS, CM_SUPPORTED_TLS_1_2_1_3_REGEX);
+        fileContentValidator.accept(CM_SETTINGS, cmCiphersRegex);
+        fileContentValidator.accept(NGINX_SSL_CONF, NGINX_TLS_1_2_1_3_REGEX);
+        fileContentValidator.accept(NGINX_SSL_CONF, NGINX_TLS_1_3_CIPHERSUITES_REGEX);
+        fileContentValidator.accept(NGINX_SSL_CONF, nginxCiphersRegex);
+        fileContentValidator.accept(NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_2_1_3_REGEX);
+        fileContentValidator.accept(NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_3_CIPHERSUITES_REGEX);
+        fileContentValidator.accept(NGINX_SSL_USER_FACING_CONF, nginxCiphersRegex);
+        fileContentValidator.accept(POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_3_CIPHER_REGEX);
+        fileContentValidator.accept(POSTGRES_OPENSSL_CONF, POSTGRES_TLS_1_2_MIN_PROTOCOL_REGEX);
+        fileContentValidator.accept(POSTGRES_SYSTEMD_DROPIN, POSTGRES_SYSTEMD_OPENSSL_CONF_REGEX);
     }
 
     public FreeIpaTestDto assertDefaultTls12Tls13EncryptionProfile(FreeIpaTestDto testDto) {

@@ -301,32 +301,11 @@ public class EncryptionProfileProviderTest {
         assertTrue(result.containsKey(TlsVersion.TLS_1_3.getVersion()));
         assertThat(result.get(TlsVersion.TLS_1_2.getVersion())).containsExactly(
                 "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
-                "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256",
-                "TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384",
-                "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256",
-                "TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384",
-                "TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256",
                 "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-                "TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256",
                 "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
-                "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384",
-                "TLS_ECCPWD_WITH_AES_128_GCM_SHA256",
-                "TLS_ECCPWD_WITH_AES_256_GCM_SHA384",
-                "TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256",
-                "TLS_ECCPWD_WITH_AES_256_CCM_SHA384",
-                "TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8",
-                "TLS_ECDHE_ECDSA_WITH_AES_256_CCM",
                 "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
                 "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-                "TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8",
-                "TLS_ECDHE_ECDSA_WITH_AES_128_CCM",
                 "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
-                "TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384",
-                "TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256",
-                "TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384",
-                "TLS_ECCPWD_WITH_AES_128_CCM_SHA256",
-                "TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256",
-                "TLS_ECDHE_PSK_WITH_AES_128_CCM_8_SHA256",
                 "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
                 "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
                 "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
@@ -344,9 +323,7 @@ public class EncryptionProfileProviderTest {
         assertThat(result.get(TlsVersion.TLS_1_3.getVersion())).containsExactly(
                 "TLS_AES_256_GCM_SHA384",
                 "TLS_CHACHA20_POLY1305_SHA256",
-                "TLS_AES_128_GCM_SHA256",
-                "TLS_AES_128_CCM_8_SHA256",
-                "TLS_AES_128_CCM_SHA256");
+                "TLS_AES_128_GCM_SHA256");
     }
 
     @Test
@@ -418,9 +395,7 @@ public class EncryptionProfileProviderTest {
                 """
                             TLS_AES_256_GCM_SHA384:
                             TLS_CHACHA20_POLY1305_SHA256:
-                            TLS_AES_128_GCM_SHA256:
-                            TLS_AES_128_CCM_8_SHA256:
-                            TLS_AES_128_CCM_SHA256
+                            TLS_AES_128_GCM_SHA256
                         """.replaceAll("\\s+", ""));
     }
 

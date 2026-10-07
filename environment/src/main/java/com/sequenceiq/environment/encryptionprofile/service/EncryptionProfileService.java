@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
@@ -33,7 +31,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
-import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -45,10 +42,6 @@ import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 public class EncryptionProfileService implements CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionProfileService.class);
-
-    private static final String RESERVED_NAME = "cdp_default";
-
-    private static final String RSA = "RSA";
 
     @Value("${cb.encryptionprofile.default.name:cdp_default_fips_v1}")
     private String defaultEncryptionProfileName;
@@ -87,23 +80,11 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     public EncryptionProfile create(EncryptionProfile encryptionProfile, String accountId, String creator) {
         LOGGER.debug("Create encryption profile request has received: {}", encryptionProfile);
-        if (encryptionProfile.getName().toLowerCase(Locale.ROOT).startsWith(RESERVED_NAME)) {
-            throw new BadRequestException("Encryption Profile name cannot start with: " + RESERVED_NAME);
-        }
         repository.findByNameAndAccountId(encryptionProfile.getName(), accountId)
                 .map(EncryptionProfile::getName)
                 .ifPresent(name -> {
                     throw new BadRequestException("Encryption Profile already exists with name: " + name);
                 });
-
-        if (CollectionUtils.isEmpty(encryptionProfile.getCipherSuites())) {
-            throw new BadRequestException("Cipher suites list cannot be empty");
-        }
-
-        if (!isTls13Only(encryptionProfile.getTlsVersions())
-                && !containsRsaCipherSuite(encryptionProfile.getCipherSuites(), encryptionProfile.getTlsVersions())) {
-            throw new BadRequestException("Encryption Profile must have at least one RSA cipher suite");
-        }
 
         encryptionProfile.setResourceCrn(createCRN(accountId));
         encryptionProfile.setAccountId(accountId);
@@ -115,23 +96,6 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
             LOGGER.error("Error happened during encryption profile creation: ", e);
             throw new InternalServerErrorException(e);
         }
-    }
-
-    private boolean isTls13Only(Set<TlsVersion> tlsVersions) {
-        return  tlsVersions.contains(TlsVersion.TLS_1_3) && tlsVersions.size() == 1;
-    }
-
-    private boolean containsRsaCipherSuite(List<String> cipherSuites, Set<TlsVersion> tlsVersions) {
-        return cipherSuites
-                .stream()
-                .anyMatch(EncryptionProfileService::isRsa);
-    }
-
-    public static boolean isRsa(String cipherSuite) {
-        if (cipherSuite == null) {
-            return false;
-        }
-        return cipherSuite.contains(RSA);
     }
 
     public EncryptionProfile getByNameAndAccountId(String encryptionProfileName, String accountId) {

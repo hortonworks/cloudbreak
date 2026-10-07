@@ -6,6 +6,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class EncryptionProfileRequestValidatorTest {
 
     private ConstraintValidatorContext context;
 
-    private CipherSuiteProvider cipherSuiteProvider = new CipherSuiteProvider();
+    private final CipherSuiteProvider cipherSuiteProvider = new CipherSuiteProvider();
 
     @Spy
     private EncryptionProfileProvider encryptionProfileProvider = new EncryptionProfileProvider(cipherSuiteProvider);
@@ -51,6 +52,30 @@ public class EncryptionProfileRequestValidatorTest {
         lenient().when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         lenient().when(violationBuilder.addPropertyNode(anyString())).thenReturn(nodeBuilder);
         lenient().when(nodeBuilder.addConstraintViolation()).thenReturn(context);
+    }
+
+    @Test
+    void testDefaultConstraintViolationIsDisabled() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        Set<TlsVersion> tls = new HashSet<>();
+        tls.add(TlsVersion.TLS_1_2);
+        request.setTlsVersions(tls);
+
+        underTest.isValid(request, context);
+
+        verify(context).disableDefaultConstraintViolation();
+    }
+
+    @Test
+    void testCipherSuitesByTlsVersionIsComputedOnce() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        request.setTlsVersions(Set.of(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3));
+        request.setCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_AES_128_GCM_SHA256"));
+
+        boolean result = underTest.isValid(request, context);
+
+        assertTrue(result);
+        verify(encryptionProfileProvider, times(1)).getAllCipherSuitesAvailableByTlsVersion();
     }
 
     @Test
@@ -74,10 +99,25 @@ public class EncryptionProfileRequestValidatorTest {
     }
 
     @Test
+    void testTls12OnlyTlsVersions() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        Set<TlsVersion> tls = new HashSet<>();
+        tls.add(TlsVersion.TLS_1_2);
+        request.setTlsVersions(tls);
+        request.setCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
+
+        boolean result = underTest.isValid(request, context);
+
+        assertFalse(result);
+        verify(context).buildConstraintViolationWithTemplate("tlsVersions cannot be TLS 1.2 only.");
+    }
+
+    @Test
     void testValidTlsVersionsNoCipherSuites() {
         EncryptionProfileRequest request = new EncryptionProfileRequest();
         Set<TlsVersion> tls = new HashSet<>();
         tls.add(TlsVersion.TLS_1_2);
+        tls.add(TlsVersion.TLS_1_3);
         request.setTlsVersions(tls);
 
         boolean result = underTest.isValid(request, context);
@@ -105,6 +145,7 @@ public class EncryptionProfileRequestValidatorTest {
         EncryptionProfileRequest request = new EncryptionProfileRequest();
         Set<TlsVersion> tls = new HashSet<>();
         tls.add(TlsVersion.TLS_1_2);
+        tls.add(TlsVersion.TLS_1_3);
         request.setTlsVersions(tls);
 
         List<String> ciphers = Arrays.asList("INVALID_CIPHER");
@@ -120,15 +161,91 @@ public class EncryptionProfileRequestValidatorTest {
         EncryptionProfileRequest request = new EncryptionProfileRequest();
         Set<TlsVersion> tls = new HashSet<>();
         tls.add(TlsVersion.TLS_1_2);
+        tls.add(TlsVersion.TLS_1_3);
         request.setTlsVersions(tls);
 
-        List<String> ciphers = Arrays.asList("TLS_CHACHA20_POLY1305_SHA256");
+        List<String> ciphers = Arrays.asList("TLS_ECDHE_ECDSA_WITH_AES_128_CCM");
         request.setCipherSuites(ciphers);
 
         boolean result = underTest.isValid(request, context);
         assertFalse(result);
-        verify(context).buildConstraintViolationWithTemplate(contains("Unsupported cipher suite(s) for the given TLS versions: TLS_CHACHA20_POLY1305_SHA256"));
+        verify(context).buildConstraintViolationWithTemplate(
+                contains("Unsupported cipher suite(s) for the given TLS versions: TLS_ECDHE_ECDSA_WITH_AES_128_CCM"));
     }
+
+    @Test
+    void testTls12CipherSuiteForTls13OnlyProfile() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        request.setTlsVersions(Set.of(TlsVersion.TLS_1_3));
+        request.setCipherSuites(List.of("TLS_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
+
+        boolean result = underTest.isValid(request, context);
+
+        assertFalse(result);
+        verify(context).buildConstraintViolationWithTemplate(
+                "Unsupported cipher suite(s) for the given TLS versions: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+    }
+
+    @Test
+    void testUnsupportedCipherSuitesAreReportedSorted() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        request.setTlsVersions(Set.of(TlsVersion.TLS_1_3));
+        request.setCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"));
+
+        boolean result = underTest.isValid(request, context);
+
+        assertFalse(result);
+        verify(context).buildConstraintViolationWithTemplate("Unsupported cipher suite(s) for the given TLS versions: "
+                + "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+    }
+
+    @Test
+    void testTls12AndTls13WithCipherSuitesForBothVersions() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        Set<TlsVersion> tls = new HashSet<>();
+        tls.add(TlsVersion.TLS_1_2);
+        tls.add(TlsVersion.TLS_1_3);
+        request.setTlsVersions(tls);
+        request.setCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_AES_128_GCM_SHA256"));
+
+        boolean result = underTest.isValid(request, context);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testTls12AndTls13WithoutTls12CipherSuite() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        Set<TlsVersion> tls = new HashSet<>();
+        tls.add(TlsVersion.TLS_1_2);
+        tls.add(TlsVersion.TLS_1_3);
+        request.setTlsVersions(tls);
+        request.setCipherSuites(List.of("TLS_AES_128_GCM_SHA256"));
+
+        boolean result = underTest.isValid(request, context);
+
+        assertFalse(result);
+        verify(context).buildConstraintViolationWithTemplate(
+                "cipherSuites must contain at least one cipher suite for each TLS version. Missing cipher suite(s) for: TLSv1.2");
+    }
+
+    @Test
+    void testTls12AndTls13WithoutTls13CipherSuite() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        Set<TlsVersion> tls = new HashSet<>();
+        tls.add(TlsVersion.TLS_1_2);
+        tls.add(TlsVersion.TLS_1_3);
+        request.setTlsVersions(tls);
+        request.setCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
+
+        boolean result = underTest.isValid(request, context);
+
+        assertFalse(result);
+        verify(context).buildConstraintViolationWithTemplate(
+                "cipherSuites must contain at least one cipher suite for each TLS version. Missing cipher suite(s) for: TLSv1.3");
+    }
+
 }
 
 

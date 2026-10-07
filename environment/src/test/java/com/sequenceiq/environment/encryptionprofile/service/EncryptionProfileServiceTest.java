@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.encryptionprofile.service;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.ACCOUNT_ID;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.CREATOR;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.DEFAULT_ENCRYPTION_PROFILE_CRN;
@@ -27,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import jakarta.ws.rs.InternalServerErrorException;
@@ -51,7 +49,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -142,16 +139,6 @@ public class EncryptionProfileServiceTest {
                 .hasRootCauseMessage("DB error");
 
         verify(ownerAssignmentService).notifyResourceDeleted(ENCRYPTION_PROFILE_CRN);
-    }
-
-    @Test
-    void testCreateFailsIfNameIsNotAllowed() {
-        assertThatThrownBy(() -> underTest.create(getTestEncryptionProfile("cdp_default_new", USER_MANAGED), ACCOUNT_ID, CREATOR))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Encryption Profile name cannot start with: cdp_default");
-
-        verify(repository, never()).save(any());
-        verify(ownerAssignmentService, never()).assignResourceOwnerRoleIfEntitled(any(), any());
     }
 
     @Test
@@ -472,20 +459,6 @@ public class EncryptionProfileServiceTest {
     }
 
     @Test
-    void testCreateEncryptionProfileShouldHaveAtLeastOneRSACipher() {
-        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
-        encryptionProfile.setCipherSuites(List.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
-
-        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> underTest.create(encryptionProfile, ACCOUNT_ID, CREATOR))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Encryption Profile must have at least one RSA cipher suite");
-
-        verify(repository, never()).save(any());
-    }
-
-    @Test
     void testGetEncryptionProfileByNameOrCrnWhenProfileNameIsUsed() {
         String encryptionProfileNameOrCrn = "epName";
 
@@ -546,33 +519,6 @@ public class EncryptionProfileServiceTest {
         verify(repository, times(1)).findByNameAndAccountId(eq("epName"), anyString());
         assertThat(ex).hasMessage("Encryption Profile not found with name: epName");
 
-    }
-
-    @Test
-    void testCreateEncryptionProfileDoesntRequireRSACipherWhenIsTls13Only() {
-        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
-        encryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_3));
-        encryptionProfile.setCipherSuites(List.of("TLS_AES_256_GCM_SHA384"));
-
-        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
-
-        assertDoesNotThrow(() -> underTest.create(encryptionProfile, ACCOUNT_ID, CREATOR));
-
-        verify(repository, times(1)).save(any());
-    }
-
-    @Test
-    void testCreateEncryptionProfileShouldNotAllowCipherSuitesEmptyList() {
-        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
-        encryptionProfile.setCipherSuites(List.of());
-
-        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> underTest.create(encryptionProfile, ACCOUNT_ID, CREATOR))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Cipher suites list cannot be empty");
-
-        verify(repository, never()).save(any());
     }
 
     @Test
