@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.STARTED;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
@@ -38,7 +37,6 @@ import com.sequenceiq.cloudbreak.job.archiver.instancemetadata.ArchiveInstanceMe
 import com.sequenceiq.cloudbreak.job.diskusage.DiskUsageSyncJobService;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshJobService;
 import com.sequenceiq.cloudbreak.job.provider.ProviderSyncJobService;
-import com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobService;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -123,6 +121,8 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.job.ExistingStackPatcherJobService;
 
 @Configuration
 public class ClusterCreationActions {
@@ -755,7 +755,7 @@ public class ClusterCreationActions {
                 providerSyncJobService.schedule(context.getStack());
                 diskUsageSyncJobService.schedule(context.getStack());
                 if (CloudPlatform.MOCK.equalsIgnoreCase(context.getStack().getCloudPlatform())) {
-                    existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK, LocalDateTime.now());
+                    existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK, ZonedDateTime.now());
                 }
                 meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), STARTED);
                 meteringService.scheduleSync(context.getStackId());

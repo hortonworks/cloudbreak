@@ -26,12 +26,13 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.service.retry.RetryType;
 import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
 
 @ExtendWith(MockitoExtension.class)
 class MinifiRetryConfigFixPatchServiceTest {

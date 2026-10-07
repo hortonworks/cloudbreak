@@ -128,7 +128,6 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -147,6 +146,7 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.stackpatcher.service.StackPatchService;
 
 @Service
 public class StackService implements ResourceIdProvider, AuthorizationResourceNamesProvider, PayloadContextProvider {
@@ -1254,7 +1254,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     public Instant getCreatedByResourceCrn(String resourceCrn) {
         Optional<Long> created = stackRepository.getCreatedByResourceCrn(resourceCrn);
         return Instant.ofEpochMilli(created.orElseThrow(() -> new NotFoundException(
-            String.format("Datahub stack with resource crn [%s] not found or terminated", resourceCrn))));
+                String.format("Datahub stack with resource crn [%s] not found or terminated", resourceCrn))));
     }
 
     public void deleteArchivedByResourceCrn(String crn) {
@@ -1280,7 +1280,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 loadBalancerPersistenceService.deleteByStackId(stackId);
 
                 LOGGER.debug("Cleanup stackPatch for stack {}", crn);
-                stackPatchService.deleteByStackId(stackId);
+                stackPatchService.deleteByResourceId(stackId);
 
                 LOGGER.debug("Cleanup components for stack {}", crn);
                 componentConfigProviderService.deleteComponentsForStack(stackId);

@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -47,6 +46,8 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.ResourceSyncUtil;
 import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
 
 @ExtendWith(MockitoExtension.class)
 class FstabValidatorServiceTest {
@@ -60,7 +61,7 @@ class FstabValidatorServiceTest {
     private static final String FSTAB_FROM_DB = "/dev/xvdb /hadoopfs/fs1 auto defaults,noatime 0 0";
 
     private static final String FSTAB_FROM_DB_2 = "/dev/xvdb /hadoopfs/fs1 auto defaults,noatime 0 0 \n" +
-        "/dev/xvdc /hadoopfs/fs2 auto defaults,noatime 0 0";
+            "/dev/xvdc /hadoopfs/fs2 auto defaults,noatime 0 0";
 
     private static final String FSTAB_FROM_HOST = "/dev/xvdb /hadoopfs/fs1 auto defaults,noatime 0 2";
 

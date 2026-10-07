@@ -20,10 +20,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalDefaultBlueprintMigrationPatchServiceTest {

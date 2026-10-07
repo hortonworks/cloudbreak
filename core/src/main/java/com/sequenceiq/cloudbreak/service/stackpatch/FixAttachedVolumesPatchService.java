@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -54,9 +53,12 @@ import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
 
 @Service
-public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
+public class FixAttachedVolumesPatchService extends ExistingStackPatchService<Stack> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FixAttachedVolumesPatchService.class);
 
     private static final Pattern UUID_RESULT_REGEX_PATTERN = Pattern.compile("(.*): UUID=\"([a-z0-9-]+)\"");
@@ -125,7 +127,7 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    protected boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         if (!PATCH_ALLOWED_STATUSES.contains(stack.getStatus())) {
             LOGGER.warn("Attached volume patch is needed for {} stack, but will be skipped, because its status is not in {}. Current status: {}",
                     stack.getName(), PATCH_ALLOWED_STATUSES, stack.getStatus());

@@ -30,10 +30,11 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.StackPatchRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.stackpatcher.repository.StackPatchRepository;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
 
 @ExtendWith(MockitoExtension.class)
 class MockPatchServiceTest {

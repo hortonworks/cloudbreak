@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.MOCK;
+import static com.sequenceiq.stackpatcher.domain.StackPatchType.MOCK;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -14,13 +14,15 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
 
 @Service
-public class MockPatchService extends ExistingStackPatchService {
+public class MockPatchService extends ExistingStackPatchService<Stack> {
 
     static final String STACK_PATCH_RESULT_TAG_KEY = "stack-patch-result";
 
@@ -69,7 +71,7 @@ public class MockPatchService extends ExistingStackPatchService {
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    protected boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         try {
             StackTags stackTags = stack.getTags().get(StackTags.class);
             String stackPatchResultTag = stackTags.getUserDefinedTags().get(STACK_PATCH_RESULT_TAG_KEY);

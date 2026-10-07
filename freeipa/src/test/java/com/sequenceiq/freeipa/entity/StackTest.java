@@ -43,4 +43,11 @@ public class StackTest {
         assertEquals(Optional.empty(), primaryGateway);
     }
 
+    @Test
+    public void testGetTenantNameReturnsAccountId() {
+        underTest.setAccountId("accountId");
+
+        assertEquals("accountId", underTest.getTenantName());
+    }
+
 }

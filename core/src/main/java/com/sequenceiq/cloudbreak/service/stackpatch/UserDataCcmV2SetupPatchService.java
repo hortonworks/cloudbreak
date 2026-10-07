@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.USER_DATA_CCMV2_SETUP;
+import static com.sequenceiq.stackpatcher.domain.StackPatchType.USER_DATA_CCMV2_SETUP;
 
 import java.util.Map;
 
@@ -11,13 +11,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
 
 @Component
-public class UserDataCcmV2SetupPatchService extends ExistingStackPatchService {
+public class UserDataCcmV2SetupPatchService extends ExistingStackPatchService<Stack> {
     public static final int MAX_START_DELAY_IN_HOURS = 6;
 
     public static final String CDP_API_ENDPOINT_URL_ENV_VARIABLE_NAME = "CDP_API_ENDPOINT_URL";
@@ -38,7 +40,7 @@ public class UserDataCcmV2SetupPatchService extends ExistingStackPatchService {
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    protected boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         Long stackId = stack.getId();
         Map<InstanceGroupType, String> userData = userDataService.getUserData(stackId);
         String gatewayUserData = userData.get(InstanceGroupType.GATEWAY);

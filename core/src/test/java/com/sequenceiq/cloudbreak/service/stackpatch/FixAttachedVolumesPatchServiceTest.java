@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
 
 @ExtendWith(MockitoExtension.class)
 class FixAttachedVolumesPatchServiceTest {

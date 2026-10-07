@@ -13,6 +13,7 @@ Assistant-oriented playbooks live under **`.agent/skills/`**. The files are **pl
 - **cb-jira**: Jira project keys, Team field / JQL (Atlassian team ids), clan → module mapping, quarterly labels — load when working with tickets or Jira integrations.
 - **cb-code-reviewer**: How the team reviews PRs (distilled from real review history) — reuse-over-duplication, logging, tests, null-safety, flow/layering, correctness bugs. Load when reviewing or self-reviewing a PR.
 - **cb-flow-engine**: Step-by-step procedure for adding a flow (state machine config, states/events, actions, handlers, flow chains) without deadlocking the engine — load when implementing a long-running async operation.
+- **cb-stack-patcher**: Step-by-step procedure for adding an existing stack patcher (`StackPatchType`, `ExistingStackPatchService`, config) or adopting the shared `stack-patcher` module in a new service — load when fixing already-provisioned resources in the background.
 - **cb-db-migration**: MyBatis Migrations procedure — file location, timestamp+ticket naming, mandatory `@UNDO`, idempotent/reversible DDL — load when changing a service database schema.
 - **cb-testing**: JUnit 5 + Mockito unit tests, Spring integration tests, the authorization-compliance test, flow-chain graph tests, Gradle/jacoco commands and coverage gates — load when writing tests or before opening a PR.
 - **cb-pr-ci-triage**: Triage PR GitHub Actions failures from a PR number (unit tests, Jacoco coverage, checkstyle, SpotBugs, integration checks) — load when a PR build is red or the user asks why CI failed.
@@ -49,6 +50,7 @@ These patterns are implemented from many modules, but documented in one. When a 
 
 - **Flow engine** (state machine, Action/Handler async pattern): `flow/AGENTS.md`. Used by `core/`, `datalake/`, `environment/`, `freeipa/`, `redbeams/`.
 - **Quartz scheduled jobs** (`MdcQuartzJob`, `JobInitializer`, `TransactionalScheduler`): `common/AGENTS.md`. Used across Core, Flow, FreeIPA, Datalake, Environment, Redbeams.
+- **Existing stack patchers** (`ExistingStackPatchService`, `StackPatchResourceService`, `stackpatch` table): `stack-patcher/AGENTS.md`.
 
 ## Continuous integration (PR testing)
 

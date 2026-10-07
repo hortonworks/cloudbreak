@@ -114,7 +114,6 @@ import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigServ
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -125,6 +124,7 @@ import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.stackpatcher.service.StackPatchService;
 
 @ExtendWith(MockitoExtension.class)
 class StackServiceTest {
@@ -733,7 +733,7 @@ class StackServiceTest {
         assertEquals(1, statuses.size());
         assertThat(statuses.getFirst())
                 .returns(ConfigStalenessState.STALE, StackClusterStatusView::getConfigStalenessState)
-                .returns(stalenessDetails,  StackClusterStatusView::getConfigStalenessDetails);
+                .returns(stalenessDetails, StackClusterStatusView::getConfigStalenessDetails);
     }
 
     private Set<StackIdView> findClusterConnectedToDatalake(
@@ -878,7 +878,7 @@ class StackServiceTest {
         verify(userDataService, times(1)).deleteByStackId(1L);
         verify(resourceService, times(1)).deleteByStackId(1L);
         verify(loadBalancerPersistenceService, times(1)).deleteByStackId(1L);
-        verify(stackPatchService, times(1)).deleteByStackId(1L);
+        verify(stackPatchService, times(1)).deleteByResourceId(1L);
         verify(componentConfigProviderService, times(1)).deleteComponentsForStack(1L);
         verify(stackRepository, times(1)).deleteByResourceCrn(anyString());
     }
@@ -949,7 +949,7 @@ class StackServiceTest {
         verify(userDataService, times(1)).deleteByStackId(anyLong());
         verify(resourceService, times(1)).deleteByStackId(anyLong());
         verify(loadBalancerPersistenceService, times(1)).deleteByStackId(anyLong());
-        verify(stackPatchService, times(1)).deleteByStackId(anyLong());
+        verify(stackPatchService, times(1)).deleteByResourceId(anyLong());
         verify(componentConfigProviderService, times(1)).deleteComponentsForStack(anyLong());
     }
 

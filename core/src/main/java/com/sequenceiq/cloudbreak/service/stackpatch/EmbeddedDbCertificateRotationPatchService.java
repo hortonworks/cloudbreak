@@ -14,13 +14,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
 
 @Component
-public class EmbeddedDbCertificateRotationPatchService extends ExistingStackPatchService {
+public class EmbeddedDbCertificateRotationPatchService extends ExistingStackPatchService<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedDbCertificateRotationPatchService.class);
 
@@ -41,7 +43,7 @@ public class EmbeddedDbCertificateRotationPatchService extends ExistingStackPatc
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    protected boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         try {
             FlowIdentifier flowIdentifier = stackRotationService.rotateSecrets(stack.getResourceCrn(),
                     List.of(CloudbreakSecretType.EMBEDDED_DB_SSL_CERT.value()), null, Map.of());

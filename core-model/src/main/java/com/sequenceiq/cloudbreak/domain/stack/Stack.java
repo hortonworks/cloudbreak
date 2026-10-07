@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
+import com.sequenceiq.cloudbreak.common.domain.StackPatchResource;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -108,7 +109,7 @@ import com.sequenceiq.common.model.ProviderSyncState;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
-public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware, StackView, StackDtoDelegate, IdAware {
+public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware, StackView, StackDtoDelegate, IdAware, StackPatchResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.GLOBAL_DEFAULT_BLUEPRINT_MIGRATION;
 import static com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService.GLOBAL_DEFAULT_ACCOUNT;
+import static com.sequenceiq.stackpatcher.domain.StackPatchType.GLOBAL_DEFAULT_BLUEPRINT_MIGRATION;
 
 import java.util.Optional;
 
@@ -15,12 +15,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
 
 @Component
-public class GlobalDefaultBlueprintMigrationPatchService extends ExistingStackPatchService {
+public class GlobalDefaultBlueprintMigrationPatchService extends ExistingStackPatchService<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalDefaultBlueprintMigrationPatchService.class);
 
@@ -45,7 +47,7 @@ public class GlobalDefaultBlueprintMigrationPatchService extends ExistingStackPa
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    protected boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         Blueprint blueprint = stack.getBlueprint();
         Optional<Blueprint> globalDefaultBlueprint = blueprintService.getGlobalDefaultBlueprintByName(blueprint.getName());
         if (globalDefaultBlueprint.isPresent()) {

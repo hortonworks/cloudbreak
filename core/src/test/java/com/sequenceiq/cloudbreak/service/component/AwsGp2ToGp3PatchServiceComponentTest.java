@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -57,8 +56,6 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretAspectService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.AwsGp2ToGp3PatchService;
-import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchEntitlementService;
-import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchUsageReporterService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -70,6 +67,9 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.service.FlowRetryService;
+import com.sequenceiq.stackpatcher.config.ExistingStackPatcherConfig;
+import com.sequenceiq.stackpatcher.service.StackPatchEntitlementService;
+import com.sequenceiq.stackpatcher.service.StackPatchUsageReporterService;
 
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsResponse;
@@ -109,37 +109,37 @@ class AwsGp2ToGp3PatchServiceComponentTest {
      * Serialized {@link VolumeSetAttributes} for the DB row (avoids Jackson ambiguity on {@code Volume} constructors when using {@code new Json(object)}).
      */
     private static final String GP2_VOLUMESET_JSON = """
-        {
-            "availabilityZone": "us-west-1a",
-            "deleteOnTermination": true,
-            "fstab": "",
-            "uuids": "",
-            "volumes": [
-                {
-                    "id": "vol-0",
-                    "device": "/dev/xvd0",
-                    "size": 100,
-                    "type": "gp2",
-                    "cloudVolumeUsageType": "GENERAL"
-                },
-                {
-                    "id": "vol-1",
-                    "device": "/dev/xvd1",
-                    "size": 100,
-                    "type": "gp2",
-                    "cloudVolumeUsageType": "GENERAL"
-                },
-                {
-                    "id": "vol-2",
-                    "device": "/dev/xvd2",
-                    "size": 100,
-                    "type": "gp2",
-                    "cloudVolumeUsageType": "GENERAL"
-                }
-            ],
-            "discoveryFQDN": "m1.cloudera.site"
-        }
-        """;
+            {
+                "availabilityZone": "us-west-1a",
+                "deleteOnTermination": true,
+                "fstab": "",
+                "uuids": "",
+                "volumes": [
+                    {
+                        "id": "vol-0",
+                        "device": "/dev/xvd0",
+                        "size": 100,
+                        "type": "gp2",
+                        "cloudVolumeUsageType": "GENERAL"
+                    },
+                    {
+                        "id": "vol-1",
+                        "device": "/dev/xvd1",
+                        "size": 100,
+                        "type": "gp2",
+                        "cloudVolumeUsageType": "GENERAL"
+                    },
+                    {
+                        "id": "vol-2",
+                        "device": "/dev/xvd2",
+                        "size": 100,
+                        "type": "gp2",
+                        "cloudVolumeUsageType": "GENERAL"
+                    }
+                ],
+                "discoveryFQDN": "m1.cloudera.site"
+            }
+            """;
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;

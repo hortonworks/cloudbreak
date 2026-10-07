@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.AWS_GP2_TO_GP3_MIGRATION;
+import static com.sequenceiq.stackpatcher.domain.StackPatchType.AWS_GP2_TO_GP3_MIGRATION;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -48,6 +47,10 @@ import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
+import com.sequenceiq.stackpatcher.service.StackPatchUsageReporterService;
 
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsResponse;
@@ -92,7 +95,7 @@ import software.amazon.awssdk.services.ec2.model.VolumeType;
  * </ol>
  */
 @Service
-public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
+public class AwsGp2ToGp3PatchService extends ExistingStackPatchService<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsGp2ToGp3PatchService.class);
 
@@ -124,7 +127,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
 
     /**
      * Returns the type of stack patch this service handles.
-     * 
+     *
      * @return AWS_GP2_TO_GP3_MIGRATION patch type
      */
     @Override
@@ -135,7 +138,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
     /**
      * Determines if the stack is affected by this patch (has GP2 volumes that need migration).
      * Only AWS stacks with GP2 volumes in the database are considered affected.
-     * 
+     *
      * @param stack the stack to check
      * @return true if the stack has GP2 volumes that need migration, false otherwise
      */
@@ -156,7 +159,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Applies the GP2 to GP3 migration patch to the stack.
      * Checks if migration has already been started and either continues monitoring existing
      * migrations or starts a new migration process.
-     * 
+     *
      * @param inputStack the stack to apply the patch to
      * @return true if the patch process is complete, false if another pass is needed
      * @throws ExistingStackPatchApplyException if the patch application fails
@@ -183,7 +186,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * or when starting a new batch of volumes after a previous batch completes.
      *
      * @param inputStack the Stack object that was passed to the doApply method
-     * @param awsClient the AWS EC2 client to use for volume operations
+     * @param awsClient  the AWS EC2 client to use for volume operations
      * @return {@code true} if there is nothing left to migrate; {@code false} if another scheduler pass is needed
      * @throws ExistingStackPatchApplyException if initiation fails wholly or something else prevents continuing
      */
@@ -242,12 +245,12 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Called when the stack patch process is run the second time and beyond for a given stack.
      * Checks the migration status of volumes that are in progress and updates the stack status accordingly.
      * If all volumes in the current batch are complete, checks if there are more volumes to migrate.
-     * 
-     * @param stack the Stack object that was passed to the doApply method
+     *
+     * @param stack      the Stack object that was passed to the doApply method
      * @param statusList the list of StackStatus objects for the stack
-     * @param awsClient the AWS EC2 client to use for querying volume status
+     * @param awsClient  the AWS EC2 client to use for querying volume status
      * @return true if stack patch process should finish or false if another pass is needed for any reason, either the current volumes being processed
-     *         need to be rechecked or a new batch of volumes needs to be processed.
+     * need to be rechecked or a new batch of volumes needs to be processed.
      * @throws ExistingStackPatchApplyException if something went wrong and the stack patch process should be marked as failed
      */
     private boolean checkVolumeMigration(Stack stack, List<StackStatus> statusList, AmazonEc2Client awsClient) throws ExistingStackPatchApplyException {
@@ -297,10 +300,10 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * failed, or still in-progress. Updates the database metadata for any newly completed volumes.
      *
      * @param inProgressVolumes volumes marked in-progress for gp2→gp3 in resource metadata
-     * @param awsClient the AWS EC2 client to query volume status
-     * @param stack the stack being patched
+     * @param awsClient         the AWS EC2 client to query volume status
+     * @param stack             the stack being patched
      * @return true if another pass is needed (volumes still in progress), false if all volumes are complete or failed
-     *         or the input List is empty
+     * or the input List is empty
      * @throws ExistingStackPatchApplyException if unable to retrieve volume information from AWS
      */
     private boolean updateVolumeStates(List<VolumeSetAttributes.Volume> inProgressVolumes,
@@ -350,9 +353,9 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
 
     /**
      * Checks to see if the migration is complete for a given volume based on its modification state.
-     * 
+     *
      * @param awsVolume the AWS Volume object
-     * @param modState the latest VolumeModificationState for the volume
+     * @param modState  the latest VolumeModificationState for the volume
      * @return MigrationState indicating COMPLETE, IN_PROGRESS, or FAILED
      */
     private MigrationState isVolumeMigrationComplete(Volume awsVolume, VolumeModification modState) {
@@ -386,11 +389,17 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Represents the current state of a volume migration.
      */
     private enum MigrationState {
-        /** Volume migration has completed successfully */
+        /**
+         * Volume migration has completed successfully
+         */
         COMPLETE,
-        /** Volume migration is still in progress */
+        /**
+         * Volume migration is still in progress
+         */
         IN_PROGRESS,
-        /** Volume migration has failed */
+        /**
+         * Volume migration has failed
+         */
         FAILED
     }
 
@@ -402,7 +411,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Returns true if VOLUME_MIGRATION_IN_PROGRESS is found before any terminal state
      * (VOLUME_MIGRATION_COMPLETE or VOLUME_MIGRATION_FAILED). Returns false if a terminal
      * state is encountered first, or if no migration statuses exist.
-     * 
+     *
      * @param statusList the list of stack statuses to check
      * @return true if migration is in progress, false otherwise
      */
@@ -434,7 +443,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
 
     /**
      * Returns the latest volume modification state for a given volume ID by querying AWS.
-     * 
+     *
      * @param volumeIds a List of volume IDs to check
      * @param awsClient the AWS EC2 client to use
      * @return the latest volume modification state, or empty if no modification state is found
@@ -463,8 +472,8 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * <p/>
      * Returns every migratable gp2 volume that passes validation (no batch cap here; callers limit to
      * {@link #VOLUME_BATCH_LIMIT} when calling EC2 modify).
-     * 
-     * @param stack the stack to get the GP2 volumes from
+     *
+     * @param stack     the stack to get the GP2 volumes from
      * @param awsClient the AWS EC2 client to use for querying volume state
      * @return a list of GP2 volumes that are valid and exist in AWS, or an empty list if no valid volumes are found
      */
@@ -522,8 +531,8 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Calculates GP3 IOPS per volume and calls EC2 modify for each id. Volumes are processed
      * one at a time to reduce throttling.
      *
-     * @param stack the stack (for logging and usage on errors)
-     * @param awsClient the AWS EC2 client used to perform volume modifications
+     * @param stack            the stack (for logging and usage on errors)
+     * @param awsClient        the AWS EC2 client used to perform volume modifications
      * @param volumesToMigrate gp2 volumes to convert (callers supply a batch with valid ids and sizes)
      * @return successes and per-volume {@link CloudbreakException}s for failed initiations
      */
@@ -567,7 +576,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
     /**
      * Determines if the patch should check for failed retryable flows before applying.
      * Volume modifications don't start flows, so we can proceed even if there are failed flows.
-     * 
+     *
      * @return false, as volume modifications don't require flow checks
      */
     @Override
@@ -580,10 +589,10 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Marks volumes in-progress after successful modify initiation, finished (and gp3 type) when done,
      * or failed when initiation or migration fails.
      *
-     * @param stackId the stack owning the resources
+     * @param stackId        the stack owning the resources
      * @param inProgressList volume ids that just started modifying
-     * @param finishedList volume ids confirmed migrated to gp3
-     * @param failedList volume ids that failed initiation or aws migration
+     * @param finishedList   volume ids confirmed migrated to gp3
+     * @param failedList     volume ids that failed initiation or aws migration
      */
     private void updateResourceMetadata(Long stackId, Set<String> inProgressList, Set<String> finishedList,
             Set<String> failedList, Collection<Resource> resources) {
@@ -654,7 +663,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
     /**
      * Describes the given volumes in EC2 and returns a map keyed by aws volume id.
      *
-     * @param volumes cloudbreak-side volume rows (null or empty ids are skipped)
+     * @param volumes   cloudbreak-side volume rows (null or empty ids are skipped)
      * @param awsClient EC2 client
      * @return volume id → EC2 Volume; missing ids omitted (empty response yields empty map)
      */
@@ -685,7 +694,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
 
     /**
      * Creates and returns an AWS EC2 client for the given stack.
-     * 
+     *
      * @param stack the stack to create the client for
      * @return the authenticated AWS EC2 client
      */
@@ -700,7 +709,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Retrieves GP2 volumes from the stack's resource metadata stored in the database.
      * This method examines AWS_VOLUMESET and AWS_ROOT_DISK resources to identify volumes
      * with GP2 type.
-     *
+     * <p>
      * NOTE: This returns database metadata which may be stale if volumes were modified
      * outside of Cloudbreak. Always validate against actual AWS state before making changes.
      *
@@ -727,11 +736,11 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Retrieves GP2 volumes from the stack's resource metadata stored in the database.
      * This method examines AWS_VOLUMESET and AWS_ROOT_DISK resources to identify volumes
      * with GP2 type.
-     *
+     * <p>
      * NOTE: This returns database metadata which may be stale if volumes were modified
      * outside of Cloudbreak. Always validate against actual AWS state before making changes.
      *
-     * @param resources stack resources to scan
+     * @param resources         stack resources to scan
      * @param modificationState modification state to match (e.g. in-progress)
      * @return matching gp2 volumes from resource metadata
      */
@@ -758,7 +767,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      *
      * @param resources stack resources to scan
      * @return left: volumes with {@link CloudVolumeModificationState#GP2_TO_GP3_FAILED} and type Gp2;
-     *         right: volumes with {@link CloudVolumeModificationState#GP2_TO_GP3_FINISHED} and type Gp3
+     * right: volumes with {@link CloudVolumeModificationState#GP2_TO_GP3_FINISHED} and type Gp3
      */
     private Pair<Long, Long> countGp2ToGp3TerminalVolumesFromResources(Collection<Resource> resources) {
         LOGGER.debug("Counting GP2 to GP3 terminal-state volumes across {} resources", resources.size());

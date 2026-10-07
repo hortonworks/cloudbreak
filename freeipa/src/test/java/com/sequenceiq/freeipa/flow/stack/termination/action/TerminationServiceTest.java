@@ -34,6 +34,7 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackStatusService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.stackpatcher.service.StackPatchService;
 
 @ExtendWith(MockitoExtension.class)
 class TerminationServiceTest {
@@ -74,6 +75,9 @@ class TerminationServiceTest {
 
     @Mock
     private StackStatusService stackStatusService;
+
+    @Mock
+    private StackPatchService stackPatchService;
 
     @InjectMocks
     private TerminationService underTest;
@@ -154,6 +158,7 @@ class TerminationServiceTest {
         verify(freeIpaRecipeService).deleteRecipes(STACK_ID);
         verify(stackEncryptionService).deleteStackEncryption(STACK_ID);
         verify(freeIpaLoadBalancerService).delete(STACK_ID);
+        verify(stackPatchService).deleteByResourceId(STACK_ID);
         verify(stackStatusService).cleanupByPreservedStatus(anyLong(), eq(DELETE_COMPLETED));
     }
 

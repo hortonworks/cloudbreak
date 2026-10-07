@@ -31,6 +31,7 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackStatusService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.stackpatcher.service.StackPatchService;
 
 @Service
 public class TerminationService {
@@ -72,6 +73,9 @@ public class TerminationService {
     @Inject
     private StackStatusService stackStatusService;
 
+    @Inject
+    private StackPatchService stackPatchService;
+
     public void finalizeTermination(Long stackId) {
         try {
             transactionService.required(() -> {
@@ -95,6 +99,7 @@ public class TerminationService {
         cleanupVault(stack);
         freeIpaRecipeService.deleteRecipes(stack.getId());
         stackEncryptionService.deleteStackEncryption(stack.getId());
+        stackPatchService.deleteByResourceId(stackId);
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
         stackStatusService.cleanupByPreservedStatus(stackId, Status.DELETE_COMPLETED);
         stackService.save(stack);

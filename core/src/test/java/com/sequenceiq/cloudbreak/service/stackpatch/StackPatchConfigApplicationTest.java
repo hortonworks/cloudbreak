@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchTypeStatus.DEPRECATED;
+import static com.sequenceiq.stackpatcher.domain.StackPatchTypeStatus.DEPRECATED;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.Map;
@@ -12,9 +12,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
-import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
-import com.sequenceiq.cloudbreak.job.stackpatcher.config.StackPatchTypeConfig;
+import com.sequenceiq.stackpatcher.config.ExistingStackPatcherConfig;
+import com.sequenceiq.stackpatcher.config.StackPatchTypeConfig;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
 
 @SpringBootTest(classes = StackPatchConfigApplicationTest.TestConfig.class)
 @EnableConfigurationProperties(ExistingStackPatcherConfig.class)

@@ -15,13 +15,15 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.service.retry.RetryType;
 import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
 
 /**
  * Re-pushes the corrected minifi flow config to clusters where minifi is the enabled logging agent.
@@ -32,7 +34,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
  * minifi service is restarted.
  */
 @Service
-public class MinifiRetryConfigFixPatchService extends ExistingStackPatchService {
+public class MinifiRetryConfigFixPatchService extends ExistingStackPatchService<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MinifiRetryConfigFixPatchService.class);
 
@@ -76,7 +78,7 @@ public class MinifiRetryConfigFixPatchService extends ExistingStackPatchService 
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    protected boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         try {
             FlowIdentifier flowIdentifier = reactorFlowManager.triggerSaltUpdate(stack.getId());
             LOGGER.info("Started salt update flow for minifi retry config fix on stack '{}' with flow identifier '{}'.",

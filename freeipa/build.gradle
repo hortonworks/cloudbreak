@@ -133,6 +133,7 @@ dependencies {
   implementation project(':cloud-aws-common')
   implementation project(':orchestrator-api')
   implementation project(':flow')
+  implementation project(':stack-patcher')
   implementation project(':freeipa-api')
   implementation project(':freeipa-client')
   implementation project(':telemetry-common')

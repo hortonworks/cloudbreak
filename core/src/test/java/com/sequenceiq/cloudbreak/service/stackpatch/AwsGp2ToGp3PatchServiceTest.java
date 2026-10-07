@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -46,6 +45,8 @@ import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.StackPatchUsageReporterService;
 
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsResponse;
@@ -476,9 +477,9 @@ class AwsGp2ToGp3PatchServiceTest {
             List<Volume> newVolumeList = new ArrayList<>();
             for (String vid : saved.volumeIds()) {
                 int idx = Integer.parseInt(vid.split("-")[1]);
-                VolumeType type =  VolumeType.GP3;
+                VolumeType type = VolumeType.GP3;
                 if (idx >= 50) {
-                    type =  VolumeType.GP2;
+                    type = VolumeType.GP2;
                 }
                 newVolumeList.add(Volume.builder()
                         .volumeId(vid)
@@ -1170,7 +1171,7 @@ class AwsGp2ToGp3PatchServiceTest {
     }
 
     private int getGp3VolumeCount(List<VolumeSetAttributes.Volume> volumes) {
-        int  count = 0;
+        int count = 0;
         for (VolumeSetAttributes.Volume volume : volumes) {
             if (volume.getType().equals(VolumeType.GP3.toString())) {
                 count++;
@@ -1180,7 +1181,7 @@ class AwsGp2ToGp3PatchServiceTest {
     }
 
     private int getInProgressVolumeCount(List<VolumeSetAttributes.Volume> volumes) {
-        int  count = 0;
+        int count = 0;
         for (VolumeSetAttributes.Volume volume : volumes) {
             if (CloudVolumeModificationState.GP2_TO_GP3_IN_PROGRESS.equals(volume.getModificationState())) {
                 count++;
@@ -1190,7 +1191,7 @@ class AwsGp2ToGp3PatchServiceTest {
     }
 
     private int getInFailedVolumeCount(List<VolumeSetAttributes.Volume> volumes) {
-        int  count = 0;
+        int count = 0;
         for (VolumeSetAttributes.Volume volume : volumes) {
             if (CloudVolumeModificationState.GP2_TO_GP3_FAILED.equals(volume.getModificationState())) {
                 count++;
@@ -1200,7 +1201,7 @@ class AwsGp2ToGp3PatchServiceTest {
     }
 
     private List<VolumeSetAttributes.Volume> createVolumes(int numVolumes) {
-        List<VolumeSetAttributes.Volume> retval =  new ArrayList<>();
+        List<VolumeSetAttributes.Volume> retval = new ArrayList<>();
         for (int i = 0; i < numVolumes; i++) {
             retval.add(new VolumeSetAttributes.Volume(
                     "vol-" + i, "/dev/xvd" + i, 100, "gp2",
@@ -1210,7 +1211,7 @@ class AwsGp2ToGp3PatchServiceTest {
     }
 
     private List<Volume> createAwsVolumeResponse(int numVolumes, VolumeType volumeType) {
-        List<Volume> retval =  new ArrayList<>();
+        List<Volume> retval = new ArrayList<>();
         for (int i = 0; i < numVolumes; i++) {
             retval.add(Volume.builder()
                     .volumeId("vol-" + i)

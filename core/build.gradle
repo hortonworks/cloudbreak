@@ -231,6 +231,7 @@ dependencies {
   implementation project(':cluster-api')
   implementation project(':databus-connector')
   implementation project(':flow')
+  implementation project(':stack-patcher')
   implementation project(':common')
   implementation project(':common-model')
   implementation project(':workspace')

@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
+import com.sequenceiq.cloudbreak.common.domain.StackPatchResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
@@ -58,7 +60,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
-public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
+public class Stack implements AccountAwareResource, OrchestratorAware, IdAware, MdcContextInfoProvider, StackPatchResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
@@ -459,6 +461,11 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         return getPrimaryGateway().orElseThrow(() -> new CloudbreakRuntimeException("Can't find any primary GW"));
     }
 
+    @Override
+    public String getWorkspaceName() {
+        return null;
+    }
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -478,6 +485,16 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     @Override
     public String getResourceName() {
         return name;
+    }
+
+    @Override
+    public String getResourceType() {
+        return "STACK";
+    }
+
+    @Override
+    public String getTenantName() {
+        return accountId;
     }
 
     public String getAppVersion() {

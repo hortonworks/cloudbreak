@@ -30,9 +30,10 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.entity.StackPatchType;
 import com.sequenceiq.freeipa.orchestrator.SaltUpdateService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
 
 @ExtendWith(MockitoExtension.class)
 class MinifiRetryConfigFixPatchServiceTest {

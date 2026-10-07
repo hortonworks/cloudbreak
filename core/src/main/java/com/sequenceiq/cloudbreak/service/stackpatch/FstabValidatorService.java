@@ -23,14 +23,16 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.ResourceSyncUtil;
 import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
+import com.sequenceiq.stackpatcher.domain.StackPatchType;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchApplyException;
+import com.sequenceiq.stackpatcher.service.ExistingStackPatchService;
 
 @Service
-public class FstabValidatorService extends ExistingStackPatchService {
+public class FstabValidatorService extends ExistingStackPatchService<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FstabValidatorService.class);
 
@@ -94,7 +96,7 @@ public class FstabValidatorService extends ExistingStackPatchService {
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    protected boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         String cloudPlatform = stack.getCloudPlatform();
         if (!VOLUME_RESOURCE_TYPE_BY_PLATFORM.containsKey(cloudPlatform)) {
             LOGGER.info("Fstab validation patch is not supported for platform {}, skipping.", cloudPlatform);
@@ -143,13 +145,13 @@ public class FstabValidatorService extends ExistingStackPatchService {
 
     private Map<String, VolumeSetAttributes> getFstabFromResources(List<Resource> volumeSetResources) {
         return volumeSetResources.stream()
-            .collect(Collectors.toMap(Resource::getInstanceId, r -> {
-                try {
-                    return r.getAttributes().get(VolumeSetAttributes.class);
-                } catch (IOException e) {
-                    LOGGER.warn("Exception while parsing attributes for resource - " + r + " :: Exception - " + e);
-                    return null;
-                }
-            }));
+                .collect(Collectors.toMap(Resource::getInstanceId, r -> {
+                    try {
+                        return r.getAttributes().get(VolumeSetAttributes.class);
+                    } catch (IOException e) {
+                        LOGGER.warn("Exception while parsing attributes for resource - " + r + " :: Exception - " + e);
+                        return null;
+                    }
+                }));
     }
 }
