@@ -22,7 +22,7 @@ ext {
 
   // Rest API
   hibernateValidatorVersion = '8.0.1.Final'
-  jakartaActivationVersion = '2.1.2'
+  jakartaActivationVersion = '2.1.4'
   jakartaServletApiVersion = '6.1.0'
   jakartaValidationVersion = '3.1.1'
   jerseyCoreVersion = '3.1.11'
