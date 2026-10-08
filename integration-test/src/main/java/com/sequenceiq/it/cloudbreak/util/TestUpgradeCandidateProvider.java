@@ -49,10 +49,6 @@ public class TestUpgradeCandidateProvider {
         return getUpgradeSourceAndCandidateByCondition(testContext, this::hasDifferentBuildNumber, runtimeVersion, Architecture.X86_64, false);
     }
 
-    public Pair<String, String> getPatchUpgradeSourceAndCandidate(TestContext testContext, String runtimeVersion, Architecture architecture) {
-        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasDifferentBuildNumber, runtimeVersion, architecture, false);
-    }
-
     public Pair<String, String> getOsUpgradeSourceAndCandidate(TestContext testContext) {
         String sourceRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
