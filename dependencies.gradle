@@ -7,7 +7,7 @@ ext {
   openapiGeneratorGradlePlugin = '7.15.0'
 
   // Spring
-  caffeineVersion = '3.1.8'
+  caffeineVersion = '3.3.0'
   quartzVersion = '2.5.2'
   springBootVersion = '3.5.16'
   springDataJpaFrameworkVersion = '3.2.3'
