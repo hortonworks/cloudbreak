@@ -695,6 +695,7 @@ public class StackOperationService {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
         MDCBuilder.buildMdcContext(stack);
         zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationEligibility(stack, accountId);
+        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationRuntimeVersion(stack);
         return flowManager.triggerZookeeperToKraftMigration(stack.getId());
     }
 
