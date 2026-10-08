@@ -15,7 +15,7 @@ ext {
   springRetryVersion = '2.0.13'
   springStateMachineCoreVersion = '2.5.0'
   springVaultCoreVersion = '3.0.4'
-  aspectjVersion = '1.9.22.1'
+  aspectjVersion = '1.9.25.1'
 
   // Polling
   dyngrPollingVersion = '1.1.3'
