@@ -931,6 +931,7 @@ class StackOperationServiceTest {
 
         underTest.triggerZookeeperToKraftMigration(nameOrCrn, "accountId");
 
+        verify(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationRuntimeVersion(stack);
         verify(flowManager).triggerZookeeperToKraftMigration(STACK_ID);
     }
 
@@ -947,6 +948,18 @@ class StackOperationServiceTest {
     }
 
     @Test
+    public void testTriggerZookeeperToKraftMigrationWhenRuntimeValidationFails() {
+        StackDto stack = mock(StackDto.class);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, "accountId")).thenReturn(stack);
+        doThrow(BadRequestException.class).when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationRuntimeVersion(stack);
+
+        assertThrows(BadRequestException.class, () -> underTest.triggerZookeeperToKraftMigration(nameOrCrn, "accountId"));
+
+        verifyNoInteractions(flowManager);
+    }
+
+    @Test
     public void testTriggerZookeeperToKraftMigrationFinalization() {
         StackDto stack = mock(StackDto.class);
         when(stack.getId()).thenReturn(STACK_ID);
@@ -956,6 +969,7 @@ class StackOperationServiceTest {
 
         underTest.triggerZookeeperToKraftMigrationFinalization(nameOrCrn, "accountId");
 
+        verify(zookeeperToKraftMigrationValidator, never()).validateZookeeperToKraftMigrationRuntimeVersion(any());
         verify(flowManager).triggerZookeeperToKraftMigrationFinalization(STACK_ID);
     }
 
@@ -981,6 +995,7 @@ class StackOperationServiceTest {
 
         underTest.triggerZookeeperToKraftMigrationRollback(nameOrCrn, "accountId");
 
+        verify(zookeeperToKraftMigrationValidator, never()).validateZookeeperToKraftMigrationRuntimeVersion(any());
         verify(flowManager).triggerZookeeperToKraftMigrationRollback(STACK_ID);
     }
 
