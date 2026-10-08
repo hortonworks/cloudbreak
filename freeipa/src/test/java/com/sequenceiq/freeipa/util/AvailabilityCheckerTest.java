@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.collection.spi.PersistentSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
 class AvailabilityCheckerTest {
@@ -30,11 +32,18 @@ class AvailabilityCheckerTest {
 
     private static final Versioned AFTER_VERSION = () -> "2.19.0";
 
+    private static final Long STACK_ID = 1L;
+
+    private static final String CURRENT_IMAGE_ID = "current-image-id";
+
     @InjectMocks
     private TestAvailbilityChecker underTest;
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Test
     void testAvailable() {
@@ -192,12 +201,30 @@ class AvailabilityCheckerTest {
 
     @Test
     void testDoesAllImageSupportWhenImageIsMissingForOldClusters() {
-        Stack stack = mock(Stack.class);
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setImage(new Json(null));
-        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceMetaData));
         boolean result = underTest.doesAllImageSupport(stack, "packageName", AFTER_VERSION);
         assertFalse(result);
+    }
+
+    @Test
+    void testDoesAllImageSupportWhenInstanceGroupsOfStackAreNotLoaded() {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setInstanceGroups(new PersistentSet<>());
+        Image currentImage = mock(Image.class);
+        when(currentImage.getUuid()).thenReturn(CURRENT_IMAGE_ID);
+        when(imageService.getImageForStack(stack)).thenReturn(currentImage);
+        InstanceMetaData instanceOnCurrentImage = new InstanceMetaData();
+        instanceOnCurrentImage.setImage(new Json(com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId(CURRENT_IMAGE_ID).build()));
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceOnCurrentImage));
+
+        boolean result = underTest.doesAllImageSupport(stack, PACKAGE_NAME, AFTER_VERSION);
+
+        assertTrue(result);
     }
 
     private Map<String, String> createPackageVersions(Stack stack) {
