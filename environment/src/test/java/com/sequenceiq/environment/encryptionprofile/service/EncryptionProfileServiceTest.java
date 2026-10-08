@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +37,7 @@ import org.hibernate.JDBCException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -48,6 +48,7 @@ import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
@@ -271,7 +272,8 @@ public class EncryptionProfileServiceTest {
 
     @Test
     void testDeleteByNameAndAccountId() {
-        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(encryptionProfile));
         when(repository.findAllEnvNamesByEncryptionProfileCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(List.of());
 
         EncryptionProfile result = underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID);
@@ -279,10 +281,23 @@ public class EncryptionProfileServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
         assertThat(result.getAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(result.getName()).startsWith(NAME + "_");
 
+        assertArchivedWithGeneratedName(captureSavedProfile());
         verify(repository).findByNameAndAccountId(NAME, ACCOUNT_ID);
-        verify(repository).delete(ENCRYPTION_PROFILE);
+        verify(repository, never()).delete(any());
         verify(ownerAssignmentService).notifyResourceDeleted(ENCRYPTION_PROFILE_CRN);
+    }
+
+    private EncryptionProfile captureSavedProfile() {
+        ArgumentCaptor<EncryptionProfile> captor = ArgumentCaptor.forClass(EncryptionProfile.class);
+        verify(repository).save(captor.capture());
+        return captor.getValue();
+    }
+
+    private void assertArchivedWithGeneratedName(EncryptionProfile saved) {
+        assertThat(saved.isArchived()).isTrue();
+        assertThat(saved.getName()).startsWith(NAME + "_").isNotEqualTo(NAME);
     }
 
     @Test
@@ -295,21 +310,25 @@ public class EncryptionProfileServiceTest {
 
         verify(repository).findByNameAndAccountId(NAME, ACCOUNT_ID);
         verify(repository, never()).delete(any());
+        verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 
     @Test
     void testDeleteByResourceCrn() {
-        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
+        when(repository.findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID)).thenReturn(Optional.of(encryptionProfile));
 
         EncryptionProfile result = underTest.deleteByResourceCrn(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
 
         assertThat(result).isNotNull();
         assertThat(result.getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
         assertThat(result.getAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(result.getName()).startsWith(NAME + "_");
 
+        assertArchivedWithGeneratedName(captureSavedProfile());
         verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
-        verify(repository).delete(ENCRYPTION_PROFILE);
+        verify(repository, never()).delete(any());
         verify(ownerAssignmentService).notifyResourceDeleted(ENCRYPTION_PROFILE_CRN);
     }
 
@@ -323,6 +342,7 @@ public class EncryptionProfileServiceTest {
 
         verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
         verify(repository, never()).delete(any());
+        verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 
@@ -403,6 +423,7 @@ public class EncryptionProfileServiceTest {
                 .hasMessage("The default encryption profile cannot be deleted.");
 
         verify(repository, never()).delete(any());
+        verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 
@@ -416,6 +437,7 @@ public class EncryptionProfileServiceTest {
                 .hasMessage("Encryption Profile cannot be deleted. It is still used by the environment(s): env1,env2.");
 
         verify(repository, never()).delete(any());
+        verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 
@@ -429,6 +451,7 @@ public class EncryptionProfileServiceTest {
                 .hasMessage("Encryption Profile cannot be deleted. It is still used by the cluster(s): cluster1,cluster2.");
 
         verify(repository, never()).delete(any());
+        verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 
@@ -444,6 +467,7 @@ public class EncryptionProfileServiceTest {
                         "It is still used by the cluster(s): cluster1,cluster2.");
 
         verify(repository, never()).delete(any());
+        verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 

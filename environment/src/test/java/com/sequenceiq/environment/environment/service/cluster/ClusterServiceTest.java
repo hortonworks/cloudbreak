@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRea
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -42,6 +44,8 @@ class ClusterServiceTest {
 
     private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:encryption:us-west-1:1234:profile:ep1";
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:ec6c1b0e-6d8e-4d6f-9f4c-2a1b0e6d8e4d";
+
     private static final String REALM = "EXAMPLE.COM";
 
     @Mock
@@ -51,11 +55,14 @@ class ClusterServiceTest {
     private ClusterService underTest;
 
     @Test
-    void getClustersNamesByEncryptionProfileDelegatesToEndpoint() {
+    void getClustersNamesByEncryptionProfileDelegatesToEndpointAsInternalActor() {
         List<String> expectedNames = List.of("cluster1", "cluster2");
-        when(stackV4Endpoint.getClustersNamesByEncryptionProfile(0L, ENCRYPTION_PROFILE_CRN)).thenReturn(expectedNames);
+        when(stackV4Endpoint.getClustersNamesByEncryptionProfile(0L, ENCRYPTION_PROFILE_CRN)).thenAnswer(invocation -> {
+            assertThat(RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())).isTrue();
+            return expectedNames;
+        });
 
-        List<String> result = underTest.getClustersNamesByEncryptionProfile(ENCRYPTION_PROFILE_CRN);
+        List<String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getClustersNamesByEncryptionProfile(ENCRYPTION_PROFILE_CRN));
 
         assertThat(result).containsExactlyElementsOf(expectedNames);
         verify(stackV4Endpoint).getClustersNamesByEncryptionProfile(0L, ENCRYPTION_PROFILE_CRN);

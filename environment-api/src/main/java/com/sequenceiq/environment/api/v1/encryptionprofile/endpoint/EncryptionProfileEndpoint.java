@@ -75,7 +75,10 @@ public interface EncryptionProfileEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = EncryptionProfileOpDescription.DELETE_BY_NAME,
             description = EncryptionProfileDescriptor.ENCRYPTION_PROFILE_NOTES, operationId = "deleteEncryptionProfileByName",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true),
+                    @ApiResponse(responseCode = "400", description = "Invalid request"),
+                    @ApiResponse(responseCode = "404", description = "There is no encryption profile with the given name")})
     EncryptionProfileResponse deleteByName(@PathParam("name") String name);
 
     @DELETE
@@ -83,7 +86,10 @@ public interface EncryptionProfileEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = EncryptionProfileOpDescription.DELETE_BY_CRN,
             description = EncryptionProfileDescriptor.ENCRYPTION_PROFILE_NOTES, operationId = "deleteEncryptionProfileByCrn",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true),
+                    @ApiResponse(responseCode = "400", description = "Invalid request"),
+                    @ApiResponse(responseCode = "404", description = "There is no encryption profile with the given CRN")})
     EncryptionProfileResponse deleteByCrn(@PathParam("crn") String crn);
 
     @GET

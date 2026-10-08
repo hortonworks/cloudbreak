@@ -32,7 +32,8 @@ public class ClusterService {
     }
 
     public List<String> getClustersNamesByEncryptionProfile(String encryptionProfileCrn) {
-        return stackV4Endpoint.getClustersNamesByEncryptionProfile(0L, encryptionProfileCrn);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> stackV4Endpoint.getClustersNamesByEncryptionProfile(0L, encryptionProfileCrn));
     }
 
     public List<String> getStackCrnsForConfigUpdate(String envCrn) {

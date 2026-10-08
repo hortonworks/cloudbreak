@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.encryptionprofile.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
@@ -197,12 +198,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                 .findByNameAndAccountId(encryptionProfileName, accountId)
                 .orElseThrow(notFound("Encryption profile", encryptionProfileName));
 
-        checkEncryptionProfileCanBeDeleted(encryptionProfile);
-
-        repository.delete(encryptionProfile);
-        ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
-
-        return encryptionProfile;
+        return archive(encryptionProfile);
     }
 
     public EncryptionProfile deleteByResourceCrn(String crn, String accountId) {
@@ -211,10 +207,17 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         EncryptionProfile encryptionProfile = repository.findByResourceCrnAndAccountId(crn, accountId)
                 .orElseThrow(notFound("Encryption profile with crn", crn));
 
-        checkEncryptionProfileCanBeDeleted(encryptionProfile);
+        return archive(encryptionProfile);
+    }
 
-        repository.delete(encryptionProfile);
+    private EncryptionProfile archive(EncryptionProfile encryptionProfile) {
+        checkEncryptionProfileCanBeDeleted(encryptionProfile);
+        String originalName = encryptionProfile.getName();
+        encryptionProfile.setName(generateArchiveName(originalName));
+        encryptionProfile.setArchived(true);
+        repository.save(encryptionProfile);
         ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
+        LOGGER.debug("Encryption profile {} has been archived as {}.", originalName, encryptionProfile.getName());
         return encryptionProfile;
     }
 
