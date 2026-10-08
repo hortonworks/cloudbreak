@@ -19,10 +19,10 @@ class SubmitterServiceEndpointResolverTest {
 
     @Test
     void resolveBaseUrlMapsCloudbreakService() {
-        SubmitterServiceEndpointResolver underTest = new SubmitterServiceEndpointResolver(
-                "http://cloudbreak:9091/cb",
-                "http://datalake:8086/dl",
-                "http://freeipa:8090/freeipa");
+        SubmitterServiceEndpointResolver underTest = new SubmitterServiceEndpointResolver(Map.of(
+                "cloudbreak", "http://cloudbreak:9091/cb",
+                "datalake", "http://datalake:8086/dl",
+                "freeipa", "http://freeipa:8090/freeipa"));
 
         assertThat(underTest.resolveBaseUrl("cloudbreak"))
                 .contains("http://cloudbreak:9091/cb");

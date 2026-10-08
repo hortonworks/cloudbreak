@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.maintenancewindow;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.v1.maintenance.model.MaintenanceTaskDispatchRequest;
+import com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport;
+import com.sequenceiq.maintenance.api.model.MaintenanceTaskKind;
 
 /**
  * Builds {@link MaintenanceTaskDispatchRequest} instances for tests, pre-filled with a valid dispatch so each test
@@ -24,7 +26,7 @@ public final class MaintenanceTaskDispatchRequestTestBuilder {
         request.setResourceCrn(RESOURCE_CRN);
         request.setTaskType(MaintenanceWindowSecretRotationSupport.TASK_TYPE);
         request.setWorkItemId("SALT_PASSWORD");
-        request.setTaskKind("ONE_SHOT");
+        request.setTaskKind(MaintenanceTaskKind.ONE_SHOT.name());
         request.setMaintenanceScheduleId(1L);
         request.setPolicyRevision("1:v1");
         request.setWindowStart(1000L);

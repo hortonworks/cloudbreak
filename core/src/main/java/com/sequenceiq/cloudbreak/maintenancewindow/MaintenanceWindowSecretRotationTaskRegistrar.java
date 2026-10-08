@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.maintenancewindow;
 
-import static com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowSecretRotationSupport.SUBMITTER_SERVICE;
-import static com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowSecretRotationSupport.TASK_KIND_ONE_SHOT;
-import static com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowSecretRotationSupport.TASK_TYPE;
-import static com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowSecretRotationSupport.executionRef;
-import static com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowSecretRotationSupport.taskPayload;
-import static com.sequenceiq.cloudbreak.maintenancewindow.MaintenanceWindowSecretRotationSupport.workItemIdForSecretName;
+import static com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport.TASK_TYPE;
+import static com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport.taskPayload;
+import static com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport.workItemIdForSecretName;
+import static com.sequenceiq.maintenance.api.execution.MaintenanceTaskExecutionRefConstants.standardExecutionRef;
+import static com.sequenceiq.maintenance.api.model.MaintenanceSubmitterService.CLOUDBREAK;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.maintenance.api.model.MaintenanceTaskKind;
 import com.sequenceiq.maintenance.api.v1.task.endpoint.MaintenanceWindowTaskEndpoint;
 import com.sequenceiq.maintenance.api.v1.task.model.request.MaintenanceWindowTaskRequest;
 import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowTaskResponse;
@@ -142,10 +142,10 @@ public class MaintenanceWindowSecretRotationTaskRegistrar {
         request.setEnvironmentCrn(environmentCrn);
         request.setTaskType(TASK_TYPE);
         request.setWorkItemId(workItemIdForSecretName(secretName));
-        request.setTaskKind(TASK_KIND_ONE_SHOT);
-        request.setSubmitterService(SUBMITTER_SERVICE);
+        request.setTaskKind(MaintenanceTaskKind.ONE_SHOT.name());
+        request.setSubmitterService(CLOUDBREAK.serviceName());
         request.setTaskPayload(taskPayload(secretName));
-        request.setExecutionRef(executionRef());
+        request.setExecutionRef(standardExecutionRef(CLOUDBREAK));
         request.setRetryWithinOccurrence(true);
         request.setMaxAttemptsPerOccurrence(maxAttemptsPerOccurrence);
         request.setRetryCooldownMinutes(retryCooldownMinutes);

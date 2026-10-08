@@ -1,6 +1,5 @@
 package com.sequenceiq.maintenance.dispatcher;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,23 +20,11 @@ import com.sequenceiq.maintenance.configuration.MaintenanceServiceEndpointConfig
 @Component
 public class SubmitterServiceEndpointResolver {
 
-    private static final String CLOUDBREAK = "cloudbreak";
-
-    private static final String DATALAKE = "datalake";
-
-    private static final String FREEIPA = "freeipa";
-
     private final Map<String, String> submitterBaseUrls;
 
     @Inject
     public SubmitterServiceEndpointResolver(
-            @Named(MaintenanceServiceEndpointConfig.CLOUDBREAK_SUBMITTER_BASE_URL) String cloudbreakBaseUrl,
-            @Named(MaintenanceServiceEndpointConfig.DATALAKE_SUBMITTER_BASE_URL) String datalakeBaseUrl,
-            @Named(MaintenanceServiceEndpointConfig.FREEIPA_SUBMITTER_BASE_URL) String freeipaBaseUrl) {
-        this(buildUrlMap(cloudbreakBaseUrl, datalakeBaseUrl, freeipaBaseUrl));
-    }
-
-    SubmitterServiceEndpointResolver(Map<String, String> submitterBaseUrls) {
+            @Named(MaintenanceServiceEndpointConfig.SUBMITTER_BASE_URLS) Map<String, String> submitterBaseUrls) {
         this.submitterBaseUrls = Map.copyOf(submitterBaseUrls);
     }
 
@@ -46,19 +33,5 @@ public class SubmitterServiceEndpointResolver {
             return Optional.empty();
         }
         return Optional.ofNullable(submitterBaseUrls.get(submitterService));
-    }
-
-    private static Map<String, String> buildUrlMap(String cloudbreakBaseUrl, String datalakeBaseUrl, String freeipaBaseUrl) {
-        Map<String, String> urls = new HashMap<>();
-        registerSubmitter(urls, CLOUDBREAK, cloudbreakBaseUrl);
-        registerSubmitter(urls, DATALAKE, datalakeBaseUrl);
-        registerSubmitter(urls, FREEIPA, freeipaBaseUrl);
-        return urls;
-    }
-
-    private static void registerSubmitter(Map<String, String> urls, String submitterService, String baseUrl) {
-        if (StringUtils.isNotBlank(baseUrl)) {
-            urls.put(submitterService, baseUrl);
-        }
     }
 }

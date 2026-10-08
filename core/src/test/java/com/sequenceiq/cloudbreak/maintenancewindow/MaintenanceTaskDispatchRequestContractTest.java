@@ -10,12 +10,21 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.v1.maintenance.model.MaintenanceTaskDispatchRequest;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.maintenance.api.model.MaintenanceTaskKind;
 
 /**
  * Guards the dispatch wire contract between the maintenance module's producer record
@@ -30,6 +39,14 @@ class MaintenanceTaskDispatchRequestContractTest {
 
     private static final String FIXTURE = "maintenancewindow/dispatch-request.json";
 
+    private static Validator validator;
+
+    @BeforeAll
+    static void setUpValidator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
     @Test
     void dispatcherPayloadDeserializesWithEveryFieldPopulated() throws IOException {
         String json = FileReaderUtils.readFileFromClasspath(FIXTURE);
@@ -43,7 +60,7 @@ class MaintenanceTaskDispatchRequestContractTest {
         assertThat(request.getResourceCrn()).isEqualTo("crn:cdp:datahub:us-west-1:acc-12345:cluster:my-dh");
         assertThat(request.getTaskType()).isEqualTo(MaintenanceWindowSecretRotationSupport.TASK_TYPE);
         assertThat(request.getWorkItemId()).isEqualTo("SALT_PASSWORD");
-        assertThat(request.getTaskKind()).isEqualTo("ONE_SHOT");
+        assertThat(request.getTaskKind()).isEqualTo(MaintenanceTaskKind.ONE_SHOT.name());
         assertThat(request.getTaskPayload())
                 .containsEntry(MaintenanceWindowSecretRotationSupport.PAYLOAD_SECRET_NAMES, List.of("SALT_PASSWORD"));
         assertThat(request.getMaintenanceScheduleId()).isEqualTo(42L);
@@ -88,5 +105,22 @@ class MaintenanceTaskDispatchRequestContractTest {
                 "task_id", "run_id", "idempotency_key", "account_id", "resource_crn", "task_type",
                 "work_item_id", "task_kind", "task_payload", "maintenance_schedule_id", "policy_revision",
                 "window_start", "window_end");
+    }
+
+    /**
+     * {@code @AccountIdMatchesResourceCrn} only runs when its group is declared on the annotation <em>and</em> this
+     * class redefines {@code Default} via {@code @GroupSequence}. Dropping either leaves the cross-tenant check
+     * silently disabled, so assert the wiring here rather than trusting it; the constraint's own behaviour is covered
+     * by {@code AccountIdMatchesResourceCrnValidatorTest} in {@code common}.
+     */
+    @Test
+    void accountIdMismatchWithResourceCrnIsRejected() {
+        MaintenanceTaskDispatchRequest request = aDispatchRequest().withAccountId("other-account").build();
+
+        Set<ConstraintViolation<MaintenanceTaskDispatchRequest>> violations = validator.validate(request);
+
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getPropertyPath()).hasToString("accountId");
+        assertThat(violations.iterator().next().getMessage()).contains("account_id");
     }
 }

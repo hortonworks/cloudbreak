@@ -1,13 +1,18 @@
 package com.sequenceiq.maintenance.configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
+import com.sequenceiq.maintenance.api.model.MaintenanceSubmitterService;
 
 /**
  * Resolves submitter service base URLs for outbound dispatch HTTP. Bean methods throw
@@ -17,11 +22,7 @@ import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
 @Configuration
 public class MaintenanceServiceEndpointConfig {
 
-    public static final String CLOUDBREAK_SUBMITTER_BASE_URL = "maintenanceCloudbreakSubmitterBaseUrl";
-
-    public static final String DATALAKE_SUBMITTER_BASE_URL = "maintenanceDatalakeSubmitterBaseUrl";
-
-    public static final String FREEIPA_SUBMITTER_BASE_URL = "maintenanceFreeipaSubmitterBaseUrl";
+    public static final String SUBMITTER_BASE_URLS = "maintenanceSubmitterBaseUrls";
 
     private final ServiceAddressResolver serviceAddressResolver;
 
@@ -57,18 +58,30 @@ public class MaintenanceServiceEndpointConfig {
         this.serviceAddressResolver = serviceAddressResolver;
     }
 
-    @Bean(name = CLOUDBREAK_SUBMITTER_BASE_URL)
-    public String cloudbreakSubmitterBaseUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver.resolveUrl(cloudbreakUrl + cloudbreakContextPath, "http", cloudbreakServiceId);
+    @Bean(name = SUBMITTER_BASE_URLS)
+    public Map<String, String> submitterBaseUrls() throws ServiceAddressResolvingException {
+        Map<String, String> urls = new HashMap<>();
+        for (MaintenanceSubmitterService submitterService : MaintenanceSubmitterService.values()) {
+            registerSubmitter(urls, submitterService, resolveSubmitterBaseUrl(submitterService));
+        }
+        return Map.copyOf(urls);
     }
 
-    @Bean(name = DATALAKE_SUBMITTER_BASE_URL)
-    public String datalakeSubmitterBaseUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver.resolveUrl(datalakeUrl + datalakeContextPath, "http", datalakeServiceId);
+    private String resolveSubmitterBaseUrl(MaintenanceSubmitterService submitterService) throws ServiceAddressResolvingException {
+        return switch (submitterService) {
+            case CLOUDBREAK -> serviceAddressResolver.resolveUrl(
+                    cloudbreakUrl + cloudbreakContextPath, "http", cloudbreakServiceId);
+            case DATALAKE -> serviceAddressResolver.resolveUrl(
+                    datalakeUrl + datalakeContextPath, "http", datalakeServiceId);
+            case FREEIPA -> serviceAddressResolver.resolveUrl(
+                    freeipaUrl + freeipaContextPath, "http", freeipaServiceId);
+        };
     }
 
-    @Bean(name = FREEIPA_SUBMITTER_BASE_URL)
-    public String freeipaSubmitterBaseUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver.resolveUrl(freeipaUrl + freeipaContextPath, "http", freeipaServiceId);
+    private static void registerSubmitter(
+            Map<String, String> urls, MaintenanceSubmitterService submitterService, String baseUrl) {
+        if (StringUtils.isNotBlank(baseUrl)) {
+            urls.put(submitterService.serviceName(), baseUrl);
+        }
     }
 }

@@ -29,7 +29,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.rotation.maintenance.MaintenanceWindowSecretRotationSupport;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.maintenance.api.model.MaintenanceTaskKind;
 import com.sequenceiq.maintenance.api.v1.task.endpoint.MaintenanceWindowTaskEndpoint;
 import com.sequenceiq.maintenance.api.v1.task.model.request.MaintenanceWindowTaskRequest;
 import com.sequenceiq.maintenance.api.v1.task.model.response.MaintenanceWindowTaskResponse;
@@ -98,7 +100,7 @@ class MaintenanceWindowSecretRotationTaskRegistrarTest {
         assertThat(requestCaptor.getAllValues()).hasSize(2);
         for (MaintenanceWindowTaskRequest request : requestCaptor.getAllValues()) {
             assertThat(request.getTaskType()).isEqualTo(MaintenanceWindowSecretRotationSupport.TASK_TYPE);
-            assertThat(request.getTaskKind()).isEqualTo(MaintenanceWindowSecretRotationSupport.TASK_KIND_ONE_SHOT);
+            assertThat(request.getTaskKind()).isEqualTo(MaintenanceTaskKind.ONE_SHOT.name());
             assertThat(request.getEnvironmentCrn()).isEqualTo(ENV_CRN);
             assertThat(request.getRetryWithinOccurrence()).isTrue();
             assertThat(request.getMaxAttemptsPerOccurrence()).isEqualTo(3);

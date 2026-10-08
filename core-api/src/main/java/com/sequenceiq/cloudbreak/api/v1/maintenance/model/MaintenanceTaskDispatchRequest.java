@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.v1.maintenance.model;
 
 import java.util.Map;
 
+import jakarta.validation.GroupSequence;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.validation.AccountIdMatchesResourceCrn;
+import com.sequenceiq.cloudbreak.validation.AccountIdMatchesResourceCrnGroup;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,6 +31,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@GroupSequence({MaintenanceTaskDispatchRequest.class, AccountIdMatchesResourceCrnGroup.class})
+@AccountIdMatchesResourceCrn(groups = AccountIdMatchesResourceCrnGroup.class)
 public class MaintenanceTaskDispatchRequest {
 
     @NotNull
