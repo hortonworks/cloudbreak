@@ -108,7 +108,7 @@ ext {
 
   // Crypto
   bouncycastleFipsVersion = '2.1.3'
-  bouncycastlePkixFipsVersion = '2.1.9'
+  bouncycastlePkixFipsVersion = '2.1.13'
   bouncycastleUtilFipsVersion = '2.1.4'
 
   // Cloudera
