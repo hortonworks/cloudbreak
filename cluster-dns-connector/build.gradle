@@ -28,7 +28,6 @@ dependencies {
 
   implementation     group: 'com.dyngr',                 name: 'polling',                         version: "$dyngrPollingVersion"
 
-  implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
   implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: "$protobufVersion"
   implementation     group: 'org.bouncycastle',                    name: 'bcpkix-fips',                    version: "$bouncycastlePkixFipsVersion"
   implementation ("io.grpc:grpc-all:$grpcVersion") {

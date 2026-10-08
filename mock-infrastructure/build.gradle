@@ -8,11 +8,13 @@ buildscript {
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
   }
 }
 
 plugins {
     id "maven-publish"
+    id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
 }
 
 apply plugin: 'org.springframework.boot'
@@ -71,16 +73,16 @@ dependencies {
   implementation group: 'org.springframework',           name: 'spring-aspects',                 version: "$springFrameworkVersion"
   implementation group:  'org.springframework',          name: 'spring-context-support',         version: "$springFrameworkVersion"
   implementation group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: "$jacksonVersion"
-  implementation group:  'javax.annotation',             name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
   implementation group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: "$protobufVersion"
   implementation group:  'com.google.code.gson',         name: 'gson',                           version: "$gsonVersion"
   implementation group:   'io.swagger',                  name: 'swagger-annotations',            version: '1.6.15'
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: "$apacheCommonsLangVersion"
   implementation group: 'org.postgresql',                name: 'postgresql',                     version: "$postgreSQLVersion"
+  implementation group: 'org.apache.tomcat.embed',       name: 'tomcat-embed-core',              version: "$tomcatVersion"
+
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: "$mockitoVersion"
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"
   testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: "$assertjVersion"
-  implementation group: 'org.apache.tomcat.embed',       name: 'tomcat-embed-core',              version: "$tomcatVersion"
 
   implementation project (':cloud-api')
   implementation project (':common')
@@ -101,10 +103,48 @@ checkstyle {
   checkstyleMain.exclude '**/generated/**'
 }
 
+// Models are shared by every CM API version, so they are generated from the newest spec only.
+def cmModelsVersion = 'v45'
+def cmApiVersions = ['v31', 'v40', 'v45']
+def cmGeneratedDir = layout.buildDirectory.dir('generated/cm-api')
+
+def cmGenerateTasks = (cmApiVersions.collect { version -> [version, false] } + [[cmModelsVersion, true]]).collect { version, models ->
+  def outputName = models ? 'model' : version
+  tasks.register(models ? 'generateCmModels' : "generateCmApi${version.capitalize()}", org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    generatorName = 'spring'
+    inputSpec = "$projectDir/cm-swagger-${version}.json".toString()
+    outputDir = cmGeneratedDir.map { it.dir(outputName).asFile.absolutePath }
+    apiPackage = "com.sequenceiq.mock.swagger.${version}.api"
+    modelPackage = 'com.sequenceiq.mock.swagger.model'
+    validateSpec = false
+    cleanupOutput = true
+    // Keeps the {mockUuid} path variable of the spec's basePath in the generated @RequestMapping
+    serverVariables = [mockUuid: '{mockUuid}']
+    globalProperties = models
+        ? [models: '', apis: 'false', supportingFiles: 'false', modelDocs: 'false', modelTests: 'false']
+        : [apis: '', models: 'false', supportingFiles: 'ApiUtil.java', apiDocs: 'false', apiTests: 'false']
+    configOptions = [
+        interfaceOnly: 'true',
+        useSpringBoot3: 'true',
+        useTags: 'true',
+        hideGenerationTimestamp: 'true',
+        openApiNullable: 'false',
+        documentationProvider: 'none',
+        annotationLibrary: 'none',
+        useBeanValidation: 'true',
+        requestMappingMode: 'api_interface'
+    ]
+  }
+}
+
+compileJava.dependsOn cmGenerateTasks
+
 sourceSets {
   main {
     java {
-      srcDirs 'src/generated'
+      srcDirs((cmApiVersions + ['model']).collect {
+        name -> cmGeneratedDir.map { it.dir("${name}/src/main/java") }
+      })
     }
   }
 }

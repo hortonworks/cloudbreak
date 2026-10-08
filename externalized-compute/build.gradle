@@ -54,7 +54,6 @@ dependencies {
     implementation group: 'com.dyngr', name: 'polling', version: "$dyngrPollingVersion"
     implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-jakarta', version: "$swaggerCoreVersion"
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: "$javaxXmlBindJaxbApiVersion"
-    implementation group: 'javax.annotation', name: 'javax.annotation-api', version: "$javaxAnnotationApiVersion"
     implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: "$protobufVersion"
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: "$apacheCommonsLangVersion"
 

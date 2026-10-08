@@ -16,6 +16,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +37,9 @@ public class ResponseModifierAspect {
     @Inject
     private ResponseModifierService responseModifierService;
 
+    @Inject
+    private Environment environment;
+
     @Pointcut("execution(public * com.sequenceiq.mock..*Controller.*(..)) ")
     public void allControllers() {
     }
@@ -52,7 +56,7 @@ public class ResponseModifierAspect {
         appendValueOrPathIfNotBlank(AnnotationUtils.findAnnotation(method, PutMapping.class), sb);
         appendValueOrPathIfNotBlank(AnnotationUtils.findAnnotation(method, DeleteMapping.class), sb);
         LOGGER.trace("Called method: {}", method);
-        String resolvedPath = resolvePath(method, proceedingJoinPoint.getArgs(), sb.toString());
+        String resolvedPath = resolvePath(method, proceedingJoinPoint.getArgs(), environment.resolvePlaceholders(sb.toString()));
         String mockUuid = getArgByName(method, proceedingJoinPoint.getArgs(), Set.of("mock_uuid", "mockuuid", "mockUuid"));
         responseModifierService.handleProfiles(mockUuid, resolvedPath);
         return responseModifierService.evaluateResponse(resolvedPath, method.getReturnType(), proceedingJoinPoint::proceed,

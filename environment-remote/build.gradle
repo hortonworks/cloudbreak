@@ -95,7 +95,6 @@ dependencies {
     implementation group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2-jakarta',         version: "$swaggerCoreVersion"
     implementation group: 'javax.xml.bind',             name: 'jaxb-api',                       version: "$javaxXmlBindJaxbApiVersion"
     implementation group: 'org.openapitools',           name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
-    implementation group: 'javax.annotation',           name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
 
     testImplementation project(path: ':authorization-common', configuration: 'tests')
     testImplementation project(path: ':common', configuration: 'tests')

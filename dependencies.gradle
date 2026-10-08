@@ -130,7 +130,6 @@ ext {
   microMeterJvmExtrasVersion = '0.3.0'
 
   // JavaX Legacy
-  javaxAnnotationApiVersion = '1.3.2' // because of protoc-gen
   javaxXmlBindJaxbApiVersion = '2.3.1' // because of SpringFox Swagger
 
   // TO REMOVE

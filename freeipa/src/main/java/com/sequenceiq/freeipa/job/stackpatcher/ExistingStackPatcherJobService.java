@@ -3,8 +3,7 @@ package com.sequenceiq.freeipa.job.stackpatcher;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.quartz.JobBuilder;

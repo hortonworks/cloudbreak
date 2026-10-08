@@ -44,7 +44,7 @@ public class BatchResourceOperationTest {
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, null);
         verify(responseCreatorComponent).exec(responseArgument.capture());
-        Assertions.assertThat(responseArgument.getValue().isSuccess()).isFalse();
+        Assertions.assertThat(responseArgument.getValue().getSuccess()).isFalse();
     }
 
     @Test
@@ -53,7 +53,7 @@ public class BatchResourceOperationTest {
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
         verify(responseCreatorComponent).exec(responseArgument.capture());
-        Assertions.assertThat(responseArgument.getValue().isSuccess()).isFalse();
+        Assertions.assertThat(responseArgument.getValue().getSuccess()).isFalse();
     }
 
     @Test
@@ -62,7 +62,7 @@ public class BatchResourceOperationTest {
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
         verify(responseCreatorComponent).exec(responseArgument.capture());
-        Assertions.assertThat(responseArgument.getValue().isSuccess()).isTrue();
+        Assertions.assertThat(responseArgument.getValue().getSuccess()).isTrue();
     }
 
     @Test
@@ -76,7 +76,7 @@ public class BatchResourceOperationTest {
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
         verify(responseCreatorComponent).exec(responseArgument.capture());
-        Assertions.assertThat(responseArgument.getValue().isSuccess()).isTrue();
+        Assertions.assertThat(responseArgument.getValue().getSuccess()).isTrue();
     }
 
     @Test
@@ -90,7 +90,7 @@ public class BatchResourceOperationTest {
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
         verify(responseCreatorComponent).exec(responseArgument.capture());
-        Assertions.assertThat(responseArgument.getValue().isSuccess()).isTrue();
+        Assertions.assertThat(responseArgument.getValue().getSuccess()).isTrue();
     }
 
     @Test
@@ -104,7 +104,7 @@ public class BatchResourceOperationTest {
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
         verify(responseCreatorComponent).exec(responseArgument.capture());
-        Assertions.assertThat(responseArgument.getValue().isSuccess()).isFalse();
+        Assertions.assertThat(responseArgument.getValue().getSuccess()).isFalse();
     }
 
     @Test
@@ -117,6 +117,6 @@ public class BatchResourceOperationTest {
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
         verify(responseCreatorComponent).exec(responseArgument.capture());
-        Assertions.assertThat(responseArgument.getValue().isSuccess()).isFalse();
+        Assertions.assertThat(responseArgument.getValue().getSuccess()).isFalse();
     }
 }

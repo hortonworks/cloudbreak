@@ -28,7 +28,6 @@ dependencies {
   implementation     group: 'org.glassfish.jersey.media',        name: 'jersey-media-multipart',         version: "$jerseyCoreVersion"
   implementation     group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                    version: "$httpClientVersion"
 
-  implementation     group: 'javax.annotation',                  name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
   implementation     group: 'com.google.protobuf',               name: 'protobuf-java',                  version: "$protobufVersion"
   implementation     group: 'com.dyngr',                         name: 'polling',                        version: "$dyngrPollingVersion"
   implementation     (group: "com.cloudera.api.swagger",      name: "cloudera-manager-api-swagger",   version: "$cmClientVersion") {

@@ -17,7 +17,6 @@ dependencies {
   implementation project(':grpc-common')
 
   implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: "$protobufVersion"
-  implementation group: 'javax.annotation',             name: 'javax.annotation-api', version: "$javaxAnnotationApiVersion"
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
@@ -53,7 +52,7 @@ protobuf {
   }
   generateProtoTasks {
     all()*.plugins {
-      grpc {}
+      grpc { option '@generated=omit' }
     }
   }
   generatedFilesBaseDir = "$projectDir/src/generated"

@@ -2,8 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
