@@ -9,12 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.events.RedbeamsEventSenderService;
+import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.sync.DBStackConnector;
 import com.sequenceiq.redbeams.sync.DBStackConnector.ConnectedDatabaseStack;
@@ -34,6 +36,9 @@ public class RdsProviderSyncService {
 
     @Inject
     private DBStackService dbStackService;
+
+    @Inject
+    private DatabaseServerConfigService databaseServerConfigService;
 
     @Inject
     private RdsProviderSyncConfig config;
@@ -79,7 +84,11 @@ public class RdsProviderSyncService {
             if (low && !dbStack.isLowStorage()) {
                 LOGGER.info(":::RDS provider sync::: DB stack {} is low on storage ({}% free, threshold {}%), notifying UI.",
                         dbStack.getResourceCrn(), freePercentage, config.getStorageLowThresholdPercentage());
-                eventSenderService.sendStorageLowNotification(dbStack, freePercentage);
+                eventSenderService.sendStorageLowNotification(
+                        databaseServerConfigService.getByCrn(Crn.safeFromString(dbStack.getResourceCrn())),
+                        dbStack,
+                        freePercentage
+                );
                 dbStack.setLowStorage(true);
                 return true;
             } else if (!low && dbStack.isLowStorage()) {

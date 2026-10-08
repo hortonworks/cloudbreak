@@ -259,3 +259,19 @@ crn:
 cdp.structuredevent:
   rest:
     contentlogging: true
+
+cdp:
+  console:
+    url: https://localhost
+
+thunderheadnotification:
+  service:
+    host: localhost
+    port: 8982
+  cleanup:
+    enabled: false
+
+notification:
+  sender:
+    weekly:
+      enabled: false

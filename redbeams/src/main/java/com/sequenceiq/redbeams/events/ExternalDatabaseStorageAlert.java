@@ -12,5 +12,14 @@ public record ExternalDatabaseStorageAlert(
         String resourceCrn,
         String name,
         String environmentCrn,
-        Double freeStoragePercentage) {
+        Double freeStoragePercentage,
+        String operationMessage) {
+
+    public ExternalDatabaseStorageAlert(
+            String resourceCrn,
+            String name,
+            String environmentCrn,
+            Double freeStoragePercentage) {
+        this(resourceCrn, name, environmentCrn, freeStoragePercentage, "is approaching its allocated storage limit");
+    }
 }

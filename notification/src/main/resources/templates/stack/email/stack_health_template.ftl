@@ -11,7 +11,7 @@
     <meta name="supported-color-schemes" content="light only">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>Action Required: Cloudera Alert</title>
+    <title>${additionalData.results[0].mainTitle}: Cloudera Alert</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet" type="text/css"/>
     <style type="text/css">
         body {
@@ -284,7 +284,7 @@
                                                                                             <tbody>
                                                                                             <tr>
                                                                                                 <td width="100%" valign="top" align="left" class="aligned-bullets st-dynamic-6r0hv9h3ozx7g" style="text-align: left; font-family: 'Plus Jakarta Sans', Arial, Helvetica, sans-serif; color: #ffffff; font-size: 16px; font-weight: 500; letter-spacing: normal; line-height: 16px; padding-bottom: 15px; width: 100%;">
-                                                                                                    <p style="margin: 0px;"><span style="font-size: 26px; line-height: 15px;color: #ff560d;">Action Required</span></p>
+                                                                                                    <p style="margin: 0px;"><span style="font-size: 26px; line-height: 15px;color: #ff560d;">${additionalData.results[0].mainTitle}</span></p>
                                                                                                 </td>
                                                                                             </tr>
                                                                                             <tr>
@@ -334,20 +334,45 @@
                     <tr>
                         <td class="content-padding">
                             <p class="greeting">Hello,</p>
-                            <p class="body-text">
-                                The <strong>${additionalData.results[0].operation}</strong> operation on the following ${additionalData.results[0].stackType} failed
-                                <a href="${additionalData.results[0].controlPlaneUrl}" target="_blank"><strong>${name}</strong></a>
+
+                            <#if additionalData.results[0].actionResult == "failed">
+                            <p class="body-text" style="margin-bottom: 0px;">
+                                The <strong>${additionalData.results[0].operation}</strong> ${additionalData.results[0].operationType} on the following ${additionalData.results[0].stackType} ${additionalData.results[0].actionResult}:
                             </p>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+                                <tr>
+                                    <td align="center" style="padding: 10px 0; font-family: 'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size: 16px;">
+                                        <a href="${additionalData.results[0].controlPlaneUrl}" target="_blank"><strong>${name}</strong></a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <#elseif additionalData.results[0].actionResult == "alerted">
+                            <p class="body-text" style="margin-bottom: 0px;">
+                                Your ${additionalData.results[0].stackType} <strong>${name}</strong> ${additionalData.results[0].operationMessage}.
+                            </p>
+                            <p class="body-text" style="margin-bottom: 24px;">
+                                Your environment remains fully operational, but action is recommended to maintain performance.
+                            </p>
+                            </#if>
 
                             <#if additionalData.results[0].statusReason?has_content>
                                 <table border="0" cellpadding="0" cellspacing="0" class="alert-container">
                                     <tr>
                                         <td class="alert-content">
-                                            <strong class="alert-label">Issue Summary:</strong><br>
+                                            <strong class="alert-label">Advisory Details:</strong><br>
                                             <strong>${additionalData.results[0].stackType}:</strong> <strong><a href="${additionalData.results[0].controlPlaneUrl}" target="_blank">${name}</a></strong><br>
                                             <strong>Operation:</strong> ${additionalData.results[0].operation}<br>
+                                            <#if additionalData.results[0].actionResult == "alerted">
+                                            <strong>Reason:</strong> ${additionalData.results[0].statusReason}<br>
+                                            <#else>
                                             <strong>Failure Reason:</strong> ${additionalData.results[0].statusReason}<br>
+                                            </#if>
                                             <strong>Date/Time:</strong> ${additionalData.results[0].dateTimeString}<br>
+                                            <#if additionalData.results[0].actionResult == "failed">
+                                            <strong>Status:</strong> Failure<br>
+                                            <#elseif additionalData.results[0].actionResult == "alerted">
+                                            <strong>Status:</strong> Warning (Non-Critical)<br>
+                                            </#if>
                                         </td>
                                     </tr>
                                 </table>

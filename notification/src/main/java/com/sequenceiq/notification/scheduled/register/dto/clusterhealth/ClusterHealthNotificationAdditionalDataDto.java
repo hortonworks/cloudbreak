@@ -15,6 +15,8 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
 
     private final String status;
 
+    private final String mainTitle;
+
     private final String emailableStatus;
 
     private final Set<InstanceStatusDto> instances;
@@ -29,6 +31,12 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
 
     private final String operation;
 
+    private final String operationType;
+
+    private final String actionResult;
+
+    private final String operationMessage;
+
     private final String controlPlaneUrl;
 
     @SuppressWarnings("ExecutableStatementCount")
@@ -36,6 +44,7 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
         super(builder.name, builder.crn);
         this.creator = builder.creator;
         this.status = builder.status;
+        this.operationMessage = builder.operationMessage;
         this.emailableStatus = toCamelCase(builder.status);
         this.instances = builder.instances;
         this.stackType = builder.stackType;
@@ -43,7 +52,10 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
         this.detailedStatus = builder.detailedStatus;
         this.statusReason = builder.statusReason;
         this.operation = builder.operation;
+        this.operationType = builder.operationType;
+        this.actionResult = builder.actionResult;
         this.controlPlaneUrl = builder.controlPlaneUrl;
+        this.mainTitle = builder.mainTitle;
     }
 
     public String getCreator() {
@@ -86,6 +98,22 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
         return controlPlaneUrl;
     }
 
+    public String getOperationType() {
+        return operationType;
+    }
+
+    public String getActionResult() {
+        return actionResult;
+    }
+
+    public String getMainTitle() {
+        return mainTitle;
+    }
+
+    public String getOperationMessage() {
+        return operationMessage;
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
@@ -107,13 +135,17 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
                 Objects.equals(detailedStatus, that.detailedStatus) &&
                 Objects.equals(statusReason, that.statusReason) &&
                 Objects.equals(operation, that.operation) &&
+                Objects.equals(operationType, that.operationType) &&
+                Objects.equals(operationMessage, that.operationMessage) &&
+                Objects.equals(actionResult, that.actionResult) &&
+                Objects.equals(mainTitle, that.mainTitle) &&
                 Objects.equals(controlPlaneUrl, that.controlPlaneUrl);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), creator, status, instances, stackType, dateTimeString,
-                detailedStatus, statusReason, operation, controlPlaneUrl);
+                detailedStatus, statusReason, operation, operationType, operationMessage, actionResult, mainTitle, controlPlaneUrl);
     }
 
     @Override
@@ -127,6 +159,10 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
                 ", detailedStatus='" + detailedStatus + '\'' +
                 ", statusReason='" + statusReason + '\'' +
                 ", operation='" + operation + '\'' +
+                ", operationMessage='" + operationMessage + '\'' +
+                ", operationType='" + operationType + '\'' +
+                ", actionResult='" + actionResult + '\'' +
+                ", mainTitle='" + mainTitle + '\'' +
                 ", controlPlaneUrl='" + controlPlaneUrl + '\'' +
                 super.toString() +
                 '}';
@@ -158,6 +194,14 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
 
         private String operation;
 
+        private String operationType = OperationType.OPERATION.name().toLowerCase(Locale.ROOT);
+
+        private String operationMessage = "";
+
+        private String actionResult = ActionResult.FAILED.name().toLowerCase(Locale.ROOT);
+
+        private String mainTitle = "Action Required";
+
         private String controlPlaneUrl;
 
         public ClusterHealthNotificationAdditionalDataDtoBuilder name(String name) {
@@ -175,9 +219,34 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
             return this;
         }
 
+        public ClusterHealthNotificationAdditionalDataDtoBuilder operationMessage(String operationMessage) {
+            this.operationMessage = operationMessage;
+            return this;
+        }
+
+        public ClusterHealthNotificationAdditionalDataDtoBuilder operationType(OperationType operationType) {
+            this.operationType = operationType.name().toLowerCase(Locale.ROOT);
+            return this;
+        }
+
+        public ClusterHealthNotificationAdditionalDataDtoBuilder actionResult(ActionResult actionResult) {
+            this.actionResult = actionResult.name().toLowerCase(Locale.ROOT);
+            return this;
+        }
+
+        public ClusterHealthNotificationAdditionalDataDtoBuilder mainTitle(String mainTitle) {
+            this.mainTitle = mainTitle;
+            return this;
+        }
+
         public ClusterHealthNotificationAdditionalDataDtoBuilder status(String status) {
             this.status = toCamelCase(status);
             this.operation = toCamelCase(status.toLowerCase(Locale.ROOT).split("_")[0]);
+            return this;
+        }
+
+        public ClusterHealthNotificationAdditionalDataDtoBuilder operation(String operation) {
+            this.operation = operation;
             return this;
         }
 

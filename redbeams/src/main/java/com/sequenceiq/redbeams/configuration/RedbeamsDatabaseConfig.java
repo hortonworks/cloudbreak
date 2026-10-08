@@ -41,8 +41,14 @@ public class RedbeamsDatabaseConfig {
     public EntityManagerFactory entityManagerFactory() throws SQLException {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
-        entityManagerFactory.setPackagesToScan("com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha",
-                "com.sequenceiq.cloudbreak.structuredevent.domain", "com.sequenceiq.cloudbreak.rotation");
+        entityManagerFactory.setPackagesToScan(
+                "com.sequenceiq.redbeams",
+                "com.sequenceiq.flow",
+                "com.sequenceiq.cloudbreak.ha",
+                "com.sequenceiq.cloudbreak.structuredevent.domain",
+                "com.sequenceiq.cloudbreak.rotation",
+                "com.sequenceiq.notification.domain"
+        );
         entityManagerFactory.setDataSource(dataSource);
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter);

@@ -304,6 +304,10 @@ public class DBStack {
         return ownerCrn;
     }
 
+    public String getOwnerCrnAsString() {
+        return ownerCrn == null ? null : ownerCrn.toString();
+    }
+
     public void setOwnerCrn(Crn ownerCrn) {
         this.ownerCrn = ownerCrn;
     }

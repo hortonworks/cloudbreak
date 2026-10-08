@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -24,9 +25,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.events.RedbeamsEventSenderService;
+import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.sync.DBStackConnector;
 import com.sequenceiq.redbeams.sync.DBStackConnector.ConnectedDatabaseStack;
@@ -65,6 +68,9 @@ class RdsProviderSyncServiceTest {
 
     @Mock
     private RedbeamsEventSenderService eventSenderService;
+
+    @Mock
+    private DatabaseServerConfigService databaseServerConfigService;
 
     @InjectMocks
     private RdsProviderSyncService underTest;
@@ -227,10 +233,25 @@ class RdsProviderSyncServiceTest {
     void shouldNotifyWhenStorageLowAndNotPreviouslyAlerted() throws Exception {
         enableStorageMonitoringWithMetrics(5.0d);
         when(dbStack.isLowStorage()).thenReturn(false);
+        DatabaseServerConfig databaseServerConfig = new DatabaseServerConfig();
+        when(databaseServerConfigService.getByCrn(Crn.safeFromString(CRN))).thenReturn(Optional.of(databaseServerConfig));
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService).sendStorageLowNotification(dbStack, 5.0d);
+        verify(eventSenderService).sendStorageLowNotification(Optional.of(databaseServerConfig), dbStack, 5.0d);
+        verify(dbStack).setLowStorage(true);
+        verify(dbStackService).save(dbStack);
+    }
+
+    @Test
+    void shouldNotifyWithoutDatabaseServerConfigWhenConfigIsMissing() throws Exception {
+        enableStorageMonitoringWithMetrics(5.0d);
+        when(dbStack.isLowStorage()).thenReturn(false);
+        when(databaseServerConfigService.getByCrn(Crn.safeFromString(CRN))).thenReturn(Optional.empty());
+
+        underTest.syncInstanceTypeAndVersion(dbStack);
+
+        verify(eventSenderService).sendStorageLowNotification(Optional.empty(), dbStack, 5.0d);
         verify(dbStack).setLowStorage(true);
         verify(dbStackService).save(dbStack);
     }
@@ -242,7 +263,7 @@ class RdsProviderSyncServiceTest {
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
         verify(dbStack, never()).setLowStorage(any(Boolean.class));
         verify(dbStackService, never()).save(any());
     }
@@ -254,7 +275,7 @@ class RdsProviderSyncServiceTest {
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
         verify(dbStack).setLowStorage(false);
         verify(dbStackService).save(dbStack);
     }
@@ -266,7 +287,7 @@ class RdsProviderSyncServiceTest {
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
         verify(dbStack, never()).setLowStorage(any(Boolean.class));
         verify(dbStackService, never()).save(any());
     }
@@ -278,7 +299,7 @@ class RdsProviderSyncServiceTest {
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
         verify(dbStackService, never()).save(any());
     }
 
@@ -289,7 +310,7 @@ class RdsProviderSyncServiceTest {
         underTest.syncInstanceTypeAndVersion(dbStack);
 
         verify(resourceConnector, never()).getDatabaseServerStorageMetrics(any(), any());
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
     }
 
     @Test
@@ -299,7 +320,7 @@ class RdsProviderSyncServiceTest {
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
         verify(dbStackService, never()).save(any());
     }
 
@@ -311,7 +332,7 @@ class RdsProviderSyncServiceTest {
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
         verify(dbStackService, never()).save(any());
     }
 
@@ -322,7 +343,7 @@ class RdsProviderSyncServiceTest {
 
         underTest.syncInstanceTypeAndVersion(dbStack);
 
-        verify(eventSenderService, never()).sendStorageLowNotification(any(), anyDouble());
+        verify(eventSenderService, never()).sendStorageLowNotification(any(), any(), anyDouble());
         verify(dbStackService, never()).save(any());
     }
 }
