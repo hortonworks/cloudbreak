@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.DOWNLOAD_PARCELS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FINALIZE_CLUSTER_UPGRADE_PREPARATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
+import static com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties.FLOW_VARIABLE_NAME;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentUpdateService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -63,6 +66,9 @@ public class ClusterUpgradePreparationActions {
     @Inject
     private ClusterComponentUpdateService clusterComponentUpdateService;
 
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @Bean(name = "CLUSTER_UPGRADE_PREPARATION_INIT_STATE")
     public Action<?, ?> initClusterUpgradePreparation() {
         return new AbstractClusterUpgradePreparationAction<>(ClusterUpgradePreparationTriggerEvent.class) {
@@ -71,14 +77,23 @@ public class ClusterUpgradePreparationActions {
             protected void doExecute(StackContext context, ClusterUpgradePreparationTriggerEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Initiating cluster upgrade preparation {}", payload);
                 Long resourceId = payload.getResourceId();
-                ImageChangeDto imageChangeDto = payload.getImageChangeDto();
-                List<String> parameterList = List.of(payload.getRuntimeVersion(), imageChangeDto.getImageId());
+                ClusterUpgradeProperties properties = payload.getClusterUpgradeProperties();
+                if (properties == null) {
+                    properties = (ClusterUpgradeProperties) variables.get(FLOW_VARIABLE_NAME);
+                }
+                if (properties == null) {
+                    properties = clusterUpgradePropertiesResolver.resolve(payload);
+                }
+                ImageChangeDto imageChangeDto = new ImageChangeDto(resourceId, properties.targetImage().imageId(),
+                        properties.targetImage().catalogName(), properties.targetImage().catalogUrl());
+                String runtimeVersion = payload.getRuntimeVersion() != null ? payload.getRuntimeVersion() : properties.targetImage().imageVersion();
+                List<String> parameterList = List.of(runtimeVersion, properties.targetImage().imageId());
                 ResourceEvent preparationStartedResourceEvent = ResourceEvent.CLUSTER_UPGRADE_PREPARATION_STARTED;
                 stackUpdater.updateStackStatus(resourceId, CLUSTER_UPGRADE_PREPARATION_STARTED,
                         messagesService.getMessage(preparationStartedResourceEvent.getMessage(), parameterList));
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), preparationStartedResourceEvent, parameterList);
                 ClusterUpgradeParcelSettingsPreparationEvent nextEvent = new ClusterUpgradeParcelSettingsPreparationEvent(resourceId, imageChangeDto,
-                        payload.getCurrentOsType());
+                        properties.currentImage().osType(), properties);
                 sendEvent(context, nextEvent.selector(), nextEvent);
             }
 
@@ -234,7 +249,8 @@ public class ClusterUpgradePreparationActions {
     }
 
     private ClusterUpgradePreparationEvent createClusterUpgradePreparationEvent(String selector, ClusterUpgradePreparationEvent payload) {
-        return new ClusterUpgradePreparationEvent(selector, payload.getResourceId(), payload.getClouderaManagerProducts(), payload.getImageId());
+        return new ClusterUpgradePreparationEvent(selector, payload.getResourceId(), payload.getClouderaManagerProducts(), payload.getImageId(),
+                payload.getClusterUpgradeProperties());
     }
 
 }

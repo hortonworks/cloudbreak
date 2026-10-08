@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_DISTRIBUTION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,12 +27,16 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterUpgradeParcelDownloadHandlerTest {
 
     private static final long STACK_ID = 1L;
+
+    private final ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
 
     @InjectMocks
     private ClusterUpgradeParcelDownloadHandler underTest;
@@ -57,6 +62,8 @@ class ClusterUpgradeParcelDownloadHandlerTest {
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent(requiredProducts));
 
         assertEquals(START_CLUSTER_UPGRADE_PARCEL_DISTRIBUTION_EVENT.name(), nextFlowStepSelector.selector());
+        assertSame(properties, ((ClusterUpgradePreparationEvent) nextFlowStepSelector).getClusterUpgradeProperties());
+        assertEquals(requiredProducts, ((ClusterUpgradePreparationEvent) nextFlowStepSelector).getClouderaManagerProducts());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(clusterApiConnectors).getConnector(stack);
         verify(clusterApi).downloadParcels(requiredProducts);
@@ -78,7 +85,7 @@ class ClusterUpgradeParcelDownloadHandlerTest {
     }
 
     private HandlerEvent<ClusterUpgradePreparationEvent> createEvent(Set<ClouderaManagerProduct> requiredProducts) {
-        return new HandlerEvent<>(new Event<>(new ClusterUpgradePreparationEvent(DOWNLOAD_PARCELS_EVENT.name(), STACK_ID, requiredProducts, "")));
+        return new HandlerEvent<>(new Event<>(new ClusterUpgradePreparationEvent(DOWNLOAD_PARCELS_EVENT.name(), STACK_ID, requiredProducts, "", properties)));
     }
 
 }

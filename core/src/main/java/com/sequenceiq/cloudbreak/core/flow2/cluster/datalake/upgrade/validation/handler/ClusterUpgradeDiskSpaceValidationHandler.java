@@ -41,7 +41,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
         LOGGER.debug("Accepting Cluster upgrade validation event.");
         ClusterUpgradeDiskSpaceValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
         try {
             diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), request.getRequiredFreeSpace());
             return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId(), clusterUpgradeProperties.getTargetImageId(),
@@ -68,7 +68,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeDiskSpaceValidationEvent> event) {
         LOGGER.error("Cluster upgrade validation was unsuccessful due to an unexpected error", e);
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(event.getData());
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(event.getData());
         return new ClusterUpgradeDiskSpaceValidationFinishedEvent(resourceId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
     }
 }

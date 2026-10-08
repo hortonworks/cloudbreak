@@ -44,9 +44,9 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
         ClusterUpgradeServiceValidationEvent request = event.getData();
         LOGGER.debug("Accepting Cluster upgrade service validation event. {}", request);
         Long stackId = request.getResourceId();
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
         try {
-            ServiceUpgradeValidationRequest validationRequest = createValidationRequest(request, stackId);
+            ServiceUpgradeValidationRequest validationRequest = createValidationRequest(clusterUpgradeProperties, stackId);
             LOGGER.debug("Running the following upgrade validations: {}", serviceUpgradeValidators);
             serviceUpgradeValidators.forEach(validator -> validator.validate(validationRequest));
             return new ClusterUpgradeValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
@@ -59,9 +59,8 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
         }
     }
 
-    private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeServiceValidationEvent request, Long stackId) {
+    private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeProperties clusterUpgradeProperties, Long stackId) {
         StackDto stack = stackDtoService.getById(stackId);
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
         return new ServiceUpgradeValidationRequest(stack, clusterUpgradeProperties.isLockComponents(), clusterUpgradeProperties.isRollingUpgradeEnabled(),
                 // TODO CB-33421: Remove upgradeImageInfo field once callers and in-flight flow events no longer use it.
                 null, clusterUpgradeProperties, clusterUpgradeProperties.isReplaceVms());
@@ -75,7 +74,6 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeServiceValidationEvent> event) {
         LOGGER.error("Cluster upgrade service validation was unsuccessful due to an unexpected error", e);
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(event.getData());
-        return new ClusterUpgradeValidationFinishedEvent(resourceId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, e);
+        return new ClusterUpgradeValidationFailureEvent(resourceId, e);
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,12 +24,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
@@ -91,7 +95,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(imageToClouderaManagerRepoConverter.convert(targetCatalogImage)).thenReturn(new com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo());
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage)).thenReturn(targetCloudImage);
 
-        ClusterUpgradeProperties properties = underTest.create(STACK_ID, TARGET_IMAGE_ID, false, true, false);
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
         assertEquals(TARGET_IMAGE_ID, properties.targetImageId());
         assertEquals(IMAGE_CATALOG_NAME, properties.imageCatalogName());
@@ -134,7 +138,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage))
                 .thenReturn(Image.builder().withImageName("targetImageName").build());
 
-        ClusterUpgradeProperties properties = underTest.create(STACK_ID, TARGET_IMAGE_ID, false, true, false);
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
         assertTrue(properties.getPreWarmParcels().isEmpty());
         verify(clouderaManagerProductTransformer).transform(targetCatalogImage, true, false);
@@ -156,7 +160,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage))
                 .thenReturn(Image.builder().withImageName("targetImageName").build());
 
-        ClusterUpgradeProperties properties = underTest.create(STACK_ID, TARGET_IMAGE_ID, false, true, false);
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
         assertNull(properties.cdhParcel());
         assertEquals(products, properties.getPreWarmParcels());
@@ -180,7 +184,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage))
                 .thenReturn(Image.builder().withImageName("targetImageName").build());
 
-        ClusterUpgradeProperties properties = underTest.create(STACK_ID, TARGET_IMAGE_ID, false, true, false);
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
         assertEquals(cdhProduct, properties.cdhParcel());
         assertEquals(Set.of(preWarmProduct), properties.getPreWarmParcels());
@@ -207,7 +211,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage))
                 .thenReturn(Image.builder().withImageName("targetImageName").build());
 
-        ClusterUpgradeProperties properties = underTest.create(STACK_ID, TARGET_IMAGE_ID, false, true, false);
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
         assertEquals("stack-runtime-version", properties.runtimeVersion());
         assertEquals("image-version-only", properties.getTargetImageVersion());
@@ -233,7 +237,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage))
                 .thenReturn(Image.builder().withImageName("targetImageName").build());
 
-        ClusterUpgradeProperties properties = underTest.create(STACK_ID, TARGET_IMAGE_ID, false, true, false);
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
         assertEquals("7.2.19", properties.runtimeVersion());
     }
@@ -262,11 +266,72 @@ class ClusterUpgradePropertiesFactoryTest {
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage))
                 .thenReturn(Image.builder().withImageName("targetImageName").build());
 
-        ClusterUpgradeProperties properties = underTest.create(STACK_ID, TARGET_IMAGE_ID, false, true, false);
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
         assertNotNull(properties.getCurrentPackageVersions());
         assertNotNull(properties.getTargetPackageVersions());
         assertEquals(IMAGE_CATALOG_URL, properties.getCurrentImage().catalogUrl());
+    }
+
+    @Test
+    void testCreateUsesExplicitTargetCatalog() throws Exception {
+        Image current = currentImage();
+        Stack stack = setupStack(false);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image target = targetCatalogImage();
+        StatedImage statedImage = StatedImage.statedImage(target, "custom-url", "custom-catalog");
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        when(imageCatalogService.getImage(WORKSPACE_ID, "custom-url", "custom-catalog", TARGET_IMAGE_ID)).thenReturn(statedImage);
+        when(stackImageService.getImageModelFromStatedImage(stack, current, statedImage)).thenReturn(Image.builder().build());
+        when(clouderaManagerProductTransformer.transform(target, true, true)).thenReturn(Set.of());
+
+        ClusterUpgradeProperties properties = underTest.create(
+                new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, "custom-catalog", "custom-url"), true, false, true);
+
+        assertEquals("custom-catalog", properties.targetImage().catalogName());
+        assertEquals("custom-url", properties.targetImage().catalogUrl());
+        assertEquals(new ClusterUpgradeProperties.UpgradeRequestOptions(true, true, false), properties.options());
+        verify(imageCatalogService).getImage(WORKSPACE_ID, "custom-url", "custom-catalog", TARGET_IMAGE_ID);
+    }
+
+    @Test
+    void testCreateWrapsMissingImage() throws Exception {
+        CloudbreakImageNotFoundException failure = new CloudbreakImageNotFoundException("missing image");
+        when(componentConfigProviderService.getImage(STACK_ID)).thenThrow(failure);
+
+        assertThatThrownBy(() -> underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, false, false))
+                .isInstanceOf(NotFoundException.class).hasMessage("Image not found for cluster upgrade").hasCause(failure);
+    }
+
+    @Test
+    void testCreateWrapsCatalogFailure() throws Exception {
+        Image current = currentImage();
+        Stack stack = mock(Stack.class);
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        CloudbreakImageCatalogException failure = new CloudbreakImageCatalogException("unavailable catalog");
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenThrow(failure);
+
+        assertThatThrownBy(() -> underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, false, false))
+                .isInstanceOf(CloudbreakServiceException.class).hasMessage("Image catalog is not reachable").hasCause(failure);
+    }
+
+    @Test
+    void testCreatePreservesNotFoundForMissingTargetImage() throws Exception {
+        Image current = currentImage();
+        Stack stack = mock(Stack.class);
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        CloudbreakImageNotFoundException failure = new CloudbreakImageNotFoundException("missing target");
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenThrow(failure);
+
+        assertThatThrownBy(() -> underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, false, false))
+                .isInstanceOf(NotFoundException.class).hasMessage("Image not found for cluster upgrade").hasCause(failure);
     }
 
     private Stack setupStack(boolean datalake) {

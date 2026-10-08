@@ -40,6 +40,12 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrepareClusterUpgradeFlowEventChainFactory.class);
 
+    private static final boolean LOCK_COMPONENTS = false;
+
+    private static final boolean ROLLING_UPGRADE_ENABLED = false;
+
+    private static final boolean REPLACE_VMS = false;
+
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
@@ -73,32 +79,13 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
     }
 
     private List<Selectable> createUpgradeValidationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
-        List<Selectable> syncEvents = new ArrayList<>();
-        syncEvents.add(
-                new ClusterUpgradeValidationTriggerEvent(
-                        event.getResourceId(),
-                        event.accepted(),
-                        event.getImageChangeDto().getImageId(),
-                        false,
-                        false,
-                        false
-                )
-        );
-        return syncEvents;
+        return List.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
+                LOCK_COMPONENTS, ROLLING_UPGRADE_ENABLED, REPLACE_VMS));
     }
 
     private List<Selectable> createClusterUpgradePreparationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
-        List<Selectable> syncEvents = new ArrayList<>();
-        syncEvents.add(
-                new ClusterUpgradePreparationTriggerEvent(
-                        event.getResourceId(),
-                        event.accepted(),
-                        event.getImageChangeDto(),
-                        event.getRuntimeVersion(),
-                        getCurrentOsType(event.getResourceId())
-                )
-        );
-        return syncEvents;
+        return List.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
+                event.getRuntimeVersion(), getCurrentOsType(event.getResourceId()), null));
     }
 
     private List<Selectable> getFullSyncEvent(UpgradePreparationChainTriggerEvent event) {

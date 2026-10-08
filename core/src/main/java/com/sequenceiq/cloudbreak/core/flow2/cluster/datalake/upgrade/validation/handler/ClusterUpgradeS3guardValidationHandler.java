@@ -43,7 +43,7 @@ public class ClusterUpgradeS3guardValidationHandler extends ExceptionCatcherEven
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeS3guardValidationEvent> event) {
         LOGGER.error("Cluster upgrade S3guard validation was unsuccessful due to an unexpected error", e);
         ClusterUpgradeS3guardValidationEvent request = event.getData();
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
         return new ClusterUpgradeS3guardValidationFinishedEvent(resourceId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
     }
 
@@ -52,7 +52,7 @@ public class ClusterUpgradeS3guardValidationHandler extends ExceptionCatcherEven
         LOGGER.debug("Accepting Cluster upgrade S3guard disabled validation event.");
         ClusterUpgradeS3guardValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
         try {
             String environmentCrn = stackService.findEnvironmentCrnByStackId(stackId);
             DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(environmentCrn);

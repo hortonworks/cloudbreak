@@ -27,7 +27,7 @@ public class ClusterUpgradeValidationEventToClusterUpgradeImageValidationFinishe
     @Override
     public ClusterUpgradeImageValidationFinishedEvent convert(Object payload) {
         ClusterUpgradeValidationEvent sourcePayload = (ClusterUpgradeValidationEvent) payload;
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(sourcePayload);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(sourcePayload);
         return new ClusterUpgradeImageValidationFinishedEvent(sourcePayload.selector(), sourcePayload.getResourceId(),
                 clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, 1L, Set.of());
     }

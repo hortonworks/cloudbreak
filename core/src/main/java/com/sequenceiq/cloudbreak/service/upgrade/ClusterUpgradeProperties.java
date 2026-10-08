@@ -22,6 +22,8 @@ public record ClusterUpgradeProperties(
         CurrentImageUpgradeContext currentImage,
         TargetImageUpgradeContext targetImage) {
 
+    public static final String FLOW_VARIABLE_NAME = "CLUSTER_UPGRADE_PROPERTIES";
+
     @JsonCreator
     public ClusterUpgradeProperties(
             @JsonProperty("options") UpgradeRequestOptions options,

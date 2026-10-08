@@ -77,7 +77,7 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
     @BeforeEach
     public void setup() {
-        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+        lenient().when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
                 ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         lenient().when(stack.getStack()).thenReturn(stackView);

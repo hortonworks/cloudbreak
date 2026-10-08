@@ -53,7 +53,7 @@ class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
 
     @BeforeEach
     public void setup() {
-        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+        lenient().when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
                 ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
         when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
         when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);

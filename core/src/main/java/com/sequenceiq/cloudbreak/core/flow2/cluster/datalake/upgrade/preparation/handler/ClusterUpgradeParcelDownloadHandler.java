@@ -43,7 +43,7 @@ public class ClusterUpgradeParcelDownloadHandler extends ExceptionCatcherEventHa
             Set<ClouderaManagerProduct> clouderaManagerProducts = request.getClouderaManagerProducts();
             clusterApiConnectors.getConnector(stack).downloadParcels(clouderaManagerProducts);
             return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DISTRIBUTION_EVENT.name(), stackId, clouderaManagerProducts,
-                    request.getImageId());
+                    request.getImageId(), request.getClusterUpgradeProperties());
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel download failed.", e);
             return new ClusterUpgradePreparationFailureEvent(request.getResourceId(), e);

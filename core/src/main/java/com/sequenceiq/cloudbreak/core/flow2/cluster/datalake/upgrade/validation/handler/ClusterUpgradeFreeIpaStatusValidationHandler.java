@@ -41,7 +41,7 @@ public class ClusterUpgradeFreeIpaStatusValidationHandler extends ExceptionCatch
         LOGGER.debug("Accepting Cluster upgrade FreeIPA status validation event.");
         ClusterUpgradeFreeIpaStatusValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
         StackView stack = getStack(stackId);
         String environmentCrn = stack.getEnvironmentCrn();
         if (!freeipaService.checkFreeipaRunning(environmentCrn, stack.getName())) {

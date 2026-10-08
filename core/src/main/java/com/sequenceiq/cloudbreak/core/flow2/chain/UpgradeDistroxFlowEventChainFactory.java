@@ -188,16 +188,8 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private List<ClusterUpgradeValidationTriggerEvent> getUpgradeValidationTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event) {
         LOGGER.info("Upgrade validation enabled, adding to flowchain");
-        return List.of(
-                new ClusterUpgradeValidationTriggerEvent(
-                        event.getResourceId(),
-                        event.accepted(),
-                        event.getImageChangeDto().getImageId(),
-                        event.isLockComponents(),
-                        event.isRollingUpgradeEnabled(),
-                        event.isReplaceVms()
-                )
-        );
+        return List.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
+                event.isLockComponents(), event.isRollingUpgradeEnabled(), event.isReplaceVms()));
     }
 
     private List<Selectable> getFullSyncEvent(DistroXUpgradeFlowChainTriggerEvent event) {
@@ -213,10 +205,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         if (event.isLockComponents()) {
             LOGGER.debug("Skip upgrade preparation because the component versions are not changing.");
             return List.of();
-        } else {
-            return List.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
-                    event.getRuntimeVersion(), currentOsType));
         }
+        return List.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
+                event.getRuntimeVersion(), currentOsType, null));
     }
 
     private List<StackEvent> getSaltUpdateTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event) {

@@ -54,7 +54,7 @@ class ClusterUpgradeDiskSpaceValidationHandlerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+        lenient().when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
                 ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
     }
 

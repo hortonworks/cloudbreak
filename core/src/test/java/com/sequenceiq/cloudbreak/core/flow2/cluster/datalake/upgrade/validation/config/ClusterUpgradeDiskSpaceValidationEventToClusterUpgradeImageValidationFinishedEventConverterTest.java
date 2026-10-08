@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
@@ -31,7 +32,7 @@ class ClusterUpgradeDiskSpaceValidationEventToClusterUpgradeImageValidationFinis
 
     @BeforeEach
     void setUp() {
-        when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+        when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
                 ((ClusterUpgradeDiskSpaceValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
     }
 

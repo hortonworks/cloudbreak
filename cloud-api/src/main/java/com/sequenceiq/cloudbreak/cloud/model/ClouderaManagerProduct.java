@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -98,6 +99,16 @@ public class ClouderaManagerProduct implements Serializable, ClouderaManagerProd
     public ClouderaManagerProduct withCsd(List<String> csd) {
         this.csd = csd;
         return this;
+    }
+
+    public ClouderaManagerProduct copy() {
+        return new ClouderaManagerProduct()
+                .withName(name)
+                .withDisplayName(displayName)
+                .withVersion(version)
+                .withParcel(parcel)
+                .withParcelFileUrl(parcelFileUrl)
+                .withCsd(csd == null ? null : new ArrayList<>(csd));
     }
 
     @Override

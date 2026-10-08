@@ -44,7 +44,7 @@ public class ClusterUpgradeParcelCleanupHandler extends ExceptionCatcherEventHan
         ClusterUpgradeValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
             StackDto stackDto = stackDtoService.getById(stackId);
             Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsFromProducts(stackDto,
                     clusterUpgradeProperties.getAllTargetProducts());

@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -41,13 +42,21 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final String IMAGE_ID = "imageId";
+    private static final String IMAGE_ID = "targetImageId";
 
     @InjectMocks
     private PrepareClusterUpgradeFlowEventChainFactory underTest;
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
+
+    @Test
+    void createsQueueWithoutResolvingUpgradeProperties() throws CloudbreakImageNotFoundException {
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL8.getOsType()).build());
+        FlowTriggerEventQueue queue = underTest.createFlowTriggerEventQueue(createEvent());
+
+        assertEquals(4, queue.getQueue().size());
+    }
 
     @Test
     void initEventShouldReturnCorrectValue() {
@@ -57,8 +66,8 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
 
     @Test
     void createFlowTriggerEventQueueShouldReturnCorrectQueue() throws CloudbreakImageNotFoundException {
-        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         UpgradePreparationChainTriggerEvent event = createEvent();
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL8.getOsType()).build());
 
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(4, flowChainQueue.getQueue().size());
@@ -71,9 +80,9 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
 
     @Test
     void createFlowTriggerEventQueueShouldThrowExceptionWhenImageNotFound() throws CloudbreakImageNotFoundException {
-        doThrow(new CloudbreakImageNotFoundException("error")).when(componentConfigProviderService).getImage(STACK_ID);
         UpgradePreparationChainTriggerEvent event = createEvent();
 
+        doThrow(new CloudbreakImageNotFoundException("error")).when(componentConfigProviderService).getImage(STACK_ID);
         String errorMessage = Assertions.assertThrows(NotFoundException.class, () -> underTest.createFlowTriggerEventQueue(event)).getMessage();
         assertEquals("Image not found for stack", errorMessage);
     }
@@ -96,7 +105,14 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upgradeValidationEvent.getResourceId());
 
         assertInstanceOf(ClusterUpgradeValidationTriggerEvent.class, upgradeValidationEvent);
-        assertEquals(imageId, ((ClusterUpgradeValidationTriggerEvent) upgradeValidationEvent).getImageId());
+        assertNull(((ClusterUpgradeValidationTriggerEvent) upgradeValidationEvent).getClusterUpgradeProperties());
+        ClusterUpgradeValidationTriggerEvent trigger = (ClusterUpgradeValidationTriggerEvent) upgradeValidationEvent;
+        assertEquals(imageId, trigger.getImageId());
+        assertEquals("catalogName", trigger.getImageChangeDto().getImageCatalogName());
+        assertEquals("catalogUrl", trigger.getImageChangeDto().getImageCatalogUrl());
+        assertEquals(false, trigger.isLockComponents());
+        assertEquals(false, trigger.isRollingUpgradeEnabled());
+        assertEquals(false, trigger.isReplaceVms());
     }
 
     private void assertUpdatePreparationEvent(FlowTriggerEventQueue flowChainQueue, String imageId) {
@@ -105,6 +121,7 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upgradePreparationEvent.getResourceId());
 
         assertInstanceOf(ClusterUpgradePreparationTriggerEvent.class, upgradePreparationEvent);
+        assertNull(((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getClusterUpgradeProperties());
         assertEquals(imageId, ((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getImageChangeDto().getImageId());
     }
 

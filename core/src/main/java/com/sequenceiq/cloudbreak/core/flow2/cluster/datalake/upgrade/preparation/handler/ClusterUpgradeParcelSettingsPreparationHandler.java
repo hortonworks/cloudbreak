@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -12,22 +13,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -46,7 +43,7 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
     private ParcelService parcelService;
 
     @Inject
-    private ImageCatalogService imageCatalogService;
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
 
     @Inject
     private OsChangeService osChangeService;
@@ -58,14 +55,17 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
         Long stackId = request.getResourceId();
         try {
             StackDto stackDto = stackDtoService.getById(stackId);
-            Image targetImage = getImageFromCatalog(stackDto, request.getImageChangeDto());
-            Set<ClouderaManagerProduct> clouderaManagerProducts = getRequiredProductsFromImage(stackDto, targetImage);
+            ClusterUpgradeProperties properties = clusterUpgradePropertiesResolver.resolve(request);
+            Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsFromProducts(stackDto,
+                    properties.targetImage().getAllProducts()).stream()
+                    .map(ClouderaManagerProduct::copy)
+                    .collect(Collectors.toSet());
             Set<ClouderaManagerProduct> updatedUpgradeCandidateProductsForOsChange = osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(
-                    clouderaManagerProducts, request.getCurrentOsType(), OsType.getByOsTypeString(targetImage.getOsType()), targetImage.getArchitecture());
+                    clouderaManagerProducts, properties.currentImage().osType(), properties.targetImage().osType(), properties.targetImage().architecture());
             LOGGER.debug("The following parcels will be prepared for upgrade: {}", updatedUpgradeCandidateProductsForOsChange);
             clusterApiConnectors.getConnector(stackDto).updateParcelSettings(updatedUpgradeCandidateProductsForOsChange);
             return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT.name(), stackId,
-                    updatedUpgradeCandidateProductsForOsChange, request.getImageChangeDto().getImageId());
+                    updatedUpgradeCandidateProductsForOsChange, properties.targetImage().imageId(), properties);
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel settings preparation failed.", e);
             return new ClusterUpgradePreparationFailureEvent(request.getResourceId(), e);
@@ -83,13 +83,4 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
         return new ClusterUpgradePreparationFailureEvent(resourceId, e);
     }
 
-    private Set<ClouderaManagerProduct> getRequiredProductsFromImage(StackDto stackDto, Image targetImage) {
-        return parcelService.getRequiredProductsFromImage(stackDto, targetImage);
-    }
-
-    private Image getImageFromCatalog(StackDto stackDto, ImageChangeDto imageChangeDto)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return imageCatalogService.getImage(stackDto.getWorkspace().getId(), imageChangeDto.getImageCatalogUrl(), imageChangeDto.getImageCatalogName(),
-                imageChangeDto.getImageId()).getImage();
-    }
 }

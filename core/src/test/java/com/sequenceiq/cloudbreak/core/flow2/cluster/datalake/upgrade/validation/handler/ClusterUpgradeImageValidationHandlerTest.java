@@ -97,7 +97,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+        lenient().when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
                 ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
         lenient().when(cloudStack.toBuilder()).thenReturn(CloudStack.builder());
     }
@@ -200,7 +200,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
                 cloudStack, cloudCredential, cloudContext, null, null);
         HandlerEvent<ClusterUpgradeImageValidationEvent> event = mock(HandlerEvent.class);
         when(event.getData()).thenReturn(request);
-        when(clusterUpgradePropertiesResolver.resolveUnchecked(request)).thenReturn(properties);
+        when(clusterUpgradePropertiesResolver.resolve(request)).thenReturn(properties);
         when(parcelAvailabilityService.validateAvailability(properties, 1L)).thenReturn(Set.of());
 
         Selectable result = underTest.doAccept(event);

@@ -37,7 +37,7 @@ public class CloudProviderUpdateCheckHandler extends ExceptionCatcherEventHandle
         LOGGER.debug("Received event: {}", event);
         ClusterUpgradeUpdateCheckRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatform(), cloudContext.getVariant());
         try {
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());

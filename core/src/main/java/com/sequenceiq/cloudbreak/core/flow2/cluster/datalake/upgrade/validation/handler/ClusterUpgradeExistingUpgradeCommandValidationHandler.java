@@ -57,7 +57,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
         // TODO CB-33421: Remove legacy image fallback once in-flight flow events no longer depend on it in JSON.
         Image targetImage = request.getImage();
         Long stackId = request.getResourceId();
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
         StackDto stackDto = getStack(stackId);
 
         ClusterApi connector = clusterApiConnectors.getConnector(stackDto);

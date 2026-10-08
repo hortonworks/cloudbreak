@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTE
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +31,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -88,7 +91,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final String IMAGE_ID = "imageId";
+    private static final String IMAGE_ID = "targetImageId";
 
     private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, "imageCatalogName", "imageCatUrl");
 
@@ -162,6 +165,18 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertImageUpdateEvent(flowChainQueue);
         assertSetDefaultJavaEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testPreparationUsesLockComponentsFromRequest(boolean lockComponents) throws CloudbreakImageNotFoundException {
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, false, lockComponents, "variant", true, "runtime");
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertThat(flowChainQueue.getQueue()).filteredOn(ClusterUpgradePreparationTriggerEvent.class::isInstance)
+                .hasSize(lockComponents ? 0 : 1);
     }
 
     @Test
@@ -418,7 +433,10 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upgradeValidationEvent.getResourceId());
         assertInstanceOf(ClusterUpgradeValidationTriggerEvent.class, upgradeValidationEvent);
         ClusterUpgradeValidationTriggerEvent validationEvent = (ClusterUpgradeValidationTriggerEvent) upgradeValidationEvent;
+        assertNull(validationEvent.getClusterUpgradeProperties());
         assertEquals(imageId, validationEvent.getImageId());
+        assertEquals(imageChangeDto.getImageCatalogName(), validationEvent.getImageChangeDto().getImageCatalogName());
+        assertEquals(imageChangeDto.getImageCatalogUrl(), validationEvent.getImageChangeDto().getImageCatalogUrl());
         assertEquals(lockComponents, validationEvent.isLockComponents());
         assertEquals(replaceVms, validationEvent.isReplaceVms());
         assertEquals(rollingUpgradeEnabled, validationEvent.isRollingUpgradeEnabled());
@@ -429,6 +447,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), upgradePreparationEvent.selector());
         assertEquals(STACK_ID, upgradePreparationEvent.getResourceId());
         assertInstanceOf(ClusterUpgradePreparationTriggerEvent.class, upgradePreparationEvent);
+        assertNull(((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getClusterUpgradeProperties());
         assertEquals(imageId, ((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getImageChangeDto().getImageId());
     }
 

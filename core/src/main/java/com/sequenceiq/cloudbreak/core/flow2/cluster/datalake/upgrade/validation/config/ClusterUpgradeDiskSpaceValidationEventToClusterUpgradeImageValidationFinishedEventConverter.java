@@ -27,7 +27,7 @@ public class ClusterUpgradeDiskSpaceValidationEventToClusterUpgradeImageValidati
     @Override
     public ClusterUpgradeImageValidationFinishedEvent convert(Object payload) {
         ClusterUpgradeDiskSpaceValidationEvent sourcePayload = (ClusterUpgradeDiskSpaceValidationEvent) payload;
-        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(sourcePayload);
+        ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(sourcePayload);
         return new ClusterUpgradeImageValidationFinishedEvent(sourcePayload.selector(), sourcePayload.getResourceId(),
                 clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties, sourcePayload.getRequiredFreeSpace(), Set.of());
     }

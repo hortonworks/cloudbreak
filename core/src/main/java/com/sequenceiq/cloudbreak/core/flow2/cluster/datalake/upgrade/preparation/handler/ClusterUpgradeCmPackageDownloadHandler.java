@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationFailureEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.preparation.ClusterUpgradeCmPackageDownloaderService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -25,15 +27,19 @@ public class ClusterUpgradeCmPackageDownloadHandler extends ExceptionCatcherEven
     @Inject
     private ClusterUpgradeCmPackageDownloaderService clusterUpgradeCmPackageDownloaderService;
 
+    @Inject
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradePreparationEvent> event) {
         LOGGER.debug("Accepting Cluster upgrade CM package download event {}", event);
         ClusterUpgradePreparationEvent request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            clusterUpgradeCmPackageDownloaderService.downloadCmPackages(stackId, request.getImageId());
+            ClusterUpgradeProperties properties = clusterUpgradePropertiesResolver.resolve(request);
+            clusterUpgradeCmPackageDownloaderService.downloadCmPackages(stackId, properties);
             return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT.name(), stackId, request.getClouderaManagerProducts(),
-                    request.getImageId());
+                    properties.targetImage().imageId(), properties);
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade CM package download failed.", e);
             return new ClusterUpgradePreparationFailureEvent(request.getResourceId(), e);

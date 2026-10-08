@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.common.model.OsType;
 
 public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
@@ -19,17 +20,25 @@ public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
 
     private final OsType currentOsType;
 
+    private final ClusterUpgradeProperties clusterUpgradeProperties;
+
     @JsonCreator
     public ClusterUpgradePreparationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto,
             @JsonProperty("runtimeVersion") String runtimeVersion,
-            @JsonProperty("currentOsType") OsType currentOsType) {
+            @JsonProperty("currentOsType") OsType currentOsType,
+            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties) {
         super(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), resourceId, accepted);
         this.imageChangeDto = imageChangeDto;
         this.runtimeVersion = runtimeVersion;
         this.currentOsType = currentOsType;
+        this.clusterUpgradeProperties = clusterUpgradeProperties;
+    }
+
+    public ClusterUpgradeProperties getClusterUpgradeProperties() {
+        return clusterUpgradeProperties;
     }
 
     public ImageChangeDto getImageChangeDto() {
@@ -40,7 +49,8 @@ public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
         return runtimeVersion;
     }
 
-    public OsType getCurrentOsType() {
+    @JsonProperty("currentOsType")
+    private OsType getCurrentOsType() {
         return currentOsType;
     }
 
@@ -50,6 +60,7 @@ public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
                 "imageChangeDto=" + imageChangeDto +
                 ", runtimeVersion='" + runtimeVersion + '\'' +
                 ", currentOsType='" + currentOsType + '\'' +
+                ", clusterUpgradeProperties='" + clusterUpgradeProperties + '\'' +
                 "} " + super.toString();
     }
 }

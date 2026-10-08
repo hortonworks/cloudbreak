@@ -31,7 +31,7 @@ public class ClusterUpgradeValidationEventToClusterUpgradeImageValidationFinishe
 
     @BeforeEach
     void setUp() {
-        when(clusterUpgradePropertiesResolver.resolveUnchecked(any())).thenAnswer(invocation ->
+        when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
                 ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
     }
 

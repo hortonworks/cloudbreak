@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
 public class ClusterUpgradeValidationTriggerEvent extends StackEvent {
 
@@ -21,6 +23,10 @@ public class ClusterUpgradeValidationTriggerEvent extends StackEvent {
 
     private final boolean replaceVms;
 
+    private final ClusterUpgradeProperties clusterUpgradeProperties;
+
+    private final ImageChangeDto imageChangeDto;
+
     @JsonCreator
     public ClusterUpgradeValidationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
@@ -28,12 +34,29 @@ public class ClusterUpgradeValidationTriggerEvent extends StackEvent {
             @JsonProperty("imageId") String imageId,
             @JsonProperty("lockComponents") boolean lockComponents,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
-            @JsonProperty("replaceVms") boolean replaceVms) {
+            @JsonProperty("replaceVms") boolean replaceVms,
+            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties,
+            @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto) {
         super(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), resourceId, accepted);
         this.imageId = imageId;
         this.lockComponents = lockComponents;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
         this.replaceVms = replaceVms;
+        this.clusterUpgradeProperties = clusterUpgradeProperties;
+        this.imageChangeDto = imageChangeDto;
+    }
+
+    public ClusterUpgradeValidationTriggerEvent(Long resourceId, Promise<AcceptResult> accepted, ImageChangeDto imageChangeDto,
+            boolean lockComponents, boolean rollingUpgradeEnabled, boolean replaceVms) {
+        this(resourceId, accepted, imageChangeDto.getImageId(), lockComponents, rollingUpgradeEnabled, replaceVms, null, imageChangeDto);
+    }
+
+    public ImageChangeDto getImageChangeDto() {
+        return imageChangeDto;
+    }
+
+    public ClusterUpgradeProperties getClusterUpgradeProperties() {
+        return clusterUpgradeProperties;
     }
 
     public String getImageId() {
@@ -59,6 +82,8 @@ public class ClusterUpgradeValidationTriggerEvent extends StackEvent {
                 .add("lockComponents=" + lockComponents)
                 .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
                 .add("replaceVms=" + replaceVms)
+                .add("clusterUpgradeProperties=" + clusterUpgradeProperties)
+                .add("imageChangeDto=" + imageChangeDto)
                 .add(super.toString())
                 .toString();
     }

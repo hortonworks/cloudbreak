@@ -39,7 +39,7 @@ public class ClusterUpgradeCsdPackageDownloadHandler extends ExceptionCatcherEve
         try {
             clouderaManagerCsdDownloaderService.downloadCsdFiles(stackDto, true, request.getClouderaManagerProducts(), true);
             return new ClusterUpgradePreparationEvent(FINISH_CLUSTER_UPGRADE_PREPARATION_EVENT.name(), stackId, request.getClouderaManagerProducts(),
-                    request.getImageId());
+                    request.getImageId(), request.getClusterUpgradeProperties());
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade CSD package download failed.", e);
             return new ClusterUpgradePreparationFailureEvent(stackId, e);

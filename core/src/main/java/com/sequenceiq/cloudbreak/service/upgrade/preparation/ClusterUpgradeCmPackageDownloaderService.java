@@ -10,11 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -22,10 +19,9 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Component
@@ -46,9 +42,6 @@ public class ClusterUpgradeCmPackageDownloaderService {
     private CloudbreakEventService eventService;
 
     @Inject
-    private ImageCatalogService imageCatalogService;
-
-    @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
@@ -63,21 +56,18 @@ public class ClusterUpgradeCmPackageDownloaderService {
     @Inject
     private ClusterManagerUpgradePreparationStateParamsProvider clusterManagerUpgradePreparationStateParamsProvider;
 
-    @Inject
-    private ImageService imageService;
-
-    public void downloadCmPackages(Long stackId, String targetImageId) throws Exception {
+    public void downloadCmPackages(Long stackId, ClusterUpgradeProperties properties) throws Exception {
         StackDto stack = stackDtoService.getById(stackId);
-        Image candidateImage = getImageFromCatalog(stackId, stack.getWorkspaceId(), targetImageId);
         Long clusterId = stack.getCluster().getId();
         ClouderaManagerRepo currentClouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
-        String candidateCmBuildNumber = candidateImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER);
+        String candidateCmBuildNumber = properties.targetImage().packageVersions().get(ImagePackageVersion.CM_BUILD_NUMBER.getKey());
         if (StringUtils.equals(currentClouderaManagerRepo.getBuildNumber(), candidateCmBuildNumber)) {
             LOGGER.debug("Cloudera Manager version is the same as the current one, no need to download CM packages");
         } else {
             eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_CM_PACKAGES);
-            LOGGER.debug("Downloading CM packages based on image {}", targetImageId);
-            SaltConfig saltConfig = createSaltConfig(candidateImage, stackId);
+            LOGGER.debug("Downloading CM packages for image {} from repo {}", properties.targetImage().imageId(),
+                    properties.targetImage().clouderaManagerRepo());
+            SaltConfig saltConfig = createSaltConfig(properties);
             clusterHostServiceRunner.redeployStates(stack);
             OrchestratorStateParams stateParams = createStateParams(stack);
             hostOrchestrator.saveCustomPillars(saltConfig, new ClusterDeletionBasedExitCriteriaModel(stackId, clusterId), stateParams);
@@ -91,14 +81,7 @@ public class ClusterUpgradeCmPackageDownloaderService {
         return saltStateParamsService.createStateParamsForReachableNodes(stack, STATE, MAX_RETRY, MAX_RETRY_ON_ERROR);
     }
 
-    private SaltConfig createSaltConfig(Image candidateImage, Long stackId) {
-        return new SaltConfig(clusterManagerUpgradePreparationStateParamsProvider.createParamsForCmPackageDownload(candidateImage, stackId));
-    }
-
-    private Image getImageFromCatalog(Long stackId, Long workspaceId, String targetImageId)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image currentModelImage = imageService.getImage(stackId);
-        return imageCatalogService.getImage(workspaceId, currentModelImage.getImageCatalogUrl(), currentModelImage.getImageCatalogName(),
-                targetImageId).getImage();
+    private SaltConfig createSaltConfig(ClusterUpgradeProperties properties) {
+        return new SaltConfig(clusterManagerUpgradePreparationStateParamsProvider.createParamsForCmPackageDownload(properties));
     }
 }

@@ -95,6 +95,15 @@ public class ClouderaManagerRepo {
         return this;
     }
 
+    public ClouderaManagerRepo copy() {
+        return new ClouderaManagerRepo()
+                .withPredefined(predefined)
+                .withVersion(version)
+                .withBaseUrl(baseUrl)
+                .withGpgKeyUrl(gpgKeyUrl)
+                .withBuildNumber(buildNumber);
+    }
+
     @Override
     public String toString() {
         return "ClouderaManagerRepo{" +

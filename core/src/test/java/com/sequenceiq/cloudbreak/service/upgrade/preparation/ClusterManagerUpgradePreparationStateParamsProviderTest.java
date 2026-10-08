@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.service.upgrade.preparation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,12 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
@@ -28,23 +27,14 @@ import com.sequenceiq.common.model.OsType;
 @ExtendWith(MockitoExtension.class)
 class ClusterManagerUpgradePreparationStateParamsProviderTest {
 
-    private static final long STACK_ID = 1L;
-
     @InjectMocks
     private ClusterManagerUpgradePreparationStateParamsProvider underTest;
 
     @Mock
-    private ImageToClouderaManagerRepoConverter imageToClouderaManagerRepoConverter;
-
-    @Mock
     private OsChangeService osChangeService;
 
-    @Mock
-    private StackImageService stackImageService;
-
     @Test
-    void testCreateParamsForCmPackageDownload() throws CloudbreakImageNotFoundException {
-        Image targetImage = Image.builder().withOsType(OsType.RHEL9.getOsType()).build();
+    void testCreateParamsForCmPackageDownload() {
         String pillarKey = "cloudera-manager-upgrade-prepare";
         String version = "7.2.0";
         String baseUrl = "http://cloudera-manager-repo";
@@ -56,13 +46,12 @@ class ClusterManagerUpgradePreparationStateParamsProviderTest {
                 .withGpgKeyUrl(gpgKeyUrl)
                 .withBuildNumber(buildNumber);
 
-        when(imageToClouderaManagerRepoConverter.convert(targetImage)).thenReturn(repo);
-        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(
-                com.sequenceiq.cloudbreak.cloud.model.Image.builder().withOsType(OsType.RHEL8.getOsType()).withArchitecture(Architecture.X86_64.getName())
-                        .build());
-        when(osChangeService.updateCmRepoInCaseOfOsChange(repo, OsType.RHEL8, OsType.RHEL9, Architecture.X86_64.getName())).thenReturn(repo);
+        ClusterUpgradeProperties upgradeProperties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                "7.3.2", "base-image", OsType.RHEL9, "x86_64", null, Set.of(), repo);
+        when(osChangeService.updateCmRepoInCaseOfOsChange(any(), eq(OsType.RHEL8), eq(OsType.RHEL9), eq(Architecture.X86_64.getName())))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        Map<String, SaltPillarProperties> actual = underTest.createParamsForCmPackageDownload(targetImage, STACK_ID);
+        Map<String, SaltPillarProperties> actual = underTest.createParamsForCmPackageDownload(upgradeProperties);
 
         assertEquals(pillarKey, actual.keySet().iterator().next());
         SaltPillarProperties saltPillarProperties = actual.get(pillarKey);
@@ -72,6 +61,7 @@ class ClusterManagerUpgradePreparationStateParamsProviderTest {
         Map<String, Object> clouderaManagerUpgradePrepare = (Map<String, Object>) properties.get("cloudera-manager-upgrade-prepare");
         assertEquals(1, clouderaManagerUpgradePrepare.size());
         ClouderaManagerRepo clouderaManagerRepo = (ClouderaManagerRepo) clouderaManagerUpgradePrepare.get("repo");
+        assertNotSame(repo, clouderaManagerRepo);
         assertEquals(version, clouderaManagerRepo.getVersion());
         assertEquals(baseUrl, clouderaManagerRepo.getBaseUrl());
         assertEquals(gpgKeyUrl, clouderaManagerRepo.getGpgKeyUrl());
@@ -80,13 +70,17 @@ class ClusterManagerUpgradePreparationStateParamsProviderTest {
     }
 
     @Test
-    void testCreateParamsForCmPackageDownloadShouldThrowExceptionWhenImageNotFound() throws CloudbreakImageNotFoundException {
-        Image targetImage = Image.builder().withOsType(OsType.RHEL9.getOsType()).build();
-        doThrow(CloudbreakImageNotFoundException.class).when(stackImageService).getCurrentImage(STACK_ID);
+    void testOsChangeDoesNotModifyTargetRepository() {
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withBaseUrl("target-url").withGpgKeyUrl("target-key");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                "7.3.2", "base-image", OsType.RHEL9, "x86_64", null, Set.of(), repo);
+        when(osChangeService.updateCmRepoInCaseOfOsChange(any(), eq(OsType.RHEL8), eq(OsType.RHEL9), eq("x86_64")))
+                .thenAnswer(invocation -> ((ClouderaManagerRepo) invocation.getArgument(0)).withBaseUrl("current-os-url"));
 
-        String errorMessage = assertThrows(NotFoundException.class, () -> underTest.createParamsForCmPackageDownload(targetImage, STACK_ID)).getMessage();
+        Map<String, SaltPillarProperties> actual = underTest.createParamsForCmPackageDownload(properties);
 
-        assertEquals("Image not found for stack", errorMessage);
+        Map<?, ?> pillar = (Map<?, ?>) actual.get("cloudera-manager-upgrade-prepare").getProperties().get("cloudera-manager-upgrade-prepare");
+        assertEquals("current-os-url", ((ClouderaManagerRepo) pillar.get("repo")).getBaseUrl());
+        assertEquals("target-url", repo.getBaseUrl());
     }
-
 }

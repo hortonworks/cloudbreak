@@ -18,8 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -55,8 +53,7 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
     }
 
     // TODO CB-33421: Replace with event.getClusterUpgradeProperties() once in-flight flow events no longer need rebuild.
-    protected ClusterUpgradeProperties resolveUpgradeProperties(ClusterUpgradeValidationEvent event)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    protected ClusterUpgradeProperties resolveUpgradeProperties(ClusterUpgradeValidationEvent event) {
         return clusterUpgradePropertiesResolver.resolve(event);
     }
 

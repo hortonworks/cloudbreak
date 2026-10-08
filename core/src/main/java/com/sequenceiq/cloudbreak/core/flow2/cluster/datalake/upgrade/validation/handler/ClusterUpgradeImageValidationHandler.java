@@ -70,7 +70,7 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
         ClusterUpgradeImageValidationEvent request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolveUnchecked(request);
+            ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
             Set<Response> parcelsResponses = parcelAvailabilityService.validateAvailability(clusterUpgradeProperties, request.getResourceId());
             long requiredDiskSpaceForUpgrade = parcelSizeService.getRequiredFreeSpace(parcelsResponses);
             Set<String> warningMessages = executePlatformSpecificValidations(request, cloudContext);

@@ -4,6 +4,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum ClusterUpgradeValidationHandlerSelectors implements FlowEvent {
 
+    RESOLVE_CLUSTER_UPGRADE_PROPERTIES_EVENT,
     VALIDATE_CLOUDPROVIDER_UPDATE,
     VALIDATE_DISK_SPACE_EVENT,
     VALIDATE_SERVICES_EVENT,
