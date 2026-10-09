@@ -9,6 +9,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
@@ -54,7 +55,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withDatabaseAvailabilityType(Optional.ofNullable(sdxClusterResponse.getSdxDatabaseResponse()).map(SdxDatabaseResponse::getAvailabilityType)
                             .orElse(SdxDatabaseAvailabilityType.NONE))
                     .withCreated(sdxClusterResponse.getCreated())
-                    .withProviderSyncStates(sdxClusterResponse.getProviderSyncStates());
+                    .withProviderSyncStates(sdxClusterResponse.getProviderSyncStates())
+                    .withNotificationState(sdxClusterResponse.getNotificationState());
         }
         return builder.withStackV4Response(stackV4Response).build();
     }
@@ -134,6 +136,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
         private Set<ProviderSyncState> providerSyncStates;
 
         private String detachedClusterName;
+
+        private NotificationState notificationState;
 
         private Builder() {
         }
@@ -282,6 +286,11 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             return this;
         }
 
+        public Builder withNotificationState(NotificationState notificationState) {
+            this.notificationState = notificationState;
+            return this;
+        }
+
         public SdxClusterDetailResponse build() {
             SdxClusterDetailResponse sdxClusterDetailResponse = new SdxClusterDetailResponse();
             sdxClusterDetailResponse.setStackV4Response(stackV4Response);
@@ -310,6 +319,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             sdxClusterDetailResponse.setSeLinuxPolicy(seLinux);
             sdxClusterDetailResponse.setDatabaseEngineVersion(databaseEngineVersion);
             sdxClusterDetailResponse.setProviderSyncStates(providerSyncStates);
+            sdxClusterDetailResponse.setNotificationState(notificationState);
             SdxDatabaseResponse sdxDatabaseResponse = new SdxDatabaseResponse();
             sdxDatabaseResponse.setAvailabilityType(databaseAvailabilityType);
             sdxDatabaseResponse.setDatabaseEngineVersion(databaseEngineVersion);
