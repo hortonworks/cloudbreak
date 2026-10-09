@@ -634,6 +634,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getBaseImageTestIdbrokerInstanceType() {
+        return delegate.getBaseImageTestIdbrokerInstanceType();
+    }
+
+    @Override
     public ResourceType getRootDiskResourceType() {
         return delegate.getRootDiskResourceType();
     }

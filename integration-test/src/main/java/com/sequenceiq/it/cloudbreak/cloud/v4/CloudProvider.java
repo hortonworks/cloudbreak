@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -286,6 +288,10 @@ public interface CloudProvider {
     ResourceType getRootDiskResourceType();
 
     String getDatalakeInstanceType(String name);
+
+    default String getBaseImageTestIdbrokerInstanceType() {
+        return getDatalakeInstanceType(IDBROKER.getName());
+    }
 
     String getAddDiskVolumeType();
 

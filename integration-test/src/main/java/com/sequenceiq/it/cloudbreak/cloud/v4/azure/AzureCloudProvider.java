@@ -85,6 +85,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     private static final String MARKETPLACE_REGION = "default";
 
+    private static final String BASE_IMAGE_TEST_IDBROKER_INSTANCE_TYPE = "Standard_D4s_v5";
+
     @Inject
     private AzureProperties azureProperties;
 
@@ -657,6 +659,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public String getDatalakeInstanceType(String name) {
         return azureProperties.getInstance().getTypes().getDatalake().getOrDefault(name,
                 azureProperties.getInstance().getTypes().getDefault());
+    }
+
+    @Override
+    public String getBaseImageTestIdbrokerInstanceType() {
+        return BASE_IMAGE_TEST_IDBROKER_INSTANCE_TYPE;
     }
 
     @Override

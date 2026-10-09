@@ -121,6 +121,12 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
                     .withTelemetry(telemetry)
+                .when((tc, dto, client) -> {
+                    dto.getRequest().getStackV4Request().getInstanceGroups().stream()
+                            .filter(ig -> IDBROKER.getName().equals(ig.getName()))
+                            .forEach(ig -> ig.getTemplate().setInstanceType(cloudProvider.getBaseImageTestIdbrokerInstanceType()));
+                    return dto;
+                })
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
