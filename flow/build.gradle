@@ -24,7 +24,7 @@ dependencies {
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation group: 'net.bytebuddy',                         name: 'byte-buddy',                     version: "$byteBuddyVersion"
   implementation group: 'javax.annotation',                      name: 'javax.annotation-api',           version: "$javaxAnnotationApiVersion"
-  implementation group: 'javax.inject',                          name: 'javax.inject',                   version: '1'
+  implementation group: 'javax.inject',                          name: 'javax.inject',                   version: '1-redhat-3'
   implementation group: 'jakarta.transaction',                   name: 'jakarta.transaction-api',        version: "$jakartaTransactionApiVersion"
   implementation group: 'javax.xml.bind',                        name: 'jaxb-api',                       version: "$javaxXmlBindJaxbApiVersion"
 
