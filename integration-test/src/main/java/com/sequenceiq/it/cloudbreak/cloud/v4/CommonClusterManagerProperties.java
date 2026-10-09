@@ -26,11 +26,19 @@ public class CommonClusterManagerProperties {
 
     private String latestRuntimeVersion;
 
+    private String proShapeRuntimeVersion;
+
+    private String proShapeMinimumQualifiedRuntimeVersion;
+
     private SdxClusterShape clusterShape;
 
     private SdxClusterShape internalClusterShape;
 
     private String internalSdxBlueprintName;
+
+    private String sdxLightDutyProBlueprintName;
+
+    private String sdxEnterpriseProBlueprintName;
 
     private String dataEngDistroXBlueprintName;
 
@@ -64,6 +72,22 @@ public class CommonClusterManagerProperties {
         this.latestRuntimeVersion = latestRuntimeVersion;
     }
 
+    public String getProShapeRuntimeVersion() {
+        return proShapeRuntimeVersion;
+    }
+
+    public void setProShapeRuntimeVersion(String proShapeRuntimeVersion) {
+        this.proShapeRuntimeVersion = proShapeRuntimeVersion;
+    }
+
+    public String getProShapeMinimumQualifiedRuntimeVersion() {
+        return proShapeMinimumQualifiedRuntimeVersion;
+    }
+
+    public void setProShapeMinimumQualifiedRuntimeVersion(String proShapeMinimumQualifiedRuntimeVersion) {
+        this.proShapeMinimumQualifiedRuntimeVersion = proShapeMinimumQualifiedRuntimeVersion;
+    }
+
     public SdxClusterShape getClusterShape() {
         return clusterShape;
     }
@@ -90,6 +114,30 @@ public class CommonClusterManagerProperties {
 
     public String getInternalSdxBlueprintNameWithRuntimeVersion(String runtimeVersion) {
         return String.format(internalSdxBlueprintName, runtimeVersion);
+    }
+
+    public String getSdxLightDutyProBlueprintName() {
+        return String.format(sdxLightDutyProBlueprintName, runtimeVersion);
+    }
+
+    public String getSdxLightDutyProBlueprintName(String runtimeVersion) {
+        return String.format(sdxLightDutyProBlueprintName, runtimeVersion);
+    }
+
+    public void setSdxLightDutyProBlueprintName(String sdxLightDutyProBlueprintName) {
+        this.sdxLightDutyProBlueprintName = sdxLightDutyProBlueprintName;
+    }
+
+    public String getSdxEnterpriseProBlueprintName() {
+        return String.format(sdxEnterpriseProBlueprintName, runtimeVersion);
+    }
+
+    public String getSdxEnterpriseProBlueprintName(String runtimeVersion) {
+        return String.format(sdxEnterpriseProBlueprintName, runtimeVersion);
+    }
+
+    public void setSdxEnterpriseProBlueprintName(String sdxEnterpriseProBlueprintName) {
+        this.sdxEnterpriseProBlueprintName = sdxEnterpriseProBlueprintName;
     }
 
     public ClouderaManager getClouderaManager() {

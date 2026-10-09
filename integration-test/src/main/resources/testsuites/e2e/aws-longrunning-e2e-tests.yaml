@@ -35,3 +35,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.tagupdate.UserDefinedTagUpdateTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzMigrationTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxLightDutyProResizeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxEnterpriseProResizeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxLightDutyProBackupRestoreTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxEnterpriseProBackupRestoreTest

@@ -19,3 +19,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.AzureMultiAzFreeIpaTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.database.RedbeamsDatabaseInstanceTypeFallbackE2ETest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxLightDutyProLifecycleTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxEnterpriseProLifecycleTest

@@ -141,6 +141,8 @@ integrationtest:
   clusterShape: LIGHT_DUTY
   internalClusterShape: CUSTOM
   internalSdxBlueprintName: "%s - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
+  sdxLightDutyProBlueprintName: "%s - SDX Light Duty Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph"
+  sdxEnterpriseProBlueprintName: "%s - Enterprise SDX Pro template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph"
   dataEngDistroXBlueprintName: "%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie"
   hybridDataMartDistroXBlueprintName: "%s - Hybrid Data Mart: Apache Impala, Hue"
   dataMartDistroXBlueprintName: "%s - Data Mart: Apache Impala, Hue"
@@ -155,6 +157,8 @@ integrationtest:
   ycloudTest: false
   runtimeVersion: 7.3.2
   latestRuntimeVersion: 7.3.2
+  proShapeRuntimeVersion: 7.3.2
+  proShapeMinimumQualifiedRuntimeVersion: 7.3.2.10000
   upgrade:
     matrix:
       7.2.17: 7.2.16

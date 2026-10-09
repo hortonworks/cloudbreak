@@ -14,3 +14,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXGcpVolumesTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxLightDutyProLifecycleTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxEnterpriseProLifecycleTest

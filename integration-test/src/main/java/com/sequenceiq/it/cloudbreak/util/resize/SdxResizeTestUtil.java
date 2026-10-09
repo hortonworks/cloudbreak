@@ -140,9 +140,14 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
 
     public SdxInternalTestDto givenProvisionEnvironmentAndDatalake(TestContext testContext, String sdxKey, String runtimeVersion,
             SdxClusterShape clusterShape, SdxResizeTestValidator validator) {
+        return givenProvisionEnvironmentAndDatalake(testContext, sdxKey, runtimeVersion, clusterShape, validator, null, null);
+    }
+
+    public SdxInternalTestDto givenProvisionEnvironmentAndDatalake(TestContext testContext, String sdxKey, String runtimeVersion,
+            SdxClusterShape clusterShape, SdxResizeTestValidator validator, String imageCatalogName, String imageId) {
         SdxCloudStorageRequest cloudStorageRequest = getCloudStorageRequest(testContext);
 
-        return testContext
+        SdxInternalTestDto sdxInternalTestDto = testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs()
@@ -150,7 +155,12 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
                 .withCloudStorage(cloudStorageRequest)
                 .withRuntimeVersion(runtimeVersion)
                 .withClusterShape(clusterShape)
-                .withTelemetry("telemetry")
+                .withTelemetry("telemetry");
+        if (imageId != null) {
+            sdxInternalTestDto.withImageCatalogNameAndImageId(imageCatalogName, imageId);
+        }
+
+        return sdxInternalTestDto
                 .when(sdxTestClient.createInternal(), key(sdxKey))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
                 .awaitForHealthyInstances()
