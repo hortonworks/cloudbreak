@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties.FLOW_VARIABLE_NAME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -17,10 +18,15 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -69,12 +75,15 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -309,6 +318,32 @@ class StackImageUpdateActionsTest {
         assertTrue(variables.containsKey(AbstractStackImageUpdateAction.ORIGINAL_IMAGE));
     }
 
+    @ParameterizedTest
+    @MethodSource("upgradeSnapshotScenarios")
+    void imageUpdateUsesUpgradeSnapshotOnlyForMatchingUnlockedUpgrade(boolean locked, boolean matchingImage) {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts("7.3.2", "base-image", OsType.RHEL9,
+                "x86_64", null, Set.of(), null);
+        properties = new ClusterUpgradeProperties(new ClusterUpgradeProperties.UpgradeRequestOptions(false, locked, true),
+                properties.currentImage(), properties.targetImage());
+        variables.put(FLOW_VARIABLE_NAME, properties);
+        StatedImage baseImage = StatedImage.statedImage(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                .withUuid(matchingImage ? properties.targetImageId() : "other-image").build(), "catalog-url", "catalog");
+        ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(), 1L, baseImage);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
+        when(state.getId()).thenReturn(StackImageUpdateState.UPDATE_IMAGE_STATE);
+
+        updateImageAction.execute(stateContext);
+
+        if (!locked && matchingImage) {
+            verify(imageComponentUpdaterService).updateComponentsForUpgrade(properties, 1L);
+            verify(imageComponentUpdaterService, never()).updateComponentsForUpgrade(any(StatedImage.class), anyLong());
+        } else {
+            verify(imageComponentUpdaterService).updateComponentsForUpgrade(baseImage, 1L);
+            verify(imageComponentUpdaterService, never()).updateComponentsForUpgrade(any(ClusterUpgradeProperties.class), anyLong());
+        }
+        verify(stackImageService).storeNewImageComponent(any(StackDto.class), eq(baseImage));
+    }
+
     @Test
     void prepareImageAction() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
@@ -404,4 +439,9 @@ class StackImageUpdateActionsTest {
         verify(stackUpdater).updateStackStatus(eq(1L), eq(DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED), eq("test"));
         verifyNoInteractions(componentConfigProviderService);
     }
+
+    private static Stream<Arguments> upgradeSnapshotScenarios() {
+        return Stream.of(Arguments.of(false, true), Arguments.of(true, true), Arguments.of(false, false));
+    }
+
 }

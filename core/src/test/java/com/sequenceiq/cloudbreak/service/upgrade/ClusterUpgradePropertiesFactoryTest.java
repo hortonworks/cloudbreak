@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -332,6 +333,49 @@ class ClusterUpgradePropertiesFactoryTest {
 
         assertThatThrownBy(() -> underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, false, false))
                 .isInstanceOf(NotFoundException.class).hasMessage("Image not found for cluster upgrade").hasCause(failure);
+    }
+
+    @Test
+    void testLegacySnapshotRebuildPreservesOriginalImageWithoutCatalogLookup() {
+        Stack stack = mock(Stack.class);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(stack.isDatalake()).thenReturn(false);
+        Image original = currentImage();
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image target = targetCatalogImage();
+        StatedImage stated = StatedImage.statedImage(target, "persisted-url", "persisted-catalog");
+        when(stackImageService.getImageModelFromStatedImage(stack, original, stated)).thenReturn(Image.builder().withImageName("target-vm").build());
+        when(clouderaManagerProductTransformer.transform(target, true, true)).thenReturn(Set.of());
+
+        ClusterUpgradeProperties properties = underTest.create(STACK_ID, original, stated,
+                new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, true));
+
+        assertEquals(original.getImageId(), properties.currentImageId());
+        assertEquals(original.getPackageVersions(), properties.currentImage().packageVersions());
+        assertEquals(OsType.RHEL8, properties.currentImage().osType());
+        assertEquals("persisted-catalog", properties.targetImage().catalogName());
+        assertEquals("persisted-url", properties.targetImage().catalogUrl());
+        verifyNoInteractions(imageCatalogService, componentConfigProviderService);
+    }
+
+    @Test
+    void testLegacyTriggerRebuildUsesOriginalImageAfterDatabaseImageWasUpdated() throws Exception {
+        Stack stack = setupStack(false);
+        Image original = currentImage();
+        Image databaseImage = Image.builder().withImageId(TARGET_IMAGE_ID).withImageCatalogName("updated-catalog")
+                .withImageCatalogUrl("updated-url").withOsType("redhat9").build();
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image target = targetCatalogImage();
+        StatedImage stated = StatedImage.statedImage(target, "updated-url", "updated-catalog");
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(databaseImage);
+        when(imageCatalogService.getImage(WORKSPACE_ID, "updated-url", "updated-catalog", TARGET_IMAGE_ID)).thenReturn(stated);
+        when(stackImageService.getImageModelFromStatedImage(stack, original, stated)).thenReturn(Image.builder().withImageName("target-vm").build());
+        when(clouderaManagerProductTransformer.transform(target, true, true)).thenReturn(Set.of());
+
+        ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), original,
+                new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, true));
+
+        assertEquals(original.getImageId(), properties.currentImageId());
+        assertEquals(OsType.RHEL8, properties.currentImage().osType());
+        assertEquals("updated-catalog", properties.targetImage().catalogName());
     }
 
     private Stack setupStack(boolean datalake) {

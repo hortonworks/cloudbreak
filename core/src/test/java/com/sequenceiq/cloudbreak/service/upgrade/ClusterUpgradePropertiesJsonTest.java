@@ -6,18 +6,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesRequest;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.common.model.OsType;
 
@@ -166,5 +171,43 @@ class ClusterUpgradePropertiesJsonTest {
         assertNull(preparation.getClusterUpgradeProperties());
         assertEquals("custom", preparation.getImageChangeDto().getImageCatalogName());
         assertEquals("RHEL8", JsonUtil.readTree(JsonUtil.writeValueAsString(preparation)).get("currentOsType").asText());
+    }
+
+    @Test
+    void testUpgradeEventsPreservePropertiesAfterSerialization() throws Exception {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
+        ClusterUpgradeTriggerEvent upgrade = new ClusterUpgradeTriggerEvent("selector", 1L, null, properties.targetImageId(), true,
+                properties.toCurrentCloudImage(), properties);
+        ConfigureClusterManagerManagementServicesRequest management = new ConfigureClusterManagerManagementServicesRequest(
+                1L, properties.toCurrentCloudImage(), properties.toCloudImage(), null, properties);
+
+        assertEquals(properties, JsonUtil.readValue(JsonUtil.writeValueAsString(upgrade), ClusterUpgradeTriggerEvent.class).getClusterUpgradeProperties());
+        assertEquals(properties, JsonUtil.readValue(JsonUtil.writeValueAsString(management),
+                ConfigureClusterManagerManagementServicesRequest.class).getClusterUpgradeProperties());
+    }
+
+    @Test
+    void testUpgradePropertiesSurviveFlowVariableSerialization() throws Exception {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put("CLUSTER_UPGRADE_PROPERTIES", properties);
+
+        Map<?, ?> restored = TypedJsonUtil.readValue(TypedJsonUtil.writeValueAsStringSilent(variables), Map.class);
+
+        assertEquals(properties, restored.get("CLUSTER_UPGRADE_PROPERTIES"));
+    }
+
+    @Test
+    void testLegacyUpgradeTriggerDeserializesWithoutProperties() throws Exception {
+        String json = """
+                {"@type":"com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent",
+                "selector":"CLUSTER_UPGRADE_INIT_EVENT","resourceId":1,"imageId":"target","rollingUpgradeEnabled":true}
+                """;
+
+        ClusterUpgradeTriggerEvent restored = JsonUtil.readValue(json, ClusterUpgradeTriggerEvent.class);
+
+        assertNull(restored.getClusterUpgradeProperties());
+        assertEquals("target", restored.getImageId());
+        assertTrue(restored.isRollingUpgradeEnabled());
     }
 }

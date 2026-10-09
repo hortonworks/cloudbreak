@@ -53,13 +53,17 @@ public class ClusterUpgradePropertiesFactory {
     private ImageToClouderaManagerRepoConverter imageToClouderaManagerRepoConverter;
 
     public ClusterUpgradeProperties create(ImageChangeDto imageChangeDto, boolean lockComponents, boolean rollingUpgradeEnabled, boolean replaceVms) {
+        return create(imageChangeDto, null, new ClusterUpgradeProperties.UpgradeRequestOptions(replaceVms, lockComponents, rollingUpgradeEnabled));
+    }
+
+    public ClusterUpgradeProperties create(ImageChangeDto imageChangeDto, Image originalImage, ClusterUpgradeProperties.UpgradeRequestOptions options) {
         try {
             Image currentImage = componentConfigProviderService.getImage(imageChangeDto.getStackId());
             Stack stack = stackService.get(imageChangeDto.getStackId());
             String catalogUrl = imageChangeDto.getImageCatalogUrl() != null ? imageChangeDto.getImageCatalogUrl() : currentImage.getImageCatalogUrl();
             String catalogName = imageChangeDto.getImageCatalogName() != null ? imageChangeDto.getImageCatalogName() : currentImage.getImageCatalogName();
             StatedImage targetStatedImage = imageCatalogService.getImage(stack.getWorkspace().getId(), catalogUrl, catalogName, imageChangeDto.getImageId());
-            return buildProperties(stack, currentImage, targetStatedImage, lockComponents, rollingUpgradeEnabled, replaceVms);
+            return buildProperties(stack, originalImage != null ? originalImage : currentImage, targetStatedImage, options);
         } catch (CloudbreakImageNotFoundException e) {
             throw new NotFoundException("Image not found for cluster upgrade", e);
         } catch (CloudbreakImageCatalogException e) {
@@ -67,8 +71,12 @@ public class ClusterUpgradePropertiesFactory {
         }
     }
 
+    public ClusterUpgradeProperties create(Long stackId, Image originalImage, StatedImage targetImage, ClusterUpgradeProperties.UpgradeRequestOptions options) {
+        return buildProperties(stackService.get(stackId), originalImage, targetImage, options);
+    }
+
     private ClusterUpgradeProperties buildProperties(Stack stack, Image currentImage, StatedImage targetStatedImage,
-            boolean lockComponents, boolean rollingUpgradeEnabled, boolean replaceVms) {
+            ClusterUpgradeProperties.UpgradeRequestOptions options) {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = targetStatedImage.getImage();
         Image targetCloudImage = stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage);
 
@@ -85,8 +93,6 @@ public class ClusterUpgradePropertiesFactory {
         String runtimeVersion = targetCatalogImage.getPackageVersions()
                 .getOrDefault(ImagePackageVersion.STACK.getKey(), targetCatalogImage.getVersion());
 
-        ClusterUpgradeProperties.UpgradeRequestOptions options =
-                new ClusterUpgradeProperties.UpgradeRequestOptions(replaceVms, lockComponents, rollingUpgradeEnabled);
         ClusterUpgradeProperties.CurrentImageUpgradeContext currentImageContext = new ClusterUpgradeProperties.CurrentImageUpgradeContext(
                 currentImage.getImageId(),
                 currentImage.getImageCatalogName(),

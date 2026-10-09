@@ -16,13 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.common.model.OsType;
 
 // TODO CB-33421: Remove with ClusterUpgradePropertiesResolver once in-flight flow events always carry clusterUpgradeProperties in JSON.
@@ -82,6 +85,7 @@ class ClusterUpgradePropertiesResolverTest {
                 properties.runtimeVersion(), properties.currentOsType(), properties)));
         assertSame(properties, underTest.resolve(new ClusterUpgradeParcelSettingsPreparationEvent(STACK_ID, null, null, properties)));
         assertSame(properties, underTest.resolve(new ClusterUpgradePreparationEvent("selector", STACK_ID, null, TARGET_IMAGE_ID, properties)));
+        assertSame(properties, underTest.resolve(new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, TARGET_IMAGE_ID, false, null, properties)));
         verifyNoInteractions(clusterUpgradePropertiesFactory);
     }
 
@@ -140,5 +144,29 @@ class ClusterUpgradePropertiesResolverTest {
         verify(clusterUpgradePropertiesFactory).create(argThat(target -> target.getImageId().equals(TARGET_IMAGE_ID)
                 && target.getStackId().equals(STACK_ID) && target.getImageCatalogName() == null && target.getImageCatalogUrl() == null),
                 eq(false), eq(false), eq(false));
+    }
+
+    @Test
+    void testLegacyUpgradeTriggerPreservesRollingUpgradeFlag() {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withFlags(false, false, false);
+        when(clusterUpgradePropertiesFactory.create(any(ImageChangeDto.class), eq(null),
+                eq(new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, false)))).thenReturn(properties);
+        ClusterUpgradeTriggerEvent event = new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, TARGET_IMAGE_ID, false, null, null);
+
+        assertSame(properties, underTest.resolve(event));
+        verify(clusterUpgradePropertiesFactory).create(argThat(target -> target.getStackId().equals(STACK_ID)
+                && target.getImageId().equals(TARGET_IMAGE_ID)), eq(null), eq(new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, false)));
+    }
+
+    @Test
+    void testLegacyUpgradeStateReusesPersistedImagesWithoutCatalogLookup() {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withFlags(false, true, false);
+        com.sequenceiq.cloudbreak.cloud.model.Image originalImage = properties.toCurrentCloudImage();
+        StatedImage targetImage = StatedImage.statedImage(Image.builder().withUuid(TARGET_IMAGE_ID).build(), "custom-url", "custom-catalog");
+        ClusterUpgradeProperties.UpgradeRequestOptions options = new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, true);
+        when(clusterUpgradePropertiesFactory.create(STACK_ID, originalImage, targetImage, options)).thenReturn(properties);
+
+        assertSame(properties, underTest.resolve(STACK_ID, originalImage, targetImage, true));
+        verify(clusterUpgradePropertiesFactory).create(STACK_ID, originalImage, targetImage, options);
     }
 }

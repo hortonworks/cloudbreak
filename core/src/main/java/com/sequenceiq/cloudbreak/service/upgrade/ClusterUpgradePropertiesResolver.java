@@ -4,16 +4,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 /**
- * Builds {@link ClusterUpgradeProperties} from validation requests and resolves properties carried by upgrade flow events.
+ * Resolves {@link ClusterUpgradeProperties} from cluster upgrade validation, preparation and upgrade flow events.
  * <p>
  * Validation requests carry the target image and upgrade options. Subsequent events carry properties in persisted flow JSON. Legacy events
  * only have {@code imageId} (and legacy upgrade flags on {@link ClusterUpgradeServiceValidationEvent}). When a
@@ -39,6 +42,21 @@ public class ClusterUpgradePropertiesResolver {
 
     public ClusterUpgradePropertiesResolver(ClusterUpgradePropertiesFactory clusterUpgradePropertiesFactory) {
         this.clusterUpgradePropertiesFactory = clusterUpgradePropertiesFactory;
+    }
+
+    public ClusterUpgradeProperties resolve(ClusterUpgradeTriggerEvent event) {
+        if (event.getClusterUpgradeProperties() != null) {
+            return event.getClusterUpgradeProperties();
+        }
+        LOGGER.debug("Rebuilding cluster upgrade properties for legacy upgrade trigger, target image {}", event.getImageId());
+        return clusterUpgradePropertiesFactory.create(new ImageChangeDto(event.getResourceId(), event.getImageId()), event.getOriginalImage(),
+                new ClusterUpgradeProperties.UpgradeRequestOptions(DEFAULT_REPLACE_VMS, DEFAULT_LOCK_COMPONENTS, event.isRollingUpgradeEnabled()));
+    }
+
+    public ClusterUpgradeProperties resolve(Long resourceId, Image originalImage, StatedImage targetImage, boolean rollingUpgradeEnabled) {
+        LOGGER.debug("Rebuilding cluster upgrade properties from persisted snapshots, target image {}", targetImage.getImage().getUuid());
+        return clusterUpgradePropertiesFactory.create(resourceId, originalImage, targetImage,
+                new ClusterUpgradeProperties.UpgradeRequestOptions(DEFAULT_REPLACE_VMS, DEFAULT_LOCK_COMPONENTS, rollingUpgradeEnabled));
     }
 
     public ClusterUpgradeProperties resolve(ClusterUpgradeValidationTriggerEvent event) {

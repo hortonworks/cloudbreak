@@ -478,6 +478,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upgradeEvent.getResourceId());
         assertInstanceOf(ClusterUpgradeTriggerEvent.class, upgradeEvent);
         assertEquals(imageId, ((ClusterUpgradeTriggerEvent) upgradeEvent).getImageId());
+        assertNull(((ClusterUpgradeTriggerEvent) upgradeEvent).getClusterUpgradeProperties());
     }
 
     private void assertImageUpdateEvent(FlowTriggerEventQueue flowChainQueue) {

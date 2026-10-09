@@ -54,7 +54,9 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
         flowChains.addNotSavedFlowChainLog(flowChainId);
         flowStatCache.putByFlowChainId(flowChainId, event.getData().getResourceId(), flowOperationType, false);
-        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, new HashMap<>(), flowOperationType, Optional.empty());
+        Map<Object, Object> contextParams = event.getHeaders().get(FlowConstants.FLOW_CONTEXTPARAMS_ID);
+        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, contextParams == null ? new HashMap<>() : new HashMap<>(contextParams),
+                flowOperationType, Optional.empty());
     }
 
     public void restoreFlowChain(String flowChainId) {

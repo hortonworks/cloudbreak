@@ -152,7 +152,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
                         event.accepted(),
                         event.getImageId(),
                         event.isRollingUpgradeEnabled(),
-                        currentImage));
+                        currentImage, null));
     }
 
     private Image getCurrentImage(DataLakeUpgradeFlowChainTriggerEvent event) {

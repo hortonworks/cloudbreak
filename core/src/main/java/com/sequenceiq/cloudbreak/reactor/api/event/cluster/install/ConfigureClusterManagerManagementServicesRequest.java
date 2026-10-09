@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
 public class ConfigureClusterManagerManagementServicesRequest extends StackEvent {
 
@@ -16,23 +17,28 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
 
     private final StatedImage targetStatedImage;
 
+    private final ClusterUpgradeProperties clusterUpgradeProperties;
+
     @JsonCreator
     public ConfigureClusterManagerManagementServicesRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("originalImage") Image originalImage,
             @JsonProperty("currentImage") Image currentImage,
-            @JsonProperty("targetStatedImage") StatedImage targetStatedImage) {
+            @JsonProperty("targetStatedImage") StatedImage targetStatedImage,
+            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties) {
         super(stackId);
         this.originalImage = originalImage;
         this.currentImage = currentImage;
         this.targetStatedImage = targetStatedImage;
+        this.clusterUpgradeProperties = clusterUpgradeProperties;
     }
 
     public ConfigureClusterManagerManagementServicesRequest(Long stackId) {
-        super(stackId);
-        this.originalImage = null;
-        this.currentImage = null;
-        this.targetStatedImage = null;
+        this(stackId, null, null, null, null);
+    }
+
+    public ClusterUpgradeProperties getClusterUpgradeProperties() {
+        return clusterUpgradeProperties;
     }
 
     public Image getOriginalImage() {
@@ -65,6 +71,7 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
                 "originalImage=" + originalImage +
                 ", currentImage=" + currentImage +
                 ", targetStatedImage=" + targetStatedImage +
+                ", clusterUpgradeProperties=" + clusterUpgradeProperties +
                 "} " + super.toString();
     }
 }

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
@@ -39,8 +41,11 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 class ConfigureClusterManagerManagementServicesHandlerTest {
@@ -116,7 +121,34 @@ class ConfigureClusterManagerManagementServicesHandlerTest {
                 "7.12.0.400", "7.12.0.500")).thenReturn(Map.of("service1", Map.of("key1", "value1"), "service2", Map.of("key2", "value2")));
         doNothing().when(clusterManagerTemplateSyncService).sync(anyLong());
 
-        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, originalImage, null, targetStatedImage)));
+        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, originalImage, null, targetStatedImage, null)));
+
+        verify(clusterBuilderService).configureManagementServices(STACK_ID);
+        verify(clusterApi).updateServiceConfig("service1", Map.of("key1", "value1"));
+        verify(clusterApi).updateServiceConfig("service2", Map.of("key2", "value2"));
+        verify(eventBus).notify(eq("CONFIGURECLUSTERMANAGERMANAGEMENTSERVICESSUCCESS"), successEventCaptor.capture());
+        assertEquals(STACK_ID, successEventCaptor.getValue().getData().getResourceId());
+    }
+
+    @Test
+    void testAcceptUsesUpgradePropertiesWithoutLegacyImages() throws IOException, CloudbreakException {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo().withVersion("7.12.0.500").withBaseUrl("https://cm-repo/");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts("7.3.2", "base-image-version",
+                OsType.RHEL9, "x86_64", null, Set.of(), cmRepo);
+        properties.currentImage().packageVersions().put(CM.getKey(), "7.12.0.400");
+        StackDto stack = mock();
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        TemplatePreparationObject templatePreparationObject = mock();
+        when(stackToTemplatePreparationObjectConverter.convert(stack)).thenReturn(templatePreparationObject);
+        CmTemplateProcessor cmTemplateProcessor = mock();
+        when(centralCmTemplateUpdater.getCmTemplateProcessor(templatePreparationObject)).thenReturn(cmTemplateProcessor);
+        ClusterApi clusterApi = mock();
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(cmTemplateComponentConfigProviderProcessor.getServiceConfigsToBeUpdatedDuringUpgrade(cmTemplateProcessor, templatePreparationObject,
+                "7.12.0.400", "7.12.0.500")).thenReturn(Map.of("service1", Map.of("key1", "value1"), "service2", Map.of("key2", "value2")));
+        doNothing().when(clusterManagerTemplateSyncService).sync(anyLong());
+
+        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, null, null, null, properties)));
 
         verify(clusterBuilderService).configureManagementServices(STACK_ID);
         verify(clusterApi).updateServiceConfig("service1", Map.of("key1", "value1"));
@@ -134,7 +166,7 @@ class ConfigureClusterManagerManagementServicesHandlerTest {
         when(targetStatedImage.getImage()).thenReturn(targetImage);
         when(targetImage.getPackageVersions()).thenReturn(Map.of());
 
-        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, originalImage, null, targetStatedImage)));
+        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, originalImage, null, targetStatedImage, null)));
 
         verify(clusterBuilderService).configureManagementServices(STACK_ID);
         verifyNoInteractions(stackDtoService);

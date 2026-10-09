@@ -29,13 +29,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
 @Service
 public class ClusterUpgradeService {
@@ -51,10 +48,10 @@ public class ClusterUpgradeService {
     @Inject
     private StackUpdater stackUpdater;
 
-    public void initUpgradeCluster(long stackId, StatedImage targetImage, boolean rollingUpgradeEnabled) {
-        String targetRuntime = targetImage.getImage().getStackDetails().getVersion();
+    public void initUpgradeCluster(long stackId, ClusterUpgradeProperties properties, boolean rollingUpgradeEnabled) {
+        String targetRuntime = properties.targetImage().runtimeVersion();
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), rollingUpgradeEnabled ? DATALAKE_ROLLING_UPGRADE : DATALAKE_UPGRADE,
-                targetRuntime, targetImage.getImage().getUuid());
+                targetRuntime, properties.targetImage().imageId());
         clusterService.updateClusterStatusByStackId(stackId, rollingUpgradeEnabled ? CLUSTER_ROLLING_UPGRADE_STARTED : CLUSTER_UPGRADE_STARTED,
                 "Cluster upgrade has been started.");
     }
@@ -63,12 +60,12 @@ public class ClusterUpgradeService {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
     }
 
-    public void clusterUpgradeFinished(long stackId, Map<String, String> currentImagePackages, StatedImage targetImage, boolean rollingUpgradeEnabled) {
-        Image targetIm = targetImage.getImage();
-        Optional<String> clusterStackVersion = getStackVersionFromImage(targetIm);
+    public void clusterUpgradeFinished(long stackId, Map<String, String> currentImagePackages, ClusterUpgradeProperties properties,
+            boolean rollingUpgradeEnabled) {
+        Optional<String> clusterStackVersion = Optional.ofNullable(properties.targetImage().runtimeVersion());
         String currentRuntimeBuildNumber = getCurrentStackBuildNumber(currentImagePackages);
         boolean clusterRuntimeUpgradeNeeded =
-                isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getStackBuildNumber));
+                isUpdateNeeded(currentRuntimeBuildNumber, properties.targetImage().cdhBuildNumber());
 
         stackUpdater.updateStackStatus(stackId,
                 rollingUpgradeEnabled ? CLUSTER_ROLLING_UPGRADE_FINISHED : DetailedStackStatus.CLUSTER_UPGRADE_FINISHED,
@@ -85,11 +82,6 @@ public class ClusterUpgradeService {
 
     public boolean isRuntimeUpgradeNecessary(Set<ClouderaManagerProduct> upgradeCandidateProducts) {
         return CollectionUtils.isNotEmpty(upgradeCandidateProducts);
-    }
-
-    public Optional<String> getStackVersionFromImage(Image image) {
-        return Optional.ofNullable(image.getStackDetails())
-                .map(ImageStackDetails::getVersion);
     }
 
     public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus, boolean rollingUpgradeEnabled) {

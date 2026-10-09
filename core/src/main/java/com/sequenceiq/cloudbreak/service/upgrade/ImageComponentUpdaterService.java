@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.image.ComponentConverter;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -41,6 +43,19 @@ public class ImageComponentUpdaterService {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private ComponentConverter componentConverter;
+
+    public void updateComponentsForUpgrade(ClusterUpgradeProperties properties, Long stackId) {
+        Stack stack = stackService.getById(stackId);
+        restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
+        LOGGER.debug("Updating the components for target image {}", properties.targetImage().imageId());
+        Set<Component> targetComponents = new HashSet<>(componentConverter.fromClouderaManagerProductList(properties.getAllTargetProducts(), stack));
+        targetComponents.add(componentConverter.fromClouderaManagerRepo(properties.targetImage().clouderaManagerRepo(), stack));
+        stackComponentUpdater.updateComponentsByStackId(stack, targetComponents, true);
+        clusterComponentUpdater.updateClusterComponentsByStackId(stack, targetComponents, true);
+    }
 
     public UpgradeImageInfo updateComponentsForUpgrade(String targetImageId, Long stackId) {
         Stack stack = stackService.getById(stackId);

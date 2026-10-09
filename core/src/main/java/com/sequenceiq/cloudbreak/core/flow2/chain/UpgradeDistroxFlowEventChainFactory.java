@@ -222,7 +222,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
             List<Selectable> upgradeEvents =
                     new ArrayList<>(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(stack, event.getImageChangeDto()));
             upgradeEvents.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                    event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), currentImage));
+                    event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), currentImage, null));
             return upgradeEvents;
         }
     }

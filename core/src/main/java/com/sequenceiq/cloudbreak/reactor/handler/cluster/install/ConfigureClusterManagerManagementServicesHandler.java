@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
@@ -91,13 +92,16 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
             throws IOException, CloudbreakException {
         Optional<com.sequenceiq.cloudbreak.cloud.model.Image> originalImageOpt = request.getOriginalImageOpt();
         Optional<StatedImage> targetStatedImageOpt = request.getTargetStatedImageOpt();
-        Optional<String> fromCmVersionOpt = originalImageOpt
-                .map(com.sequenceiq.cloudbreak.cloud.model.Image::getPackageVersions)
-                .map(packageVersions -> packageVersions.get(CM.getKey()));
-        Optional<String> toCmVersionOpt = targetStatedImageOpt
-                .map(StatedImage::getImage)
-                .map(Image::getPackageVersions)
-                .map(packageVersions -> packageVersions.get(CM.getKey()));
+        Optional<String> fromCmVersionOpt = request.getClusterUpgradeProperties() != null
+                ? Optional.ofNullable(request.getClusterUpgradeProperties().currentImage().packageVersions()).map(packages -> packages.get(CM.getKey()))
+                : originalImageOpt.map(com.sequenceiq.cloudbreak.cloud.model.Image::getPackageVersions)
+                        .map(packageVersions -> packageVersions.get(CM.getKey()));
+        Optional<String> toCmVersionOpt = request.getClusterUpgradeProperties() != null
+                ? Optional.ofNullable(request.getClusterUpgradeProperties().targetImage().clouderaManagerRepo())
+                        .map(ClouderaManagerRepo::getVersion)
+                : targetStatedImageOpt.map(StatedImage::getImage)
+                        .map(Image::getPackageVersions)
+                        .map(packageVersions -> packageVersions.get(CM.getKey()));
 
         if (fromCmVersionOpt.isPresent() && toCmVersionOpt.isPresent()) {
             StackDto stack = stackDtoService.getById(stackId);

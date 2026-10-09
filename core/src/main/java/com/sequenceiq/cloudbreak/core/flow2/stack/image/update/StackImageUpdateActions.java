@@ -6,10 +6,12 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_STARTED;
+import static com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties.FLOW_VARIABLE_NAME;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -57,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.PayloadConverter;
 
@@ -128,7 +131,13 @@ public class StackImageUpdateActions {
                     LOGGER.debug("Image not found", e);
                     throw new CloudbreakServiceException(e.getMessage(), e);
                 }
-                getImageComponentUpdaterService().updateComponentsForUpgrade(payload.getImage(), context.getStack().getId());
+                ClusterUpgradeProperties properties = (ClusterUpgradeProperties) variables.get(FLOW_VARIABLE_NAME);
+                if (properties != null && !properties.options().lockComponents()
+                        && Objects.equals(properties.targetImage().imageId(), payload.getImage().getImage().getUuid())) {
+                    getImageComponentUpdaterService().updateComponentsForUpgrade(properties, context.getStack().getId());
+                } else {
+                    getImageComponentUpdaterService().updateComponentsForUpgrade(payload.getImage(), context.getStack().getId());
+                }
                 getStackImageService().storeNewImageComponent(context.getStack(), payload.getImage());
                 sendEvent(context, new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), context.getStack().getId()));
             }

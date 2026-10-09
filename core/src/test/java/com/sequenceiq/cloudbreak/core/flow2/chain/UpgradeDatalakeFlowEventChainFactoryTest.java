@@ -248,6 +248,7 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
         assertInstanceOf(ClusterUpgradeTriggerEvent.class, upgradeEvent);
         ClusterUpgradeTriggerEvent clusterUpgradeTriggerEvent = (ClusterUpgradeTriggerEvent) upgradeEvent;
         assertEquals(IMAGE_ID, clusterUpgradeTriggerEvent.getImageId());
+        assertNull(clusterUpgradeTriggerEvent.getClusterUpgradeProperties());
     }
 
     private void assertSetDefaultJavaEvent(FlowTriggerEventQueue flowChainQueue) {

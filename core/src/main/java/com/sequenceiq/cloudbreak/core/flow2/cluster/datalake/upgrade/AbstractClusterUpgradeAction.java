@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
+import static com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties.FLOW_VARIABLE_NAME;
+
 import java.util.Map;
 
 import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.CurrentImageRetrieverService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
@@ -21,16 +22,12 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
 
     protected static final String ORIGINAL_IMAGE = "ORIGINAL_IMAGE";
 
-    protected static final String CURRENT_IMAGE = "CURRENT_IMAGE";
-
-    protected static final String CURRENT_MODEL_IMAGE = "CURRENT_MODEL_IMAGE";
-
     protected static final String TARGET_IMAGE = "TARGET_IMAGE";
 
     protected static final String ROLLING_UPGRADE_ENABLED = "ROLLING_UPGRADE_ENABLED";
 
     @Inject
-    private CurrentImageRetrieverService currentImageRetrieverService;
+    private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
 
     @Inject
     private StackService stackService;
@@ -43,26 +40,22 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
         return (Image) variables.get(ORIGINAL_IMAGE);
     }
 
-    protected StatedImage getCurrentImage(Map<Object, Object> variables) {
-        return (StatedImage) variables.get(CURRENT_IMAGE);
+    protected ClusterUpgradeProperties getUpgradeProperties(ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+        if (payload.getClusterUpgradeProperties() != null) {
+            return payload.getClusterUpgradeProperties();
+        }
+        return (ClusterUpgradeProperties) variables.computeIfAbsent(FLOW_VARIABLE_NAME, key -> clusterUpgradePropertiesResolver.resolve(payload));
     }
 
-    protected StatedImage getTargetImage(Map<Object, Object> variables) {
-        return (StatedImage) variables.get(TARGET_IMAGE);
+    protected ClusterUpgradeProperties getUpgradeProperties(Map<Object, Object> variables, Long stackId) {
+        // TODO CB-33421: Remove fallback once in-flight flows always contain upgrade properties.
+        return (ClusterUpgradeProperties) variables.computeIfAbsent(FLOW_VARIABLE_NAME,
+                key -> clusterUpgradePropertiesResolver.resolve(stackId, getOriginalImage(variables), (StatedImage) variables.get(TARGET_IMAGE),
+                        Boolean.TRUE.equals(variables.get(ROLLING_UPGRADE_ENABLED))));
     }
 
     protected StackService getStackService() {
         return stackService;
     }
 
-    protected Image retrieveCurrentImageFromVariables(Map<Object, Object> variables, Long stackId) {
-        return (Image) variables.computeIfAbsent(CURRENT_MODEL_IMAGE, key -> {
-            try {
-                Stack stack = stackService.getById(stackId);
-                return currentImageRetrieverService.retrieveCurrentModelImage(stack);
-            } catch (CloudbreakImageNotFoundException e) {
-                throw new CloudbreakServiceException(e);
-            }
-        });
-    }
 }

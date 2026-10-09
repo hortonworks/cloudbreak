@@ -6,8 +6,10 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -21,17 +23,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.image.ComponentConverter;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageComponentUpdaterServiceTest {
@@ -59,6 +65,9 @@ public class ImageComponentUpdaterServiceTest {
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private ComponentConverter componentConverter;
 
     @InjectMocks
     private ImageComponentUpdaterService underTest;
@@ -165,6 +174,31 @@ public class ImageComponentUpdaterServiceTest {
         verify(restRequestThreadLocalService).setWorkspaceId(WORKSPACE_ID);
         verify(stackComponentUpdater, never()).updateComponentsByStackId(any(), any(), anyBoolean());
         verify(clusterComponentUpdater, never()).updateClusterComponentsByStackId(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testUpdateComponentsUsesExplicitProductsAndCmRepository() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion("7.3.2-1.build")
+                .withParcel("https://runtime-repo/");
+        ClouderaManagerProduct cfm = new ClouderaManagerProduct().withName("CFM").withVersion("4.0.0")
+                .withParcel("https://cfm-repo/");
+        ClouderaManagerRepo cm = new ClouderaManagerRepo().withVersion("7.13.2").withBaseUrl("https://cm-repo/");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts("7.3.2", "base-image-version",
+                OsType.RHEL9, "x86_64", cdh, Set.of(cfm), cm);
+        Set<Component> parcelComponents = getComponents();
+        Component cmComponent = new Component();
+        cmComponent.setName("CM_REPO_DETAILS");
+        when(componentConverter.fromClouderaManagerProductList(Set.of(cdh, cfm), stack)).thenReturn(parcelComponents);
+        when(componentConverter.fromClouderaManagerRepo(cm, stack)).thenReturn(cmComponent);
+        Set<Component> expected = new HashSet<>(parcelComponents);
+        expected.add(cmComponent);
+
+        underTest.updateComponentsForUpgrade(properties, STACK_ID);
+
+        verify(restRequestThreadLocalService).setWorkspaceId(WORKSPACE_ID);
+        verify(stackComponentUpdater).updateComponentsByStackId(stack, expected, true);
+        verify(clusterComponentUpdater).updateClusterComponentsByStackId(stack, expected, true);
+        verifyNoInteractions(imageService, upgradeImageInfoFactory);
     }
 
     private static Stream<Class<? extends Exception>> possibleExceptions() {
