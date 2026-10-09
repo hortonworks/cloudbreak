@@ -33,18 +33,21 @@ public class KraftMigrationService {
     public KraftMigrationStatus getKraftMigrationStatus(StackDto stack) {
         String crn = stack.getResourceCrn();
         LOGGER.info("Getting KRaft migration status for stack with {} CRN", crn);
-        boolean kraftMigrationSupported = zookeeperToKraftMigrationValidator.isMigrationFromZookeeperToKraftSupported(stack, stack.getAccountId());
+        boolean kraftMigrationSupported = zookeeperToKraftMigrationValidator.isKraftMigrationStatusSupported(stack, stack.getAccountId());
         return getKraftMigrationStatus(stack, kraftMigrationSupported);
     }
 
     public KraftMigrationStatusResponse getKraftMigrationStatusResponse(StackDto stack) {
         String crn = stack.getResourceCrn();
         LOGGER.info("Getting KRaft migration status response for stack with {} CRN", crn);
-        boolean kraftMigrationSupported = zookeeperToKraftMigrationValidator.isMigrationFromZookeeperToKraftSupported(stack, stack.getAccountId());
+        boolean kraftMigrationSupported = zookeeperToKraftMigrationValidator.isKraftMigrationStatusSupported(stack, stack.getAccountId());
         KraftMigrationOperationStatus migrationOperationStatus = getKraftMigrationOperationStatus(stack, kraftMigrationSupported);
 
-        boolean kraftMigrationRequired = isKraftMigrationRequired(kraftMigrationSupported, migrationOperationStatus);
-        KraftMigrationAction recommendedAction = getKraftMigrationAction(kraftMigrationSupported, migrationOperationStatus);
+        KraftMigrationAction recommendedAction = getKraftMigrationAction(stack, kraftMigrationSupported, migrationOperationStatus);
+        boolean kraftMigrationRequired = recommendedAction == KraftMigrationAction.MIGRATE;
+        if (migrationOperationStatus == KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE && !kraftMigrationRequired) {
+            migrationOperationStatus = KraftMigrationOperationStatus.NOT_APPLICABLE;
+        }
         LOGGER.debug("kraftMigrationSupported: {}, kraftMigrationOperationStatus based on cluster configs: {}, recommendedAction: {}",
                 kraftMigrationSupported, migrationOperationStatus, recommendedAction);
         return new KraftMigrationStatusResponse(migrationOperationStatus.name(), recommendedAction.name(), kraftMigrationRequired);
@@ -74,19 +77,19 @@ public class KraftMigrationService {
         return kraftMigrationStatus;
     }
 
-    private KraftMigrationAction getKraftMigrationAction(boolean kraftMigrationSupported, KraftMigrationOperationStatus kraftMigrationStatus) {
+    private KraftMigrationAction getKraftMigrationAction(StackDto stack, boolean kraftMigrationSupported,
+            KraftMigrationOperationStatus kraftMigrationStatus) {
         if (!kraftMigrationSupported) {
             return KraftMigrationAction.NO_ACTION;
         }
 
         return switch (kraftMigrationStatus) {
-            case ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE -> KraftMigrationAction.MIGRATE;
+            case ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE ->
+                    zookeeperToKraftMigrationValidator.isZookeeperToKRaftMigrationSupportedForRuntimeVersion(stack)
+                            ? KraftMigrationAction.MIGRATE : KraftMigrationAction.NO_ACTION;
             case ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE -> KraftMigrationAction.FINALIZE;
             default -> KraftMigrationAction.NO_ACTION;
         };
     }
 
-    private boolean isKraftMigrationRequired(boolean kraftMigrationSupported, KraftMigrationOperationStatus kraftMigrationStatus) {
-        return kraftMigrationSupported && KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE.equals(kraftMigrationStatus);
-    }
 }
