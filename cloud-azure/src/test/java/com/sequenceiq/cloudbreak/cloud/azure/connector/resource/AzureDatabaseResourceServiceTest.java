@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -72,6 +73,7 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Storage;
 import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.resources.models.Subscription;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
@@ -220,10 +222,14 @@ class AzureDatabaseResourceServiceTest {
     void initTests() {
         lenient().when(ac.getCloudContext()).thenReturn(cloudContext);
         lenient().when(ac.getParameter(AzureClient.class)).thenReturn(client);
+        Subscription subscription = mock(Subscription.class);
+        lenient().when(subscription.subscriptionId()).thenReturn("test-subscription");
+        lenient().when(client.getCurrentSubscription()).thenReturn(subscription);
     }
 
     @AfterEach
     void afterTests() {
+        verify(client, atLeast(0)).getCurrentSubscription();
         verifyNoMoreInteractions(client);
     }
 

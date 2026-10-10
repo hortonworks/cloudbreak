@@ -169,9 +169,10 @@ public class AzureDatabaseResourceService {
         AzureClient client = ac.getParameter(AzureClient.class);
 
         DatabaseServer databaseServer = stack.getDatabaseServer();
-        azurePermissionValidator.validateFlexibleServerPermission(client, databaseServer);
-        String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        String targetScope = "/subscriptions/" + client.getCurrentSubscription().subscriptionId() + "/resourceGroups/" + resourceGroupName;
+        azurePermissionValidator.validateFlexibleServerPermission(client, databaseServer, targetScope);
+        String stackName = azureUtils.getStackName(cloudContext);
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
 
         createResourceGroupIfNotExists(ac, stack, client, resourceGroupName, resourceGroupUsage, persistenceNotifier);
@@ -695,7 +696,10 @@ public class AzureDatabaseResourceService {
 
     public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack dbStack) {
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-        azurePermissionValidator.validateFlexibleServerPermission(client);
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, dbStack);
+        String targetScope = "/subscriptions/" + client.getCurrentSubscription().subscriptionId() + "/resourceGroups/" + resourceGroupName;
+        azurePermissionValidator.validateFlexibleServerPermission(client, targetScope);
         azureRDSAutoMigrationValidator.validate(authenticatedContext, dbStack);
     }
 

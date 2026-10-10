@@ -4,7 +4,9 @@ import static com.sequenceiq.common.model.AzureDatabaseType.AZURE_DATABASE_TYPE_
 import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -46,6 +48,8 @@ class AzurePermissionValidatorTest {
 
     private static final String ROLE_DEFINITION_ID = "role-definition-id-1";
 
+    private static final String TARGET_SCOPE = "/subscriptions/test-subscription/resourceGroups/test-rg";
+
     private static final String CMK_MINIMAL_ROLE_DEF_PATH = "json/azure-cmk-minimal-role-def-test.json";
 
     private static final String CMK_MISSING_ROLE_DEF_PATH = "json/azure-cmk-missing-role-def-test.json";
@@ -77,21 +81,20 @@ class AzurePermissionValidatorTest {
     @Test
     void testShouldNotThrowExceptionWithMinimalRole() throws IOException {
         AzureRoleDefinitionProperties requiredRoles = readPermissions(FLEXIBLE_MINIMAL_ROLE_DEF_PATH);
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
         RoleDefinition roleDefinition = createRoleDefinition(requiredRoles.getActions(), List.of());
         DatabaseServer databaseServer = createDatabaseServer(FLEXIBLE_SERVER);
         when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
         when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(requiredRoles);
 
-        underTest.validateFlexibleServerPermission(client, databaseServer);
+        underTest.validateFlexibleServerPermission(client, databaseServer, TARGET_SCOPE);
     }
 
     @Test
     void testShouldNotThrowExceptionWithCMKMinimalRole() throws IOException {
         AzureRoleDefinitionProperties requiredRoles = readPermissions(CMK_MINIMAL_ROLE_DEF_PATH);
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
-        when(roleAssignment.scope()).thenReturn("subscription/1");
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, "subscription/1");
         RoleDefinition roleDefinition = createRoleDefinitionWithDataActions(requiredRoles.getDataActions(), List.of());
         when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
@@ -108,8 +111,7 @@ class AzurePermissionValidatorTest {
     void testShouldNotThrowExceptionWithCMKMissingRole() throws IOException {
         AzureRoleDefinitionProperties requiredRoles = readPermissions(CMK_MINIMAL_ROLE_DEF_PATH);
         AzureRoleDefinitionProperties actualRoles = readPermissions(CMK_MISSING_ROLE_DEF_PATH);
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
-        when(roleAssignment.scope()).thenReturn("subscription/1/vaultid");
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, "subscription/1/vaultid");
         RoleDefinition roleDefinition = createRoleDefinitionWithDataActions(actualRoles.getDataActions(), List.of());
         when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
@@ -128,84 +130,87 @@ class AzurePermissionValidatorTest {
 
     @Test
     void testShouldNotThrowExceptionAvailableRolesContainsStar() throws IOException {
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
         RoleDefinition roleDefinition = createRoleDefinition(List.of("*"), List.of());
         DatabaseServer databaseServer = createDatabaseServer(FLEXIBLE_SERVER);
         when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
         when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(readPermissions(FLEXIBLE_MINIMAL_ROLE_DEF_PATH));
 
-        underTest.validateFlexibleServerPermission(client, databaseServer);
+        underTest.validateFlexibleServerPermission(client, databaseServer, TARGET_SCOPE);
     }
 
     @Test
     void testShouldThrowExceptionWithDefaultRole() throws IOException {
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
         RoleDefinition roleDefinition = createRoleDefinition(readPermissions(DEFAULT_ROLE_DEF_PATH).getActions(), List.of());
         DatabaseServer databaseServer = createDatabaseServer(FLEXIBLE_SERVER);
         when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
         when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(readPermissions(FLEXIBLE_MINIMAL_ROLE_DEF_PATH));
 
-        AzureResourceException exception = assertThrows(AzureResourceException.class, () -> underTest.validateFlexibleServerPermission(client, databaseServer));
+        AzureResourceException exception = assertThrows(AzureResourceException.class,
+                () -> underTest.validateFlexibleServerPermission(client, databaseServer, TARGET_SCOPE));
 
         assertEquals("The following required Flexible Server action(s) are missing from your role definition: " +
-                "[Microsoft.DBforPostgreSQL/flexibleServers/write, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
+                "[Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.DBforPostgreSQL/flexibleServers/start/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
+                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action, Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action]", exception.getMessage());
     }
 
     @Test
     void testShouldThrowExceptionWithServiceEndpointMinimalRole() throws IOException {
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
         RoleDefinition roleDefinition = createRoleDefinition(readPermissions(SERVICE_ENDPOINT_MINIMAL_ROLE_DEF_PATH).getActions(), List.of());
         DatabaseServer databaseServer = createDatabaseServer(FLEXIBLE_SERVER);
         when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
         when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(readPermissions(FLEXIBLE_MINIMAL_ROLE_DEF_PATH));
 
-        AzureResourceException exception = assertThrows(AzureResourceException.class, () -> underTest.validateFlexibleServerPermission(client, databaseServer));
+        AzureResourceException exception = assertThrows(AzureResourceException.class,
+                () -> underTest.validateFlexibleServerPermission(client, databaseServer, TARGET_SCOPE));
 
         assertEquals("The following required Flexible Server action(s) are missing from your role definition: " +
-                "[Microsoft.DBforPostgreSQL/flexibleServers/write, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
+                "[Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.DBforPostgreSQL/flexibleServers/start/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
+                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action, Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action]", exception.getMessage());
     }
 
     @Test
     void testShouldThrowExceptionWithPrivateEndpointMinimalRole() throws IOException {
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
         RoleDefinition roleDefinition = createRoleDefinition(readPermissions(PRIVATE_ENDPOINT_MINIMAL_ROLE_DEF_PATH).getActions(), List.of());
         DatabaseServer databaseServer = createDatabaseServer(FLEXIBLE_SERVER);
         when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
         when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(readPermissions(FLEXIBLE_MINIMAL_ROLE_DEF_PATH));
 
-        AzureResourceException exception = assertThrows(AzureResourceException.class, () -> underTest.validateFlexibleServerPermission(client, databaseServer));
+        AzureResourceException exception = assertThrows(AzureResourceException.class,
+                () -> underTest.validateFlexibleServerPermission(client, databaseServer, TARGET_SCOPE));
 
         assertEquals("The following required Flexible Server action(s) are missing from your role definition: " +
-                "[Microsoft.DBforPostgreSQL/flexibleServers/write, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
+                "[Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.DBforPostgreSQL/flexibleServers/start/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
+                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action, Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action]", exception.getMessage());
     }
 
     @Test
     void testShouldNotThrowExceptionWhenTheDatabaseTypeIsSingleServer() {
-        underTest.validateFlexibleServerPermission(client, createDatabaseServer(SINGLE_SERVER));
+        underTest.validateFlexibleServerPermission(client, createDatabaseServer(SINGLE_SERVER), TARGET_SCOPE);
 
-        verifyNoInteractions(client, azureRoleDefinitionProvider);
+        verifyNoInteractions(azureRoleDefinitionProvider);
     }
 
     @ParameterizedTest
     @MethodSource("flexibleServerTestDataProvider")
     void testDifferentScenariosShouldThrowExceptionWithDifferentRoles(Integer ordinal, String expectedError) throws IOException {
-        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID);
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
         AzureRoleDefinitionProperties roleDefinitionProperties = readPermissions(String.format(FLEXIBLE_MINIMAL_ROLE_DEF_PATTERN, ordinal));
         RoleDefinition roleDefinition = createRoleDefinition(roleDefinitionProperties.getActions(), roleDefinitionProperties.getNotActions());
         DatabaseServer databaseServer = createDatabaseServer(FLEXIBLE_SERVER);
@@ -213,7 +218,8 @@ class AzurePermissionValidatorTest {
         when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
         when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(readPermissions(FLEXIBLE_MINIMAL_ROLE_DEF_PATH));
 
-        AzureResourceException exception = assertThrows(AzureResourceException.class, () -> underTest.validateFlexibleServerPermission(client, databaseServer));
+        AzureResourceException exception = assertThrows(AzureResourceException.class,
+                () -> underTest.validateFlexibleServerPermission(client, databaseServer, TARGET_SCOPE));
 
         assertEquals(expectedError, exception.getMessage());
     }
@@ -224,16 +230,199 @@ class AzurePermissionValidatorTest {
                         "[Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, Microsoft.DBforPostgreSQL/flexibleServers/configurations/write]"),
                 Arguments.of(2, "The following required Flexible Server action(s) are missing from your role definition: " +
                         "[Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write]"),
-                Arguments.of(3, "1. The following required Flexible Server action(s) are explicitly denied in your role definition " +
-                        "(in 'notActions' section): [Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write]\n" +
-                        "2. The following required Flexible Server action(s) are missing from your role definition: " +
+                Arguments.of(3, "The following required Flexible Server action(s) are missing from your role definition: " +
                         "[Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write]")
         );
     }
 
-    private RoleAssignment createRoleAssignment(String roleDefinitionId) {
+    // Note: action in NotActions but absent from Actions → "missing" only, not "denied" ---
+    // Azure RBAC: effective = Actions − NotActions. If an action is not in Actions, NotActions is
+    // irrelevant — you cannot subtract what was never added. The old code reported such actions as
+    // both "denied" AND "missing" (contradictory). The fix classifies them as "missing" only.
+
+    @Test
+    void testActionInNotActionsButAbsentFromActionsShouldBeReportedAsMissingOnly() {
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
+        RoleDefinition roleDefinition = createRoleDefinition(
+                List.of("Microsoft.DBforPostgreSQL/flexibleServers/read"),
+                List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
+        when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
+        AzureRoleDefinitionProperties required = new AzureRoleDefinitionProperties();
+        required.setActions(List.of("Microsoft.DBforPostgreSQL/flexibleServers/read", "Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(required);
+
+        AzureResourceException exception = assertThrows(AzureResourceException.class,
+                () -> underTest.validateFlexibleServerPermission(client, TARGET_SCOPE));
+
+        assertEquals("The following required Flexible Server action(s) are missing from your role definition: " +
+                "[Microsoft.DBforPostgreSQL/flexibleServers/write]", exception.getMessage());
+        assertFalse(exception.getMessage().contains("denied"),
+                "Action absent from Actions should not be reported as 'denied' even if it appears in NotActions");
+    }
+
+    // --- Regression for wildcard NotActions ---
+
+    @Test
+    void testWildcardNotActionsShouldDenyMatchingActions() {
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
+        RoleDefinition roleDefinition = createRoleDefinition(List.of("*"), List.of("Microsoft.DBforPostgreSQL/*/write"));
+        when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
+        when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
+        AzureRoleDefinitionProperties required = new AzureRoleDefinitionProperties();
+        required.setActions(List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(required);
+
+        AzureResourceException exception = assertThrows(AzureResourceException.class,
+                () -> underTest.validateFlexibleServerPermission(client, TARGET_SCOPE));
+
+        assertTrue(exception.getMessage().contains("denied"));
+        assertTrue(exception.getMessage().contains("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+    }
+
+    @Test
+    void testWildcardNotActionsShouldNotDenyNonMatchingActions() {
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, TARGET_SCOPE);
+        RoleDefinition roleDefinition = createRoleDefinition(List.of("*"), List.of("Microsoft.Compute/*/write"));
+        when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
+        when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
+        AzureRoleDefinitionProperties required = new AzureRoleDefinitionProperties();
+        required.setActions(List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(required);
+
+        underTest.validateFlexibleServerPermission(client, TARGET_SCOPE);
+    }
+
+    // --- Regression for multiple roles ---
+
+    @Test
+    void testActionDeniedByOneRoleButGrantedByAnotherShouldPass() {
+        String roleDefIdA = "role-def-a";
+        String roleDefIdB = "role-def-b";
+        RoleAssignment assignmentA = createRoleAssignment(roleDefIdA, TARGET_SCOPE);
+        RoleAssignment assignmentB = createRoleAssignment(roleDefIdB, TARGET_SCOPE);
+        RoleDefinition roleDefA = createRoleDefinition(List.of("*"), List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        RoleDefinition roleDefB = createRoleDefinition(List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"), List.of());
+        when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(assignmentA, assignmentB));
+        when(client.getRoleDefinitionById(roleDefIdA)).thenReturn(roleDefA);
+        when(client.getRoleDefinitionById(roleDefIdB)).thenReturn(roleDefB);
+        AzureRoleDefinitionProperties required = new AzureRoleDefinitionProperties();
+        required.setActions(List.of("Microsoft.DBforPostgreSQL/flexibleServers/write", "Microsoft.DBforPostgreSQL/flexibleServers/read"));
+        when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(required);
+
+        underTest.validateFlexibleServerPermission(client, TARGET_SCOPE);
+    }
+
+    // --- Regression for scope filtering ---
+
+    @Test
+    void testPermissionOnUnrelatedResourceGroupShouldNotSatisfy() {
+        String unrelatedScope = "/subscriptions/test-subscription/resourceGroups/other-rg";
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, unrelatedScope);
+        when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
+        AzureRoleDefinitionProperties required = new AzureRoleDefinitionProperties();
+        required.setActions(List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(required);
+
+        AzureResourceException exception = assertThrows(AzureResourceException.class,
+                () -> underTest.validateFlexibleServerPermission(client, TARGET_SCOPE));
+
+        assertTrue(exception.getMessage().contains("missing"));
+    }
+
+    @Test
+    void testSubscriptionLevelAssignmentShouldApplyToResourceGroup() {
+        String subscriptionScope = "/subscriptions/test-subscription";
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, subscriptionScope);
+        RoleDefinition roleDefinition = createRoleDefinition(List.of("*"), List.of());
+        when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
+        when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
+        AzureRoleDefinitionProperties required = new AzureRoleDefinitionProperties();
+        required.setActions(List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(required);
+
+        underTest.validateFlexibleServerPermission(client, TARGET_SCOPE);
+    }
+
+    @Test
+    void testScopeComparisonShouldBeCaseInsensitive() {
+        String mixedCaseScope = "/subscriptions/Test-Subscription/resourceGroups/Test-RG";
+        RoleAssignment roleAssignment = createRoleAssignment(ROLE_DEFINITION_ID, mixedCaseScope);
+        RoleDefinition roleDefinition = createRoleDefinition(List.of("*"), List.of());
+        when(client.listRoleAssignmentsByServicePrincipal(PRINCIPAL_ID)).thenReturn(List.of(roleAssignment));
+        when(client.getRoleDefinitionById(ROLE_DEFINITION_ID)).thenReturn(roleDefinition);
+        AzureRoleDefinitionProperties required = new AzureRoleDefinitionProperties();
+        required.setActions(List.of("Microsoft.DBforPostgreSQL/flexibleServers/write"));
+        when(azureRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition()).thenReturn(required);
+
+        underTest.validateFlexibleServerPermission(client, TARGET_SCOPE);
+    }
+
+    // --- Tests for matchesActionPattern ---
+
+    @Test
+    void testMatchesActionPatternExactMatch() {
+        assertTrue(underTest.matchesActionPattern("Microsoft.Compute/disks/write", "Microsoft.Compute/disks/write"));
+        assertFalse(underTest.matchesActionPattern("Microsoft.Compute/disks/read", "Microsoft.Compute/disks/write"));
+    }
+
+    @Test
+    void testMatchesActionPatternGlobalWildcard() {
+        assertTrue(underTest.matchesActionPattern("Microsoft.Compute/disks/write", "*"));
+    }
+
+    @Test
+    void testMatchesActionPatternWildcardInMiddle() {
+        assertTrue(underTest.matchesActionPattern("Microsoft.Compute/disks/write", "Microsoft.Compute/*/write"));
+        assertTrue(underTest.matchesActionPattern("Microsoft.Compute/virtualMachines/write", "Microsoft.Compute/*/write"));
+        assertFalse(underTest.matchesActionPattern("Microsoft.Compute/disks/read", "Microsoft.Compute/*/write"));
+    }
+
+    @Test
+    void testMatchesActionPatternTrailingWildcard() {
+        assertTrue(underTest.matchesActionPattern("Microsoft.Compute/disks/write", "Microsoft.Compute/*"));
+        assertTrue(underTest.matchesActionPattern("Microsoft.Compute/disks/read", "Microsoft.Compute/*"));
+        assertFalse(underTest.matchesActionPattern("Microsoft.Storage/storageAccounts/read", "Microsoft.Compute/*"));
+    }
+
+    // --- Tests for isScopeApplicable ---
+
+    @Test
+    void testIsScopeApplicableExactMatch() {
+        assertTrue(underTest.isScopeApplicable("/subscriptions/sub1/resourceGroups/rg1", "/subscriptions/sub1/resourceGroups/rg1"));
+    }
+
+    @Test
+    void testIsScopeApplicableParentScope() {
+        assertTrue(underTest.isScopeApplicable("/subscriptions/sub1", "/subscriptions/sub1/resourceGroups/rg1"));
+    }
+
+    @Test
+    void testIsScopeApplicableUnrelatedScope() {
+        assertFalse(underTest.isScopeApplicable("/subscriptions/sub1/resourceGroups/other", "/subscriptions/sub1/resourceGroups/target"));
+    }
+
+    @Test
+    void testIsScopeApplicablePrefixBoundary() {
+        assertFalse(underTest.isScopeApplicable("/subscriptions/sub10", "/subscriptions/sub1/resourceGroups/rg1"));
+    }
+
+    @Test
+    void testIsScopeApplicableNullTargetAlwaysMatches() {
+        assertTrue(underTest.isScopeApplicable("/subscriptions/sub1", null));
+    }
+
+    @Test
+    void testIsScopeApplicableNullAssignmentAlwaysMatches() {
+        assertTrue(underTest.isScopeApplicable(null, "/subscriptions/sub1"));
+    }
+
+    // --- Helpers ---
+
+    private RoleAssignment createRoleAssignment(String roleDefinitionId, String scope) {
         RoleAssignment roleAssignment = mock(RoleAssignment.class);
-        when(roleAssignment.roleDefinitionId()).thenReturn(roleDefinitionId);
+        lenient().when(roleAssignment.roleDefinitionId()).thenReturn(roleDefinitionId);
+        when(roleAssignment.scope()).thenReturn(scope);
         return roleAssignment;
     }
 
@@ -242,7 +431,7 @@ class AzurePermissionValidatorTest {
         Permission permission = mock(Permission.class);
         when(roleDefinition.permissions()).thenReturn(Set.of(permission));
         when(permission.actions()).thenReturn(allowedActions);
-        when(permission.notActions()).thenReturn(notAllowedActions);
+        lenient().when(permission.notActions()).thenReturn(notAllowedActions);
         return roleDefinition;
     }
 
