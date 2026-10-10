@@ -5,11 +5,13 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
@@ -69,6 +71,15 @@ public class EncryptionProfileAssertions {
                         i, instanceIp, expected, actual));
                 throw new TestFailException(format("Cipher suite order mismatch at '%s' instance!", instanceIp));
             }
+        }
+    }
+
+    public void validateComplianceStandards(EncryptionProfileResponse response, Set<String> expectedStandards) {
+        Set<String> actualStandards = response.getComplianceStandards();
+        if (actualStandards == null || !actualStandards.equals(expectedStandards)) {
+            Log.error(LOGGER, format("Encryption profile '%s' has unexpected compliance standards! Expected: %s, Actual: %s",
+                    response.getName(), expectedStandards, actualStandards));
+            throw new TestFailException(format("Encryption profile '%s' has unexpected compliance standards!", response.getName()));
         }
     }
 

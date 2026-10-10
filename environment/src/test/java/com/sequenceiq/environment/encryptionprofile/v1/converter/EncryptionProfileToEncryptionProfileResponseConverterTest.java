@@ -11,18 +11,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
+import com.sequenceiq.environment.encryptionprofile.EncryptionProfileComplianceEvaluator;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,13 +33,21 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
     @Mock
     private EncryptionProfileProvider encryptionProfileProvider;
 
-    @InjectMocks
     private EncryptionProfileToEncryptionProfileResponseConverter converter;
 
     private EncryptionProfile encryptionProfile;
 
     @BeforeEach
     void setUp() {
+        when(encryptionProfileProvider.getFips1403ApprovedCipherSuites())
+                .thenReturn(Map.of(
+                        TlsVersion.TLS_1_2, Set.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
+                        TlsVersion.TLS_1_3, Set.of("TLS_AES_128_GCM_SHA256")));
+        EncryptionProfileComplianceEvaluator complianceEvaluator = new EncryptionProfileComplianceEvaluator(encryptionProfileProvider);
+        converter = new EncryptionProfileToEncryptionProfileResponseConverter();
+        ReflectionTestUtils.setField(converter, "encryptionProfileProvider", encryptionProfileProvider);
+        ReflectionTestUtils.setField(converter, "complianceEvaluator", complianceEvaluator);
+
         encryptionProfile = new EncryptionProfile();
         encryptionProfile.setName(NAME);
         encryptionProfile.setDescription(DESCRIPTION);
@@ -70,5 +80,29 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         expectedCipherMap.put("TLSv1.3", List.of("TLS_AES_128_GCM_SHA256"));
 
         assertThat(response.getCipherSuites()).isEqualTo(expectedCipherMap);
+    }
+
+    @Test
+    void testConvertReportsFips1403ComplianceForApprovedProfile() {
+        when(encryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion())
+                .thenReturn(Map.of(TlsVersion.TLS_1_2.getVersion(), List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
+                        TlsVersion.TLS_1_3.getVersion(), List.of("TLS_AES_128_GCM_SHA256")));
+
+        EncryptionProfileResponse response = converter.convert(encryptionProfile);
+
+        assertThat(response.getComplianceStandards()).containsExactly("FIPS_140_3");
+    }
+
+    @Test
+    void testConvertReportsNoComplianceForProfileWithNonApprovedCipher() {
+        encryptionProfile.setTlsVersions(new HashSet<>(List.of(TlsVersion.TLS_1_2)));
+        encryptionProfile.setCipherSuites(List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"));
+        when(encryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion())
+                .thenReturn(Map.of(TlsVersion.TLS_1_2.getVersion(),
+                        List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA")));
+
+        EncryptionProfileResponse response = converter.convert(encryptionProfile);
+
+        assertThat(response.getComplianceStandards()).isEmpty();
     }
 }

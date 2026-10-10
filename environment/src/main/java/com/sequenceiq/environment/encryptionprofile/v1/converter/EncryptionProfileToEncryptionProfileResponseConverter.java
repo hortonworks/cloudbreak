@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
+import com.sequenceiq.environment.encryptionprofile.EncryptionProfileComplianceEvaluator;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 
 @Component
@@ -20,6 +21,9 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
 
     @Inject
     private EncryptionProfileProvider encryptionProfileProvider;
+
+    @Inject
+    private EncryptionProfileComplianceEvaluator complianceEvaluator;
 
     public EncryptionProfileResponse convert(EncryptionProfile source) {
         if (source == null) {
@@ -35,6 +39,7 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
         response.setClouderaInternalCipherSuites(Collections.emptyMap());
         response.setCreated(source.getCreated());
         response.setStatus(source.getResourceStatus().name());
+        response.setComplianceStandards(complianceEvaluator.evaluate(source.getTlsVersions(), source.getCipherSuites()));
         return response;
     }
 

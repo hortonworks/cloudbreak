@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -351,6 +352,23 @@ public class EncryptionProfileProviderTest {
         assertThat(result.get(TlsVersion.TLS_1_3.getVersion())).containsExactly(
                 "TLS_AES_128_GCM_SHA256",
                         "TLS_AES_256_GCM_SHA384");
+    }
+
+    @Test
+    public void testGetFips1403ApprovedCipherSuites() {
+        Map<TlsVersion, Set<String>> result = underTest.getFips1403ApprovedCipherSuites();
+
+        assertThat(result).containsOnlyKeys(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3);
+        assertThat(result.get(TlsVersion.TLS_1_2)).containsExactlyInAnyOrder(
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+                "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+                "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384");
+        assertThat(result.get(TlsVersion.TLS_1_3)).containsExactlyInAnyOrder(
+                "TLS_AES_128_GCM_SHA256",
+                "TLS_AES_256_GCM_SHA384");
     }
 
     @Test

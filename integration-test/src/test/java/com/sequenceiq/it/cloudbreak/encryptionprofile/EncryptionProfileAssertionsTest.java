@@ -1,10 +1,15 @@
 package com.sequenceiq.it.cloudbreak.encryptionprofile;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Set;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.it.cloudbreak.assertion.encryptionprofile.EncryptionProfileAssertions;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class EncryptionProfileAssertionsTest {
 
@@ -31,5 +36,25 @@ public class EncryptionProfileAssertionsTest {
         assertDoesNotThrow(() -> {
             underTest.validateCipherSuitesConfiguration(serviceName, configContent, instanceIp);
         });
+    }
+
+    @Test
+    public void testValidateComplianceStandardsWithMatchingStandards() {
+        EncryptionProfileAssertions underTest = new EncryptionProfileAssertions();
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setName("profile");
+        response.setComplianceStandards(Set.of("FIPS_140_3"));
+
+        assertDoesNotThrow(() -> underTest.validateComplianceStandards(response, Set.of("FIPS_140_3")));
+    }
+
+    @Test
+    public void testValidateComplianceStandardsWithMismatchingStandards() {
+        EncryptionProfileAssertions underTest = new EncryptionProfileAssertions();
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setName("profile");
+        response.setComplianceStandards(Set.of());
+
+        assertThrows(TestFailException.class, () -> underTest.validateComplianceStandards(response, Set.of("FIPS_140_3")));
     }
 }

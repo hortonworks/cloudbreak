@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 
 @Service
 public class EncryptionProfileProvider {
@@ -66,6 +69,13 @@ public class EncryptionProfileProvider {
         return Map.of(
                 TLS_1_2.getVersion(), EncryptionProfileConverter.toListString(cipherSuiteProvider.getRecommendedTls12CipherSuites()),
                 TLS_1_3.getVersion(), EncryptionProfileConverter.toListString(cipherSuiteProvider.getRecommendedTls13CipherSuites())
+        );
+    }
+
+    public Map<TlsVersion, Set<String>> getFips1403ApprovedCipherSuites() {
+        return Map.of(
+                TLS_1_2, Set.copyOf(EncryptionProfileConverter.toListString(cipherSuiteProvider.getFips1403ApprovedTls12CipherSuites())),
+                TLS_1_3, Set.copyOf(EncryptionProfileConverter.toListString(cipherSuiteProvider.getFips1403ApprovedTls13CipherSuites()))
         );
     }
 

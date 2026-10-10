@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.encryptionprofile.model;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CRN;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,9 @@ public class EncryptionProfileResponse {
 
     @Schema(description = EncryptionProfileModelDescription.STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
     private String status;
+
+    @Schema(description = EncryptionProfileModelDescription.COMPLIANCE_STANDARDS)
+    private Set<String> complianceStandards = new HashSet<>();
 
     public Set<String> getTlsVersions() {
         return tlsVersions;
@@ -111,6 +115,14 @@ public class EncryptionProfileResponse {
         this.status = status;
     }
 
+    public Set<String> getComplianceStandards() {
+        return complianceStandards;
+    }
+
+    public void setComplianceStandards(Set<String> complianceStandards) {
+        this.complianceStandards = complianceStandards;
+    }
+
     @JsonIgnore
     public boolean isLegacy() {
         return "cdp_default_fips_v1".equals(name);
@@ -126,6 +138,7 @@ public class EncryptionProfileResponse {
                 ", cipherSuites='" + cipherSuites + '\'' +
                 ", clouderaInternalCipherSuites='" + clouderaInternalCipherSuites + '\'' +
                 ", status='" + status + '\'' +
+                ", complianceStandards='" + complianceStandards + '\'' +
                 '}';
     }
 }

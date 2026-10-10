@@ -173,6 +173,16 @@ public class CipherSuiteProvider {
                 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
     }
 
+    public List<CipherSuite> getFips1403ApprovedTls12CipherSuites() {
+        return List.of(
+                TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                TLS_DHE_RSA_WITH_AES_256_GCM_SHA384);
+    }
+
     public List<CipherSuite> getAllowedTls13CipherSuites() {
         return List.of(
                 TLS_AES_256_GCM_SHA384,
@@ -183,6 +193,12 @@ public class CipherSuiteProvider {
     }
 
     public List<CipherSuite> getRecommendedTls13CipherSuites() {
+        return List.of(
+                TLS_AES_128_GCM_SHA256,
+                TLS_AES_256_GCM_SHA384);
+    }
+
+    public List<CipherSuite> getFips1403ApprovedTls13CipherSuites() {
         return List.of(
                 TLS_AES_128_GCM_SHA256,
                 TLS_AES_256_GCM_SHA384);

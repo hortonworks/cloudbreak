@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.it.cloudbreak.assertion.encryptionprofile.EncryptionProfileAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.stack.EncryptionProfileAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -57,6 +58,9 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
     @Inject
     private EncryptionProfileAssertion encryptionProfileAssertion;
 
+    @Inject
+    private EncryptionProfileAssertions encryptionProfileAssertions;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -78,6 +82,10 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
                 .withTlsVersions(Set.of(TlsVersion.TLS_1_3))
                 .withCipherSuites(List.of("TLS_AES_256_GCM_SHA384"))
                 .when(encryptionProfileTestClient.create())
+                .then((tc, testDto, client) -> {
+                    encryptionProfileAssertions.validateComplianceStandards(testDto.getResponse(), Set.of("FIPS_140_3"));
+                    return testDto;
+                })
                 .given(EnvironmentNetworkTestDto.class)
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
