@@ -1,7 +1,7 @@
-set AD_DOMAIN=${adDomain}
-set IPA_DOMAIN=${ipaDomain}
-set IPA_IPS=<#list ipaIpAddresses as ip>${ip}<#if ip_has_next> </#if></#list>
-set TRUST_SECRET=${trustSecret}
+set "AD_DOMAIN=${adDomain}"
+set "IPA_DOMAIN=${ipaDomain}"
+set "IPA_IPS=<#list ipaIpAddresses as ip>${ip}<#if ip_has_next> </#if></#list>"
+set "TRUST_SECRET=${trustSecret}"
 
 :: DNS setup for Active Directory cross-realm trust
 :: More info: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/dnscmd

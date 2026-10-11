@@ -15,6 +15,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrepareCrossRealmTrustBase {
+    public static final String REALM_MATCHER = "(?i)[a-z0-9_](?:[a-z0-9_-]{0,61}[a-z0-9_])?(?:\\.[a-z0-9_](?:[a-z0-9_-]{0,61}[a-z0-9_])?)*";
+
+    public static final String INVALID_REALM_MESSAGE = "Invalid realm format, only letters, digits, '-', '_' and '.' separated labels are allowed";
+
+    public static final String TRUST_SECRET_MATCHER = "[A-Za-z0-9@#$*+,./:;=?_~-]{1,128}";
+
+    public static final String INVALID_TRUST_SECRET_MESSAGE = "Invalid trust secret, only letters, digits and @#$*+,./:;=?_~- are allowed (max 128)";
+
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
     @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,9 +30,11 @@ public class PrepareCrossRealmTrustRequest extends PrepareCrossRealmTrustBase {
     private String ip;
 
     @NotEmpty
+    @Pattern(regexp = REALM_MATCHER, message = INVALID_REALM_MESSAGE)
     @Schema(description = CrossRealmTrustModelDescriptions.REALM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String realm;
 
+    @Pattern(regexp = TRUST_SECRET_MATCHER, message = INVALID_TRUST_SECRET_MESSAGE)
     @Schema(description = CrossRealmTrustModelDescriptions.TRUST_SECRET, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String trustSecret;
 

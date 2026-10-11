@@ -5,7 +5,9 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescri
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,9 +22,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddCrossRealmTrustV2Request extends PrepareCrossRealmTrustBase {
 
+    @Valid
     @Schema(description = CrossRealmTrustModelDescriptions.AD)
     private PrepareCrossRealmTrustV2ActiveDirectoryRequest ad;
 
+    @Valid
     @Schema(description = CrossRealmTrustModelDescriptions.MIT)
     private PrepareCrossRealmTrustV2MitRequest mit;
 
@@ -34,6 +38,7 @@ public class AddCrossRealmTrustV2Request extends PrepareCrossRealmTrustBase {
     @Schema(description = ModelDescriptions.REMOTE_ENVIRONMENT_CRN)
     private String remoteEnvironmentCrn;
 
+    @Pattern(regexp = TRUST_SECRET_MATCHER, message = INVALID_TRUST_SECRET_MESSAGE)
     @Schema(description = CrossRealmTrustModelDescriptions.TRUST_SECRET)
     private String trustSecret;
 

@@ -1,5 +1,5 @@
-set AD_DOMAIN=ad.org
-set IPA_DOMAIN=freeipa.org
+set "AD_DOMAIN=ad.org"
+set "IPA_DOMAIN=freeipa.org"
 
 :: Clean up of DNS setup and its caches for Active Directory cross-realm trust
 :: More info: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/dnscmd

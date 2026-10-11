@@ -1,5 +1,5 @@
-set AD_DOMAIN=ad.org
-set IPA_DOMAIN=freeipa.org
+set "AD_DOMAIN=ad.org"
+set "IPA_DOMAIN=freeipa.org"
 
 REM Secure channel validation from the Active Directory server towards the FreeIPA:
 nltest /sc_verify:%IPA_DOMAIN%

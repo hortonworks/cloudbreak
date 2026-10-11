@@ -1,7 +1,7 @@
-set AD_DOMAIN=ad.org
-set IPA_DOMAIN=freeipa.org
-set IPA_IPS=ipaIp1 ipaIp2 ipaIp3
-set TRUST_SECRET=trustSecret
+set "AD_DOMAIN=ad.org"
+set "IPA_DOMAIN=freeipa.org"
+set "IPA_IPS=ipaIp1 ipaIp2 ipaIp3"
+set "TRUST_SECRET=trustSecret"
 
 :: DNS setup for Active Directory cross-realm trust
 :: More info: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/dnscmd

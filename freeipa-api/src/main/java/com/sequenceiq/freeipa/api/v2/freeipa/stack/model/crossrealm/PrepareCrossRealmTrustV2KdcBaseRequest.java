@@ -3,10 +3,12 @@ package com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustBase;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public abstract class PrepareCrossRealmTrustV2KdcBaseRequest {
 
     @NotEmpty
+    @Pattern(regexp = PrepareCrossRealmTrustBase.REALM_MATCHER, message = PrepareCrossRealmTrustBase.INVALID_REALM_MESSAGE)
     @Schema(description = FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions.KDC_REALM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String realm;
 
