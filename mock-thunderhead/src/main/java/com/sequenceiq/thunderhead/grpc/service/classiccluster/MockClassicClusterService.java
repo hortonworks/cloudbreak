@@ -7,11 +7,11 @@ import static com.sequenceiq.thunderhead.service.ClassicClusterService.CLUSTER_P
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.inject.Inject;
 
@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -45,7 +46,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockClassicClusterService.class);
 
-    private static final Map<String, OnPremisesApiProto.Cluster> CLUSTER_CACHE = new HashMap<>();
+    private static final Map<String, OnPremisesApiProto.Cluster> CLUSTER_CACHE = new ConcurrentHashMap<>();
 
     @Value("${mock.classicCluster.passValidationForDatalake:true}")
     private boolean passValidationForDatalake;
@@ -107,6 +108,21 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
     }
 
     private OnPremisesApiProto.Cluster convert(ClassicCluster classicCluster) {
+        return RetryTemplate.builder()
+                .maxAttempts(3)
+                .fixedBackoff(5000)
+                .retryOn(Exception.class)
+                .build()
+                .execute(context -> {
+                    if (context.getRetryCount() > 0) {
+                        LOGGER.warn("Retry attempt {}/3 to get cluster details from CM for '{}'",
+                                context.getRetryCount() + 1, classicCluster.getName());
+                    }
+                    return fetchClusterFromCm(classicCluster);
+                });
+    }
+
+    private OnPremisesApiProto.Cluster fetchClusterFromCm(ClassicCluster classicCluster) {
         try {
             ApiClient apiClient =
                     clouderaManagerApiClientProvider.getClouderaManagerClient(getHttpClientConfig(classicCluster), null, null, null, API_V_51);
