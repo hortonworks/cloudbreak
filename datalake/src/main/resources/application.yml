@@ -125,6 +125,10 @@ sdx:
   update.imd:
     sleep-time-sec: 2
     duration-min: 10
+  parallel:
+    rds:
+      create:
+        enabled: false
 
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 

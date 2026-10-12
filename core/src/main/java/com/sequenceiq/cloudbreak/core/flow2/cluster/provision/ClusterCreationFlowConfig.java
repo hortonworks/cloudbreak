@@ -68,6 +68,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_LICENCE_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.AUTOCONFIGURE_CLUSTER_MANAGER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_MACHINES_STATE;
@@ -106,6 +108,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.VALIDATE_CLOUD_STORAGE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.VALIDATE_LICENCE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.WAIT_FOR_CLUSTER_MANAGER_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_STATE;
 
 import java.util.List;
 
@@ -157,9 +160,13 @@ public class ClusterCreationFlowConfig extends StackStatusFinalizerAbstractFlowC
                     .event(BOOTSTRAP_PUBLIC_ENDPOINT_FINISHED_EVENT)
                     .defaultFailureEvent()
             .from(BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE)
-                    .to(UPLOAD_RECIPES_STATE)
+                    .to(WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_STATE)
                     .event(BOOTSTRAP_FREEIPA_ENDPOINT_FINISHED_EVENT)
                 .defaultFailureEvent()
+            .from(WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_STATE)
+                    .to(UPLOAD_RECIPES_STATE)
+                    .event(WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_FINISHED_EVENT)
+                    .failureEvent(WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_FAILED_EVENT)
             .from(UPLOAD_RECIPES_STATE)
                     .to(CONFIGURE_KEYTABS_STATE)
                     .event(UPLOAD_RECIPES_FINISHED_EVENT)

@@ -194,7 +194,8 @@ public class DatabaseServiceTest {
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
 
-        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createAndWaitUntilAvailable(cluster, env)))
+                .isInstanceOf(BadRequestException.class);
 
         verify(databaseServerV4Endpoint).createInternal(allocateDatabaseServerV4RequestCaptor.capture(), anyString());
         AllocateDatabaseServerV4Request dbRequest = allocateDatabaseServerV4RequestCaptor.getValue();
@@ -233,7 +234,7 @@ public class DatabaseServiceTest {
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
 
         assertThrows(CloudbreakServiceException.class, () -> {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env));
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createAndWaitUntilAvailable(cluster, env));
         });
     }
 
@@ -312,12 +313,89 @@ public class DatabaseServiceTest {
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
                 .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
 
-        DatabaseServerStatusV4Response response =  ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(defaultSdxCluster, env));
+        DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.createAndWaitUntilAvailable(defaultSdxCluster, env));
 
         verify(sdxDatabaseRepository, times(1)).save(any());
         verify(sdxClusterRepository, times(1)).save(any());
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS),
                 eq("External database creation in progress"), eq(defaultSdxCluster));
+    }
+
+    @Test
+    public void testFireCreateShouldNotWaitForDatabase() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        SdxDatabase database = new SdxDatabase();
+        database.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(database);
+        DetailedEnvironmentResponse env = getEnvironmentForFireCreate();
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.ENVIRONMENT_CREATED);
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(DATABASE_CRN);
+        createResponse.setStatus(Status.CREATE_IN_PROGRESS);
+        when(databaseServerV4Endpoint.createInternal(any(), any())).thenReturn(createResponse);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(new AwsDatabaseServerParameterSetter());
+        when(dbConfigs.get(new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY))).thenReturn(getDatabaseConfig());
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
+
+        DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.fireCreate(cluster, env));
+
+        assertThat(response.getResourceCrn()).isEqualTo(DATABASE_CRN);
+        verify(sdxDatabaseRepository, times(1)).save(any());
+        verify(sdxClusterRepository, times(1)).save(any());
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS),
+                eq("External database creation in progress"), eq(cluster));
+        verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
+    }
+
+    @Test
+    public void testFireCreateShouldReuseCrnWhenDatabaseAlreadyCreated() {
+        DatabaseServerStatusV4Response response =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.fireCreate(defaultSdxCluster, getEnvironmentForFireCreate()));
+
+        assertThat(response.getResourceCrn()).isEqualTo(DATABASE_CRN);
+        verify(databaseServerV4Endpoint, never()).createInternal(any(), any());
+        verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
+        verifyNoInteractions(sdxDatabaseRepository);
+    }
+
+    @Test
+    public void testFireCreateShouldThrowWhenDatabaseIsStopped() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        SdxDatabase database = new SdxDatabase();
+        database.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(database);
+        DetailedEnvironmentResponse env = getEnvironmentForFireCreate();
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.ENVIRONMENT_CREATED);
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(DATABASE_CRN);
+        createResponse.setStatus(Status.STOPPED);
+        when(databaseServerV4Endpoint.createInternal(any(), any())).thenReturn(createResponse);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(new AwsDatabaseServerParameterSetter());
+        when(dbConfigs.get(new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY))).thenReturn(getDatabaseConfig());
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"), null));
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.fireCreate(cluster, env)))
+                .isInstanceOf(CloudbreakServiceException.class)
+                .hasMessageContaining("STOPPED");
+    }
+
+    private DetailedEnvironmentResponse getEnvironmentForFireCreate() {
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("region");
+        env.setLocation(locationResponse);
+        return env;
     }
 
     @Test
@@ -622,7 +700,8 @@ public class DatabaseServiceTest {
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
 
-        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createAndWaitUntilAvailable(cluster, env)))
+                .isInstanceOf(BadRequestException.class);
 
         verify(databaseServerV4Endpoint).createInternal(allocateDatabaseServerV4RequestCaptor.capture(), anyString());
         AllocateDatabaseServerV4Request dbRequest = allocateDatabaseServerV4RequestCaptor.getValue();
@@ -680,7 +759,8 @@ public class DatabaseServiceTest {
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
 
-        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createAndWaitUntilAvailable(cluster, env)))
+                .isInstanceOf(BadRequestException.class);
 
         verify(databaseServerV4Endpoint).createInternal(allocateDatabaseServerV4RequestCaptor.capture(), anyString());
         AllocateDatabaseServerV4Request dbRequest = allocateDatabaseServerV4RequestCaptor.getValue();
@@ -732,7 +812,8 @@ public class DatabaseServiceTest {
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
 
-        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createAndWaitUntilAvailable(cluster, env)))
+                .isInstanceOf(BadRequestException.class);
 
         verify(databaseServerV4Endpoint).createInternal(allocateDatabaseServerV4RequestCaptor.capture(), anyString());
         AllocateDatabaseServerV4Request dbRequest = allocateDatabaseServerV4RequestCaptor.getValue();

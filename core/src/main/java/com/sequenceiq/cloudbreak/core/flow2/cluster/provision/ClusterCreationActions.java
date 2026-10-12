@@ -81,6 +81,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ValidateClust
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ValidateClusterLicenceSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForExternalDatabaseRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForExternalDatabaseSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequest;
@@ -346,11 +348,26 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "UPLOAD_RECIPES_STATE")
-    public Action<?, ?> uploadRecipesAction() {
+    @Bean(name = "WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_STATE")
+    public Action<?, ?> waitForExternalDatabaseAction() {
         return new AbstractClusterCreationAction<>(BootstrapFreeIPAEndpointSuccess.class) {
             @Override
             protected void doExecute(ClusterCreationViewContext context, BootstrapFreeIPAEndpointSuccess payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterCreationViewContext context) {
+                return new WaitForExternalDatabaseRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "UPLOAD_RECIPES_STATE")
+    public Action<?, ?> uploadRecipesAction() {
+        return new AbstractClusterCreationAction<>(WaitForExternalDatabaseSuccess.class) {
+            @Override
+            protected void doExecute(ClusterCreationViewContext context, WaitForExternalDatabaseSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

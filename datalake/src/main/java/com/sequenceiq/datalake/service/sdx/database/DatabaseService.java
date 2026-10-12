@@ -138,12 +138,17 @@ public class DatabaseService {
     @Inject
     private EntitlementService entitlementService;
 
-    public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
+    public DatabaseServerStatusV4Response createAndWaitUntilAvailable(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
+        DatabaseServerStatusV4Response response = fireCreate(sdxCluster, env);
+        return waitAndGetDatabase(sdxCluster, response.getResourceCrn(), SdxDatabaseOperation.CREATION, true);
+    }
+
+    public DatabaseServerStatusV4Response fireCreate(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for Data Lake {}", env.getName(), sdxCluster.getClusterName());
         String dbResourceCrn;
-        DatabaseServerStatusV4Response serverStatusV4Response = null;
+        DatabaseServerStatusV4Response serverStatusV4Response = new DatabaseServerStatusV4Response();
         if (dbHasBeenCreatedPreviously(sdxCluster)) {
-            dbResourceCrn = sdxCluster.getDatabaseCrn();
+            serverStatusV4Response.setResourceCrn(sdxCluster.getDatabaseCrn());
         } else {
             try {
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -151,8 +156,8 @@ public class DatabaseService {
                     throw new CloudbreakServiceException("Data Lake deletion in progress! Do not provision database, create flow cancelled");
                 }
                 serverStatusV4Response =
-                ThreadBasedUserCrnProvider.doAsInternalActor(
-                        () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env, initiatorUserCrn), initiatorUserCrn));
+                        ThreadBasedUserCrnProvider.doAsInternalActor(
+                                () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env, initiatorUserCrn), initiatorUserCrn));
                 dbResourceCrn = serverStatusV4Response.getResourceCrn();
                 DatabaseParameterInitUtil.setDatabaseCrn(sdxCluster, dbResourceCrn);
                 sdxDatabaseRepository.save(sdxCluster.getSdxDatabase());
@@ -164,11 +169,11 @@ public class DatabaseService {
                 throw badRequestException;
             }
         }
-        if (serverStatusV4Response != null && serverStatusV4Response.getStatus().equals(Status.STOPPED)) {
+        if (Status.STOPPED.equals(serverStatusV4Response.getStatus())) {
             throw new CloudbreakServiceException(String.format("Database already in %s state. Provisioning new database failed",
                     serverStatusV4Response.getStatus()));
         }
-        return waitAndGetDatabase(sdxCluster, dbResourceCrn, SdxDatabaseOperation.CREATION, true);
+        return serverStatusV4Response;
     }
 
     private boolean dbHasBeenCreatedPreviously(SdxCluster sdxCluster) {

@@ -40,6 +40,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ValidateClust
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ValidateClusterLicenceSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForExternalDatabaseFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForExternalDatabaseSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationFailed;
@@ -89,6 +91,8 @@ public enum ClusterCreationEvent implements FlowEvent {
     UPLOAD_RECIPES_FAILED_EVENT(EventSelectorUtil.selector(UploadRecipesFailed.class)),
     CONFIGURE_KEYTABS_FINISHED_EVENT(EventSelectorUtil.selector(KeytabConfigurationSuccess.class)),
     CONFIGURE_KEYTABS_FAILED_EVENT(EventSelectorUtil.selector(KeytabConfigurationFailed.class)),
+    WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_FINISHED_EVENT(EventSelectorUtil.selector(WaitForExternalDatabaseSuccess.class)),
+    WAIT_FOR_EXTERNAL_DATABASE_AVAILABLE_FAILED_EVENT(EventSelectorUtil.selector(WaitForExternalDatabaseFailed.class)),
     START_AMBARI_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterManagerServicesSuccess.class)),
     START_AMBARI_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartAmbariServicesFailed.class)),
     PREFLIGHT_CHECK_FINISHED_EVENT(EventSelectorUtil.selector(PreFlightCheckSuccess.class)),

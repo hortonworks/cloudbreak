@@ -72,7 +72,7 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
     protected OperationInfo getCreateOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("CreateDatalakeCluster")
-                .withFirstStates("SDX_CREATION_WAIT_RDS_STATE")
+                .withFirstStates("SDX_CREATION_TRIGGER_RDS_STATE")
                 .withLastStates("SDX_CREATION_FINISHED_STATE")
                 .build();
     }

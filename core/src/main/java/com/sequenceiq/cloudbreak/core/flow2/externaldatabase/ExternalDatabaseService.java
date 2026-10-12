@@ -556,14 +556,21 @@ public class ExternalDatabaseService {
                 null);
     }
 
+    public void waitForDatabaseAvailable(ClusterView cluster, String databaseCrn, boolean cancellable) {
+        Object database = waitAndGetDatabase(cluster, databaseCrn, dbPollingConfig.getConfig(), DatabaseOperation.CREATION, cancellable);
+        if (database == null) {
+            throw new CloudbreakServiceException(String.format("External database %s was not found, it might have been deleted", databaseCrn));
+        }
+    }
+
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,
             DatabaseOperation databaseOperation, boolean cancellable) {
         waitAndGetDatabase(cluster, databaseCrn, dbPollingConfig.getConfig(), databaseOperation, cancellable);
     }
 
-    private void waitAndGetDatabase(ClusterView cluster, String databaseCrn, PollingConfig pollingConfig, DatabaseOperation databaseOperation,
+    private Object waitAndGetDatabase(ClusterView cluster, String databaseCrn, PollingConfig pollingConfig, DatabaseOperation databaseOperation,
             boolean cancellable) {
-        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+        return Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
                 .run(() -> databaseObtainerService.obtainAttemptResult(cluster, databaseOperation, databaseCrn, cancellable));

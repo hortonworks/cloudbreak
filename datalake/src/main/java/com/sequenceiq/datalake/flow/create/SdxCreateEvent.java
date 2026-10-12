@@ -16,7 +16,8 @@ public enum SdxCreateEvent implements FlowEvent {
     SDX_STACK_CREATION_SUCCESS_EVENT("StackCreationSuccessEvent"),
     SDX_CREATE_FAILED_EVENT("SdxCreateFailedEvent"),
     SDX_CREATE_FAILED_HANDLED_EVENT("SDX_CREATE_FAILED_HANDLED_EVENT"),
-    SDX_CREATE_FINALIZED_EVENT("SDX_CREATE_FINALIZED_EVENT");
+    SDX_CREATE_FINALIZED_EVENT("SDX_CREATE_FINALIZED_EVENT"),
+    RDS_TRIGGERED_EVENT("RdsTriggeredEvent");
 
     private final String event;
 

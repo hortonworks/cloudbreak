@@ -1301,6 +1301,30 @@ class ExternalDatabaseServiceTest {
         return flowResp;
     }
 
+    @Test
+    void waitForDatabaseAvailableReturnsWhenTheDatabaseBecomesAvailable() throws JsonProcessingException {
+        ClusterView cluster = mock(ClusterView.class);
+        when(databaseObtainerService.obtainAttemptResult(cluster, DatabaseOperation.CREATION, "dbCrn", true))
+                .thenReturn(AttemptResults.justContinue())
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+
+        underTest.waitForDatabaseAvailable(cluster, "dbCrn", true);
+
+        verify(databaseObtainerService, times(2)).obtainAttemptResult(cluster, DatabaseOperation.CREATION, "dbCrn", true);
+    }
+
+    @Test
+    void waitForDatabaseAvailableFailsWithClearMessageWhenTheDatabaseIsGone() throws JsonProcessingException {
+        ClusterView cluster = mock(ClusterView.class);
+        when(databaseObtainerService.obtainAttemptResult(cluster, DatabaseOperation.CREATION, "dbCrn", true))
+                .thenReturn(AttemptResults.finishWith(null));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.waitForDatabaseAvailable(cluster, "dbCrn", true));
+
+        assertEquals("External database dbCrn was not found, it might have been deleted", exception.getMessage());
+    }
+
     private void mockShortPollConfig() {
         PollingConfig config = PollingConfig.builder()
                 .withSleepTime(10)

@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.create;
 
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.ENV_WAIT_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.RDS_TRIGGERED_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.RDS_WAIT_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_CREATE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_CREATE_FAILED_HANDLED_EVENT;
@@ -25,7 +26,7 @@ class SdxCreateEventTest {
     private static final Map<SdxCreateEvent, String> ENUM_TO_EVENT_MAP = new EnumMap<>(Map.ofEntries(
             entry(SDX_VALIDATION_EVENT, "SDX_VALIDATION_EVENT"), entry(SDX_VALIDATION_SUCCESS_EVENT, "SdxValidationSuccessEvent"),
             entry(STORAGE_VALIDATION_SUCCESS_EVENT, "StorageValidationSuccessEvent"), entry(ENV_WAIT_SUCCESS_EVENT, "EnvWaitSuccessEvent"),
-            entry(RDS_WAIT_SUCCESS_EVENT, "RdsWaitSuccessEvent"),
+            entry(RDS_WAIT_SUCCESS_EVENT, "RdsWaitSuccessEvent"), entry(RDS_TRIGGERED_EVENT, "RdsTriggeredEvent"),
             entry(STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_SUCCESS_EVENT, "STORAGECONSUMPTIONCOLLECTIONSCHEDULINGSUCCESSEVENT"),
             entry(SDX_STACK_CREATION_IN_PROGRESS_EVENT, "SDX_STACK_CREATION_IN_PROGRESS_EVENT"),
             entry(SDX_STACK_CREATION_SUCCESS_EVENT, "StackCreationSuccessEvent"), entry(SDX_CREATE_FAILED_EVENT, "SdxCreateFailedEvent"),
