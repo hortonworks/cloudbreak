@@ -1,0 +1,5 @@
+name: "aws-hybrid-trust-tests"
+tests:
+  - name: "aws_hybrid_trust_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.trust.HybridTrustTests
