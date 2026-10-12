@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.service.image.ImageCatalogException;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Component
 public class AvailabilityChecker {
@@ -33,6 +34,9 @@ public class AvailabilityChecker {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     public boolean isRequiredPackagesInstalled(Stack stack, Set<String> requiredPackages) {
         try {
@@ -105,7 +109,7 @@ public class AvailabilityChecker {
 
     protected boolean doesAllImageSupport(Stack stack, String packageName, Versioned supportedAfter) {
         try {
-            Set<String> imageIdsInUse = stack.getNotTerminatedInstanceMetaDataSet().stream()
+            Set<String> imageIdsInUse = instanceMetaDataService.findNotTerminatedForStack(stack.getId()).stream()
                     .map(InstanceMetaData::getImage)
                     .map(imageJson -> imageJson.getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class))
                     .map(com.sequenceiq.cloudbreak.cloud.model.Image::getImageId)

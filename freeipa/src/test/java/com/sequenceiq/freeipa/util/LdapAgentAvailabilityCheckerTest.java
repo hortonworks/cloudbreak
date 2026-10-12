@@ -19,17 +19,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
-import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
 class LdapAgentAvailabilityCheckerTest {
 
     private static final String LDAP_PACKAGE_NAME = "freeipa-ldap-agent";
+
+    private static final Long STACK_ID = 1L;
 
     private static final String CURRENT_IMAGE_ID = "current-image-id";
 
@@ -37,6 +39,9 @@ class LdapAgentAvailabilityCheckerTest {
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
     private LdapAgentAvailabilityChecker underTest;
@@ -79,7 +84,6 @@ class LdapAgentAvailabilityCheckerTest {
     void testIsLdapAgentTlsSupportAvailableWhenImageDoesNotSupportTls() {
         Stack stack = new Stack();
 
-        InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         Image instanceImage = mock(Image.class);
@@ -89,10 +93,8 @@ class LdapAgentAvailabilityCheckerTest {
         when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-
-        stack.setInstanceGroups(Set.of(instanceGroup));
+        stack.setId(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceMetaData));
 
         com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image currentImage = mock(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image.class);
         when(currentImage.getUuid()).thenReturn(CURRENT_IMAGE_ID);
@@ -117,7 +119,6 @@ class LdapAgentAvailabilityCheckerTest {
     void testDoesAllImageSupportTlsWhenAllImagesAreSame() {
         Stack stack = new Stack();
 
-        InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         Image instanceImage = mock(Image.class);
@@ -127,10 +128,8 @@ class LdapAgentAvailabilityCheckerTest {
         when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-
-        stack.setInstanceGroups(Set.of(instanceGroup));
+        stack.setId(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceMetaData));
 
         com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image currentImage = mock(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image.class);
         when(currentImage.getUuid()).thenReturn(INSTANCE_IMAGE_ID);
@@ -149,7 +148,6 @@ class LdapAgentAvailabilityCheckerTest {
     void testDoesAllImageSupportTlsWhenNonCurrentImagesSupportTls() {
         Stack stack = new Stack();
 
-        InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         Image instanceImage = mock(Image.class);
@@ -159,10 +157,8 @@ class LdapAgentAvailabilityCheckerTest {
         when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-
-        stack.setInstanceGroups(Set.of(instanceGroup));
+        stack.setId(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceMetaData));
 
         com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image currentImage = mock(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image.class);
         when(currentImage.getUuid()).thenReturn(CURRENT_IMAGE_ID);
@@ -196,7 +192,6 @@ class LdapAgentAvailabilityCheckerTest {
     void testDoesAllImageSupportTlsWhenNonCurrentImagesDoNotSupportTls() {
         Stack stack = new Stack();
 
-        InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         Image instanceImage = mock(Image.class);
@@ -206,10 +201,8 @@ class LdapAgentAvailabilityCheckerTest {
         when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-
-        stack.setInstanceGroups(Set.of(instanceGroup));
+        stack.setId(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceMetaData));
 
         com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image currentImage = mock(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image.class);
         when(currentImage.getUuid()).thenReturn(CURRENT_IMAGE_ID);
@@ -243,7 +236,6 @@ class LdapAgentAvailabilityCheckerTest {
     void testDoesAllNonCurrentImageSupportTlsWhenImageNotFound() {
         Stack stack = new Stack();
 
-        InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         Image instanceImage = mock(Image.class);
@@ -253,10 +245,8 @@ class LdapAgentAvailabilityCheckerTest {
         when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-
-        stack.setInstanceGroups(Set.of(instanceGroup));
+        stack.setId(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceMetaData));
 
         com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image currentImage =
                 mock(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image.class);
