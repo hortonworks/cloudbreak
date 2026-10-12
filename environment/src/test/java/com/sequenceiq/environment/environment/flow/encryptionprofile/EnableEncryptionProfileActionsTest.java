@@ -8,8 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,11 +25,9 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.CommonContext;
@@ -58,9 +56,6 @@ class EnableEncryptionProfileActionsTest {
 
     @Mock
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
-
-    @Mock
-    private EnvironmentService environmentService;
 
     private CommonContext context;
 
@@ -141,10 +136,6 @@ class EnableEncryptionProfileActionsTest {
 
         Event event = mock(Event.class);
         when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn(event);
-        Environment environment = mock(Environment.class);
-        Optional<Environment> environmentOp = Optional.of(environment);
-        when(environmentService.findEnvironmentById(any())).thenReturn(environmentOp);
-        when(environment.getStatus()).thenReturn(EnvironmentStatus.AVAILABLE);
 
         new AbstractActionTestSupport<>(failedAction).doExecute(context, enableEncryptionProfileFailedEvent, Map.of());
 
@@ -152,9 +143,32 @@ class EnableEncryptionProfileActionsTest {
                 enableEncryptionProfileFailedEvent,
                 EnvironmentStatus.AVAILABLE,
                 ResourceEvent.ENABLE_ENCRYPTION_PROFILE_FAILED,
+                List.of("404"),
                 EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
         verify(eventBus)
                 .notify(eq(EnableEncryptionProfileStateSelectors.HANDLED_FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.selector()), eq(event));
+    }
+
+    @Test
+    public void testFailedActionWithoutExceptionMessage() throws Exception {
+        AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent> failedAction =
+                (AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent>) underTest.failedAction();
+        EnableEncryptionProfileFailedEvent enableEncryptionProfileFailedEvent =
+                new EnableEncryptionProfileFailedEvent(1L, "envName", "envCrn", new RuntimeException());
+
+        initActionPrivateFields(failedAction);
+
+        Event event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(failedAction).doExecute(context, enableEncryptionProfileFailedEvent, Map.of());
+
+        verify(environmentStatusUpdateService, times(1)).updateFailedEnvironmentStatusAndNotify(context,
+                enableEncryptionProfileFailedEvent,
+                EnvironmentStatus.AVAILABLE,
+                ResourceEvent.ENABLE_ENCRYPTION_PROFILE_FAILED,
+                List.of("Unknown error"),
+                EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

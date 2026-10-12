@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -85,5 +86,6 @@ class SetEncryptionProfileHandlerTest {
         assertEquals(event.getResourceId(), selectable.getResourceId());
         assertEquals(FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.name(), selectable.selector());
         assertEquals("failed", selectable.getException().getMessage());
+        assertEquals(event.getResourceCrn(), ((EnableEncryptionProfileFailedEvent) selectable).getResourceCrn());
     }
 }

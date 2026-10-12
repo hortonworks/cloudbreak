@@ -32,9 +32,9 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 @Configuration
 public class SdxEnableEncryptionProfileActions {
 
-    static final String ENCRYPTION_PROFILE_CRN_VARIABLE = "ENCRYPTION_PROFILE_CRN";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxEnableEncryptionProfileActions.class);
+
+    private static final String UNKNOWN_ERROR = "Unknown error";
 
     @Inject
     private SdxStatusService sdxStatusService;
@@ -48,9 +48,6 @@ public class SdxEnableEncryptionProfileActions {
             @Override
             protected void doExecute(SdxContext context, SdxEnableEncryptionProfileTriggerEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting Enable Encryption Profile flow for SDX: {}", payload.getResourceId());
-                if (StringUtils.isNotEmpty(payload.getEncryptionProfileCrn())) {
-                    variables.put(ENCRYPTION_PROFILE_CRN_VARIABLE, payload.getEncryptionProfileCrn());
-                }
                 sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS,
                         "Enable Encryption Profile is in progress", payload.getResourceId());
                 sendEvent(context, SdxEnableEncryptionProfileHandlerEvent.from(context, payload.getEncryptionProfileCrn()));
@@ -84,10 +81,14 @@ public class SdxEnableEncryptionProfileActions {
             protected void doExecute(SdxContext context, SdxEnableEncryptionProfileFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Enable Encryption Profile failed for SDX: {}", payload.getResourceId(), exception);
+                String reason = Optional.ofNullable(exception)
+                        .map(Exception::getMessage)
+                        .filter(StringUtils::isNotBlank)
+                        .orElse(UNKNOWN_ERROR);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_ENABLE_ENCRYPTION_PROFILE_FAILED,
-                        List.of(sdxCluster.getName()), "Enable Encryption Profile failed", sdxCluster);
-                sdxStatusService.setStatusForDatalake(RUNNING, "Enable Encryption Profile failed, datalake returned to RUNNING", sdxCluster);
+                        List.of(sdxCluster.getName(), reason), "Enable Encryption Profile failed: " + reason, sdxCluster);
+                sdxStatusService.setStatusForDatalake(RUNNING, "Enable Encryption Profile failed: " + reason, sdxCluster);
                 sendEvent(context, SDX_ENABLE_ENCRYPTION_PROFILE_FAIL_HANDLED_EVENT.event(), payload);
             }
         };

@@ -48,7 +48,7 @@ public class ValidateEnableEncryptionProfileHandler extends ExceptionCatcherEven
 
         } catch (Exception e) {
             return new EnableEncryptionProfileFailedEvent(payload.getResourceId(), payload.getResourceName(),
-                    payload.getEncryptionProfileCrn(), e);
+                    payload.getResourceCrn(), e);
         }
     }
 }

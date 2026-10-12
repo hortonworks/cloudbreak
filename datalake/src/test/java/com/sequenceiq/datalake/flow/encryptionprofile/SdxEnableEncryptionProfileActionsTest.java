@@ -3,11 +3,9 @@ package com.sequenceiq.datalake.flow.encryptionprofile;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ENABLE_ENCRYPTION_PROFILE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
-import static com.sequenceiq.datalake.flow.encryptionprofile.SdxEnableEncryptionProfileActions.ENCRYPTION_PROFILE_CRN_VARIABLE;
 import static com.sequenceiq.datalake.flow.encryptionprofile.SdxEnableEncryptionProfileEvent.SDX_ENABLE_ENCRYPTION_PROFILE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.encryptionprofile.SdxEnableEncryptionProfileEvent.SDX_ENABLE_ENCRYPTION_PROFILE_FINALIZED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -106,7 +104,6 @@ class SdxEnableEncryptionProfileActionsTest {
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(eq(DATALAKE_ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS),
                 eq("Enable Encryption Profile is in progress"), eq(SDX_ID));
-        assertEquals(ENCRYPTION_PROFILE_CRN, variables.get(ENCRYPTION_PROFILE_CRN_VARIABLE));
         ArgumentCaptor<String> selectorCaptor = ArgumentCaptor.forClass(String.class);
         verify(eventBus).notify(selectorCaptor.capture(), eventCaptor.capture());
         assertEquals(EventSelectorUtil.selector(SdxEnableEncryptionProfileHandlerEvent.class), selectorCaptor.getValue());
@@ -117,18 +114,16 @@ class SdxEnableEncryptionProfileActionsTest {
     }
 
     @Test
-    void testEnableEncryptionProfileActionWithNullCrnDoesNotStoreVariableAndForwardsNull() throws Exception {
+    void testEnableEncryptionProfileActionWithNullCrnForwardsNull() throws Exception {
         SdxEnableEncryptionProfileTriggerEvent event =
                 SdxEnableEncryptionProfileTriggerEvent.from(SDX_ID, USER_ID, null);
         doCallRealMethod().when(reactorEventFactory).createEvent(any(), any());
         AbstractSdxEnableEncryptionProfileAction<SdxEnableEncryptionProfileTriggerEvent> action =
                 (AbstractSdxEnableEncryptionProfileAction<SdxEnableEncryptionProfileTriggerEvent>) underTest.enableEncryptionProfileAction();
         initActionPrivateFields(action);
-        Map<Object, Object> concurrentVariables = new ConcurrentHashMap<>();
 
-        new AbstractActionTestSupport<>(action).doExecute(context, event, concurrentVariables);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, new ConcurrentHashMap<>());
 
-        assertFalse(concurrentVariables.containsKey(ENCRYPTION_PROFILE_CRN_VARIABLE));
         ArgumentCaptor<String> selectorCaptor = ArgumentCaptor.forClass(String.class);
         verify(eventBus).notify(selectorCaptor.capture(), eventCaptor.capture());
         SdxEnableEncryptionProfileHandlerEvent capturedEvent = eventCaptor.getValue().getData();
@@ -170,8 +165,8 @@ class SdxEnableEncryptionProfileActionsTest {
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(eq(DATALAKE_ENABLE_ENCRYPTION_PROFILE_FAILED),
-                eq(List.of("my-datalake")), eq("Enable Encryption Profile failed"), eq(sdxCluster));
-        verify(sdxStatusService).setStatusForDatalake(eq(RUNNING), any(String.class), eq(sdxCluster));
+                eq(List.of("my-datalake", "boom")), eq("Enable Encryption Profile failed: boom"), eq(sdxCluster));
+        verify(sdxStatusService).setStatusForDatalake(eq(RUNNING), eq("Enable Encryption Profile failed: boom"), eq(sdxCluster));
         ArgumentCaptor<String> selectorCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Event> failedEventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(selectorCaptor.capture(), failedEventCaptor.capture());
@@ -179,6 +174,24 @@ class SdxEnableEncryptionProfileActionsTest {
         SdxEnableEncryptionProfileFailedEvent capturedEvent = (SdxEnableEncryptionProfileFailedEvent) failedEventCaptor.getValue().getData();
         assertEquals(SDX_ID, capturedEvent.getResourceId());
         assertEquals("boom", capturedEvent.getException().getMessage());
+    }
+
+    @Test
+    void testFailedActionWithoutExceptionMessage() throws Exception {
+        SdxEnableEncryptionProfileFailedEvent event =
+                new SdxEnableEncryptionProfileFailedEvent(SDX_ID, USER_ID, new RuntimeException());
+        doCallRealMethod().when(reactorEventFactory).createEvent(any(), any());
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        when(sdxCluster.getName()).thenReturn("my-datalake");
+        when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
+        AbstractSdxEnableEncryptionProfileAction<SdxEnableEncryptionProfileFailedEvent> action =
+                (AbstractSdxEnableEncryptionProfileAction<SdxEnableEncryptionProfileFailedEvent>) underTest.failedAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(eq(DATALAKE_ENABLE_ENCRYPTION_PROFILE_FAILED),
+                eq(List.of("my-datalake", "Unknown error")), eq("Enable Encryption Profile failed: Unknown error"), eq(sdxCluster));
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

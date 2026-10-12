@@ -13,8 +13,11 @@ import static com.sequenceiq.environment.environment.flow.encryptionprofile.even
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.UPDATE_SSL_CONFIG_FREEIPA_HANDLER_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.VALIDATE_ENABLE_ENCRYPTION_PROFILE_HANDLER_EVENT;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -24,11 +27,9 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
@@ -39,14 +40,12 @@ public class EnableEncryptionProfileActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnableEncryptionProfileActions.class);
 
+    private static final String UNKNOWN_ERROR = "Unknown error";
+
     private final EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    private final EnvironmentService environmentService;
-
-    public EnableEncryptionProfileActions(
-            EnvironmentStatusUpdateService environmentStatusUpdateService, EnvironmentService environmentService) {
+    public EnableEncryptionProfileActions(EnvironmentStatusUpdateService environmentStatusUpdateService) {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
-        this.environmentService = environmentService;
     }
 
     @Bean(name = "VALIDATE_ENABLE_ENCRYPTION_PROFILE_STATE")
@@ -128,25 +127,25 @@ public class EnableEncryptionProfileActions {
 
             @Override
             protected void doExecute(CommonContext context, EnableEncryptionProfileFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Failed to enable encryption profile: {}", payload.getException().getMessage());
+                String reason = getFailureReason(payload.getException());
+                LOGGER.error("Failed to enable encryption profile: {}", reason, payload.getException());
                 environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(
                                 context,
                                 payload,
-                                getCurrentStatus(payload.getResourceId()),
+                                EnvironmentStatus.AVAILABLE,
                                 ResourceEvent.ENABLE_ENCRYPTION_PROFILE_FAILED,
+                                List.of(reason),
                                 ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
                 sendEvent(context, HANDLED_FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.event(), payload);
             }
         };
     }
 
-    private EnvironmentStatus getCurrentStatus(Long envId) {
-        return environmentService
-                .findEnvironmentById(envId)
-                .map(Environment::getStatus)
-                .orElseThrow(() -> new IllegalStateException(
-                        String.format("Cannot get status of environment, because it does not exist: %s. ", envId)
-                ));
+    private String getFailureReason(Exception exception) {
+        return Optional.ofNullable(exception)
+                .map(Exception::getMessage)
+                .filter(StringUtils::isNotBlank)
+                .orElse(UNKNOWN_ERROR);
     }
 }

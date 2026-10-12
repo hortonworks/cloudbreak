@@ -60,7 +60,7 @@ public class SetEncryptionProfileHandler extends ExceptionCatcherEventHandler<En
 
         } catch (Exception e) {
             return new EnableEncryptionProfileFailedEvent(payload.getResourceId(), payload.getResourceName(),
-                    payload.getEncryptionProfileCrn(), e);
+                    payload.getResourceCrn(), e);
         }
     }
 }
