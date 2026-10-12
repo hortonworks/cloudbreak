@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSUFFICIENT_INSTANCE_CAPACITY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -41,8 +42,15 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.interceptor.ExecutionAttribute;
 import software.amazon.awssdk.core.retry.RetryPolicy;
+import software.amazon.awssdk.core.retry.RetryPolicyContext;
+import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
 import software.amazon.awssdk.core.retry.backoff.FullJitterBackoffStrategy;
+import software.amazon.awssdk.core.retry.conditions.RetryCondition;
+import software.amazon.awssdk.core.retry.conditions.TokenBucketExceptionCostFunction;
+import software.amazon.awssdk.core.retry.conditions.TokenBucketRetryCondition;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClientBuilder;
@@ -80,7 +88,22 @@ public abstract class AwsClient {
 
     public static final int BASE_CLIENT_BACKOFF_MINS_START_INSTANCES = 1;
 
+    public static final int MAX_ICE_RETRIES_RUN_INSTANCES = 5;
+
+    public static final int BASE_ICE_BACKOFF_SECONDS_RUN_INSTANCES = 30;
+
+    public static final int MAX_ICE_BACKOFF_SECONDS_RUN_INSTANCES = 120;
+
     public static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
+
+    public static final String RUN_INSTANCES_EC2_CLIENT_KEY = "RunInstances" + AmazonEc2Client.class.getName();
+
+    static final int LEGACY_RETRY_TOKEN_BUCKET_SIZE = 500;
+
+    static final int LEGACY_RETRY_TOKEN_COST = 5;
+
+    private static final ExecutionAttribute<Integer> INSUFFICIENT_INSTANCE_CAPACITY_RETRIES =
+            new ExecutionAttribute<>("CloudbreakInsufficientInstanceCapacityRetries");
 
     @Value("${cb.aws.metrics.enabled:true}")
     private boolean awsMetricsEnabled;
@@ -132,6 +155,13 @@ public abstract class AwsClient {
                     startInstancesAmazonEc2Client = createEc2ClientForStartInstancesOperation(awsCredentialView);
                 }
                 authenticatedContext.putParameter("StartInstances" + AmazonEc2Client.class.getName(), startInstancesAmazonEc2Client);
+                AmazonEc2Client runInstancesAmazonEc2Client;
+                if (region != null) {
+                    runInstancesAmazonEc2Client = createEc2ClientForRunInstancesOperation(awsCredentialView, region);
+                } else {
+                    runInstancesAmazonEc2Client = createEc2ClientForRunInstancesOperation(awsCredentialView);
+                }
+                authenticatedContext.putParameter(RUN_INSTANCES_EC2_CLIENT_KEY, runInstancesAmazonEc2Client);
             }
         } catch (AwsServiceException e) {
             throw new CredentialVerificationException(e.getMessage(), e);
@@ -147,6 +177,17 @@ public abstract class AwsClient {
     public AmazonEc2Client createEc2ClientForStartInstancesOperation(AwsCredentialView awsCredential) {
         Ec2Client ec2Client = createAccessWithClientConfiguration(awsCredential, awsDefaultZoneProvider.getDefaultZone(awsCredential),
                 getClientConfigurationForStartInstances());
+        return new AmazonEc2Client(ec2Client, retry);
+    }
+
+    public AmazonEc2Client createEc2ClientForRunInstancesOperation(AwsCredentialView awsCredential, String regionName) {
+        Ec2Client ec2Client = createAccessWithClientConfiguration(awsCredential, regionName, getClientConfigurationForRunInstances());
+        return new AmazonEc2Client(ec2Client, retry);
+    }
+
+    public AmazonEc2Client createEc2ClientForRunInstancesOperation(AwsCredentialView awsCredential) {
+        Ec2Client ec2Client = createAccessWithClientConfiguration(awsCredential, awsDefaultZoneProvider.getDefaultZone(awsCredential),
+                getClientConfigurationForRunInstances());
         return new AmazonEc2Client(ec2Client, retry);
     }
 
@@ -403,5 +444,65 @@ public abstract class AwsClient {
             clientOverrideConfigurationBuilder.addMetricPublisher(awsMetricPublisher);
         }
         return clientOverrideConfigurationBuilder.build();
+    }
+
+    private ClientOverrideConfiguration getClientConfigurationForRunInstances() {
+        ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = ClientOverrideConfiguration.builder()
+                .retryPolicy(createRunInstancesRetryPolicy());
+        if (awsMetricsEnabled) {
+            clientOverrideConfigurationBuilder.addMetricPublisher(awsMetricPublisher);
+        }
+        return clientOverrideConfigurationBuilder.build();
+    }
+
+    // The legacy token bucket is per client and shared by the parallel RunInstances calls: ICE is free so every node gets its capacity backoff,
+    // other errors keep the legacy costs so a 5xx storm is still cut short. ICE retries are counted per request so that throttling retries
+    // do not use up the ICE budget.
+    static RetryPolicy createRunInstancesRetryPolicy() {
+        RetryCondition defaultRetryCondition = RetryCondition.defaultRetryCondition();
+        BackoffStrategy defaultBackoffStrategy = BackoffStrategy.defaultStrategy();
+        BackoffStrategy insufficientCapacityBackoffStrategy = FullJitterBackoffStrategy.builder()
+                .baseDelay(Duration.ofSeconds(BASE_ICE_BACKOFF_SECONDS_RUN_INSTANCES))
+                .maxBackoffTime(Duration.ofSeconds(MAX_ICE_BACKOFF_SECONDS_RUN_INSTANCES))
+                .build();
+        TokenBucketExceptionCostFunction legacyExceptionCost = TokenBucketExceptionCostFunction.builder()
+                .throttlingExceptionCost(0)
+                .defaultExceptionCost(LEGACY_RETRY_TOKEN_COST)
+                .build();
+        return RetryPolicy.builder()
+                .numRetries(MAX_CLIENT_RETRIES)
+                .retryCondition(context -> isInsufficientInstanceCapacity(context.exception())
+                        ? tryCountInsufficientInstanceCapacityRetry(context)
+                        : defaultRetryCondition.shouldRetry(context))
+                .backoffStrategy(context -> isInsufficientInstanceCapacity(context.exception())
+                        ? insufficientCapacityBackoffStrategy.computeDelayBeforeNextRetry(context.toBuilder()
+                                .retriesAttempted(insufficientInstanceCapacityRetries(context) - 1)
+                                .build())
+                        : defaultBackoffStrategy.computeDelayBeforeNextRetry(context))
+                .retryCapacityCondition(TokenBucketRetryCondition.builder()
+                        .tokenBucketSize(LEGACY_RETRY_TOKEN_BUCKET_SIZE)
+                        .exceptionCostFunction(exception -> isInsufficientInstanceCapacity(exception) ? 0 : legacyExceptionCost.apply(exception))
+                        .build())
+                .build();
+    }
+
+    private static boolean tryCountInsufficientInstanceCapacityRetry(RetryPolicyContext context) {
+        int retries = insufficientInstanceCapacityRetries(context);
+        if (retries >= MAX_ICE_RETRIES_RUN_INSTANCES) {
+            return false;
+        }
+        context.executionAttributes().putAttribute(INSUFFICIENT_INSTANCE_CAPACITY_RETRIES, retries + 1);
+        return true;
+    }
+
+    private static int insufficientInstanceCapacityRetries(RetryPolicyContext context) {
+        Integer retries = context.executionAttributes().getAttribute(INSUFFICIENT_INSTANCE_CAPACITY_RETRIES);
+        return retries == null ? 0 : retries;
+    }
+
+    private static boolean isInsufficientInstanceCapacity(SdkException exception) {
+        return exception instanceof AwsServiceException awsServiceException
+                && awsServiceException.awsErrorDetails() != null
+                && INSUFFICIENT_INSTANCE_CAPACITY.equalsIgnoreCase(awsServiceException.awsErrorDetails().errorCode());
     }
 }

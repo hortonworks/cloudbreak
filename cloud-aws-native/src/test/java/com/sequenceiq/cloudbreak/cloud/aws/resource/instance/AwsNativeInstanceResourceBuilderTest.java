@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsClient.RUN_INSTANCES_EC2_CLIENT_KEY;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSUFFICIENT_INSTANCE_CAPACITY;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
@@ -16,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -266,6 +268,66 @@ class AwsNativeInstanceResourceBuilderTest {
         verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
                 eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
         verify(instanceTemplate, times(1)).putParameter(eq(CloudResource.ARCHITECTURE), eq(ArchitectureValues.X86_64.name()));
+    }
+
+    static Object[][] runInstancesClientSelectionSource() {
+        return new Object[][]{
+                // runInstancesClientAvailable, fallbackInstanceTypeEnabled, fallbackInstanceTypes, runInstancesClientExpected
+                {true, false, null, true},
+                {false, false, null, false},
+                {true, true, List.of(A1_LARGE.toString()), false},
+                {true, true, List.of(), true}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("runInstancesClientSelectionSource")
+    void testBuildWhenInstanceNoExistSelectsRunInstancesClient(boolean runInstancesClientAvailable, boolean fallbackInstanceTypeEnabled,
+            List<String> fallbackInstanceTypes, boolean runInstancesClientExpected) throws Exception {
+        Instance instance = Instance.builder().instanceId(INSTANCE_ID).architecture(ArchitectureValues.X86_64).build();
+        RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
+        AmazonEc2Client runInstancesEc2Client = mock(AmazonEc2Client.class);
+        AmazonEc2Client expectedClient = runInstancesClientExpected ? runInstancesEc2Client : amazonEc2Client;
+        AmazonEc2Client unexpectedClient = runInstancesClientExpected ? amazonEc2Client : runInstancesEc2Client;
+        CloudResource cloudResource = createInstanceResourceForBuild();
+        Image image = mock(Image.class);
+        long privateId = 0;
+
+        when(entitlementService.isFallbackInstanceTypeEnabled(cloudContext.getAccountId())).thenReturn(fallbackInstanceTypeEnabled);
+        if (fallbackInstanceTypeEnabled) {
+            when(instanceTemplate.getFallbackInstanceTypes()).thenReturn(fallbackInstanceTypes);
+        }
+        lenient().when(ac.getParameter(RUN_INSTANCES_EC2_CLIENT_KEY, AmazonEc2Client.class))
+                .thenReturn(runInstancesClientAvailable ? runInstancesEc2Client : null);
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.empty());
+        when(expectedClient.createInstance(any())).thenReturn(runInstancesResponse);
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(group.getName()).thenReturn("groupName");
+        when(cloudStack.getImage()).thenReturn(image);
+        when(image.getImageName()).thenReturn("img-name");
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
+        when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");
+        when(cloudStack.getSupportedImdsVersion()).thenReturn(null);
+        when(cloudStack.getUserDataByType(any())).thenReturn(TEST_USERDATA);
+        when(cloudInstance.hasParameter(USERDATA_SECRET_ID)).thenReturn(false);
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+
+        assertEquals(INSTANCE_ID, actual.get(0).getInstanceId());
+        verify(expectedClient, times(1)).createInstance(any());
+        verify(unexpectedClient, never()).createInstance(any());
+    }
+
+    private CloudResource createInstanceResourceForBuild() {
+        return CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("groupName")
+                .withParameters(emptyMap())
+                .build();
     }
 
     @Test

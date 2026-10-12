@@ -90,6 +90,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
                 .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getTenantId())
+                .withEnableMultipleClient(true)
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         if (payload instanceof StackScaleTriggerEvent) {

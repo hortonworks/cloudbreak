@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsClient.RUN_INSTANCES_EC2_CLIENT_KEY;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView.AWS;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView.DEFAULT_REGION_KEY;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -114,9 +115,10 @@ class AwsAuthenticatorTest {
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         Map<String, String> roleArn = new HashMap<>();
         roleArn.put("roleArn", "role");
-        testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", roleArn)),
+        AuthenticatedContext auth = testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", roleArn)),
                 getCloudContextBuilder().withEnableMultipleClient(true).build());
-        verify(awsEnvironmentVariableChecker, times(5)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
+        assertTrue(auth.hasParameter(RUN_INSTANCES_EC2_CLIENT_KEY));
+        verify(awsEnvironmentVariableChecker, times(7)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
         verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
     }
 

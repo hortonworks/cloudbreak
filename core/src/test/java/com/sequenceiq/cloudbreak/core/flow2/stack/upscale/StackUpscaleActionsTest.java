@@ -50,6 +50,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Bean;
+import org.springframework.statemachine.ExtendedState;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -93,6 +95,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -122,6 +125,8 @@ class StackUpscaleActionsTest {
     private static final String VARIANT = "VARIANT";
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
+
+    private static final String STACK_CRN = "crn:cdp:datahub:us-west-1:accountId:cluster:stackId";
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -596,5 +601,25 @@ class StackUpscaleActionsTest {
                     .as("Action bean '%s' must extend AbstractStackUpscaleAction", method.getName())
                     .isInstanceOf(AbstractStackUpscaleAction.class);
         }
+    }
+
+    @Test
+    void createFlowContextEnablesMultipleClient() {
+        AbstractStackUpscaleAction<UpscaleStackSaltValidationResult> action = getPrevalidateAction();
+        StackUtil stackUtil = mock(StackUtil.class);
+        ReflectionTestUtils.setField(action, "stackDtoService", stackDtoService);
+        ReflectionTestUtils.setField(action, "stackUtil", stackUtil);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        StateContext<StackUpscaleState, StackUpscaleEvent> stateContext = mock(StateContext.class);
+        ExtendedState extendedState = mock(ExtendedState.class);
+        when(stateContext.getExtendedState()).thenReturn(extendedState);
+        when(extendedState.getVariables()).thenReturn(createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(), NetworkScaleDetails.getEmpty(),
+                new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()), VARIANT));
+
+        StackScalingFlowContext flowContext = new AbstractActionTestSupport<>(action)
+                .createFlowContext(flowParameters, stateContext, new UpscaleStackSaltValidationResult(STACK_ID));
+
+        assertThat(flowContext.getCloudContext().isMultipleClientEnabled()).isTrue();
     }
 }

@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.InstanceCreationContext;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.InstanceTypeRetryExceptionMatcher;
@@ -160,17 +161,34 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 amazonEc2Client.startInstances(StartInstancesRequest.builder().instanceIds(instance.instanceId()).build());
             }
         } else {
-            if (entitlementService.isFallbackInstanceTypeEnabled(ac.getCloudContext().getAccountId())) {
-                instance = createNewInstanceWithInstanceTypeRetry(new InstanceCreationContext(context, ac, amazonEc2Client), cloudInstance, group, cloudStack,
-                        cloudResource, instanceName, instanceTemplate);
+            boolean fallbackInstanceTypeEnabled = entitlementService.isFallbackInstanceTypeEnabled(ac.getCloudContext().getAccountId());
+            AmazonEc2Client createInstanceClient = resolveCreateInstanceClient(ac, amazonEc2Client,
+                    fallbackInstanceTypeEnabled && CollectionUtils.isNotEmpty(instanceTemplate.getFallbackInstanceTypes()));
+            if (fallbackInstanceTypeEnabled) {
+                instance = createNewInstanceWithInstanceTypeRetry(new InstanceCreationContext(context, ac, createInstanceClient), cloudInstance, group,
+                        cloudStack, cloudResource, instanceName, instanceTemplate);
             } else {
-                instance = createNewInstance(new InstanceCreationContext(context, ac, amazonEc2Client), cloudInstance, group, cloudStack,
+                instance = createNewInstance(new InstanceCreationContext(context, ac, createInstanceClient), cloudInstance, group, cloudStack,
                         cloudResource, instanceName, instanceTemplate.getFlavor());
             }
         }
         cloudResource.setInstanceId(instance.instanceId());
         cloudInstance.getTemplate().putParameter(CloudResource.ARCHITECTURE, instance.architecture().name());
         return buildableResource;
+    }
+
+    private AmazonEc2Client resolveCreateInstanceClient(AuthenticatedContext ac, AmazonEc2Client defaultClient, boolean fallbackInstanceTypesAvailable) {
+        if (fallbackInstanceTypesAvailable) {
+            LOGGER.debug("Fallback instance types are set, using the default client for RunInstances to fail over without capacity backoff.");
+            return defaultClient;
+        }
+        AmazonEc2Client runInstancesClient = new AuthenticatedContextView(ac).getRunInstancesAmazonEC2Client();
+        if (runInstancesClient == null) {
+            LOGGER.debug("Capacity-aware RunInstances EC2 client is not available, falling back to the default client for RunInstances.");
+            return defaultClient;
+        }
+        LOGGER.debug("Using capacity-aware RunInstances EC2 client.");
+        return runInstancesClient;
     }
 
     private void shouldRetryWithDifferentInstanceType(AwsServiceException e, String instanceType) {

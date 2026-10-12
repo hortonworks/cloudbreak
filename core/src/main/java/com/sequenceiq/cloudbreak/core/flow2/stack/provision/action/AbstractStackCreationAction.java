@@ -62,6 +62,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends
                 .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getTenantId())
+                .withEnableMultipleClient(true)
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         return new StackCreationContext(flowParameters, stack, stack.getCloudPlatform(), cloudContext, cloudCredential, provisionType);

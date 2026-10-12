@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -22,6 +23,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.statemachine.ExtendedState;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -58,7 +61,9 @@ import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -75,6 +80,8 @@ class StackCreationActionsTest {
     private static final String FLOW_TRIGGER_USER_CRN = "flowTriggerUserCrn";
 
     private static final String FLOW_CHAIN_ID = "flowChainId";
+
+    private static final String STACK_CRN = "crn:cdp:datahub:us-west-1:accountId:cluster:stackId";
 
     @Mock
     private ImageService imageService;
@@ -283,5 +290,26 @@ class StackCreationActionsTest {
         assertThat(launchStackRequest).isNotNull();
         assertThat(launchStackRequest.getFallbackImage()).isEqualTo(Optional.of("fallbackImage"));
         assertThat(launchStackRequest.getSelector()).isEqualTo("LAUNCHSTACKREQUEST");
+    }
+
+    @Test
+    void createFlowContextEnablesMultipleClient() {
+        AbstractStackCreationAction<PrepareImageResult> action = initAction(underTest::imageSetupFinishedAction);
+        StackUtil stackUtil = mock(StackUtil.class);
+        ReflectionTestUtils.setField(action, "stackDtoService", stackDtoService);
+        ReflectionTestUtils.setField(action, "stackUtil", stackUtil);
+        StackView stack = mock(StackView.class);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(stack.getCreator()).thenReturn(mock(User.class));
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        StateContext<StackCreationState, StackCreationEvent> stateContext = mock(StateContext.class);
+        ExtendedState extendedState = mock(ExtendedState.class);
+        when(stateContext.getExtendedState()).thenReturn(extendedState);
+        when(extendedState.getVariables()).thenReturn(new HashMap<>());
+
+        StackCreationContext context = new AbstractActionTestSupport<>(action)
+                .createFlowContext(flowParameters, stateContext, new PrepareImageResult(STACK_ID, "imageId"));
+
+        assertThat(context.getCloudContext().isMultipleClientEnabled()).isTrue();
     }
 }
