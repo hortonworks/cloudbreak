@@ -22,12 +22,18 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
 class SaltBootstrapVersionCheckerTest {
 
+    private static final Long STACK_ID = 1L;
+
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
     private Stack stack;
@@ -105,7 +111,8 @@ class SaltBootstrapVersionCheckerTest {
         im2.setImage(imageJson2);
 
         when(imageService.getImage(imageFilterSettings)).thenReturn(ImageWrapper.ofFreeipaImage(image, ""));
-        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2));
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(im1, im2));
 
         boolean result = underTest.isFqdnAsHostnameSupported(stack);
 
@@ -170,7 +177,8 @@ class SaltBootstrapVersionCheckerTest {
         when(imageService.getImage(imageFilterSettings)).thenReturn(ImageWrapper.ofFreeipaImage(otherSupportedImage, ""));
         InstanceMetaData instanceOnOtherImage = instanceWithImageId("other-supported-image-id");
         InstanceMetaData instanceOnCurrentImage = instanceWithImageId("current-image-id");
-        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(instanceOnOtherImage, instanceOnCurrentImage));
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceOnOtherImage, instanceOnCurrentImage));
 
         boolean result = underTest.isHttpsOnlySupported(stack);
 
@@ -189,7 +197,8 @@ class SaltBootstrapVersionCheckerTest {
         when(imageService.getImage(imageFilterSettings)).thenReturn(ImageWrapper.ofFreeipaImage(oldImage, ""));
         InstanceMetaData instanceOnOldImage = instanceWithImageId("old-image-id");
         InstanceMetaData instanceOnCurrentImage = instanceWithImageId("current-image-id");
-        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(instanceOnOldImage, instanceOnCurrentImage));
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceOnOldImage, instanceOnCurrentImage));
 
         boolean result = underTest.isHttpsOnlySupported(stack);
 
