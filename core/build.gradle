@@ -285,6 +285,7 @@ dependencies {
   testImplementation project(path: ':core-model', configuration: 'tests')
   testImplementation project(path: ':cloud-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':service-common', configuration: 'tests')
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')
   testImplementation project(path: ':cloud-reactor', configuration: 'tests')
