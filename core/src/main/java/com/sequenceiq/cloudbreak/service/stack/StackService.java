@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -311,8 +310,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    @Value("${cluster.fetch.deleted.maxDaysLimit:2}")
-    private Integer maxLimitForDeletedClusters;
+    @Value("${cluster.fetch.deleted.limit:50}")
+    private Integer deletedStacksFetchLimit;
 
     public Optional<Stack> findStackByNameAndWorkspaceId(String name, Long workspaceId) {
         return findByNameAndWorkspaceId(name, workspaceId);
@@ -1240,8 +1239,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     public List<StackClusterStatusView> getDeletedStacks(Long since) {
-        validateMaxLimitForDeletedClusters(since);
-        return stackRepository.getDeletedStacks(since);
+        return stackRepository.getDeletedStacks(since, PageRequest.of(0, deletedStacksFetchLimit));
     }
 
     public Set<String> getAllForArchive(long dateFrom, int limit) {
@@ -1319,13 +1317,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 instanceGroupService.save(instanceGroup);
                 instanceGroupService.delete(instanceGroup.getId());
             }
-        }
-    }
-
-    private void validateMaxLimitForDeletedClusters(Long since) {
-        if (System.currentTimeMillis() - since > TimeUnit.DAYS.toMillis(maxLimitForDeletedClusters)) {
-            throw new BadRequestException(String.format("Fetching deleted clusters is only allowed for last %s days",
-                    maxLimitForDeletedClusters));
         }
     }
 

@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
@@ -138,8 +139,27 @@ class StackRepositoryTest {
 
     @Test
     void testGetDeletedStacks() {
-        List<StackClusterStatusView> deletedStacks = stackRepository.getDeletedStacks(TERMINATED_STACK_TIME - 1);
+        List<StackClusterStatusView> deletedStacks = stackRepository.getDeletedStacks(TERMINATED_STACK_TIME - 1, PageRequest.of(0, 50));
         assertEquals(2, deletedStacks.size());
+        assertThat(deletedStacks).allMatch(stack -> stack.getTerminated() == TERMINATED_STACK_TIME);
+    }
+
+    @Test
+    void testGetDeletedStacksOrderedByTerminatedAscending() {
+        List<StackClusterStatusView> deletedStacks = stackRepository.getDeletedStacks(LONG_TERMINATED_STACK_TIME - 1, PageRequest.of(0, 50));
+
+        assertThat(deletedStacks)
+                .extracting(StackClusterStatusView::getTerminated)
+                .containsExactly(LONG_TERMINATED_STACK_TIME, TERMINATED_STACK_TIME, TERMINATED_STACK_TIME);
+    }
+
+    @Test
+    void testGetDeletedStacksLimitedByPageSize() {
+        List<StackClusterStatusView> deletedStacks = stackRepository.getDeletedStacks(LONG_TERMINATED_STACK_TIME - 1, PageRequest.of(0, 1));
+
+        assertThat(deletedStacks)
+                .extracting(StackClusterStatusView::getTerminated)
+                .containsExactly(LONG_TERMINATED_STACK_TIME);
     }
 
     @Test

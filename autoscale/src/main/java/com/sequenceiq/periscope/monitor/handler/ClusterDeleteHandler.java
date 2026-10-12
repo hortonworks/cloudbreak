@@ -43,7 +43,8 @@ public class ClusterDeleteHandler {
     @Value("${periscope.maxDeleteRetryCount:5}")
     private int maxDeleteRetryCount;
 
-    public void deleteClusters(Long since) {
+    public long deleteClusters(Long since) {
+        long executionStart = System.currentTimeMillis();
         LOGGER.info("Fetch Clusters deleted since {} from CB", since);
         List<StackStatusV4Response> stacks = cloudbreakCommunicator.getDeletedClusters(since);
         LOGGER.info("Clusters to delete based on response from CB {}", stacks);
@@ -62,6 +63,17 @@ public class ClusterDeleteHandler {
             clustersToBeDeleted.add(deleteExecutorService.submit(() -> deleteCluster(cluster)));
         });
         waitForClustersToDelete(clustersToBeDeleted);
+        long nextSince = calculateNextSince(stacks, since, executionStart);
+        LOGGER.info("Fetched {} deleted clusters from CB, next fetch will be since {}", stacks.size(), nextSince);
+        return nextSince;
+    }
+
+    private long calculateNextSince(List<StackStatusV4Response> stackStatusV4Responses, Long since, long executionStart) {
+        if (stackStatusV4Responses.isEmpty()) {
+            return since;
+        }
+        Long lastTerminated = stackStatusV4Responses.getLast().getTerminated();
+        return lastTerminated != null ? lastTerminated : executionStart;
     }
 
     private void waitForClustersToDelete(List<Future<String>> clustersToBeDeleted) {

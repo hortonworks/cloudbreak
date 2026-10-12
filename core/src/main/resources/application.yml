@@ -870,7 +870,7 @@ cluster:
       processing:
         workers: 1
         queueSizeLimit: 2000
-  fetch.deleted.maxDaysLimit: 2
+  fetch.deleted.limit: 50
 
 
 clusterProxy:

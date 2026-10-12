@@ -34,4 +34,6 @@ public interface StackClusterStatusView {
     String getConfigStalenessDetails();
 
     Set<ProviderSyncState> getProviderSyncStates();
+
+    Long getTerminated();
 }

@@ -92,9 +92,11 @@ public class DeleteMonitorTest {
         PeriscopeJob periscopeJob = mock(PeriscopeJob.class);
         when(periscopeJob.getLastExecuted()).thenReturn(lastExecuted);
         when(periscopeJobRepository.findById(JOB_NAME)).thenReturn(Optional.of(periscopeJob));
+        when(clusterDeleteHandler.deleteClusters(lastExecuted)).thenReturn(200L);
         deleteMonitor.execute(getContext());
         verify(clusterDeleteHandler).deleteClusters(lastExecuted);
-        verify(periscopeJob).setLastExecuted(anyLong());
+        verify(periscopeJob).setLastExecuted(200L);
+        verify(periscopeJobRepository).save(periscopeJob);
     }
 
     private JobExecutionContext getContext() {

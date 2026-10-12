@@ -43,6 +43,9 @@ public class StackStatusV4Response {
     @Schema(description = ModelDescriptions.StackModelDescription.PROVIDER_SYNC_STATES)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
+    @Schema(description = ModelDescriptions.StackModelDescription.TERMINATED)
+    private Long terminated;
+
     public Long getId() {
         return id;
     }
@@ -123,6 +126,14 @@ public class StackStatusV4Response {
         this.providerSyncStates = providerSyncStates;
     }
 
+    public Long getTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Long terminated) {
+        this.terminated = terminated;
+    }
+
     @Override
     public String toString() {
         return "StackStatusV4Response{" +
@@ -136,6 +147,7 @@ public class StackStatusV4Response {
                 ", certExpirationDetails='" + certExpirationDetails +
                 ", configStaleness='" + configStaleness +
                 ", providerSyncStates=" + providerSyncStates +
+                ", terminated=" + terminated +
                 '}';
     }
 }

@@ -50,6 +50,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -67,7 +68,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -311,7 +311,6 @@ class StackServiceTest {
         lenient().when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
 
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
-        ReflectionTestUtils.setField(underTest, "maxLimitForDeletedClusters", 2);
     }
 
     @Test
@@ -727,6 +726,11 @@ class StackServiceTest {
             public Set<ProviderSyncState> getProviderSyncStates() {
                 return Set.of(ProviderSyncState.VALID);
             }
+
+            @Override
+            public Long getTerminated() {
+                return null;
+            }
         }));
 
         List<StackClusterStatusView> statuses = underTest.getStatusesByCrnsInternal(List.of("crn1"), StackType.WORKLOAD);
@@ -807,23 +811,16 @@ class StackServiceTest {
 
     @Test
     void testGetDeletedStacks() {
+        ReflectionTestUtils.setField(underTest, "deletedStacksFetchLimit", 50);
         Long since = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
         StackClusterStatusView stackClusterStatusView1 = mock(StackClusterStatusView.class);
         StackClusterStatusView stackClusterStatusView2 = mock(StackClusterStatusView.class);
-        when(stackRepository.getDeletedStacks(since)).thenReturn(List.of(stackClusterStatusView1, stackClusterStatusView2));
+        when(stackRepository.getDeletedStacks(since, PageRequest.of(0, 50))).thenReturn(List.of(stackClusterStatusView1, stackClusterStatusView2));
         List<StackClusterStatusView> deletedStacks = underTest.getDeletedStacks(since);
-        verify(stackRepository).getDeletedStacks(since);
+        verify(stackRepository).getDeletedStacks(since, PageRequest.of(0, 50));
         assertEquals(2, deletedStacks.size());
         assertEquals(stackClusterStatusView1, deletedStacks.get(0));
         assertEquals(stackClusterStatusView2, deletedStacks.get(1));
-    }
-
-    @Test
-    void testGetDeletedStacksThrowsExceptionForLimit() {
-        Long since = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.getDeletedStacks(since));
-        assertEquals("Fetching deleted clusters is only allowed for last 2 days", badRequestException.getMessage());
     }
 
     @Test

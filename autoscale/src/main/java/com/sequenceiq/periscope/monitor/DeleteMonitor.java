@@ -61,12 +61,11 @@ public class DeleteMonitor extends ClusterMonitor {
             }
             if (leader) {
                 LOGGER.info("Execution for {} started", getIdentifier());
-                long lastExecuted = System.currentTimeMillis();
                 clusterDeleteHandler = getApplicationContext().getBean(ClusterDeleteHandler.class);
                 periscopeJobRepository = getApplicationContext().getBean(PeriscopeJobRepository.class);
                 PeriscopeJob periscopeJob = periscopeJobRepository.findById(getIdentifier()).orElse(new PeriscopeJob(getIdentifier(),
                         System.currentTimeMillis() - DEFAULT_DELETE_DURATION_MS));
-                clusterDeleteHandler.deleteClusters(periscopeJob.getLastExecuted());
+                long lastExecuted = clusterDeleteHandler.deleteClusters(periscopeJob.getLastExecuted());
                 periscopeJob.setLastExecuted(lastExecuted);
                 periscopeJobRepository.save(periscopeJob);
                 LOGGER.info("Execution for {} completed successfully with lastExecuted updated as {}", getIdentifier(), lastExecuted);

@@ -204,12 +204,14 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "c.statusReason as clusterStatusReason, "
             + "c.certExpirationState as certExpirationState, "
             + "c.configStalenessState as configStalenessState, "
-            + "c.configStalenessDetails as configStalenessDetails "
+            + "c.configStalenessDetails as configStalenessDetails, "
+            + "s.terminated as terminated "
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN s.stackStatus ss "
-            + "WHERE s.terminated > :since")
-    List<StackClusterStatusView> getDeletedStacks(@Param("since") Long since);
+            + "WHERE s.terminated > :since "
+            + "ORDER BY s.terminated ASC, s.id ASC")
+    List<StackClusterStatusView> getDeletedStacks(@Param("since") Long since, Pageable pageable);
 
     @Query("SELECT s.id as id, "
             + "s.resourceCrn as crn, "

@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -104,6 +106,41 @@ class ClusterDeleteHandlerTest {
     }
 
     @Test
+    void testDeleteClustersReturnsTerminatedOfLastStackAsNextSince() {
+        Long since = 100L;
+        when(cloudbreakCommunicator.getDeletedClusters(since)).thenReturn(List.of(getDeletedStack(200L), getDeletedStack(300L)));
+        when(clusterService.findOneByStackCrn(CLOUDBREAK_STACK_CRN)).thenReturn(Optional.empty());
+
+        long nextSince = underTest.deleteClusters(since);
+
+        assertEquals(300L, nextSince);
+    }
+
+    @Test
+    void testDeleteClustersReturnsSinceWhenNoDeletedStacksReturned() {
+        Long since = 100L;
+        when(cloudbreakCommunicator.getDeletedClusters(since)).thenReturn(List.of());
+
+        long nextSince = underTest.deleteClusters(since);
+
+        assertEquals(since, nextSince);
+        verify(deleteExecutorService, never()).submit(any(Callable.class));
+    }
+
+    @Test
+    void testDeleteClustersReturnsExecutionStartWhenTerminatedIsMissing() {
+        Long since = 100L;
+        when(cloudbreakCommunicator.getDeletedClusters(since)).thenReturn(getDeletedStacks());
+        when(clusterService.findOneByStackCrn(CLOUDBREAK_STACK_CRN)).thenReturn(Optional.empty());
+
+        long beforeExecution = System.currentTimeMillis();
+        long nextSince = underTest.deleteClusters(since);
+        long afterExecution = System.currentTimeMillis();
+
+        assertTrue(nextSince >= beforeExecution && nextSince <= afterExecution);
+    }
+
+    @Test
     void testDeleteCluster() {
         when(clusterService.countByEnvironmentCrn(CLOUDBREAK_ENV_CRN)).thenReturn(Integer.valueOf(1));
 
@@ -163,5 +200,12 @@ class ClusterDeleteHandlerTest {
         StackStatusV4Response stackStatusV4Response = new StackStatusV4Response();
         stackStatusV4Response.setCrn(CLOUDBREAK_STACK_CRN);
         return List.of(stackStatusV4Response);
+    }
+
+    private StackStatusV4Response getDeletedStack(Long terminated) {
+        StackStatusV4Response stackStatusV4Response = new StackStatusV4Response();
+        stackStatusV4Response.setCrn(CLOUDBREAK_STACK_CRN);
+        stackStatusV4Response.setTerminated(terminated);
+        return stackStatusV4Response;
     }
 }
