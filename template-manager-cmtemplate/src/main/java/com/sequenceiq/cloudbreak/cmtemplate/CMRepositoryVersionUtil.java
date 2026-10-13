@@ -202,6 +202,11 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1);
     }
 
+    public static boolean isHostsStartRolesSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepo is compared for hosts start roles support");
+        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_9_0);
+    }
+
     public static boolean isKnoxServletAsyncSupported(Optional<ClouderaManagerProduct> cdhProduct) {
         LOGGER.info("ClouderaManagerRepo is compared for knox servlet async support");
         boolean supported = false;

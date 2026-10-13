@@ -9,8 +9,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -38,6 +41,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.chain.util.RepairServiceRestartDecider;
+import com.sequenceiq.cloudbreak.core.flow2.chain.util.RepairServiceRestartPolicy;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
@@ -152,6 +157,9 @@ class ClusterRepairFlowEventChainFactoryTest {
     @Mock
     private SkuMigrationService skuMigrationService;
 
+    @Mock
+    private RepairServiceRestartDecider repairServiceRestartDecider;
+
     @InjectMocks
     private ClusterRepairFlowEventChainFactory underTest;
 
@@ -162,6 +170,8 @@ class ClusterRepairFlowEventChainFactoryTest {
     void setup() {
         setupStackDto();
         setupViews();
+        lenient().when(repairServiceRestartDecider.restartPolicyFor(any(), any()))
+                .thenAnswer(invocation -> restartAsRequestedBy(invocation.getArgument(0)));
     }
 
     @Test
@@ -555,6 +565,56 @@ class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
+    void testBatchRepairDecidesRestartServicesPerBatch() {
+        Stack stack = getStack();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        setupPrimaryGateway();
+        RepairServiceRestartPolicy restartOnlyWithMaster = repairedHostGroups -> repairedHostGroups.contains(HG_MASTER);
+        doReturn(restartOnlyWithMaster).when(repairServiceRestartDecider).restartPolicyFor(any(), any());
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack)
+                .withFailedPrimaryGateway()
+                .withFailedSecondaryGateways()
+                .with320FailedCore()
+                .withRepairType(RepairType.BATCH)
+                .build());
+
+        List<Boolean> restartServicesByBatch = eventQueues.getQueue().stream()
+                .filter(StackAndClusterUpscaleTriggerEvent.class::isInstance)
+                .map(StackAndClusterUpscaleTriggerEvent.class::cast)
+                .map(StackAndClusterUpscaleTriggerEvent::isRestartServices)
+                .collect(Collectors.toList());
+
+        assertEquals(List.of(true, false, false, false), restartServicesByBatch);
+        verify(repairServiceRestartDecider, times(1)).restartPolicyFor(any(), any());
+    }
+
+    @Test
+    void testAllAtOnceRepairDecidesRestartServicesForTheRepairedHostGroups() {
+        Stack stack = getStack();
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        setupPrimaryGateway();
+        RepairServiceRestartPolicy skipRestartForCoreOnly = repairedHostGroups -> !Set.of(HG_CORE).equals(repairedHostGroups);
+        doReturn(skipRestartForCoreOnly).when(repairServiceRestartDecider).restartPolicyFor(any(), any());
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack)
+                .with3FailedCore()
+                .withUpgrade()
+                .withRestartServices()
+                .build());
+
+        List<Boolean> restartServicesByUpscale = eventQueues.getQueue().stream()
+                .filter(StackAndClusterUpscaleTriggerEvent.class::isInstance)
+                .map(StackAndClusterUpscaleTriggerEvent.class::cast)
+                .map(StackAndClusterUpscaleTriggerEvent::isRestartServices)
+                .collect(Collectors.toList());
+
+        assertEquals(List.of(false), restartServicesByUpscale);
+    }
+
+    @Test
     void testRootDiskMigration() {
         ReflectionTestUtils.setField(underTest, "rootDiskRepairMigrationEnabled", true);
         when(rootVolumeSizeProvider.getDefaultRootVolumeForPlatform(any(), eq(false))).thenReturn(200);
@@ -859,6 +919,10 @@ class ClusterRepairFlowEventChainFactoryTest {
         assertEquals(expectedEvents, eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList()));
     }
 
+    private static RepairServiceRestartPolicy restartAsRequestedBy(ClusterRepairTriggerEvent event) {
+        return repairedHostGroups -> event.isRestartServices();
+    }
+
     private static class TriggerEventBuilder {
 
         private final Stack stack;
@@ -874,6 +938,8 @@ class ClusterRepairFlowEventChainFactoryTest {
         private boolean upgrade;
 
         private boolean rollingRestartEnabled;
+
+        private boolean restartServices;
 
         private TriggerEventBuilder(Stack stack) {
             this.stack = stack;
@@ -929,6 +995,11 @@ class ClusterRepairFlowEventChainFactoryTest {
             return this;
         }
 
+        private TriggerEventBuilder withRestartServices() {
+            restartServices = true;
+            return this;
+        }
+
         private TriggerEventBuilder withRollingRestartEnabled() {
             rollingRestartEnabled = true;
             return this;
@@ -946,7 +1017,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 failedNodes.put(HG_AUXILIARY, failedAuxiliaryNodes);
             }
 
-            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade, rollingRestartEnabled);
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, restartServices, "variant", upgrade, rollingRestartEnabled);
         }
     }
 }

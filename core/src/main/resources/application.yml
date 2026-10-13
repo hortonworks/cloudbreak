@@ -823,6 +823,7 @@ cb:
   upgrade:
     failure.sync:
       sdx.enabled: false
+    repair.skip.worker.restart.enabled: true
     validation:
       distrox:
         maxNumberOfInstancesForRollingUpgrade: 20

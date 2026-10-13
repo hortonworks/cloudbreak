@@ -43,6 +43,8 @@ import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.chain.util.RepairServiceRestartDecider;
+import com.sequenceiq.cloudbreak.core.flow2.chain.util.RepairServiceRestartPolicy;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
@@ -139,6 +141,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private SkuMigrationService skuMigrationService;
+
+    @Inject
+    private RepairServiceRestartDecider repairServiceRestartDecider;
 
     @Override
     public String initEvent() {
@@ -296,36 +301,38 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private void addDownscaleAndUpscaleEvents(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String,
             Set<String>> repairableGroupsWithHostNames, boolean singlePrimaryGW, StackDto stack) {
+        RepairServiceRestartPolicy restartPolicy = repairServiceRestartDecider.restartPolicyFor(event, stack);
         if (ALL_AT_ONCE.equals(event.getRepairType())) {
             LOGGER.info("Upgrading all the nodes by groups, upgrading all the nodes within a group at the same time, for stack: '{}'", event.getStackId());
-            addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stack);
+            addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stack, restartPolicy);
         } else {
             LOGGER.info("Special repair: '{}'", event.getRepairType());
-            specialRepair(event, flowTriggers, repairableGroupsWithHostNames, stack, event.getRepairType());
+            specialRepair(event, flowTriggers, repairableGroupsWithHostNames, stack, restartPolicy);
         }
     }
 
     private void specialRepair(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            Map<String, Set<String>> repairableGroupsWithHostNames, StackDto stack, ClusterRepairTriggerEvent.RepairType repairType) {
+            Map<String, Set<String>> repairableGroupsWithHostNames, StackDto stack, RepairServiceRestartPolicy restartPolicy) {
         Optional<String> primaryGwFQDN = stack.getPrimaryGatewayFQDN();
         Set<String> secondaryGwFQDNs = stack.getSecondaryGatewayFQDNs();
         HashMultimap<String, String> repairableGroupsWithHostNameMultimap = HashMultimap.create();
         repairableGroupsWithHostNames.forEach(repairableGroupsWithHostNameMultimap::putAll);
         LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgwAndGw =
                 collectHostsByHostGroupAndSortByPGwGwAndName(primaryGwFQDN, secondaryGwFQDNs, repairableGroupsWithHostNameMultimap);
-        switch (repairType) {
-            case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack);
-            case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack);
-            default -> throw new IllegalStateException("Unknown repair type:" + repairType);
+        switch (event.getRepairType()) {
+            case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack, restartPolicy);
+            case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack, restartPolicy);
+            default -> throw new IllegalStateException("Unknown repair type:" + event.getRepairType());
         }
     }
 
     private void addRepairFlowsForEachNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw, Optional<String> primaryGwFQDN, StackDto stackDto) {
+            LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw, Optional<String> primaryGwFQDN, StackDto stackDto,
+            RepairServiceRestartPolicy restartPolicy) {
         hostsByHostGroupAndSortedByPgw.asMap().forEach((hostGroupName, instances) -> {
             LinkedHashMultimap<String, String> hostGroup = LinkedHashMultimap.create();
             hostGroup.putAll(hostGroupName, List.copyOf(instances));
-            addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostGroup, primaryGwFQDN, stackDto);
+            addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostGroup, primaryGwFQDN, stackDto, restartPolicy);
         });
     }
 
@@ -366,7 +373,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addBatchedRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackDto stackDto) {
+            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackDto stackDto,
+            RepairServiceRestartPolicy restartPolicy) {
         int batchSize = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
         LOGGER.info("Batch repair with batch size: {}", batchSize);
         while (!orderedHostMultimap.values().isEmpty()) {
@@ -377,12 +385,13 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 orderedHostMultimap.values().remove(hostToRepair.getValue());
             }
             Set<String> repairedHosts = repairableGroups.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-            addRepairFlows(event, flowTriggers, repairableGroups, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackDto);
+            addRepairFlows(event, flowTriggers, repairableGroups, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackDto, restartPolicy);
         }
     }
 
     private void addRepairFlowsForEachGroupsWithOneNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackDto stackDto) {
+            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackDto stackDto,
+            RepairServiceRestartPolicy restartPolicy) {
         LOGGER.info("Rolling upgrade, repairing one node from each host group at one time, for stack: '{}'", event.getStackId());
         while (!orderedHostMultimap.values().isEmpty()) {
             Map<String, Set<String>> repairableGroupsWithOneHostName = new HashMap<>();
@@ -393,7 +402,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 });
             }
             Set<String> repairedHosts = repairableGroupsWithOneHostName.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-            addRepairFlows(event, flowTriggers, repairableGroupsWithOneHostName, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackDto);
+            addRepairFlows(event, flowTriggers, repairableGroupsWithOneHostName, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackDto,
+                    restartPolicy);
         }
     }
 
@@ -402,7 +412,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String, Set<String>> repairableGroupsWithHostNames,
-            boolean singlePrimaryGW, StackDto stackDto) {
+            boolean singlePrimaryGW, StackDto stackDto, RepairServiceRestartPolicy restartPolicy) {
         if (!repairableGroupsWithHostNames.isEmpty()) {
             flowTriggers.add(downscaleEvent(singlePrimaryGW, event, repairableGroupsWithHostNames));
             LOGGER.info("Downscale event added for: {}", repairableGroupsWithHostNames);
@@ -412,8 +422,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                             event.getResourceId(), groupWithHostNames.getKey()));
                 }
             }
+            boolean restartServices = restartPolicy.restartServicesNeeded(repairableGroupsWithHostNames.keySet());
             flowTriggers.add(fullUpscaleEvent(event, repairableGroupsWithHostNames, singlePrimaryGW,
-                    event.isRestartServices(), isKerberosSecured(stackDto.getStack()), event.isRollingRestartEnabled()));
+                    restartServices, isKerberosSecured(stackDto.getStack()), event.isRollingRestartEnabled()));
             LOGGER.info("Upscale event added for: {}", repairableGroupsWithHostNames);
         }
     }

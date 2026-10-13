@@ -9,7 +9,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isHostsStartRolesSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
@@ -1333,7 +1333,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         if (!hosts.isEmpty()) {
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
             LOGGER.info("CM version is: {}", clouderaManagerRepoDetails.getVersion());
-            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails.getVersion(), CLOUDERAMANAGER_VERSION_7_9_0)) {
+            if (isHostsStartRolesSupported(clouderaManagerRepoDetails)) {
                 LOGGER.info("Current action is repair and CM version is newer than 7.9.0, start services on hosts because services were stopped");
                 if (!hosts.isEmpty()) {
                     LOGGER.info("Start roles on hosts: {}", hosts);

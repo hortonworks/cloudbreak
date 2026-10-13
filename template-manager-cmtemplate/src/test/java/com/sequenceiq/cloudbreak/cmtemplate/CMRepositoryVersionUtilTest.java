@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,9 +10,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 class CMRepositoryVersionUtilTest {
@@ -98,5 +101,14 @@ class CMRepositoryVersionUtilTest {
         assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(gcpDatalakeMinVersion, CloudPlatform.GCP, StackType.WORKLOAD));
         // GCP DataHub IS supported at 7.13.2.20000
         assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported("7.13.2.30000", CloudPlatform.GCP, StackType.WORKLOAD));
+    }
+
+    @ParameterizedTest(name = "CM {0} supports hosts start roles: {1}")
+    @CsvSource({"7.6.0, false", "7.8.1, false", "7.9.0, true", "7.13.1.706, true"})
+    void isHostsStartRolesSupported(String cmVersion, boolean expected) {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion(cmVersion);
+
+        assertEquals(expected, CMRepositoryVersionUtil.isHostsStartRolesSupported(clouderaManagerRepo));
     }
 }
