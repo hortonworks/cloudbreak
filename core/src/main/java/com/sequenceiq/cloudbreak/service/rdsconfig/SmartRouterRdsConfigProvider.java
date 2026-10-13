@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smartrouter.SmartRouterRoles.SMARTROUTER_SERVER;
+
 import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Component
@@ -54,8 +57,11 @@ public class SmartRouterRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Override
     protected boolean isRdsConfigNeeded(StackDtoDelegate stackDtoDelegate) {
-        String blueprintText = stackDtoDelegate.getBlueprint().getBlueprintJsonText();
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.doesCMComponentExistsInBlueprint("SMARTROUTER_SERVER");
+        Blueprint blueprint = stackDtoDelegate.getBlueprint();
+        if (blueprint == null) {
+            return false;
+        }
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
+        return blueprintProcessor.doesCMComponentExistsInBlueprint(SMARTROUTER_SERVER);
     }
 }

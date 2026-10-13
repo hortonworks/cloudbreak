@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.smartrouter;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smartrouter.SmartRouterRoles.SMARTROUTER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smartrouter.SmartRouterRoles.SMARTROUTER_SERVER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,11 +54,11 @@ public class SmartRouterRdsRoleConfigProvider extends AbstractRdsRoleConfigProvi
 
     @Override
     public String getServiceType() {
-        return "SMARTROUTER";
+        return SMARTROUTER;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of("SMARTROUTER_SERVER");
+        return List.of(SMARTROUTER_SERVER);
     }
 }

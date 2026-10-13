@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +68,15 @@ class SmartRouterRdsConfigProviderTest {
         when(cmTemplateProcessor.doesCMComponentExistsInBlueprint("SMARTROUTER_SERVER")).thenReturn(false);
 
         assertThat(underTest.isRdsConfigNeeded(stack)).isFalse();
+    }
+
+    @Test
+    void testIsRdsConfigNeededWhenTheBlueprintIsNull() {
+        StackDtoDelegate stack = mock(StackDtoDelegate.class);
+        when(stack.getBlueprint()).thenReturn(null);
+
+        assertThat(underTest.isRdsConfigNeeded(stack)).isFalse();
+        verifyNoInteractions(cmTemplateProcessorFactory);
     }
 
     private StackDtoDelegate createStack() {

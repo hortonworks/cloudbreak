@@ -174,9 +174,48 @@ class SmartRouterParcelServiceTest {
         CloudbreakServiceException actual = assertThrows(CloudbreakServiceException.class, () -> underTest.getProduct(RHEL8));
 
         assertThat(actual)
-                .hasMessage("Failed to get Smart Router component details from " + LATEST_COMPILED_BUILD_URL)
-                .hasRootCauseInstanceOf(CloudbreakServiceException.class)
-                .hasRootCauseMessage("No latest compiled build found for " + COMPONENT_NAME);
+                .hasMessage("No latest compiled build found for " + COMPONENT_NAME + " on OS " + RHEL8)
+                .hasNoCause();
+    }
+
+    @ParameterizedTest(name = "osType={0}")
+    @NullAndEmptySource
+    @ValueSource(strings = " ")
+    void testGetProductShouldThrowCloudbreakServiceExceptionWhenTheOsTypeIsBlank(String osType) {
+        CloudbreakServiceException actual = assertThrows(CloudbreakServiceException.class, () -> underTest.getProduct(osType));
+
+        assertThat(actual).hasMessage("No OS type provided for " + COMPONENT_NAME);
+        verifyNoInteractions(restClientFactory);
+    }
+
+    @ParameterizedTest(name = "response={0}")
+    @ValueSource(strings = {
+            "{\"redhat8\": {\"build\": \"1.0.0-b9\"}}",
+            "{\"redhat8\": {\"gbn_url\": \"\", \"build\": \"1.0.0-b9\"}}"
+    })
+    void testGetProductShouldThrowCloudbreakServiceExceptionWhenTheGbnUrlIsMissing(String response) {
+        mockLatestCompiledBuild(RELEASE_VERSION, RHEL8, response);
+
+        CloudbreakServiceException actual = assertThrows(CloudbreakServiceException.class, () -> underTest.getProduct(RHEL8));
+
+        assertThat(actual)
+                .hasMessage("Field 'gbn_url' is missing from the latest compiled build of " + COMPONENT_NAME + " on OS " + RHEL8)
+                .hasNoCause();
+    }
+
+    @ParameterizedTest(name = "response={0}")
+    @ValueSource(strings = {
+            "{\"redhat8\": {\"gbn_url\": \"http://build.example.com/s3/build/1111/\"}}",
+            "{\"redhat8\": {\"gbn_url\": \"http://build.example.com/s3/build/1111/\", \"build\": \" \"}}"
+    })
+    void testGetProductShouldThrowCloudbreakServiceExceptionWhenTheBuildIsMissing(String response) {
+        mockLatestCompiledBuild(RELEASE_VERSION, RHEL8, response);
+
+        CloudbreakServiceException actual = assertThrows(CloudbreakServiceException.class, () -> underTest.getProduct(RHEL8));
+
+        assertThat(actual)
+                .hasMessage("Field 'build' is missing from the latest compiled build of " + COMPONENT_NAME + " on OS " + RHEL8)
+                .hasNoCause();
     }
 
     @Test
