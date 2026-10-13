@@ -14,6 +14,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
@@ -229,9 +230,9 @@ public interface CloudProvider {
 
     List<String> getDistroXVariants();
 
-    String getFreeIpaUpgradeImageId();
+    OsType getFreeIpaDestinationUpgradeImageOS();
 
-    String getFreeIpaCentos7UpgradeImageId();
+    OsType getFreeIpaSourceUpgradeImageOS();
 
     String getFreeIpaMarketplaceUpgradeImageId();
 

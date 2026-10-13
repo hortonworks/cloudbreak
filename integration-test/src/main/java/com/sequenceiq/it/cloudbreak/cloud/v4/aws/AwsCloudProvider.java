@@ -28,6 +28,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEncryptionV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
@@ -515,13 +516,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getFreeIpaUpgradeImageId() {
-        return awsProperties.getFreeipa().getUpgrade().getImageId();
-    }
-
-    @Override
-    public String getFreeIpaCentos7UpgradeImageId() {
-        return awsProperties.getFreeipa().getUpgrade().getCentos7ImageId();
+    public OsType getFreeIpaSourceUpgradeImageOS() {
+        return awsProperties.getFreeipa().getUpgrade().getSourceOs();
     }
 
     @Override

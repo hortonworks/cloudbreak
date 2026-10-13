@@ -50,6 +50,47 @@ public class FreeIpaImageUtil {
         }
     }
 
+    public LastAndNewestImage getLastAndNewestImageByOs(String catalogUrl, String cloudProvider, OsType sourceOS, OsType destinationOS) {
+        String body = RestClientUtil.get().target(catalogUrl).request().get().readEntity(String.class);
+        try {
+            ImageCatalog imageCatalog = objectMapper.readValue(body, ImageCatalog.class);
+            List<Image> providerImages = imageCatalog.getImages().getFreeipaImages().stream()
+                    .filter(image -> hasImageOnCloudProvider(image, cloudProvider))
+                    .sorted(Comparator.comparing(Image::getDate).reversed())
+                    .toList();
+            if (sourceOS.getOs().equalsIgnoreCase(destinationOS.getOs())) {
+                List<Image> sameOsImages = providerImages.stream()
+                        .filter(image -> sourceOS.getOs().equalsIgnoreCase(image.getOs()))
+                        .limit(2)
+                        .toList();
+                if (sameOsImages.size() != 2) {
+                    throw new RuntimeException(String.format(
+                            "Not found at least two '%s' freeipa images on %s. Please burn more images in %s catalog.",
+                            sourceOS, cloudProvider, catalogUrl));
+                }
+                return new LastAndNewestImage(sameOsImages.get(1), sameOsImages.get(0));
+            }
+            Image last = newestImageByOs(providerImages, sourceOS.getOs(), cloudProvider, catalogUrl);
+            Image newest = newestImageByOs(providerImages, destinationOS.getOs(), cloudProvider, catalogUrl);
+            return new LastAndNewestImage(last, newest);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Image newestImageByOs(List<Image> providerImages, String os, String cloudProvider, String catalogUrl) {
+        return providerImages.stream()
+                .filter(image -> os.equalsIgnoreCase(image.getOs()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(String.format(
+                        "Not found any '%s' freeipa image on %s. Please burn an image in %s catalog.",
+                        os, cloudProvider, catalogUrl)));
+    }
+
+    private boolean hasImageOnCloudProvider(Image image, String cloudProvider) {
+        return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase());
+    }
+
     private List<Image> filterPublished(ImageCatalog imageCatalog, List<Image> images) {
         Set<String> publishedImageIds = imageCatalog.getVersions().getFreeIpaVersions().stream()
                 .flatMap(freeIpaVersions -> freeIpaVersions.getImageIds().stream())

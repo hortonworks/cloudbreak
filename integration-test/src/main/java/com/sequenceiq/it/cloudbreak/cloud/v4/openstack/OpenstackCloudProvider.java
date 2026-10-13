@@ -18,6 +18,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -369,12 +370,12 @@ public class OpenstackCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getFreeIpaUpgradeImageId() {
+    public OsType getFreeIpaDestinationUpgradeImageOS() {
         return null;
     }
 
     @Override
-    public String getFreeIpaCentos7UpgradeImageId() {
+    public OsType getFreeIpaSourceUpgradeImageOS() {
         return null;
     }
 

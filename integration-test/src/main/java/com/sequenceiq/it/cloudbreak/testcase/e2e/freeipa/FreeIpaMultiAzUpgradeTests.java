@@ -13,6 +13,8 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.util.FreeIpaImageUtil;
+import com.sequenceiq.it.cloudbreak.util.LastAndNewestImage;
 
 public class FreeIpaMultiAzUpgradeTests extends AbstractFreeipaE2ETest {
 
@@ -20,6 +22,9 @@ public class FreeIpaMultiAzUpgradeTests extends AbstractFreeipaE2ETest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private FreeIpaImageUtil freeIpaImageUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -34,16 +39,22 @@ public class FreeIpaMultiAzUpgradeTests extends AbstractFreeipaE2ETest {
             then = "the MultiAz stack should be available AND deletable")
     public void testHAFreeIpaMultiAzInstanceUpgrade(TestContext testContext) {
 
+        String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
+        LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(
+                freeIpaImageCatalogUrl,
+                testContext.getCloudProvider().getCloudPlatform().name(),
+                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
+                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()
+        );
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
                 .withEnableMultiAzFreeIpa()
-                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider()
-                        .getFreeIpaCentos7UpgradeImageId())
+                .withFreeIpaImage(freeIpaImageCatalogUrl, images.last().getUuid())
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .useAlternativeServiceEndpointIfConfigured()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
-                .when(freeIpaTestClient.upgrade())
+                .when(freeIpaTestClient.upgrade(freeIpaImageCatalogUrl, images.newest().getUuid()))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc, OperationType.UPGRADE);

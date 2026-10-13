@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaAvailabilityAssertion;
@@ -23,6 +24,8 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.FreeIpaImageUtil;
+import com.sequenceiq.it.cloudbreak.util.LastAndNewestImage;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -44,6 +47,9 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
 
+    @Inject
+    private FreeIpaImageUtil freeIpaImageUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         initializeTest(testContext);
@@ -56,8 +62,13 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                     "AND the stack is upgraded one node at a time",
             then = "the stack should be available AND deletable")
     public void testSingleFreeIpaInstanceUpgrade(TestContext testContext) {
-        testFreeIpaUpgrade(testContext, 1,
-                testContext.getCloudProvider().getFreeIpaUpgradeImageId(), true);
+        testFreeIpaUpgrade(
+                testContext,
+                1,
+                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
+                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS(),
+                true
+        );
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -67,13 +78,25 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                     "AND the stack is upgraded one node at a time",
             then = "the stack should be available AND deletable")
     public void testHAFreeIpaInstanceUpgrade(TestContext testContext) {
-        testFreeIpaUpgrade(testContext, 3,
-                testContext.getCloudProvider().getFreeIpaCentos7UpgradeImageId(), false);
+        testFreeIpaUpgrade(
+                testContext,
+                3,
+                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
+                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS(),
+                false
+        );
     }
 
-    private void testFreeIpaUpgrade(TestContext testContext, int freeIpaInstances, String initialImageId, boolean validateLB) {
+    private void testFreeIpaUpgrade(TestContext testContext, int freeIpaInstances, OsType sourceOS, OsType destinationOS, boolean validateLB) {
+        String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
+        LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(
+                freeIpaImageCatalogUrl,
+                testContext.getCloudProvider().getCloudPlatform().name(),
+                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
+                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()
+        );
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, freeIpaInstances, Optional.of(FreeIpaLoadBalancerType.NONE))
-                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), initialImageId)
+                .withFreeIpaImage(freeIpaImageCatalogUrl, images.last().getUuid())
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)

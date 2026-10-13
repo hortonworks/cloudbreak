@@ -20,6 +20,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
@@ -530,13 +531,13 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getFreeIpaUpgradeImageId() {
-        return delegate.getFreeIpaUpgradeImageId();
+    public OsType getFreeIpaDestinationUpgradeImageOS() {
+        return delegate.getFreeIpaDestinationUpgradeImageOS();
     }
 
     @Override
-    public String getFreeIpaCentos7UpgradeImageId() {
-        return delegate.getFreeIpaCentos7UpgradeImageId();
+    public OsType getFreeIpaSourceUpgradeImageOS() {
+        return delegate.getFreeIpaSourceUpgradeImageOS();
     }
 
     @Override

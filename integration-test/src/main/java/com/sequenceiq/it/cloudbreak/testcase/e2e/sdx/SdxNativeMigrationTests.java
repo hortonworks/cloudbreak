@@ -28,6 +28,8 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.FreeIpaImageUtil;
+import com.sequenceiq.it.cloudbreak.util.LastAndNewestImage;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
@@ -56,6 +58,9 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
+    @Inject
+    private FreeIpaImageUtil freeIpaImageUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         initializeTest(testContext);
@@ -78,8 +83,15 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
 
 
         String subnet = awsCloudProvider.getSubnetId();
+        String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
+        LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(
+                freeIpaImageCatalogUrl,
+                testContext.getCloudProvider().getCloudPlatform().name(),
+                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
+                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()
+        );
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
-                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
+                .withFreeIpaImage(freeIpaImageCatalogUrl, images.newest().getUuid())
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)

@@ -29,6 +29,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
@@ -488,18 +489,13 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getFreeIpaUpgradeImageId() {
-        return azureProperties.getFreeipa().getUpgrade().getImageId();
+    public OsType getFreeIpaDestinationUpgradeImageOS() {
+        return azureProperties.getFreeipa().getUpgrade().getDestinationOs();
     }
 
     @Override
-    public String getFreeIpaCentos7UpgradeImageId() {
-        return azureProperties.getFreeipa().getUpgrade().getCentos7ImageId();
-    }
-
-    @Override
-    public String getFreeIpaMarketplaceUpgradeImageId() {
-        return azureProperties.getFreeipa().getMarketplace().getUpgrade().getImageId();
+    public OsType getFreeIpaSourceUpgradeImageOS() {
+        return azureProperties.getFreeipa().getUpgrade().getSourceOs();
     }
 
     @Override

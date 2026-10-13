@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import com.sequenceiq.common.model.OsType;
+
 public class FreeIpaProperties {
 
     private String instanceType;
@@ -53,26 +55,26 @@ public class FreeIpaProperties {
     }
 
     public static class Upgrade {
-        private String imageId;
+        private OsType destinationOs;
 
-        private String centos7ImageId;
+        private OsType sourceOs;
 
         private String catalog;
 
-        public String getImageId() {
-            return imageId;
+        public OsType getDestinationOs() {
+            return destinationOs;
         }
 
-        public void setImageId(String imageId) {
-            this.imageId = imageId;
+        public void setDestinationOs(OsType destinationOs) {
+            this.destinationOs = destinationOs;
         }
 
-        public String getCentos7ImageId() {
-            return centos7ImageId;
+        public OsType getSourceOs() {
+            return sourceOs;
         }
 
-        public void setCentos7ImageId(String centos7ImageId) {
-            this.centos7ImageId = centos7ImageId;
+        public void setSourceOs(OsType sourceOs) {
+            this.sourceOs = sourceOs;
         }
 
         public String getCatalog() {

@@ -25,6 +25,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
@@ -475,13 +476,13 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getFreeIpaUpgradeImageId() {
-        return gcpProperties.getFreeipa().getUpgrade().getImageId();
+    public OsType getFreeIpaDestinationUpgradeImageOS() {
+        return gcpProperties.getFreeipa().getUpgrade().getDestinationOs();
     }
 
     @Override
-    public String getFreeIpaCentos7UpgradeImageId() {
-        return gcpProperties.getFreeipa().getUpgrade().getCentos7ImageId();
+    public OsType getFreeIpaSourceUpgradeImageOS() {
+        return gcpProperties.getFreeipa().getUpgrade().getSourceOs();
     }
 
     @Override

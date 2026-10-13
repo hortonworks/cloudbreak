@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
@@ -420,13 +421,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public String getFreeIpaUpgradeImageId() {
+    public OsType getFreeIpaDestinationUpgradeImageOS() {
         LOGGER.warn("'freeIpaUpgradeImageId' is not implemented");
         return null;
     }
 
     @Override
-    public String getFreeIpaCentos7UpgradeImageId() {
+    public OsType getFreeIpaSourceUpgradeImageOS() {
         LOGGER.warn("'freeIpaCentos7UpgradeImageId' is not implemented");
         return null;
     }
