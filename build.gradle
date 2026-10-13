@@ -27,7 +27,7 @@ buildscript {
 
 plugins {
   id "org.ajoberstar.grgit" version "5.3.3"
-  id "com.github.spotbugs" version "6.5.12"
+  id "com.github.spotbugs" version "6.5.13"
   id "com.adarshr.test-logger" version "4.0.0"
   id "com.netflix.nebula.resolution-rules" version "13.1.2"
   id 'com.diffplug.spotless' version '8.10.4'
