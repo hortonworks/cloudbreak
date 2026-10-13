@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
@@ -33,6 +34,8 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.CloudbreakImageUtil;
+import com.sequenceiq.it.cloudbreak.util.FreeIpaImageUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -51,6 +54,12 @@ public class SdxOpenstackTests extends AbstractE2ETest {
 
     @Inject
     private OpenstackProperties openstackProperties;
+
+    @Inject
+    private CloudbreakImageUtil cloudbreakImageUtil;
+
+    @Inject
+    private FreeIpaImageUtil freeIpaImageUtil;
 
     private String runtimeVersion;
 
@@ -72,27 +81,29 @@ public class SdxOpenstackTests extends AbstractE2ETest {
     }
 
     private void createImageCatalogs(TestContext testContext) {
-        String cbCatalogName = openstackProperties.getSdxImage().getCatalog();
-        String cbCatalogUrl = openstackProperties.getSdxImage().getUrl();
-        if (StringUtils.isNoneBlank(cbCatalogName, cbCatalogUrl)) {
+        OpenstackProperties.Image sdxImage = openstackProperties.getSdxImage();
+        if (hasCustomImageCatalog(sdxImage)) {
             testContext.given("cbImageCatalog", ImageCatalogTestDto.class)
-                    .withName(cbCatalogName)
-                    .withUrl(cbCatalogUrl)
+                    .withName(sdxImage.getCatalog())
+                    .withUrl(sdxImage.getUrl())
                     .withoutCleanup()
                     .when(imageCatalogTestClient.createIfNotExistV4())
                     .validate();
         }
 
-        String freeipaCatalogName = openstackProperties.getFreeipaImage().getCatalog();
-        String freeipaCatalogUrl = openstackProperties.getFreeipaImage().getUrl();
-        if (StringUtils.isNoneBlank(freeipaCatalogName, freeipaCatalogUrl)) {
+        OpenstackProperties.Image freeIpaImage = openstackProperties.getFreeipaImage();
+        if (hasCustomImageCatalog(freeIpaImage)) {
             testContext.given("freeipaImageCatalog", ImageCatalogTestDto.class)
-                    .withName(freeipaCatalogName)
-                    .withUrl(freeipaCatalogUrl)
+                    .withName(freeIpaImage.getCatalog())
+                    .withUrl(freeIpaImage.getUrl())
                     .withoutCleanup()
                     .when(imageCatalogTestClient.createIfNotExistV4())
                     .validate();
         }
+    }
+
+    private boolean hasCustomImageCatalog(OpenstackProperties.Image image) {
+        return StringUtils.isNoneBlank(image.getCatalog(), image.getUrl());
     }
 
     private void fetchCdhDetails(TestContext testContext) {
@@ -125,6 +136,28 @@ public class SdxOpenstackTests extends AbstractE2ETest {
                 .orElseThrow(() -> new TestFailException("No CDH versions found in stack matrix"));
     }
 
+    private String configuredOrNewestFreeIpaImageId() {
+        OpenstackProperties.Image freeIpaImage = openstackProperties.getFreeipaImage();
+        if (shouldUseNewestImage(freeIpaImage)) {
+            return freeIpaImageUtil.getNewestImageId(freeIpaImage.getUrl(), CloudPlatform.OPENSTACK.name(),
+                    openstackProperties.getRegion(), OsType.getByOsTypeString(openstackProperties.getOsType()).getOs(), Architecture.X86_64);
+        }
+        return freeIpaImage.getId();
+    }
+
+    private String configuredOrNewestSdxBaseImageId() {
+        OpenstackProperties.Image sdxImage = openstackProperties.getSdxImage();
+        if (shouldUseNewestImage(sdxImage)) {
+            return cloudbreakImageUtil.getNewestBaseImageId(sdxImage.getUrl(), CloudPlatform.OPENSTACK.name(),
+                    openstackProperties.getRegion(), openstackProperties.getOsType(), Architecture.X86_64);
+        }
+        return sdxImage.getId();
+    }
+
+    private boolean shouldUseNewestImage(OpenstackProperties.Image image) {
+        return StringUtils.isBlank(image.getId()) && hasCustomImageCatalog(image);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running openstack environment",
@@ -133,6 +166,8 @@ public class SdxOpenstackTests extends AbstractE2ETest {
     )
     public void testSdxCreateStopStartRepair(TestContext testContext) {
         fetchCdhDetails(testContext);
+        String freeIpaImageId = configuredOrNewestFreeIpaImageId();
+        String sdxImageId = configuredOrNewestSdxBaseImageId();
 
         ClouderaManagerProductV4Request cdh = new ClouderaManagerProductV4Request();
         cdh.setName(CDH);
@@ -148,7 +183,7 @@ public class SdxOpenstackTests extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                     .valid()
                     .withCreateFreeIpa(true)
-                    .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaImageCatalog(), testContext.getCloudProvider().getFreeIpaImageId())
+                    .withFreeIpaImage(openstackProperties.getFreeipaImage().getCatalog(), freeIpaImageId)
                     .withFreeIpaNodes(1)
                     .withNetwork(EnvironmentNetworkTestDto.class.getSimpleName())
                 .when(getEnvironmentTestClient().create())
@@ -168,9 +203,7 @@ public class SdxOpenstackTests extends AbstractE2ETest {
                 .given(SdxInternalTestDto.class)
                     .withDefaultSDXSettings()
                     .withClusterShape(SdxClusterShape.LIGHT_DUTY)
-                    .withImageCatalogNameAndImageId(
-                            openstackProperties.getSdxImage().getCatalog(),
-                            openstackProperties.getSdxImage().getId())
+                    .withImageCatalogNameAndImageId(openstackProperties.getSdxImage().getCatalog(), sdxImageId)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow()
                 .await(SdxClusterStatusResponse.RUNNING)

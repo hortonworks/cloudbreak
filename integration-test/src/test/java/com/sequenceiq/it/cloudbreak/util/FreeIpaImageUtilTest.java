@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -20,6 +21,7 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sun.net.httpserver.HttpServer;
 
 /**
@@ -68,6 +70,7 @@ public class FreeIpaImageUtilTest {
         httpServer.start();
         catalogUrl = "http://localhost:" + httpServer.getAddress().getPort() + "/v3-test-freeipa-image-catalog.json";
         underTest = new FreeIpaImageUtil();
+        ReflectionTestUtils.setField(underTest, "imageCatalogDownloader", new ImageCatalogDownloader());
     }
 
     @AfterClass
@@ -192,6 +195,37 @@ public class FreeIpaImageUtilTest {
         assertThatThrownBy(() -> underTest.getLastAndNewestImageByOs(catalogUrl, Architecture.ARM64, AWS, OsType.CENTOS7, OsType.CENTOS7))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Not found at least two 'CENTOS7' freeipa images on AWS. Please burn more images in %s catalog.", catalogUrl);
+    }
+
+    @Test
+    public void testGetNewestImageIdReturnsNewestImageOfProviderOsAndArchitecture() {
+        // newer Azure redhat8, AWS redhat9 and AWS redhat8 arm64 images are in the catalog
+        String imageId = underTest.getNewestImageId(catalogUrl, AWS, AWS_REGION, OsType.RHEL8.getOs(), Architecture.X86_64);
+
+        assertThat(imageId).isEqualTo("4dc6eb19-60da-4f5e-a4bc-6addaf8f5790");
+    }
+
+    @Test
+    public void testGetNewestImageIdReturnsNewestArm64Image() {
+        // a newer AWS redhat9 x86_64 image is in the catalog
+        String imageId = underTest.getNewestImageId(catalogUrl, AWS, AWS_REGION, OsType.RHEL9.getOs(), Architecture.ARM64);
+
+        assertThat(imageId).isEqualTo("f6d1d145-0f04-44d6-98c5-780e00844c5e");
+    }
+
+    @Test
+    public void testGetNewestImageIdReturnsNewestImageInRegion() {
+        // us-east-1 only has older images without an architecture field
+        String imageId = underTest.getNewestImageId(catalogUrl, AWS, "us-east-1", OsType.RHEL8.getOs(), Architecture.X86_64);
+
+        assertThat(imageId).isEqualTo("1015105b-4c87-43be-98fd-561e578d158b");
+    }
+
+    @Test
+    public void testGetNewestImageIdFailsWhenNoImageMatches() {
+        assertThatThrownBy(() -> underTest.getNewestImageId(catalogUrl, AZURE, AZURE_REGION, OsType.RHEL9.getOs(), Architecture.ARM64))
+                .isInstanceOf(TestFailException.class)
+                .hasMessage("Not found any 'redhat9' arm64 freeipa image on AZURE (region: West US). Please burn an image in %s catalog.", catalogUrl);
     }
 
     private void assertUpgradeableImages(Pair<Image, Image> images, String cloudProvider, String region, Architecture architecture) {

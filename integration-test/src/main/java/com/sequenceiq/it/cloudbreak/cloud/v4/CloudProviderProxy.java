@@ -443,26 +443,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getFreeIpaImageCatalog() {
-        return delegate.getFreeIpaImageCatalog();
-    }
-
-    @Override
-    public String getFreeIpaImageId() {
-        return delegate.getFreeIpaImageId();
-    }
-
-    @Override
-    public String getSdxImageCatalog() {
-        return delegate.getSdxImageCatalog();
-    }
-
-    @Override
-    public String getSdxImageId() {
-        return delegate.getSdxImageId();
-    }
-
-    @Override
     public SdxDatabaseRequest extendDBRequestWithProviderParams(SdxDatabaseRequest sdxDatabaseRequest) {
         return delegate.extendDBRequestWithProviderParams(sdxDatabaseRequest);
     }

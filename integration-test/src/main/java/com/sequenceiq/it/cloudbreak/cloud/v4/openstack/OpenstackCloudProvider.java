@@ -339,26 +339,6 @@ public class OpenstackCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getFreeIpaImageCatalog() {
-        return openstackProperties.getFreeipaImage().getCatalog();
-    }
-
-    @Override
-    public String getFreeIpaImageId() {
-        return openstackProperties.getFreeipaImage().getId();
-    }
-
-    @Override
-    public String getSdxImageCatalog() {
-        return openstackProperties.getSdxImage().getCatalog();
-    }
-
-    @Override
-    public String getSdxImageId() {
-        return openstackProperties.getSdxImage().getId();
-    }
-
-    @Override
     public String getFreeIpaImageCatalogUrl() {
         return openstackProperties.getFreeipaImage().getUrl();
     }
