@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -145,6 +147,32 @@ class KraftMigrationServiceTest {
         assertEquals(expectedResponse.getKraftMigrationStatus(), actualResponse.getKraftMigrationStatus());
         assertEquals(expectedResponse.getRecommendedAction(), actualResponse.getRecommendedAction());
         assertEquals(expectedResponse.isKraftMigrationRequired(), actualResponse.isKraftMigrationRequired());
+    }
+
+    @Test
+    void testGetKraftMigrationStatusQueriesTheClusterWhileTheKraftMigrationValidationIsInProgress() {
+        StackDto stack = setupStack(STACK_ID, Status.UPDATE_IN_PROGRESS);
+        Stack domainStack = (Stack) stack.getStack();
+        domainStack.setStackStatus(new StackStatus(domainStack, DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_IN_PROGRESS));
+        ClusterApi clusterApi = mock(ClusterApi.class);
+        ClusterKraftMigrationStatusService clusterKraftMigrationStatusService = mock(ClusterKraftMigrationStatusService.class);
+        when(zookeeperToKraftMigrationValidator.isKraftMigrationStatusSupported(stack, stack.getAccountId())).thenReturn(true);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApi.clusterKraftMigrationStatusService()).thenReturn(clusterKraftMigrationStatusService);
+        when(clusterKraftMigrationStatusService.getKraftMigrationStatus()).thenReturn(KraftMigrationStatus.ZOOKEEPER_INSTALLED);
+
+        assertEquals(KraftMigrationStatus.ZOOKEEPER_INSTALLED, underTest.getKraftMigrationStatus(stack));
+    }
+
+    @Test
+    void testGetKraftMigrationStatusIsNotApplicableWhileAnotherOperationIsInProgress() {
+        StackDto stack = setupStack(STACK_ID, Status.UPDATE_IN_PROGRESS);
+        Stack domainStack = (Stack) stack.getStack();
+        domainStack.setStackStatus(new StackStatus(domainStack, DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS));
+        when(zookeeperToKraftMigrationValidator.isKraftMigrationStatusSupported(stack, stack.getAccountId())).thenReturn(true);
+
+        assertEquals(KraftMigrationStatus.NOT_APPLICABLE, underTest.getKraftMigrationStatus(stack));
+        verifyNoInteractions(clusterApiConnectors);
     }
 
     @Test

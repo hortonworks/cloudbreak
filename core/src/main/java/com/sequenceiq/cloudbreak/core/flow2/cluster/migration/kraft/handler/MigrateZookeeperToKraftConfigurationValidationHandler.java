@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
+import com.sequenceiq.cloudbreak.service.migration.kraft.KraftAclValidationOrchestratorService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
@@ -43,6 +44,9 @@ public class MigrateZookeeperToKraftConfigurationValidationHandler extends Excep
     @Inject
     private FlowMessageService flowMessageService;
 
+    @Inject
+    private KraftAclValidationOrchestratorService kraftAclValidationOrchestratorService;
+
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<MigrateZookeeperToKraftConfigurationEvent> event) {
         LOGGER.error("Migrate Zookeeper to KRaft configuration validation failed.", e);
@@ -63,6 +67,7 @@ public class MigrateZookeeperToKraftConfigurationValidationHandler extends Excep
                 return new MigrateZookeeperToKraftConfigurationEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), stackId, false);
             }
             zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationState(kraftMigrationStatus);
+            kraftAclValidationOrchestratorService.validateKraftAcls(stack);
         } catch (Exception e) {
             LOGGER.error("Migrate Zookeeper to KRaft configuration validation failed.", e);
             return new MigrateZookeeperToKraftConfigurationFailureEvent(stackId, e);

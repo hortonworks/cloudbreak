@@ -8,8 +8,10 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,11 +24,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftConfigurationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftConfigurationFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
+import com.sequenceiq.cloudbreak.service.migration.kraft.KraftAclValidationOrchestratorService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
@@ -51,6 +55,9 @@ class MigrateZookeeperToKraftConfigurationValidationHandlerTest {
     @Mock
     private FlowMessageService flowMessageService;
 
+    @Mock
+    private KraftAclValidationOrchestratorService kraftAclValidationOrchestratorService;
+
     @InjectMocks
     private MigrateZookeeperToKraftConfigurationValidationHandler underTest;
 
@@ -68,8 +75,29 @@ class MigrateZookeeperToKraftConfigurationValidationHandlerTest {
 
         Selectable result = underTest.doAccept(event);
 
+        verify(kraftAclValidationOrchestratorService).validateKraftAcls(stackDto);
         assertInstanceOf(MigrateZookeeperToKraftConfigurationEvent.class, result);
         assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT.name(), result.getSelector());
+    }
+
+    @Test
+    void testDoAcceptFailureWhenTheKraftAclsAreMissing() {
+        StackDto stackDto = new StackDto();
+        MigrateZookeeperToKraftConfigurationEvent request =
+                new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.selector(), STACK_ID,
+                        NO_KRAFT_INSTALL_NEEDED);
+        HandlerEvent<MigrateZookeeperToKraftConfigurationEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.ZOOKEEPER_INSTALLED;
+        when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
+        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationState(kraftMigrationStatus);
+        doThrow(new CloudbreakServiceException("The KRaft cluster ACL validation failed on the Kafka broker nodes."))
+                .when(kraftAclValidationOrchestratorService).validateKraftAcls(stackDto);
+
+        Selectable result = underTest.doAccept(event);
+
+        assertInstanceOf(MigrateZookeeperToKraftConfigurationFailureEvent.class, result);
+        assertEquals(FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), result.getSelector());
     }
 
     @Test
@@ -87,6 +115,7 @@ class MigrateZookeeperToKraftConfigurationValidationHandlerTest {
 
         String expectedMessage = "Skipping Zookeeper to KRaft migration because cluster is already migrated to KRaft";
         verify(flowMessageService).fireEventAndLog(STACK_ID, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT, expectedMessage);
+        verify(kraftAclValidationOrchestratorService, never()).validateKraftAcls(any());
         assertInstanceOf(MigrateZookeeperToKraftConfigurationEvent.class, result);
         assertEquals(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), result.getSelector());
     }
