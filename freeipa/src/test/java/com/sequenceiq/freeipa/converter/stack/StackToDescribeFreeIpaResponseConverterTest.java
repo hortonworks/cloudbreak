@@ -101,6 +101,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
     private static final String LOAD_BALANCER_FQDN = "lb.freeipa.example.com";
 
+    private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:7b2c1f3e-2d4a-4b8e-9f1a-3c5d6e7f8a9b";
+
     @InjectMocks
     private StackToDescribeFreeIpaResponseConverter underTest;
 
@@ -165,6 +167,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         validateResult(tunnel, result, freeIpaServerResponse);
         validateFreeIpaResponse(freeIpaServerResponse, false);
         assertThat(result.getTrust()).isNull();
+        assertThat(result.getEncryptionProfileCrn()).isNull();
     }
 
     @ParameterizedTest(name = "tunnel={0}")
@@ -204,6 +207,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         Stack stack = createStack(Tunnel.DIRECT);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.name());
+        environmentResponse.setEncryptionProfileCrn(ENCRYPTION_PROFILE_CRN);
         ImageEntity image = new ImageEntity();
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
@@ -221,6 +225,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(TrustStatus.TRUST_SETUP_REQUIRED.name(), TrustResponse::getTrustStatus)
                 .returns(null, TrustResponse::getOperationId)
                 .returns(null, TrustResponse::getFqdn);
+        assertThat(result.getEncryptionProfileCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
     }
 
     @Test

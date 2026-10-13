@@ -127,6 +127,8 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setSecurity(getSecurity(stack));
         boolean hybridEnvironment = environmentResponse != null && EnvironmentType.isHybridFromEnvironmentTypeString(environmentResponse.getEnvironmentType());
         describeFreeIpaResponse.setTrust(convertTrust(stack, hybridEnvironment));
+        Optional.ofNullable(environmentResponse)
+                .ifPresent(env -> describeFreeIpaResponse.setEncryptionProfileCrn(env.getEncryptionProfileCrn()));
         return describeFreeIpaResponse;
     }
 

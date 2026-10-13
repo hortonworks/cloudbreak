@@ -114,6 +114,9 @@ public class DescribeFreeIpaResponse {
     @Schema(description = FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions.TRUST_DETAILS, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private TrustResponse trust;
 
+    @Schema(description = FreeIpaModelDescriptions.ENCRYPTION_PROFILE_CRN)
+    private String encryptionProfileCrn;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -322,6 +325,14 @@ public class DescribeFreeIpaResponse {
         this.trust = trust;
     }
 
+    public String getEncryptionProfileCrn() {
+        return encryptionProfileCrn;
+    }
+
+    public void setEncryptionProfileCrn(String encryptionProfileCrn) {
+        this.encryptionProfileCrn = encryptionProfileCrn;
+    }
+
     @Override
     public String toString() {
         return "DescribeFreeIpaResponse{" +
@@ -351,6 +362,7 @@ public class DescribeFreeIpaResponse {
                 ", security=" + security +
                 ", loadBalancer=" + loadBalancer +
                 ", trust=" + trust +
+                ", encryptionProfileCrn='" + encryptionProfileCrn + '\'' +
                 '}';
     }
 }

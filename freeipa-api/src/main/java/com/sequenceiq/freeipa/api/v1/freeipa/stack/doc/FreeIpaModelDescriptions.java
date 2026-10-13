@@ -36,6 +36,7 @@ public class FreeIpaModelDescriptions {
     public static final String LOADBALANCER_DETAILS = "freeipa loadbalancer details";
     public static final String LOADBALANCER_TYPE = "type of FreeIpa load balancer to be created, " +
             "possible values: NONE, INTERNAL_NLB, default is INTERNAL_NLB";
+    public static final String ENCRYPTION_PROFILE_CRN = "CRN of the environment's encryption profile. Encryption Profile manages TLS version and cipher suites";
 
     private FreeIpaModelDescriptions() {
     }
