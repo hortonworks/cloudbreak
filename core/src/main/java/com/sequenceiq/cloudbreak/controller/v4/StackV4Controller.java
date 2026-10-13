@@ -817,18 +817,6 @@ public class StackV4Controller extends NotificationController implements StackV4
         return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 
-    @Override
-    @InternalOnly
-    public void validateDiskUpdateByCrnInternal(Long workspaceId, @ResourceCrn String crn, DiskUpdateRequest updateRequest) {
-        stackOperationService.validateStackDiskUpdate(NameOrCrn.ofCrn(crn), updateRequest, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    @InternalOnly
-    public void validateRootVolumeUpdateByCrnInternal(Long workspaceId, @ResourceCrn String crn, DiskUpdateRequest rootDiskVolumesRequest) {
-        stackOperationService.validateRootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
     @InternalOnly
     @Override
     public FlowIdentifier manageDatabaseUser(Long workspaceId, ExternalDatabaseManageDatabaseUserV4Request rq, @InitiatorUserCrn String initiatorUserCrn) {

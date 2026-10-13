@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -92,6 +91,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -252,8 +252,7 @@ class UpdateDistroxDiskFlowChainIntegrationTest {
         doNothing().when(nodeValidator).checkForRecentHeartbeat();
 
         when(diskUpdateService.isDiskTypeChangeSupported(CLOUD_PLATFORM)).thenReturn(true);
-        when(diskUpdateService.getVolumesToUpdate(any(), eq(GROUP), eq(REQUESTED_SIZE), eq(REQUESTED_TYPE), any()))
-                .thenReturn(List.of(new Volume("vol-1", "", CURRENT_TYPE, CURRENT_SIZE, CloudVolumeUsageType.GENERAL)));
+        when(verticalScalingValidatorService.validateAddVolumesRequest(any(), any(), any())).thenReturn(ValidationResult.builder().build());
     }
 
     @Test

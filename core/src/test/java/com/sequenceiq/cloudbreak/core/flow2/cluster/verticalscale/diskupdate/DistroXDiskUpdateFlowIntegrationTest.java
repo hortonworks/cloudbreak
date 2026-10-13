@@ -33,7 +33,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
@@ -56,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.VerticalScalingValidatorService;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -149,8 +149,7 @@ class DistroXDiskUpdateFlowIntegrationTest extends AbstractFlowIntegrationTest {
         when(stackService.getByIdWithLists(STACK_ID)).thenReturn(mock(Stack.class));
 
         when(diskUpdateService.isDiskTypeChangeSupported(CLOUD_PLATFORM)).thenReturn(true);
-        when(diskUpdateService.getVolumesToUpdate(any(), eq(GROUP), eq(REQUESTED_SIZE), eq(REQUESTED_TYPE), any()))
-                .thenReturn(List.of(new Volume("vol-1", "", CURRENT_TYPE, CURRENT_SIZE, CloudVolumeUsageType.GENERAL)));
+        when(verticalScalingValidatorService.validateAddVolumesRequest(any(), any(), any())).thenReturn(ValidationResult.builder().build());
     }
 
     @Test

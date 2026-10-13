@@ -72,11 +72,9 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DETERMINE_DATALAKE_DATA_SIZES;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROOT_VOLUME_UPDATE_BY_STACK_CRN;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROOT_VOLUME_UPDATE_VALIDATE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_STACK_SECRETS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SEND_NOTIFICATION;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.UPDATE_VOLUME_RESOURCE_BY_CRN;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VALIDATE_DISK_UPDATE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VALIDATE_VERTICAL_SCALE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
@@ -1053,26 +1051,6 @@ public interface StackV4Endpoint {
             @Valid DiskUpdateRequest rootDiskVolumesRequest,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
-
-    @POST
-    @Path("internal/crn/{crn}/disk_update/validate")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = VALIDATE_DISK_UPDATE_BY_CRN, operationId = "validateDiskUpdateByCrnInternal",
-            responses = @ApiResponse(responseCode = "204", description = "successful operation", useReturnTypeSchema = true))
-    void validateDiskUpdateByCrnInternal(@PathParam("workspaceId") Long workspaceId,
-            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-            @NotNull @Valid DiskUpdateRequest updateRequest);
-
-    @POST
-    @Path("internal/crn/{crn}/modify_root_volume/validate")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = ROOT_VOLUME_UPDATE_VALIDATE_BY_CRN, operationId = "validateRootVolumeUpdateByCrnInternal",
-            responses = @ApiResponse(responseCode = "204", description = "successful operation", useReturnTypeSchema = true))
-    void validateRootVolumeUpdateByCrnInternal(@PathParam("workspaceId") Long workspaceId,
-            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-            @NotNull @Valid DiskUpdateRequest rootDiskVolumesRequest);
 
     @PUT
     @Path("internal/manage_db_user")

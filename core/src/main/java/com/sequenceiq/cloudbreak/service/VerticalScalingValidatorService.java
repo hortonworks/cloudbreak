@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
@@ -369,13 +370,12 @@ public class VerticalScalingValidatorService {
         return validationBuilder.build();
     }
 
-    public ValidationResult validateAddVolumesRequest(Stack stack, List<Volume> volumesToBeUpdated, String group, String diskType, String volumeType,
-            int size) {
+    public ValidationResult validateAddVolumesRequest(Stack stack, List<Volume> volumesToBeUpdated, DistroXDiskUpdateEvent distroXDiskUpdateEvent) {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
                 .stream()
-                .filter(e -> e.getGroupName().equalsIgnoreCase(group))
+                .filter(e -> e.getGroupName().equalsIgnoreCase(distroXDiskUpdateEvent.getGroup()))
                 .findFirst();
 
         CloudConnector cloudConnector = cloudPlatformConnectors.get(platform(
@@ -386,18 +386,18 @@ public class VerticalScalingValidatorService {
 
         if (!volumesToBeUpdated.isEmpty() && instanceGroupOptional.isPresent()) {
             InstanceGroup instanceGroup = instanceGroupOptional.get();
-            boolean databaseDisk = diskType != null && diskType.equalsIgnoreCase(DiskType.DATABASE_DISK.name());
 
             for (VolumeTemplate template : instanceGroup.getTemplate().getVolumeTemplates()) {
                 VolumeParameterType volumeParameterType = diskTypes.diskMapping().get(template.getVolumeType());
-                if (databaseDisk && template.getUsageType() == VolumeUsageType.DATABASE) {
-                    template.setVolumeSize(size);
-                } else if (!databaseDisk) {
+                if (distroXDiskUpdateEvent.getDiskType().equalsIgnoreCase(DiskType.DATABASE_DISK.name())
+                        && template.getUsageType() == VolumeUsageType.DATABASE) {
+                    template.setVolumeSize(distroXDiskUpdateEvent.getSize());
+                } else if (!distroXDiskUpdateEvent.getDiskType().equalsIgnoreCase(DiskType.DATABASE_DISK.name())) {
                     if (!EPHEMERAL.equals(volumeParameterType)) {
-                        if (StringUtils.isNotBlank(volumeType)) {
-                            template.setVolumeType(volumeType);
+                        if (StringUtils.isNotBlank(distroXDiskUpdateEvent.getVolumeType())) {
+                            template.setVolumeType(distroXDiskUpdateEvent.getVolumeType());
                         }
-                        template.setVolumeSize(size);
+                        template.setVolumeSize(distroXDiskUpdateEvent.getSize());
                     }
                 }
             }

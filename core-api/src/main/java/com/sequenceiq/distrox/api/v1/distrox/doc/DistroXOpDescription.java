@@ -46,8 +46,6 @@ public class DistroXOpDescription {
     public static final String ROOT_VOLUME_UPDATE_BY_DH_NAME = "Update root volume of stack instance group by Datahub name";
     public static final String ROOT_VOLUME_UPDATE_BY_DH_CRN = "Update root volume of to stack instance group by Datahub crn";
     public static final String ROOT_VOLUME_UPDATE_BY_STACK_CRN = "Update root volume of stack instance group by Stack CRN";
-    public static final String VALIDATE_DISK_UPDATE_BY_CRN = "Validate disk type change and resize by cluster crn";
-    public static final String ROOT_VOLUME_UPDATE_VALIDATE_BY_CRN = "Validate root volume update of stack instance group by cluster crn";
 
     public static final String IMD_UPDATE = "update instance metadata for Distrox's instances";
     public static final String REPAIR_CLUSTER_BY_NAME = "repairs the stack by name";
