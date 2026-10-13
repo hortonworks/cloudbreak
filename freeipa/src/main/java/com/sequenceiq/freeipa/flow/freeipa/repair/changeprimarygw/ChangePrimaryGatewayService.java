@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.freeipa.cleanup.VerifyReplicationCleanupService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 
 @Service
@@ -40,6 +41,9 @@ public class ChangePrimaryGatewayService {
 
     @Inject
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
+
+    @Inject
+    private VerifyReplicationCleanupService verifyReplicationCleanupService;
 
     public Optional<String> getPrimaryGatewayInstanceId(Stack stack) {
         try {
@@ -111,6 +115,12 @@ public class ChangePrimaryGatewayService {
         } else {
             LOGGER.debug("The primary gateway {} metadata did not change", newPrimaryGatewayInstanceId);
         }
+    }
+
+    public void verifyReplicationConvergenceOnPrimaryGateway(Stack stack) throws CloudbreakOrchestratorException {
+        String primaryGatewayFqdn = stack.getPrimaryGatewayAndThrowExceptionIfEmpty().getDiscoveryFQDN();
+        LOGGER.debug("Verifying FreeIPA replication convergence on the new primary gateway {}", primaryGatewayFqdn);
+        verifyReplicationCleanupService.verifyConvergenceOnMaster(stack, primaryGatewayFqdn);
     }
 
     private InstanceMetaData findInstanceMetaDataByInstanceId(Set<InstanceMetaData> instanceMetaDataSet, String instanceId) {

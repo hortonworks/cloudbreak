@@ -156,7 +156,7 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
             events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), event.getResourceId(), forceAzRecalculation(), instanceCountForUpscale,
                     Boolean.FALSE, true, false, event.getOperationId(), event.getTargetVariant().getValue(), Set.of(event.getPrimaryGwInstanceId())));
             events.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
-                    new ArrayList<String>(event.getInstanceIds()), Boolean.FALSE, event.getOperationId()));
+                    new ArrayList<>(event.getInstanceIds()), Boolean.FALSE, event.getOperationId()).withReplicationVerification());
             events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(), instanceIds, instanceCountForDownscale, false,
                     true, false, event.getOperationId()));
             events.addAll(createMigrationFlowIfNeeded(event, groupNames, "CloudFormation cleanup"));

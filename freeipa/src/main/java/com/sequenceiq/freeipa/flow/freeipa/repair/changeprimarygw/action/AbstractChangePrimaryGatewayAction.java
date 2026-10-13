@@ -22,6 +22,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public abstract class AbstractChangePrimaryGatewayAction<P extends Payload> extends
         AbstractCommonChainAction<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent, ChangePrimaryGatewayContext, P> {
 
+    private static final String VERIFY_REPLICATION = "VERIFY_REPLICATION";
+
     @Inject
     private StackService stackService;
 
@@ -36,6 +38,14 @@ public abstract class AbstractChangePrimaryGatewayAction<P extends Payload> exte
         MDCBuilder.buildMdcContext(stack);
         addMdcOperationIdIfPresent(stateContext.getExtendedState().getVariables());
         return new ChangePrimaryGatewayContext(flowParameters, stack);
+    }
+
+    protected void setVerifyReplication(Map<Object, Object> variables, boolean verifyReplication) {
+        variables.put(VERIFY_REPLICATION, verifyReplication);
+    }
+
+    protected boolean isVerifyReplication(Map<Object, Object> variables) {
+        return Boolean.TRUE.equals(variables.get(VERIFY_REPLICATION));
     }
 
     @Override

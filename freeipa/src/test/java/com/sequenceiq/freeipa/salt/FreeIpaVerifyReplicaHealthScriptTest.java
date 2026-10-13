@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,9 +59,42 @@ class FreeIpaVerifyReplicaHealthScriptTest {
 
     private static final String ABORTING_STATUS = "Error (4) Replication error acquiring replica: Replication is aborting";
 
+    private static final String TRANSIENT_STATUS =
+            "Error (18) Can't acquire replica (Incremental update transient warning.  Backing off, will retry update later.)";
+
+    private static final String GENERATION = "6adf12a5000000060000";
+
+    private static final String OTHER_GENERATION = "6adf12a5000000070000";
+
+    private static final String BASE_TIME = "6adf12a9";
+
+    private static final String OLD_TIME = "6adf3d26";
+
+    private static final String NEW_TIME = "6adf3ee7";
+
+    private static final int LOCAL_RID = 3;
+
+    private static final int SEED_RID = 5;
+
+    private static final int REMOVED_RID = 7;
+
+    private static final int CLEANED_RID = 8;
+
     private static final String REAL_END = "20261021103000Z";
 
     private static final String EPOCH_END = "19700101000000Z";
+
+    private static final String CA_AGMT_TO_SEED = "caTo" + SEED_HOST;
+
+    private static final String CA_AGMT_TO_LOCAL = "caTo" + LOCAL_HOST;
+
+    /**
+     * The timeout line VerifyReplicationCleanupService matches on. VerifyReplicationCleanupServiceTest feeds the same line
+     * (CONVERGENCE_TIMEOUT_OUTPUT) to the service to drive its timeout detection, so a change here must be mirrored there.
+     */
+    private static final Pattern TIMEOUT_LINE = Pattern.compile("^FAIL: replica \\S+ not healthy within \\d+s \\(see failing agreements\\)$");
+
+    private static final String TIMEOUT_TEXT = "not healthy within";
 
     private static final String STUB_FIXTURES_ENV = "STUB_FIXTURES";
 
@@ -73,6 +107,18 @@ class FreeIpaVerifyReplicaHealthScriptTest {
             #!/usr/bin/env bash
             cat >/dev/null
             exit 0
+            """;
+
+    private static final String STUB_KINIT_FAILING = """
+            #!/usr/bin/env bash
+            cat >/dev/null
+            echo "kinit: Preauthentication failed while getting initial credentials" >&2
+            exit 1
+            """;
+
+    private static final String STUB_KLIST_NO_TICKET = """
+            #!/usr/bin/env bash
+            exit 1
             """;
 
     private static final String STUB_LDAPSEARCH = """
@@ -134,6 +180,7 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         assertThat(result.exitCode()).isZero();
         assertThat(result.stdout()).contains("SUCCESS");
         assertThat(result.stdout()).doesNotContain("idle agmt=");
+        assertThat(result.stdout()).doesNotContain("RESULT:");
         assertThat(result.stderr()).isEmpty();
     }
 
@@ -179,6 +226,9 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         assertThat(result.stdout()).contains("not corroborated");
         assertThat(result.stdout()).doesNotContain("SUCCESS");
         assertSingleLineFailureMessage(result);
+        assertResultLine(result,
+                notCorroborated(CA_AGMT_TO_SEED, LOCAL_HOST, SEED_HOST, "o=ipaca"),
+                notCorroborated(CA_AGMT_TO_LOCAL, SEED_HOST, LOCAL_HOST, "o=ipaca"));
     }
 
     @Test
@@ -241,7 +291,8 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         ScriptResult result = runScript(0, 0);
 
         assertThat(result.exitCode()).isEqualTo(1);
-        assertThat(result.stdout()).contains("not corroborated");
+        // Unresolved idle agreements are collected, but with nothing proving this dirsrv can bind outward the exit stays 1.
+        assertThat(result.stdout()).contains("not corroborated").doesNotContain("RESULT:");
         assertSingleLineFailureMessage(result);
     }
 
@@ -254,6 +305,7 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         assertThat(result.exitCode()).isEqualTo(3);
         assertThat(result.stdout()).contains("not corroborated");
         assertSingleLineFailureMessage(result);
+        assertResultLine(result, notCorroborated(CA_AGMT_TO_SEED, LOCAL_HOST, SEED_HOST, "o=ipaca"));
     }
 
     @Test
@@ -265,6 +317,7 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         assertThat(result.exitCode()).isEqualTo(3);
         assertThat(result.stdout()).contains("not corroborated");
         assertSingleLineFailureMessage(result);
+        assertResultLine(result, notCorroborated(CA_AGMT_TO_SEED, LOCAL_HOST, SEED_HOST, ""));
     }
 
     @Test
@@ -301,6 +354,51 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         assertThat(result.exitCode()).isEqualTo(3);
         assertThat(result.stdout()).doesNotContain("SUCCESS");
         assertSingleLineFailureMessage(result);
+        assertResultLine(result,
+                "peer " + SEED_HOST + " could not be queried",
+                notCorroborated(CA_AGMT_TO_SEED, LOCAL_HOST, SEED_HOST, "o=ipaca"));
+    }
+
+    @Test
+    void testUnqueryablePeerWithHealthyLocalAgreementsThenExitThreeNamingThePeerOnly() throws Exception {
+        markUnqueryable(SEED_HOST);
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(3);
+        assertThat(result.stdout()).doesNotContain("SUCCESS");
+        assertSingleLineFailureMessage(result);
+        assertResultLine(result, "peer " + SEED_HOST + " could not be queried");
+    }
+
+    @Test
+    void testPeerHostingNoAgreementsWithHealthyLocalAgreementsThenExitThreeNamingThePeerOnly() throws Exception {
+        removePeerFixture(SEED_HOST);
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(3);
+        assertThat(result.stdout()).doesNotContain("SUCCESS");
+        assertSingleLineFailureMessage(result);
+        assertResultLine(result, "peer " + SEED_HOST + " hosts no replication agreement");
+    }
+
+    @Test
+    void testFailedKinitThenEveryPeerQueryFailsAndExitThreeNamesKinitAndPeers() throws Exception {
+        writeStub("klist", STUB_KLIST_NO_TICKET);
+        writeStub("kinit", STUB_KINIT_FAILING);
+        markUnqueryable(SEED_HOST);
+        markUnqueryable(OTHER_HOST);
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(3);
+        assertThat(result.stdout()).contains("kinit as admin failed").doesNotContain("SUCCESS");
+        assertSingleLineFailureMessage(result);
+        assertResultLine(result,
+                "kinit as admin failed, so no peer could be queried",
+                "peer " + SEED_HOST + " could not be queried",
+                "peer " + OTHER_HOST + " could not be queried");
     }
 
     @Test
@@ -313,6 +411,9 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         assertThat(result.exitCode()).isEqualTo(3);
         assertThat(result.stdout()).doesNotContain("SUCCESS");
         assertSingleLineFailureMessage(result);
+        assertResultLine(result,
+                "peer " + SEED_HOST + " hosts no replication agreement",
+                notCorroborated(CA_AGMT_TO_SEED, LOCAL_HOST, SEED_HOST, "o=ipaca"));
     }
 
     @Test
@@ -322,12 +423,12 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         ScriptResult result = runScript(0, 0);
 
         assertThat(result.exitCode()).isEqualTo(1);
-        assertThat(result.stdout()).contains("FAIL agmt=");
+        assertThat(result.stdout()).contains("FAIL agmt=").doesNotContain("RESULT:");
         assertSingleLineFailureMessage(result);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {CONNECT_ERROR_STATUS, INVALID_CREDENTIALS_STATUS, BUSY_STATUS, DECODING_ERROR_STATUS, ABORTING_STATUS})
+    @ValueSource(strings = {CONNECT_ERROR_STATUS, INVALID_CREDENTIALS_STATUS, DECODING_ERROR_STATUS, ABORTING_STATUS})
     void testLocalAgreementWithErrorStatusThenExitOne(String status) throws Exception {
         writeLocal(agreement(Suffix.IPA, SEED_HOST, status, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST));
 
@@ -384,7 +485,314 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         ScriptResult result = runScript(0, 0);
 
         assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).doesNotContain("RESULT:");
         assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testBusyLocalAgreementWithCoveringSeedRuvThenStaleStatusIgnoredAndSuccess() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, OLD_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isZero();
+        assertThat(result.stdout()).contains("is stale", "SUCCESS");
+        assertThat(result.stderr()).isEmpty();
+    }
+
+    @Test
+    void testTransientPeerAgreementWithCoveringLocalRuvThenStaleStatusIgnoredAndSuccess() throws Exception {
+        writeLocal(ok(Suffix.IPA, SEED_HOST), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), agreement(Suffix.CA, LOCAL_HOST, TRANSIENT_STATUS, EPOCH_END, "FALSE"),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, OLD_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isZero();
+        assertThat(result.stdout()).contains("is stale", "SUCCESS");
+        assertThat(result.stderr()).isEmpty();
+    }
+
+    @Test
+    void testPendingAgreementWhenSupplierListsRidMissingOnConsumerThenExitOne() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME), rid(REMOVED_RID, OLD_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).contains("does not hold every change").doesNotContain("is stale", "SUCCESS");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testPendingAgreementWhenConsumerHasOlderMaxCsnThenExitOne() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, OLD_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).contains("does not hold every change").doesNotContain("is stale");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testPendingAgreementWhenReplicaGenerationDiffersThenExitOne() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(OTHER_GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).doesNotContain("is stale");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {CONNECT_ERROR_STATUS, INVALID_CREDENTIALS_STATUS})
+    void testErrorStatusThatDoesNotProveBindWithCoveringRuvsThenExitOne(String status) throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, status, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).doesNotContain("is stale", "pend agmt=");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testDisabledBusyAgreementWithCoveringRuvsThenExitOne() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE").replace("\n\n", "\nnsds5ReplicaEnabled: off\n\n"),
+                ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).doesNotContain("is stale", "pend agmt=");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testCodeZeroInProgressAgreementWithCoveringRuvsThenSuccess() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, OK_STATUS, REAL_END, "TRUE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isZero();
+        assertThat(result.stdout()).contains("is stale", "SUCCESS");
+        assertThat(result.stderr()).isEmpty();
+    }
+
+    @Test
+    void testPendingAgreementWhenConsumerHasNoReplicaEntryThenExitOne() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).doesNotContain("is stale");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testPendingAgreementWhenConsumerHasRuvOnlyForOtherSuffixThenExitOne() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).doesNotContain("is stale");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testUncoveredPendingPeerAgreementWithEverythingElseHealthyThenExitOneNotThree() throws Exception {
+        writeLocal(ok(Suffix.IPA, SEED_HOST), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, OLD_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), agreement(Suffix.CA, LOCAL_HOST, TRANSIENT_STATUS, EPOCH_END, "FALSE"),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.exitCode()).isNotEqualTo(3);
+        assertThat(result.stdout()).contains("does not hold every change").doesNotContain("RESULT:");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testSupplierRidWithoutCsnsMissingOnConsumerThenStillConverged() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME), ridWithoutCsns(REMOVED_RID)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isZero();
+        assertThat(result.stdout()).contains("is stale", "SUCCESS");
+        assertThat(result.stderr()).isEmpty();
+    }
+
+    @Test
+    void testTransientLocalAgreementWhenSupplierListsCleanedRidWithCsnsMissingOnSeedThenExitOne() throws Exception {
+        writeLocal(ok(Suffix.IPA, SEED_HOST), agreement(Suffix.CA, SEED_HOST, TRANSIENT_STATUS, EPOCH_END, "FALSE"),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME), rid(CLEANED_RID, OLD_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).contains("does not hold every change").doesNotContain("is stale", "SUCCESS");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testRuvElementsWithoutUrlOrWithTrailingTokenAreParsedThenStaleStatusIgnoredAndSuccess() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), ridWithoutUrl(LOCAL_RID, NEW_TIME), ridWithTrailingToken(SEED_RID, OLD_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), ridWithTrailingToken(LOCAL_RID, NEW_TIME), ridWithoutUrl(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isZero();
+        assertThat(result.stdout()).contains("is stale", "SUCCESS");
+        assertThat(result.stderr()).isEmpty();
+    }
+
+    @Test
+    void testRuvElementsWithoutUrlOrWithTrailingTokenWhenConsumerHasOlderMaxCsnThenExitOne() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.IPA, generation(GENERATION), ridWithoutUrl(LOCAL_RID, NEW_TIME), ridWithTrailingToken(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST),
+                replica(Suffix.IPA, generation(GENERATION), ridWithTrailingToken(LOCAL_RID, NEW_TIME), ridWithoutUrl(SEED_RID, OLD_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).contains("does not hold every change").doesNotContain("is stale");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testPendingLocalAgreementWhenPeerReturnsNoReplicaEntryThenFailureNamesPeer() throws Exception {
+        writeLocal(ok(Suffix.IPA, SEED_HOST), agreement(Suffix.CA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), ok(Suffix.CA, LOCAL_HOST));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).contains("no RUV of o=ipaca could be read from " + SEED_HOST).doesNotContain("is stale");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testPendingPeerAgreementWhenPeerReturnsNoReplicaEntryThenFailureNamesPeer() throws Exception {
+        writeLocal(ok(Suffix.IPA, SEED_HOST), ok(Suffix.CA, SEED_HOST),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), agreement(Suffix.CA, LOCAL_HOST, TRANSIENT_STATUS, EPOCH_END, "FALSE"));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(result.stdout()).contains("no RUV of o=ipaca could be read from " + SEED_HOST).doesNotContain("is stale");
+        assertSingleLineFailureMessage(result);
+    }
+
+    @Test
+    void testPendingAgreementsInBothDirectionsOnSameSuffixWithCoveringRuvsThenBothStaleAndSuccess() throws Exception {
+        writeLocal(ok(Suffix.IPA, SEED_HOST), agreement(Suffix.CA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), agreement(Suffix.CA, LOCAL_HOST, TRANSIENT_STATUS, EPOCH_END, "FALSE"),
+                replica(Suffix.CA, generation(GENERATION), rid(LOCAL_RID, NEW_TIME), rid(SEED_RID, NEW_TIME)));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isZero();
+        assertThat(result.stdout()).contains("SUCCESS");
+        assertThat(countOccurrences(result.stdout(), "is stale")).isEqualTo(2);
+        assertThat(result.stderr()).isEmpty();
+    }
+
+    @Test
+    void testTimeoutWithExitOnePrintsConvergenceTimeoutMarker() throws Exception {
+        writeLocal(agreement(Suffix.IPA, SEED_HOST, BUSY_STATUS, EPOCH_END, "FALSE"), ok(Suffix.CA, SEED_HOST));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertTimeoutMarkerLine(result);
+    }
+
+    @Test
+    void testTimeoutWithExitThreePrintsConvergenceTimeoutMarker() throws Exception {
+        writeLocal(ok(Suffix.IPA, SEED_HOST), idle(Suffix.CA, SEED_HOST));
+        writePeer(SEED_HOST, ok(Suffix.IPA, LOCAL_HOST), idle(Suffix.CA, LOCAL_HOST));
+
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isEqualTo(3);
+        assertTimeoutMarkerLine(result);
+    }
+
+    @Test
+    void testSuccessDoesNotPrintConvergenceTimeoutMarker() throws Exception {
+        ScriptResult result = runScript(0, 0);
+
+        assertThat(result.exitCode()).isZero();
+        assertThat(result.stdout()).doesNotContain(TIMEOUT_TEXT);
+        assertThat(result.stderr()).doesNotContain(TIMEOUT_TEXT);
+    }
+
+    @Test
+    void testMissingRealmFailsBeforePollingWithoutConvergenceTimeoutMarker() throws Exception {
+        ScriptResult result = runScript(0, 0, "REALM");
+
+        assertThat(result.exitCode()).isNotZero();
+        assertThat(result.stderr()).contains("REALM");
+        assertThat(result.stdout()).doesNotContain(TIMEOUT_TEXT);
+        assertThat(result.stderr()).doesNotContain(TIMEOUT_TEXT);
+    }
+
+    private static void assertTimeoutMarkerLine(ScriptResult result) {
+        assertThat(result.stderr()).contains(TIMEOUT_TEXT);
+        assertThat(result.stderr().lines().filter(line -> TIMEOUT_LINE.matcher(line).find()).toList()).hasSize(1);
+    }
+
+    private static String notCorroborated(String agreement, String supplier, String target, String suffix) {
+        return "idle agreement " + agreement + " on " + supplier + " -> " + target + " (" + suffix + ") not corroborated";
+    }
+
+    private static void assertResultLine(ScriptResult result, String... unresolvedReasons) {
+        List<String> resultLines = result.stdout().lines().filter(line -> line.startsWith("RESULT:")).toList();
+        assertThat(resultLines).containsExactly("RESULT: no agreement is broken; unresolved: " + String.join("; ", unresolvedReasons));
     }
 
     private static void assertSingleLineFailureMessage(ScriptResult result) {
@@ -405,6 +813,10 @@ class FreeIpaVerifyReplicaHealthScriptTest {
     }
 
     private ScriptResult runScript(int timeoutSeconds, int pollIntervalSeconds) throws IOException, InterruptedException {
+        return runScript(timeoutSeconds, pollIntervalSeconds, new String[0]);
+    }
+
+    private ScriptResult runScript(int timeoutSeconds, int pollIntervalSeconds, String... unsetVariables) throws IOException, InterruptedException {
         assertThat(SCRIPT).exists();
         File stdoutFile = fixtureDir.resolve("script.stdout").toFile();
         File stderrFile = fixtureDir.resolve("script.stderr").toFile();
@@ -417,6 +829,7 @@ class FreeIpaVerifyReplicaHealthScriptTest {
         processBuilder.environment().put("TIMEOUT_SECONDS", String.valueOf(timeoutSeconds));
         processBuilder.environment().put("POLL_INTERVAL_SECONDS", String.valueOf(pollIntervalSeconds));
         processBuilder.environment().put(STUB_FIXTURES_ENV, fixtureDir.toAbsolutePath().toString());
+        Arrays.stream(unsetVariables).forEach(processBuilder.environment()::remove);
         processBuilder.redirectInput(ProcessBuilder.Redirect.from(new File("/dev/null")));
         processBuilder.redirectOutput(stdoutFile);
         processBuilder.redirectError(stderrFile);
@@ -466,6 +879,40 @@ class FreeIpaVerifyReplicaHealthScriptTest {
 
     private static String idle(Suffix suffix, String toHost) {
         return agreement(suffix, toHost, IDLE_STATUS, EPOCH_END, "FALSE");
+    }
+
+    private static String replica(Suffix suffix, String... ruvElements) {
+        List<String> lines = new ArrayList<>();
+        lines.add("dn: cn=replica,cn=" + suffix.escapedDn + ",cn=mapping tree,cn=config");
+        lines.add("cn: replica");
+        lines.add("nsDS5ReplicaRoot: " + suffix.dn);
+        Arrays.stream(ruvElements).forEach(element -> lines.add("nsds50ruv: " + element));
+        return String.join("\n", lines) + "\n\n";
+    }
+
+    private static String generation(String value) {
+        return "{replicageneration} " + value;
+    }
+
+    private static String rid(int rid, String maxTime) {
+        return "{replica " + rid + " ldap://ipaserver" + rid + "." + DOMAIN + ":389} " + csn(BASE_TIME, rid) + " " + csn(maxTime, rid);
+    }
+
+    private static String ridWithoutCsns(int rid) {
+        return "{replica " + rid + " ldap://ipaserver" + rid + "." + DOMAIN + ":389}";
+    }
+
+    private static String ridWithoutUrl(int rid, String maxTime) {
+        return "{replica " + rid + "} " + csn(BASE_TIME, rid) + " " + csn(maxTime, rid);
+    }
+
+    private static String ridWithTrailingToken(int rid, String maxTime) {
+        return rid(rid, maxTime) + " " + BASE_TIME;
+    }
+
+    /** A 20 hex character CSN: time (8), sequence number (4), replica id (4), sub-sequence number (4). */
+    private static String csn(String time, int rid) {
+        return time + "0000" + String.format("%04x", rid) + "0000";
     }
 
     private static String agreement(Suffix suffix, String toHost, String status, String end, String inProgress) {

@@ -73,6 +73,6 @@ public class RootVolumeUpdateFlowEventChainFactory implements FlowEventChainFact
     private void addChangeGatewayEventToQueue(Queue<Selectable> flowEventChain, RootVolumeUpdateEvent event, List<String> primaryGatewayInstanceIds,
             boolean finalChain) {
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
-                primaryGatewayInstanceIds, finalChain, event.getOperationId(), event.accepted()));
+                primaryGatewayInstanceIds, finalChain, event.getOperationId(), event.accepted()).withReplicationVerification());
     }
 }

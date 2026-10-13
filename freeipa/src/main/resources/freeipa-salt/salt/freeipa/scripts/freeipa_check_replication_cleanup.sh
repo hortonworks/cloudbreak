@@ -146,6 +146,7 @@ while true; do
   fi
 
   if [[ "$elapsed" -ge "$TIMEOUT_SECONDS" ]]; then
+    # Keep "TIMEOUT after": VerifyReplicationCleanupService matches it to tell this timeout from a run that never got here.
     # Emit the actionable diagnostic to stderr so the salt cmd.run surfaces it as the failure reason
     # (SaltErrorResolver pulls this command's Stderr; see orchestrator-salt stderrcommands.yaml).
     {

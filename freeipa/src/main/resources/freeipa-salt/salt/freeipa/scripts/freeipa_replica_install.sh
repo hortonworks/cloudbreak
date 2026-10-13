@@ -307,14 +307,15 @@ if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
       echo "FreeIPA replication with another FreeIPA server could not be established because it is temporarily busy. The operation will be retried." >&2
       exit 1
     elif [ "$gate_rc" -eq 3 ]; then
-      # The gate saw no agreement broken: the only ones left are idle (no session
-      # started since dirsrv startup, code 0) that the other direction / other suffix could
-      # not vouch for yet, and an agreement of this replica completed a session, so its
-      # dirsrv is not latched onto a stale ccache. The restart below would not fix anything
-      # and would reset every agreement of this replica back to idle, so only give
-      # replication another window. When every agreement of this replica is idle the gate
-      # returns 1 instead and the restart below still runs.
-      echo "Replication health gate failed only on idle agreements that are not corroborated yet; not restarting the IPA stack, re-verifying"
+      # The gate saw no agreement broken, and an agreement of this replica completed a
+      # session, so its dirsrv is not latched onto a stale ccache. What is left is named in
+      # the gate's "RESULT:" line: idle agreements the other direction / other suffix could
+      # not vouch for yet, peers that could not be queried or host no agreement, or a failed
+      # admin kinit. The restart below would fix none of these and would reset every
+      # agreement of this replica back to idle, so only give replication another window.
+      # When every agreement of this replica is idle the gate returns 1 instead and the
+      # restart below still runs.
+      echo "Replication health gate saw no broken agreement (see its RESULT line for what is unresolved); not restarting the IPA stack, re-verifying"
     else
       echo "Replication health gate failed; breaking stale dirsrv ccache latch and restarting the IPA stack"
       # A plain 'ipactl restart' re-reads the poisoned external ccache. Stop the

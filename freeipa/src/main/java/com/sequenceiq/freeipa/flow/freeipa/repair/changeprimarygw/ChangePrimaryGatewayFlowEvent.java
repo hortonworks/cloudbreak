@@ -5,6 +5,8 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.replication.ChangePrimaryGatewayVerifyReplicationFailed;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.replication.ChangePrimaryGatewayVerifyReplicationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.selection.ChangePrimaryGatewaySelectionSuccess;
 import com.sequenceiq.freeipa.flow.stack.HealthCheckFailed;
 import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
@@ -20,6 +22,8 @@ public enum ChangePrimaryGatewayFlowEvent implements FlowEvent {
     CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_FINISHED_EVENT(EventSelectorUtil.selector(HealthCheckSuccess.class)),
     CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_FAILED_EVENT(EventSelectorUtil.selector(HealthCheckFailed.class)),
     CHANGE_PRIMARY_GATEWAY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_FINISHED_EVENT,
+    CHANGE_PRIMARY_GATEWAY_VERIFY_REPLICATION_FINISHED_EVENT(EventSelectorUtil.selector(ChangePrimaryGatewayVerifyReplicationSuccess.class)),
+    CHANGE_PRIMARY_GATEWAY_VERIFY_REPLICATION_FAILED_EVENT(EventSelectorUtil.selector(ChangePrimaryGatewayVerifyReplicationFailed.class)),
     CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT("CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT"),
     FAILURE_EVENT(EventSelectorUtil.selector(ChangePrimaryGatewayFailureEvent.class)),
     FAIL_HANDLED_EVENT("CHANGE_PRIMARY_GATEWAY_FAIL_HANDLED_EVENT");

@@ -214,7 +214,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
             ArrayList<String> oldInstances = new ArrayList<>(event.getInstanceIds());
             oldInstances.add(event.getPrimareGwInstanceId());
             events.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
-                    oldInstances, Boolean.FALSE, event.getOperationId()));
+                    oldInstances, Boolean.FALSE, event.getOperationId()).withReplicationVerification());
             events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale,
                     instanceCountForDownscale, false, true, false, event.getOperationId()));
             events.addAll(createMigrationFlowIfNeeded(event, groupNames, "CloudFormation cleanup"));

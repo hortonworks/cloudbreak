@@ -39,6 +39,8 @@ import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryG
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.SwitchFreeIpaMasterToPrimaryGatewayEvent;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.replication.ChangePrimaryGatewayVerifyReplicationRequest;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.replication.ChangePrimaryGatewayVerifyReplicationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.selection.ChangePrimaryGatewaySelectionRequest;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.selection.ChangePrimaryGatewaySelectionSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.failure.ClusterProxyUpdateRegistrationFailedToChangePrimaryGatewayFailureEventConverter;
@@ -67,6 +69,7 @@ public class ChangePrimaryGatewayActions {
                 setOperationId(variables, operationId);
                 setInstanceIds(variables, payload.getRepairInstanceIds());
                 setFinalChain(variables, payload.getFinalChain());
+                setVerifyReplication(variables, payload.isVerifyReplication());
                 LOGGER.info("Starting to change the primary gateway {}", payload);
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Starting to change the primary gateway");
                 List<String> repairInstanceIds = payload.getRepairInstanceIds() == null ? List.of() : payload.getRepairInstanceIds();
@@ -174,6 +177,25 @@ public class ChangePrimaryGatewayActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Switching FreeIPA CRL Master To Primary Gateway");
                 Selectable request = new SwitchFreeIpaMasterToPrimaryGatewayEvent(stack.getId());
+                sendEvent(context, request.selector(), request);
+            }
+        };
+    }
+
+    @Bean(name = "CHANGE_PRIMARY_GATEWAY_VERIFY_REPLICATION_STATE")
+    public Action<?, ?> verifyReplicationAction() {
+        return new AbstractChangePrimaryGatewayAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                Selectable request;
+                if (isVerifyReplication(variables)) {
+                    stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Verifying FreeIPA replication convergence");
+                    request = new ChangePrimaryGatewayVerifyReplicationRequest(stack.getId());
+                } else {
+                    LOGGER.debug("Replication convergence verification is not requested for this primary gateway change, skipping it");
+                    request = new ChangePrimaryGatewayVerifyReplicationSuccess(stack.getId());
+                }
                 sendEvent(context, request.selector(), request);
             }
         };

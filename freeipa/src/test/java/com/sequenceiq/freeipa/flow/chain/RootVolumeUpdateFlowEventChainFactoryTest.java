@@ -4,6 +4,8 @@ import static com.sequenceiq.freeipa.flow.chain.FlowChainTriggers.ROOT_VOLUME_UP
 import static com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Queue;
@@ -52,7 +54,9 @@ class RootVolumeUpdateFlowEventChainFactoryTest {
         assertInstanceOf(FlowChainInitPayload.class, resultQueue.poll());
         assertInstanceOf(FreeIpaProviderTemplateUpdateEvent.class, resultQueue.poll());
         assertInstanceOf(UpscaleEvent.class, resultQueue.poll());
-        assertInstanceOf(ChangePrimaryGatewayEvent.class, resultQueue.poll());
+        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = assertInstanceOf(ChangePrimaryGatewayEvent.class, resultQueue.poll());
+        assertTrue(changePrimaryGatewayEvent.isVerifyReplication());
+        assertSame(event.accepted(), changePrimaryGatewayEvent.accepted());
         assertInstanceOf(DownscaleEvent.class, resultQueue.poll());
 
         result.getQueue().addAll(restrainedQueueData);

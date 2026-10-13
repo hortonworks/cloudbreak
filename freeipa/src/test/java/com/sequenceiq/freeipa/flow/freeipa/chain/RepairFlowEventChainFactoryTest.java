@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.freeipa.chain;
 
 import static com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Queue;
@@ -14,6 +15,7 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.chain.RepairFlowEventChainFactory;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.event.RepairEvent;
 
 class RepairFlowEventChainFactoryTest {
@@ -40,6 +42,12 @@ class RepairFlowEventChainFactoryTest {
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("CHANGE_PRIMARY_GATEWAY_EVENT", "DOWNSCALE_EVENT", "UPSCALE_EVENT", "CHANGE_PRIMARY_GATEWAY_EVENT"), triggeredOperations);
+        List<ChangePrimaryGatewayEvent> changePrimaryGatewayEvents = eventQueues.stream()
+                .filter(ChangePrimaryGatewayEvent.class::isInstance)
+                .map(ChangePrimaryGatewayEvent.class::cast)
+                .toList();
+        assertEquals(2, changePrimaryGatewayEvents.size());
+        assertTrue(changePrimaryGatewayEvents.stream().noneMatch(ChangePrimaryGatewayEvent::isVerifyReplication));
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue);
     }
 }

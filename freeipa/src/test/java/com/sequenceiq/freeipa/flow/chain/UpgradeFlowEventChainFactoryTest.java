@@ -126,6 +126,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
         assertFalse(changePrimaryGatewayEvent.getFinalChain());
         assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertTrue(changePrimaryGatewayEvent.isVerifyReplication());
         assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
         assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
@@ -313,6 +314,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
         assertFalse(changePrimaryGatewayEvent.getFinalChain());
         assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertTrue(changePrimaryGatewayEvent.isVerifyReplication());
         assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
         assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
@@ -388,6 +390,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
         assertFalse(changePrimaryGatewayEvent.getFinalChain());
         assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertTrue(changePrimaryGatewayEvent.isVerifyReplication());
         assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
         assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
@@ -489,6 +492,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
         assertFalse(changePrimaryGatewayEvent.getFinalChain());
         assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertTrue(changePrimaryGatewayEvent.isVerifyReplication());
         assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
         assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
@@ -614,6 +618,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
         assertFalse(changePrimaryGatewayEvent.getFinalChain());
         assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertTrue(changePrimaryGatewayEvent.isVerifyReplication());
         assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
         assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
@@ -721,7 +726,7 @@ class UpgradeFlowEventChainFactoryTest {
         AwsVariantMigrationTriggerEvent pgwPreScale = (AwsVariantMigrationTriggerEvent) queue.poll();
         assertEquals(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), pgwPreScale.selector());
         assertTrue(queue.poll() instanceof UpscaleEvent);
-        assertTrue(queue.poll() instanceof ChangePrimaryGatewayEvent);
+        assertTrue(((ChangePrimaryGatewayEvent) queue.poll()).isVerifyReplication());
         assertTrue(queue.poll() instanceof DownscaleEvent);
         AwsVariantMigrationTriggerEvent pgwCleanup = (AwsVariantMigrationTriggerEvent) queue.poll();
         assertEquals(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), pgwCleanup.selector());

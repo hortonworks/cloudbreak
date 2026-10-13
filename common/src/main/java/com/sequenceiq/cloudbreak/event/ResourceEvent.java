@@ -1049,6 +1049,12 @@ public enum ResourceEvent {
     FREEIPA_MULTI_AZ_MIGRATION_STARTED("freeipa.multi.az.migration.started"),
     FREEIPA_MULTI_AZ_MIGRATION_FINISHED("freeipa.multi.az.migration.finished"),
     FREEIPA_MULTI_AZ_MIGRATION_FAILED("freeipa.multi.az.migration.failed"),
+    FREEIPA_REPLICATION_CLEANUP_FAILED("freeipa.replication.cleanup.failed"),
+    FREEIPA_REPLICATION_CLEANUP_EXECUTION_FAILED("freeipa.replication.cleanup.execution.failed"),
+    FREEIPA_REPLICATION_CONVERGENCE_FAILED_ON_SURVIVING_MASTERS("freeipa.replication.convergence.failed.surviving.masters"),
+    FREEIPA_REPLICATION_CONVERGENCE_FAILED_ON_MASTER("freeipa.replication.convergence.failed.master"),
+    FREEIPA_REPLICATION_CONVERGENCE_EXECUTION_FAILED_ON_SURVIVING_MASTERS("freeipa.replication.convergence.execution.failed.surviving.masters"),
+    FREEIPA_REPLICATION_CONVERGENCE_EXECUTION_FAILED_ON_MASTER("freeipa.replication.convergence.execution.failed.master"),
 
     REDBEAMS_EXTERNAL_DATABASE_STORAGE_LOW("resource.redbeams.database.storage.low");
 

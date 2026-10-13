@@ -1,9 +1,12 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -30,6 +33,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.freeipa.cleanup.VerifyReplicationCleanupService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +64,9 @@ class ChangePrimaryGatewayServiceTest {
 
     @Mock
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
+
+    @Mock
+    private VerifyReplicationCleanupService verifyReplicationCleanupService;
 
     @InjectMocks
     private ChangePrimaryGatewayService underTest;
@@ -242,5 +249,32 @@ class ChangePrimaryGatewayServiceTest {
         verify(im2).setInstanceMetadataType(eq(InstanceMetadataType.GATEWAY_PRIMARY));
         verify(instanceMetaDataRepository).save(eq(im1));
         verify(instanceMetaDataRepository).save(eq(im2));
+    }
+
+    @Test
+    void testVerifyReplicationConvergenceOnPrimaryGatewayTargetsThePrimaryGateway() throws Exception {
+        Stack stack = mock(Stack.class);
+        InstanceMetaData primaryGateway = mock(InstanceMetaData.class);
+        when(primaryGateway.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
+        when(stack.getPrimaryGatewayAndThrowExceptionIfEmpty()).thenReturn(primaryGateway);
+
+        underTest.verifyReplicationConvergenceOnPrimaryGateway(stack);
+
+        verify(verifyReplicationCleanupService).verifyConvergenceOnMaster(stack, HOSTNAME_2);
+    }
+
+    @Test
+    void testVerifyReplicationConvergenceOnPrimaryGatewayPropagatesFailure() throws Exception {
+        Stack stack = mock(Stack.class);
+        InstanceMetaData primaryGateway = mock(InstanceMetaData.class);
+        when(primaryGateway.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
+        when(stack.getPrimaryGatewayAndThrowExceptionIfEmpty()).thenReturn(primaryGateway);
+        CloudbreakOrchestratorFailedException failure = new CloudbreakOrchestratorFailedException("not converged");
+        doThrow(failure).when(verifyReplicationCleanupService).verifyConvergenceOnMaster(stack, HOSTNAME_2);
+
+        CloudbreakOrchestratorFailedException thrown = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> underTest.verifyReplicationConvergenceOnPrimaryGateway(stack));
+
+        assertSame(failure, thrown);
     }
 }

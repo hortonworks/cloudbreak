@@ -18,11 +18,19 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
 
     private final List<String> repairInstanceIds;
 
+    private final boolean verifyReplication;
+
     public ChangePrimaryGatewayEvent(String selector, Long stackId, List<String> repairInstanceIds, Boolean finalChain, String operationId) {
         super(selector, stackId);
         this.repairInstanceIds = repairInstanceIds;
         this.finalChain = finalChain;
         this.operationId = operationId;
+        this.verifyReplication = false;
+    }
+
+    public ChangePrimaryGatewayEvent(String selector, Long stackId, List<String> repairInstanceIds, Boolean finalChain, String operationId,
+            Promise<AcceptResult> accepted) {
+        this(selector, stackId, repairInstanceIds, finalChain, operationId, false, accepted);
     }
 
     @JsonCreator
@@ -32,11 +40,17 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
             @JsonProperty("repairInstanceIds") List<String> repairInstanceIds,
             @JsonProperty("finalChain") Boolean finalChain,
             @JsonProperty("operationId") String operationId,
+            @JsonProperty("verifyReplication") boolean verifyReplication,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.repairInstanceIds = repairInstanceIds;
         this.finalChain = finalChain;
         this.operationId = operationId;
+        this.verifyReplication = verifyReplication;
+    }
+
+    public ChangePrimaryGatewayEvent withReplicationVerification() {
+        return new ChangePrimaryGatewayEvent(selector(), getResourceId(), repairInstanceIds, finalChain, operationId, true, accepted());
     }
 
     public List<String> getRepairInstanceIds() {
@@ -51,12 +65,17 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
         return operationId;
     }
 
+    public boolean isVerifyReplication() {
+        return verifyReplication;
+    }
+
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(ChangePrimaryGatewayEvent.class, other,
                 event -> Objects.equals(operationId, event.operationId)
                         && Objects.equals(repairInstanceIds, event.repairInstanceIds)
-                        && Objects.equals(finalChain, event.finalChain));
+                        && Objects.equals(finalChain, event.finalChain)
+                        && verifyReplication == event.verifyReplication);
     }
 
     @Override
@@ -66,6 +85,7 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
                 + ", repairInstanceIds='" + repairInstanceIds + '\''
                 + ", finalChain='" + finalChain + '\''
                 + ", operationId='" + operationId + '\''
+                + ", verifyReplication=" + verifyReplication
                 + "}";
     }
 }

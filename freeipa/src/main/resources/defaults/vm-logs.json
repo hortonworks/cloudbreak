@@ -202,5 +202,9 @@
   {
     "path": "/var/log/freeipa_replication_cleanup.log",
     "label": "freeipa-replication-cleanup"
+  },
+  {
+    "path": "/var/log/freeipa_replication_convergence.log",
+    "label": "freeipa-replication-convergence"
   }
 ]

@@ -47,6 +47,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationEvent;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationFinalizeState;
 import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
@@ -178,6 +179,13 @@ class MultiAzMigrationFlowEventChainFactoryTest {
         assertThat(downscaleEvents).extracting(DownscaleEvent::getInstanceIds).allMatch(ids -> ids.size() == 1);
         assertThat(downscaleEvents).flatExtracting(DownscaleEvent::getInstanceIds)
                 .containsExactlyInAnyOrderElementsOf(expectedReplacedInstanceIds);
+
+        List<ChangePrimaryGatewayEvent> changePrimaryGatewayEvents = queue.getQueue().stream()
+                .filter(ChangePrimaryGatewayEvent.class::isInstance)
+                .map(ChangePrimaryGatewayEvent.class::cast)
+                .toList();
+        assertThat(changePrimaryGatewayEvents).hasSize(expectedReplacedInstanceIds.contains(PRIMARY_GW) ? 1 : 0);
+        assertThat(changePrimaryGatewayEvents).allMatch(ChangePrimaryGatewayEvent::isVerifyReplication);
     }
 
     private static MultiAzMigrationEvent event(Variant sourceVariant, String... nonPrimaryGwInstanceIds) {

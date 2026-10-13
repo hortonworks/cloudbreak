@@ -195,6 +195,10 @@ freeipa:
   replication.cleanup.polling:
     timeout-sec: 600
     interval-sec: 10
+  replication.convergence:
+    enabled: true
+    timeout-sec: 300
+    interval-sec: 10
   loadbalancer:
     health-check:
       port: 5080

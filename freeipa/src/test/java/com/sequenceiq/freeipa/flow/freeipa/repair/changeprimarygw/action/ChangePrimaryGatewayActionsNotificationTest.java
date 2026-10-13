@@ -6,9 +6,14 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CHANGE_PRIMA
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.OperationAwareAction.OPERATION_ID;
 import static com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction.FINAL_CHAIN;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_VERIFY_REPLICATION_FINISHED_EVENT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +23,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +36,8 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -37,6 +45,8 @@ import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayContext;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.replication.ChangePrimaryGatewayVerifyReplicationRequest;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.replication.ChangePrimaryGatewayVerifyReplicationSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -44,6 +54,8 @@ import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @ExtendWith(MockitoExtension.class)
 class ChangePrimaryGatewayActionsNotificationTest {
+
+    private static final String VERIFY_REPLICATION = "VERIFY_REPLICATION";
 
     @InjectMocks
     private ChangePrimaryGatewayActions underTest;
@@ -134,6 +146,90 @@ class ChangePrimaryGatewayActionsNotificationTest {
 
         verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_CHANGE_PRIMARY_GATEWAY_FINISHED,
                 List.of("repair-chained"));
+    }
+
+    @Test
+    void startingActionStoresVerifyReplicationFlag() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        ChangePrimaryGatewayEvent payload = new ChangePrimaryGatewayEvent("selector", 1L, List.of("i-1"), true, "op-1")
+                .withReplicationVerification();
+
+        AbstractChangePrimaryGatewayAction<ChangePrimaryGatewayEvent> action =
+                (AbstractChangePrimaryGatewayAction<ChangePrimaryGatewayEvent>) underTest.startingAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        assertEquals(Boolean.TRUE, variables.get(VERIFY_REPLICATION));
+    }
+
+    @Test
+    void startingActionStoresFalseVerifyReplicationFlagByDefault() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        ChangePrimaryGatewayEvent payload = new ChangePrimaryGatewayEvent("selector", 1L, List.of("i-1"), true, "op-1");
+
+        AbstractChangePrimaryGatewayAction<ChangePrimaryGatewayEvent> action =
+                (AbstractChangePrimaryGatewayAction<ChangePrimaryGatewayEvent>) underTest.startingAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        assertEquals(Boolean.FALSE, variables.get(VERIFY_REPLICATION));
+    }
+
+    @Test
+    void verifyReplicationActionSendsRequestAndUpdatesStatusWhenVerificationIsRequested() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put(VERIFY_REPLICATION, true);
+        StackEvent payload = new StackEvent("selector", 1L);
+
+        AbstractChangePrimaryGatewayAction<StackEvent> action = (AbstractChangePrimaryGatewayAction<StackEvent>) underTest.verifyReplicationAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Verifying FreeIPA replication convergence");
+        ChangePrimaryGatewayVerifyReplicationRequest sent = captureSentEvent(ChangePrimaryGatewayVerifyReplicationRequest.class);
+        assertEquals(1L, sent.getResourceId());
+        verify(eventBus).notify(eq(EventSelectorUtil.selector(ChangePrimaryGatewayVerifyReplicationRequest.class)), any());
+    }
+
+    @Test
+    void verifyReplicationActionSendsSuccessWithoutStatusUpdateWhenVerificationIsNotRequested() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put(VERIFY_REPLICATION, false);
+        StackEvent payload = new StackEvent("selector", 1L);
+
+        AbstractChangePrimaryGatewayAction<StackEvent> action = (AbstractChangePrimaryGatewayAction<StackEvent>) underTest.verifyReplicationAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verifyNoInteractions(stackUpdater);
+        ChangePrimaryGatewayVerifyReplicationSuccess sent = captureSentEvent(ChangePrimaryGatewayVerifyReplicationSuccess.class);
+        assertEquals(1L, sent.getResourceId());
+        verify(eventBus).notify(eq(CHANGE_PRIMARY_GATEWAY_VERIFY_REPLICATION_FINISHED_EVENT.event()), any());
+    }
+
+    @Test
+    void verifyReplicationActionSendsSuccessWithoutStatusUpdateWhenFlagIsMissing() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        StackEvent payload = new StackEvent("selector", 1L);
+
+        AbstractChangePrimaryGatewayAction<StackEvent> action = (AbstractChangePrimaryGatewayAction<StackEvent>) underTest.verifyReplicationAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verifyNoInteractions(stackUpdater);
+        captureSentEvent(ChangePrimaryGatewayVerifyReplicationSuccess.class);
+        verify(eventBus).notify(eq(CHANGE_PRIMARY_GATEWAY_VERIFY_REPLICATION_FINISHED_EVENT.event()), any());
+    }
+
+    private <T> T captureSentEvent(Class<T> expectedType) {
+        ArgumentCaptor<Object> payloadCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(reactorEventFactory).createEvent(any(), payloadCaptor.capture());
+        return assertInstanceOf(expectedType, payloadCaptor.getValue());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {
