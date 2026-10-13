@@ -19,10 +19,14 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -67,6 +71,7 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -228,13 +233,179 @@ class AzureUtilsTest {
         when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"), any())).thenReturn(Mono.error(new RuntimeException("failed1")));
         when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance3"), any())).thenReturn(Mono.error(new RuntimeException("failed2")));
 
-        assertThrows(
+        CloudbreakServiceException exception = assertThrows(
                 CloudbreakServiceException.class,
                 () -> underTest.deallocateInstances(ac,
                         List.of(createCloudInstance("instance1"), createCloudInstance("instance2"),
                                 createCloudInstance("instance3"))));
 
         verify(azureClient, times(3)).deallocateVirtualMachineAsync(anyString(), anyString(), any());
+        assertThat(exception.getMessage())
+                .contains("instance1 - STOPPED", "instance2 - FAILED - failed1", "instance3 - FAILED - failed2")
+                .doesNotContain("failed1 failed2")
+                .doesNotContain("instance2 - STOPPED", "instance3 - STOPPED");
+    }
+
+    @Test
+    void deallocateInstancesWithLimitedRetryShouldReportUnknownOnTimeoutAndFailedOnOtherErrorsWithoutStopped() {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(), any(DynamicModel.class))).thenReturn("resourceGroup");
+        when(azureVirtualMachineService.getVmsAndVmStatusesFromAzureWithoutRetry(any(), anyList()))
+                .thenReturn(new AzureVirtualMachinesWithStatuses(new HashMap<>(),
+                        List.of(
+                                new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED),
+                                new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.STARTED),
+                                new CloudVmInstanceStatus(createCloudInstance("instance3"), InstanceStatus.STARTED))));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance1"), any())).thenReturn(Mono.empty());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"), any())).thenReturn(Mono.error(new TimeoutException("timeout")));
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance3"), any())).thenReturn(Mono.error(new RuntimeException("failed")));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.deallocateInstancesWithLimitedRetry(ac,
+                        List.of(createCloudInstance("instance1"), createCloudInstance("instance2"), createCloudInstance("instance3")), 1000L));
+
+        assertThat(exception.getMessage())
+                .contains("instance1 - STOPPED", "instance2 - UNKNOWN - timeout", "instance3 - FAILED - failed")
+                .doesNotContain("timeout failed")
+                .doesNotContain("instance2 - STOPPED", "instance3 - STOPPED");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("resourceDeletionsWithFailureList")
+    void resourceDeletionShouldReportFailedResources(String name, BiFunction<AzureClient, String, Mono<Void>> clientCall, TestResourceDeletion deletion,
+            String messagePrefix) {
+        AzureClient azureClient = mock(AzureClient.class);
+        when(clientCall.apply(azureClient, "r1")).thenReturn(Mono.empty());
+        when(clientCall.apply(azureClient, "r2")).thenReturn(Mono.error(new RuntimeException("r2 error")));
+        when(clientCall.apply(azureClient, "r3")).thenReturn(Mono.error(new RuntimeException("r3 error")));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> deletion.delete(underTest, azureClient, List.of("r1", "r2", "r3")));
+
+        assertEquals(messagePrefix + "r2 error r3 error, failed resources: [r2, r3]", exception.getMessage());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("resourceDeletionsWithFailureList")
+    void resourceDeletionShouldOmitFailedResourcesWhenClientCallThrowsSynchronously(String name, BiFunction<AzureClient, String, Mono<Void>> clientCall,
+            TestResourceDeletion deletion, String messagePrefix) {
+        AzureClient azureClient = mock(AzureClient.class);
+        when(clientCall.apply(azureClient, "r1")).thenThrow(new RuntimeException("sync error"));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> deletion.delete(underTest, azureClient, List.of("r1")));
+
+        assertEquals(messagePrefix + "sync error", exception.getMessage());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("resourceDeletionsWithFailureList")
+    void resourceDeletionShouldSucceedWhenEveryDeletionSucceeds(String name, BiFunction<AzureClient, String, Mono<Void>> clientCall,
+            TestResourceDeletion deletion, String messagePrefix) {
+        AzureClient azureClient = mock(AzureClient.class);
+        when(clientCall.apply(azureClient, "r1")).thenReturn(Mono.empty());
+        when(clientCall.apply(azureClient, "r2")).thenReturn(Mono.empty());
+
+        deletion.delete(underTest, azureClient, List.of("r1", "r2"));
+
+        clientCall.apply(verify(azureClient), "r1");
+        clientCall.apply(verify(azureClient), "r2");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("fluxResourceDeletions")
+    void fluxResourceDeletionShouldSubscribeOnce(String name, BiFunction<AzureClient, Collection<String>, Flux<String>> clientCall,
+            TestResourceDeletion deletion, String expectedErrorMessage) {
+        AzureClient azureClient = mock(AzureClient.class);
+        AtomicInteger subscriptions = new AtomicInteger();
+        List<String> ids = List.of("id1", "id2");
+        when(clientCall.apply(azureClient, ids)).thenReturn(Flux.fromIterable(ids).doOnSubscribe(subscription -> subscriptions.incrementAndGet()));
+
+        deletion.delete(underTest, azureClient, ids);
+
+        assertEquals(1, subscriptions.get());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("fluxResourceDeletions")
+    void fluxResourceDeletionShouldSubscribeOnceAndMapError(String name, BiFunction<AzureClient, Collection<String>, Flux<String>> clientCall,
+            TestResourceDeletion deletion, String expectedErrorMessage) {
+        AzureClient azureClient = mock(AzureClient.class);
+        AtomicInteger subscriptions = new AtomicInteger();
+        RuntimeException cause = new RuntimeException("delete error");
+        List<String> ids = List.of("id1", "id2");
+        when(clientCall.apply(azureClient, ids))
+                .thenReturn(Flux.just("id1").concatWith(Flux.error(cause)).doOnSubscribe(subscription -> subscriptions.incrementAndGet()));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> deletion.delete(underTest, azureClient, ids));
+
+        assertEquals(1, subscriptions.get());
+        assertEquals(expectedErrorMessage, exception.getMessage());
+        assertEquals(cause, exception.getCause());
+    }
+
+    static Stream<Arguments> resourceDeletionsWithFailureList() {
+        return Stream.of(
+                Arguments.of("deleteInstancesByName",
+                        (BiFunction<AzureClient, String, Mono<Void>>) (client, name) -> client.deleteVirtualMachine("rg", name),
+                        (TestResourceDeletion) (utils, client, names) -> {
+                            AuthenticatedContext ac = mock(AuthenticatedContext.class);
+                            when(ac.getParameter(AzureClient.class)).thenReturn(client);
+                            utils.deleteInstancesByName(ac, "rg", names);
+                        },
+                        "Error(s) occurred while waiting for vm deletion: "),
+                Arguments.of("deleteNetworkInterfaces",
+                        (BiFunction<AzureClient, String, Mono<Void>>) (client, name) -> client.deleteNetworkInterfaceAsync("rg", name),
+                        (TestResourceDeletion) (utils, client, names) -> utils.deleteNetworkInterfaces(client, "rg", names),
+                        "Error(s) occurred while waiting for network interface deletion: "),
+                Arguments.of("deletePublicIps",
+                        (BiFunction<AzureClient, String, Mono<Void>>) (client, name) -> client.deletePublicIpAddressByNameAsync("rg", name),
+                        (TestResourceDeletion) (utils, client, names) -> utils.deletePublicIps(client, "rg", names),
+                        "Error(s) occurred while waiting for public ip deletion: "),
+                Arguments.of("deleteLoadBalancers",
+                        (BiFunction<AzureClient, String, Mono<Void>>) (client, name) -> client.deleteLoadBalancerAsync("rg", name),
+                        (TestResourceDeletion) (utils, client, names) -> utils.deleteLoadBalancers(client, "rg", names),
+                        "Error(s) occurred while waiting for load balancer deletion: "),
+                Arguments.of("deleteAvailabilitySets",
+                        (BiFunction<AzureClient, String, Mono<Void>>) (client, name) -> client.deleteAvailabilitySetAsync("rg", name),
+                        (TestResourceDeletion) (utils, client, names) -> utils.deleteAvailabilitySets(client, "rg", names),
+                        "Error(s) occurred while waiting for availability set deletion: "),
+                Arguments.of("deleteGenericResources",
+                        (BiFunction<AzureClient, String, Mono<Void>>) AzureClient::deleteGenericResourceByIdAsync,
+                        (TestResourceDeletion) AzureUtils::deleteGenericResources,
+                        "Error(s) occurred while waiting for generic resource deletion: "),
+                Arguments.of("deleteManagedDisks by name",
+                        (BiFunction<AzureClient, String, Mono<Void>>) (client, name) -> client.deleteManagedDiskAsync("rg", name),
+                        (TestResourceDeletion) (utils, client, names) -> utils.deleteManagedDisks(client, "rg", names),
+                        "Error(s) occurred while waiting for managed disks deletion: ")
+        );
+    }
+
+    static Stream<Arguments> fluxResourceDeletions() {
+        return Stream.of(
+                Arguments.of("deleteSecurityGroups",
+                        (BiFunction<AzureClient, Collection<String>, Flux<String>>) AzureClient::deleteSecurityGroupsAsync,
+                        (TestResourceDeletion) AzureUtils::deleteSecurityGroups,
+                        "Can't delete all security groups: delete error"),
+                Arguments.of("deleteNetworks",
+                        (BiFunction<AzureClient, Collection<String>, Flux<String>>) AzureClient::deleteNetworksAsync,
+                        (TestResourceDeletion) AzureUtils::deleteNetworks,
+                        "Can't delete all networks: delete error"),
+                Arguments.of("deleteStorageAccounts",
+                        (BiFunction<AzureClient, Collection<String>, Flux<String>>) AzureClient::deleteStorageAccountsAsync,
+                        (TestResourceDeletion) AzureUtils::deleteStorageAccounts,
+                        "Can't delete all storage accounts: delete error"),
+                Arguments.of("deleteImages",
+                        (BiFunction<AzureClient, Collection<String>, Flux<String>>) AzureClient::deleteImagesAsync,
+                        (TestResourceDeletion) AzureUtils::deleteImages,
+                        "Can't delete all images: delete error"),
+                Arguments.of("deleteManagedDisks by ids",
+                        (BiFunction<AzureClient, Collection<String>, Flux<String>>) AzureClient::deleteManagedDisksAsync,
+                        (TestResourceDeletion) AzureUtils::deleteManagedDisks,
+                        "Can't delete all managed disks: [id1, id2], error: delete error")
+        );
     }
 
     @Test
@@ -808,5 +979,10 @@ class AzureUtilsTest {
         assertThat(result).hasMessage(
                 "Managed disk creation failed: 'Long running operation is Failed or Cancelled.', please go to Azure Portal for detailed message");
         assertThat(result).hasCause(e);
+    }
+
+    @FunctionalInterface
+    interface TestResourceDeletion {
+        void delete(AzureUtils azureUtils, AzureClient azureClient, List<String> resources);
     }
 }

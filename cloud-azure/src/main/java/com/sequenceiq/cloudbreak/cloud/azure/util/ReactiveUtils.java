@@ -2,24 +2,38 @@ package com.sequenceiq.cloudbreak.cloud.azure.util;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.stream.Stream;
 
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class ReactiveUtils {
 
+    private static final String BLOCK_TERMINATED_WITH_ERROR = "#block terminated with an error";
+
     private ReactiveUtils() {
     }
 
     public static String getErrorMessageOrConcatSuppressedMessages(Exception e) {
-        if (e.getClass().getSimpleName().contains("CompositeException")) {
-            return Arrays.stream(e.getSuppressed())
-                    .filter(cause -> !e.getMessage().contains("#block terminated with an error"))
-                    .map(Throwable::getMessage)
-                    .collect(Collectors.joining(" "));
+        if (Exceptions.isMultiple(e)) {
+            return String.join(" ", getErrorMessages(e));
+        } else {
+            return Exceptions.unwrap(e).getMessage();
         }
-        return e.getMessage();
+    }
+
+    public static List<String> getErrorMessages(Exception e) {
+        if (Exceptions.isMultiple(e)) {
+            return Arrays.stream(e.getSuppressed())
+                    .map(Throwable::getMessage)
+                    .filter(Objects::nonNull)
+                    .filter(message -> !message.contains(BLOCK_TERMINATED_WITH_ERROR))
+                    .toList();
+        } else {
+            return Stream.ofNullable(Exceptions.unwrap(e).getMessage()).toList();
+        }
     }
 
     public static <T> void waitAll(List<Mono<T>> actions) {

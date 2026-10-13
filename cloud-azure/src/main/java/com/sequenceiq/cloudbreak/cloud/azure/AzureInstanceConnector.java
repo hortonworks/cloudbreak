@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureCapacityErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.util.ReactiveUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.util.SchedulerProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.util.VmStatusErrorMessageUtils;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -133,7 +135,7 @@ public class AzureInstanceConnector implements InstanceConnector {
                 LOGGER.error("Unable to reboot instance {} because of invalid status {}.", vm.getCloudInstance().getInstanceId(), vm.getStatus().toString());
             }
         }
-        ReactiveUtils.waitAll(completables);
+        waitForReboot(completables, statuses, "reboot");
         return statuses;
     }
 
@@ -157,12 +159,21 @@ public class AzureInstanceConnector implements InstanceConnector {
                 LOGGER.error("Unable to restart instance {} because of invalid status {}.", vm.getCloudInstance().getInstanceId(), vm.getStatus().toString());
             }
         }
-        ReactiveUtils.waitAll(completables);
+        waitForReboot(completables, statuses, "restart");
         return statuses;
     }
 
-    private Mono<Void> doReboot(CloudVmInstanceStatus vm, List<CloudVmInstanceStatus> statuses,
-                                Mono<Void> asyncCall) {
+    private void waitForReboot(List<Mono<Void>> completables, List<CloudVmInstanceStatus> statuses, String operation) {
+        try {
+            ReactiveUtils.waitAll(completables);
+        } catch (Exception e) {
+            String errorMessage = VmStatusErrorMessageUtils.createErrorMessage("Error(s) occurred while waiting for vm " + operation + ": ", e, statuses);
+            LOGGER.error(errorMessage);
+            throw new CloudbreakServiceException(errorMessage, e);
+        }
+    }
+
+    private Mono<Void> doReboot(CloudVmInstanceStatus vm, List<CloudVmInstanceStatus> statuses, Mono<Void> asyncCall) {
         return asyncCall.doOnError(throwable -> {
                     LOGGER.error("Error happened on azure instance reboot: {}", vm, throwable);
                     statuses.add(new CloudVmInstanceStatus(vm.getCloudInstance(), InstanceStatus.FAILED, throwable.getMessage()));

@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.compute.models.VirtualMachine;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -68,10 +70,9 @@ class AzureInstanceConnectorTest {
     private AzureInstanceConnector underTest;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    void setUp() {
         lenient().when(schedulerProvider.io()).thenReturn(Schedulers.immediate());
-        inputList = getCloudInstances();
+        inputList = getCloudInstances("i-1", "i-2");
     }
 
     @Test
@@ -155,10 +156,64 @@ class AzureInstanceConnectorTest {
         assertThat(result, hasItem(hasProperty("status", is(InstanceStatus.STARTED))));
     }
 
-    private List<CloudInstance> getCloudInstances() {
-        CloudInstance instance1 = new CloudInstance("i-1", null, null, "subnet-123", "az1");
-        CloudInstance instance2 = new CloudInstance("i-2", null, null, "subnet-123", "az1");
-        return List.of(instance1, instance2);
+    @Test
+    void testRebootWithMixedResultsThrowsWithPerVmStatuses() {
+        List<CloudInstance> vms = getCloudInstances("i-1", "i-2", "i-3");
+        AuthenticatedContext ac = mockCheckAndClient(vms, InstanceStatus.STOPPED);
+        when(azureClient.startVirtualMachineAsync("resourceGroup", "i-1", null)).thenReturn(Mono.empty());
+        when(azureClient.startVirtualMachineAsync("resourceGroup", "i-2", null)).thenReturn(Mono.error(new TimeoutException("timeout")));
+        when(azureClient.startVirtualMachineAsync("resourceGroup", "i-3", null)).thenReturn(Mono.error(new InsufficientCapacityException("capacity")));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.reboot(ac, List.of(), vms));
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Error(s) occurred while waiting for vm reboot: "
+                + "statuses: [i-1 - STARTED, i-2 - FAILED - timeout, i-3 - FAILED - capacity]");
+    }
+
+    @Test
+    void testRestartWithLimitedRetryWithMixedResultsThrowsWithPerVmStatuses() {
+        List<CloudInstance> vms = getCloudInstances("i-1", "i-2", "i-3");
+        AuthenticatedContext ac = mockCheckAndClient(vms, InstanceStatus.STARTED);
+        when(azureClient.stopVirtualMachineAsync(anyString(), anyString())).thenReturn(Mono.empty());
+        when(azureClient.startVirtualMachineAsync("resourceGroup", "i-1", 600_000L)).thenReturn(Mono.empty());
+        when(azureClient.startVirtualMachineAsync("resourceGroup", "i-2", 600_000L)).thenReturn(Mono.error(new TimeoutException("timeout")));
+        when(azureClient.startVirtualMachineAsync("resourceGroup", "i-3", 600_000L))
+                .thenReturn(Mono.error(new InsufficientCapacityException("capacity")));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.restartWithLimitedRetry(ac, List.of(), vms, 600_000L, List.of(InstanceStatus.STOPPED)));
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Error(s) occurred while waiting for vm restart: "
+                + "statuses: [i-1 - STARTED, i-2 - FAILED - timeout, i-3 - FAILED - capacity]");
+    }
+
+    @Test
+    void testRebootWithSingleFailureThrowsWithPerVmStatuses() {
+        List<CloudInstance> vms = getCloudInstances("i-1", "i-2", "i-3");
+        AuthenticatedContext ac = mockCheckAndClient(vms, InstanceStatus.STOPPED);
+        when(azureClient.startVirtualMachineAsync(anyString(), anyString(), any())).thenReturn(Mono.empty());
+        when(azureClient.startVirtualMachineAsync("resourceGroup", "i-2", null)).thenReturn(Mono.error(new RuntimeException("start failed")));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.reboot(ac, List.of(), vms));
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Error(s) occurred while waiting for vm reboot: "
+                + "statuses: [i-1 - STARTED, i-2 - FAILED - start failed, i-3 - STARTED]");
+    }
+
+    private AuthenticatedContext mockCheckAndClient(List<CloudInstance> vms, InstanceStatus currentStatus) {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(), any(DynamicModel.class))).thenReturn("resourceGroup");
+        when(azureVirtualMachineService.getVmsAndVmStatusesFromAzure(any(), anyList()))
+                .thenReturn(new AzureVirtualMachinesWithStatuses(createVirtualMachineMap("i-1", "i-2", "i-3"),
+                        vms.stream().map(vm -> new CloudVmInstanceStatus(vm, currentStatus)).toList()));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        return ac;
+    }
+
+    private List<CloudInstance> getCloudInstances(String... instanceIds) {
+        return Arrays.stream(instanceIds)
+                .map(instanceId -> new CloudInstance(instanceId, null, null, "subnet-123", "az1"))
+                .toList();
     }
 
     private Map<String, VirtualMachine> createVirtualMachineMap(String... instanceIds) {
