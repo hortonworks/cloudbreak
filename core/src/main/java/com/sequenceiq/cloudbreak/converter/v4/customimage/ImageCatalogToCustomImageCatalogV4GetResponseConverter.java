@@ -23,6 +23,9 @@ public class ImageCatalogToCustomImageCatalogV4GetResponseConverter {
     @Inject
     private ImageVersionsConverter imageVersionsConverter;
 
+    @Inject
+    private VmImagesConverter vmImagesConverter;
+
     public CustomImageCatalogV4GetResponse convert(ImageCatalog source) {
         CustomImageCatalogV4GetResponse result = new CustomImageCatalogV4GetResponse();
         result.setName(source.getName());
@@ -39,6 +42,7 @@ public class ImageCatalogToCustomImageCatalogV4GetResponseConverter {
         result.setImageType(source.getImageType() != null ? source.getImageType().name() : null);
         result.setSourceImageId(source.getCustomizedImageId());
         result.setImageDate(source.getCreated());
+        result.setVmImages(vmImagesConverter.convert(source.getVmImage()));
 
         try {
             Image image = imageCatalogService.getSourceImageByImageType(source).getImage();

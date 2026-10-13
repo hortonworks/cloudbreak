@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4GetImageResponse;
@@ -46,6 +47,9 @@ public class CustomImageToCustomImageCatalogV4GetImageResponseConverterTest {
 
     @Mock
     private ImageVersionsConverter imageVersionsConverter;
+
+    @Spy
+    private VmImagesConverter vmImagesConverter;
 
     @Mock
     private StatedImage statedImage;

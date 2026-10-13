@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,6 +35,9 @@ public class CustomImageCatalogV4ImageListItemResponse implements JsonEntity {
 
     @JsonProperty
     private String cloudProvider;
+
+    @JsonProperty
+    private Set<CustomImageCatalogV4VmImageResponse> vmImages = new HashSet<>();
 
     public String getImageId() {
         return imageId;
@@ -88,5 +93,13 @@ public class CustomImageCatalogV4ImageListItemResponse implements JsonEntity {
 
     public void setCloudProvider(String cloudProvider) {
         this.cloudProvider = cloudProvider;
+    }
+
+    public Set<CustomImageCatalogV4VmImageResponse> getVmImages() {
+        return vmImages;
+    }
+
+    public void setVmImages(Set<CustomImageCatalogV4VmImageResponse> vmImages) {
+        this.vmImages = vmImages;
     }
 }

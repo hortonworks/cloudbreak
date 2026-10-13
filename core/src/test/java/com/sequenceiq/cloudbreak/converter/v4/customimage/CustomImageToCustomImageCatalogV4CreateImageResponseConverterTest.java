@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4CreateImageResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4VmImageResponse;
@@ -13,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.VmImage;
 import com.sequenceiq.common.api.type.ImageType;
 
+@ExtendWith(MockitoExtension.class)
 public class CustomImageToCustomImageCatalogV4CreateImageResponseConverterTest {
 
     private static final String IMAGE_ID = "image id";
@@ -25,12 +29,11 @@ public class CustomImageToCustomImageCatalogV4CreateImageResponseConverterTest {
 
     private static final String IMAGE_REFERENCE = "image reference";
 
-    private CustomImageToCustomImageCatalogV4CreateImageResponseConverter victim;
+    @Spy
+    private VmImagesConverter vmImagesConverter;
 
-    @BeforeEach
-    public void initTest() {
-        victim = new CustomImageToCustomImageCatalogV4CreateImageResponseConverter();
-    }
+    @InjectMocks
+    private CustomImageToCustomImageCatalogV4CreateImageResponseConverter victim;
 
     @Test
     public void shouldConvert() {
