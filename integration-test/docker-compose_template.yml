@@ -6,6 +6,10 @@ services:
   test:
     networks:
       cbreak_default: {}
+    # Keep user and user.dir as they were on the UBI8 base, which ran as root in /home/jboss:
+    # this base runs as uid 65532 in /home/build, which cannot write the host-mounted ./dumps.
+    user: "root"
+    working_dir: /home/jboss
     ports:
       - 2020:2020
       - 9400-9900:9400-9900
@@ -16,6 +20,9 @@ services:
       - ./testuser_home:/home/jboss
     command: java -XX:OnOutOfMemoryError="kill -9 %p" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/it/dumps -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES} | tee cbtest.log
     environment:
+      # Keeps $HOME identical to the UBI8 image, which set /home/jboss; this base sets
+      # /home/java. Shell tools only — the JVM takes user.home from passwd, not $HOME.
+      - HOME=/home/jboss
       - INTEGRATIONTEST_USER_ACCESSKEY
       - INTEGRATIONTEST_USER_SECRETKEY
       - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://dev-gateway
@@ -103,7 +110,7 @@ services:
       - INTEGRATIONTEST_PROXY_PASSWORD2
       - INTEGRATIONTEST_TESTSUITE_CLEANUP
       - INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.21-1.1741864872-stig-01042025
+    image: docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-25-runtime-nofips
     deploy:
       resources:
         limits:

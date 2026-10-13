@@ -55,7 +55,7 @@ if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
     -v "$(pwd)"/scripts/analyse_postgres_stat.jsh:/opt/analyse_postgres_stat.jsh \
     -v "$(pwd)"/test-output/docker_stats/pg_stat_network_io.result:/tmp/pg_stat_network_io.result \
     --env INTEGRATION_TEST_MAX_POSTGRES_OUTPUT=${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT} \
-    docker-private.infra.cloudera.com/cloudera_base/ubi8/openjdk-21:1.18-3.1705519633 \
+    docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-25-runtime-nofips \
     jshell /opt/analyse_postgres_stat.jsh > ./test-output/docker_stats/pg_stat_network_io_analysed.result;
 
     pg_res=$(cat ./test-output/docker_stats/pg_stat_network_io_analysed.result);
