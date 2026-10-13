@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
@@ -98,7 +99,6 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseInstanceTypeRe
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.java.JavaDefaultVersionCalculator;
 import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -196,7 +196,7 @@ public class StackCreatorService {
     private JavaVersionValidator javaVersionValidator;
 
     @Inject
-    private JavaDefaultVersionCalculator javaDefaultVersionCalculator;
+    private JavaVersionPolicy javaVersionPolicy;
 
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
@@ -323,14 +323,11 @@ public class StackCreatorService {
                 String imageRuntimeVersion = imgFromCatalog.getImage().getRuntimeVersion()
                         .or(() -> getCdhFullVersionFromRequest(stackRequest))
                         .orElseGet(blueprint::getStackVersion);
-                String stackVersion = imgFromCatalog.getImage().getStackVersion()
-                        .or(() -> getCdhStackVersionFromRequest(stackRequest))
-                        .orElseGet(blueprint::getStackVersion);
-                LOGGER.info("Resolved runtime version '{}' and stack version '{}' for java version calculation.", imageRuntimeVersion, stackVersion);
-                int javaVersion = javaDefaultVersionCalculator.calculate(stackRequest.getJavaVersion(), imageRuntimeVersion);
+                LOGGER.info("Resolved runtime version '{}' for java version calculation.", imageRuntimeVersion);
+                int javaVersion = javaVersionPolicy.requestedOrDefaultVersion(stackRequest.getJavaVersion(), imageRuntimeVersion);
                 setJavaVersion(stackRequest, stack, javaVersion);
                 LOGGER.info("Selected java version: {}", javaVersion);
-                javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackVersion, stackRequest.getJavaVersion());
+                javaVersionValidator.validateImage(imgFromCatalog.getImage(), imageRuntimeVersion, javaVersion);
                 stackCreationRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 cmRepoOsValidator.validate(stackRequest, imgFromCatalog.getImage());
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
@@ -639,11 +636,6 @@ public class StackCreatorService {
         return getCdhProductVersion(stackRequest)
                 .map(CdhVersionProvider::getCdhFullVersionFromVersionString)
                 .filter(version -> !version.isEmpty());
-    }
-
-    private Optional<String> getCdhStackVersionFromRequest(StackV4Request stackRequest) {
-        return getCdhProductVersion(stackRequest)
-                .flatMap(CdhVersionProvider::getCdhStackVersionFromVersionString);
     }
 
     private Optional<String> getCdhProductVersion(StackV4Request stackRequest) {

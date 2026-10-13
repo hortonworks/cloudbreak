@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 
 @Service
 public class JavaVersionValidator {
@@ -15,11 +15,11 @@ public class JavaVersionValidator {
     private static final int JAVA_VERSION_8 = 8;
 
     @Inject
-    private CommonJavaVersionValidator commonJavaVersionValidator;
+    private JavaVersionPolicy javaVersionPolicy;
 
-    public void validateImage(Image image, String runtime, Integer javaVersion) {
+    public void validateImage(Image image, String runtimeVersion, Integer javaVersion) {
         if (javaVersion != null) {
-            commonJavaVersionValidator.validateByVmConfiguration(runtime, javaVersion);
+            javaVersionPolicy.validateSupported(runtimeVersion, javaVersion);
             if (javaPresentedInMetadata(image)) {
                 if (!image.getPackageVersions().containsKey(String.format("java%d", javaVersion))) {
                     throw javaVersionNotSupporter(image.getUuid(), javaVersion);
@@ -33,7 +33,8 @@ public class JavaVersionValidator {
     }
 
     private BadRequestException javaVersionNotSupporter(String uuid, Integer javaVersion) {
-        throw new BadRequestException(String.format("The '%s' image does not support java version %d to be forced.", uuid, javaVersion));
+        throw new BadRequestException(String.format("The '%s' image does not contain Java version %d. "
+                + "Choose an image that contains it, or request a different Java version.", uuid, javaVersion));
     }
 
     private boolean javaPresentedInMetadata(Image image) {

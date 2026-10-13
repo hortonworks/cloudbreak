@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain.util;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
-
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import jakarta.inject.Inject;
 
@@ -10,20 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaUpdateConfigurations;
-import com.sequenceiq.cloudbreak.util.JavaUtil;
-import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 
 @Service
 public class SetDefaultJavaVersionFlowChainService {
@@ -34,38 +31,29 @@ public class SetDefaultJavaVersionFlowChainService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private AllowableJavaUpdateConfigurations allowableJavaUpdateConfigurations;
+    private JavaVersionPolicy javaVersionPolicy;
+
+    @Inject
+    private RuntimeVersionService runtimeVersionService;
 
     public List<SetDefaultJavaVersionTriggerEvent> setDefaultJavaVersionTriggerEvent(StackDto stack, ImageChangeDto imageChangeDto) {
         try {
             StatedImage image = imageCatalogService.getImage(stack.getWorkspaceId(), imageChangeDto.getImageCatalogUrl(),
                     imageChangeDto.getImageCatalogName(), imageChangeDto.getImageId());
-            String runtimeVersion = image.getImage().getRuntimeVersion().orElse("");
-            Integer minJavaVersionForRuntime = allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime(runtimeVersion);
+            String targetRuntimeVersion = image.getImage().getRuntimeVersion().orElse("");
+            String sourceRuntimeVersion = Optional.ofNullable(stack.getCluster())
+                    .flatMap(cluster -> runtimeVersionService.getServicePackQualifiedRuntimeVersion(cluster.getId()))
+                    .orElse("");
             Integer currentJavaVersion = stack.getStack().getJavaVersion();
-            String selector = FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
-            if (NullUtil.allNotNull(currentJavaVersion, minJavaVersionForRuntime)) {
-                if (currentJavaVersion < minJavaVersionForRuntime) {
-                    return List.of(new SetDefaultJavaVersionTriggerEvent(selector, stack.getId(), String.valueOf(minJavaVersionForRuntime),
-                            false, false, false));
-                } else if (CLOUDERA_STACK_VERSION_7_3_1.getVersion().equalsIgnoreCase(image.getImage().getPackageVersion(ImagePackageVersion.STACK))
-                        && currentJavaVersion.equals(JavaUtil.JAVA_11)) {
-                    if (CMRepositoryVersionUtil.isVersionOlderThanLimited(runtimeVersion, () -> "7.3.1.500")) {
-                        return List.of(new SetDefaultJavaVersionTriggerEvent(selector, stack.getId(),
-                                String.valueOf(JavaUtil.JAVA_8), false, false, false));
-                    } else {
-                        return List.of(new SetDefaultJavaVersionTriggerEvent(
-                                selector,
-                                stack.getId(),
-                                String.valueOf(JavaUtil.JAVA_17),
-                                false,
-                                false,
-                                false
-                        ));
-                    }
-                }
+            OptionalInt targetJavaVersion = javaVersionPolicy.autoUpgradeTarget(sourceRuntimeVersion, targetRuntimeVersion, currentJavaVersion);
+            if (targetJavaVersion.isEmpty()) {
+                LOGGER.debug("Java {} is kept for the upgrade from runtime '{}' to '{}'.", currentJavaVersion, sourceRuntimeVersion, targetRuntimeVersion);
+                return List.of();
             }
-            return List.of();
+            LOGGER.info("Java version is changed from {} to {} because of the upgrade from runtime '{}' to '{}'.",
+                    currentJavaVersion, targetJavaVersion.getAsInt(), sourceRuntimeVersion, targetRuntimeVersion);
+            return List.of(new SetDefaultJavaVersionTriggerEvent(FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT, stack.getId(),
+                    String.valueOf(targetJavaVersion.getAsInt()), false, false, false));
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.warn("Image not found in image catalog, continue with the upgrade flow.", e);
             throw new NotFoundException("Image not found in image catalog", e);

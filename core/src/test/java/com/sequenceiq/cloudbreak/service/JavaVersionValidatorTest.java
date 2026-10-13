@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
-import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
 
 @ExtendWith(MockitoExtension.class)
 class JavaVersionValidatorTest {
@@ -32,7 +32,7 @@ class JavaVersionValidatorTest {
     private static final int JAVA_VERSION_21 = 21;
 
     @Mock
-    private CommonJavaVersionValidator commonJavaVersionValidator;
+    private JavaVersionPolicy javaVersionPolicy;
 
     @Mock
     private Image image;
@@ -47,7 +47,7 @@ class JavaVersionValidatorTest {
 
     @Test
     public void shouldNotFailInCaseOfImageSupportsJavaVersion() {
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        doNothing().when(javaVersionPolicy).validateSupported(any(), anyInt());
         when(image.getPackageVersion(ImagePackageVersion.JAVA)).thenReturn("11");
         when(image.getPackageVersions()).thenReturn(Map.of(
                 String.format("java%d", JAVA_VERSION_11), "anyvalue",
@@ -58,7 +58,7 @@ class JavaVersionValidatorTest {
 
     @Test
     public void shouldNotFailInCaseOfImageSupportsJava21() {
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        doNothing().when(javaVersionPolicy).validateSupported(any(), anyInt());
         when(image.getPackageVersion(ImagePackageVersion.JAVA)).thenReturn("21");
         when(image.getPackageVersions()).thenReturn(Map.of(
                 String.format("java%d", JAVA_VERSION_21), "anyvalue",
@@ -69,7 +69,7 @@ class JavaVersionValidatorTest {
 
     @Test
     public void shouldFailInCaseOfImageDoesNotContainJava21() {
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        doNothing().when(javaVersionPolicy).validateSupported(any(), anyInt());
         when(image.getUuid()).thenReturn("imageuuid");
         when(image.getPackageVersion(ImagePackageVersion.JAVA)).thenReturn("17");
         when(image.getPackageVersions()).thenReturn(Map.of(
@@ -79,12 +79,13 @@ class JavaVersionValidatorTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> victim.validateImage(image, "7.3.2.100", JAVA_VERSION_21));
 
-        assertEquals("The 'imageuuid' image does not support java version 21 to be forced.", exception.getMessage());
+        assertEquals("The 'imageuuid' image does not contain Java version 21. Choose an image that contains it, or request a different Java version.",
+                exception.getMessage());
     }
 
     @Test
-    public void shouldFailInCaseOfJavaVersionNotSupportedByTheVirtualMachineConfiguration() {
-        doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+    public void shouldFailInCaseOfJavaVersionNotSupportedByTheJavaVersionPolicy() {
+        doThrow(new BadRequestException("java error")).when(javaVersionPolicy).validateSupported(any(), anyInt());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> victim.validateImage(image, null, JAVA_VERSION_11));
@@ -94,30 +95,32 @@ class JavaVersionValidatorTest {
 
     @Test
     public void shoudlFailOnJavaVersionIsNotSupportedByTheImage() {
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        doNothing().when(javaVersionPolicy).validateSupported(any(), anyInt());
         when(image.getUuid()).thenReturn("imageuuid");
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> victim.validateImage(image, null, JAVA_VERSION_11));
 
-        assertEquals("The 'imageuuid' image does not support java version 11 to be forced.", exception.getMessage());
+        assertEquals("The 'imageuuid' image does not contain Java version 11. Choose an image that contains it, or request a different Java version.",
+                exception.getMessage());
     }
 
     @Test
     public void shouldFailOnJavaVersionBecauseNotJava8WhenNoJavaMetadata() {
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        doNothing().when(javaVersionPolicy).validateSupported(any(), anyInt());
         when(image.getUuid()).thenReturn("imageuuid");
         when(image.getPackageVersion(ImagePackageVersion.JAVA)).thenReturn("java8");
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> victim.validateImage(image, null, JAVA_VERSION_11));
 
-        assertEquals("The 'imageuuid' image does not support java version 11 to be forced.", exception.getMessage());
+        assertEquals("The 'imageuuid' image does not contain Java version 11. Choose an image that contains it, or request a different Java version.",
+                exception.getMessage());
     }
 
     @Test
     public void shouldNotFailOnJavaVersionBecauseJava8WhenNoJavaMetadata() {
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        doNothing().when(javaVersionPolicy).validateSupported(any(), anyInt());
 
         victim.validateImage(image, null, JAVA_VERSION_8);
     }

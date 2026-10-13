@@ -30,3 +30,74 @@ cb:
     latest: "7.3.3"
     overlay:
       enabled: false
+
+# java - single source of truth for Java (JDK) version handling across the CDP control plane services.
+#
+# versions            - which Java versions a cluster on a given runtime may run, and therefore what a
+#                       new cluster may be created with.
+#                       'from' is inclusive, 'until' is EXCLUSIVE, omitting 'until' means "and every
+#                       newer runtime". The '.X' suffix wildcards the last segment, so 'until: 7.3.1.X'
+#                       covers the whole 7.3.1 line.
+# switch-restrictions - exceptions where moving a RUNNING cluster onto a Java version needs a newer
+#                       runtime than creating a cluster with it does. Switching to 'jdk' is blocked
+#                       on runtimes before 'until' (EXCLUSIVE) and allowed from 'until' on. Omitting 'until'
+#                       means a running cluster can never be switched to 'jdk'. Only versions that differ
+#                       appear here; everything else may be switched to wherever it may run.
+#                       The reason is mandatory, is logged at startup and is returned to the caller on
+#                       rejection.
+# defaults            - which Java version a NEW cluster gets when the request does not specify one.
+#                       The entry with the highest matching 'from' wins, so there is no upper bound to
+#                       maintain. Defaults are never used during a runtime upgrade.
+# auto-upgrades       - what a runtime upgrade does with the Java version of an EXISTING cluster.
+#                       A rule's 'targetFrom' (inclusive) and 'targetUntil' (EXCLUSIVE, optional) bound the
+#                       runtime the cluster is upgraded TO, not the one it is upgraded from.
+#                       1. the current Java version is still switchable on the target runtime ('versions'
+#                          minus 'switch-restrictions'):
+#                          it is kept, unless a rule below matches it AND the upgrade crosses the rule's
+#                          'targetFrom' (the old runtime is before 'targetFrom', the new one is inside the
+#                          rule's target range). Then the rule's 'setJdk' is used, once. Upgrades that start
+#                          inside the target range keep the current version, so a deliberate choice is not
+#                          undone by the next patch upgrade. Example:
+#                            - { targetFrom: 7.3.6, whenJdk: 17, setJdk: 21 }
+#                          moves Java 17 to 21 on 7.3.5 -> 7.3.6, but keeps 17 on 7.3.6 -> 7.3.7,
+#                          while 'versions' still allows creating and switching to 17 on 7.3.6+.
+#                       2. the current Java version is not switchable there: a rule below that matches
+#                          the current version and the target runtime is used on every upgrade into
+#                          its target range, crossing or not
+#                       3. otherwise: the LOWEST Java version that is switchable on the target runtime
+#                          ('versions' minus 'switch-restrictions') is used, but only if it is newer than
+#                          the current one. A cluster is never moved to an older Java version, except by
+#                          an explicit rule.
+#                       At most one rule is applied per upgrade, rules do not chain. With 17 -> 21 at 7.3.6
+#                       and 21 -> 25 at 7.5.0, a Java 17 cluster upgraded from 7.3.5 straight to 7.5.0 moves
+#                       to 21, not 25, and stays on 21 later, because the next upgrade starts at or after 7.5.0.
+#                       Example: a Java 8 cluster upgraded from 7.3.1 to 7.3.2 moves to Java 17 by step 3,
+#                       and to 7.3.4 it would also move to Java 17, not to 21, even if 'defaults' gives 21
+#                       for new 7.3.4 clusters. Moving to a newer Java version than that stays explicit.
+#                       Java 11 can still be requested for new clusters up to 7.3.1.x, as before, but a running
+#                       cluster is never switched to it, and the rules below migrate clusters running it.
+#
+# Overriding (env vars, e.g. JAVA_VERSIONS_2_FROM, or an override file): Spring replaces a whole list, it does
+# not merge entries by index. To change one entry, restate every entry of that list, otherwise the missing
+# entries are lost or startup fails.
+java:
+  versions:
+    - { jdk: 8,  from: 7.1.0, until: 7.3.1.X }
+    - { jdk: 11, from: 7.1.0, until: 7.3.1.X }
+    - { jdk: 17, from: 7.3.1 }
+    # Java 21 will be enabled from 7.3.4. It is configured from 7.3.3 here to enable testing, and it is
+    # temporarily overridden in the cloud-services-infra repo for prod clusters.
+    - { jdk: 21, from: 7.3.3 }
+  switch-restrictions:
+    - { jdk: 11, reason: "Java 11 is kept only for existing clusters, a running cluster cannot be switched to it" }
+    - { jdk: 17, until: 7.3.1.500, reason: "CB-30923 Cloudera Manager supports switching a running cluster to JDK 17 from 7.3.1.500" }
+  defaults:
+    - { jdk: 8,  from: 7.1.0 }
+    - { jdk: 17, from: 7.3.1 }
+    # Uncomment once the runtime that defaults to Java 21 is decided (CB-34059).
+    # - { jdk: 21, from: 7.3.5 }
+  auto-upgrades:
+    - { targetFrom: 7.3.1,     targetUntil: 7.3.1.500, whenJdk: 11, setJdk: 8 }
+    - { targetFrom: 7.3.1.500,                         whenJdk: 11, setJdk: 17 }
+    # Uncomment once autoupgrade decided
+    # - { targetFrom: 7.3.6, whenJdk: 17, setJdk: 21 }   # 17 → 21 when upgrading from below 7.3.6 to 7.3.6 or newer

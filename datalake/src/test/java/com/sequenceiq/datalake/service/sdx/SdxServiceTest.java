@@ -70,6 +70,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -84,6 +85,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -92,10 +94,10 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -184,7 +186,7 @@ class SdxServiceTest {
     private ImageCatalogService imageCatalogService;
 
     @Mock
-    private CommonJavaVersionValidator commonJavaVersionValidator;
+    private JavaVersionPolicy javaVersionPolicy;
 
     @Mock
     private PlatformStringTransformer platformStringTransformer;
@@ -540,7 +542,7 @@ class SdxServiceTest {
     @Test
     public void testAddRmsToSdxCluster() throws IOException, TransactionExecutionException {
         DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
+        doNothing().when(javaVersionPolicy).validateSupported(any(), anyInt());
         when(environmentService.validateAndGetEnvironment(anyString())).thenReturn(environmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         BaseStackDetailsV4Response baseStackDetailsV4Response = new BaseStackDetailsV4Response();
@@ -555,7 +557,7 @@ class SdxServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
 
-        verify(commonJavaVersionValidator, times(1)).validateByVmConfiguration(any(), eq(11));
+        verify(javaVersionPolicy, times(1)).validateSupported(any(), eq(11));
         verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
         verify(environmentService, times(2)).validateAndGetEnvironment(anyString());
         verify(stackRequestHandler, times(1)).getStackRequest(any(), any(), any(), any(), any(), any());
@@ -856,7 +858,7 @@ class SdxServiceTest {
         mockTransactionServiceRequired();
         String lightDutyJson = readLightDutyTestTemplate();
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
+        doNothing().when(javaVersionPolicy).validateSupported(any(), eq(11));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         sdxClusterRequest.setJavaVersion(11);
         withCloudStorage(sdxClusterRequest);
@@ -968,12 +970,12 @@ class SdxServiceTest {
     }
 
     @Test
-    void testCreateSdxClusterFailsInCaseOfForcedJavaVersionIsNotSupportedByTheVirtualMachineConfiguration() {
+    void testCreateSdxClusterFailsInCaseOfForcedJavaVersionIsNotSupportedByTheJavaVersionPolicy() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
         sdxClusterRequest.setJavaVersion(11);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
                 anyString(), anyString())).thenReturn(Collections.emptyList());
-        doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
+        doThrow(new BadRequestException("java error")).when(javaVersionPolicy).validateSupported(any(), eq(11));
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
@@ -991,7 +993,7 @@ class SdxServiceTest {
         when(cdpConfigService.getDefaultRuntime()).thenReturn("7.3.2");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
                 anyString(), anyString())).thenReturn(Collections.emptyList());
-        doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
+        doThrow(new BadRequestException("java error")).when(javaVersionPolicy).validateSupported(any(), eq(11));
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(new ImageV4Response());
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
@@ -1002,7 +1004,31 @@ class SdxServiceTest {
 
         assertEquals("java error", badRequestException.getMessage());
 
-        verify(commonJavaVersionValidator).validateByVmConfiguration(eq("7.3.2"), eq(11));
+        verify(javaVersionPolicy).validateSupported(eq("7.3.2"), eq(11));
+    }
+
+    @Test
+    void testCreateSdxClusterValidatesForcedJavaVersionAgainstTheServicePackQualifiedRuntime() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
+        sdxClusterRequest.setJavaVersion(21);
+        when(cdpConfigService.getDefaultRuntime()).thenReturn("7.3.3");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
+                anyString(), anyString())).thenReturn(Collections.emptyList());
+        doThrow(new BadRequestException("java error")).when(javaVersionPolicy).validateSupported(any(), eq(21));
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
+        BaseStackRepoDetailsV4Response repository = new BaseStackRepoDetailsV4Response();
+        repository.setStack(Map.of(StackRepoDetails.REPOSITORY_VERSION, "7.3.3-1.cdh7.3.3.p100.80393083"));
+        BaseStackDetailsV4Response stackDetails = new BaseStackDetailsV4Response();
+        stackDetails.setRepository(repository);
+        ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setStackDetails(stackDetails);
+        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+
+        assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
+
+        verify(javaVersionPolicy).validateSupported(eq("7.3.3.100"), eq(21));
     }
 
     @Test

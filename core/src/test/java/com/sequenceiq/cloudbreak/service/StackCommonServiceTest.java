@@ -63,9 +63,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -85,6 +83,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -191,7 +190,7 @@ class StackCommonServiceTest {
     private SaltVersionUpgradeService saltVersionUpgradeService;
 
     @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private RuntimeVersionService runtimeVersionService;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -684,10 +683,7 @@ class StackCommonServiceTest {
         instanceGroupAdjustment.setInstanceGroup(group);
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
         when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
-        ClouderaManagerProduct cdh = new ClouderaManagerProduct();
-        cdh.setName("CDH");
-        cdh.setVersion("7.3.2-1.cdh7.3.2.p10000.80393083");
-        when(clusterComponentConfigProvider.getCdhProduct(anyLong())).thenReturn(Optional.of(cdh));
+        when(runtimeVersionService.getCdhFullVersion(anyLong())).thenReturn(Optional.of("7.3.2.10000"));
         when(cloudParameterCache.isUpScalingSupported(anyString())).thenReturn(Boolean.TRUE);
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(cloudbreakUser.getUserCrn()).thenReturn("crn:cdp:" + Crn.Service.AUTOSCALE.getName() + ":us-west-1:altus:user:__internal__actor__");
@@ -723,10 +719,7 @@ class StackCommonServiceTest {
         instanceGroupAdjustment.setInstanceGroup(group);
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
         when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
-        ClouderaManagerProduct cdh = new ClouderaManagerProduct();
-        cdh.setName("CDH");
-        cdh.setVersion("7.3.2-1.cdh7.3.2.p10000.80393083");
-        when(clusterComponentConfigProvider.getCdhProduct(anyLong())).thenReturn(Optional.of(cdh));
+        when(runtimeVersionService.getCdhFullVersion(anyLong())).thenReturn(Optional.of("7.3.2.10000"));
         when(cloudParameterCache.isDownScalingSupported(anyString())).thenReturn(Boolean.TRUE);
         when(multiAzValidator.validateNetworkScaleRequest(any(), any(), anyString())).thenReturn(ValidationResult.builder().build());
         UpdateClusterV4Request updateClusterV4Request = new UpdateClusterV4Request();
@@ -758,10 +751,7 @@ class StackCommonServiceTest {
         instanceGroupAdjustment.setInstanceGroup(group);
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
         when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
-        ClouderaManagerProduct cdh = new ClouderaManagerProduct();
-        cdh.setName("CDH");
-        cdh.setVersion("7.3.2-1.cdh7.3.2.p0.80393083");
-        when(clusterComponentConfigProvider.getCdhProduct(anyLong())).thenReturn(Optional.of(cdh));
+        when(runtimeVersionService.getCdhFullVersion(anyLong())).thenReturn(Optional.of("7.3.2.0"));
         lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest));

@@ -988,25 +988,6 @@ cdp:
   console:
     url: https://localhost
 
-vm:
-  default:
-    javaVersions:
-      - version: 8
-        minRuntimeVersion: 7.1.0
-        maxRuntimeVersion: 7.2.18.X
-      - version: 17
-        minRuntimeVersion: 7.3.1
-  update:
-    allowable:
-      javaVersions:
-        - version: 8
-          minRuntimeVersion: 7.1.0
-          maxRuntimeVersion: 7.3.1.X
-        - version: 17
-          minRuntimeVersion: 7.3.1.500
-        - version: 21
-          minRuntimeVersion: 7.3.3
-
 retry:
   errors:
     patterns-no-retry:

@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUST
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,9 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -66,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -73,7 +71,6 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -174,7 +171,7 @@ public class StackCommonService {
     private CloudbreakFlowRetryService cloudbreakFlowRetryService;
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private RuntimeVersionService runtimeVersionService;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
@@ -368,7 +365,7 @@ public class StackCommonService {
 
     private void validateScalingRequest(StackView stack, String instanceGroupName, Integer scalingAdjustment) {
         if (KRAFT_HOST_GROUP.equalsIgnoreCase(instanceGroupName)) {
-            boolean kraftResizeSupported = getCdhFullVersion(stack)
+            boolean kraftResizeSupported = runtimeVersionService.getCdhFullVersion(stack.getClusterId())
                     .map(v -> CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(v, CLOUDERA_STACK_VERSION_7_3_2_10000))
                     .orElse(false);
             if (!kraftResizeSupported) {
@@ -382,13 +379,6 @@ public class StackCommonService {
             throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
         nodeCountLimitValidator.validateScale(stack, scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
-    }
-
-    private Optional<String> getCdhFullVersion(StackView stack) {
-        return clusterComponentConfigProvider.getCdhProduct(stack.getClusterId())
-                .map(ClouderaManagerProduct::getVersion)
-                .map(CdhVersionProvider::getCdhFullVersionFromVersionString)
-                .filter(StringUtils::isNotBlank);
     }
 
     private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProductBase;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Service
 public class RuntimeVersionService {
@@ -29,6 +30,26 @@ public class RuntimeVersionService {
             return getRuntimeVersionFromClouderaManagerProducts(clouderaManagerProductDetails);
         }
         return Optional.empty();
+    }
+
+    public Optional<String> getServicePackQualifiedRuntimeVersion(Long clusterId) {
+        Optional<ClouderaManagerProduct> cdhProduct = getCdhProduct(clusterId);
+        return cdhProduct.flatMap(RuntimeVersionService::getCdhFullVersion)
+                .or(() -> getRuntimeVersionFromClouderaManagerProducts(cdhProduct.stream().toList()));
+    }
+
+    public Optional<String> getCdhFullVersion(Long clusterId) {
+        return getCdhProduct(clusterId).flatMap(RuntimeVersionService::getCdhFullVersion);
+    }
+
+    private Optional<ClouderaManagerProduct> getCdhProduct(Long clusterId) {
+        return clusterId == null ? Optional.empty() : clusterComponentConfigProvider.getCdhProduct(clusterId);
+    }
+
+    private static Optional<String> getCdhFullVersion(ClouderaManagerProduct cdhProduct) {
+        return Optional.ofNullable(cdhProduct.getVersion())
+                .map(CdhVersionProvider::getCdhFullVersionFromVersionString)
+                .filter(StringUtils::isNotBlank);
     }
 
     public static Optional<String> getRuntimeVersionFromClouderaManagerProducts(List<? extends ClouderaManagerProductBase> products) {

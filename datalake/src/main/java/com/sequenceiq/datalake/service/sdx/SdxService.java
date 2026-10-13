@@ -77,13 +77,13 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.ConfigStalenessState;
@@ -175,7 +175,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private CommonJavaVersionValidator commonJavaVersionValidator;
+    private JavaVersionPolicy javaVersionPolicy;
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
@@ -407,8 +407,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = SdxRuntimeVersionProvider.getRuntime(imageV4Response, sdxClusterRequest, internalStackV4Request,
                 cdpConfigService.getDefaultRuntime());
+        String qualifiedRuntimeVersion = SdxRuntimeVersionProvider.getServicePackQualifiedRuntimeVersion(imageV4Response, internalStackV4Request,
+                runtimeVersion);
         encryptionProfileService.validateEncryptionProfile(sdxClusterRequest, environment, runtimeVersion);
-        validateJavaVersion(runtimeVersion, sdxClusterRequest.getJavaVersion());
+        validateJavaVersion(qualifiedRuntimeVersion, sdxClusterRequest.getJavaVersion());
         String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
         validateOsEntitled(os, accountId);
         validateOsAndRuntime(os, runtimeVersion);
@@ -417,8 +419,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         ccmService.validateCcmV2Requirement(environment.getTunnel(), runtimeVersion);
 
-        String qualifiedRuntimeVersion = SdxRuntimeVersionProvider.getServicePackQualifiedRuntimeVersion(imageV4Response, internalStackV4Request,
-                runtimeVersion);
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, qualifiedRuntimeVersion, name, userCrn, environment);
         setArchitecture(internalStackV4Request, sdxCluster, architecture);
         setNotificationState(internalStackV4Request, sdxCluster, getNotificationState(sdxClusterRequest));
@@ -752,7 +752,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private void validateJavaVersion(String runtime, Integer javaVersion) {
         if (javaVersion != null) {
-            commonJavaVersionValidator.validateByVmConfiguration(runtime, javaVersion);
+            javaVersionPolicy.validateSupported(runtime, javaVersion);
         }
     }
 

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.spring.YamlPropertySourceFactory;
 
 /**
@@ -17,5 +19,6 @@ import com.sequenceiq.cloudbreak.spring.YamlPropertySourceFactory;
 @Configuration
 @PropertySource(value = "classpath:service-common-config.yml", factory = YamlPropertySourceFactory.class)
 @PropertySource(value = "file:${cb.etc.config.dir:}/service-common-config.yml", ignoreResourceNotFound = true, factory = YamlPropertySourceFactory.class)
+@EnableConfigurationProperties(JavaVersionPolicy.class)
 public class ServiceCommonConfig {
 }

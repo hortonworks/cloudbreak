@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.controller;
 import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB;
 import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_HMAC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.stack.CmRepoOsValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
@@ -54,6 +57,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
@@ -64,7 +68,6 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.java.JavaDefaultVersionCalculator;
 import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -165,7 +168,7 @@ class StackCreatorServiceJavaVersionTest {
     private JavaVersionValidator javaVersionValidator;
 
     @Mock
-    private JavaDefaultVersionCalculator javaDefaultVersionCalculator;
+    private JavaVersionPolicy javaVersionPolicy;
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
@@ -246,10 +249,10 @@ class StackCreatorServiceJavaVersionTest {
             Supplier<?> supplier = invocation.getArgument(0);
             return supplier.get();
         });
-        when(imageService.getSupportedImdsVersion(any(), any())).thenReturn(Optional.empty());
-        when(stackService.create(any(Stack.class), any(StatedImage.class), any(User.class), any(Workspace.class))).thenReturn(stack);
-        when(stackDtoService.getById(anyLong())).thenReturn(mock(com.sequenceiq.cloudbreak.dto.StackDto.class));
-        when(stackToStackV4ResponseConverter.convert(any())).thenReturn(
+        lenient().when(imageService.getSupportedImdsVersion(any(), any())).thenReturn(Optional.empty());
+        lenient().when(stackService.create(any(Stack.class), any(StatedImage.class), any(User.class), any(Workspace.class))).thenReturn(stack);
+        lenient().when(stackDtoService.getById(anyLong())).thenReturn(mock(com.sequenceiq.cloudbreak.dto.StackDto.class));
+        lenient().when(stackToStackV4ResponseConverter.convert(any())).thenReturn(
                 new com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response());
     }
 
@@ -257,18 +260,17 @@ class StackCreatorServiceJavaVersionTest {
     void prewarmedImageWithRuntimeVersionUsesImageVersion() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.3.0"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.3"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.3.0"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(eq(null), eq("7.3.3.0"))).thenReturn(17);
 
         StackV4Request stackRequest = createStackRequest("7.3.3-1.cdh7.3.3.p0.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.3.0");
-        verify(javaVersionValidator).validateImage(image, "7.3.3", 17);
+        verify(javaVersionPolicy).requestedOrDefaultVersion(null, "7.3.3.0");
+        verify(javaVersionValidator).validateImage(image, "7.3.3.0", 17);
         assertEquals(17, stack.getJavaVersion());
     }
 
@@ -276,18 +278,17 @@ class StackCreatorServiceJavaVersionTest {
     void baseImageWithoutRuntimeVersionFallsBackToCdhRequest() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.empty());
-        when(image.getStackVersion()).thenReturn(Optional.empty());
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.3.0"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(eq(null), eq("7.3.3.0"))).thenReturn(17);
 
         StackV4Request stackRequest = createStackRequest("7.3.3-1.cdh7.3.3.p0.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.3.0");
-        verify(javaVersionValidator).validateImage(image, "7.3.3", 17);
+        verify(javaVersionPolicy).requestedOrDefaultVersion(null, "7.3.3.0");
+        verify(javaVersionValidator).validateImage(image, "7.3.3.0", 17);
         assertEquals(17, stack.getJavaVersion());
     }
 
@@ -295,18 +296,17 @@ class StackCreatorServiceJavaVersionTest {
     void baseImageWithOlderCdhVersionResolvesToJdk17() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.empty());
-        when(image.getStackVersion()).thenReturn(Optional.empty());
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.2.29999"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(eq(null), eq("7.3.2.29999"))).thenReturn(17);
 
         StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p29999.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.2.29999");
-        verify(javaVersionValidator).validateImage(image, "7.3.2", 17);
+        verify(javaVersionPolicy).requestedOrDefaultVersion(null, "7.3.2.29999");
+        verify(javaVersionValidator).validateImage(image, "7.3.2.29999", 17);
         assertEquals(17, stack.getJavaVersion());
     }
 
@@ -314,17 +314,16 @@ class StackCreatorServiceJavaVersionTest {
     void baseImageWithNoCdhProductFallsBackToBlueprintVersion() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.empty());
-        when(image.getStackVersion()).thenReturn(Optional.empty());
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.1"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(any(), eq("7.3.1"))).thenReturn(17);
 
         StackV4Request stackRequest = createStackRequest(null);
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(any(), eq("7.3.1"));
+        verify(javaVersionPolicy).requestedOrDefaultVersion(any(), eq("7.3.1"));
         verify(javaVersionValidator).validateImage(image, "7.3.1", 17);
         assertEquals(17, stack.getJavaVersion());
     }
@@ -333,18 +332,17 @@ class StackCreatorServiceJavaVersionTest {
     void prewarmedImageVersionTakesPrecedenceOverCdhRequest() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.3.0"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.3"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(null), eq("7.3.3.0"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(eq(null), eq("7.3.3.0"))).thenReturn(17);
 
         StackV4Request stackRequest = createStackRequest("7.3.2-1.cdh7.3.2.p29000.80393083");
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(null, "7.3.3.0");
-        verify(javaVersionValidator).validateImage(image, "7.3.3", 17);
+        verify(javaVersionPolicy).requestedOrDefaultVersion(null, "7.3.3.0");
+        verify(javaVersionValidator).validateImage(image, "7.3.3.0", 17);
         assertEquals(17, stack.getJavaVersion());
     }
 
@@ -352,19 +350,18 @@ class StackCreatorServiceJavaVersionTest {
     void userSpecifiedJavaVersionIsPassedToCalculator() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.3.0"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.3"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(17), eq("7.3.3.0"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(eq(17), eq("7.3.3.0"))).thenReturn(17);
 
         StackV4Request stackRequest = createStackRequest("7.3.3-1.cdh7.3.3.p0.80393083");
         stackRequest.setJavaVersion(17);
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(17, "7.3.3.0");
-        verify(javaVersionValidator).validateImage(image, "7.3.3", 17);
+        verify(javaVersionPolicy).requestedOrDefaultVersion(17, "7.3.3.0");
+        verify(javaVersionValidator).validateImage(image, "7.3.3.0", 17);
         assertEquals(17, stack.getJavaVersion());
     }
 
@@ -372,31 +369,48 @@ class StackCreatorServiceJavaVersionTest {
     void userSpecifiedJava21OnRuntime733IsPassedThrough() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.3.0"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.3"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(eq(21), eq("7.3.3.0"))).thenReturn(21);
+        when(javaVersionPolicy.requestedOrDefaultVersion(eq(21), eq("7.3.3.0"))).thenReturn(21);
 
         StackV4Request stackRequest = createStackRequest("7.3.3-1.cdh7.3.3.p0.80393083");
         stackRequest.setJavaVersion(21);
 
         callCreateStack(stackRequest);
 
-        verify(javaDefaultVersionCalculator).calculate(21, "7.3.3.0");
-        verify(javaVersionValidator).validateImage(image, "7.3.3", 21);
+        verify(javaVersionPolicy).requestedOrDefaultVersion(21, "7.3.3.0");
+        verify(javaVersionValidator).validateImage(image, "7.3.3.0", 21);
         assertEquals(21, stack.getJavaVersion());
+    }
+
+    @Test
+    void defaultJavaVersionMissingFromImageFailsTheCreation() throws Exception {
+        Image image = mock(Image.class);
+        when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.3.0"));
+        lenient().when(image.getArchitecture()).thenReturn("x86_64");
+        StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
+        setupImageFuture(statedImage);
+        when(javaVersionPolicy.requestedOrDefaultVersion(eq(null), eq("7.3.3.0"))).thenReturn(17);
+        doThrow(new BadRequestException("The 'uuid' image does not contain Java version 17."))
+                .when(javaVersionValidator).validateImage(image, "7.3.3.0", 17);
+
+        StackV4Request stackRequest = createStackRequest("7.3.3-1.cdh7.3.3.p0.80393083");
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> callCreateStack(stackRequest));
+
+        assertEquals("The 'uuid' image does not contain Java version 17.", exception.getMessage());
+        verify(stackService, never()).create(any(Stack.class), any(StatedImage.class), any(User.class), any(Workspace.class));
     }
 
     @Test
     void testCreateStackWithGcpRazAuthTypeWhenItsGivenInStack() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(any(), eq("7.3.2"))).thenReturn(17);
         when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
         StackV4Request stackRequest = createStackRequest("7.3.2");
         stack.setCloudPlatform("GCP");
@@ -413,11 +427,10 @@ class StackCreatorServiceJavaVersionTest {
     void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoBefore713220000() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(any(), eq("7.3.2"))).thenReturn(17);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.3.2"));
         when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
         StackV4Request stackRequest = createStackRequest("7.3.2");
@@ -435,11 +448,10 @@ class StackCreatorServiceJavaVersionTest {
     void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoAfter713230000AndEntitlementEnabled() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(any(), eq("7.3.2"))).thenReturn(17);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null))
                 .thenReturn(new ClouderaManagerRepo().withVersion("7.13.2.30000"));
         when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
@@ -459,11 +471,10 @@ class StackCreatorServiceJavaVersionTest {
     void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoAfter713220000AndEntitlementDisabled() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(any(), eq("7.3.2"))).thenReturn(17);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.13.2.20000"));
         when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
         when(entitlementService.isGcpRazWithCabEnabled(ACCOUNT_ID)).thenReturn(false);
@@ -482,11 +493,10 @@ class StackCreatorServiceJavaVersionTest {
     void testCreateStackWithoutGcpRazAuthTypeWhenCMRepoBefore713220000AndEntitlementEnabled() throws Exception {
         Image image = mock(Image.class);
         when(image.getRuntimeVersion()).thenReturn(Optional.of("7.3.2"));
-        when(image.getStackVersion()).thenReturn(Optional.of("7.3.2"));
         lenient().when(image.getArchitecture()).thenReturn("x86_64");
         StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
         setupImageFuture(statedImage);
-        when(javaDefaultVersionCalculator.calculate(any(), eq("7.3.2"))).thenReturn(17);
+        when(javaVersionPolicy.requestedOrDefaultVersion(any(), eq("7.3.2"))).thenReturn(17);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails((Long) null)).thenReturn(new ClouderaManagerRepo().withVersion("7.3.2"));
         when(clusterCreationService.prepare(any(), any(), any(), any())).thenReturn(stack.getCluster());
         when(entitlementService.isGcpRazWithCabEnabled(ACCOUNT_ID)).thenReturn(true);

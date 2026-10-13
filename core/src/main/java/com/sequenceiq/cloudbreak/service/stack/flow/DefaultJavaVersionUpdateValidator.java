@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.javaversion.JavaVersionPolicy;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaUpdateConfigurations;
 
 @Service
 public class DefaultJavaVersionUpdateValidator {
@@ -29,7 +29,7 @@ public class DefaultJavaVersionUpdateValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultJavaVersionUpdateValidator.class);
 
     @Inject
-    private AllowableJavaUpdateConfigurations allowableJavaUpdateConfigurations;
+    private JavaVersionPolicy javaVersionPolicy;
 
     @Inject
     private ImageService imageService;
@@ -41,7 +41,7 @@ public class DefaultJavaVersionUpdateValidator {
             validateTheRequestedJavaVersionExistenceOnTheImage(image, javaVersionRequest.getDefaultJavaVersion());
             String runtimeVersion = getRuntimeVersion(stack, image);
             if (StringUtils.isNotEmpty(runtimeVersion)) {
-                allowableJavaUpdateConfigurations.checkValidConfiguration(parseInt(javaVersionRequest.getDefaultJavaVersion()), runtimeVersion);
+                javaVersionPolicy.validateSwitchable(runtimeVersion, parseInt(javaVersionRequest.getDefaultJavaVersion()));
             } else {
                 LOGGER.warn("The runtime version could not be found on the VM image('{}') of the cluster with name '{}'.", image.getImageId(), stack.getName());
             }
@@ -56,12 +56,20 @@ public class DefaultJavaVersionUpdateValidator {
         try {
             Image image = imageService.getImage(stack.getId());
             String runtimeVersion = getRuntimeVersion(stack, image);
-            return allowableJavaUpdateConfigurations.listValidJavaVersions(runtimeVersion);
+            return listSwitchableJavaVersions(runtimeVersion);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             String message = String.format("Image information could not be found for the cluster with name '%s'", stack.getName());
             LOGGER.warn(message);
             throw new BadRequestException(message, e);
         }
+    }
+
+    private List<String> listSwitchableJavaVersions(String runtimeVersion) {
+        if (StringUtils.isEmpty(runtimeVersion)) {
+            LOGGER.warn("The runtime version is unknown, listing every switchable Java version.");
+            return javaVersionPolicy.allSwitchableVersions().stream().map(String::valueOf).toList();
+        }
+        return javaVersionPolicy.switchableVersions(runtimeVersion).stream().map(String::valueOf).toList();
     }
 
     private String getRuntimeVersion(StackDto stack, Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
