@@ -13,7 +13,6 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
@@ -29,8 +28,6 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.FreeIpaImageUtil;
-import com.sequenceiq.it.cloudbreak.util.LastAndNewestImage;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
@@ -59,9 +56,6 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
-    @Inject
-    private FreeIpaImageUtil freeIpaImageUtil;
-
     @Override
     protected void setupTest(TestContext testContext) {
         initializeTest(testContext);
@@ -84,11 +78,8 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
 
 
         String subnet = awsCloudProvider.getSubnetId();
-        String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
-        LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(freeIpaImageCatalogUrl,
-                testContext.getCloudProvider().getCloudPlatform().name(), OsType.RHEL8.getOs());
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
-                .withFreeIpaImage(freeIpaImageCatalogUrl, images.newest().getUuid())
+                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)

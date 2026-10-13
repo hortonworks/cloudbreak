@@ -50,31 +50,6 @@ public class FreeIpaImageUtil {
         }
     }
 
-    public LastAndNewestImage getLastAndNewestImageByOs(String catalogUrl, String cloudProvider, String os) {
-        String body = RestClientUtil.get().target(catalogUrl).request().get().readEntity(String.class);
-        try {
-            ImageCatalog imageCatalog = objectMapper.readValue(body, ImageCatalog.class);
-            List<Image> images = imageCatalog.getImages().getFreeipaImages().stream()
-                    .filter(image -> hasImageOnCloudProvider(image, cloudProvider))
-                    .filter(image -> os.equalsIgnoreCase(image.getOs()))
-                    .sorted(Comparator.comparing(Image::getDate).reversed())
-                    .limit(2)
-                    .toList();
-            if (images.size() != 2) {
-                throw new RuntimeException(String.format(
-                        "Not found at least two '%s' freeipa images on %s. Please burn more images in %s catalog.",
-                        os, cloudProvider, catalogUrl));
-            }
-            return new LastAndNewestImage(images.get(1), images.get(0));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private boolean hasImageOnCloudProvider(Image image, String cloudProvider) {
-        return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase());
-    }
-
     private List<Image> filterPublished(ImageCatalog imageCatalog, List<Image> images) {
         Set<String> publishedImageIds = imageCatalog.getVersions().getFreeIpaVersions().stream()
                 .flatMap(freeIpaVersions -> freeIpaVersions.getImageIds().stream())

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -22,8 +21,6 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.FreeIpaImageUtil;
-import com.sequenceiq.it.cloudbreak.util.LastAndNewestImage;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 
 public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
@@ -43,9 +40,6 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
 
     @Inject
     private AwsCloudProvider awsCloudProvider;
-
-    @Inject
-    private FreeIpaImageUtil freeIpaImageUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -68,13 +62,10 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
         awsParams.setVpcId(awsCloudProvider.getVpcId());
         environmentNetworkRequest.setAws(awsParams);
         environmentNetworkRequest.setSubnetIds(awsCloudProvider.getSubnetIDs());
-        String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
-        LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(freeIpaImageCatalogUrl,
-                testContext.getCloudProvider().getCloudPlatform().name(), OsType.RHEL8.getOs());
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 1)
                 .withTelemetry("telemetry")
                 .withFreeIpaPlatformVariant("AWS")
-                .withFreeIpaImage(freeIpaImageCatalogUrl, images.last().getUuid())
+                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
                 .withNetwork(environmentNetworkRequest)
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
@@ -83,7 +74,7 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .then(freeIpaCloudFormationStackDoesExist())
                 .when(freeIpaTestClient.checkVariant("AWS"))
-                .when(freeIpaTestClient.upgrade(freeIpaImageCatalogUrl, images.newest().getUuid()))
+                .when(freeIpaTestClient.upgrade())
                 .awaitForFlow()
                 .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .then(freeIpaCloudFormationStackDoesNotExist())
