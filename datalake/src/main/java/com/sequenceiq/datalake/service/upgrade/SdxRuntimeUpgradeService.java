@@ -136,6 +136,7 @@ public class SdxRuntimeUpgradeService {
                     SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
                     sdxUpgradeRequest.setImageId(triggerEvent.getImageId());
                     sdxUpgradeRequest.setRollingUpgradeEnabled(triggerEvent.isRollingUpgradeEnabled());
+                    sdxUpgradeRequest.setComponents(triggerEvent.getComponents());
                     return Optional.of(sdxUpgradeRequest);
                 })
                 .orElseGet(() -> {
@@ -212,7 +213,7 @@ public class SdxRuntimeUpgradeService {
         boolean keepVariant = request != null && Boolean.TRUE.equals(request.isKeepVariant());
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
         return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, shouldReplaceVmsAfterUpgrade(request), skipBackup, skipOptions,
-                rollingUpgradeEnabled, keepVariant);
+                rollingUpgradeEnabled, keepVariant, request != null ? request.getComponents() : null);
     }
 
     private SdxUpgradeResponse initSdxUpgradePreparation(SdxUpgradeResponse upgradeResponse, SdxUpgradeRequest request, SdxCluster cluster, boolean skipBackup) {
@@ -221,7 +222,8 @@ public class SdxRuntimeUpgradeService {
         }
         List<ImageInfoV4Response> upgradeCandidates = upgradeResponse.getUpgradeCandidates();
         String imageId = determineImageId(request, upgradeCandidates);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId, skipBackup);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId, skipBackup,
+                request.getComponents());
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, imageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE_PREPARATION.getMessage(), List.of(targetCdhVersion, imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);

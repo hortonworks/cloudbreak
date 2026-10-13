@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product;
 
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.validation.constraints.NotEmpty;
 
@@ -82,6 +83,26 @@ public class ClouderaManagerProductV4Request implements JsonEntity, ClouderaMana
     public ClouderaManagerProductV4Request withCsd(List<String> csd) {
         this.csd = csd;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        ClouderaManagerProductV4Request that = (ClouderaManagerProductV4Request) other;
+        return Objects.equals(name, that.name)
+                && Objects.equals(version, that.version)
+                && Objects.equals(parcel, that.parcel)
+                && Objects.equals(csd, that.csd);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, version, parcel, csd);
     }
 
     @Override

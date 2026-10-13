@@ -201,7 +201,7 @@ class StackV4ControllerTest {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
         when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, imageId)).thenReturn(flowIdentifier);
 
-        FlowIdentifier result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN));
+        FlowIdentifier result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN, null));
 
         assertEquals(flowIdentifier, result);
     }

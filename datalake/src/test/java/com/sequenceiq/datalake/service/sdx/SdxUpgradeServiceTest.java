@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -26,12 +29,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -85,6 +90,23 @@ public class SdxUpgradeServiceTest {
     public void setUp() {
         sdxCluster = getValidSdxCluster();
         detachedSdxCluster = getDetachedSdxCluster();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"false,false", "false,true", "true,false", "true,true"})
+    void testUpgradeRuntimeForwardsComponents(boolean rollingUpgradeEnabled, boolean withComponents) {
+        when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
+        ClouderaManagerV4Request components = withComponents ? SdxTestUtil.getUpgradeComponents() : null;
+        ArgumentCaptor<ClouderaManagerV4Request> componentsCaptor = ArgumentCaptor.forClass(ClouderaManagerV4Request.class);
+        FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
+        when(stackV4Endpoint.upgradeClusterByNameInternal(eq(0L), eq(sdxCluster.getClusterName()), eq(TARGET_IMAGE_ID), eq(SdxTestUtil.USER_CRN),
+                eq(rollingUpgradeEnabled), componentsCaptor.capture())).thenReturn(flowIdentifier);
+
+        ThreadBasedUserCrnProvider.doAs(SdxTestUtil.USER_CRN,
+                () -> underTest.upgradeRuntime(STACK_ID, TARGET_IMAGE_ID, rollingUpgradeEnabled, components));
+
+        assertSame(components, componentsCaptor.getValue());
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
     }
 
     @Test

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCid
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackInstanceMetadataUpdateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
@@ -461,7 +462,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn,
-            Boolean rollingUpgradeEnabled) {
+            Boolean rollingUpgradeEnabled, ClouderaManagerV4Request components) {
         return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), imageId, rollingUpgradeEnabled);
     }
 
@@ -473,7 +474,8 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier prepareClusterUpgradeByCrnInternal(Long workspaceId, String crn, String imageId, @InitiatorUserCrn String initiatorUserCrn) {
+    public FlowIdentifier prepareClusterUpgradeByCrnInternal(Long workspaceId, String crn, String imageId, @InitiatorUserCrn String initiatorUserCrn,
+            ClouderaManagerV4Request components) {
         return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), imageId);
     }
 

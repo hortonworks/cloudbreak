@@ -1,6 +1,9 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -9,11 +12,15 @@ import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -51,17 +58,21 @@ class SdxUpgradePrepareServiceTest {
     @InjectMocks
     private SdxUpgradePrepareService underTest;
 
-    @Test
-    public void testPrepareUpgrade() {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void testPrepareUpgrade(boolean withComponents) {
         SdxCluster cluster = new SdxCluster();
         cluster.setCrn("crn");
         when(sdxService.getById(STACK_ID)).thenReturn(cluster);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, cluster.getCrn(), IMAGE_ID, USER_CRN))
+        ClouderaManagerV4Request components = withComponents ? SdxTestUtil.getUpgradeComponents() : null;
+        ArgumentCaptor<ClouderaManagerV4Request> componentsCaptor = ArgumentCaptor.forClass(ClouderaManagerV4Request.class);
+        when(stackV4Endpoint.prepareClusterUpgradeByCrnInternal(eq(0L), eq(cluster.getCrn()), eq(IMAGE_ID), eq(USER_CRN), componentsCaptor.capture()))
                 .thenReturn(flowIdentifier);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID, components));
 
+        assertSame(components, componentsCaptor.getValue());
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS, "Preparing Data Lake for upgrade",
                 cluster);
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
@@ -73,11 +84,12 @@ class SdxUpgradePrepareServiceTest {
         cluster.setCrn("crn");
         when(sdxService.getById(STACK_ID)).thenReturn(cluster);
         WebApplicationException webApplicationException = new WebApplicationException();
-        when(stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, cluster.getCrn(), IMAGE_ID, USER_CRN))
+        when(stackV4Endpoint.prepareClusterUpgradeByCrnInternal(eq(0L), eq(cluster.getCrn()), eq(IMAGE_ID), eq(USER_CRN), any()))
                 .thenThrow(webApplicationException);
         when(exceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("fail");
 
-        assertThrows(CloudbreakServiceException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID)));
+        assertThrows(CloudbreakServiceException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID, null)));
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS, "Preparing Data Lake for upgrade",
                 cluster);

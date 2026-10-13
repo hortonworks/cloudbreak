@@ -123,6 +123,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCid
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackInstanceMetadataUpdateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
@@ -578,7 +579,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier upgradeClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
-            @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled);
+            @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled, @Valid ClouderaManagerV4Request components);
 
     @GET
     @Path("internal/{name}/cluster_upgrade/reinitiable")
@@ -594,7 +595,8 @@ public interface StackV4Endpoint {
     @Operation(summary = STACK_UPGRADE_INTERNAL, operationId = "prepareClusterUpgradeByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier prepareClusterUpgradeByCrnInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
+            @Valid ClouderaManagerV4Request components);
 
     @PUT
     @Path("internal/{name}/check_rds_upgrade")

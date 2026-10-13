@@ -52,7 +52,7 @@ public class DatalakeUpgradePreparationActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradePreparationStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Data Lake upgrade preparation has been started for {}", payload.getResourceId());
-                upgradePrepareService.prepareUpgrade(payload.getResourceId(), payload.getImageId());
+                upgradePrepareService.prepareUpgrade(payload.getResourceId(), payload.getImageId(), payload.getComponents());
                 sendEvent(context, new SdxEvent(DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS_EVENT.event(), context));
             }
 

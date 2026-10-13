@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -36,15 +37,15 @@ public class SdxUpgradePrepareService {
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
-    public void prepareUpgrade(Long id, String imageId) {
+    public void prepareUpgrade(Long id, String imageId, ClouderaManagerV4Request components) {
         SdxCluster sdxCluster = sdxService.getById(id);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS, "Preparing Data Lake for upgrade",
                 sdxCluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            LOGGER.debug("Initiating upgrade prepare for {} with image {}", sdxCluster, imageId);
+            LOGGER.debug("Initiating upgrade prepare for {} with image {} and components {}", sdxCluster, imageId, components);
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, sdxCluster.getCrn(), imageId, initiatorUserCrn));
+                    () -> stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, sdxCluster.getCrn(), imageId, initiatorUserCrn, components));
             LOGGER.debug("Upgrade prepare initiated with flow {}", flowIdentifier);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {

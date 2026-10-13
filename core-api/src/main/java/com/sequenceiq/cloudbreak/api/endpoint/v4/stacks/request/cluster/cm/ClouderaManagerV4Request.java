@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm;
 
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.validation.Valid;
 
@@ -66,6 +67,25 @@ public class ClouderaManagerV4Request implements JsonEntity {
     public ClouderaManagerV4Request withEnableAutoTls(Boolean enableAutoTls) {
         setEnableAutoTls(enableAutoTls);
         return this;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        ClouderaManagerV4Request that = (ClouderaManagerV4Request) other;
+        return Objects.equals(repository, that.repository)
+                && Objects.equals(products, that.products)
+                && Objects.equals(enableAutoTls, that.enableAutoTls);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(repository, products, enableAutoTls);
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
@@ -84,13 +85,15 @@ public class SdxUpgradeService {
         }
     }
 
-    public void upgradeRuntime(Long id, String imageId, boolean rollingUpgradeEnabled) {
+    public void upgradeRuntime(Long id, String imageId, boolean rollingUpgradeEnabled, ClouderaManagerV4Request components) {
         SdxCluster sdxCluster = sdxService.getById(id);
         sendRuntimeUpgradeNotification(rollingUpgradeEnabled, sdxCluster);
+        LOGGER.debug("Initiating runtime upgrade for {} with image {} and components {}", sdxCluster, imageId, components);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn, rollingUpgradeEnabled));
+                    () -> stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn, rollingUpgradeEnabled,
+                            components));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);

@@ -3,13 +3,18 @@ package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     public static final String DATALAKE_UPGRADE_FLOW_CHAIN_EVENT = "DatalakeUpgradeFlowChainEvent";
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final ClouderaManagerV4Request components;
 
     private final String imageId;
 
@@ -34,7 +39,8 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
-            @JsonProperty("keepVariant") boolean keepVariant) {
+            @JsonProperty("keepVariant") boolean keepVariant,
+            @JsonProperty("components") ClouderaManagerV4Request components) {
         super(selector, sdxId, userId);
         this.imageId = imageId;
         this.replaceVms = replaceVms;
@@ -42,8 +48,13 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
         this.skipOptions = skipOptions;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
         this.keepVariant = keepVariant;
+        this.components = components;
     }
     //CHECKSTYLE:ON
+
+    public ClouderaManagerV4Request getComponents() {
+        return components;
+    }
 
     public String getImageId() {
         return imageId;
@@ -79,7 +90,8 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
         return isClassAndEqualsEvent(DatalakeUpgradeFlowChainStartEvent.class, other,
                 event -> Objects.equals(imageId, event.imageId)
                         && replaceVms == event.replaceVms
-                        && Objects.equals(backupLocation, event.backupLocation));
+                        && Objects.equals(backupLocation, event.backupLocation)
+                        && Objects.equals(components, event.components));
     }
 
     @Override
@@ -88,7 +100,10 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
                 "imageId='" + imageId + '\'' +
                 ", replaceVms=" + replaceVms +
                 ", backupLocation='" + backupLocation + '\'' +
-                ", rollingUpgradeEnabled='" + rollingUpgradeEnabled + '\'' +
+                ", skipOptions=" + skipOptions +
+                ", rollingUpgradeEnabled=" + rollingUpgradeEnabled +
+                ", keepVariant=" + keepVariant +
+                ", components=" + components +
                 "} " + super.toString();
     }
 }

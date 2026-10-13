@@ -1,5 +1,10 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import java.util.List;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 
@@ -30,4 +35,22 @@ public class SdxTestUtil {
         sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
     }
+
+    public static ClouderaManagerV4Request getUpgradeComponents() {
+        ClouderaManagerRepositoryV4Request repository = new ClouderaManagerRepositoryV4Request();
+        repository.setVersion("7.13.2.20000-83309838");
+        repository.setBaseUrl("https://repo.example.com/cm/");
+        repository.setGpgKeyUrl("https://repo.example.com/cm/key.asc");
+        ClouderaManagerProductV4Request cdh = new ClouderaManagerProductV4Request();
+        cdh.setName("CDH");
+        cdh.setVersion("7.3.2-1.cdh7.3.2.p20000.83281140");
+        cdh.setParcel("https://repo.example.com/cdh/");
+        ClouderaManagerProductV4Request cfm = new ClouderaManagerProductV4Request();
+        cfm.setName("CFM");
+        cfm.setVersion("2.2.9");
+        cfm.setParcel("https://repo.example.com/cfm/");
+        cfm.setCsd(List.of("https://repo.example.com/NIFI.jar", "https://repo.example.com/NIFIREGISTRY.jar"));
+        return new ClouderaManagerV4Request().withRepository(repository).withProducts(List.of(cdh, cfm));
+    }
+
 }

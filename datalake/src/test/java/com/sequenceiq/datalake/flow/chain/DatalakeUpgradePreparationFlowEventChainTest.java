@@ -39,8 +39,7 @@ public class DatalakeUpgradePreparationFlowEventChainTest {
     @Test
     public void chainCreationTest() {
         DatalakeUpgradePreparationFlowChainStartEvent event = new DatalakeUpgradePreparationFlowChainStartEvent(
-                SDX_ID, USER_CRN, IMAGE_ID, BACKUP_LOCATION
-        );
+                SDX_ID, USER_CRN, IMAGE_ID, BACKUP_LOCATION, null);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
         assertEquals(2, flowTriggerEventQueue.getQueue().size());
 

@@ -27,6 +27,7 @@ public class SdxUpgradeClusterConverter {
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setImageId(sdxUpgradeRequest.getImageId());
         upgradeV4Request.setRuntime(sdxUpgradeRequest.getRuntime());
+        upgradeV4Request.setComponents(sdxUpgradeRequest.getComponents());
         upgradeV4Request.setDryRun(sdxUpgradeRequest.isDryRun());
         upgradeV4Request.setLockComponents(sdxUpgradeRequest.getLockComponents());
         if (Objects.nonNull(sdxUpgradeRequest.getShowAvailableImages())) {

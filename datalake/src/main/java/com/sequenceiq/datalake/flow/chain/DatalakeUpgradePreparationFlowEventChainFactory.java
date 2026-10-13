@@ -31,7 +31,7 @@ public class DatalakeUpgradePreparationFlowEventChainFactory implements FlowEven
                 event.getResourceId(), event.getUserId(), event.getBackupLocation(),
                 DatalakeBackupFailureReason.BACKUP_ON_UPGRADE, event.accepted()));
         chain.add(new DatalakeUpgradePreparationStartEvent(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(), event.getResourceId(),
-                        event.getUserId(), event.getImageId()));
+                event.getUserId(), event.getImageId(), event.getComponents()));
         return new FlowTriggerEventQueue(getName(), event, chain);
     }
 }

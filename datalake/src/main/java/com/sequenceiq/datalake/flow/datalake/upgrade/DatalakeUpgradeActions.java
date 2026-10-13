@@ -82,7 +82,7 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Data Lake upgrade has been started for {}", payload.getResourceId());
-                sdxUpgradeService.upgradeRuntime(payload.getResourceId(), payload.getImageId(), payload.isRollingUpgradeEnabled());
+                sdxUpgradeService.upgradeRuntime(payload.getResourceId(), payload.getImageId(), payload.isRollingUpgradeEnabled(), payload.getComponents());
                 sendEvent(context, DATALAKE_UPGRADE_IN_PROGRESS_EVENT.event(), payload);
             }
 

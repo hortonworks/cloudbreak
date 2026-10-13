@@ -10,6 +10,7 @@ import static com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.Datala
 import static com.sequenceiq.flow.api.model.FlowType.FLOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +28,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -34,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -52,12 +56,16 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.datalake.restartservices.event.DatalakeRestartServicesStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradePreparationFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.preparation.event.DatalakeUpgradePreparationStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateEvent;
 import com.sequenceiq.datalake.service.sdx.EnvironmentService;
+import com.sequenceiq.datalake.service.sdx.SdxTestUtil;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
@@ -125,12 +133,36 @@ class SdxReactorFlowManagerTest {
         lenient().doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
+    @ParameterizedTest
+    @CsvSource({"false,false", "false,true", "true,false", "true,true"})
+    void testComponentsAreForwarded(boolean preparation, boolean backup) {
+        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster)).thenReturn(backup);
+        ClouderaManagerV4Request components = SdxTestUtil.getUpgradeComponents();
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        if (preparation) {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                    () -> underTest.triggerDatalakeRuntimeUpgradePreparationFlow(sdxCluster, IMAGE_ID, false, components));
+        } else {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID,
+                    SdxUpgradeReplaceVms.DISABLED, false, SKIP_OPTIONS, false, false, components));
+        }
+
+        verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
+        if (preparation) {
+            assertSame(components, backup ? ((DatalakeUpgradePreparationFlowChainStartEvent) captor.getValue()).getComponents()
+                    : ((DatalakeUpgradePreparationStartEvent) captor.getValue()).getComponents());
+        } else {
+            assertSame(components, backup ? ((DatalakeUpgradeFlowChainStartEvent) captor.getValue()).getComponents()
+                    : ((DatalakeUpgradeStartEvent) captor.getValue()).getComponents());
+        }
+    }
+
     @Test
     void testSdxBackupOnUpgradeSupportedPlatform() {
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any())).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null));
         verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -139,13 +171,13 @@ class SdxReactorFlowManagerTest {
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any())).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
 
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any())).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -156,7 +188,7 @@ class SdxReactorFlowManagerTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -167,7 +199,7 @@ class SdxReactorFlowManagerTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_EVENT.event()), any(Event.class));
     }
 
@@ -178,7 +210,7 @@ class SdxReactorFlowManagerTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, true,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_EVENT.event()), any(Event.class));
     }
 
@@ -192,7 +224,7 @@ class SdxReactorFlowManagerTest {
     @Test
     public void testTriggerDatalakeRuntimeUpgradePreparationFlow() {
         FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradePreparationFlow(sdxCluster, IMAGE_ID,
-                false));
+                false, null));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event()), any(Event.class));
         assertEquals(FLOW, result.getType());
         assertEquals("flowId", result.getPollableId());
@@ -270,7 +302,7 @@ class SdxReactorFlowManagerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradeFlow(
                 sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED,
-                TestConstants.DO_NOT_KEEP_VARIANT));
+                TestConstants.DO_NOT_KEEP_VARIANT, null));
 
         verify(eventFactory).createEventWithErrHandler(anyMap(), argumentCaptor.capture());
         DatalakeUpgradeFlowChainStartEvent upgradeEvent = (DatalakeUpgradeFlowChainStartEvent) argumentCaptor.getValue();

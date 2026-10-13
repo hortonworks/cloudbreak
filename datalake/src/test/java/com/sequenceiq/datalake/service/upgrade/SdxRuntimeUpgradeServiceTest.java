@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -34,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -44,6 +47,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
@@ -66,6 +70,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.chain.DatalakeUpgradeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.SdxTestUtil;
 import com.sequenceiq.datalake.service.validation.upgrade.SdxUpgradeValidator;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -164,6 +169,34 @@ class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeFilter = new SdxUpgradeFilter();
         ReflectionTestUtils.setField(sdxUpgradeFilter, "entitlementService", entitlementService, EntitlementService.class);
         ReflectionTestUtils.setField(underTest, "upgradeFilter", sdxUpgradeFilter, SdxUpgradeFilter.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testUpgradeAndPreparationForwardComponents(boolean preparation) {
+        ClouderaManagerV4Request components = SdxTestUtil.getUpgradeComponents();
+        sdxUpgradeRequest.setComponents(components);
+        sdxUpgradeRequest.setLockComponents(false);
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(sdxCluster);
+        ArgumentCaptor<UpgradeV4Request> requestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), requestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
+        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any())).thenCallRealMethod();
+        ImageInfoV4Response candidate = new ImageInfoV4Response();
+        candidate.setImageId(IMAGE_ID);
+        candidate.setComponentVersions(createExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(candidate));
+        when(messagesService.getMessage(anyString(), anyList())).thenReturn("message");
+
+        doAs(USER_CRN, () -> underTest.triggerUpgradeByCrn(USER_CRN, CLUSTER_CRN, sdxUpgradeRequest, preparation));
+
+        assertSame(components, requestCaptor.getValue().getComponents());
+        if (preparation) {
+            verify(sdxReactorFlowManager).triggerDatalakeRuntimeUpgradePreparationFlow(eq(sdxCluster), eq(IMAGE_ID), anyBoolean(), eq(components));
+        } else {
+            verify(sdxReactorFlowManager).triggerDatalakeRuntimeUpgradeFlow(eq(sdxCluster), eq(IMAGE_ID), any(), anyBoolean(), any(),
+                    anyBoolean(), anyBoolean(), eq(components));
+        }
     }
 
     @Test
@@ -286,9 +319,9 @@ class SdxRuntimeUpgradeServiceTest {
                 underTest.triggerUpgradeByCrn(USER_CRN, CLUSTER_CRN, sdxUpgradeRequest, false));
 
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null);
         assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
@@ -320,9 +353,9 @@ class SdxRuntimeUpgradeServiceTest {
                 underTest.triggerUpgradeByCrn(USER_CRN, CLUSTER_CRN, sdxUpgradeRequest, false));
 
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null);
         assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
@@ -349,7 +382,7 @@ class SdxRuntimeUpgradeServiceTest {
         doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, CLUSTER_CRN, sdxUpgradeRequest, false));
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                skipOptions, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+                skipOptions, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null);
         assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
@@ -435,9 +468,9 @@ class SdxRuntimeUpgradeServiceTest {
         doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, CLUSTER_CRN, sdxUpgradeRequest, false));
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT, null);
         assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
@@ -810,8 +843,9 @@ class SdxRuntimeUpgradeServiceTest {
         assertEquals("There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", result.reason());
     }
 
-    @Test
-    void testReinitiateClusterUpgrade() {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testReinitiateClusterUpgrade(boolean withComponents) {
         ArgumentCaptor<UpgradeV4Request> upgradeRequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(0L, STACK_NAME, USER_CRN)).thenReturn(
                 getUpgradeReinitiableV4Response(
@@ -820,8 +854,9 @@ class SdxRuntimeUpgradeServiceTest {
         );
         when(sdxService.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(STACK_NAME))).thenReturn(getValidSdxCluster());
         when(datalakeUpgradeFlowEventChainFactory.getName()).thenCallRealMethod();
+        ClouderaManagerV4Request components = withComponents ? SdxTestUtil.getUpgradeComponents() : null;
         DatalakeUpgradeFlowChainStartEvent expectedTriggerEvent = new DatalakeUpgradeFlowChainStartEvent(
-                DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, 1L, "1", IMAGE_ID, false, null, null, true, false);
+                DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, 1L, "1", IMAGE_ID, false, null, null, true, false, components);
         FlowChainLog flowChainLog = mock();
         when(flowChainLog.getTriggerEventJackson()).thenReturn(new Json(expectedTriggerEvent).getValue());
         when(flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(1L, "DatalakeUpgradeFlowEventChainFactory"))
@@ -839,7 +874,7 @@ class SdxRuntimeUpgradeServiceTest {
         when(messagesService.getMessage(eq(ResourceEvent.DATALAKE_UPGRADE.getMessage()), anyList())).thenReturn("message");
         FlowIdentifier flowIdentifier = mock();
         when(sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(eq(sdxCluster), eq(IMAGE_ID), eq(SdxUpgradeReplaceVms.ENABLED), eq(false), any(),
-                eq(true), eq(false))).thenReturn(flowIdentifier);
+                eq(true), eq(false), eq(components))).thenReturn(flowIdentifier);
 
         SdxUpgradeResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitiateClusterUpgrade(NameOrCrn.ofName(STACK_NAME)));
 
@@ -847,6 +882,14 @@ class SdxRuntimeUpgradeServiceTest {
         assertEquals("message", result.getReason());
         verify(stackV4Endpoint).checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeRequestCaptor.capture(), eq(ACCOUNT_ID));
         assertTrue(upgradeRequestCaptor.getValue().getInternalUpgradeSettings().isUpgradeReinitiation());
+        ClouderaManagerV4Request restoredComponents = upgradeRequestCaptor.getValue().getComponents();
+        if (withComponents) {
+            assertEquals(components.getRepository().getBaseUrl(), restoredComponents.getRepository().getBaseUrl());
+            assertEquals(components.getProducts().getFirst().getParcel(), restoredComponents.getProducts().getFirst().getParcel());
+            assertEquals(components.getProducts().get(1).getCsd(), restoredComponents.getProducts().get(1).getCsd());
+        } else {
+            assertNull(restoredComponents);
+        }
     }
 
     @Test
@@ -876,7 +919,8 @@ class SdxRuntimeUpgradeServiceTest {
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitiateClusterUpgrade(NameOrCrn.ofName(STACK_NAME))));
 
         verify(stackV4Endpoint, never()).checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString());
-        verify(sdxReactorFlowManager, never()).triggerDatalakeRuntimeUpgradeFlow(any(), anyString(), any(), anyBoolean(), any(), anyBoolean(), anyBoolean());
+        verify(sdxReactorFlowManager, never()).triggerDatalakeRuntimeUpgradeFlow(any(), anyString(), any(), anyBoolean(), any(),
+                anyBoolean(), anyBoolean(), isNull());
     }
 
     private static UpgradeReinitiableV4Response getUpgradeReinitiableV4Response() {

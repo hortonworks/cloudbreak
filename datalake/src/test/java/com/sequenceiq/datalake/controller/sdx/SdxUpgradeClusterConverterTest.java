@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
+import com.sequenceiq.datalake.service.sdx.SdxTestUtil;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
@@ -55,6 +58,19 @@ public class SdxUpgradeClusterConverterTest {
         assertEquals(UpgradeShowAvailableImages.LATEST_ONLY, actual.getShowAvailableImages());
         assertTrue(actual.getReplaceVms());
         assertTrue(actual.isSkipDataHubValidation());
+        assertNull(actual.getComponents());
+    }
+
+    @Test
+    void testSdxUpgradeRequestToUpgradeV4RequestWithComponents() {
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        request.setImageId(IMAGE_ID);
+        request.setComponents(SdxTestUtil.getUpgradeComponents());
+
+        UpgradeV4Request actual = underTest.sdxUpgradeRequestToUpgradeV4Request(request);
+
+        assertEquals(IMAGE_ID, actual.getImageId());
+        assertSame(request.getComponents(), actual.getComponents());
     }
 
     @Test

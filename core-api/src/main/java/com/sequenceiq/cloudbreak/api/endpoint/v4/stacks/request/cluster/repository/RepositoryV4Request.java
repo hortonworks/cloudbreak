@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.repository;
 
+import java.util.Objects;
+
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -47,6 +49,25 @@ public class RepositoryV4Request implements JsonEntity {
 
     public void setGpgKeyUrl(String gpgKeyUrl) {
         this.gpgKeyUrl = gpgKeyUrl;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        RepositoryV4Request that = (RepositoryV4Request) other;
+        return Objects.equals(version, that.version)
+                && Objects.equals(baseUrl, that.baseUrl)
+                && Objects.equals(gpgKeyUrl, that.gpgKeyUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(version, baseUrl, gpgKeyUrl);
     }
 
     @Override
