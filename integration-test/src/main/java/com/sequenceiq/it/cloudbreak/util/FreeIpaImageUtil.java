@@ -88,7 +88,8 @@ public class FreeIpaImageUtil {
     }
 
     private boolean hasImageOnCloudProvider(Image image, String cloudProvider) {
-        return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase());
+        return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase())
+                && Architecture.X86_64.name().equalsIgnoreCase(image.getArchitecture());
     }
 
     private List<Image> filterPublished(ImageCatalog imageCatalog, List<Image> images) {
@@ -102,7 +103,8 @@ public class FreeIpaImageUtil {
 
     private boolean hasImageOnClouderProvider(Image image, String cloudProvider, String region) {
         return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase())
-                && image.getImageSetsByProvider().get(cloudProvider.toLowerCase()).containsKey(region);
+                && image.getImageSetsByProvider().get(cloudProvider.toLowerCase()).containsKey(region)
+                && Architecture.X86_64.name().equalsIgnoreCase(image.getArchitecture());
     }
 
     private boolean hasArchitecture(Image image, Architecture architecture) {
