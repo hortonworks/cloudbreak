@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -829,5 +833,45 @@ public class AzureVolumeResourceBuilderTest {
         assertThat(resultVolumes.get(0).getId()).contains("disk-1");
         assertThat(resultVolumes.get(1).getId()).contains("disk-2");
         assertThat(resultVolumes.get(2).getId()).contains("disk-3");
+    }
+
+    @Test
+    void testFailedDiskCreationIsRethrownWithAzureErrorDetails() throws Exception {
+        when(intermediateBuilderExecutor.submit(any(Runnable.class))).thenAnswer(invocation -> future);
+        ManagementException managementException = new ManagementException("Long running operation is Failed or Cancelled.", null);
+        when(future.get()).thenThrow(new ExecutionException(managementException));
+        ManagementException detailed = new ManagementException("detailed", null);
+        when(azureUtils.withDetailedMessage(managementException, "Managed disk creation")).thenReturn(detailed);
+
+        ManagementException result = assertThrows(ManagementException.class,
+                () -> underTest.build(auth, group, List.of(createRequestedVolumeSet()), cloudStack, null, null));
+
+        assertSame(detailed, result);
+    }
+
+    @Test
+    void testFailedDiskCreationWithNonAzureCauseIsRethrown() throws Exception {
+        when(intermediateBuilderExecutor.submit(any(Runnable.class))).thenAnswer(invocation -> future);
+        ExecutionException executionException = new ExecutionException(new IllegalStateException("boom"));
+        when(future.get()).thenThrow(executionException);
+
+        ExecutionException result = assertThrows(ExecutionException.class,
+                () -> underTest.build(auth, group, List.of(createRequestedVolumeSet()), cloudStack, null, null));
+
+        assertSame(executionException, result);
+        verify(azureUtils, never()).withDetailedMessage(any(), any());
+    }
+
+    private CloudResource createRequestedVolumeSet() {
+        List<VolumeSetAttributes.Volume> volumes = List.of(
+                new VolumeSetAttributes.Volume("disk-1", null, 100, "StandardSSD_LRS", CloudVolumeUsageType.GENERAL));
+        return CloudResource.builder()
+                .withType(ResourceType.AZURE_VOLUMESET)
+                .withStatus(CommonStatus.REQUESTED)
+                .withName("volumeset-1")
+                .withAvailabilityZone(AVAILABILITY_ZONE)
+                .withParameters(Map.of(CloudResource.ATTRIBUTES,
+                        new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, 100, "StandardSSD_LRS")))
+                .build();
     }
 }

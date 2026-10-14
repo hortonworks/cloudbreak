@@ -17,6 +17,7 @@ import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDeploymentCapacityError;
 import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 
@@ -94,7 +95,7 @@ public class AzureExceptionHandler {
             }
             if (isCapacityError(me)) {
                 LOGGER.debug("Re-throwing as InsufficientCapacityException", me);
-                throw new InsufficientCapacityException(me);
+                throw new InsufficientCapacityException(AzureUtils.getErrorMessage(me, "Azure operation"), me);
             }
             throw me;
         }

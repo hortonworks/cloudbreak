@@ -4,9 +4,11 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_VOLUMESET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,11 +32,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureDiskWithLun;
@@ -58,6 +62,9 @@ public class AzureAttachmentResourceBuilderTest {
 
     @Spy
     private AzureInstanceFinder azureInstanceFinder;
+
+    @Mock
+    private AzureUtils azureUtils;
 
     @InjectMocks
     private AzureAttachmentResourceBuilder underTest;
@@ -299,5 +306,43 @@ public class AzureAttachmentResourceBuilderTest {
                 .withParameters(parameters)
                 .withInstanceId(resourceType.name() + "1")
                 .build();
+    }
+
+    @Test
+    public void testFailedAttachmentIsRethrownWithAzureErrorDetails() {
+        List<VolumeSetAttributes.Volume> volumes = List.of(
+                new VolumeSetAttributes.Volume("disk", null, null, null, null)
+        );
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(null, null, null,
+                volumes, null, null);
+        CloudResource instanceResource = createResource(AZURE_INSTANCE, Map.of());
+        List<CloudResource> buildableResource = Lists.newArrayList(
+                instanceResource,
+                createResource(AZURE_VOLUMESET, Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+        );
+        CloudInstance cloudInstance = new CloudInstance("instance", null, null, null, null, Map.of());
+        AuthenticatedContext auth = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        Disk disk = mock(Disk.class);
+        when(virtualMachine.dataDisks()).thenReturn(Map.of());
+        when(virtualMachine.name()).thenReturn("vm1");
+        when(auth.getCloudContext()).thenReturn(mock(CloudContext.class));
+        when(auth.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
+        when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(Optional.of(virtualMachine));
+        when(azureClient.getDiskById(any())).thenReturn(disk);
+        when(disk.id()).thenReturn("diskid");
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("resourceGroup");
+        ManagementException managementException = new ManagementException("Long running operation is Failed or Cancelled.", null);
+        doThrow(managementException).when(azureClient).attachDisksToVmWithLun(any(), eq(virtualMachine));
+        ManagementException detailed = new ManagementException("detailed", null);
+        when(azureUtils.withDetailedMessage(managementException, "Attaching volumes to virtual machine vm1")).thenReturn(detailed);
+        AzureContext azureContext = mock(AzureContext.class);
+        when(azureContext.getComputeResources(1L)).thenReturn(List.of(instanceResource));
+
+        ManagementException result = assertThrows(ManagementException.class,
+                () -> underTest.build(azureContext, cloudInstance, 1L, auth, null, buildableResource, mock(CloudStack.class)));
+
+        assertSame(detailed, result);
     }
 }

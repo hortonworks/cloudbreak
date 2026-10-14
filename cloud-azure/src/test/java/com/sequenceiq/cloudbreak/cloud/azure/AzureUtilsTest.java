@@ -41,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.azure.core.http.HttpResponse;
 import com.azure.core.management.exception.AdditionalInfo;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
@@ -773,5 +774,39 @@ class AzureUtilsTest {
                 Arguments.of("subnet1", List.of("subnet1")),
                 Arguments.of("subnet2,subnet1", List.of("subnet1", "subnet2"))
         );
+    }
+
+    @Test
+    void withDetailedMessageKeepsArmErrorDetails() {
+        ManagementError managementError = AzureTestUtils.managementError("ResourceOperationFailure",
+                "The resource operation completed with terminal provisioning state 'Failed'.");
+        AzureTestUtils.setDetails(managementError,
+                List.of(AzureTestUtils.managementError("InternalExecutionError", "An internal execution error occurred. Please retry later.")));
+        HttpResponse response = mock(HttpResponse.class);
+        when(response.getBodyAsString()).thenReturn(Mono.just("{\"status\":\"Failed\"}"));
+        ManagementException e = new ManagementException("Long running operation is Failed or Cancelled.", response, managementError);
+
+        ManagementException result = underTest.withDetailedMessage(e, "Attaching volumes to virtual machine vm1");
+
+        assertThat(result).hasMessage("Attaching volumes to virtual machine vm1 failed, status code ResourceOperationFailure, "
+                + "error message: The resource operation completed with terminal provisioning state 'Failed'., "
+                + "details: An internal execution error occurred. Please retry later.");
+        assertThat(result.getValue()).isSameAs(managementError);
+        assertThat(result.getResponse()).isSameAs(response);
+        assertThat(result).hasCause(e);
+        verify(response).getBodyAsString();
+    }
+
+    @Test
+    void withDetailedMessageWhenResponseBodyIsNotReadable() {
+        HttpResponse response = mock(HttpResponse.class);
+        when(response.getBodyAsString()).thenReturn(Mono.error(new IllegalStateException("body already consumed")));
+        ManagementException e = new ManagementException("Long running operation is Failed or Cancelled.", response);
+
+        ManagementException result = underTest.withDetailedMessage(e, "Managed disk creation");
+
+        assertThat(result).hasMessage(
+                "Managed disk creation failed: 'Long running operation is Failed or Cancelled.', please go to Azure Portal for detailed message");
+        assertThat(result).hasCause(e);
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -28,6 +29,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
@@ -288,7 +290,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     private void awaitVolumeCreation(List<Future<?>> futures) throws Exception {
         LOGGER.debug("Waiting for volumes creation requests ({} futures)", futures.size());
         for (Future<?> future : futures) {
-            future.get();
+            try {
+                future.get();
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof ManagementException managementException) {
+                    throw azureUtils.withDetailedMessage(managementException, "Managed disk creation");
+                }
+                throw e;
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.util;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
@@ -31,6 +32,8 @@ import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureExceptionHandlerTest {
@@ -268,4 +271,24 @@ public class AzureExceptionHandlerTest {
         assertFalse(underTest.isExceptionCodeConflict(null));
     }
 
+    @Test
+    void handleExceptionWhenCapacityErrorThenThrowsInsufficientCapacityExceptionWithAzureErrorDetails() {
+        ManagementError skuNotAvailable = AzureTestUtils.managementError("SkuNotAvailable", "The requested SKU is not available.");
+        ManagementError resourceFailure = AzureTestUtils.managementError("ResourceDeploymentFailure",
+                "The resource write operation failed to complete successfully.");
+        AzureTestUtils.setDetails(resourceFailure, List.of(skuNotAvailable));
+        ManagementError deploymentFailed = AzureTestUtils.managementError("DeploymentFailed", "At least one resource deployment operation failed.");
+        AzureTestUtils.setDetails(deploymentFailed, List.of(resourceFailure));
+        ManagementException managementException = new ManagementException("Long running operation is Failed or Cancelled.", null, deploymentFailed);
+        Supplier<String> stringSupplier = () -> {
+            throw managementException;
+        };
+
+        InsufficientCapacityException result = assertThrows(InsufficientCapacityException.class, () -> underTest.handleException(stringSupplier));
+
+        assertEquals("Azure operation failed, status code DeploymentFailed, error message: At least one resource deployment operation failed., "
+                + "details: The resource write operation failed to complete successfully. (details: The requested SKU is not available.)",
+                result.getMessage());
+        assertSame(managementException, result.getCause());
+    }
 }

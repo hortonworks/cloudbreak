@@ -14,10 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureDiskWithLun;
@@ -44,6 +46,9 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
 
     @Inject
     private AzureInstanceFinder azureInstanceFinder;
+
+    @Inject
+    private AzureUtils azureUtils;
 
     @Override
     public List<CloudResource> create(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -84,6 +89,15 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     }
 
     private void attachVolumesIfNeeded(AzureClient client, VirtualMachine vm, Set<String> diskIds, List<VolumeSetAttributes.Volume> volumes,
+            String volumeFqdn, Object instanceFqdn) {
+        try {
+            attachMissingVolumes(client, vm, diskIds, volumes, volumeFqdn, instanceFqdn);
+        } catch (ManagementException e) {
+            throw azureUtils.withDetailedMessage(e, "Attaching volumes to virtual machine " + vm.name());
+        }
+    }
+
+    private void attachMissingVolumes(AzureClient client, VirtualMachine vm, Set<String> diskIds, List<VolumeSetAttributes.Volume> volumes,
             String volumeFqdn, Object instanceFqdn) {
         List<AzureDiskWithLun> disks = new ArrayList<>();
         for (VolumeSetAttributes.Volume volume : volumes) {

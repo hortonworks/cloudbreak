@@ -802,6 +802,13 @@ public class AzureUtils {
         return convertToCloudConnectorException(e, actionDescription, errorMessage);
     }
 
+    public ManagementException withDetailedMessage(ManagementException e, String actionDescription) {
+        LOGGER.warn("{} failed, Azure response body: {}", actionDescription, getResponseBody(e));
+        ManagementException detailed = new ManagementException(getErrorMessage(e, actionDescription), e.getResponse(), e.getValue());
+        detailed.initCause(e);
+        return detailed;
+    }
+
     public CloudConnectorException convertToCloudConnectorExceptionWithFailureReason(ManagementException e, String actionDescription,
             String operationFailureReason) {
         String errorMessage = operationFailureReason == null
@@ -819,6 +826,15 @@ public class AzureUtils {
         }
     }
 
+    private String getResponseBody(ManagementException e) {
+        try {
+            return e.getResponse() == null ? null : e.getResponse().getBodyAsString().block();
+        } catch (RuntimeException ex) {
+            LOGGER.debug("Could not read the Azure response body", ex);
+            return null;
+        }
+    }
+
     public static String extractErrorMessage(Throwable e) {
         if (e instanceof ManagementException managementException
                 && managementException.getValue() != null
@@ -828,9 +844,9 @@ public class AzureUtils {
         return e.getMessage();
     }
 
-    private String getErrorMessage(ManagementException e, String actionDescription) {
+    public static String getErrorMessage(ManagementException e, String actionDescription) {
         if (e.getValue() != null && e.getValue().getDetails() != null) {
-            String details = e.getValue().getDetails().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
+            String details = e.getValue().getDetails().stream().map(AzureUtils::getCloudErrorMessage).collect(Collectors.joining(", "));
             return String.format("%s failed, status code %s, error message: %s, details: %s",
                     actionDescription, e.getValue().getCode(), e.getValue().getMessage(), details);
         } else if (e.getValue() != null && e.getValue().getMessage() != null) {
@@ -847,8 +863,8 @@ public class AzureUtils {
                 .anyMatch(error -> errorMessage.contains(error.getMessageFragment()));
     }
 
-    private String getCloudErrorMessage(ManagementError cloudError) {
-        if (cloudError.getCode().equals("RequestDisallowedByPolicy")) {
+    private static String getCloudErrorMessage(ManagementError cloudError) {
+        if ("RequestDisallowedByPolicy".equals(cloudError.getCode())) {
             String message = cloudError.getMessage().replace("See error details for policy resource IDs.", "");
             return message + cloudError.getAdditionalInfo()
                     .stream()
