@@ -8,7 +8,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
@@ -95,10 +94,7 @@ public class LegacyRestCommonService {
     }
 
     private Json getJson(String body) {
-        if (body != null && StringUtils.isNotEmpty(body.trim())) {
-            if (!JsonUtil.isValid(body)) {
-                throw new IllegalArgumentException("Invalid json: " + AnonymizerUtil.anonymize(body));
-            }
+        if (body != null && StringUtils.isNotEmpty(body.trim()) && JsonUtil.isValid(body)) {
             return new Json(body);
         }
         return null;
