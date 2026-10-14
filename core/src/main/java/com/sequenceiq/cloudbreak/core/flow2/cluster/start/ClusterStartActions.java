@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarCon
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRotateHostCertificateRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRotateHostCertificateResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DnsUpdateFinished;
 import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -88,11 +90,21 @@ public class ClusterStartActions {
         };
     }
 
-    @Bean(name = "UPDATING_DNS_IN_PEM_STATE")
-    public Action<?, ?> updateClusterDnsEntriesInPem() {
+    @Bean(name = "CLUSTER_START_ROTATE_HOST_CERTIFICATE_STATE")
+    public Action<?, ?> rotateHostCertificateIfNeeded() {
         return new AbstractClusterAction<>(ClusterStartPillarConfigUpdateResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStartPillarConfigUpdateResult payload, Map<Object, Object> variables) {
+                sendEvent(context, new ClusterStartRotateHostCertificateRequest(context.getStackId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPDATING_DNS_IN_PEM_STATE")
+    public Action<?, ?> updateClusterDnsEntriesInPem() {
+        return new AbstractClusterAction<>(ClusterStartRotateHostCertificateResult.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, ClusterStartRotateHostCertificateResult payload, Map<Object, Object> variables) {
                 StackDto stack = stackDtoService.getById(payload.getResourceId());
                 clusterStartService.updateDnsEntriesInPem(stack);
                 sendEvent(context);

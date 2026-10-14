@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarCo
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDbCertRotationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRotateHostCertificateResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DnsUpdateFinished;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -11,6 +12,8 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 public enum ClusterStartEvent implements FlowEvent {
     CLUSTER_START_EVENT("CLUSTER_START_TRIGGER_EVENT"),
     CLUSTER_START_PILLAR_CONFIG_UPDATE_FINISHED_EVENT(EventSelectorUtil.selector(ClusterStartPillarConfigUpdateResult.class)),
+    CLUSTER_START_ROTATE_HOST_CERTIFICATE_FINISHED_EVENT(EventSelectorUtil.selector(ClusterStartRotateHostCertificateResult.class)),
+    CLUSTER_START_ROTATE_HOST_CERTIFICATE_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterStartRotateHostCertificateResult.class)),
     CLUSTER_DB_CERT_ROTATION_FINISH_EVENT(EventSelectorUtil.selector(ClusterDbCertRotationResult.class)),
     CLUSTER_DB_CERT_ROTATION_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterDbCertRotationResult.class)),
     CLUSTER_START_PILLAR_CONFIG_UPDATE_FAILED_EVENT(EventSelectorUtil.selector(PillarConfigUpdateFailed.class)),
