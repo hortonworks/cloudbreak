@@ -30,13 +30,11 @@ class MaintenanceServiceConditionsTest {
                         mock(MaintenanceWindowTaskEndpoint.class));
                 context.getBeanFactory().registerSingleton("stackDtoService", mock(StackDtoService.class));
             })
-            .withUserConfiguration(MaintenanceWindowScheduleLookupService.class,
-                    MaintenanceWindowSecretRotationTaskRegistrar.class);
+            .withUserConfiguration(MaintenanceWindowSecretRotationTaskRegistrar.class);
 
     @Test
     void servicesAreAbsentWhenUrlPropertyIsUnset() {
         contextRunner.run(context -> assertThat(context)
-                .doesNotHaveBean(MaintenanceWindowScheduleLookupService.class)
                 .doesNotHaveBean(MaintenanceWindowSecretRotationTaskRegistrar.class));
     }
 
@@ -45,7 +43,6 @@ class MaintenanceServiceConditionsTest {
         contextRunner
                 .withPropertyValues(MaintenanceServiceConditions.URL_PROPERTY + "=")
                 .run(context -> assertThat(context)
-                        .doesNotHaveBean(MaintenanceWindowScheduleLookupService.class)
                         .doesNotHaveBean(MaintenanceWindowSecretRotationTaskRegistrar.class));
     }
 
@@ -54,7 +51,6 @@ class MaintenanceServiceConditionsTest {
         contextRunner
                 .withPropertyValues(MaintenanceServiceConditions.URL_PROPERTY + "=   ")
                 .run(context -> assertThat(context)
-                        .doesNotHaveBean(MaintenanceWindowScheduleLookupService.class)
                         .doesNotHaveBean(MaintenanceWindowSecretRotationTaskRegistrar.class));
     }
 
@@ -63,7 +59,6 @@ class MaintenanceServiceConditionsTest {
         contextRunner
                 .withPropertyValues(MaintenanceServiceConditions.URL_PROPERTY + "=http://localhost:8080")
                 .run(context -> assertThat(context)
-                        .hasSingleBean(MaintenanceWindowScheduleLookupService.class)
                         .hasSingleBean(MaintenanceWindowSecretRotationTaskRegistrar.class));
     }
 }

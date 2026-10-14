@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
@@ -17,8 +18,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
+import com.sequenceiq.datalake.maintenancewindow.MaintenanceServiceConditions;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
+import com.sequenceiq.maintenance.client.internal.MaintenanceApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -59,6 +62,10 @@ public class AppConfig implements AsyncConfigurer {
     private String freeIpaServerUrl;
 
     @Inject
+    @Named("maintenanceServerUrl")
+    private String maintenanceServerUrl;
+
+    @Inject
     private MeterRegistry meterRegistry;
 
     @Bean
@@ -79,6 +86,12 @@ public class AppConfig implements AsyncConfigurer {
     @Bean
     public FreeIpaApiClientParams freeIpaApiClientParams() {
         return new FreeIpaApiClientParams(restDebug, certificateValidation, ignorePreValidation, freeIpaServerUrl);
+    }
+
+    @Bean
+    @ConditionalOnExpression(MaintenanceServiceConditions.URL_CONFIGURED)
+    public MaintenanceApiClientParams maintenanceApiClientParams() {
+        return new MaintenanceApiClientParams(restDebug, certificateValidation, ignorePreValidation, maintenanceServerUrl);
     }
 
     @Bean(name = DELAYED_TASK_EXECUTOR)

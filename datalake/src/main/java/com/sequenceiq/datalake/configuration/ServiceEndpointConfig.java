@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.configuration;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.DependsOn;
 
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
+import com.sequenceiq.datalake.maintenancewindow.MaintenanceServiceConditions;
 
 @Configuration
 public class ServiceEndpointConfig {
@@ -49,6 +51,15 @@ public class ServiceEndpointConfig {
     @Value("${datalake.freeipa.serviceId:}")
     private String freeipaServiceId;
 
+    @Value("${" + MaintenanceServiceConditions.URL_PROPERTY + ":}")
+    private String maintenanceServiceUrl;
+
+    @Value("${datalake.maintenance.contextPath:/maintenance}")
+    private String maintenanceContextPath;
+
+    @Value("${datalake.maintenance.serviceid:}")
+    private String maintenanceServiceId;
+
     @Inject
     private ServiceAddressResolver serviceAddressResolver;
 
@@ -74,5 +85,14 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String freeIpaServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(freeipaServiceUrl + freeipaRootContextPath, "http", freeipaServiceId);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String maintenanceServerUrl() throws ServiceAddressResolvingException {
+        if (StringUtils.isBlank(maintenanceServiceUrl)) {
+            return "";
+        }
+        return serviceAddressResolver.resolveUrl(maintenanceServiceUrl + maintenanceContextPath, "http", maintenanceServiceId);
     }
 }
