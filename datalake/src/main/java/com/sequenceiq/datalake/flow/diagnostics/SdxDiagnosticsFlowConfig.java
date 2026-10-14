@@ -78,7 +78,7 @@ public class SdxDiagnosticsFlowConfig extends AbstractFlowConfiguration<SdxDiagn
 
     @Override
     public String getDisplayName() {
-        return "Collect diagnostics for SDX cluster";
+        return "Collect diagnostics for Data Lake cluster";
     }
 
     @Override

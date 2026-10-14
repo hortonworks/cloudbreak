@@ -105,7 +105,7 @@ class DatalakeRestartServicesWaitHandlerTest {
                 .returns(USER_ID, SdxEvent::getUserId);
         assertThat(result.getException())
                 .isInstanceOf(PollerStoppedException.class)
-                .hasMessage("Datalake restart services timed out after " + DURATION_IN_MINUTES + " minutes");
+                .hasMessage("Data Lake restart services timed out after " + DURATION_IN_MINUTES + " minutes");
     }
 
     @Test

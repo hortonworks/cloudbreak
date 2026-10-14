@@ -27,7 +27,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "Create datalake cluster and then delete",
+            given = "Create Data Lake cluster and then delete",
             when = "create cluster and if available then delete",
             then = "the cluster should work")
     public void testCreateDatalakeDelete(MockedTestContext testContext) {
@@ -49,8 +49,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "Create datalake cluster and workload",
-            when = "call create cluster with datalake and with workload config",
+            given = "Create Data Lake cluster and workload",
+            when = "call create cluster with Data Lake and with workload config",
             then = "will work fine")
     public void testSameEnvironmentInDatalakeAndWorkload(MockedTestContext testContext) {
         testContext

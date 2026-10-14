@@ -167,7 +167,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
     public void validateClusterForDatalake(
             OnPremisesApiProto.ValidateClusterForDatalakeRequest request,
             StreamObserver<OnPremisesApiProto.ValidateClusterForDatalakeResponse> responseObserver) {
-        LOGGER.info("Validating Classic Cluster {} for datalake result is {}", request.getClusterCrn(), passValidationForDatalake);
+        LOGGER.info("Validating Classic Cluster {} for Data Lake result is {}", request.getClusterCrn(), passValidationForDatalake);
         List<OnPremisesApiProto.DatalakeValidation> validations = Arrays.stream(OnPremisesApiProto.DatalakeValidationType.Value.values())
                 .filter(validationType -> !Set.of(UNSET, UNRECOGNIZED).contains(validationType))
                 .map(validationType -> OnPremisesApiProto.DatalakeValidation.newBuilder()
@@ -190,7 +190,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
         }
         return switch (validationType) {
             case CLUSTER_TYPE_CDPDC -> "Cluster type is not CDPDC.";
-            case CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9 -> "Cloudera runtime version 7.1.0 cannot be considered as datalake.";
+            case CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9 -> "Cloudera runtime version 7.1.0 cannot be considered as Data Lake.";
             case KERBERIZED -> "Cluster not kerberized.";
             case NOT_COMPUTE_CLUSTER -> "Cloudera Manager is a 'COMPUTE' type cluster.";
             default -> "Default MOCK validation reason";

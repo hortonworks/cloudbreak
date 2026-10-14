@@ -36,7 +36,7 @@ public class DistroXJavaTests extends AbstractMockTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
+    @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state",
             when = "set default Java version on the DistroX cluster",
             then = "DistroX default Java version should be set, the cluster should be up and running")
     public void testSetDefaultJavaVersion(TestContext testContext) {

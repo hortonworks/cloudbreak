@@ -77,7 +77,7 @@ public class DatalakeRecoveryBringupFlowConfig extends StackStatusFinalizerAbstr
 
     @Override
     public String getDisplayName() {
-        return "Bringing back SDX instances for recovery";
+        return "Bringing back Data Lake instances for recovery";
     }
 
     @Override

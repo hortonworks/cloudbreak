@@ -121,7 +121,7 @@ class AtlasRdsRoleConfigProviderTest {
     private static Stream<Arguments> isConfigurationNeededArguments() {
         return Stream.of(
                 Arguments.of("All conditions met", StackType.DATALAKE, true, false, false, "7.13.2.10001", "7.3.2", true, true),
-                Arguments.of("Not DataLake", StackType.WORKLOAD, true, false, false, "7.13.2.10001", "7.3.2", true, false),
+                Arguments.of("Not Data Lake", StackType.WORKLOAD, true, false, false, "7.13.2.10001", "7.3.2", true, false),
                 Arguments.of("HBase present", StackType.DATALAKE, true, true, false, "7.13.2.10001", "7.3.2", true, false),
                 Arguments.of("HDFS present", StackType.DATALAKE, true, false, true, "7.13.2.10001", "7.3.2", true, false),
                 Arguments.of("Atlas not present in blueprint", StackType.DATALAKE, false, false, false, "7.13.2.10001", "7.3.2", true, false),

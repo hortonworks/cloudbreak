@@ -263,7 +263,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
             return measure(() -> privateControlPlaneClient.getRemoteDataContext(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
-            handleUnauthorized(environmentCrn, e, "data lake");
+            handleUnauthorized(environmentCrn, e, "Data Lake");
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
             throw new CloudbreakServiceException(String.format("Unable to fetch remote data context for crn %s", environmentCrn), e);
         }
@@ -277,9 +277,9 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
             return measure(() -> privateControlPlaneClient.getDatalakeServices(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
-            handleUnauthorized(environmentCrn, e, "data lake");
+            handleUnauthorized(environmentCrn, e, "Data Lake");
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
-            throw new RemoteEnvironmentException(String.format("Unable to fetch data lake services for crn %s", environmentCrn), e);
+            throw new RemoteEnvironmentException(String.format("Unable to fetch Data Lake services for crn %s", environmentCrn), e);
         }
     }
 

@@ -68,9 +68,9 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running env service and sdx service",
-            when = "valid create environment and create datalake requests sent",
-            then = "environment/datalake should be created but unauthorized users should not be able to get events"
+            given = "there is a running env service and Data Lake service",
+            when = "valid create environment and create Data Lake requests sent",
+            then = "environment/Data Lake should be created but unauthorized users should not be able to get events"
     )
     public void testGetSdxEvents(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();

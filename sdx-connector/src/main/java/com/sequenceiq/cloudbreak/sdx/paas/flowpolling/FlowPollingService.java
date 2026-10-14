@@ -27,7 +27,7 @@ public class FlowPollingService {
         return getFlowCheckResponse(flowId)
                 .map(flowCheckResponse -> {
                     if (Boolean.TRUE.equals(flowCheckResponse.getLatestFlowFinalizedAndFailed())) {
-                        return AttemptResults.breakFor(new IllegalStateException("SDX flow operation failed for flow ID: " + flowId));
+                        return AttemptResults.breakFor(new IllegalStateException("Data Lake flow operation failed for flow ID: " + flowId));
                     } else if (Boolean.TRUE.equals(flowCheckResponse.getHasActiveFlow())) {
                         return AttemptResults.justContinue();
                     }

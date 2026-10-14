@@ -100,7 +100,7 @@ public class LoadBalancerPollerService {
         List<FlowIdentifier> flowIdentifiers = stackService.updateLoadBalancer(stackNames);
         LOGGER.debug("Monitoring load balancer update flows: {}", flowIdentifiers);
 
-        LOGGER.debug("Starting poller to check all data lake and data hub stacks for environment {} are updated", environmentName);
+        LOGGER.debug("Starting poller to check all Data Lake and data hub stacks for environment {} are updated", environmentName);
         return Polling.stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
             .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
             .waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
@@ -149,7 +149,7 @@ public class LoadBalancerPollerService {
     }
 
     private Set<String> getAttachedDatalakeClusters(String environmentName) {
-        LOGGER.debug("Getting SDX clusters for environment: '{}'", environmentName);
+        LOGGER.debug("Getting Data Lake clusters for environment: '{}'", environmentName);
         Collection<SdxClusterResponse> responses = sdxService.list(environmentName);
         return responses.stream().map(SdxClusterResponse::getName).collect(Collectors.toSet());
     }

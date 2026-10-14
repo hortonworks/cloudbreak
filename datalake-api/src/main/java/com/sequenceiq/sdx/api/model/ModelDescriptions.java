@@ -276,7 +276,7 @@ public class ModelDescriptions {
     public static final String ENCRYPTION_PROFILE_NAME_OR_CRN =
             "Name or CRN of the encryption profile to be used. Encryption Profile manages TLS version and cipher suites";
 
-    public static final String DATALAKE_CRN = "The CRN of the Datalake.";
+    public static final String DATALAKE_CRN = "The CRN of the Data Lake.";
 
     public static final String RDS_UPGRADE_STATUS = "The RDS upgrade status: UPGRADE_REQUIRED, UPGRADE_NOT_REQUIRED, UNKNOWN, or NO_DATALAKE.";
 
@@ -284,7 +284,7 @@ public class ModelDescriptions {
 
     public static final String CURRENT_MAJOR_VERSION_STRING = "The current PostgreSQL major version (e.g. '11'); present when the DB server was reachable.";
 
-    public static final String RDS_UPGRADE_STATUSES = "List of per-Datalake RDS upgrade status entries.";
+    public static final String RDS_UPGRADE_STATUSES = "List of per-Data Lake RDS upgrade status entries.";
 
     private ModelDescriptions() {
     }
@@ -295,15 +295,15 @@ public class ModelDescriptions {
         public static final String MIGRATE_DATABASE_TO_SSL_RESPONSE_TYPE = "Information about the Migrate Database operation acceptance.";
         public static final String ROTATE_RDS_CERTIFICATE_ERROR_REASON = "Reason of the error if Rotate Database Certificate could not be started.";
         public static final String MIGRATE_DATABASE_TO_SSL_ERROR_REASON = "Reason of the error if Migrate Database could not be started.";
-        public static final String RDS_CERTIFICATE_ROTATION_BY_NAME = "rotate Database certificate of the data lake by name";
-        public static final String RDS_CERTIFICATE_ROTATION_BY_CRN = "rotate Database certificate of the data lake by crn";
+        public static final String RDS_CERTIFICATE_ROTATION_BY_NAME = "rotate Database certificate of the Data Lake by name";
+        public static final String RDS_CERTIFICATE_ROTATION_BY_CRN = "rotate Database certificate of the Data Lake by crn";
         public static final String ROTATE_RDS_CERTIFICATE_NOTES = "Rotate the public certificate of the Database";
-        public static final String MIGRATE_DATABASE_TO_SSL_BY_NAME = "Migrate database to ssl of the data lake by name";
-        public static final String MIGRATE_DATABASE_TO_SSL_BY_CRN = "Migrate database to ssl of the data lake by crn";
+        public static final String MIGRATE_DATABASE_TO_SSL_BY_NAME = "Migrate database to ssl of the Data Lake by name";
+        public static final String MIGRATE_DATABASE_TO_SSL_BY_CRN = "Migrate database to ssl of the Data Lake by crn";
         public static final String MIGRATE_DATABASE_TO_SSL_NOTES = "Migrate non ssl to ssl based Database";
-        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_CRNS = "Check RDS upgrade status for a list of Datalake CRNs";
-        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_CRN = "Check RDS upgrade status for a single Datalake by CRN";
-        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_NAME = "Check RDS upgrade status for a single Datalake by name";
-        public static final String RDS_UPGRADE_STATUS_NOTES = "Returns whether an RDS major-version upgrade is required for the given Datalake(s)";
+        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_CRNS = "Check RDS upgrade status for a list of Data Lake CRNs";
+        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_CRN = "Check RDS upgrade status for a single Data Lake by CRN";
+        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_NAME = "Check RDS upgrade status for a single Data Lake by name";
+        public static final String RDS_UPGRADE_STATUS_NOTES = "Returns whether an RDS major-version upgrade is required for the given Data Lake(s)";
     }
 }

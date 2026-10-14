@@ -61,7 +61,7 @@ public class CloudStorageManifesterTest {
     @InjectMocks
     private CloudStorageManifester underTest;
 
-    private String exampleBlueprintName = "SDX HA dummy BP";
+    private String exampleBlueprintName = "Data Lake HA dummy BP";
 
     @Test
     public void whenConfigIsProvidedReturnFileSystemParameters() {

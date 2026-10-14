@@ -92,7 +92,7 @@ public class DatalakeBackupActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerBackupEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Triggering data lake backup for {}", payload.getResourceId());
+                LOGGER.info("Triggering Data Lake backup for {}", payload.getResourceId());
 
                 DatalakeBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
@@ -121,7 +121,7 @@ public class DatalakeBackupActions {
         return new AbstractSdxAction<>(DatalakeDatabaseBackupStartEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupStartEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Wating for services to be stopped for datalake backup of {} ", payload.getResourceId());
+                LOGGER.info("Wating for services to be stopped for Data Lake backup of {} ", payload.getResourceId());
                 sendEvent(context, DatalakeBackupAwaitServicesStoppedRequest.from(payload));
             }
 
@@ -148,7 +148,7 @@ public class DatalakeBackupActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupStartEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake database backup has been started for {} with backup location {}", payload.getResourceId(),
+                LOGGER.info("Data Lake database backup has been started for {} with backup location {}", payload.getResourceId(),
                         payload.getBackupRequest().getBackupLocation());
 
                 sdxBackupRestoreService.databaseBackup(payload.getDrStatus(), payload.getResourceId(),
@@ -169,13 +169,13 @@ public class DatalakeBackupActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake database backup is in progress for {} ", payload.getResourceId());
+                LOGGER.info("Data Lake database backup is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 int databaseMaxDurationInMin = variables.get(DATABASE_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(DATABASE_MAX_DURATION_IN_MIN) : 0;
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_BACKUP_INPROGRESS,
                         ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS,
-                        "Datalake backup in progress", payload.getResourceId());
+                        "Data Lake backup in progress", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_REQUESTED, sdxCluster);
                 sendEvent(context, DatalakeDatabaseBackupWaitRequest.from(context, operationId, databaseMaxDurationInMin));
             }
@@ -194,7 +194,7 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupCouldNotStartEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake database backup could not be started for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake database backup could not be started for Data Lake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, payload.getException().getMessage());
 
@@ -219,7 +219,7 @@ public class DatalakeBackupActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Full datalake backup is in progress for {} ", payload.getResourceId());
+                LOGGER.info("Full Data Lake backup is in progress for {} ", payload.getResourceId());
 
                 // Due to the unique approach of this flow configuration, a failed database backup state is not considered a failed flow.
                 getFlow(context.getFlowId()).clearFlowFailed();
@@ -248,11 +248,11 @@ public class DatalakeBackupActions {
         return new AbstractSdxAction<>(DatalakeBackupSuccessEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeBackupSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Sdx backup is finalized with sdx id: {}", payload.getResourceId());
+                LOGGER.info("Data Lake backup is finalized with Data Lake id: {}", payload.getResourceId());
                 sendEvent(context, DATALAKE_BACKUP_FINALIZED_EVENT.event(), payload);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FINISHED,
-                        "Datalake backup finished, Datalake is running", payload.getResourceId());
+                        "Data Lake backup finished, Data Lake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FINISHED, sdxCluster);
             }
 
@@ -268,12 +268,12 @@ public class DatalakeBackupActions {
         return new AbstractSdxAction<>(DatalakeBackupCancelledEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeBackupCancelledEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Sdx backup was cancelled with sdx id: {}", payload.getResourceId());
+                LOGGER.info("Data Lake backup was cancelled with Data Lake id: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_CANCELLED,
-                        "Datalake backup cancelled", payload.getResourceId());
+                        "Data Lake backup cancelled", payload.getResourceId());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(new Exception("Datalake backup cancelled"));
+                flow.setFlowFailed(new Exception("Data Lake backup cancelled"));
 
                 sendEvent(context, DATALAKE_BACKUP_CANCEL_HANDLED_EVENT.event(), payload);
             }
@@ -291,7 +291,7 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake database backup failed for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake database backup failed for Data Lake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
 
@@ -317,7 +317,7 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeBackupFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake backup failed for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake backup failed for Data Lake with id: {}", payload.getResourceId(), exception);
                 String failureReason = getFailureReason(variables, exception);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FAILED, Collections.singleton(failureReason),
@@ -337,12 +337,12 @@ public class DatalakeBackupActions {
             private String getFailureReason(Map<Object, Object> variables, Exception exception) {
                 StringBuilder reason = new StringBuilder();
                 if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
-                    reason.append("Upgrade not started, datalake backup failed.");
+                    reason.append("Upgrade not started, Data Lake backup failed.");
                 } else {
                     if (exception instanceof PollerStoppedException) {
                         reason.append("Backup timed out, see the backup status using cdp-cli for more information.");
                     } else {
-                        reason.append("Backup failed, returning datalake to running state.");
+                        reason.append("Backup failed, returning Data Lake to running state.");
                     }
                 }
                 if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {

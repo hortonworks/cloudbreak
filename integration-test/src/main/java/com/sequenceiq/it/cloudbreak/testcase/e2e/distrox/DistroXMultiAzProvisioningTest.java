@@ -41,7 +41,7 @@ public class DistroXMultiAzProvisioningTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "a valid MultiAz stack create request is sent for DH",
             then = "the MultiAz stack should be available and the cluster should be up and running"
     )

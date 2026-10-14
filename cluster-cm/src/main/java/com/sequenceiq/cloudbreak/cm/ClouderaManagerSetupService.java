@@ -427,7 +427,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     .addItemsItem(setHeader(stackType))
                     .addItemsItem(disableGoogleAnalytics());
             if (shouldDisableFasterFirstRun()) {
-                LOGGER.info("RAZ-enabled Datalake without HDFS/HBase: disabling Faster First Run "
+                LOGGER.info("RAZ-enabled Data Lake without HDFS/HBase: disabling Faster First Run "
                         + "(enable_faster_bootstrap=false) so ZooKeeper starts before RANGER_RAZ. See CB-33827, OPSAPS-79103.");
                 apiConfigList.addItemsItem(new ApiConfig().name(ENABLE_FASTER_BOOTSTRAP).value("false"));
             }
@@ -534,12 +534,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
             CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
-            LOGGER.info("Get remote context from Datalake cluster: {}", stack.getName());
+            LOGGER.info("Get remote context from Data Lake cluster: {}", stack.getName());
             ApiRemoteDataContext remoteDataContext = cdpResourceApi.getRemoteContextByCluster(stack.getName());
             return JsonUtil.writeValueAsString(remoteDataContext);
         } catch (ApiException | ClouderaManagerClientInitException e) {
-            LOGGER.error("Error while getting remote context of Datalake cluster: {}", stack.getName(), e);
-            throw new ClouderaManagerOperationFailedException("Error while getting remote context of Datalake cluster", e);
+            LOGGER.error("Error while getting remote context of Data Lake cluster: {}", stack.getName(), e);
+            throw new ClouderaManagerOperationFailedException("Error while getting remote context of Data Lake cluster", e);
         } catch (JsonProcessingException e) {
             LOGGER.error("Failed to serialize remote context.", e);
             throw new ClouderaManagerOperationFailedException("Failed to serialize remote context.", e);
@@ -598,8 +598,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.info("Error while creating data context using: {}", sdxContext, e);
             throw new ClouderaManagerOperationFailedException(String.format("Error while creating data context: %s", e.getMessage()), e);
         } catch (IOException e) {
-            LOGGER.info("Failed to parse SDX context to CM API object.", e);
-            throw new ClouderaManagerOperationFailedException(String.format("Failed to parse SDX context to CM API object: %s", e.getMessage()), e);
+            LOGGER.info("Failed to parse Data Lake context to CM API object.", e);
+            throw new ClouderaManagerOperationFailedException(String.format("Failed to parse Data Lake context to CM API object: %s", e.getMessage()), e);
         }
     }
 

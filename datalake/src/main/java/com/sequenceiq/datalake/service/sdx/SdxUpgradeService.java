@@ -101,10 +101,10 @@ public class SdxUpgradeService {
 
     private void sendRuntimeUpgradeNotification(boolean rollingUpgradeEnabled, SdxCluster sdxCluster) {
         if (rollingUpgradeEnabled) {
-            sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_ROLLING_UPGRADE_IN_PROGRESS, DATALAKE_ROLLING_UPGRADE_STARTED, "Upgrading datalake runtime",
+            sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_ROLLING_UPGRADE_IN_PROGRESS, DATALAKE_ROLLING_UPGRADE_STARTED, "Upgrading Data Lake runtime",
                     sdxCluster);
         } else {
-            sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_UPGRADE_STARTED, "Upgrading datalake runtime", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_UPGRADE_STARTED, "Upgrading Data Lake runtime", sdxCluster);
         }
     }
 
@@ -145,7 +145,7 @@ public class SdxUpgradeService {
                         sdxService.updateDatabaseEngineVersion(sdxCluster.getCrn(), stackV4Response.getExternalDatabase().getDatabaseEngineVersion());
                         LOGGER.info("The embedded db engine version has been updated from Cloudbreak for cluster: {}", sdxCluster.getClusterName());
                     }
-                }, () -> LOGGER.info("The embedded db version is missing from the stack response, sdx db version update will be skipped!"));
+                }, () -> LOGGER.info("The embedded db version is missing from the stack response, Data Lake db version update will be skipped!"));
     }
 
     private StackV4Response retrieveStack(SdxCluster sdxCluster) {

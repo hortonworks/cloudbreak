@@ -93,11 +93,11 @@ class ResizeRecoveryServiceTest {
 
         assertTrue(sdxRecoverableResponse.getReason().startsWith("Resize can not be recovered from this point "));
         if (RUNNING.equals(status)) {
-            assertTrue(sdxRecoverableResponse.getReason().endsWith("Datalake is running, resize can not be recovered from this point"));
+            assertTrue(sdxRecoverableResponse.getReason().endsWith("Data Lake is running, resize can not be recovered from this point"));
         } else if (DELETE_FAILED.equals(status)) {
-            assertTrue(sdxRecoverableResponse.getReason().endsWith("Failed to delete original data lake, not a recoverable error"));
+            assertTrue(sdxRecoverableResponse.getReason().endsWith("Failed to delete original Data Lake, not a recoverable error"));
         } else {
-            assertTrue(sdxRecoverableResponse.getReason().contains("Cannot recover from resize due to Datalake not being in a recoverable status: "));
+            assertTrue(sdxRecoverableResponse.getReason().contains("Cannot recover from resize due to Data Lake not being in a recoverable status: "));
         }
     }
 
@@ -115,13 +115,19 @@ class ResizeRecoveryServiceTest {
 
     @Test
     public void testRestoreFailedAndRunningRecoverable() {
-        sdxStatusEntity.setStatusReason("Datalake is running, Datalake restore failed");
+        sdxStatusEntity.setStatusReason("Data Lake is running, Data Lake restore failed");
+        testGetClusterRecoverableForStatusRecoverable(RUNNING);
+    }
+
+    @Test
+    public void testRestoreFailedAndRunningRecoverableWithOldMessage() {
+        sdxStatusEntity.setStatusReason("Upgrade not finished correctly, datalake restore failed.");
         testGetClusterRecoverableForStatusRecoverable(RUNNING);
     }
 
     @Test
     public void testRestoreNotFailedAndRunningNotRecoverable() {
-        sdxStatusEntity.setStatusReason("Datalake is running");
+        sdxStatusEntity.setStatusReason("Data Lake is running");
         testGetClusterRecoverableForStatusNotRecoverable(RUNNING);
     }
 
@@ -185,12 +191,28 @@ class ResizeRecoveryServiceTest {
     public void testOnlyOneClusterStoppedDuringResizeRecoverable() {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
                 .thenReturn(Optional.empty());
+        sdxStatusEntity.setStatusReason("Data Lake detach failed");
+        testGetClusterRecoverableForStatusRecoverable(STOPPED);
+    }
+
+    @Test
+    public void testOnlyOneClusterStoppedDuringResizeRecoverableWithSDX() {
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.empty());
         sdxStatusEntity.setStatusReason("SDX detach failed");
         testGetClusterRecoverableForStatusRecoverable(STOPPED);
     }
 
     @Test
     public void testOnlyOneClusterStopFailedDuringResizeRecoverable() {
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.empty());
+        sdxStatusEntity.setStatusReason("Data Lake resize failure");
+        testGetClusterRecoverableForStatusRecoverable(STOP_FAILED);
+    }
+
+    @Test
+    public void testOnlyOneClusterStopFailedDuringResizeRecoverableWithOldMessage() {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
                 .thenReturn(Optional.empty());
         sdxStatusEntity.setStatusReason("Datalake resize failure");
@@ -219,7 +241,7 @@ class ResizeRecoveryServiceTest {
         SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster));
 
         assertEquals(RecoveryStatus.NON_RECOVERABLE, sdxRecoverableResponse.getStatus());
-        assertEquals("Resize can not be recovered from original cluster. It must have exactly one datalake in the environment",
+        assertEquals("Resize can not be recovered from original cluster. It must have exactly one Data Lake in the environment",
                 sdxRecoverableResponse.getReason());
     }
 }

@@ -27,7 +27,7 @@ public interface DatabaseConfigEndpoint {
     @GET
     @Path("connectionparams")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get datalake database config", operationId = "getDatalakeDbConfig",
+    @Operation(summary = "get Data Lake database config", operationId = "getDatalakeDbConfig",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DbConnectionParamsV4Response getDbConfig(@QueryParam("datalakeCrn") @NotEmpty String datalakeCrn,
             @QueryParam("databaseType") @NotNull DatabaseType databaseType);

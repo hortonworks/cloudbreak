@@ -20,14 +20,14 @@ public class SdxCheckForUpgradeAction implements Action<SdxTestDto, SdxClient> {
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         Log.log(LOGGER, format(" Environment: %s", testDto.getRequest().getEnvironment()));
-        Log.whenJson(LOGGER, " SDX check for upgrade request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " Data Lake check for upgrade request: ", testDto.getRequest());
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setDryRun(true);
         SdxUpgradeResponse upgradeResponse = client.getDefaultClient(testContext)
                 .sdxUpgradeEndpoint()
                 .upgradeClusterByName(testDto.getName(), request);
-        Log.whenJson(LOGGER, " SDX check for upgrade response: ", upgradeResponse);
-        Log.log(LOGGER, " SDX name: %s", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()).getName());
+        Log.whenJson(LOGGER, " Data Lake check for upgrade response: ", upgradeResponse);
+        Log.log(LOGGER, " Data Lake name: %s", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()).getName());
         return testDto;
     }
 }

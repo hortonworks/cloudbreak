@@ -32,20 +32,20 @@ public class SdxRestoreAction implements Action<SdxTestDto, SdxClient> {
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
-        Log.when(LOGGER, format(" SDX '%s' restore has been started to '%s' ", sdxName, backupLocation));
-        Log.whenJson(LOGGER, " SDX restore request: ", testDto.getRequest());
-        LOGGER.info(format(" SDX '%s' restore has been started to '%s'... ", sdxName, backupLocation));
+        Log.when(LOGGER, format(" Data Lake '%s' restore has been started to '%s' ", sdxName, backupLocation));
+        Log.whenJson(LOGGER, " Data Lake restore request: ", testDto.getRequest());
+        LOGGER.info(format(" Data Lake '%s' restore has been started to '%s'... ", sdxName, backupLocation));
         SdxRestoreResponse sdxRestoreResponse = client.getDefaultClient(testContext)
                 .sdxRestoreEndpoint()
                 .restoreDatalakeByName(sdxName, backupId, backupLocation, false, false, false, false,
                         0, false);
-        testDto.setFlow("SDX restore", sdxRestoreResponse.getFlowIdentifier());
+        testDto.setFlow("Data Lake restore", sdxRestoreResponse.getFlowIdentifier());
 
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX response after restore: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " Data Lake response after restore: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
         return testDto;
     }
 }

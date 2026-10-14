@@ -54,7 +54,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
+    @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state",
             when = "upgrade called on the DistroX cluster",
             then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXUpgrade(MockedTestContext testContext) {
@@ -92,7 +92,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
+    @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state",
             when = "upgrade by upgrade sets called on the DistroX cluster",
             then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXOsUpgradeByUpgradeSets(MockedTestContext testContext) {
@@ -132,7 +132,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state, scale up",
+    @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state, scale up",
             when = "upgrade by upgrade sets called on the DistroX cluster",
             then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXBatchOsUpgrade(MockedTestContext testContext) {

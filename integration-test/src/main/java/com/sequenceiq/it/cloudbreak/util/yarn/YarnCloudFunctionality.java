@@ -121,7 +121,7 @@ public class YarnCloudFunctionality implements CloudFunctionality {
             return format("https://s3.console.aws.amazon.com/s3/buckets/" +
                     "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-sdx-logs/%s/&showversions=false", serverProperties.getCbVersion());
         } else {
-            Log.error(LOGGER, format(" CB Version is not available for datalake '%s'. So cannot determine the version at " +
+            Log.error(LOGGER, format(" CB Version is not available for Data Lake '%s'. So cannot determine the version at " +
                     "cluster logs path: https://s3.console.aws.amazon.com/s3/buckets/" +
                     "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-sdx-logs/&showversions=false ", crn));
             return null;

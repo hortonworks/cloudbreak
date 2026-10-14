@@ -29,7 +29,7 @@ public class ModifyProxyConfigWaitAction extends ModifyProxyConfigAction<SdxEven
 
     @Override
     protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-        LOGGER.info("Waiting for modify proxy config for SDX stack {}", context.getSdxId());
+        LOGGER.info("Waiting for modify proxy config for Data Lake stack {}", context.getSdxId());
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_PROXY_CONFIG_MODIFICATION_IN_PROGRESS,
                 "Modifying proxy config", context.getSdxId());
         sendEvent(context);

@@ -37,7 +37,7 @@ public class SdxClientService {
         try {
             return sdxEndpoint.getByEnvCrn(environmentCrn, false);
         } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
-            LOGGER.error(String.format("Failed to get datalake clusters for environment %s", environmentCrn), e);
+            LOGGER.error(String.format("Failed to get Data Lake clusters for environment %s", environmentCrn), e);
             return new ArrayList<>();
         }
     }

@@ -73,7 +73,7 @@ public class StackCreationRuntimeVersionValidator {
     private void checkRuntimeVersion(String environmentCrn, String requestedStackVersion) {
         Optional<String> optionalErrorMessage = validateStackVersionLocally(environmentCrn, requestedStackVersion);
         if (optionalErrorMessage.isPresent()) {
-            LOGGER.error("Falling back to SDX connector, because: {}", optionalErrorMessage.get());
+            LOGGER.error("Falling back to Data Lake connector, because: {}", optionalErrorMessage.get());
             validateStackVersionWithSdxConnector(environmentCrn, requestedStackVersion);
         }
     }
@@ -85,13 +85,13 @@ public class StackCreationRuntimeVersionValidator {
             if (relatedDatalakeStack.isPresent() && relatedDatalakeStack.get().isAvailable()) {
                 Optional<String> cdhVersion = runtimeVersionService.getRuntimeVersion(relatedDatalakeStack.get().getClusterView().getId());
                 if (cdhVersion.isEmpty()) {
-                    return Optional.of(String.format("Cannot found CDH details about related datalake stack in CB, name: %s",
+                    return Optional.of(String.format("Cannot found CDH details about related Data Lake stack in CB, name: %s",
                             relatedDatalakeStack.get().getName()));
                 }
                 datalakeStackVersion = cdhVersion.get();
             } else {
                 return Optional.of(String.format("Cannot found related Data Lake stack in CB for environment CRN %s " +
-                        "or the datalake isn't available yet.", environmentCrn));
+                        "or the Data Lake isn't available yet.", environmentCrn));
             }
         } catch (Exception e) {
             return Optional.of(String.format("Something happened during check of runtime version of Data Lake stack on CB side: %s", e.getMessage()));

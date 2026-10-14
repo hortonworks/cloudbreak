@@ -63,7 +63,7 @@ public class DistroXMultiAzRepairAndScaleTest extends AbstractE2EWithReusableRes
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = " valid MultiAz Datahub is provisioned, scaled up and scaled down",
             then = "the MultiAz Datahub should be available and nodes should be distributed correctly across multiple AZs after each operation")
     public void testDistroXMultiAzProvisionAndRepair(TestContext testContext, ITestContext iTestContext) {
@@ -107,7 +107,7 @@ public class DistroXMultiAzRepairAndScaleTest extends AbstractE2EWithReusableRes
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = " valid MultiAz Datahub is provisioned, scaled up and scaled down",
             then = "the MultiAz Datahub should be available and nodes should be distributed correctly across multiple AZs after each operation")
     public void testDistroXMultiAzProvisionAndScale(TestContext testContext, ITestContext iTestContext) {

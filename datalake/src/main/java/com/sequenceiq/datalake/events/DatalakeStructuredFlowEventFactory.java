@@ -125,7 +125,7 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
                 return Optional.ofNullable(JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class));
             }
         } catch (Exception e) {
-            LOGGER.warn("Cannot read stack request for sdx cluster", e);
+            LOGGER.warn("Cannot read stack request for Data Lake cluster", e);
         }
         return Optional.empty();
     }
@@ -165,7 +165,7 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
         try {
             return databaseService.getDatabaseServerTelemetry(databaseCrn).getInstanceType();
         } catch (Exception e) {
-            LOGGER.warn("Cannot read DB instance type from redbeams for datalake database crn: {}", databaseCrn, e);
+            LOGGER.warn("Cannot read DB instance type from redbeams for Data Lake database crn: {}", databaseCrn, e);
             return null;
         }
     }

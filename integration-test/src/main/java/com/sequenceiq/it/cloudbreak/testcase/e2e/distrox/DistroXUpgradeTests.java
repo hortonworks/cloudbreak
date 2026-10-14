@@ -68,7 +68,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and two DistroX clusters in available state, " +
+            given = "there is a running Cloudbreak, and an environment with Data Lake and two DistroX clusters in available state, " +
                     "one cluster created with default catalog and one cluster created with production catalog disk are encrypted",
             when = "upgrade called on all DistroX clusters",
             then = "All DistroX upgrade should be successful, the clusters should be up and running, disks are encrypted too")
@@ -97,7 +97,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and a DistroX (COD) cluster in available state",
+            given = "there is a running Cloudbreak, and an environment with Data Lake and a DistroX (COD) cluster in available state",
             when = "force OS upgrade (runtime + OS) rolling upgrade called on the DistroX (COD) cluster",
             then = "the runtime upgrade should be successful, and partial OS oupgrade should upgrade the gateway nodes to the new image version")
     public void testForcedOsUpgradeWhenCODCluster(TestContext testContext) {

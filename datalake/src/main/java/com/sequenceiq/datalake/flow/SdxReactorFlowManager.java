@@ -149,14 +149,14 @@ public class SdxReactorFlowManager {
     private SdxRotationService sdxRotationService;
 
     public FlowIdentifier triggerSdxCreation(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake creation for: {}", cluster);
+        LOGGER.info("Trigger Data Lake creation for: {}", cluster);
         String selector = SDX_VALIDATION_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster, DatalakeDrSkipOptions skipOptions, boolean validationOnly) {
-        LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
+        LOGGER.info("Trigger Data Lake resizing for: {}", sdxClusterId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(newSdxCluster);
         boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(newSdxCluster);
@@ -180,7 +180,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, Optional<SdxCluster> newSdxCluster) {
-        LOGGER.info("Triggering recovery for failed SDX resize with original cluster: {} and resized cluster: {}",
+        LOGGER.info("Triggering recovery for failed Data Lake resize with original cluster: {} and resized cluster: {}",
                 oldSdxCluster, newSdxCluster);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         eventSenderService.sendEventAndNotification(oldSdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
@@ -192,14 +192,14 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerSdxDeletion(SdxCluster cluster, boolean forced) {
-        LOGGER.info("Trigger Datalake deletion for: {} forced: {}", cluster, forced);
+        LOGGER.info("Trigger Data Lake deletion for: {} forced: {}", cluster, forced);
         String selector = SDX_DELETE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxDeleteStartEvent(selector, cluster.getId(), userId, forced), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxRepairFlow(SdxCluster cluster, SdxRepairRequest repairRequest) {
-        LOGGER.info("Trigger Datalake repair for: {} with settings: {}", cluster, repairRequest);
+        LOGGER.info("Trigger Data Lake repair for: {} with settings: {}", cluster, repairRequest);
         SdxRepairSettings settings = SdxRepairSettings.from(repairRequest);
         String selector = SDX_REPAIR_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
@@ -208,7 +208,7 @@ public class SdxReactorFlowManager {
 
     public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup,
             DatalakeDrSkipOptions skipOptions, boolean rollingUpgradeEnabled, boolean keepVariant) {
-        LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
+        LOGGER.info("Trigger Data Lake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(cluster)) {
             LOGGER.info("Triggering backup before an upgrade");
@@ -226,7 +226,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerDatabaseServerUpgradeFlow(SdxCluster cluster, TargetMajorVersion targetMajorVersion, boolean forced) {
-        LOGGER.info("Trigger Database Server Upgrade on Datalake for: {} with targetMajorVersion: {}. Forced: {}", cluster, targetMajorVersion, forced);
+        LOGGER.info("Trigger Database Server Upgrade on Data Lake for: {} with targetMajorVersion: {}. Forced: {}", cluster, targetMajorVersion, forced);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxUpgradeDatabaseServerEvent event = new SdxUpgradeDatabaseServerEvent(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), cluster.getId(),
                 initiatorUserCrn, targetMajorVersion, forced);
@@ -234,7 +234,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerDatalakeRuntimeUpgradePreparationFlow(SdxCluster cluster, String imageId, boolean skipBackup) {
-        LOGGER.info("Trigger Datalake runtime upgrade preparation for: {} with imageId: {}", cluster.getClusterName(), imageId);
+        LOGGER.info("Trigger Data Lake runtime upgrade preparation for: {} with imageId: {}", cluster.getClusterName(), imageId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(cluster)) {
             LOGGER.info("Triggering backup/upgrade preparations");
@@ -251,21 +251,21 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerDatalakeSyncComponentVersionsFromCmFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake sync component versions from CM");
+        LOGGER.info("Trigger Data Lake sync component versions from CM");
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCmSyncStartEvent event = new SdxCmSyncStartEvent(cluster.getId(), userId);
         return notify(event.selector(), event, cluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxStartFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake start for: {}", cluster);
+        LOGGER.info("Trigger Data Lake start for: {}", cluster);
         String selector = SDX_START_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxStartStartEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxStopFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake stop for: {}", cluster);
+        LOGGER.info("Trigger Data Lake stop for: {}", cluster);
         String selector = SDX_STOP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxStartStopEvent(selector, cluster.getId(), userId), cluster.getClusterName());
@@ -310,14 +310,14 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerCcmUpgradeFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger CCM Upgrade on Datalake for: {}", cluster);
+        LOGGER.info("Trigger CCM Upgrade on Data Lake for: {}", cluster);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         UpgradeCcmStackEvent event = new UpgradeCcmStackEvent(UPGRADE_CCM_UPGRADE_STACK_EVENT.event(), cluster.getId(), initiatorUserCrn);
         return notify(event.selector(), event, cluster.getClusterName());
     }
 
     public FlowIdentifier triggerDatabaseCertificateRotation(SdxCluster cluster) {
-        LOGGER.info("Trigger Certificate Rotation on Datalake for: {}", cluster);
+        LOGGER.info("Trigger Certificate Rotation on Data Lake for: {}", cluster);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         RotateCertificateStackEvent event =
                 new RotateCertificateStackEvent(ROTATE_CERTIFICATE_STACK_EVENT.event(), cluster.getId(), initiatorUserCrn);
@@ -326,7 +326,7 @@ public class SdxReactorFlowManager {
 
     public FlowIdentifier triggerSetDefaultJavaVersion(SdxCluster cluster, String defaultJavaVersion,
             boolean restartServices, boolean restartCM, boolean rollingRestart) {
-        LOGGER.info("Trigger Set Default Java Version to {} on Datalake for: {}, restart services: {}, restart CM: {}, rolling restart: {}",
+        LOGGER.info("Trigger Set Default Java Version to {} on Data Lake for: {}, restart services: {}, restart CM: {}, rolling restart: {}",
                 defaultJavaVersion, cluster, restartServices, restartCM, rollingRestart);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SetDatalakeDefaultJavaVersionTriggerEvent datalakeDefaultJavaVersionTriggerEvent =
@@ -336,7 +336,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerRestartClusterServices(SdxCluster cluster, boolean rollingRestart, boolean staleServicesOnly) {
-        LOGGER.info("Trigger Restart Cluster Services on Datalake for: {}, rolling restart: {}", cluster, rollingRestart);
+        LOGGER.info("Trigger Restart Cluster Services on Data Lake for: {}, rolling restart: {}", cluster, rollingRestart);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         DatalakeRestartServicesStartEvent datalakeRestartServicesStartEvent =
                 new DatalakeRestartServicesStartEvent(cluster.getId(), cluster.getName(), initiatorUserCrn, rollingRestart, staleServicesOnly);
@@ -361,12 +361,12 @@ public class SdxReactorFlowManager {
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null) {
-                throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for sdx cluster %s.",
+                throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for Data Lake cluster %s.",
                         event.getData().getResourceId()));
             } else {
                 switch (accepted.getResultType()) {
                     case ALREADY_EXISTING_FLOW:
-                        throw new FlowsAlreadyRunningException(String.format("Request not allowed, datalake cluster '%s' already has a running operation. " +
+                        throw new FlowsAlreadyRunningException(String.format("Request not allowed, Data Lake cluster '%s' already has a running operation. " +
                                         "Running operation(s): [%s]",
                                 identifier,
                                 flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
@@ -385,26 +385,26 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerSaltPasswordRotationTracker(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake salt password rotation tracker for: {}", cluster);
+        LOGGER.info("Trigger Data Lake salt password rotation tracker for: {}", cluster);
         return sdxRotationService.triggerSecretRotation(cluster.getCrn(), List.of(DatalakeSecretType.SALT_PASSWORD.value()), null, null);
     }
 
     public FlowIdentifier triggerModifyProxyConfigTracker(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake modify proxy config tracker for: {}", cluster);
+        LOGGER.info("Trigger Data Lake modify proxy config tracker for: {}", cluster);
         String selector = ModifyProxyConfigTrackerEvent.MODIFY_PROXY_CONFIG_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerUpdateTrustedRealmTracker(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake update trusted realm tracker for: {}", cluster);
+        LOGGER.info("Trigger Data Lake update trusted realm tracker for: {}", cluster);
         String selector = UpdateTrustedRealmTrackerEvent.UPDATE_TRUSTED_REALM_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerSaltUpdate(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake salt Salt update for: {}", cluster);
+        LOGGER.info("Trigger Data Lake salt Salt update for: {}", cluster);
         String selector = SaltUpdateEvent.SALT_UPDATE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SaltUpdateTriggerEvent(cluster.getId(), userId), cluster.getClusterName());
@@ -428,7 +428,7 @@ public class SdxReactorFlowManager {
 
     public FlowIdentifier triggerDatalakeDiskUpdate(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        LOGGER.info("Vertical Scale flow triggered for datalake {}", sdxCluster.getName());
+        LOGGER.info("Vertical Scale flow triggered for Data Lake {}", sdxCluster.getName());
         DatalakeDiskUpdateEvent datalakeDiskUpdateTriggerEvent = DatalakeDiskUpdateEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceCrn(sdxCluster.getResourceCrn())
@@ -440,14 +440,14 @@ public class SdxReactorFlowManager {
                 .withAccountId(sdxCluster.getAccountId())
                 .withSelector(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_VALIDATION_EVENT.selector())
                 .build();
-        LOGGER.debug("Disk Update flow trigger event sent for datalake {}", sdxCluster.getName());
+        LOGGER.debug("Disk Update flow trigger event sent for Data Lake {}", sdxCluster.getName());
         return notify(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_VALIDATION_EVENT.selector(), datalakeDiskUpdateTriggerEvent,
                 sdxCluster.getClusterName(), userCrn);
     }
 
     public FlowIdentifier triggerDatalakeAddVolumes(SdxCluster sdxCluster, StackAddVolumesRequest addVolumesRequest, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        LOGGER.info("Vertical Scale flow triggered for datalake add volumes {}", sdxCluster.getName());
+        LOGGER.info("Vertical Scale flow triggered for Data Lake add volumes {}", sdxCluster.getName());
         DatalakeAddVolumesEvent datalakeAddVolumesTriggerEvent = new DatalakeAddVolumesEvent(DATALAKE_ADD_VOLUMES_TRIGGER_EVENT.selector(),
                 sdxCluster.getId(), userCrn, addVolumesRequest, sdxCluster.getClusterName());
         return notify(DATALAKE_ADD_VOLUMES_TRIGGER_EVENT.selector(), datalakeAddVolumesTriggerEvent,
@@ -462,7 +462,7 @@ public class SdxReactorFlowManager {
 
     public FlowIdentifier triggerDatalakeRootVolumeUpdate(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        LOGGER.info("Root Volume Vertical Scale flow triggered for datalake {}", sdxCluster.getName());
+        LOGGER.info("Root Volume Vertical Scale flow triggered for Data Lake {}", sdxCluster.getName());
         DatalakeRootVolumeUpdateEvent datalakeRootVolumeUpdateEvent = DatalakeRootVolumeUpdateEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceCrn(sdxCluster.getResourceCrn())
@@ -475,12 +475,12 @@ public class SdxReactorFlowManager {
                 .withSelector(DATALAKE_ROOT_VOLUME_UPDATE_EVENT.selector())
                 .withInitiatorUserCrn(userCrn)
                 .build();
-        LOGGER.debug("Root volume update flow trigger event sent for datalake {}", sdxCluster.getName());
+        LOGGER.debug("Root volume update flow trigger event sent for Data Lake {}", sdxCluster.getName());
         return notify(DATALAKE_ROOT_VOLUME_UPDATE_EVENT.selector(), datalakeRootVolumeUpdateEvent, sdxCluster.getClusterName(), userCrn);
     }
 
     public FlowIdentifier triggerSkuMigration(SdxCluster cluster, boolean force) {
-        LOGGER.info("Trigger Sku migration to STANDARD on Datalake for: {}, force: {}",
+        LOGGER.info("Trigger Sku migration to STANDARD on Data Lake for: {}, force: {}",
                 cluster, force);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         DataLakeSkuMigrationTriggerEvent dataLakeSkuMigrationTriggerEvent =
@@ -489,7 +489,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerUpdatePublicDnsEntries(SdxCluster cluster) {
-        LOGGER.info("Trigger update of public DNS entries on Datalake for: {}", cluster);
+        LOGGER.info("Trigger update of public DNS entries on Data Lake for: {}", cluster);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         DatalakeUpdatePublicDnsEntriesTriggerEvent datalakeUpdatePublicDnsEntriesTriggerEvent =
                 new DatalakeUpdatePublicDnsEntriesTriggerEvent(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_EVENT.event(), cluster.getId(), initiatorUserCrn);
@@ -497,7 +497,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerEnableEncryptionProfile(SdxCluster cluster, String encryptionProfileCrn) {
-        LOGGER.info("Trigger Enable Encryption Profile flow for Datalake: {}", cluster.getClusterName());
+        LOGGER.info("Trigger Enable Encryption Profile flow for Data Lake: {}", cluster.getClusterName());
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxEnableEncryptionProfileTriggerEvent triggerEvent =
                 SdxEnableEncryptionProfileTriggerEvent.from(cluster.getId(), userId, encryptionProfileCrn);
@@ -505,17 +505,17 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerZookeeperToKraftMigrationFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger ZooKeeper to KRaft migration for DataLake: {}", cluster.getClusterName());
+        LOGGER.info("Trigger ZooKeeper to KRaft migration for Data Lake: {}", cluster.getClusterName());
         return triggerKraftMigrationFlow(cluster, KraftMigrationOperationType.MIGRATE);
     }
 
     public FlowIdentifier triggerZookeeperToKraftFinalizationFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger ZooKeeper to KRaft migration finalization for DataLake: {}", cluster.getClusterName());
+        LOGGER.info("Trigger ZooKeeper to KRaft migration finalization for Data Lake: {}", cluster.getClusterName());
         return triggerKraftMigrationFlow(cluster, KraftMigrationOperationType.FINALIZE);
     }
 
     public FlowIdentifier triggerZookeeperToKraftRollbackFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger ZooKeeper to KRaft migration rollback for DataLake: {}", cluster.getClusterName());
+        LOGGER.info("Trigger ZooKeeper to KRaft migration rollback for Data Lake: {}", cluster.getClusterName());
         return triggerKraftMigrationFlow(cluster, KraftMigrationOperationType.ROLLBACK);
     }
 

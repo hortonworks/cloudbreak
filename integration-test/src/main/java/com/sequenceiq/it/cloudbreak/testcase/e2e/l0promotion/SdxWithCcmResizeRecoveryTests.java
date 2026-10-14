@@ -34,8 +34,8 @@ public class SdxWithCcmResizeRecoveryTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is an available environment with a running SDX cluster connected via CCMv2 Jumpgate",
-            when = "resize is performed on the SDX cluster but fails during provisioning",
+            given = "there is an available environment with a running Data Lake cluster connected via CCMv2 Jumpgate",
+            when = "resize is performed on the Data Lake cluster but fails during provisioning",
             then = "recovery should be available and successful when run, the original cluster should be up and running"
     )
     public void testCcmSdxResizeRecoveryFromProvisioningFailure(TestContext testContext) {

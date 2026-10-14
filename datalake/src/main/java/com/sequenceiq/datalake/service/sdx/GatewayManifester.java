@@ -29,7 +29,7 @@ public class GatewayManifester {
             gatewayV4Request.setTopologies(List.of(getGatewayTopologyV4Request()));
             gatewayV4Request.setSsoType(defaultSsoType);
             stackV4Request.getCluster().setGateway(gatewayV4Request);
-            LOGGER.info("Configured gateway for SDX {}", stackV4Request.getName());
+            LOGGER.info("Configured gateway for Data Lake {}", stackV4Request.getName());
         }
         return stackV4Request;
     }

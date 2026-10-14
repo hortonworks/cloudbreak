@@ -11,7 +11,7 @@ public class DistroXOpDescription {
     public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
     public static final String GET_ALL = "retrieve all stacks";
     public static final String LIST = "list stacks by environment crn";
-    public static final String OPERATIONS_BY_SDX_INSTANCE_HEALTH = "Get list of operations which are allowed or not based on sdx instance health";
+    public static final String OPERATIONS_BY_SDX_INSTANCE_HEALTH = "Get list of operations which are allowed or not based on Data Lake instance health";
     public static final String LIST_BY_SERVICE_TYPES = "list stacks which have any of the given service types in their cluster template";
     public static final String GET_BY_NAME = "get stack by name";
     public static final String GET_BY_CRN = "get stack by crn";
@@ -71,7 +71,7 @@ public class DistroXOpDescription {
     public static final String LIST_FLOW_PROGRESS = "List recent flow operations progress details for resource by resource crn";
     public static final String GET_OPERATION = "Get flow operation progress details for resource by resource crn";
     public static final String GET_DATAHUB_AUDIT_EVENTS = "Get Data Hub audit events";
-    public static final String DETERMINE_DATALAKE_DATA_SIZES = "Determines the sizes of the different local data on the datalake";
+    public static final String DETERMINE_DATALAKE_DATA_SIZES = "Determines the sizes of the different local data on the Data Lake";
     public static final String MODIFY_PROXY_CONFIG_INTERNAL = "Modify proxy config of stack";
     public static final String ROTATE_STACK_SECRETS = "Rotate stack secrets";
 

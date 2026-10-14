@@ -98,7 +98,7 @@ public class CertRenewalServiceTest {
     public void testFinalizeCertRenewal() {
         underTest.finalizeCertRenewal(1L);
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Datalake cert renewal finished", 1L);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Data Lake cert renewal finished", 1L);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class CertRenewalServiceTest {
         verify(sdxService).getById(1L);
         verify(cloudbreakPoller).pollUpdateUntilAvailable("Certificate renewal", sdxCluster, pollingConfig);
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_FINISHED, ResourceEvent.DATALAKE_CERT_RENEWAL_FINISHED,
-                "Datalake is running", sdxCluster);
+                "Data Lake is running", sdxCluster);
     }
 
     @Test

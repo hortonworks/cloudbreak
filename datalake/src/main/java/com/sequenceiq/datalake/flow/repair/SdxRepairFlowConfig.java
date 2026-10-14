@@ -73,7 +73,7 @@ public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairStat
 
     @Override
     public String getDisplayName() {
-        return "Repair SDX";
+        return "Repair Data Lake";
     }
 
     @Override

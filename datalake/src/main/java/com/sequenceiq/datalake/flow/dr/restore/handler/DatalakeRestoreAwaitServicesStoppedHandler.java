@@ -76,7 +76,7 @@ public class DatalakeRestoreAwaitServicesStoppedHandler extends ExceptionCatcher
         try {
             sdxOperationRepository.save(request.getDrStatus());
 
-            LOGGER.info("Start polling datalake status for id: {} with timeout duration: {}", sdxId, durationInMinutes);
+            LOGGER.info("Start polling Data Lake status for id: {} with timeout duration: {}", sdxId, durationInMinutes);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes,
                     TimeUnit.MINUTES);
             sdxBackupRestoreService.waitForServiceToBeStopped(
@@ -96,12 +96,12 @@ public class DatalakeRestoreAwaitServicesStoppedHandler extends ExceptionCatcher
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Restore services stopped poller stopped for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake restore timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake restore timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Restore services stopped polling failed for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakServiceException exception) {
-            LOGGER.info("Datalake restore failed. Reason: " + exception.getMessage());
+            LOGGER.info("Data Lake restore failed. Reason: " + exception.getMessage());
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         }
 

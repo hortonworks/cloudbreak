@@ -44,7 +44,7 @@ public class RotateCertificateActions {
 
             @Override
             protected void doExecute(SdxContext context, RotateCertificateStackEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Execute Rotate Certificate stack flow for SDX: {}", payload.getResourceId());
+                LOGGER.info("Execute Rotate Certificate stack flow for Data Lake: {}", payload.getResourceId());
                 RotateCertificateStackRequest request = RotateCertificateStackRequest.from(context);
                 sendEvent(context, request);
             }
@@ -62,7 +62,7 @@ public class RotateCertificateActions {
 
             @Override
             protected void doExecute(SdxContext context, RotateCertificateSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Rotate Certificate finalized for SDX: {}", payload.getResourceId());
+                LOGGER.info("Rotate Certificate finalized for Data Lake: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         "Rotate Certificate completed successfully", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.ROTATE_DATABASE_CERTIFICATE_FINISHED, sdxCluster);
@@ -80,7 +80,7 @@ public class RotateCertificateActions {
             protected void doExecute(SdxContext context, RotateCertificateFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DATALAKE_DATABASE_CERTIFICATE_ROTATION_FAILED;
-                LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
+                LOGGER.info("Update Data Lake status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
                 String statusReason = "Rotate Certificate failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();

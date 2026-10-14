@@ -122,7 +122,7 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
                     .map(Cluster::getName)
                     .collect(Collectors.joining(", "));
             LOGGER.info("{} will not be deleted because there are clusters associated with it: {}, this is quite normal, "
-                    + "since we are reusing the sdx database.", resource.getName(), clusters);
+                    + "since we are reusing the Data Lake database.", resource.getName(), clusters);
             inUse = true;
         }
         return inUse;

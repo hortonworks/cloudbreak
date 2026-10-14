@@ -48,7 +48,7 @@ public class SdxDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Start diagnostics collection for sdx cluster with id: {}", context.getSdxId());
+                LOGGER.debug("Start diagnostics collection for Data Lake cluster with id: {}", context.getSdxId());
                 payload.getProperties().put(DIAGNOSTICS_UUID_PARAM, context.getFlowId());
                 FlowIdentifier flowIdentifier = diagnosticsFlowService.startDiagnosticsCollection(payload.getProperties());
                 SdxDiagnosticsCollectionEvent event = new SdxDiagnosticsCollectionEvent(payload.getResourceId(),
@@ -75,7 +75,7 @@ public class SdxDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Diagnostics collection is in progress for sdx cluster");
+                LOGGER.debug("Diagnostics collection is in progress for Data Lake cluster");
                 sendEvent(context, SdxDiagnosticsWaitRequest.from(context, payload));
             }
 
@@ -98,7 +98,7 @@ public class SdxDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDiagnosticsSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Diagnostics collection is finished for sdx cluster");
+                LOGGER.debug("Diagnostics collection is finished for Data Lake cluster");
                 sendEvent(context, SDX_DIAGNOSTICS_COLLECTION_FINALIZED_EVENT.event(), payload);
             }
 
@@ -121,7 +121,7 @@ public class SdxDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDiagnosticsFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Diagnostics collection failed for sdx cluster");
+                LOGGER.debug("Diagnostics collection failed for Data Lake cluster");
                 sendEvent(context, SDX_DIAGNOSTICS_COLLECTION_FAILED_HANDLED_EVENT.event(), payload);
             }
 

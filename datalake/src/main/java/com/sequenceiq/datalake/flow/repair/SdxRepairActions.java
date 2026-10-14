@@ -62,7 +62,7 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairStartEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Start repair flow for Datalake: {}", payload.getResourceId());
+                LOGGER.info("Start repair flow for Data Lake: {}", payload.getResourceId());
                 SdxRepairStartRequest request = new SdxRepairStartRequest(payload.getResourceId(), payload.getUserId(), payload.getRepairSettings());
                 sendEvent(context, request.selector(), request);
             }
@@ -85,7 +85,7 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Datalake repair in progress: {}", payload.getResourceId());
+                LOGGER.info("Data Lake repair in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
 
@@ -112,9 +112,9 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Datalake repair finalized: {}", payload.getResourceId());
+                LOGGER.info("Data Lake repair finalized: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.SDX_REPAIR_FINISHED, "Repair finished, Datalake is running", payload.getResourceId());
+                        ResourceEvent.SDX_REPAIR_FINISHED, "Repair finished, Data Lake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_REPAIR_FINISHED, sdxCluster);
                 jobService.schedule(sdxCluster.getId(), SdxClusterJobAdapter.class);
                 sendEvent(context, SDX_REPAIR_FINALIZED_EVENT.event(), payload);
@@ -139,7 +139,7 @@ public class SdxRepairActions {
             @Override
             protected void doExecute(SdxContext context, SdxRepairCouldNotStartEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake repair could not be started for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake repair could not be started for Data Lake with id: {}", payload.getResourceId(), exception);
                 sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);
             }
 
@@ -162,8 +162,8 @@ public class SdxRepairActions {
             @Override
             protected void doExecute(SdxContext context, SdxRepairFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake repair failed for datalakeId: {}", payload.getResourceId(), exception);
-                String statusReason = "Datalake stack repair failed";
+                LOGGER.error("Data Lake repair failed for datalakeId: {}", payload.getResourceId(), exception);
+                String statusReason = "Data Lake stack repair failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }

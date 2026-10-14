@@ -62,7 +62,7 @@ public class PlatformAwareSdxConnector {
 
     @Deprecated
     public Optional<String> getRemoteDataContext(String sdxCrn) {
-        LOGGER.info("Getting remote data context for SDX {}", sdxCrn);
+        LOGGER.info("Getting remote data context for Data Lake {}", sdxCrn);
         return getRdcView(sdxCrn).getRemoteDataContext();
     }
 
@@ -109,7 +109,7 @@ public class PlatformAwareSdxConnector {
     }
 
     public Set<String> listSdxCrns(String environmentCrn) {
-        LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentCrn);
+        LOGGER.info("Getting Data Lake CRN'S for the Data Lakes in the environment {}", environmentCrn);
         Set<String> paasSdxCrns = platformDependentSdxDescribeServices.get(TargetPlatform.PAAS).listSdxCrns(environmentCrn);
         if (CollectionUtils.isEmpty(paasSdxCrns)) {
             for (TargetPlatform targetPlatform : List.of(TargetPlatform.PDL)) {
@@ -166,7 +166,7 @@ public class PlatformAwareSdxConnector {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
         if (!platforms.isEmpty()) {
-            throw new BadRequestException(String.format("Platforms [%s] have already SDX cluster!", platforms));
+            throw new BadRequestException(String.format("Platforms [%s] have already Data Lake cluster!", platforms));
         }
     }
 
@@ -182,7 +182,7 @@ public class PlatformAwareSdxConnector {
             return TargetPlatform.PAAS;
         } else if (targetPlatforms.size() > 1) {
             String joinedSdxCrns = Joiner.on(",").join(sdxCrns);
-            LOGGER.error("Could not decide target SDX platform based on SDX CRN list [{}].", joinedSdxCrns);
+            LOGGER.error("Could not decide target Data Lake platform based on Data Lake CRN list [{}].", joinedSdxCrns);
             throw new IllegalStateException(
                     String.format("Could not determine Data Lake platform from CRNs [%s], please contact Cloudera support!", joinedSdxCrns));
         }

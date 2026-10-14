@@ -83,7 +83,7 @@ public class MetricsTest extends AbstractMockTest {
     @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "datalake service is running",
+            given = "Data Lake service is running",
             when = "call the metrics endpoint",
             then = "metrics response contains a predefined set of metrics")
     public void testDatalakeMetrics(TestContext testContext) throws IOException {

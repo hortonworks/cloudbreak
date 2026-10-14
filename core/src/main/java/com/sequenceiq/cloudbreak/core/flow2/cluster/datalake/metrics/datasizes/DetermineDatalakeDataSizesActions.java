@@ -54,7 +54,7 @@ public class DetermineDatalakeDataSizesActions {
             @Override
             protected void doExecute(DetermineDatalakeDataSizesContext context, DetermineDatalakeDataSizesBaseEvent payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(
-                        context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS, "Determination of datalake data sizes in progress"
+                        context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS, "Determination of Data Lake data sizes in progress"
                 );
                 partialSaltStateUpdateService.performSaltUpdate(context.getStackId(), List.of(SALT_COMPONENT_NAME));
                 sendEvent(context, DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_FINISHED_EVENT.event(), payload);
@@ -84,7 +84,7 @@ public class DetermineDatalakeDataSizesActions {
             protected void doExecute(DetermineDatalakeDataSizesContext context, DetermineDatalakeDataSizesSubmissionEvent payload,
                     Map<Object, Object> variables) {
                 Stack stack = stackService.getById(context.getStackId());
-                LOGGER.info("Submitting datalake data sizes info '{}' for cluster {}.", payload.getDataSizesResult(), stack.getResourceCrn());
+                LOGGER.info("Submitting Data Lake data sizes info '{}' for cluster {}.", payload.getDataSizesResult(), stack.getResourceCrn());
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> sdxEndpoint.submitDatalakeDataSizesInternal(
@@ -92,7 +92,7 @@ public class DetermineDatalakeDataSizesActions {
                 );
 
                 stackUpdater.updateStackStatus(
-                        context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_FINISHED, "Finished determination of datalake data sizes"
+                        context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_FINISHED, "Finished determination of Data Lake data sizes"
                 );
                 sendEvent(context, DETERMINE_DATALAKE_DATA_SIZES_SUBMISSION_SUCCESS_EVENT.event(), payload);
             }
@@ -105,7 +105,7 @@ public class DetermineDatalakeDataSizesActions {
             @Override
             protected void doExecute(DetermineDatalakeDataSizesContext context, DetermineDatalakeDataSizesFailureEvent payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(
-                        context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_FAILED, "Determining the datalake data sizes failed"
+                        context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_FAILED, "Determining the Data Lake data sizes failed"
                 );
                 sendEvent(context, DETERMINE_DATALAKE_DATA_SIZES_FAILURE_HANDLED_EVENT.event(), payload);
             }

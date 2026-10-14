@@ -52,8 +52,8 @@ public class SdxDetachService {
      * Detaches the internal SDX cluster by assigning it a new "detached" name and CRN.
      */
     public SdxCluster detachCluster(Long sdxID, boolean detachDuringRecovery) {
-        LOGGER.info("Started detaching SDX cluster with ID: {}.", sdxID);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake detach in progress.", sdxID);
+        LOGGER.info("Started detaching Data Lake cluster with ID: {}.", sdxID);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Data Lake detach in progress.", sdxID);
 
         SdxCluster cluster = sdxService.getById(sdxID);
         String originalName = cluster.getClusterName();
@@ -67,7 +67,7 @@ public class SdxDetachService {
         }
         cluster = sdxService.save(cluster);
 
-        LOGGER.info("Finished detaching SDX cluster with ID: {}. Modified name from {} to {} and crn from {} to {}.",
+        LOGGER.info("Finished detaching Data Lake cluster with ID: {}. Modified name from {} to {} and crn from {} to {}.",
                 cluster.getId(), originalName, cluster.getClusterName(), cluster.getOriginalCrn(), cluster.getCrn());
         return cluster;
     }
@@ -79,16 +79,16 @@ public class SdxDetachService {
      *              able to be saved due to the stack object being null.
      */
     public void detachStack(SdxCluster cluster, String originalName) {
-        LOGGER.info("Started detaching stack of SDX cluster with ID: {}.", cluster.getId());
+        LOGGER.info("Started detaching stack of Data Lake cluster with ID: {}.", cluster.getId());
         sdxAttachDetachUtils.updateStack(originalName, cluster.getClusterName(), cluster.getCrn(), true);
         jobService.schedule(cluster.getId(), SdxClusterJobAdapter.class);
-        LOGGER.info("Finished detaching stack of SDX cluster with ID: {}.", cluster.getId());
+        LOGGER.info("Finished detaching stack of Data Lake cluster with ID: {}.", cluster.getId());
     }
 
     public void detachCCMv1ClusterProxyMapping(SdxCluster cluster) {
-            LOGGER.info("Started detaching CCMv1 cluster proxy mapping of SDX cluster with ID: {}.", cluster.getId());
+            LOGGER.info("Started detaching CCMv1 cluster proxy mapping of Data Lake cluster with ID: {}.", cluster.getId());
             sdxAttachDetachUtils.reRegisterClusterProxyConfig(cluster, true, cluster.getOriginalCrn());
-            LOGGER.info("Finished detaching CCMv1 cluster proxy mapping of SDX cluster with ID: {}.", cluster.getId());
+            LOGGER.info("Finished detaching CCMv1 cluster proxy mapping of Data Lake cluster with ID: {}.", cluster.getId());
     }
 
     /**
@@ -97,15 +97,15 @@ public class SdxDetachService {
      *      - IllegalArgumentException : If the database could not be saved due to the object for it being null.
      */
     public void detachExternalDatabase(SdxCluster cluster) {
-        LOGGER.info("Started detaching external database of SDX cluster with ID {} so it has crn {} " +
+        LOGGER.info("Started detaching external database of Data Lake cluster with ID {} so it has crn {} " +
                 "instead of {}.", cluster.getId(), cluster.getCrn(), cluster.getOriginalCrn());
         sdxAttachDetachUtils.updateExternalDatabase(cluster, cluster.getOriginalCrn());
-        LOGGER.info("Finished detaching external database of SDX cluster with ID {}.", cluster.getId());
+        LOGGER.info("Finished detaching external database of Data Lake cluster with ID {}.", cluster.getId());
     }
 
     public void markAsDetached(Long detachedClusterID) {
         sdxStatusService.setStatusForDatalakeAndNotify(
-                DatalakeStatusEnum.STOPPED, "Datalake is detached.", detachedClusterID
+                DatalakeStatusEnum.STOPPED, "Data Lake is detached.", detachedClusterID
         );
     }
 

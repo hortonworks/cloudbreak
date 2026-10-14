@@ -32,7 +32,7 @@ public interface SdxRestoreEndpoint {
     @POST
     @Path("{name}/restoreDatalake")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "restore the datalake ", operationId = "restoreDatalake",
+    @Operation(summary = "restore the Data Lake ", operationId = "restoreDatalake",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     @SuppressWarnings("ParameterNumber")
     SdxRestoreResponse restoreDatalakeByName(@PathParam("name") String name,
@@ -48,31 +48,31 @@ public interface SdxRestoreEndpoint {
     @POST
     @Path("{name}/restoreDatalakeStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "restore status of the datalake ", operationId = "restoreDatalakeStatus",
+    @Operation(summary = "restore status of the Data Lake ", operationId = "restoreDatalakeStatus",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRestoreStatusResponse getRestoreDatalakeStatusByName(@PathParam("name") String name, @QueryParam("restoreId") String restoreId);
 
     @GET
     @Path("{name}/getRestoreDatalakeStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "restore status of the datalake by datalake name ", operationId = "getRestoreDatalakeStatus",
+    @Operation(summary = "restore status of the Data Lake by Data Lake name ", operationId = "getRestoreDatalakeStatus",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SdxRestoreStatusResponse getRestoreDatalakeStatus(@Parameter(description = "required: datalake name", required = true) @PathParam("name") String name,
-            @Parameter(description = "optional: datalake restore id") @QueryParam("restoreId") String restoreId,
-            @Parameter(description = "optional: datalake backup name") @QueryParam("backupName") String backupName);
+    SdxRestoreStatusResponse getRestoreDatalakeStatus(@Parameter(description = "required: Data Lake name", required = true) @PathParam("name") String name,
+            @Parameter(description = "optional: Data Lake restore id") @QueryParam("restoreId") String restoreId,
+            @Parameter(description = "optional: Data Lake backup name") @QueryParam("backupName") String backupName);
 
     @GET
     @Path("{name}/getDatalakeRestoreId")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "restore Id of the datalake restore by datalake name ", operationId = "getDatalakeRestoreId",
+    @Operation(summary = "restore Id of the Data Lake restore by Data Lake name ", operationId = "getDatalakeRestoreId",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    String getDatalakeRestoreId(@Parameter(description = "required: datalake name", required = true) @PathParam("name") String name,
-            @Parameter(description = "optional: datalake backup name") @QueryParam("backupName") String backupName);
+    String getDatalakeRestoreId(@Parameter(description = "required: Data Lake name", required = true) @PathParam("name") String name,
+            @Parameter(description = "optional: Data Lake backup name") @QueryParam("backupName") String backupName);
 
     @POST
     @Path("{name}/restoreDatabase")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "restore the database backing datalake ", operationId = "restoreDatabase",
+    @Operation(summary = "restore the database backing Data Lake ", operationId = "restoreDatabase",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxDatabaseRestoreResponse restoreDatabaseByName(@PathParam("name") String name,
             @QueryParam("backupId") String backupId,
@@ -83,7 +83,7 @@ public interface SdxRestoreEndpoint {
     @GET
     @Path("{name}/restoreDatabaseStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get the status of datalake database restore operation", operationId = "restoreDatabaseStatus",
+    @Operation(summary = "Get the status of Data Lake database restore operation", operationId = "restoreDatabaseStatus",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxDatabaseRestoreStatusResponse getRestoreDatabaseStatusByName(@PathParam("name") String name, @QueryParam("operationId") String operationId);
 }

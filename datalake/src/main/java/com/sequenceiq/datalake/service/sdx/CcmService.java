@@ -23,13 +23,13 @@ public class CcmService {
                 case CCMV2:
                     if (versionComparator.compare(() -> CCMV2_REQUIRED_VERSION, () -> runtimeVersion) > 0) {
                         throw new BadRequestException(String.format("Runtime version %s does not support Cluster Connectivity Manager. " +
-                                "Please try creating a datalake with runtime version at least %s.", runtimeVersion, CCMV2_REQUIRED_VERSION));
+                                "Please try creating a Data Lake with runtime version at least %s.", runtimeVersion, CCMV2_REQUIRED_VERSION));
                     }
                     break;
                 case CCMV2_JUMPGATE:
                     if (versionComparator.compare(() -> CCMV2_JUMPGATE_REQUIRED_VERSION, () -> runtimeVersion) > 0) {
                         throw new BadRequestException(String.format("Runtime version %s does not support Cluster Connectivity Manager. " +
-                                "Please try creating a datalake with runtime version at least %s.", runtimeVersion, CCMV2_JUMPGATE_REQUIRED_VERSION));
+                                "Please try creating a Data Lake with runtime version at least %s.", runtimeVersion, CCMV2_JUMPGATE_REQUIRED_VERSION));
                     }
                     break;
                 default:

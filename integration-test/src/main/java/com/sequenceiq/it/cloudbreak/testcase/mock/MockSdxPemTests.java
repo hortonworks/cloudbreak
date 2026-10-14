@@ -102,8 +102,8 @@ public class MockSdxPemTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Internal Create request is sent but DNS registration was not successful",
-            then = "SDX should be in PROVISIONING_FAILED / CREATE_FAILED state when finished with statusReason: " +
+            when = "a valid Data Lake Internal Create request is sent but DNS registration was not successful",
+            then = "Data Lake should be in PROVISIONING_FAILED / CREATE_FAILED state when finished with statusReason: " +
                     "'Failed to create or update DNS entry for endpoint'"
     )
     public void testProvisionSdxWithDeniedDnsRequest(MockedTestContext testContext) {
@@ -199,8 +199,8 @@ public class MockSdxPemTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "restart failed on datalake with dns update",
-            then = "perform datalake's update public dns command and wait for a running datalake "
+            when = "restart failed on Data Lake with dns update",
+            then = "perform Data Lake's update public dns command and wait for a running Data Lake "
     )
     public void testUpdateDnsEntriesAfterFailedDatalakeStart(MockedTestContext testContext) {
         // deny2nddnsatdl is checked in MockPublicEndpointManagementService.java
@@ -344,9 +344,9 @@ public class MockSdxPemTests extends AbstractMockTest {
 
     private void checkExpectedSdxClusterStatus(SdxInternalTestDto testDto, SdxClusterStatusResponse expectedStatus) {
         SdxClusterStatusResponse status = testDto.getResponse().getStatus();
-        Log.expect(LOGGER, "Expected sdx cluster status: '" + expectedStatus + "' actual statusReason: '" + status + "'");
+        Log.expect(LOGGER, "Expected Data Lake cluster status: '" + expectedStatus + "' actual statusReason: '" + status + "'");
         if (!(status == expectedStatus)) {
-            throw new TestFailException("Test failed to reach sdx cluster status: " + expectedStatus + " got: " + status);
+            throw new TestFailException("Test failed to reach Data Lake cluster status: " + expectedStatus + " got: " + status);
         }
     }
 

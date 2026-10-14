@@ -65,7 +65,7 @@ public class SaltUpdateWaitHandler extends ExceptionCatcherEventHandler<SaltUpda
             LOGGER.debug("Salt update finished successfully in core.");
             return new SaltUpdateWaitSuccessResponse(sdxId, userId);
         } catch (SdxWaitException e) {
-            LOGGER.warn("Error occurred during waiting for salt update for SDX stack {}, error: ", sdxId, e);
+            LOGGER.warn("Error occurred during waiting for salt update for Data Lake stack {}, error: ", sdxId, e);
             return new SaltUpdateFailureResponse(sdxId, userId, e);
         }
     }

@@ -93,12 +93,12 @@ public class SdxCcmUpgradeService {
 
     public void initAndWaitForStackUpgrade(SdxCluster sdxCluster, PollingConfig pollingConfig) {
         String stackCrn = sdxCluster.getStackCrn();
-        LOGGER.debug("Initiating CCM upgrade on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
+        LOGGER.debug("Initiating CCM upgrade on stack CRN {} for Data Lake {}", stackCrn, sdxCluster.getName());
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         StackCcmUpgradeV4Response upgradeResponse =
                 ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.upgradeCcmByCrnInternal(0L, stackCrn, initiatorUserCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
-        LOGGER.debug("Waiting for CCM upgrade on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
+        LOGGER.debug("Waiting for CCM upgrade on stack CRN {} for Data Lake {}", stackCrn, sdxCluster.getName());
         cloudbreakPoller.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);
     }
 
@@ -113,7 +113,7 @@ public class SdxCcmUpgradeService {
     private Optional<SdxCluster> getSdxCluster(String environmentCrn) {
         List<SdxCluster> clusters = sdxService.listSdxByEnvCrn(environmentCrn);
         if (clusters.size() > 1) {
-            LOGGER.debug("Environment {} has more than 1 datalake", environmentCrn);
+            LOGGER.debug("Environment {} has more than 1 Data Lake", environmentCrn);
             throw new BadRequestException(getMessage(DATALAKE_UPGRADE_CCM_ERROR_INVALID_COUNT, List.of(environmentCrn)));
         }
         if (clusters.isEmpty()) {
@@ -124,29 +124,29 @@ public class SdxCcmUpgradeService {
 
     private SdxCcmUpgradeResponse checkPrerequisitesAndTrigger(SdxCluster sdxCluster, StackV4Response stack) {
         if (!stack.getStatus().isAvailable() && Status.UPGRADE_CCM_FAILED != stack.getStatus()) {
-            LOGGER.debug("Datalake stack {} is not available for CCM upgrade", stack.getName());
+            LOGGER.debug("Data Lake stack {} is not available for CCM upgrade", stack.getName());
             return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(),
                     getMessage(DATALAKE_UPGRADE_CCM_NOT_AVAILABLE), stack.getCrn());
         }
 
-        LOGGER.debug("Datalake stack {} has to be upgraded from TunnelType {} to {}", stack.getName(), stack.getTunnel().name(), Tunnel.latestUpgradeTarget());
+        LOGGER.debug("Data Lake stack {} has to be upgraded from TunnelType {} to {}", stack.getName(), stack.getTunnel().name(), Tunnel.latestUpgradeTarget());
         return triggerCcmUpgradeFlow(sdxCluster);
     }
 
     private SdxCcmUpgradeResponse noDatalakeAnswer(String environmentCrn) {
-        LOGGER.debug("Environment {} has no datalake", environmentCrn);
+        LOGGER.debug("Environment {} has no Data Lake", environmentCrn);
         return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.SKIP, FlowIdentifier.notTriggered(),
                 getMessage(DATALAKE_UPGRADE_CCM_NO_DATALAKE, List.of(environmentCrn)), null);
     }
 
     private SdxCcmUpgradeResponse alreadyOnLatestAnswer(StackV4Response stack) {
-        LOGGER.debug("Datalake stack {} already has TunnelType {}", stack.getName(), stack.getTunnel().name());
+        LOGGER.debug("Data Lake stack {} already has TunnelType {}", stack.getName(), stack.getTunnel().name());
         return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.SKIP, FlowIdentifier.notTriggered(),
                 getMessage(DATALAKE_UPGRADE_CCM_ALREADY_UPGRADED), stack.getCrn());
     }
 
     private SdxCcmUpgradeResponse cannotUpgradeAnswer(StackV4Response stack) {
-        LOGGER.debug("Datalake stack {} has TunnelType {}. No CCM upgrade is possible.", stack.getName(), stack.getTunnel().name());
+        LOGGER.debug("Data Lake stack {} has TunnelType {}. No CCM upgrade is possible.", stack.getName(), stack.getTunnel().name());
         return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(),
                 getMessage(DATALAKE_UPGRADE_CCM_NOT_UPGRADEABLE), stack.getCrn());
     }

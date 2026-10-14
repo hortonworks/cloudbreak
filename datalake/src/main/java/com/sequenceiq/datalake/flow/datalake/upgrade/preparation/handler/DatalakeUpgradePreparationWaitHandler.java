@@ -65,7 +65,7 @@ public class DatalakeUpgradePreparationWaitHandler extends ExceptionCatcherEvent
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Upgrade poller stopped for cluster: {}", sdxId);
             return new DatalakeUpgradePreparationFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake upgrade preparation timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake upgrade preparation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Upgrade preparation polling failed for cluster: {}", sdxId);
             return new DatalakeUpgradePreparationFailedEvent(sdxId, userId, exception);

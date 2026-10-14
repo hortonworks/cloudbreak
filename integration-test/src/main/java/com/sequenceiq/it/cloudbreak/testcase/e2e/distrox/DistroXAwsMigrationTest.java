@@ -46,7 +46,7 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running cloudbreak and existing environment, distrox, datalake",
+            given = "there is a running cloudbreak and existing environment, distrox, Data Lake",
             when = "a valid DistroX",
             then = "DistroX cluster is multiAZ")
     public void testAwsNativeMigration(TestContext testContext) {

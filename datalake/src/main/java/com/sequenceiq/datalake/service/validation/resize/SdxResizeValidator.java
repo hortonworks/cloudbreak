@@ -28,7 +28,7 @@ public class SdxResizeValidator {
 
     public void validateDatabaseTypeForResize(SdxDatabase sdxDatabase, CloudPlatform cloudPlatform) {
         if (CloudPlatform.AZURE.equals(cloudPlatform) && hasExternalDatabase(sdxDatabase) && isSingleServer(sdxDatabase)) {
-            String message = "Resizing a DataLake cluster is not possible when using Azure Single Server database type. "
+            String message = "Resizing a Data Lake cluster is not possible when using Azure Single Server database type. "
                     + "To proceed with the resizing operation, you will first need to upgrade your cluster’s database type to Azure Flexible Server. "
                     + "Once this change is made, you can retry the resize operation.";
             LOGGER.warn(message);

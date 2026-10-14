@@ -95,7 +95,7 @@ class EnvironmentCrossRealmTrustCancelSaltUpdateHandlerTest {
 
     @Test
     void testDoAcceptWhenDatalakeSaltUpdateFailsReturnsFailedEvent() {
-        doThrow(new RuntimeException("datalake salt update failed"))
+        doThrow(new RuntimeException("Data Lake salt update failed"))
                 .when(sdxPollerService).updateSaltOnAttachedDatalakeClusters(RESOURCE_ID, RESOURCE_NAME);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(new Event<>(buildEvent())));

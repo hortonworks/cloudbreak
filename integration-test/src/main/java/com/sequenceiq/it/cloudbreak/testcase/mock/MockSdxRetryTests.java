@@ -33,7 +33,7 @@ public class MockSdxRetryTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "start an sdx cluster",
+            when = "start a Data Lake cluster",
             then = "failed first and retry"
     )
     public void testRetry(MockedTestContext testContext) {

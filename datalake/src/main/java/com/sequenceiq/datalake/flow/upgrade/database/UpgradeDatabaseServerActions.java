@@ -47,7 +47,7 @@ public class UpgradeDatabaseServerActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Execute upgrade database server flow for SDX: {}", payload.getResourceId());
+                LOGGER.info("Execute upgrade database server flow for Data Lake: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS, "Database server upgrade is in progress",
                         payload.getResourceId());
                 UpgradeDatabaseServerRequest request = UpgradeDatabaseServerRequest.from(context, payload.getTargetMajorVersion(), payload.isForced());
@@ -67,7 +67,7 @@ public class UpgradeDatabaseServerActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Wait for upgrade database server flow in core for SDX: {}", payload.getResourceId());
+                LOGGER.info("Wait for upgrade database server flow in core for Data Lake: {}", payload.getResourceId());
                 UpgradeDatabaseServerWaitRequest request = UpgradeDatabaseServerWaitRequest.from(context);
                 sendEvent(context, request);
             }
@@ -81,11 +81,11 @@ public class UpgradeDatabaseServerActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerWaitSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Database server upgrade finalized for SDX: {}", payload.getResourceId());
+                LOGGER.info("Database server upgrade finalized for Data Lake: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED,
-                        "Datalake Database server upgrade completed successfully",
+                        "Data Lake Database server upgrade completed successfully",
                         payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.UPGRADE_DATABASE_SERVER_FINISHED, sdxCluster);
                 sendEvent(context, SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT.event(), payload);
@@ -102,7 +102,7 @@ public class UpgradeDatabaseServerActions {
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_FAILED;
-                LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
+                LOGGER.info("Update Data Lake status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
                 String statusReason = exception.getMessage() != null
                         ? exception.getMessage()
                         : "Database server upgrade failed";

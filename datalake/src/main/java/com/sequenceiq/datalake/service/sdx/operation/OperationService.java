@@ -57,7 +57,7 @@ public class OperationService {
                 if (detailed) {
                     handleProvisionOperation(resourceCrn, sdxOperationView, detailed);
                 } else {
-                    LOGGER.debug("Skipping detailed SDX provision operation response");
+                    LOGGER.debug("Skipping detailed Data Lake provision operation response");
                 }
             }
         }

@@ -66,7 +66,7 @@ public class SdxCertRotationWaitHandler extends ExceptionCatcherEventHandler<Sdx
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Cert rotation poller stopped for stack: {}", sdxId);
             response = new SdxCertRotationFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake cert rotation timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake cert rotation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Cert rotation polling failed for stack: {}", sdxId);
             response = new SdxCertRotationFailedEvent(sdxId, userId, exception);

@@ -18,7 +18,7 @@ public class SdxDatabaseServerUpgradeAvailabilityChecker {
 
     public boolean isUpgradeNeeded(StackDatabaseServerResponse stackDatabaseServerResponse, TargetMajorVersion targetMajorVersion, boolean forced) {
         Optional<MajorVersion> currentVersionOptional = Optional.ofNullable(stackDatabaseServerResponse.getMajorVersion());
-        LOGGER.debug("Checking if database upgrade is needed for sdx cluster. Registered database engine version: {}", currentVersionOptional);
+        LOGGER.debug("Checking if database upgrade is needed for Data Lake cluster. Registered database engine version: {}", currentVersionOptional);
         return currentVersionOptional
                 .map(majorVersion -> isUpgradeNeeded(majorVersion, targetMajorVersion, forced))
                 .orElse(true);

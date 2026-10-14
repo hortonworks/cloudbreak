@@ -124,7 +124,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT, timeOut = 10800000)
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an attached SDX and Datahubs (in case of AWS, create one of the Datahub with external database)",
+            when = "create an attached Data Lake and Datahubs (in case of AWS, create one of the Datahub with external database)",
             then = "should be stopped first and started after it, and required services should be in running state in CM ")
     public void testCreateStopStartEnvironment(TestContext testContext) {
         LOGGER.info("Environment stop-start test execution has been started....");

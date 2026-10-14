@@ -361,7 +361,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
                 () -> underTest.getDatalakeServices(USER_CRN, ENV_CRN));
-        assertEquals(String.format(String.format("Unable to fetch data lake services for crn %s", ENV_CRN)), runtimeException.getMessage());
+        assertEquals(String.format(String.format("Unable to fetch Data Lake services for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 
     @Test

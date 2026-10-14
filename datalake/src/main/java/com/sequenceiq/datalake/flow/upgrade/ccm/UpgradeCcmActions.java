@@ -42,7 +42,7 @@ public class UpgradeCcmActions {
 
             @Override
             protected void doExecute(SdxContext context, UpgradeCcmStackEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Execute CCM upgrade stack flow for SDX: {}", payload.getResourceId());
+                LOGGER.info("Execute CCM upgrade stack flow for Data Lake: {}", payload.getResourceId());
                 UpgradeCcmStackRequest request = UpgradeCcmStackRequest.from(context);
                 sendEvent(context, request);
             }
@@ -60,7 +60,7 @@ public class UpgradeCcmActions {
 
             @Override
             protected void doExecute(SdxContext context, UpgradeCcmSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("CCM upgrade finalized for SDX: {}", payload.getResourceId());
+                LOGGER.info("CCM upgrade finalized for Data Lake: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         "Cluster Connectivity Manager upgrade completed successfully", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.UPGRADE_CCM_FINISHED, sdxCluster);
@@ -78,7 +78,7 @@ public class UpgradeCcmActions {
             protected void doExecute(SdxContext context, UpgradeCcmFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_FAILED;
-                LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
+                LOGGER.info("Update Data Lake status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
                 String statusReason = "Cluster Connectivity Manager upgrade failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();

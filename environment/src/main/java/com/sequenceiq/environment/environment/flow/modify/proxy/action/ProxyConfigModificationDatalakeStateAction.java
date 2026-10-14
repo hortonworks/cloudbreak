@@ -30,7 +30,7 @@ public class ProxyConfigModificationDatalakeStateAction extends AbstractEnvProxy
 
     @Override
     protected void doExecute(EnvProxyModificationContext context, EnvProxyModificationDefaultEvent payload, Map<Object, Object> variables) throws Exception {
-        LOGGER.info("Env proxy modification datalake step started");
+        LOGGER.info("Env proxy modification Data Lake step started");
 
         environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
                 EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_DATALAKE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_DATALAKE_STARTED,

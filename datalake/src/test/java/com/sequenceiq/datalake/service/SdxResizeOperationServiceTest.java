@@ -75,7 +75,7 @@ class SdxResizeOperationServiceTest {
                 {SdxDetachFlowConfig.class, failedOperation("Failed to detach old Data Lake from environment.", true, true), true},
                 {SdxCreateFlowConfig.class, failedOperation("New Data Lake creation failed.", true, true), true},
                 {DatalakeRestoreFlowConfig.class, failedOperation("Failed to restore data from old Data Lake to new Data Lake.", true, true), true},
-                {SdxDeleteFlowConfig.class, failedOperation("Failed to delete old data lake.", false, true), true},
+                {SdxDeleteFlowConfig.class, failedOperation("Failed to delete old Data Lake.", false, true), true},
                 {UpdateLoadBalancerDNSFlowConfig.class, failedOperation("Load balancer update failed.", false, true), false},
                 {DatahubRefreshFlowConfig.class, failedOperation("Data Hub refresh operation failed.", false, true), false},
         };

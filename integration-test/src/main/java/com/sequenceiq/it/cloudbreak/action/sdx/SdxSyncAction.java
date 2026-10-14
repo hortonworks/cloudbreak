@@ -25,9 +25,9 @@ public class SdxSyncAction implements Action<SdxTestDto, SdxClient> {
 
         testContext.waitingFor(Duration.ofMinutes(1), "Waiting for CM services to be synchronized has been interrupted");
 
-        Log.when(LOGGER, format(" SDX '%s' sync has been started... ", sdxName));
-        Log.whenJson(LOGGER, " SDX sync request: ", testDto.getRequest());
-        LOGGER.info(format(" SDX '%s' sync has been started... ", sdxName));
+        Log.when(LOGGER, format(" Data Lake '%s' sync has been started... ", sdxName));
+        Log.whenJson(LOGGER, " Data Lake sync request: ", testDto.getRequest());
+        LOGGER.info(format(" Data Lake '%s' sync has been started... ", sdxName));
         client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .sync(sdxName);
@@ -35,7 +35,7 @@ public class SdxSyncAction implements Action<SdxTestDto, SdxClient> {
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX response after sync: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " Data Lake response after sync: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
 
         return testDto;
     }

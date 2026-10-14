@@ -43,9 +43,9 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "recipe called on MASTER host group",
-            then = "SDX recipe executions should be successful"
+            then = "Data Lake recipe executions should be successful"
     )
     public void testSDXPreClouderaManagerStartRecipe(TestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();

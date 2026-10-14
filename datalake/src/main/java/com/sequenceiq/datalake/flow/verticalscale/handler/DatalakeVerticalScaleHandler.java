@@ -68,13 +68,13 @@ public class DatalakeVerticalScaleHandler extends EventSenderAwareHandler<Datala
             eventSender().sendEvent(result, request.getHeaders());
             LOGGER.debug("VERTICAL_SCALE_DATALAKE_EVENT event sent");
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Polling exited before timeout for SDX: {}. Cause: ", dataLakeVerticalScaleEvent.getResourceId(), userBreakException);
+            LOGGER.error("Polling exited before timeout for Data Lake: {}. Cause: ", dataLakeVerticalScaleEvent.getResourceId(), userBreakException);
             DatalakeVerticalScaleFailedEvent failedEvent =
                     new DatalakeVerticalScaleFailedEvent(dataLakeVerticalScaleEvent, userBreakException,
                             DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED);
             eventSender().sendEvent(failedEvent, request.getHeaders());
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Poller stopped for SDX: {}", dataLakeVerticalScaleEvent.getResourceId(), pollerStoppedException);
+            LOGGER.error("Poller stopped for Data Lake: {}", dataLakeVerticalScaleEvent.getResourceId(), pollerStoppedException);
             DatalakeVerticalScaleFailedEvent failedEvent =
                     new DatalakeVerticalScaleFailedEvent(dataLakeVerticalScaleEvent, pollerStoppedException,
                             DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED);

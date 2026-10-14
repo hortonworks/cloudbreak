@@ -101,7 +101,7 @@ public class SdxStopAllDatahubHandlerTest {
 
         assertEquals(SDX_ID, sdxStopFailedEvent.getResourceId());
         assertEquals(USER_ID, sdxStopFailedEvent.getUserId());
-        assertEquals("Datalake stop timed out after 40 minutes",
+        assertEquals("Data Lake stop timed out after 40 minutes",
                 sdxStopFailedEvent.getException().getMessage());
     }
 }

@@ -46,9 +46,9 @@ public class SdxRestartInstancesTest extends AbstractE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
-            given = "there is an available environment with a running datalake",
+            given = "there is an available environment with a running Data Lake",
             when = "restart Instances is called",
-            then = "Instances are restarted and datalake is running"
+            then = "Instances are restarted and Data Lake is running"
     )
     public void testSdxRestartInstances(TestContext testContext) {
         AtomicReference<String> dataLakeName = new AtomicReference<>();

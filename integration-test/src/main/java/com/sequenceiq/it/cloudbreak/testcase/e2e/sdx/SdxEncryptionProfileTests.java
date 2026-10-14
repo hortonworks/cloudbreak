@@ -24,7 +24,7 @@ public class SdxEncryptionProfileTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a SDX cluster in available state",
+            when = "a Data Lake cluster in available state",
             then = "check default tls version is configured"
     )
     public void testEncryptionProfile(TestContext testContext) {

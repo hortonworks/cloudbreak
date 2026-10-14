@@ -25,9 +25,9 @@ public class SdxSyncInternalAction implements Action<SdxInternalTestDto, SdxClie
 
         testContext.waitingFor(Duration.ofMinutes(1), "Waiting for CM services to be synchronized has been interrupted");
 
-        Log.when(LOGGER, format(" Internal SDX '%s' sync has been started... ", sdxName));
-        Log.whenJson(LOGGER, " Internal SDX sync request: ", testDto.getRequest());
-        LOGGER.info(format(" Internal SDX '%s' sync has been started... ", sdxName));
+        Log.when(LOGGER, format(" Internal Data Lake '%s' sync has been started... ", sdxName));
+        Log.whenJson(LOGGER, " Internal Data Lake sync request: ", testDto.getRequest());
+        LOGGER.info(format(" Internal Data Lake '%s' sync has been started... ", sdxName));
         client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .sync(sdxName);
@@ -35,7 +35,7 @@ public class SdxSyncInternalAction implements Action<SdxInternalTestDto, SdxClie
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " Internal SDX response after sync: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " Internal Data Lake response after sync: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
 
         return testDto;
     }

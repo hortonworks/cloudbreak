@@ -39,9 +39,9 @@ public class SdxKraftMigrationTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "Kraft migration is performed on the SDX cluster",
-            then = "the SDX cluster should be available and running in KRaft mode")
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
+            when = "Kraft migration is performed on the Data Lake cluster",
+            then = "the Data Lake cluster should be available and running in KRaft mode")
     public void testSdxKraftMigrationWithRollback(TestContext testContext) {
         testContext
                 .given(SdxTestDto.class)

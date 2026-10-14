@@ -41,14 +41,14 @@ public interface SdxRotationEndpoint {
     @PUT
     @Path("rotate_secret")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Rotate SDX secrets", operationId = "rotateSDXSecrets",
+    @Operation(summary = "Rotate Data Lake secrets", operationId = "rotateSDXSecrets",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
 
     @GET
     @Path("list_secret_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "List rotatable secret types for SDX", operationId = "listRotatableSdxSecretType",
+    @Operation(summary = "List rotatable secret types for Data Lake", operationId = "listRotatableSdxSecretType",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxSecretTypeResponse> listRotatableSdxSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @QueryParam("datalakeCrn") @NotEmpty String datalakeCrn);

@@ -235,7 +235,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running datalake",
+            given = "there is a running Data Lake",
             when = "a DostroX is created with 401 nodes or scaled to 401 nodes",
             then = "the creation or scale should fail")
     public void testNodeCountLimit(MockedTestContext testContext, ITestContext testNgContext) {

@@ -123,9 +123,9 @@ public class UserDefinedTagUpdateTest extends AbstractE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, an SDX cluster and a DistroX for every variant in available state",
+            given = "there is a running Cloudbreak, a Data Lake cluster and a DistroX for every variant in available state",
             when = "user defined tags are updated on the environment",
-            then = "the tags are updated on the Environment, SDX and DistroX resources in the cloud provider side")
+            then = "the tags are updated on the Environment, Data Lake and DistroX resources in the cloud provider side")
     public void testUserDefinedTagUpdate(TestContext testContext, ITestContext iTestContext) {
         EnvironmentEditRequest environmentEditRequest = new EnvironmentEditRequest();
         environmentEditRequest.setUpdateTagsOnExistingResources(true);

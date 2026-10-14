@@ -132,7 +132,7 @@ public class SdxRuntimeUpgradeService {
                 .filter(DatalakeUpgradeFlowChainStartEvent.class::isInstance)
                 .map(DatalakeUpgradeFlowChainStartEvent.class::cast)
                 .map(triggerEvent -> {
-                    LOGGER.info("Last Sdx upgrade flow chain trigger event: {}", triggerEvent);
+                    LOGGER.info("Last Data Lake upgrade flow chain trigger event: {}", triggerEvent);
                     SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
                     sdxUpgradeRequest.setImageId(triggerEvent.getImageId());
                     sdxUpgradeRequest.setRollingUpgradeEnabled(triggerEvent.isRollingUpgradeEnabled());

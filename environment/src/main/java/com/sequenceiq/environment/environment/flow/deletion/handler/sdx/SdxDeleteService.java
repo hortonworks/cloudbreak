@@ -34,7 +34,7 @@ public class SdxDeleteService {
     }
 
     public void deleteSdxClustersForEnvironment(PollingConfig pollingConfig, EnvironmentView environment, boolean force) {
-        LOGGER.debug("Calling delete for all data lakes in the environment.");
+        LOGGER.debug("Calling delete for all Data Lakes in the environment.");
 
         platformAwareSdxConnector.deleteByEnvironment(environment.getResourceCrn(), force);
 
@@ -49,8 +49,8 @@ public class SdxDeleteService {
                     .waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .run(pollingAttempt);
         } catch (PollerStoppedException e) {
-            LOGGER.info("Datalake deletion timed out");
-            throw new SdxOperationFailedException("Datalake deletion timed out");
+            LOGGER.info("Data Lake deletion timed out");
+            throw new SdxOperationFailedException("Data Lake deletion timed out");
         }
     }
 }

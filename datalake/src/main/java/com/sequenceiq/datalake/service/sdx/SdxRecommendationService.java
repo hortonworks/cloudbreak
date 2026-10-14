@@ -148,7 +148,7 @@ public class SdxRecommendationService {
 
     public void validateVmTypeOverride(DetailedEnvironmentResponse environment, SdxCluster sdxCluster) {
         try {
-            LOGGER.debug("Validate vm type override for sdx cluster: {}", sdxCluster.getCrn());
+            LOGGER.debug("Validate vm type override for Data Lake cluster: {}", sdxCluster.getCrn());
             String cloudPlatform = environment.getCloudPlatform();
             if (shouldValidateVmTypes(sdxCluster, cloudPlatform)) {
                 StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);

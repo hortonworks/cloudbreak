@@ -62,7 +62,7 @@ public class DatalakeAddVolumesHandler extends ExceptionCatcherEventHandler<Data
     @Override
     protected Selectable doAccept(HandlerEvent<DatalakeAddVolumesEvent> event) {
         DatalakeAddVolumesEvent request = event.getData();
-        LOGGER.debug("Starting add volumes for datalake with request: {}", request);
+        LOGGER.debug("Starting add volumes for Data Lake with request: {}", request);
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         StackAddVolumesRequest stackAddVolumesRequest = request.getStackAddVolumesRequest();
@@ -79,13 +79,13 @@ public class DatalakeAddVolumesHandler extends ExceptionCatcherEventHandler<Data
                         }
                     });
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-            LOGGER.debug("Starting polling for datalake-core add volumes flow :: {}", flowIdentifier);
+            LOGGER.debug("Starting polling for Data Lake core add volumes flow :: {}", flowIdentifier);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_INTERVAL, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             sdxWaitService.waitForCloudbreakFlow(sdxCluster.getId(), pollingConfig, "Polling add volumes flow");
-            LOGGER.debug("Core add volumes flow for datalake is complete :: {}", flowIdentifier);
+            LOGGER.debug("Core add volumes flow for Data Lake is complete :: {}", flowIdentifier);
             return new DatalakeAddVolumesEvent(DATALAKE_ADD_VOLUMES_FINISH_EVENT.selector(), sdxId, userId, stackAddVolumesRequest, request.getSdxName());
         } catch (Exception e) {
-            LOGGER.warn("Sdx add volumes failed, sdxId: {}", sdxId, e);
+            LOGGER.warn("Data Lake add volumes failed, sdxId: {}", sdxId, e);
             return new DatalakeAddVolumesFailedEvent(sdxId, userId, e);
         }
     }

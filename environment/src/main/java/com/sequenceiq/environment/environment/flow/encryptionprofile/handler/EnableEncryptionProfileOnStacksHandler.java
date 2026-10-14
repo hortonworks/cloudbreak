@@ -123,17 +123,17 @@ public class EnableEncryptionProfileOnStacksHandler extends ExceptionCatcherEven
                 .filter(dl -> SdxClusterStatusResponse.RUNNING.equals(dl.getStatus()))
                 .toList();
         if (runningDatalakes.isEmpty()) {
-            LOGGER.info("No RUNNING datalake found for environment {}, skipping datalake step", envCrn);
+            LOGGER.info("No RUNNING Data Lake found for environment {}, skipping Data Lake step", envCrn);
             return List.of();
         }
         if (runningDatalakes.size() > 1) {
-            LOGGER.warn("Multiple RUNNING datalakes found for environment {} ({}); only the first will be processed", envCrn, runningDatalakes.size());
+            LOGGER.warn("Multiple RUNNING Data Lakes found for environment {} ({}); only the first will be processed", envCrn, runningDatalakes.size());
         }
         SdxClusterResponse dl = runningDatalakes.getFirst();
         if (datalakeHasOwnEncryptionProfile(dl.getCrn())) {
             return List.of();
         }
-        LOGGER.info("Triggering enable encryption profile on datalake {} for environment {} "
+        LOGGER.info("Triggering enable encryption profile on Data Lake {} for environment {} "
                 + "(env-level profile inherited, no cluster-level CRN forwarded)", dl.getCrn(), envCrn);
         return List.of(sdxService.enableEncryptionProfile(dl.getCrn(), null));
     }
@@ -184,7 +184,7 @@ public class EnableEncryptionProfileOnStacksHandler extends ExceptionCatcherEven
                 .map(ClusterV4Response::getEncryptionProfileCrn)
                 .orElse(null);
         if (hasOwnEncryptionProfile(clusterEncryptionProfileCrn)) {
-            LOGGER.info("Skipping datalake {} — it has its own encryption profile [{}]", datalakeCrn, clusterEncryptionProfileCrn);
+            LOGGER.info("Skipping Data Lake {} — it has its own encryption profile [{}]", datalakeCrn, clusterEncryptionProfileCrn);
             return true;
         }
         return false;
@@ -219,12 +219,12 @@ public class EnableEncryptionProfileOnStacksHandler extends ExceptionCatcherEven
                     .run(sdxPollerProvider.flowListPoller(envId, flowIdentifiers));
             if (datalakeMultipleFlowsResultEvaluator.anyFailed(flowIdentifiers)) {
                 throw new SdxOperationFailedException(
-                        String.format("Failed to enable encryption profile on datalake. Flow ids: %s", flowIdentifiers));
+                        String.format("Failed to enable encryption profile on Data Lake. Flow ids: %s", flowIdentifiers));
             }
         } catch (PollerStoppedException e) {
-            LOGGER.warn("Enable encryption profile on datalake stacks timed out or error happened.", e);
+            LOGGER.warn("Enable encryption profile on Data Lake stacks timed out or error happened.", e);
             throw new CloudbreakServiceException(
-                    String.format("Enable encryption profile on datalake stacks timed out or error happened: %s", e.getMessage()), e);
+                    String.format("Enable encryption profile on Data Lake stacks timed out or error happened: %s", e.getMessage()), e);
         }
     }
 

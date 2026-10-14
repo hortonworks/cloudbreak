@@ -114,7 +114,7 @@ public class DatalakeRecoveryBringupActions {
                 Long stackId = payload.getResourceId();
                 StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
                 MDCBuilder.buildMdcContext(stackView);
-                LOGGER.error("Datalake recovery failed for stack with id: {}", stackId, exception);
+                LOGGER.error("Data Lake recovery failed for stack with id: {}", stackId, exception);
                 return DatalakeRecoveryBringupContext.from(flowParameters, payload);
             }
 

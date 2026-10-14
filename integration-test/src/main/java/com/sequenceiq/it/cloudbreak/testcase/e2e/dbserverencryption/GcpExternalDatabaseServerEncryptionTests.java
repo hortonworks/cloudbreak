@@ -81,7 +81,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an encrypted environment is created on GCP with external database",
-            when = "SDX and DistroX is created with external encrypted database",
+            when = "Data Lake and DistroX is created with external encrypted database",
             then = "SSL encryption is enabled for GCP, the cluster should be up and running"
     )
     public void testExternalDatabaseEncryptionOnGCP(TestContext testContext) {

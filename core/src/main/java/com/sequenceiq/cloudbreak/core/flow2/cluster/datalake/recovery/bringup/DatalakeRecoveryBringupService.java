@@ -26,12 +26,12 @@ public class DatalakeRecoveryBringupService {
     private StackUpdater stackUpdater;
 
     public void handleDatalakeRecoveryBringupSuccess(Long stackId) {
-        LOGGER.info("Datalake stack bringup has been finished successfully.");
+        LOGGER.info("Data Lake stack bringup has been finished successfully.");
         flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), DATALAKE_RECOVERY_BRINGUP_FINISHED);
     }
 
     public void handleDatalakeRecoveryBringupFailure(Long stackId, String errorReason, DetailedStackStatus detailedStatus) {
-        LOGGER.warn("Datalake stack bringup has failed with {}.", errorReason);
+        LOGGER.warn("Data Lake stack bringup has failed with {}.", errorReason);
         stackUpdater.updateStackStatus(stackId, detailedStatus, errorReason);
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_RECOVERY_BRINGUP_FAILED, errorReason);
     }

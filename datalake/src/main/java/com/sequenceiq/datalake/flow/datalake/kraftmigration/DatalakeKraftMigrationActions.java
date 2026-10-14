@@ -52,14 +52,14 @@ public class DatalakeKraftMigrationActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeKraftMigrationStartEvent payload, Map<Object, Object> variables) {
                 variables.put(OPERATION_TYPE_KEY, payload.getOperationType());
-                LOGGER.info("ZooKeeper to KRaft {} started for DataLake id {}", payload.getOperationType(), payload.getResourceId());
+                LOGGER.info("ZooKeeper to KRaft {} started for Data Lake id {}", payload.getOperationType(), payload.getResourceId());
                 sdxKraftMigrationService.triggerOnCloudbreak(payload.getResourceId(), payload.getOperationType());
                 sendEvent(context, new SdxEvent(DATALAKE_KRAFT_MIGRATION_IN_PROGRESS_EVENT.event(), context));
             }
 
             @Override
             protected Object getFailurePayload(DatalakeKraftMigrationStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                LOGGER.error("ZooKeeper to KRaft {} failed to start for DataLake id {}", payload.getOperationType(), payload.getResourceId(), ex);
+                LOGGER.error("ZooKeeper to KRaft {} failed to start for Data Lake id {}", payload.getOperationType(), payload.getResourceId(), ex);
                 return DatalakeKraftMigrationFailedEvent.from(payload, ex);
             }
         };
@@ -76,13 +76,13 @@ public class DatalakeKraftMigrationActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("ZooKeeper to KRaft migration is in progress for DataLake id {}", payload.getResourceId());
+                LOGGER.info("ZooKeeper to KRaft migration is in progress for Data Lake id {}", payload.getResourceId());
                 sendEvent(context, DatalakeKraftMigrationWaitRequest.from(context));
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                LOGGER.error("ZooKeeper to KRaft migration in-progress state failed for DataLake id {}", payload.getResourceId(), ex);
+                LOGGER.error("ZooKeeper to KRaft migration in-progress state failed for Data Lake id {}", payload.getResourceId(), ex);
                 return DatalakeKraftMigrationFailedEvent.from(payload, ex);
             }
         };
@@ -103,7 +103,7 @@ public class DatalakeKraftMigrationActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 KraftMigrationOperationType operationType = (KraftMigrationOperationType) variables.get(OPERATION_TYPE_KEY);
-                LOGGER.info("ZooKeeper to KRaft {} finished for DataLake id {}", operationType, payload.getResourceId());
+                LOGGER.info("ZooKeeper to KRaft {} finished for Data Lake id {}", operationType, payload.getResourceId());
                 sdxStatusService.setStatusForDatalake(
                         DatalakeStatusEnum.RUNNING,
                         getFinishedMessage(operationType),
@@ -113,7 +113,7 @@ public class DatalakeKraftMigrationActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                LOGGER.error("ZooKeeper to KRaft migration finalization failed for DataLake id {}", payload.getResourceId(), ex);
+                LOGGER.error("ZooKeeper to KRaft migration finalization failed for Data Lake id {}", payload.getResourceId(), ex);
                 return DatalakeKraftMigrationFailedEvent.from(payload, ex);
             }
 
@@ -146,7 +146,7 @@ public class DatalakeKraftMigrationActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeKraftMigrationFailedEvent payload, Map<Object, Object> variables) {
                 KraftMigrationOperationType operationType = (KraftMigrationOperationType) variables.get(OPERATION_TYPE_KEY);
-                LOGGER.error("ZooKeeper to KRaft {} failed for DataLake id {}", operationType, payload.getResourceId());
+                LOGGER.error("ZooKeeper to KRaft {} failed for Data Lake id {}", operationType, payload.getResourceId());
                 sdxStatusService.setStatusForDatalake(
                         getFailedStatusEnum(operationType),
                         "ZooKeeper to KRaft migration failed: " + payload.getException().getMessage(),

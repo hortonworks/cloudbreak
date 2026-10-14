@@ -20,18 +20,18 @@ public class SdxDeleteInternalAction implements Action<SdxInternalTestDto, SdxCl
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         testContext.skipSafeLogicValidation();
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+        Log.when(LOGGER, " Data Lake endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", Data Lake's environment: "
                 + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX Internal delete request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " Data Lake Internal delete request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .delete(testDto.getName(), false);
-        testDto.setFlow("SDX delete", flowIdentifier);
+        testDto.setFlow("Data Lake delete", flowIdentifier);
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX Internal delete response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake Internal delete response: ", detailedResponse);
         return testDto;
     }
 }

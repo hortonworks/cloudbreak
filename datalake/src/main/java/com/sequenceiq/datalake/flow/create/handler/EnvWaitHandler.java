@@ -53,7 +53,7 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
         String userId = envWaitRequest.getUserId();
         Selectable response;
         try {
-            LOGGER.debug("start polling env for sdx: {}", datalakeId);
+            LOGGER.debug("start polling env for Data Lake: {}", datalakeId);
             DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.waitAndGetEnvironment(datalakeId);
 
             response = new EnvWaitSuccessEvent(datalakeId, userId, detailedEnvironmentResponse);
@@ -62,14 +62,14 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
             LOGGER.error("Env polling exited before timeout. Cause: ", userBreakException);
             response = new SdxCreateFailedEvent(datalakeId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Env poller stopped for SDX: {}", datalakeId, pollerStoppedException);
+            LOGGER.error("Env poller stopped for Data Lake: {}", datalakeId, pollerStoppedException);
             response = new SdxCreateFailedEvent(datalakeId, userId,
                     new PollerStoppedException("Env wait timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Env polling failed for SDX: {}", datalakeId, exception);
+            LOGGER.error("Env polling failed for Data Lake: {}", datalakeId, exception);
             response = new SdxCreateFailedEvent(datalakeId, userId, exception);
         } catch (Exception anotherException) {
-            LOGGER.error("Something wrong happened in SDX creation wait phase", anotherException);
+            LOGGER.error("Something wrong happened in Data Lake creation wait phase", anotherException);
             response = new SdxCreateFailedEvent(datalakeId, userId, anotherException);
         }
         return response;

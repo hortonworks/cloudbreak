@@ -39,8 +39,8 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a basic SDX create request with FreeIPA and DataLake Cloud Storage has been sent",
-            then = "SDX should be available along with the created Cloud storage objects"
+            when = "a basic Data Lake create request with FreeIPA and DataLake Cloud Storage has been sent",
+            then = "Data Lake should be available along with the created Cloud storage objects"
     )
     public void testSDXWithDataLakeAndFreeIpaStorageCanBeCreatedSuccessfully(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();

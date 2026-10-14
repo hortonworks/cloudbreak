@@ -35,19 +35,19 @@ public class SdxBackupAction implements Action<SdxTestDto, SdxClient> {
 
         testContext.waitingFor(Duration.ofMinutes(2), "Waiting for CM services to be synchronized has been interrupted");
 
-        Log.when(LOGGER, format(" SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
-        Log.whenJson(LOGGER, " SDX backup request: ", testDto.getRequest());
-        LOGGER.info(format(" SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
+        Log.when(LOGGER, format(" Data Lake '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
+        Log.whenJson(LOGGER, " Data Lake backup request: ", testDto.getRequest());
+        LOGGER.info(format(" Data Lake '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
         SdxBackupResponse sdxBackupResponse = client.getDefaultClient(testContext)
                 .sdxBackupEndpoint()
                 .backupDatalakeByName(sdxName, backupLocation, backupName, false, false, false, false,
                         0);
-        testDto.setFlow("SDX backup", sdxBackupResponse.getFlowIdentifier());
+        testDto.setFlow("Data Lake backup", sdxBackupResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX response after backup: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " Data Lake response after backup: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
         return testDto;
     }
 }

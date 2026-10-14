@@ -21,15 +21,15 @@ public class SdxStopByNameAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Stop SDX: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " SDX stop request: ", testDto.getRequest());
+        Log.when(LOGGER, format(" Stop Data Lake: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Data Lake stop request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().stopByName(testDto.getName());
-        testDto.setFlow("SDX stop", flowIdentifier);
+        testDto.setFlow("Data Lake stop", flowIdentifier);
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX stop response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake stop response: ", detailedResponse);
         return testDto;
     }
 }

@@ -194,7 +194,7 @@ public class SdxInstanceService {
                 overrideInstanceStorage(templateInstanceGroup, customInstanceGroupDisk.getInstanceDiskSize());
             });
         } else if (CollectionUtils.isNotEmpty(currentInstanceGroups) && !SdxClusterShape.LIGHT_DUTY.equals(sdxClusterShape)) {
-            LOGGER.debug("Override default template with modified instance groups from previous datalake.");
+            LOGGER.debug("Override default template with modified instance groups from previous Data Lake.");
             currentInstanceGroups.forEach(instanceGroupDisk -> {
                 Optional<InstanceGroupV4Request> templateInstanceGroupOp = getTemplateInstanceGroup(defaultTemplate, instanceGroupDisk.getName());
                 overrideInstanceStorageWithPreviousDiskSize(instanceGroupDisk, templateInstanceGroupOp);

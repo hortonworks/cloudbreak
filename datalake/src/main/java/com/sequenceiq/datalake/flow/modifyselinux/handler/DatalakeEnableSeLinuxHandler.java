@@ -70,10 +70,10 @@ public class DatalakeEnableSeLinuxHandler extends ExceptionCatcherEventHandler<D
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> distroXV1Endpoint.modifySeLinuxByCrn(event.getResourceCrn(), event.getSelinuxMode()));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-        LOGGER.debug("Starting polling for enabling SELinux on datalake stack - flow identifier :: {}", flowIdentifier);
+        LOGGER.debug("Starting polling for enabling SELinux on Data Lake stack - flow identifier :: {}", flowIdentifier);
         PollingConfig pollingConfig = new PollingConfig(SLEEP_INTERVAL_IN_SECONDS, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
         sdxWaitService.waitForCloudbreakFlow(sdxCluster.getId(), pollingConfig, "Polling Resize flow");
-        LOGGER.debug("Enabling SELinux on datalake flow is complete :: {}", flowIdentifier);
+        LOGGER.debug("Enabling SELinux on Data Lake flow is complete :: {}", flowIdentifier);
         return DatalakeModifySeLinuxEvent.builder()
                 .withAccepted(new Promise<>())
                 .withSelector(FINISH_MODIFY_SELINUX_DATALAKE_EVENT.selector())

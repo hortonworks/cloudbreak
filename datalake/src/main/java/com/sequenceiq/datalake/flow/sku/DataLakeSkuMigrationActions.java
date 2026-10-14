@@ -79,7 +79,7 @@ public class DataLakeSkuMigrationActions {
                         "Successfully migrated Skus for the Data Lake", context.getSdxId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 Set<ProviderSyncState> providerSyncStates = sdxCluster.getProviderSyncStates();
-                LOGGER.info("Removing BASIC_SKU_MIGRATION_NEEDED from provider sync states for datalake: {}", sdxCluster.getClusterName());
+                LOGGER.info("Removing BASIC_SKU_MIGRATION_NEEDED from provider sync states for Data Lake: {}", sdxCluster.getClusterName());
                 providerSyncStates.remove(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
                 sdxService.save(sdxCluster);
                 sendEvent(context, new SdxEvent(DATALAKE_SKU_MIGRATION_FINALIZED_EVENT.event(), context.getSdxId(), context.getUserId()));
@@ -98,9 +98,9 @@ public class DataLakeSkuMigrationActions {
 
             @Override
             protected void doExecute(SdxContext context, DataLakeSkuMigrationFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.warn("Failed to migrate Skus for datalake");
+                LOGGER.warn("Failed to migrate Skus for Data Lake");
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_SKU_MIGRATION_CHANGE_FAILED,
-                        Collections.singleton(payload.getException().getMessage()), "Failed to migrate Skus for datalake",
+                        Collections.singleton(payload.getException().getMessage()), "Failed to migrate Skus for Data Lake",
                         context.getSdxId());
                 sendEvent(context);
             }

@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SdxDatabaseServerCertificateStatusV4Request {
 
     @NotNull
-    @Schema(description = "Crns of the datalakes")
+    @Schema(description = "Crns of the Data Lakes")
     @ValidCrn(resource = {VM_DATALAKE})
     private Set<String> crns = new HashSet<>();
 

@@ -164,11 +164,11 @@ public class StorageValidationService {
 
     private StackV4Response getStack(SdxCluster cluster) {
         try {
-            LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", cluster.getName());
+            LOGGER.info("Calling cloudbreak for Data Lake cluster details by name {}", cluster.getName());
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, cluster.getName(), Collections.emptySet(), cluster.getAccountId()));
         } catch (jakarta.ws.rs.NotFoundException e) {
-            LOGGER.info("Sdx cluster not found on CB side", e);
+            LOGGER.info("Data Lake cluster not found on CB side", e);
             return null;
         }
     }

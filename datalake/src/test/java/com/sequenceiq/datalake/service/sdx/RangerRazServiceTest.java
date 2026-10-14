@@ -144,7 +144,7 @@ class RangerRazServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster)));
 
-        assertEquals(String.format("Ranger raz is not installed on the datalake: %s!", CLUSTER_NAME), exception.getMessage());
+        assertEquals(String.format("Ranger raz is not installed on the Data Lake: %s!", CLUSTER_NAME), exception.getMessage());
         verify(sdxService, times(0)).save(sdxCluster);
     }
 

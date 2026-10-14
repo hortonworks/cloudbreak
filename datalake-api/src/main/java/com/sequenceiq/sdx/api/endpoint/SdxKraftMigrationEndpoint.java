@@ -27,7 +27,7 @@ public interface SdxKraftMigrationEndpoint {
     @PUT
     @Path("crn/{crn}/migrate_from_zookeeper_to_kraft")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Initiate the migration from Zookeeper to KRaft broker in Kafka for a DataLake cluster.",
+    @Operation(summary = "Initiate the migration from Zookeeper to KRaft broker in Kafka for a Data Lake cluster.",
             operationId = "migrateDataLakeFromZookeeperToKraftByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier migrateFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn);
@@ -35,7 +35,7 @@ public interface SdxKraftMigrationEndpoint {
     @PUT
     @Path("crn/{crn}/finalize_zookeeper_to_kraft_migration")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Finalize the migration from Zookeeper to KRaft broker in Kafka for a DataLake cluster.",
+    @Operation(summary = "Finalize the migration from Zookeeper to KRaft broker in Kafka for a Data Lake cluster.",
             operationId = "finalizeDataLakeMigrationFromZookeeperToKraftByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn);
@@ -43,7 +43,7 @@ public interface SdxKraftMigrationEndpoint {
     @PUT
     @Path("crn/{crn}/rollback_zookeeper_to_kraft_migration")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Rollback the migration from Zookeeper to KRaft broker in Kafka for a DataLake cluster.",
+    @Operation(summary = "Rollback the migration from Zookeeper to KRaft broker in Kafka for a Data Lake cluster.",
             operationId = "rollbackDataLakeMigrationFromZookeeperToKraftByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn);
@@ -51,7 +51,7 @@ public interface SdxKraftMigrationEndpoint {
     @GET
     @Path("crn/{crn}/zookeeper_to_kraft_migration_status")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Returns the status of the migration from Zookeeper to KRaft broker in Kafka for a DataLake cluster.",
+    @Operation(summary = "Returns the status of the migration from Zookeeper to KRaft broker in Kafka for a Data Lake cluster.",
             operationId = "dataLakeZookeeperToKraftMigrationStatusByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     KraftMigrationStatusResponse zookeeperToKraftMigrationStatusByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn);

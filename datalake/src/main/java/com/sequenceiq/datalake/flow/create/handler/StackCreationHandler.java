@@ -66,12 +66,12 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
             sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
             response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Polling exited before timeout for SDX: {}. Cause: ", sdxId, userBreakException);
+            LOGGER.error("Polling exited before timeout for Data Lake: {}. Cause: ", sdxId, userBreakException);
             response = new SdxCreateFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Poller stopped for SDX: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Poller stopped for Data Lake: {}", sdxId, pollerStoppedException);
             response = new SdxCreateFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake stack creation timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake stack creation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Polling failed for stack: {}", sdxId, exception);
             response = new SdxCreateFailedEvent(sdxId, userId, exception);

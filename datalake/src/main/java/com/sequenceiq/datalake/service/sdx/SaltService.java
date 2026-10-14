@@ -33,7 +33,7 @@ public class SaltService {
         SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdxCluster);
         DatalakeStatusEnum status = sdxStatus.getStatus();
         if (status.isStopState() || status.isDeleteInProgressOrCompleted()) {
-            String message = String.format("SaltStack update cannot be initiated as datalake '%s' is currently in '%s' state.",
+            String message = String.format("SaltStack update cannot be initiated as Data Lake '%s' is currently in '%s' state.",
                     sdxCluster.getName(), status);
             LOGGER.info(message);
             throw new BadRequestException(message);

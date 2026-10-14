@@ -89,7 +89,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is an environment with SDX in available state",
+            given = "there is an environment with Data Lake in available state",
             when = "secrets are getting rotated (AWS - all secrets, non-AWS - limited set of secrets),  before " +
                     "recovery called on the IDBROKER and MASTER host group, where the instance had been stopped",
             then = "all the actions (secret rotation then recovery) should be successful, the cluster should be available"

@@ -124,7 +124,7 @@ public class SdxResizeOperationService {
         } else if (classEquals(UpdateLoadBalancerDNSFlowConfig.class, flowType)) {
             return failedWithRetryAllowed(flowChainId, "Load balancer update failed.");
         } else if (classEquals(SdxDeleteFlowConfig.class, flowType)) {
-            return failedWithRetryAllowed(flowChainId, "Failed to delete old data lake.");
+            return failedWithRetryAllowed(flowChainId, "Failed to delete old Data Lake.");
         } else if (classEquals(DatalakeRestoreFlowConfig.class, flowType)) {
             return failedWithRetryAndRollbackAllowed(flowChainId, "Failed to restore data from old Data Lake to new Data Lake.");
         } else if (classEquals(SdxCreateFlowConfig.class, flowType)) {

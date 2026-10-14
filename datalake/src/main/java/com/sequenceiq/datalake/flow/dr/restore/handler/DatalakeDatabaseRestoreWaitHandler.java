@@ -61,7 +61,7 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
         LOGGER.info("Timeout duration for database restore set to {} minutes.", duration);
         Selectable response;
         try {
-            LOGGER.info("Start polling datalake database restore for id: {} with timeout duration: {}", sdxId, duration);
+            LOGGER.info("Start polling Data Lake database restore for id: {} with timeout duration: {}", sdxId, duration);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration, TimeUnit.MINUTES);
             sdxBackupRestoreService.waitCloudbreakFlow(sdxId, pollingConfig, "Database restore");
             response = new DatalakeFullRestoreInProgressEvent(sdxId, userId, request.getOperationId());

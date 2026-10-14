@@ -30,7 +30,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 class PaasSdxStartStopServiceTest {
     private static final String SDX_CRN = "sdx-crn";
 
-    private static final String POLL_TIMEOUT_MSG = "Datalake start/stop timed out";
+    private static final String POLL_TIMEOUT_MSG = "Data Lake start/stop timed out";
 
     @Mock
     private SdxEndpoint sdxEndpoint;
@@ -77,7 +77,7 @@ class PaasSdxStartStopServiceTest {
     void testStartFailure() {
         when(sdxEndpoint.getByCrn(SDX_CRN)).thenReturn(getSdxClusterResponse(SdxClusterStatusResponse.STOPPED));
         when(flowPollingService.pollFlowIdAndReturnAttemptResult(any()))
-                .thenReturn(AttemptResults.breakFor(new IllegalStateException("SDX flow operation failed")));
+                .thenReturn(AttemptResults.breakFor(new IllegalStateException("Data Lake flow operation failed")));
         assertThrows(UserBreakException.class, () -> paasSdxStartStopService.startSdx(SDX_CRN));
         verify(sdxEndpoint).startByCrn(SDX_CRN);
     }
@@ -116,7 +116,7 @@ class PaasSdxStartStopServiceTest {
     void testStopFailure() {
         when(sdxEndpoint.getByCrn(SDX_CRN)).thenReturn(getSdxClusterResponse(SdxClusterStatusResponse.RUNNING));
         when(flowPollingService.pollFlowIdAndReturnAttemptResult(any()))
-                .thenReturn(AttemptResults.breakFor(new IllegalStateException("SDX flow operation failed")));
+                .thenReturn(AttemptResults.breakFor(new IllegalStateException("Data Lake flow operation failed")));
         assertThrows(UserBreakException.class, () -> paasSdxStartStopService.stopSdx(SDX_CRN));
         verify(sdxEndpoint).stopByCrn(SDX_CRN);
     }

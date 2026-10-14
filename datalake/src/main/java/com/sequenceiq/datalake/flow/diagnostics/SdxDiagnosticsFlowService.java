@@ -42,13 +42,13 @@ public class SdxDiagnosticsFlowService {
     private SdxService sdxService;
 
     public FlowIdentifier startDiagnosticsCollection(Map<String, Object> properties) {
-        LOGGER.debug("Start diagnostic collection for SDX");
+        LOGGER.debug("Start diagnostic collection for Data Lake");
         DiagnosticsCollectionRequest request = diagnosticsParamsConverter.convertToRequest(properties);
         return diagnosticsV4Endpoint.collectDiagnostics(request);
     }
 
     public FlowIdentifier startCmDiagnosticsCollection(Map<String, Object> properties) {
-        LOGGER.debug("Start CM based diagnostic collection for SDX");
+        LOGGER.debug("Start CM based diagnostic collection for Data Lake");
         CmDiagnosticsCollectionRequest request = diagnosticsParamsConverter.convertToCmRequest(properties);
         return diagnosticsV4Endpoint.collectCmDiagnostics(request);
     }
@@ -58,8 +58,8 @@ public class SdxDiagnosticsFlowService {
     }
 
     public void waitForDiagnosticsCollection(Long sdxId, PollingConfig pollingConfig, FlowIdentifier flowIdentifier, boolean cmBundle) {
-        String startPollingMessage = cmBundle ? String.format("Start polling CM based diagnostics collection for SDX stack id '%s'", sdxId)
-                : String.format("Start polling diagnostics collection for SDX stack id '%s'", sdxId);
+        String startPollingMessage = cmBundle ? String.format("Start polling CM based diagnostics collection for Data Lake stack id '%s'", sdxId)
+                : String.format("Start polling diagnostics collection for Data Lake stack id '%s'", sdxId);
         String failedMessage = cmBundle ? "Cm based diagnostic collection flow failed in Cloudbreak."
                 : "Diagnostic collection flow failed in Cloudbreak.";
         LOGGER.debug(startPollingMessage);

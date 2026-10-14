@@ -77,7 +77,7 @@ public class SdxAttachDetachUtils {
     }
 
     public void reRegisterClusterProxyConfig(SdxCluster cluster, boolean skipFullReRegistration, String originalCrn) {
-        LOGGER.info("Attempting to re-register the cluster proxy config for SDX cluster with ID: {}", cluster.getId());
+        LOGGER.info("Attempting to re-register the cluster proxy config for Data Lake cluster with ID: {}", cluster.getId());
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> stackV4Endpoint.reRegisterClusterProxyConfig(0L, cluster.getCrn(), skipFullReRegistration, originalCrn, initiatorUserCrn)
@@ -89,6 +89,6 @@ public class SdxAttachDetachUtils {
         cloudbreakPoller.pollFlowStateByFlowIdentifierUntilComplete(
                 "re-register cluster proxy config", flowIdentifier, cluster.getId(), pollingConfig
         );
-        LOGGER.info("Finished re-register of cluster proxy config for SDX cluster with ID: {}", cluster.getId());
+        LOGGER.info("Finished re-register of cluster proxy config for Data Lake cluster with ID: {}", cluster.getId());
     }
 }

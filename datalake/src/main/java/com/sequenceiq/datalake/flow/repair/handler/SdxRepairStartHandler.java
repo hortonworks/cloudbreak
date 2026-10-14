@@ -41,7 +41,7 @@ public class SdxRepairStartHandler extends ExceptionCatcherEventHandler<SdxRepai
         try {
             repairService.startSdxRepair(sdxId, request.getRepairSettings());
         } catch (Exception e) {
-            LOGGER.error("Sdx repair start failed, sdxId: {}, error: {}", sdxId, e.getMessage());
+            LOGGER.error("Data Lake repair start failed, sdxId: {}, error: {}", sdxId, e.getMessage());
             return new SdxRepairCouldNotStartEvent(sdxId, userId, e);
         }
         return new SdxRepairInProgressEvent(sdxId, userId);

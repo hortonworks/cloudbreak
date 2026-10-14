@@ -43,9 +43,9 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "upgrade called on the SDX cluster",
-            then = "SDX upgrade database server should be successful, the cluster should be up and running"
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
+            when = "upgrade called on the Data Lake cluster",
+            then = "Data Lake upgrade database server should be successful, the cluster should be up and running"
     )
     public void testSDXDatabaseUpgrade(TestContext testContext) {
         String runtimeVersion = sdxUpgradeDatabaseTestUtil.getRuntimeVersion();
@@ -58,9 +58,9 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster with specified runtime in available state",
-            when = "upgrade called on the SDX cluster",
-            then = "SDX upgrade database server should be successful, the cluster should be up and running"
+            given = "there is a running Cloudbreak, and a Data Lake cluster with specified runtime in available state",
+            when = "upgrade called on the Data Lake cluster",
+            then = "Data Lake upgrade database server should be successful, the cluster should be up and running"
     )
     public void testSDXDatabaseUpgradeWithRuntime(TestContext testContext) {
         String latestOriginalDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getLatestOriginalDatabaseMajorVersion();
@@ -109,9 +109,9 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state with encrypted database",
-            when = "upgrade called on the SDX cluster",
-            then = "SDX upgrade database server should be successful, the cluster should be up and running"
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state with encrypted database",
+            when = "upgrade called on the Data Lake cluster",
+            then = "Data Lake upgrade database server should be successful, the cluster should be up and running"
     )
     public void testSDXDatabaseUpgradeWithEncryption(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class).withDatabaseEncryptionKey();

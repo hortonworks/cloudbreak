@@ -117,7 +117,7 @@ class EnvNetworkCidrsModificationActionsTest {
                         EnvNetworkCidrsModificationState.NETWORK_CIDRS_MODIFICATION_FREEIPA_STATE
                 ),
                 Arguments.of(
-                        "Datalake and Datahubs",
+                        "Data Lake and Datahubs",
                         START_MODIFY_NETWORK_CIDRS_DATALAKE_AND_DATAHUBS_EVENT.selector(),
                         (Function<EnvNetworkCidrsModificationActions, Action<?, ?>>)
                                 EnvNetworkCidrsModificationActions::modifyNetworkCidrsOnDatalakeAndDataHubs,

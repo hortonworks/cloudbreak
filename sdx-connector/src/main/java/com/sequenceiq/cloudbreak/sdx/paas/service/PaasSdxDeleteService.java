@@ -24,7 +24,7 @@ public class PaasSdxDeleteService extends PaasSdxStatusService implements Platfo
 
     @Override
     public void deleteSdx(String sdxCrn, Boolean force) {
-        LOGGER.info("Calling delete for SDX PaaS cluster {}", sdxCrn);
+        LOGGER.info("Calling delete for Data Lake PaaS cluster {}", sdxCrn);
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> sdxEndpoint.deleteByCrn(sdxCrn, force));
     }

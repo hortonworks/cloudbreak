@@ -49,7 +49,7 @@ public class SdxCmSyncWaitHandler extends ExceptionCatcherEventHandler<SdxCmSync
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<SdxCmSyncWaitEvent> event) {
-        LOGGER.warn("Error happened during syncing CM and parcel versions from a datalake CM to component table {}, error: ", resourceId, e);
+        LOGGER.warn("Error happened during syncing CM and parcel versions from a Data Lake CM to component table {}, error: ", resourceId, e);
         return new SdxCmSyncFailedEvent(resourceId, event.getData().getUserId(), e);
     }
 
@@ -64,7 +64,7 @@ public class SdxCmSyncWaitHandler extends ExceptionCatcherEventHandler<SdxCmSync
             sdxWaitService.waitForCloudbreakFlow(sdxCluster, pollingConfig, "Sync cm");
             return new SdxEvent(SDX_CM_SYNC_FINISHED_EVENT.event(), event.getData().getResourceId(), event.getData().getUserId());
         } catch (SdxWaitException e) {
-            LOGGER.warn("Error happened during waiting for syncing CM and parcel versions from a datalake CM to component table {}, error: ",
+            LOGGER.warn("Error happened during waiting for syncing CM and parcel versions from a Data Lake CM to component table {}, error: ",
                     sdxCmSyncWaitEvent.getResourceId(), e);
             return new SdxCmSyncFailedEvent(sdxCmSyncWaitEvent.getResourceId(), sdxCmSyncWaitEvent.getUserId(), e);
         }

@@ -46,7 +46,7 @@ public class SaltUpdateActions {
             @Override
             protected void doExecute(SdxContext context, SaltUpdateTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 variables.put(PREVIOUS_STACK_STATUS, sdxStatusService.getActualStatusForSdx(context.getSdxId()));
-                LOGGER.info("Initiating Salt update for SDX stack {}", context.getSdxId());
+                LOGGER.info("Initiating Salt update for Data Lake stack {}", context.getSdxId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_UPDATE_IN_PROGRESS,
                         "Initiating SaltStack update", context.getSdxId());
                 SaltUpdateRequest request = new SaltUpdateRequest(context.getSdxId(), context.getUserId(),
@@ -68,7 +68,7 @@ public class SaltUpdateActions {
             @Override
             protected void doExecute(SdxContext context, SaltUpdateSuccessResponse payload, Map<Object, Object> variables) throws Exception {
                 variables.put(PREVIOUS_STACK_STATUS, sdxStatusService.getActualStatusForSdx(context.getSdxId()));
-                LOGGER.info("Waiting for Salt update for SDX stack {}", context.getSdxId());
+                LOGGER.info("Waiting for Salt update for Data Lake stack {}", context.getSdxId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_UPDATE_IN_PROGRESS,
                         "Running SaltStack update", context.getSdxId());
                 sendEvent(context);
@@ -92,7 +92,7 @@ public class SaltUpdateActions {
 
             @Override
             protected void doExecute(SdxContext context, SaltUpdateWaitSuccessResponse payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Salt update for SDX stack {} finished", context.getSdxId());
+                LOGGER.info("Salt update for Data Lake stack {} finished", context.getSdxId());
                 String statusReason = "SaltStack update finished successfully";
                 if (variables.get(PREVIOUS_STACK_STATUS) != null) {
                     String previousStatusReason = ((SdxStatusEntity) variables.get(PREVIOUS_STACK_STATUS)).getStatusReason();
@@ -126,7 +126,7 @@ public class SaltUpdateActions {
 
             @Override
             protected void doExecute(SdxContext context, SaltUpdateFailureResponse payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.warn("Salt update for SDX stack {} failed", context.getSdxId());
+                LOGGER.warn("Salt update for Data Lake stack {} failed", context.getSdxId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_UPDATE_FAILED,
                         Collections.singleton(payload.getException().getMessage()), "SaltStack update failed", context.getSdxId());
                 sendEvent(context);

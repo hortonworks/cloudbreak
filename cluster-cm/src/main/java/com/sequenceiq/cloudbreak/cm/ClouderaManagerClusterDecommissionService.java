@@ -177,7 +177,7 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
     public void cleanupCluster(Telemetry telemetry) {
         if (telemetry != null && telemetry.getWorkloadAnalytics() != null) {
             if (StackType.DATALAKE.equals(stack.getType())) {
-                LOGGER.info("Stack type is datalake, no need for WA cleanup");
+                LOGGER.info("Stack type is Data Lake, no need for WA cleanup");
             } else {
                 databusService.cleanUpMachineUser(stack);
             }

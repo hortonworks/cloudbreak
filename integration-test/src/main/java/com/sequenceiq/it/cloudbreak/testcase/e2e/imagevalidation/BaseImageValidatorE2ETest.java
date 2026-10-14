@@ -89,8 +89,8 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
 
     @Description(
             given = "there is a running environment with FreeIpa",
-            when = "provisioning an SDX with the x86_64 base image under validation",
-            then = "SDX should be available with healthy instances")
+            when = "provisioning a Data Lake with the x86_64 base image under validation",
+            then = "Data Lake should be available with healthy instances")
     private void testSDXWithX86BaseImage(TestContext testContext, ImageV4Response imageUnderValidation) {
         String cluster = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
@@ -131,7 +131,7 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
     }
 
     @Description(
-            given = "there is a running environment with FreeIpa and SDX on x86_64 architecture",
+            given = "there is a running environment with FreeIpa and Data Lake on x86_64 architecture",
             when = "provisioning an DistroX with the arm64 base image under validation",
             then = "DistroX should be available with healthy instances")
     private void testDistroXWithArm64BaseImage(TestContext testContext, ImageV4Response imageUnderValidation) {

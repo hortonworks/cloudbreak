@@ -48,11 +48,11 @@ public class RedbeamsDbCertificateProvider {
     private void getDatalakeDatabaseRootCerts(StackView stack, Set<String> result) {
         if (StackType.WORKLOAD.equals(stack.getType())) {
             Optional<SdxBasicView> datalake = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
-            LOGGER.debug("Gathering datalake and its database if exists for the datahub cluster");
+            LOGGER.debug("Gathering Data Lake and its database if exists for the datahub cluster");
             if (datalake.isPresent()) {
                 result.addAll(getDatabaseRootCerts(datalake.get().dbServerCrn(), datalake.get().crn()));
             } else {
-                LOGGER.warn("No datalake resource could be found for the datahub cluster");
+                LOGGER.warn("No Data Lake resource could be found for the datahub cluster");
             }
         } else {
             LOGGER.debug("Stack is not a datahub cluster");

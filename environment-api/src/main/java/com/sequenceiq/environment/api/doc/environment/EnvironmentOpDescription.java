@@ -28,10 +28,10 @@ public class EnvironmentOpDescription {
     public static final String EDIT_BY_CRN = "Edit an environment by CRN. Location, regions and description can be changed.";
     public static final String DELETE_TAGS_BY_NAME = "Delete user-defined tags from an environment by name and cascade the deletion to child resources.";
     public static final String DELETE_TAGS_BY_CRN = "Delete user-defined tags from an environment by CRN and cascade the deletion to child resources.";
-    public static final String START_BY_NAME = "Start an environment by name. The freeipa, datalake and datahubs will be started in this order";
-    public static final String START_BY_CRN = "Start an environment by CRN. The freeipa, datalake and datahubs will be started in this order";
-    public static final String STOP_BY_NAME = "Stop an environment by name. The datahubs, datalake and freeipa will be stopped in this order";
-    public static final String STOP_BY_CRN = "Stop an environment by CRN. The datahubs, datalake and freeipa will be stopped in this order";
+    public static final String START_BY_NAME = "Start an environment by name. The freeipa, Data Lake and datahubs will be started in this order";
+    public static final String START_BY_CRN = "Start an environment by CRN. The freeipa, Data Lake and datahubs will be started in this order";
+    public static final String STOP_BY_NAME = "Stop an environment by name. The datahubs, Data Lake and freeipa will be stopped in this order";
+    public static final String STOP_BY_CRN = "Stop an environment by CRN. The datahubs, Data Lake and freeipa will be stopped in this order";
     public static final String VERIFY_CREDENTIAL_BY_CRN = "Verifies the credential used by the given environment.";
     public static final String TAG_UPDATE_PERMISSIONS_BY_NAME =
             "Checks by environment name whether the environment's credential is allowed to propagate tag changes to the already created resources.";

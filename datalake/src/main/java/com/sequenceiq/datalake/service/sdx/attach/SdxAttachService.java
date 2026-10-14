@@ -61,7 +61,7 @@ public class SdxAttachService {
             reRegisterClusterProxyConfig(reattached, false, detachedCrn);
             return reattached;
         } catch (Exception e) {
-            LOGGER.error("Failed to reattach SDX cluster with CRN '" + detachedCrn +
+            LOGGER.error("Failed to reattach Data Lake cluster with CRN '" + detachedCrn +
                     "'. Putting detached cluster back to its original state.", e);
             undoReattach(reattached, detachedName, detachedCrn, stackReattached);
             throw e;
@@ -72,7 +72,7 @@ public class SdxAttachService {
      * Throws RuntimeException if cluster is not detached or could not revert name and CRN.
      */
     public SdxCluster reattachCluster(SdxCluster cluster) {
-        LOGGER.info("Started reattaching SDX cluster with ID: {}", cluster.getId());
+        LOGGER.info("Started reattaching Data Lake cluster with ID: {}", cluster.getId());
 
         if (!cluster.isDetached()) {
             throw new SdxDetachException("Attempting to reattach a cluster which was not detached!");
@@ -86,7 +86,7 @@ public class SdxAttachService {
         cluster.setDetached(false);
         SdxCluster saved = sdxService.save(cluster);
 
-        LOGGER.info("Finished reattaching SDX cluster with ID: {}. Cluster now has name {} and crn {}.",
+        LOGGER.info("Finished reattaching Data Lake cluster with ID: {}. Cluster now has name {} and crn {}.",
                 saved.getId(), saved.getClusterName(), saved.getCrn());
         return saved;
     }
@@ -97,10 +97,10 @@ public class SdxAttachService {
      *      - TransactionExecutionException : If updating the stack fails.
      */
     public void reattachStack(SdxCluster cluster, String originalName) {
-        LOGGER.info("Started reattaching stack of SDX cluster with ID: {}", cluster.getId());
+        LOGGER.info("Started reattaching stack of Data Lake cluster with ID: {}", cluster.getId());
         sdxAttachDetachUtils.updateStack(originalName, cluster.getClusterName(), cluster.getCrn(), false);
         jobService.schedule(cluster.getId(), SdxClusterJobAdapter.class);
-        LOGGER.info("Finished reattaching stack of SDX cluster with ID: {}. Now has name {} and crn {}.",
+        LOGGER.info("Finished reattaching stack of Data Lake cluster with ID: {}. Now has name {} and crn {}.",
                 cluster.getId(), cluster.getClusterName(), cluster.getCrn());
     }
 
@@ -108,9 +108,9 @@ public class SdxAttachService {
      * Throws a NotFoundException if the database is not found for the cluster CRN and environment CRN.
      */
     private void reattachExternalDatabase(SdxCluster cluster, String detachedCrn) {
-        LOGGER.info("Started reattaching external database for SDX cluster with ID: {}", cluster.getId());
+        LOGGER.info("Started reattaching external database for Data Lake cluster with ID: {}", cluster.getId());
         sdxAttachDetachUtils.updateExternalDatabase(cluster, detachedCrn);
-        LOGGER.info("Finished reattaching external database for SDX cluster with ID: {}. Now has crn: {}.",
+        LOGGER.info("Finished reattaching external database for Data Lake cluster with ID: {}. Now has crn: {}.",
                 cluster.getId(), cluster.getCrn());
     }
 
@@ -120,9 +120,9 @@ public class SdxAttachService {
      * Note that this method has no undesired side effects and is safe to call even if not necessarily required.
      */
     public void reRegisterClusterProxyConfig(SdxCluster cluster, boolean skipFullReRegistration, String detachedCrn) {
-        LOGGER.info("Started re-registering cluster proxy config for SDX cluster with ID: {}", cluster.getId());
+        LOGGER.info("Started re-registering cluster proxy config for Data Lake cluster with ID: {}", cluster.getId());
         sdxAttachDetachUtils.reRegisterClusterProxyConfig(cluster, skipFullReRegistration, detachedCrn);
-        LOGGER.info("Finished re-registering cluster proxy config for SDX cluster with ID: {}. Now has crn: {}.",
+        LOGGER.info("Finished re-registering cluster proxy config for Data Lake cluster with ID: {}. Now has crn: {}.",
                 cluster.getId(), cluster.getCrn());
     }
 
@@ -140,7 +140,7 @@ public class SdxAttachService {
             ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn());
             return created;
         } catch (Exception e) {
-            LOGGER.error("Failed to assign resource owner role to new SDX with CRN '" + created.getCrn() +
+            LOGGER.error("Failed to assign resource owner role to new Data Lake with CRN '" + created.getCrn() +
                     "'. Removing it from database.", e);
             sdxService.delete(created);
             throw e;
@@ -149,7 +149,7 @@ public class SdxAttachService {
 
     public void markAsAttached(SdxCluster attached) {
         sdxStatusService.setStatusForDatalake(
-                DatalakeStatusEnum.REQUESTED, "Newly attached datalake requested.", attached
+                DatalakeStatusEnum.REQUESTED, "Newly attached Data Lake requested.", attached
         );
     }
 

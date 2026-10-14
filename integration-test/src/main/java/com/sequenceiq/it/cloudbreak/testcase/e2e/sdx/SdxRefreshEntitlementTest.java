@@ -57,7 +57,7 @@ public class SdxRefreshEntitlementTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "entitlement refresh called to enable/disable prometheus",
             then = "prometheus service status should change"
     )

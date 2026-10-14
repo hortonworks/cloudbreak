@@ -125,7 +125,7 @@ public class DistroXEphemeralTests extends AbstractE2EWithReusableResourcesTest 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
+            given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state",
             when = "recovery called on the MASTER host group of DistroX cluster, where the EC2 instance had been terminated",
             then = "DistroX recovery should be successful, the cluster should be up and running"
     )
@@ -169,7 +169,7 @@ public class DistroXEphemeralTests extends AbstractE2EWithReusableResourcesTest 
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
-    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
+    @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state",
             when = "upgrade called on the DistroX cluster", then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXEphemeralUpgrade(TestContext testContext) {
         createAndWaitDataHubWithStorageOptimizedInstancesAndWithUpgradeRuntime(testContext);

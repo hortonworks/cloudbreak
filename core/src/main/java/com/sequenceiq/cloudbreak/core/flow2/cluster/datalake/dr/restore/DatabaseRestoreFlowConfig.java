@@ -71,7 +71,7 @@ public class DatabaseRestoreFlowConfig extends StackStatusFinalizerAbstractFlowC
 
     @Override
     public String getDisplayName() {
-        return "Restore SDX database";
+        return "Restore Data Lake database";
     }
 
     @Override

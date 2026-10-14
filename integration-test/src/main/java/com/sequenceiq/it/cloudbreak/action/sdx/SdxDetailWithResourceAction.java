@@ -18,7 +18,7 @@ public class SdxDetailWithResourceAction implements Action<SdxInternalTestDto, S
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.whenJson(LOGGER, "Sdx get request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, "Data Lake get request: ", testDto.getRequest());
         SdxClusterDetailResponse response = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getSdxDetailWithResourcesByName(testDto.getName(), Set.of());

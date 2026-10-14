@@ -87,7 +87,7 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "There is a running Environment with FreeIPA and SDX",
+            given = "There is a running Environment with FreeIPA and Data Lake",
             then = "Check that all the expected Python versions are installed")
     public void testPythonVersionsAreCorrect(TestContext testContext) {
 
@@ -101,7 +101,7 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "There is a running Environment with FreeIPA and SDX",
+            given = "There is a running Environment with FreeIPA and Data Lake",
             then = "Check that the default Java version is the expected one")
     public void testJavaVersionsAreCorrect(TestContext testContext) {
 
@@ -115,7 +115,7 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "There is a running Environment with FreeIPA and SDX",
+            given = "There is a running Environment with FreeIPA and Data Lake",
             then = "Check that the default OS version is the expected one")
     public void testOsVersionsAreCorrect(TestContext testContext) {
 

@@ -45,7 +45,7 @@ public class WaitDatalakeUpdateDnsEntriesHandler extends ExceptionCatcherEventHa
 
     @Override
     protected Selectable doAccept(HandlerEvent<WaitDatalakeUpdateDnsEntriesRequest> event) {
-        LOGGER.info("Start polling update of public DNS entries for datalake, event: {}", event);
+        LOGGER.info("Start polling update of public DNS entries for Data Lake, event: {}", event);
         WaitDatalakeUpdateDnsEntriesRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -54,10 +54,10 @@ public class WaitDatalakeUpdateDnsEntriesHandler extends ExceptionCatcherEventHa
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
             sdxWaitService.waitForCloudbreakFlow(sdxCluster, pollingConfig, "Updating public DNS entries");
-            LOGGER.info("Update of public DNS entries finished for SDX stack {}.", sdxId);
+            LOGGER.info("Update of public DNS entries finished for Data Lake stack {}.", sdxId);
             return new WaitDatalakeUpdateDnsEntriesResponse(sdxId, userId);
         } catch (SdxWaitException e) {
-            LOGGER.warn("Update of public DNS entries failed for SDX stack {}", sdxId, e);
+            LOGGER.warn("Update of public DNS entries failed for Data Lake stack {}", sdxId, e);
             return new DatalakeUpdatePublicDnsEntriesFailedEvent(sdxId, userId, e);
         }
     }

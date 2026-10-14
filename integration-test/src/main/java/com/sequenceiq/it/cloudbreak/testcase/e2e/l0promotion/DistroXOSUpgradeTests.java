@@ -48,8 +48,8 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running environment with freeIPA in available state",
-            when = "Default SDX and base DistroX (5 nodes with master, compute and workers) should be created successfully",
-            and = "SDX then DistroX runtime upgrade done successfully after that OS upgrade called on DistroX",
+            when = "Default Data Lake and base DistroX (5 nodes with master, compute and workers) should be created successfully",
+            and = "Data Lake then DistroX runtime upgrade done successfully after that OS upgrade called on DistroX",
             then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testBaseDistroXOSUpgrade(TestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();

@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("SDX gateway provider service tests")
+@DisplayName("Data Lake gateway provider service tests")
 public class GatewayManifesterTest {
 
     @InjectMocks

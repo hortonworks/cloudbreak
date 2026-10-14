@@ -41,7 +41,7 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("SDX retry service service tests")
+@DisplayName("Data Lake retry service service tests")
 class SdxRetryServiceTest {
 
     @Mock

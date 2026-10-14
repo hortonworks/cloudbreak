@@ -66,7 +66,7 @@ public class DatalakeDiskUpdateHandler extends EventSenderAwareHandler<DatalakeD
         try {
             Long stackId = payload.getStackId();
             SdxCluster sdxCluster = sdxService.getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), payload.getClusterName());
-            LOGGER.debug("Starting Disk Update for datalake.");
+            LOGGER.debug("Starting Disk Update for Data Lake.");
             DiskModificationRequest diskModificationRequest = new DiskModificationRequest();
             diskModificationRequest.setVolumesToUpdate(payload.getVolumesToBeUpdated());
             diskModificationRequest.setStackId(stackId);
@@ -81,7 +81,7 @@ public class DatalakeDiskUpdateHandler extends EventSenderAwareHandler<DatalakeD
                         }
                     });
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-            LOGGER.debug("Starting polling for datalake orchestrator resizing flow :: {}", flowIdentifier);
+            LOGGER.debug("Starting polling for Data Lake orchestrator resizing flow :: {}", flowIdentifier);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_INTERVAL, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             sdxWaitService.waitForCloudbreakFlow(sdxCluster.getId(), pollingConfig, "Polling Resize flow");
             LOGGER.debug("Disk Resize flow is complete :: {}", flowIdentifier);

@@ -47,7 +47,7 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
         String userId = stopAllDatahubRequest.getUserId();
         Selectable response;
         try {
-            LOGGER.debug("Polling is started for the operation of stopping all datahubs clusters for sdx with id: {}", sdxId);
+            LOGGER.debug("Polling is started for the operation of stopping all datahubs clusters for Data Lake with id: {}", sdxId);
             sdxStopService.stopAllDatahub(sdxId);
             response = new SdxEvent(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT.event(), sdxId, userId);
         } catch (UserBreakException userBreakException) {
@@ -56,7 +56,7 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Poller stopped for stack: " + sdxId, pollerStoppedException);
             response = new SdxStopFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake stop timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
+                    new PollerStoppedException("Data Lake stop timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
         } catch (PollerException exception) {
             LOGGER.error("Polling failed for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId, exception);

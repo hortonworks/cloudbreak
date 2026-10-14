@@ -93,7 +93,7 @@ public class DiskUsageSyncJobService implements JobSchedulerService {
         StackDto stack = stackService.getById(Long.valueOf(stackId));
 
         if (stack.getType() == StackType.DATALAKE) {
-            LOGGER.debug("Skip scheduling database disk usage sync job, stack is a Datalake: {}", stack.getResourceCrn());
+            LOGGER.debug("Skip scheduling database disk usage sync job, stack is a Data Lake: {}", stack.getResourceCrn());
         } else if (stack.getDatabase() == null || stack.getDatabase().getExternalDatabaseAvailabilityType() == null) {
             LOGGER.warn("Skip scheduling database disk usage sync job, database type can't be determined for stack: {}", stack.getResourceCrn());
         } else if (!stack.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded()) {

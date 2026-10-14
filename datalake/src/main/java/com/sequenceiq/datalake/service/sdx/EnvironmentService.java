@@ -118,14 +118,14 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
         BackupResponse backupResponse = detailedEnvironmentResponse.getBackup();
         TelemetryResponse telemetryResponse = detailedEnvironmentResponse.getTelemetry();
         if (backupResponse != null && backupResponse.getStorageLocation() != null) {
-            LOGGER.info("Using the backup location to store the datalake backup");
+            LOGGER.info("Using the backup location to store the Data Lake backup");
             return backupResponse.getStorageLocation();
         } else if (telemetryResponse != null && telemetryResponse.getLogging() != null) {
-            LOGGER.info("Backup location not configured. Using the log location to store the datalake backup");
+            LOGGER.info("Backup location not configured. Using the log location to store the Data Lake backup");
             return telemetryResponse.getLogging().getStorageLocation();
         } else {
             LOGGER.error("Could not identify the location to store the backup");
-            throw new BadRequestException("Backup Location is empty. Datalake backup is not triggered.");
+            throw new BadRequestException("Backup Location is empty. Data Lake backup is not triggered.");
         }
     }
 
@@ -192,7 +192,7 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
                     });
             return environmentResponse;
         } else {
-            throw notFound("SDX cluster", sdxId).get();
+            throw notFound("Data Lake cluster", sdxId).get();
         }
     }
 
@@ -261,7 +261,7 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
         }
 
         if (!entitlementService.internalTenant(environment.getAccountId()) && EnvironmentType.HYBRID_BASE.toString().equals(environment.getEnvironmentType())) {
-            throw new BadRequestException("Creating or Resizing datalake is not supported for Hybrid Environment");
+            throw new BadRequestException("Creating or Resizing Data Lake is not supported for Hybrid Environment");
         }
     }
 }

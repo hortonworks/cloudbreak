@@ -66,7 +66,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "start an sdx cluster without attached disk on gateway, but disk attachment is supported on cloud provider side",
+            when = "start a Data Lake cluster without attached disk on gateway, but disk attachment is supported on cloud provider side",
             then = "Upgrade option should be presented"
     )
     public void testSdxUpgradeWhenNoAttachedDisksButEmbeddedDBShouldHaveBeenOnSelfConfiguredAttachedDisk(MockedTestContext testContext) {
@@ -108,8 +108,8 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running CloudSdxInternalTestDtobreak",
-            when = "start an sdx cluster with external database",
+            given = "there is a running Cloudbreak",
+            when = "start a Data Lake cluster with external database",
             then = "Upgrade option should be presented"
     )
     public void testSdxUpgradeSuccessfulWhenExternalDatabaseIsUsed(MockedTestContext testContext) {
@@ -177,8 +177,8 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running CloudSdxInternalTestDtobreak",
-            when = "start an sdx cluster with embedded database on attached disk",
+            given = "there is a running Cloudbreak",
+            when = "start a Data Lake cluster with embedded database on attached disk",
             then = "Upgrade option should be presented"
     )
     public void testSdxUpgradeSuccessfulWhenEmbeddedDatabaseIsOnAttachedDisk(MockedTestContext testContext) {
@@ -217,7 +217,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "start an sdx cluster without attached disk on gateway, but disk attachment is supported on cloud provider side",
+            when = "start a Data Lake cluster without attached disk on gateway, but disk attachment is supported on cloud provider side",
             then = "Upgrade option should be presented"
     )
     public void testSdxUpgradeAfterResize(MockedTestContext testContext) {
@@ -268,7 +268,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
     @Description(
             given = "there is a running Cloudbreak",
             when = "upgrade the cluster but during the process of backup, cancel the backup",
-            then = "stack status reason should be datalake cancelled when stack turns back to be RUNNING"
+            then = "stack status reason should be Data Lake cancelled when stack turns back to be RUNNING"
     )
     public void testSdxUpgradeFailedWithBackupCancelled(MockedTestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();
@@ -318,7 +318,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .then((tc, testDto, client) -> {
                     SdxClusterDetailResponse sdx = testDto.getResponse();
-                    assertEquals(sdx.getStatusReason(), "Datalake backup cancelled");
+                    assertEquals(sdx.getStatusReason(), "Data Lake backup cancelled");
                     return testDto;
                 })
                 .validate();

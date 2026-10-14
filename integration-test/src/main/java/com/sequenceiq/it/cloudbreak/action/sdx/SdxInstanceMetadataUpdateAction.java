@@ -27,7 +27,7 @@ public class SdxInstanceMetadataUpdateAction implements Action<SdxInternalTestDt
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.whenJson(LOGGER, format(" SDX instance metadata update request for %n"), testDto.getCrn());
+        Log.whenJson(LOGGER, format(" Data Lake instance metadata update request for %n"), testDto.getCrn());
         String currentImdsVersion = testDto.getResponse().getStackV4Response().getSupportedImdsVersion();
         InstanceMetadataUpdateType targetUpdateType = StringUtils.equals(currentImdsVersion, ImdsConstants.AWS_IMDS_VERSION_V2) ?
                 IMDS_HTTP_TOKEN_OPTIONAL : IMDS_HTTP_TOKEN_REQUIRED;
@@ -39,15 +39,15 @@ public class SdxInstanceMetadataUpdateAction implements Action<SdxInternalTestDt
             }
         });
         if (IMDS_HTTP_TOKEN_REQUIRED.equals(targetUpdateType) && !StringUtils.equals(imageImdsVersion.get(), ImdsConstants.AWS_IMDS_VERSION_V2)) {
-            Log.whenJson(LOGGER, format(" SDX image is not compatible regarding stack: %n"), testDto.getCrn());
+            Log.whenJson(LOGGER, format(" Data Lake image is not compatible regarding stack: %n"), testDto.getCrn());
             return testDto;
         }
         SdxInstanceMetadataUpdateRequest request = new SdxInstanceMetadataUpdateRequest();
         request.setCrn(testDto.getCrn());
         request.setUpdateType(targetUpdateType);
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().instanceMetadataUpdate(request);
-        testDto.setFlow("SDX instance metadata update",  flowIdentifier);
-        Log.whenJson(LOGGER, format(" SDX instance metadata update: %n"), testDto.getCrn());
+        testDto.setFlow("Data Lake instance metadata update",  flowIdentifier);
+        Log.whenJson(LOGGER, format(" Data Lake instance metadata update: %n"), testDto.getCrn());
         return testDto;
     }
 }

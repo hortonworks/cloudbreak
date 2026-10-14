@@ -59,10 +59,10 @@ public class StorageValidationHandler extends ExceptionCatcherEventHandler<Stora
                 stackRequestManifester.configureStackForSdxCluster(sdxCluster.get(), env);
                 return new StorageValidationSuccessEvent(sdxId, userId);
             } else {
-                throw notFound("SDX cluster", sdxId).get();
+                throw notFound("Data Lake cluster", sdxId).get();
             }
         } catch (Exception anotherException) {
-            LOGGER.error("Something wrong happened in sdx storage validation phase", anotherException);
+            LOGGER.error("Something wrong happened in Data Lake storage validation phase", anotherException);
             return new SdxCreateFailedEvent(sdxId, userId, anotherException);
         }
     }

@@ -59,7 +59,7 @@ public class UpgradeCcmStackHandler extends ExceptionCatcherEventHandler<Upgrade
         String userId = request.getUserId();
         Selectable response;
         try {
-            LOGGER.debug("Initiating CCM upgrade and start polling for SDX: {}", sdxCluster.getName());
+            LOGGER.debug("Initiating CCM upgrade and start polling for Data Lake: {}", sdxCluster.getName());
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             ccmUpgradeService.initAndWaitForStackUpgrade(sdxCluster, pollingConfig);
             response = new UpgradeCcmSuccessEvent(sdxId, userId);

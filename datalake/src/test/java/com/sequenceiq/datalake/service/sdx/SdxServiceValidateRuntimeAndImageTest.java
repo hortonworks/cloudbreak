@@ -75,7 +75,7 @@ public class SdxServiceValidateRuntimeAndImageTest {
         clusterRequest.setRuntime("7.2.16");
         imageV4Response.setVersion("7.2.17");
         assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response))
-                .hasMessage("SDX cluster request must not specify both runtime version and image at the same time because image " +
+                .hasMessage("Data Lake cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
     }
 
@@ -99,7 +99,7 @@ public class SdxServiceValidateRuntimeAndImageTest {
     @Test
     void imageNotFoundWithNoRuntime() {
         assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, null))
-                .hasMessage("SDX cluster request has null runtime version and null image response. It cannot " +
+                .hasMessage("Data Lake cluster request has null runtime version and null image response. It cannot " +
                         "determine the runtime version.");
     }
 
@@ -107,7 +107,7 @@ public class SdxServiceValidateRuntimeAndImageTest {
     void imageNotFoundWithEmptyRuntime() {
         clusterRequest.setRuntime("");
         assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, null))
-                .hasMessage("SDX cluster request has null runtime version and null image response. It cannot " +
+                .hasMessage("Data Lake cluster request has null runtime version and null image response. It cannot " +
                         "determine the runtime version.");
     }
 

@@ -74,6 +74,6 @@ public class DataLakeSkuMigrationFlowConfig
 
     @Override
     public String getDisplayName() {
-        return "Migrate Skus for datalake";
+        return "Migrate Skus for Data Lake";
     }
 }

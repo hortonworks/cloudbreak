@@ -55,8 +55,8 @@ public class MockSdxTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Custom Create request is sent",
-            then = "SDX should be available AND deletable"
+            when = "a valid Data Lake Custom Create request is sent",
+            then = "Data Lake should be available AND deletable"
     )
     public void testCustomSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) {
         String sdxCustom = resourcePropertyProvider().getName();
@@ -84,8 +84,8 @@ public class MockSdxTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Internal Create request is sent",
-            then = "SDX should be available AND deletable"
+            when = "a valid Data Lake Internal Create request is sent",
+            then = "Data Lake should be available AND deletable"
     )
     public void testDefaultSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
@@ -111,8 +111,8 @@ public class MockSdxTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Internal Create request is sent with Cluster Template",
-            then = "SDX should be available AND deletable"
+            when = "a valid Data Lake Internal Create request is sent with Cluster Template",
+            then = "Data Lake should be available AND deletable"
     )
     public void testSDXFromTemplateCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) throws IOException {
         String sdxInternal = resourcePropertyProvider().getName();
@@ -140,7 +140,7 @@ public class MockSdxTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "start an sdx cluster with different CM and CDH versions",
+            when = "start a Data Lake cluster with different CM and CDH versions",
             then = "versions should be correct"
     )
     public void testSdxCreateWithDifferentCmAndCdhVersions(MockedTestContext testContext) {
@@ -192,8 +192,8 @@ public class MockSdxTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "start an sdx cluster",
-            then = "SDX should be available"
+            when = "start a Data Lake cluster",
+            then = "Data Lake should be available"
     )
     public void testSdxStopStart(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
@@ -221,8 +221,8 @@ public class MockSdxTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "an invalid SDX Create request is sent with wrong custom instance type",
-            then = "SDX create should be failed"
+            when = "an invalid Data Lake Create request is sent with wrong custom instance type",
+            then = "Data Lake create should be failed"
     )
     public void testSDXCreateWithInvalidCustomInstanceTypesShouldFail(MockedTestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -255,11 +255,11 @@ public class MockSdxTests extends AbstractMockTest {
     private SdxTestDto validateSdxStatusReason(TestContext testContext, SdxTestDto testDto, SdxClient client) {
         SdxClusterStatusResponse sdxStatus = testDto.getResponse().getStatus();
         if (!SdxClusterStatusResponse.PROVISIONING_FAILED.equals(sdxStatus)) {
-            throw new TestFailException("Sdx status is not PROVISIONING_FAILED, current status: " + sdxStatus);
+            throw new TestFailException("Data Lake status is not PROVISIONING_FAILED, current status: " + sdxStatus);
         }
         String statusReason = testDto.getResponse().getStatusReason();
-        if (!"Datalake creation failed. Invalid custom instance type for instance group: master - small".equals(statusReason)) {
-            throw new TestFailException("Sdx status reason is invalid: " + statusReason);
+        if (!"Data Lake creation failed. Invalid custom instance type for instance group: master - small".equals(statusReason)) {
+            throw new TestFailException("Data Lake status reason is invalid: " + statusReason);
         }
         return testDto;
     }

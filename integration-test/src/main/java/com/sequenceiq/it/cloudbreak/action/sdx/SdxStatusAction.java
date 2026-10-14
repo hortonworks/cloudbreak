@@ -29,7 +29,7 @@ public class SdxStatusAction implements Action<SdxTestDto, SdxClient> {
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX resize response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake resize response: ", detailedResponse);
         return testDto;
     }
 }

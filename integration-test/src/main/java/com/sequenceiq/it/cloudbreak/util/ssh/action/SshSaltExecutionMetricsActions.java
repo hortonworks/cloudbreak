@@ -154,7 +154,7 @@ public class SshSaltExecutionMetricsActions {
             case "sdx":
                 List<InstanceGroupV4Response> sdxInstanceGroups = ((SdxClient) client).getDefaultClient(testContext).sdxEndpoint()
                         .getDetail(resourceName, Set.of()).getStackV4Response().getInstanceGroups();
-                LOGGER.info("Sdx host groups found: {}", sdxInstanceGroups.toString());
+                LOGGER.info("Data Lake host groups found: {}", sdxInstanceGroups.toString());
                 return getGatewayPrivateIp(sdxInstanceGroups);
             case "distrox":
                 List<InstanceGroupV4Response> distroxInstanceGroups = ((CloudbreakClient) client).getDefaultClient(testContext).distroXV1Endpoint()

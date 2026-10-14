@@ -48,8 +48,8 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a basic SDX create request is sent",
-            then = "SDX should be available AND deletable"
+            when = "a basic Data Lake create request is sent",
+            then = "Data Lake should be available AND deletable"
     )
     public void testSDXWithPrewarmedImageCanBeCreatedSuccessfully(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -71,8 +71,8 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX create request is sent (latest Base Image)",
-            then = "SDX should be available AND deletable"
+            when = "a valid Data Lake create request is sent (latest Base Image)",
+            then = "Data Lake should be available AND deletable"
     )
     public void testSDXWithBaseImageCanBeCreatedSuccessfully(TestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();

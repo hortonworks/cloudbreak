@@ -59,7 +59,7 @@ public class SdxServiceValidateInternalSdxRequestTest {
 
         assertThatThrownBy(() -> underTest.validateInternalSdxRequest(stackRequest, clusterRequest))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Custom instance group is not accepted on SDX Internal API.");
+                .hasMessage("Custom instance group is not accepted on Data Lake Internal API.");
     }
 
     @Test

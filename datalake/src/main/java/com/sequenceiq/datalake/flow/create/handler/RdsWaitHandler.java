@@ -75,49 +75,49 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
             if (sdxCluster.isPresent()) {
                 if (sdxCluster.get().hasExternalDatabase()) {
                     validForDatabaseCreation(sdxId, env);
-                    LOGGER.debug("start polling database for sdx: {}", sdxId);
+                    LOGGER.debug("start polling database for Data Lake: {}", sdxId);
                     databaseService.create(sdxCluster.get(), env);
                     setRdsCreatedStatus(sdxCluster.get());
                     return new RdsWaitSuccessEvent(sdxId, userId);
                 } else {
-                    LOGGER.debug("skipping creation of database for sdx: {}", sdxId);
+                    LOGGER.debug("skipping creation of database for Data Lake: {}", sdxId);
                     return new RdsWaitSuccessEvent(sdxId, userId);
                 }
             } else {
-                throw notFound("SDX cluster", sdxId).get();
+                throw notFound("Data Lake cluster", sdxId).get();
             }
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
             return new SdxCreateFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Database poller stopped for Data Lake: {}", sdxId, pollerStoppedException);
             return new SdxCreateFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database creation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
+            LOGGER.error("Database polling failed for Data Lake: {}", sdxId, exception);
             return new SdxCreateFailedEvent(sdxId, userId, exception);
         } catch (Exception anotherException) {
-            LOGGER.error("Something wrong happened in sdx database creation wait phase", anotherException);
+            LOGGER.error("Something wrong happened in Data Lake database creation wait phase", anotherException);
             return new SdxCreateFailedEvent(sdxId, userId, anotherException);
         }
     }
 
     private void setRdsCreatedStatus(SdxCluster cluster) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATED, "Sdx external database created", cluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATED, "Data Lake external database created", cluster);
     }
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {
         String message;
         if (CloudPlatform.AWS.name().equalsIgnoreCase(env.getCloudPlatform())) {
             if (env.getNetwork().getSubnetMetas().size() < 2) {
-                message = String.format("Cannot create external database for sdx: %s, not enough subnets in the vpc", sdxId);
+                message = String.format("Cannot create external database for Data Lake: %s, not enough subnets in the vpc", sdxId);
                 LOGGER.error(message);
                 throw new BadRequestException(message);
             }
             Map<String, Long> zones = env.getNetwork().getSubnetMetas().values().stream()
                     .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
             if (zones.size() < 2) {
-                message = String.format("Cannot create external database for sdx: %s, vpc subnets must cover at least two different availability zones",
+                message = String.format("Cannot create external database for Data Lake: %s, vpc subnets must cover at least two different availability zones",
                         sdxId);
                 LOGGER.error(message);
                 throw new BadRequestException(message);

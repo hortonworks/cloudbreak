@@ -70,7 +70,7 @@ public class ModelDescriptions {
         public static final String IMAGE_CATALOG_URL = "url of the image catalog";
         public static final String IMAGE_ID = "id of the image";
         public static final String IMAGE_CATALOG_NAME = "name of the image catalog";
-        public static final String IMAGE_TYPE = "type of the image - datalake, datahub or freeipa";
+        public static final String IMAGE_TYPE = "type of the image - Data Lake, Data Hub or FreeIPA";
         public static final String SOURCE_IMAGE_ID = "id of the source image serving as the base of the customized image";
         public static final String PARCEL_BASE_URL = "custom base url for parcels in case of a customized image";
         public static final String VMS_TO_REGIONS = "VM image references mapped to cloud regions";
@@ -81,7 +81,7 @@ public class ModelDescriptions {
 
     public static class CustomImageDescription {
         public static final String IMAGE_ID = "id of the image";
-        public static final String IMAGE_TYPE = "type of the image - datalake, datahub or freeipa";
+        public static final String IMAGE_TYPE = "type of the image - Data Lake, Data Hub or FreeIPA";
         public static final String SOURCE_IMAGE_ID = "id of the source image serving as the base of the customized image";
         public static final String BASE_PARCEL_URL = "base url of of parcels in the image";
         public static final String VM_IMAGES = "image references of the custom image in different regions";
@@ -167,7 +167,7 @@ public class ModelDescriptions {
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
         public static final String ENVIRONMENT_CRN = "CRN of the environment which the stack is assigned to";
         public static final String STACK_VERSION = "Runtime version of the cluster";
-        public static final String RESOURCE_CRN = "CRN of the cluster if there is corresponding cluster in another service (for example in SDX)";
+        public static final String RESOURCE_CRN = "CRN of the cluster if there is corresponding cluster in another service (for example in Data Lake)";
         public static final String TERMINATED = "termination completion time of stack in long";
         public static final String AWS_PARAMETERS = "aws specific parameters for stack";
         public static final String AZURE_PARAMETERS = "azure specific parameters for stack";
@@ -211,7 +211,7 @@ public class ModelDescriptions {
         public static final String ATTACHED_RESOURCES = "List of resources attached to the stack";
         public static final String SECURITY = "Security related objects";
         public static final String PROVIDER_SYNC_STATES = "Contains information about provider issues. No issues found if empty or 'VALID'.";
-        public static final String DATA_LAKE = "Details about the data lake associated with the stack";
+        public static final String DATA_LAKE = "Details about the Data Lake associated with the stack";
         public static final String STACK_TYPE = "Type of the stack, for example Data Lake or DataHub";
         public static final String RESOURCE_UPDATE_RESPONSE_DESCRIPTION = "Flow identifier for the current resource/ volume sync operation";
     }
@@ -294,13 +294,13 @@ public class ModelDescriptions {
         public static final String TEMPLATE = "stringified template JSON";
         public static final String TYPE = "type of the cluster template. The default is OTHER";
         public static final String CLOUD_PLATFORM = "cloudplatform which this template is compatible with";
-        public static final String DATALAKE_REQUIRED = "datalake required which this template is compatible with. The default is OPTIONAL";
+        public static final String DATALAKE_REQUIRED = "Data Lake required which this template is compatible with. The default is OPTIONAL";
     }
 
     public static class ClusterTemplateViewModelDescription {
         public static final String TYPE = "type of the cluster template";
         public static final String CLOUD_PLATFORM = "cloudplatform which this template is compatible with";
-        public static final String DATALAKE_REQUIRED = "datalake required which this template is compatible with";
+        public static final String DATALAKE_REQUIRED = "Data Lake required which this template is compatible with";
         public static final String NODE_COUNT = "node count of the cluster template";
         public static final String STACK_TYPE = "stack type of cluster template";
         public static final String STACK_VERSION = "stack version of cluster template";

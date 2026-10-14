@@ -27,7 +27,7 @@ public class TrustedRealmService {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     public FlowIdentifier updateTrustedRealm(SdxCluster sdxCluster, UpdateTrustedRealmRequest request) {
-        LOGGER.info("Triggering update trusted realm on datalake '{}' with request: {}", sdxCluster.getClusterName(), request);
+        LOGGER.info("Triggering update trusted realm on Data Lake '{}' with request: {}", sdxCluster.getClusterName(), request);
         FlowIdentifier flowIdentifier = stackService.triggerUpdateTrustedRealm(sdxCluster.getCrn(), request);
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         return sdxReactorFlowManager.triggerUpdateTrustedRealmTracker(sdxCluster);

@@ -52,7 +52,7 @@ class CcmServiceTest {
             assertThatThrownBy(() -> underTest.validateCcmV2Requirement(Tunnel.CCMV2, runtime))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage(String.format("Runtime version %s does not support Cluster Connectivity Manager. "
-                            + "Please try creating a datalake with runtime version at least %s.", runtime, SdxVersionRuleEnforcer.CCMV2_REQUIRED_VERSION));
+                            + "Please try creating a Data Lake with runtime version at least %s.", runtime, SdxVersionRuleEnforcer.CCMV2_REQUIRED_VERSION));
         } else {
             underTest.validateCcmV2Requirement(Tunnel.CCMV2, runtime);
         }
@@ -64,7 +64,7 @@ class CcmServiceTest {
         if (!compatible) {
             assertThatThrownBy(() -> underTest.validateCcmV2Requirement(Tunnel.CCMV2_JUMPGATE, runtime)).isInstanceOf(BadRequestException.class)
                     .hasMessage(String.format("Runtime version %s does not support Cluster Connectivity Manager. "
-                            + "Please try creating a datalake with runtime version at least %s.", runtime, CCMV2_JUMPGATE_REQUIRED_VERSION));
+                            + "Please try creating a Data Lake with runtime version at least %s.", runtime, CCMV2_JUMPGATE_REQUIRED_VERSION));
         } else {
             underTest.validateCcmV2Requirement(Tunnel.CCMV2_JUMPGATE, runtime);
         }

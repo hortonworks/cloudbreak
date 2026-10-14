@@ -16,7 +16,7 @@ public class DatalakeCrnValidator implements ConstraintValidator<DatalakeCrn, St
             return true;
         }
         if (Crn.isCrn(req) && !Crn.fromString(req).getResourceType().equals(Crn.ResourceType.DATALAKE)) {
-            String messageTemplate = "Crn is not belong to a datalake cluster";
+            String messageTemplate = "Crn is not belong to a Data Lake cluster";
             ValidatorUtil.addConstraintViolation(constraintValidatorContext, messageTemplate);
             return false;
         } else if (!Crn.isCrn(req)) {

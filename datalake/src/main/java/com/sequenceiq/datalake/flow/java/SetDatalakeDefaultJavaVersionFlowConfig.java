@@ -74,6 +74,6 @@ public class SetDatalakeDefaultJavaVersionFlowConfig
 
     @Override
     public String getDisplayName() {
-        return "Set default Java version for datalake";
+        return "Set default Java version for Data Lake";
     }
 }

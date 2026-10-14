@@ -118,7 +118,7 @@ public class SdxStartServiceTest {
 
         verify(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Datalake start in progress", sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Data Lake start in progress", sdxCluster);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class SdxStartServiceTest {
 
         verifyNoInteractions(cloudbreakFlowService);
         verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
-                "Datalake start in progress", sdxCluster);
+                "Data Lake start in progress", sdxCluster);
     }
 
     @Test

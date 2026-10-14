@@ -39,16 +39,16 @@ public class SharedServiceValidator {
     private void checkCloudPlatform(StackV4Request request, Long workspaceId, ValidationResultBuilder resultBuilder) {
         Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(request.getEnvironmentCrn());
         if (sdxBasicView.isEmpty()) {
-            resultBuilder.error("Datalake stack in the requested environment was not found.");
+            resultBuilder.error("Data Lake stack in the requested environment was not found.");
         } else if (sdxBasicView.get().platform().equals(TargetPlatform.PAAS)) {
             Optional<StackView> datalakeStack = stackViewService.findByName(request.getSharedService().getDatalakeName(), workspaceId);
             if (datalakeStack.isEmpty()) {
-                resultBuilder.error("Datalake stack with the requested name (in sharedService/sharedClusterName field) was not found.");
+                resultBuilder.error("Data Lake stack with the requested name (in sharedService/sharedClusterName field) was not found.");
             } else {
                 String datalakeCloudPlatform = datalakeStack.get().cloudPlatform();
                 CloudPlatform requestedCloudPlatform = request.getCloudPlatform();
                 if (!datalakeCloudPlatform.equals(requestedCloudPlatform.name())) {
-                    resultBuilder.error(String.format("Requested cloud platform [%s] does not match with the datalake"
+                    resultBuilder.error(String.format("Requested cloud platform [%s] does not match with the Data Lake"
                             + " cluser's cloud platform [%s].", requestedCloudPlatform, datalakeCloudPlatform));
                 }
             }

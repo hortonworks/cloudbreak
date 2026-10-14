@@ -71,7 +71,7 @@ public class DatabaseBackupFlowConfig extends StackStatusFinalizerAbstractFlowCo
 
     @Override
     public String getDisplayName() {
-        return "Backup SDX database";
+        return "Backup Data Lake database";
     }
 
     @Override

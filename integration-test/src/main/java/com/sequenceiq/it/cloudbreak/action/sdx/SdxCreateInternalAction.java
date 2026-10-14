@@ -19,18 +19,18 @@ public class SdxCreateInternalAction implements Action<SdxInternalTestDto, SdxCl
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+        Log.when(LOGGER, " Data Lake endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", Data Lake's environment: "
                 + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX create request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " Data Lake create request: ", testDto.getRequest());
         if (!StringUtils.equals(testContext.getExistingResourceNames().get(SdxInternalTestDto.class), testDto.getName())) {
             SdxClusterResponse sdxClusterResponse = client.getDefaultClient(testContext).sdxInternalEndpoint().create(testDto.getName(), testDto.getRequest());
-            testDto.setFlow("SDX create internal", sdxClusterResponse.getFlowIdentifier());
+            testDto.setFlow("Data Lake create internal", sdxClusterResponse.getFlowIdentifier());
             testDto.setResponse(client.getDefaultClient(testContext).sdxEndpoint().getDetailByCrn(sdxClusterResponse.getCrn(), Collections.emptySet()));
         } else {
-            Log.whenJson(LOGGER, " SDX already exists %s.", testDto.getName());
+            Log.whenJson(LOGGER, " Data Lake already exists %s.", testDto.getName());
             testDto.setResponse(client.getDefaultClient(testContext).sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet()));
         }
-        Log.whenJson(LOGGER, " SDX create response: ", testDto.getResponse());
+        Log.whenJson(LOGGER, " Data Lake create response: ", testDto.getResponse());
         return testDto;
     }
 }

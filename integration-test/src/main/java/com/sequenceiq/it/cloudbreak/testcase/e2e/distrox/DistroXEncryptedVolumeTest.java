@@ -132,8 +132,8 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Description(
             given = "there is a valid credential for the selected provider",
             when = "new environment and freeIpa with encrypted volume should be created",
-                and = "SDX then distroX with encrypted volumes also should be created for environment",
-            then = "freeIpa, sdx and distroX volumes should be encrypted with the provided key")
+                and = "Data Lake then distroX with encrypted volumes also should be created for environment",
+            then = "freeIpa, Data Lake and distroX volumes should be encrypted with the provided key")
     public void testCreateDistroXWithEncryptedVolumes(TestContext testContext) {
         String preTerminationRecipeName = resourcePropertyProvider().getName();
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
@@ -160,8 +160,8 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Description(
             given = "there is a valid Azure credential and a new resource group",
             when = "environment with freeIpa should be created in the resource group with encrypted volume",
-            and = "SDX then distroX also with encrypted volumes should be created for environment",
-            then = "freeIpa, sdx and distroX volumes should be encrypted with the provided key")
+            and = "Data Lake then distroX also with encrypted volumes should be created for environment",
+            then = "freeIpa, Data Lake and distroX volumes should be encrypted with the provided key")
     public void testCreateDistroXWithEncryptedVolumesInSingleRG(TestContext testContext) {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);

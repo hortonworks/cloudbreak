@@ -85,7 +85,7 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
 
     @Override
     public String getDisplayName() {
-        return "Delete SDX";
+        return "Delete Data Lake";
     }
 
     @Override

@@ -52,24 +52,24 @@ public class SdxDeleteService {
     private SdxRotationService sdxRotationService;
 
     public FlowIdentifier deleteSdxByClusterCrn(String accountId, String clusterCrn, boolean forced) {
-        LOGGER.info("Deleting SDX {}", clusterCrn);
+        LOGGER.info("Deleting Data Lake {}", clusterCrn);
         return sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountId, clusterCrn)
                 .map(sdxCluster -> deleteSdxCluster(sdxCluster, forced))
-                .orElseThrow(() -> notFound("SDX cluster", clusterCrn).get());
+                .orElseThrow(() -> notFound("Data Lake cluster", clusterCrn).get());
     }
 
     public FlowIdentifier deleteSdx(String accountId, String name, boolean forced) {
-        LOGGER.info("Deleting SDX {}", name);
+        LOGGER.info("Deleting Data Lake {}", name);
         return sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountId, name)
                 .map(sdxCluster -> deleteSdxCluster(sdxCluster, forced))
-                .orElseThrow(() -> notFound("SDX cluster", name).get());
+                .orElseThrow(() -> notFound("Data Lake cluster", name).get());
     }
 
     private FlowIdentifier deleteSdxCluster(SdxCluster sdxCluster, boolean forced) {
         checkIfSdxIsDeletable(sdxCluster, forced);
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxClusterRepository.save(sdxCluster);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Data Lake deletion requested", sdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxDeletion(sdxCluster, forced);
         flowCancelService.cancelRunningFlows(sdxCluster.getId());
         sdxRotationService.cleanupSecretRotationEntries(sdxCluster.getCrn());
@@ -92,7 +92,7 @@ public class SdxDeleteService {
         Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
         if (!attachedDistroXClusters.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub(s) cluster(s) must be terminated " +
-                            "before deletion of SDX cluster: [%s].",
+                            "before deletion of Data Lake cluster: [%s].",
                     attachedDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.joining(", "))));
         }
     }

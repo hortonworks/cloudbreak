@@ -57,7 +57,7 @@ public class SdxEnableEncryptionProfileHandler extends ExceptionCatcherEventHand
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<SdxEnableEncryptionProfileHandlerEvent> event) {
-        LOGGER.warn("Exception during Enable Encryption Profile in SDX: ", e);
+        LOGGER.warn("Exception during Enable Encryption Profile in Data Lake: ", e);
         return new SdxEnableEncryptionProfileFailedEvent(resourceId, event.getData().getUserId(), e);
     }
 
@@ -68,14 +68,14 @@ public class SdxEnableEncryptionProfileHandler extends ExceptionCatcherEventHand
         String userId = event.getUserId();
         String encryptionProfileCrn = event.getEncryptionProfileCrn();
         SdxCluster sdxCluster = sdxService.getById(sdxId);
-        LOGGER.info("Triggering Enable Encryption Profile on stack for SDX: {}, encryptionProfileCrn: {}", sdxId, encryptionProfileCrn);
+        LOGGER.info("Triggering Enable Encryption Profile on stack for Data Lake: {}, encryptionProfileCrn: {}", sdxId, encryptionProfileCrn);
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> stackV4Endpoint.enableEncryptionProfileByCrn(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), encryptionProfileCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         LOGGER.info("Polling Enable Encryption Profile flow in core, flowIdentifier: {}", flowIdentifier);
         PollingConfig pollingConfig = new PollingConfig(SLEEP_INTERVAL_IN_SECONDS, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
         sdxWaitService.waitForCloudbreakFlow(sdxId, pollingConfig, "Enable encryption profile");
-        LOGGER.info("Enable Encryption Profile on SDX stack completed, flowIdentifier: {}", flowIdentifier);
+        LOGGER.info("Enable Encryption Profile on Data Lake stack completed, flowIdentifier: {}", flowIdentifier);
         return new SdxEvent(SDX_ENABLE_ENCRYPTION_PROFILE_SUCCESS_EVENT.event(), sdxId, userId);
     }
 }

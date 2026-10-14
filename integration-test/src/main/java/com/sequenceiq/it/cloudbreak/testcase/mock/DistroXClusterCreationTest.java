@@ -198,8 +198,8 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX create request is sent with an attached cloud storage",
-            then = "DistroX should be available with the inherited cloud storage AND both the DistroX and the SDX is deletable"
+            when = "a valid Data Lake create request is sent with an attached cloud storage",
+            then = "DistroX should be available with the inherited cloud storage AND both the DistroX and the Data Lake is deletable"
     )
     public void testDistroxCloudStorage(MockedTestContext testContext) {
         String storageEnvKey = resourcePropertyProvider().getName();
@@ -251,9 +251,9 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a running Cloudbreak",
-            when = "a valid SDX has created with an external database",
+            when = "a valid Data Lake has created with an external database",
             and = "a valid Distrox create request is sent",
-            then = "DistroX should be available with the inherited database AND both the DistroX and the SDX is deletable"
+            then = "DistroX should be available with the inherited database AND both the DistroX and the Data Lake is deletable"
     )
     public void testSdxWithAttachedDatabase(MockedTestContext testContext) {
         String envName = resourcePropertyProvider().getEnvironmentName();

@@ -64,10 +64,10 @@ public class RdsStartHandler extends ExceptionCatcherEventHandler<RdsWaitingToSt
                 if (databasePauseSupportService.isDatabasePauseSupported(sdxCluster)) {
                     sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_START_IN_PROGRESS,
                             "External database start in progress", sdxCluster);
-                    LOGGER.debug("start polling database start for sdx: {}", sdxId);
+                    LOGGER.debug("start polling database start for Data Lake: {}", sdxId);
                     databaseService.start(sdxCluster);
                 } else {
-                    LOGGER.debug("skipping start of database for sdx: {}", sdxId);
+                    LOGGER.debug("skipping start of database for Data Lake: {}", sdxId);
                 }
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_STARTED,
                         "External database started", sdxCluster);
@@ -77,14 +77,14 @@ public class RdsStartHandler extends ExceptionCatcherEventHandler<RdsWaitingToSt
             LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
             response = new SdxStartFailedEvent(sdxId, userId, userBreakException, true);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Database poller stopped for Data Lake: {}", sdxId, pollerStoppedException);
             PollerStoppedException exception = new PollerStoppedException("Database start timed out after " + durationInMinutes + " minutes");
             response = new SdxStartFailedEvent(sdxId, userId, exception, true);
         } catch (PollerException exception) {
-            LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
+            LOGGER.error("Database polling failed for Data Lake: {}", sdxId, exception);
             response = new SdxStartFailedEvent(sdxId, userId, exception);
         } catch (Exception anotherException) {
-            LOGGER.error("Something wrong happened in sdx database start wait phase", anotherException);
+            LOGGER.error("Something wrong happened in Data Lake database start wait phase", anotherException);
             response = new SdxStartFailedEvent(sdxId, userId, anotherException);
         }
         return response;

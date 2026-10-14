@@ -33,35 +33,35 @@ public interface SdxRecoveryEndpoint {
     @POST
     @Path("{name}/recover")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "recovers the datalake", operationId = "recoverDatalakeCluster",
+    @Operation(summary = "recovers the Data Lake", operationId = "recoverDatalakeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecoveryResponse recoverClusterByName(@PathParam("name") String name, @Valid SdxRecoveryRequest recoverSdxClusterRequest);
 
     @POST
     @Path("/crn/{crn}/recover")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "recovers the datalake", operationId = "recoverDatalakeClusterByCrn",
+    @Operation(summary = "recovers the Data Lake", operationId = "recoverDatalakeClusterByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecoveryResponse recoverClusterByCrn(@PathParam("crn") String crn, @Valid SdxRecoveryRequest recoverSdxClusterRequest);
 
     @GET
     @Path("{name}/recoverable")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "validates if the data lake is recoverable or not", operationId = "getClusterRecoverableByName",
+    @Operation(summary = "validates if the Data Lake is recoverable or not", operationId = "getClusterRecoverableByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecoverableResponse getClusterRecoverableByName(@PathParam("name") String name);
 
     @GET
     @Path("/crn/{crn}/recoverable")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "validates if the data lake is recoverable or not", operationId = "getClusterRecoverableByCrn",
+    @Operation(summary = "validates if the Data Lake is recoverable or not", operationId = "getClusterRecoverableByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecoverableResponse getClusterRecoverableByCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("{environmentCrn}/resize/status")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Re-size SDX cluster", operationId = "resizeSdx",
+    @Operation(summary = "Re-size Data Lake cluster", operationId = "resizeSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxResizeOperationResponse getResizeStatus(@PathParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn);
 }

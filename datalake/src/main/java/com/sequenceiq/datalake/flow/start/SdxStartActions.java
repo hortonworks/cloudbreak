@@ -61,7 +61,7 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartStartEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Execute rds start flow for SDX: {}", payload.getResourceId());
+                LOGGER.info("Execute rds start flow for Data Lake: {}", payload.getResourceId());
                 sendEvent(context);
             }
 
@@ -89,7 +89,7 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsStartSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Execute start flow for SDX: {}", payload.getResourceId());
+                LOGGER.info("Execute start flow for Data Lake: {}", payload.getResourceId());
                 startService.start(payload.getResourceId());
                 sendEvent(context, SDX_START_IN_PROGRESS_EVENT.event(), payload);
             }
@@ -112,7 +112,7 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("SDX start in progress: {}", payload.getResourceId());
+                LOGGER.info("Data Lake start in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
 
@@ -139,9 +139,9 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("SDX start finalized: {}", payload.getResourceId());
+                LOGGER.info("Data Lake start finalized: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        "Datalake is running", payload.getResourceId());
+                        "Data Lake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_START_FINISHED, sdxCluster);
                 sendEvent(context, SDX_START_FINALIZED_EVENT.event(), payload);
             }
@@ -166,8 +166,8 @@ public class SdxStartActions {
             protected void doExecute(SdxContext context, SdxStartFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.START_FAILED;
-                LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
-                String statusReason = "SDX start failed";
+                LOGGER.info("Update Data Lake status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
+                String statusReason = "Data Lake start failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }

@@ -92,8 +92,8 @@ public enum EnvironmentStatus {
 
     LOAD_BALANCER_ENV_UPDATE_STARTED("Starting load balancer update for environment"),
     LOAD_BALANCER_ENV_UPDATE_FAILED("Failed to update environment with load balancer"),
-    LOAD_BALANCER_STACK_UPDATE_STARTED("Starting load balancer update for all data lakes and data hubs"),
-    LOAD_BALANCER_STACK_UPDATE_FAILED("Failed to update data lakes and data hubs with load balancer"),
+    LOAD_BALANCER_STACK_UPDATE_STARTED("Starting load balancer update for all Data Lakes and data hubs"),
+    LOAD_BALANCER_STACK_UPDATE_FAILED("Failed to update Data Lakes and data hubs with load balancer"),
 
     UPGRADE_CCM_VALIDATION_IN_PROGRESS("Validation for CCM upgrade"),
     UPGRADE_CCM_VALIDATION_FAILED("Validation for CCM upgrade failed"),

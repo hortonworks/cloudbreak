@@ -51,14 +51,14 @@ public class DatalakeUpgradePreparationActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradePreparationStartEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake upgrade preparation has been started for {}", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade preparation has been started for {}", payload.getResourceId());
                 upgradePrepareService.prepareUpgrade(payload.getResourceId(), payload.getImageId());
                 sendEvent(context, new SdxEvent(DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS_EVENT.event(), context));
             }
 
             @Override
             protected Object getFailurePayload(DatalakeUpgradePreparationStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                LOGGER.error("Datalake upgrade preparation failed to start for event: {}", payload, ex);
+                LOGGER.error("Data Lake upgrade preparation failed to start for event: {}", payload, ex);
                 return DatalakeUpgradePreparationFailedEvent.from(payload, ex);
             }
         };
@@ -75,13 +75,13 @@ public class DatalakeUpgradePreparationActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake upgrade preparation is in progress for {}", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade preparation is in progress for {}", payload.getResourceId());
                 sendEvent(context, DatalakeUpgradePreparationWaitRequest.from(context));
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                LOGGER.error("Datalake upgrade preparation failed to poll: {}", payload, ex);
+                LOGGER.error("Data Lake upgrade preparation failed to poll: {}", payload, ex);
                 return DatalakeUpgradeFailedEvent.from(payload, ex);
             }
         };
@@ -101,7 +101,7 @@ public class DatalakeUpgradePreparationActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Sdx upgrade was finalized with sdx id: {}", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade was finalized with Data Lake id: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_UPGRADE_PREPARATION_FINISHED,
@@ -112,7 +112,7 @@ public class DatalakeUpgradePreparationActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                LOGGER.error("Datalake upgrade preparation finalization failed: {}", payload, ex);
+                LOGGER.error("Data Lake upgrade preparation finalization failed: {}", payload, ex);
                 return DatalakeUpgradeFailedEvent.from(payload, ex);
             }
         };
@@ -133,7 +133,7 @@ public class DatalakeUpgradePreparationActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradePreparationFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Sdx upgrade preparation failed for sdxId: {}", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade preparation failed for sdxId: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.DATALAKE_UPGRADE_PREPARATION_FAILED,
                         "Upgrade preparation failed: " + payload.getException().getMessage(),

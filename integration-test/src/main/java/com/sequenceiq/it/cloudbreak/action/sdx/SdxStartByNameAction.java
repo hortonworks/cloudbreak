@@ -21,15 +21,15 @@ public class SdxStartByNameAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Start SDX: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " SDX start request: ", testDto.getRequest());
+        Log.when(LOGGER, format(" Start Data Lake: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Data Lake start request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().startByName(testDto.getName());
-        testDto.setFlow("SDX start", flowIdentifier);
+        testDto.setFlow("Data Lake start", flowIdentifier);
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX start response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake start response: ", detailedResponse);
         return testDto;
     }
 }

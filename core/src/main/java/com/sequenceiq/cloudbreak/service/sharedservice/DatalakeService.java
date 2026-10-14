@@ -44,7 +44,7 @@ public class DatalakeService {
 
     public void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
         if (!Strings.isNullOrEmpty(source.getEnvironmentCrn())) {
-            LOGGER.debug("Prepare datalake request by environmentCrn");
+            LOGGER.debug("Prepare Data Lake request by environmentCrn");
             SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
             Optional<SdxBasicView> datalakeStack = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
             datalakeStack.ifPresent(s -> sharedServiceRequest.setDatalakeName(s.name()));
@@ -64,7 +64,7 @@ public class DatalakeService {
     public void addSharedServiceResponse(StackV4Response stackResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (!Strings.isNullOrEmpty(stackResponse.getEnvironmentCrn())) {
-            LOGGER.debug("Checking datalake through the environmentCrn.");
+            LOGGER.debug("Checking Data Lake through the environmentCrn.");
             fillSharedResponseOnlyForPaasDL(stackResponse.getEnvironmentCrn(), sharedServiceResponse);
         }
         stackResponse.setSharedService(sharedServiceResponse);
@@ -118,7 +118,7 @@ public class DatalakeService {
 
     public void decorateWithDataLakeResponseAnyPlatform(StackType stackType, StackV4Response stackResponse) {
         if (!StackType.WORKLOAD.equals(stackType)) {
-            LOGGER.debug("Skipping datalake decoration for non-workload stack.");
+            LOGGER.debug("Skipping Data Lake decoration for non-workload stack.");
             return;
         }
         platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackResponse.getEnvironmentCrn())

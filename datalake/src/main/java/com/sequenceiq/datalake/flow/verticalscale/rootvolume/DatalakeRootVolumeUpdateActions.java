@@ -33,7 +33,7 @@ public class DatalakeRootVolumeUpdateActions {
         return new AbstractDatalakeRootVolumeUpdateAction<>(DatalakeRootVolumeUpdateEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeRootVolumeUpdateEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Starting Root Volume Update for datalake.");
+                LOGGER.debug("Starting Root Volume Update for Data Lake.");
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_DISK_UPDATE_IN_PROGRESS,
                         String.format("Root disk update is in progress for group of %s on the Data Lake.",
                                 payload.getRootVolumeUpdateRequest().getGroup()), payload.getResourceId());
@@ -61,7 +61,7 @@ public class DatalakeRootVolumeUpdateActions {
         return new AbstractDatalakeRootVolumeUpdateAction<>(DatalakeRootVolumeUpdateFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeRootVolumeUpdateFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to update disks in DataLake '%s'. Status: '%s'.",
+                LOGGER.error(String.format("Failed to update disks in Data Lake '%s'. Status: '%s'.",
                         payload.getDatalakeRootVolumeUpdateEvent(), payload.getDatalakeStatus()), payload.getException());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         payload.getDatalakeStatus(),

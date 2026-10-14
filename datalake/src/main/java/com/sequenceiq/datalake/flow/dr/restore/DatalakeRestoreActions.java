@@ -112,7 +112,7 @@ public class DatalakeRestoreActions {
                         DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
                         flowLogService.getLastFlowLog(flowParameters.getFlowId())) && !payload.isValidationOnly()) {
                     SdxCluster sdxCluster = sdxService.getByNameInAccount(payload.getUserId(), payload.getSdxName());
-                    LOGGER.info("Updating the Sdx-id in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
+                    LOGGER.info("Updating the Data Lake ID in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
                     payload.getDrStatus().setSdxClusterId(sdxCluster.getId());
                     sdxContext.setSdxId(sdxCluster.getId());
                 }
@@ -144,7 +144,7 @@ public class DatalakeRestoreActions {
                 payload.getDrStatus().setOperationId(restoreStatusResponse.getRestoreId());
                 if (restoreStatusResponse.getState().isFailed()) {
                     variables.put(FAILURE_REASON, restoreStatusResponse.getFailureReason());
-                    LOGGER.error("Datalake restore has failed for {} ", context.getSdxId());
+                    LOGGER.error("Data Lake restore has failed for {} ", context.getSdxId());
                     sendEvent(context, DATALAKE_RESTORE_FAILED_EVENT.event(), payload);
                 } else {
                     sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, context.getSdxId(), restoreStatusResponse.getBackupId(),
@@ -164,7 +164,7 @@ public class DatalakeRestoreActions {
         return new AbstractSdxAction<>(DatalakeDatabaseRestoreStartEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Wating for services to be stopped for datalake restore of {} ", payload.getResourceId());
+                LOGGER.info("Wating for services to be stopped for Data Lake restore of {} ", payload.getResourceId());
                 sendEvent(context, DatalakeRestoreAwaitServicesStoppedRequest.from(payload));
             }
 
@@ -195,7 +195,7 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
                 if (payload.getBackupLocation() != null) {
-                    LOGGER.info("Datalake database restore has been started for {} with backup location {}", payload.getResourceId(),
+                    LOGGER.info("Data Lake database restore has been started for {} with backup location {}", payload.getResourceId(),
                             payload.getBackupLocation());
 
                     int fullDrMaxDuration = variables.containsKey(MAX_DURATION_IN_MIN) ?
@@ -214,8 +214,8 @@ public class DatalakeRestoreActions {
                     variables.put(MAX_DURATION_IN_MIN, finalDuration);
                     sendEvent(context, DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT.event(), payload);
                 } else {
-                    LOGGER.error("Datalake database restore has been skipped because backup location is null {}", payload.getResourceId());
-                    throw new BadRequestException("Backup Location is null. Datalake database restore is not triggered.");
+                    LOGGER.error("Data Lake database restore has been skipped because backup location is null {}", payload.getResourceId());
+                    throw new BadRequestException("Backup Location is null. Data Lake database restore is not triggered.");
                 }
             }
 
@@ -231,7 +231,7 @@ public class DatalakeRestoreActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake database restore is in progress for {} ", payload.getResourceId());
+                LOGGER.info("Data Lake database restore is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 int databaseMaxDurationInMin = variables.get(MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(MAX_DURATION_IN_MIN) : 0;
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
@@ -239,11 +239,11 @@ public class DatalakeRestoreActions {
                     sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_VALIDATION_INPROGRESS,
                         ResourceEvent.DATALAKE_RESTORE_VALIDATION_IN_PROGRESS,
-                        "Datalake restore validation in progress", payload.getResourceId());
+                        "Data Lake restore validation in progress", payload.getResourceId());
                 } else {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
                         ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
-                        "Datalake restore in progress", payload.getResourceId());
+                        "Data Lake restore in progress", payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_RESTORE_REQUESTED, sdxCluster);
                 }
                 sendEvent(context, DatalakeDatabaseRestoreWaitRequest.from(context, operationId, databaseMaxDurationInMin));
@@ -262,7 +262,7 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreCouldNotStartEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake database restore could not be started for Data Lake with id: {}", payload.getResourceId(), exception);
 
                 // Due to the unique approach of this flow configuration, a failed database backup state is not considered a failed flow.
                 getFlow(context.getFlowId()).clearFlowFailed();
@@ -284,7 +284,7 @@ public class DatalakeRestoreActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Full datalake restore is in progress for {} ", payload.getResourceId());
+                LOGGER.info("Full Data Lake restore is in progress for {} ", payload.getResourceId());
 
                 // Due to the unique approach of this flow configuration, a failed database backup state is not considered a failed flow.
                 getFlow(context.getFlowId()).clearFlowFailed();
@@ -315,15 +315,15 @@ public class DatalakeRestoreActions {
         return new AbstractSdxAction<>(DatalakeRestoreSuccessEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeRestoreSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Sdx database restore is finalized with sdx id: {}", payload.getResourceId());
+                LOGGER.info("Data Lake database restore is finalized with Data Lake id: {}", payload.getResourceId());
                 if (variables.containsKey(VALIDATION_ONLY) && (Boolean) variables.get(VALIDATION_ONLY)) {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_VALIDATION_FINISHED,
-                        "Datalake restore validation finished, Datalake is running", payload.getResourceId());
+                        "Data Lake restore validation finished, Data Lake is running", payload.getResourceId());
                 } else {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
-                        "Datalake restore finished, Datalake is running", payload.getResourceId());
+                        "Data Lake restore finished, Data Lake is running", payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FINISHED, sdxCluster);
                 }
                 sendEvent(context, DATALAKE_RESTORE_FINALIZED_EVENT.event(), payload);
@@ -342,7 +342,7 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake database restore could not be started for Data Lake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
@@ -361,7 +361,7 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake restore failed for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake restore failed for Data Lake with id: {}", payload.getResourceId(), exception);
                 if ((Boolean) variables.getOrDefault(VALIDATION_ONLY, Boolean.FALSE)) {
                     String failureReason = getFailureReason(variables, exception);
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
@@ -395,12 +395,12 @@ public class DatalakeRestoreActions {
                 if ((Boolean) variables.getOrDefault(VALIDATION_ONLY, Boolean.FALSE) && variables.containsKey(FAILURE_REASON)) {
                     reason.append("Restore validation failed. Reason: ").append(variables.get(FAILURE_REASON));
                 } else if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeRestoreFailureReason.RESTORE_ON_UPGRADE_FAILURE.name())) {
-                    reason.append("Upgrade not finished correctly, datalake restore failed.");
+                    reason.append("Upgrade not finished correctly, Data Lake restore failed.");
                 } else {
                     if (exception instanceof PollerStoppedException) {
                         reason.append("Restore timed out, see the restore status using cdp-cli for more information.");
                     } else {
-                        reason.append("Restore failed, returning datalake to running state.");
+                        reason.append("Restore failed, returning Data Lake to running state.");
                     }
                 }
                 if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {

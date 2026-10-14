@@ -93,9 +93,9 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "There is a running environment with datalake connected via CCMv2",
+            given = "There is a running environment with Data Lake connected via CCMv2",
             when = "CCM Rotation happens",
-            then = "Datalake then CCM V2 Jumpgate agent access key rotation should be successful.")
+            then = "Data Lake then CCM V2 Jumpgate agent access key rotation should be successful.")
     public void testCcmV2Rotation(TestContext testContext) {
         createEnvironmentWithCcm(testContext, Tunnel.CCMV2_JUMPGATE);
         createSdxForEnvironment(testContext);
@@ -244,13 +244,13 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                 .then((tc, testDto, client) -> {
                     String sdxName = testDto.getName();
                     List<String> instancesToRepair = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
-                    LOGGER.info("Gathered instance ids to repair '{}' for SDX with name '{}'", instancesToRepair, sdxName);
+                    LOGGER.info("Gathered instance ids to repair '{}' for Data Lake with name '{}'", instancesToRepair, sdxName);
                     SdxRepairRequest clusterRepairRequest = new SdxRepairRequest();
                     clusterRepairRequest.setNodesIds(instancesToRepair);
-                    LOGGER.debug("Sending repair request to SDX: '{}'", clusterRepairRequest);
+                    LOGGER.debug("Sending repair request to Data Lake: '{}'", clusterRepairRequest);
                     FlowIdentifier flowIdentifier = client.getDefaultClient(tc).sdxEndpoint().repairCluster(sdxName, clusterRepairRequest);
-                    LOGGER.info("Repair with flow id '{}' has been initiated on the SDX with name '{}'", flowIdentifier, sdxName);
-                    testDto.setFlow("SDX repair", flowIdentifier);
+                    LOGGER.info("Repair with flow id '{}' has been initiated on the Data Lake with name '{}'", flowIdentifier, sdxName);
+                    testDto.setFlow("Data Lake repair", flowIdentifier);
                     return testDto;
                 })
                 .await(SdxClusterStatusResponse.RUNNING)

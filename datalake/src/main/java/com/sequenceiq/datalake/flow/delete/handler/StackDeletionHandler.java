@@ -65,7 +65,7 @@ public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDele
             response = new SdxDeletionFailedEvent(
                     sdxId,
                     userId,
-                    new PollerStoppedException("Datalake stack deletion timed out after " + durationInMinutes + " minutes"),
+                    new PollerStoppedException("Data Lake stack deletion timed out after " + durationInMinutes + " minutes"),
                     stackDeletionWaitRequest.isForced());
         } catch (PollerException exception) {
             LOGGER.error("Deletion polling failed for stack: {}", sdxId);

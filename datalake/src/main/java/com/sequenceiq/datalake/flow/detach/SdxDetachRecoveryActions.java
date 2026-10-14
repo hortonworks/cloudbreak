@@ -56,14 +56,14 @@ public class SdxDetachRecoveryActions {
                     Map<Object, Object> variables) throws Exception {
                 SdxCluster clusterToReattach = sdxService.getById(payload.getResourceId());
                 clusterToReattach = sdxAttachService.reattachDetachedSdxCluster(clusterToReattach);
-                LOGGER.info("Successfully restored detached SDX with ID {}.", clusterToReattach.getId());
+                LOGGER.info("Successfully restored detached Data Lake with ID {}.", clusterToReattach.getId());
                 sendEvent(context, SDX_DETACH_RECOVERY_SUCCESS_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(SdxStartDetachRecoveryEvent payload, Optional<SdxContext> flowContext,
                     Exception e) {
-                LOGGER.error("Failed to recover from detach of SDX with ID {}.", payload.getResourceId());
+                LOGGER.error("Failed to recover from detach of Data Lake with ID {}.", payload.getResourceId());
                 return SdxDetachRecoveryFailedEvent.from(payload, e);
             }
         };
@@ -82,9 +82,9 @@ public class SdxDetachRecoveryActions {
             @Override
             protected void doExecute(SdxContext context, SdxDetachRecoveryFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Detach recovery of SDX cluster with ID {} and name {} failed with error {}.",
+                LOGGER.error("Detach recovery of Data Lake cluster with ID {} and name {} failed with error {}.",
                         payload.getResourceId(), payload.getSdxName(), exception.getMessage(), exception);
-                String statusReason = Optional.ofNullable(exception.getMessage()).orElse("SDX detach recovery failed");
+                String statusReason = Optional.ofNullable(exception.getMessage()).orElse("Data Lake detach recovery failed");
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_DETACH_RECOVERY_FAILURE_HANDLED_EVENT.event(), payload);
             }

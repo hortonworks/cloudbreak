@@ -58,7 +58,7 @@ public class DistroXBigScaleTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a valid credential for the selected provider",
-            when = "new environment with attached freeIpa and SDX should be created along with Cloud Cost Reducer tags",
+            when = "new environment with attached freeIpa and Data Lake should be created along with Cloud Cost Reducer tags",
                 and = "new distroX also should be created for environment",
             then = "distrox can be scaled up (up to 800 Worker nodes) then down (down to 600 Worker nodes) in 3 rounds")
     public void testCreateAndBigScaleDistroX(TestContext testContext, ITestContext iTestContext) {

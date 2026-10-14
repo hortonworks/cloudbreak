@@ -34,9 +34,9 @@ public class SdxWithCcmResizeTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is an available environment with a running SDX cluster connected via CCMv2 Jumpgate",
-            when = "resize is called on the SDX cluster",
-            then = "SDX resize should be successful, the new cluster should be up and running"
+            given = "there is an available environment with a running Data Lake cluster connected via CCMv2 Jumpgate",
+            when = "resize is called on the Data Lake cluster",
+            then = "Data Lake resize should be successful, the new cluster should be up and running"
     )
     public void testCcmSDXResize(TestContext testContext) {
         sdxResizeTestUtil.runResizeTest(

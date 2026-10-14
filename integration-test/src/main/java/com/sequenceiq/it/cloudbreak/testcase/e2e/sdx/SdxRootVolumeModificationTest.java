@@ -39,9 +39,9 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
-            given = "there is an available environment with a running datalake",
-            when = "root volume modification is called on the datalake",
-            then = "root volume should be modified and the datalake should be up and running"
+            given = "there is an available environment with a running Data Lake",
+            when = "root volume modification is called on the Data Lake",
+            then = "root volume should be modified and the Data Lake should be up and running"
     )
     public void testSdxRootVolumeModification(TestContext testContext) {
         testContext

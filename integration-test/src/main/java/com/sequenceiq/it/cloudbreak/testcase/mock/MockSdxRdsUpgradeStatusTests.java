@@ -42,9 +42,9 @@ public class MockSdxRdsUpgradeStatusTests extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running Cloudbreak with an available SDX cluster",
-            when = "the RDS upgrade status is queried by datalake CRN, by name and by a single-element CRN list",
-            then = "every endpoint returns a status that echoes the datalake CRN and carries a consistent, known upgrade status")
+            given = "there is a running Cloudbreak with an available Data Lake cluster",
+            when = "the RDS upgrade status is queried by Data Lake CRN, by name and by a single-element CRN list",
+            then = "every endpoint returns a status that echoes the Data Lake CRN and carries a consistent, known upgrade status")
     public void testRdsUpgradeStatusEndpointsReturnConsistentResult(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         testContext

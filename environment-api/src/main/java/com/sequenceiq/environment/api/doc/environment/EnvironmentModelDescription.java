@@ -17,7 +17,7 @@ public class EnvironmentModelDescription {
     public static final String PRIVATE_SUBNET_CREATION = "A flag to enable or disable the private subnet creation.";
     public static final String SERVICE_ENDPOINT_CREATION = "A flag to enable or disable the service endpoint creation.";
     public static final String PUBLIC_ENDPOINT_ACCESS_GATEWAY = "A flag to enable the Public Endpoint Access Gateway, which provides public UI/API " +
-            "access to private data lakes and data hubs.";
+            "access to private Data Lakes and data hubs.";
     public static final String ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "Subnet ids for the Public Endpoint Access Gateway. If provided, these " +
             "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
             "selected from the subnet list provided for environment creation. (Optional)";
@@ -99,7 +99,7 @@ public class EnvironmentModelDescription {
     public static final String PUBLIC_KEY_ID = "Public key ID registered at the cloud provider.";
     public static final String LOGIN_USER_NAME = "User name created on the nodes for SSH access";
 
-    public static final String SECURITY_ACCESS = "Security control for FreeIPA and Datalake deployment.";
+    public static final String SECURITY_ACCESS = "Security control for FreeIPA and Data Lake deployment.";
     public static final String KNOX_SECURITY_GROUP = "Security group where Knox-enabled hosts are placed. Comma separated list.";
     public static final String DEFAULT_SECURITY_GROUP = "Security group where all other hosts are placed. Comma separated list.";
     public static final String KNOX_SECURITY_GROUPS = "Security groups where Knox-enabled hosts are placed. Comma separated list.";

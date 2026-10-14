@@ -286,7 +286,7 @@ class RdsDeletionHandlerTest {
     }
 
     private void verifyDeletedStatus(SdxCluster sdxCluster) {
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Data Lake External RDS deleted", sdxCluster);
         verify(ownerAssignmentService).notifyResourceDeleted(DATALAKE_CRN);
     }
 
@@ -336,7 +336,7 @@ class RdsDeletionHandlerTest {
         SdxCluster sdxCluster = sdxCluster(sdxDatabaseAvailabilityType, createDatabase);
         when(sdxClusterRepository.findById(DATALAKE_ID)).thenReturn(Optional.of(sdxCluster));
         doThrow(new NotFoundException("Data Lake not found"))
-                .when(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", sdxCluster);
+                .when(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Data Lake External RDS deleted", sdxCluster);
 
         Selectable result = underTest.doAccept(handlerEvent);
 

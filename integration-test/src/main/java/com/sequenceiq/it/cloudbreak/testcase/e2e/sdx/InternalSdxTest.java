@@ -19,9 +19,9 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "an SDX internal request",
-            when = "a SDX internal create request is sent",
-            then = "SDX is created")
+            given = "a Data Lake internal request",
+            when = "a Data Lake internal create request is sent",
+            then = "Data Lake is created")
     public void testCreateInternalSdx(TestContext testContext) {
         testContext
                 .given(SdxInternalTestDto.class)

@@ -59,7 +59,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX multiAz cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake multiAz cluster in available state",
             when = "a valid upgrade stack request is sent ",
             then = "the MultiAz stack should be upgraded and the cluster should be up and running"
     )

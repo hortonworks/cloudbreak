@@ -92,7 +92,7 @@ class CMRepositoryVersionUtilTest {
     }
 
     @Test
-    @DisplayName("GCP DataHub requires higher CM version than GCP Datalake")
+    @DisplayName("GCP DataHub requires higher CM version than GCP Data Lake")
     void gcpDatahubRequiresHigherVersionThanDatalake() {
         String gcpDatalakeMinVersion = "7.11.0";
         // GCP Datalake is supported at 7.11.0

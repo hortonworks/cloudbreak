@@ -66,9 +66,9 @@ public class RedbeamsCertificateSwapTest extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "environment datalake and redbeams with ssl configuration stopped",
+            given = "environment Data Lake and redbeams with ssl configuration stopped",
             when = "start",
-            then = "redbeams certificate is sent again to the datalake through salt pillar")
+            then = "redbeams certificate is sent again to the Data Lake through salt pillar")
     public void testRedbeamsCertificateSwap(TestContext testContext) {
         givenRedbeamsServerWithOneCertificate(testContext);
         givenACreatedEnvironment(testContext);

@@ -77,7 +77,7 @@ public class UpdateLoadBalancerDNSActions {
 
             @Override
             protected Object getFailurePayload(StartUpdateLoadBalancerDNSEvent payload, Optional<SdxContext> flowContext, Exception e) {
-                LOGGER.error("Failed to update load balancer DNS of SDX with ID {} on PEM.", payload.getResourceId());
+                LOGGER.error("Failed to update load balancer DNS of Data Lake with ID {} on PEM.", payload.getResourceId());
                 return UpdateLoadBalancerDNSFailedEvent.from(payload, e);
             }
         };
@@ -97,7 +97,7 @@ public class UpdateLoadBalancerDNSActions {
                         DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
                         flowLogService.getLastFlowLog(flowParameters.getFlowId()))) {
                     SdxCluster sdxCluster = sdxService.getByNameInAccount(payload.getUserId(), payload.getSdxName());
-                    LOGGER.info("Updating the Sdx-id in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
+                    LOGGER.info("Updating the Data Lake ID in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
                     context.setSdxId(sdxCluster.getId());
                 }
                 return context;
@@ -128,7 +128,7 @@ public class UpdateLoadBalancerDNSActions {
 
             @Override
             protected Object getFailurePayload(StartUpdateLoadBalancerDNSEvent payload, Optional<SdxContext> flowContext, Exception e) {
-                LOGGER.error("Failed to update load balancer DNS of SDX with ID {} on Free IPA.", payload.getResourceId());
+                LOGGER.error("Failed to update load balancer DNS of Data Lake with ID {} on Free IPA.", payload.getResourceId());
                 return UpdateLoadBalancerDNSFailedEvent.from(payload, e);
             }
         };
@@ -146,7 +146,7 @@ public class UpdateLoadBalancerDNSActions {
             @Override
             protected void doExecute(SdxContext context, UpdateLoadBalancerDNSFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Update of load balancer DNS for SDX cluster with ID {} and name {} failed with error {}.",
+                LOGGER.error("Update of load balancer DNS for Data Lake cluster with ID {} and name {} failed with error {}.",
                         payload.getResourceId(), payload.getSdxName(), exception.getMessage(), exception);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 eventSenderService.sendEventAndNotification(

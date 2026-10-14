@@ -99,7 +99,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDeleteStartEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Start stack deletion for SDX: {}", payload.getResourceId());
+                LOGGER.info("Start stack deletion for Data Lake: {}", payload.getResourceId());
                 jobService.unschedule(String.valueOf(context.getSdxId()));
                 periodicRotationJobService.unschedule(String.valueOf(context.getSdxId()));
                 provisionerService.startStackDeletion(payload.getResourceId(), payload.isForced());
@@ -125,7 +125,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDeleteStartEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Datalake stack deletion in progress: {}", payload.getResourceId());
+                LOGGER.info("Data Lake stack deletion in progress: {}", payload.getResourceId());
                 sendEvent(context, StackDeletionWaitRequest.from(context, payload));
             }
 
@@ -168,7 +168,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, StorageConsumptionCollectionUnschedulingSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake delete remote database of SDX cluster: {}", payload.getResourceId());
+                LOGGER.info("Data Lake delete remote database of Data Lake cluster: {}", payload.getResourceId());
                 sendEvent(context, RdsDeletionWaitRequest.from(context, payload));
             }
 
@@ -191,7 +191,7 @@ public class SdxDeleteActions {
             @Override
             protected void doExecute(SdxContext context, RdsDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 Long datalakeId = payload.getResourceId();
-                LOGGER.info("Datalake delete finalized: {}", datalakeId);
+                LOGGER.info("Data Lake delete finalized: {}", datalakeId);
                 SdxCluster sdxCluster = sdxService.getById(datalakeId);
                 if (sdxCluster != null) {
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FINISHED, sdxCluster);
@@ -225,7 +225,7 @@ public class SdxDeleteActions {
             @Override
             protected void doExecute(SdxContext context, SdxDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
-                String statusReason = "Datalake deletion failed";
+                String statusReason = "Data Lake deletion failed";
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
                 if (StringUtils.hasText(errorMessage)) {
                     statusReason = statusReason + ". " + errorMessage;
@@ -248,7 +248,7 @@ public class SdxDeleteActions {
                         );
                     }
                 } catch (NotFoundException notFoundException) {
-                    LOGGER.error("Cannot set status to SDX_DELETION_FAILED because datalake was not found", notFoundException);
+                    LOGGER.error("Cannot set status to SDX_DELETION_FAILED because Data Lake was not found", notFoundException);
                 }
                 sendEvent(context, SDX_DELETE_FAILED_HANDLED_EVENT.event(), payload);
             }

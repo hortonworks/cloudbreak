@@ -47,7 +47,7 @@ public class SdxEnableEncryptionProfileActions {
         return new AbstractSdxEnableEncryptionProfileAction<>(SdxEnableEncryptionProfileTriggerEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEnableEncryptionProfileTriggerEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Starting Enable Encryption Profile flow for SDX: {}", payload.getResourceId());
+                LOGGER.info("Starting Enable Encryption Profile flow for Data Lake: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS,
                         "Enable Encryption Profile is in progress", payload.getResourceId());
                 sendEvent(context, SdxEnableEncryptionProfileHandlerEvent.from(context, payload.getEncryptionProfileCrn()));
@@ -65,7 +65,7 @@ public class SdxEnableEncryptionProfileActions {
         return new AbstractSdxEnableEncryptionProfileAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Enable Encryption Profile finished for SDX: {}", payload.getResourceId());
+                LOGGER.info("Enable Encryption Profile finished for Data Lake: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(RUNNING, ResourceEvent.DATALAKE_ENABLE_ENCRYPTION_PROFILE_FINISHED,
                         "Enable Encryption Profile completed successfully", sdxCluster);
@@ -80,7 +80,7 @@ public class SdxEnableEncryptionProfileActions {
             @Override
             protected void doExecute(SdxContext context, SdxEnableEncryptionProfileFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Enable Encryption Profile failed for SDX: {}", payload.getResourceId(), exception);
+                LOGGER.error("Enable Encryption Profile failed for Data Lake: {}", payload.getResourceId(), exception);
                 String reason = Optional.ofNullable(exception)
                         .map(Exception::getMessage)
                         .filter(StringUtils::isNotBlank)

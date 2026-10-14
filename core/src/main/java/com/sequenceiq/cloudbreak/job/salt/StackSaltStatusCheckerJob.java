@@ -143,7 +143,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
             LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
         } else if (StackType.DATALAKE.equals(stack.getType()) &&
                 !sdxFlowEndpoint.getLastFlowByResourceCrn(stack.getResourceCrn()).getFinalized()) {
-            LOGGER.debug("Other flow is running for datalake {}", stack.getResourceCrn());
+            LOGGER.debug("Other flow is running for Data Lake {}", stack.getResourceCrn());
         } else if (SYNCABLE_STATES.contains(stackStatus)) {
             rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
             rotateSaltPasswordIfNeeded(stack, context);

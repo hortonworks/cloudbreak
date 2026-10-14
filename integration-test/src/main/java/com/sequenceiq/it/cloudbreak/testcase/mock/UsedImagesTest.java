@@ -66,7 +66,7 @@ public class UsedImagesTest extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "a running environment with an sdx",
+            given = "a running environment with a Data Lake",
             when = "list used images requests are sent to cb and freeipa",
             then = "response should have the images",
             and = "after deleting env used images should not those images"
@@ -118,8 +118,8 @@ public class UsedImagesTest extends AbstractMockTest {
                     List<UsedImageStacksV4Response> usedImages = usedImagesTestDto.getResponse().getUsedImages();
                     UsedImageStacksV4Response usedImageStacksV4Response = usedImages.stream()
                             .filter(usedImage -> usedImage.getImage().getImageId().contains(sdxImageUuid))
-                            .findFirst().orElseThrow(() -> new TestFailException(String.format("SDX image is NOT in use with ID:: %s", sdxImageUuid)));
-                    LOGGER.info("Used SDX image ID:: {}", usedImageStacksV4Response.getImage().getImageId());
+                            .findFirst().orElseThrow(() -> new TestFailException(String.format("Data Lake image is NOT in use with ID:: %s", sdxImageUuid)));
+                    LOGGER.info("Used Data Lake image ID:: {}", usedImageStacksV4Response.getImage().getImageId());
                     return usedImagesTestDto;
                 })
 
@@ -146,9 +146,9 @@ public class UsedImagesTest extends AbstractMockTest {
                     List<UsedImageStacksV4Response> usedImages = usedImagesTestDto.getResponse().getUsedImages();
                     if (usedImages.stream()
                             .noneMatch(usedImage -> usedImage.getImage().getImageId().contains(sdxImageUuid))) {
-                        LOGGER.info("SDX image (ID:: {}) is not in use anymore", sdxImageUuid);
+                        LOGGER.info("Data Lake image (ID:: {}) is not in use anymore", sdxImageUuid);
                     } else {
-                        throw new TestFailException(String.format("SDX image (ID:: %s) is still in use!", sdxImageUuid));
+                        throw new TestFailException(String.format("Data Lake image (ID:: %s) is still in use!", sdxImageUuid));
                     }
                     return usedImagesTestDto;
                 })

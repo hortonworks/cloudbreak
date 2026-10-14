@@ -120,7 +120,7 @@ public class CertRenewalActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCertRenewalFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.error("Cert renewal failed for datalake. Reason: {}", payload.getFailureReason());
+                LOGGER.error("Cert renewal failed for Data Lake. Reason: {}", payload.getFailureReason());
                 certRenewalService.handleFailure(payload.getResourceId(), payload.getFailureReason());
                 sendEvent(context, SdxCertRenewalEvent.CERT_RENEWAL_FAILURE_HANDLED_EVENT.event(), payload);
             }

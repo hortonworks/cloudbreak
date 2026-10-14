@@ -154,19 +154,19 @@ public class DatabaseSslService {
     private boolean isSslEnforcementForVMDatalakeEmbeddedDbEnabled(StackView stackView, boolean creation) {
         boolean sslEnforcementForEmbeddedDbEnabled = false;
         Optional<Stack> datalakeStackOpt = Optional.ofNullable(stackService.getByCrnOrElseNull(stackView.getDatalakeCrn()));
-        LOGGER.debug("Gathering datalake and its DB if exists for the datahub cluster");
+        LOGGER.debug("Gathering Data Lake and its DB if exists for the datahub cluster");
         if (datalakeStackOpt.isPresent()) {
             Stack datalakeStack = datalakeStackOpt.get();
             Cluster datalakeCluster = datalakeStack.getCluster();
             if (isEmbeddedDatabase(datalakeCluster)) {
                 sslEnforcementForEmbeddedDbEnabled =
                         isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster, datalakeStack.getDatabase(), creation);
-                LOGGER.info("SSL enforcement is {} for the parent datalake stack embedded DB", sslEnforcementForEmbeddedDbEnabled ? ENABLED : DISABLED);
+                LOGGER.info("SSL enforcement is {} for the parent Data Lake stack embedded DB", sslEnforcementForEmbeddedDbEnabled ? ENABLED : DISABLED);
             } else {
-                LOGGER.info("The parent datalake stack uses an external DB");
+                LOGGER.info("The parent Data Lake stack uses an external DB");
             }
         } else {
-            LOGGER.warn("No datalake resource could be found for the datahub cluster");
+            LOGGER.warn("No Data Lake resource could be found for the datahub cluster");
         }
         return sslEnforcementForEmbeddedDbEnabled;
     }

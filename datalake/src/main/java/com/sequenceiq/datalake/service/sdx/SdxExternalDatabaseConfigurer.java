@@ -144,7 +144,7 @@ public class SdxExternalDatabaseConfigurer {
     private void validate(CloudPlatform cloudPlatform, String clusterName, SdxDatabase sdxDatabase) {
         if (sdxDatabase.hasExternalDatabase()
                 && !platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)) {
-            String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", clusterName,
+            String message = String.format("Cannot create external database for Data Lake: %s, for now only %s is/are supported", clusterName,
                     platformConfig.getSupportedExternalDatabasePlatforms());
             LOGGER.debug(message);
             throw new BadRequestException(message);

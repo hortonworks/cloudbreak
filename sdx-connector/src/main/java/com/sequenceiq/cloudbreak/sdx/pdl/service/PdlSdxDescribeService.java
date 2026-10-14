@@ -80,8 +80,8 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
             return getRemoteEnvironmentEndPoint().getDatalakeServicesByCrn(request);
         } catch (RuntimeException exception) {
             String message = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
-            LOGGER.error("Not able to fetch the datalake services for PDL {}: {}.", crn, message, exception);
-            throw new RuntimeException(String.format("Not able to fetch the datalake services for PDL %s: %s", crn, message), exception);
+            LOGGER.error("Not able to fetch the Data Lake services for PDL {}: {}.", crn, message, exception);
+            throw new RuntimeException(String.format("Not able to fetch the Data Lake services for PDL %s: %s", crn, message), exception);
         }
     }
 
@@ -116,7 +116,7 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
                         .build());
             }
         } catch (RuntimeException exception) {
-            LOGGER.error(String.format("Exception while fetching CRN for private datalake with Environment: %s.", environmentCrn), exception);
+            LOGGER.error(String.format("Exception while fetching CRN for private Data Lake with Environment: %s.", environmentCrn), exception);
             if (exception instanceof BadRequestException) {
                 throw exception;
             }

@@ -66,7 +66,7 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     private void checkMaintenance(String resourceCrn) {
         Crn crn = Crn.fromString(resourceCrn);
         if (crn != null && !entitlementService.isDiagnosticsEnabled(crn.getAccountId())) {
-            throw new ServiceUnavailableException("DataLake diagnostics service is currently unavailable.");
+            throw new ServiceUnavailableException("Data Lake diagnostics service is currently unavailable.");
         }
     }
 }

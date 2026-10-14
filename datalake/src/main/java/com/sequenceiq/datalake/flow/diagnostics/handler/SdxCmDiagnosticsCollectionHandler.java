@@ -53,14 +53,14 @@ public class SdxCmDiagnosticsCollectionHandler extends ExceptionCatcherEventHand
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             diagnosticsFlowService.waitForDiagnosticsCollection(sdxId, pollingConfig, request.getFlowIdentifier(), true);
             response = new SdxDiagnosticsSuccessEvent(sdxId, userId, properties);
-            LOGGER.debug("SDX CM based diagnostics collection event finished");
+            LOGGER.debug("Data Lake CM based diagnostics collection event finished");
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Polling exited before timeout for SDX (CM based diagnostic collection): {}. Cause: ", sdxId, userBreakException);
+            LOGGER.error("Polling exited before timeout for Data Lake (CM based diagnostic collection): {}. Cause: ", sdxId, userBreakException);
             response = new SdxCmDiagnosticsFailedEvent(sdxId, userId, properties, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Poller stopped for SDX (CM based diagnostic collection): {}", sdxId, pollerStoppedException);
+            LOGGER.error("Poller stopped for Data Lake (CM based diagnostic collection): {}", sdxId, pollerStoppedException);
             response = new SdxCmDiagnosticsFailedEvent(sdxId, userId, properties,
-                    new PollerStoppedException("Datalake CM based diagnostic collection timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake CM based diagnostic collection timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Polling failed for stack (CM based diagnostic collection): {}", sdxId, exception);
             response = new SdxCmDiagnosticsFailedEvent(sdxId, userId, properties, exception);

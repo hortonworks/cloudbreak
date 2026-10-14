@@ -60,7 +60,7 @@ public class DetermineDatalakeDataSizesFlowConfig
 
     @Override
     public String getDisplayName() {
-        return "Determine datalake data sizes flow";
+        return "Determine Data Lake data sizes flow";
     }
 
     @Override

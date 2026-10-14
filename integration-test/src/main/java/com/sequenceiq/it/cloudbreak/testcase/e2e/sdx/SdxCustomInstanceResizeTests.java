@@ -34,9 +34,9 @@ public class SdxCustomInstanceResizeTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is an available environment with a running SDX cluster (CUSTOM shape, single-az)",
-            when = "resize is called on the SDX cluster with custom instance type and custom disk size on master instance group",
-            then = "SDX resize should be successful, the new cluster running with custom instances from previous SDX cluster"
+            given = "there is an available environment with a running Data Lake cluster (CUSTOM shape, single-az)",
+            when = "resize is called on the Data Lake cluster with custom instance type and custom disk size on master instance group",
+            then = "Data Lake resize should be successful, the new cluster running with custom instances from previous Data Lake cluster"
     )
     public void testSdxCustomInstanceResize(TestContext testContext) {
         String sdxKey = resourcePropertyProvider().getName();

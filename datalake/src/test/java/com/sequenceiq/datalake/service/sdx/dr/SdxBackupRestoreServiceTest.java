@@ -225,7 +225,7 @@ public class SdxBackupRestoreServiceTest {
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
         NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.triggerDatalakeRestore(sdxCluster, sdxCluster.getName(), BACKUP_ID,
                 "/.", skipOptions, 10, true));
-        assertEquals(String.format("Backup Id %s does not exist for data lake: %s", BACKUP_ID, sdxCluster.getClusterName()), exception.getMessage());
+        assertEquals(String.format("Backup Id %s does not exist for Data Lake: %s", BACKUP_ID, sdxCluster.getClusterName()), exception.getMessage());
     }
 
     @Test
@@ -293,7 +293,7 @@ public class SdxBackupRestoreServiceTest {
                 false)).thenThrow(new WebApplicationException("Failed to get BackupInfo"));
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.databaseBackup(operation, 1L, databaseBackupRequest)));
-        assertEquals(String.format("Database backup failed for datalake-id: [%s]. Message: [Database backup failed]",
+        assertEquals(String.format("Database backup failed for Data Lake ID: [%s]. Message: [Database backup failed]",
                 sdxCluster.getId()), exception.getMessage());
     }
 
@@ -335,7 +335,7 @@ public class SdxBackupRestoreServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                         () -> underTest.databaseRestore(operation, 1L, "1", "/asdf", 0, false)));
-        assertEquals(String.format("Database restore failed for datalake-id: [%s]. Message: [Database backup failed]",
+        assertEquals(String.format("Database restore failed for Data Lake ID: [%s]. Message: [Database backup failed]",
                 sdxCluster.getId()), exception.getMessage());
     }
 
@@ -418,7 +418,7 @@ public class SdxBackupRestoreServiceTest {
 
         when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(null);
         NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.getLastSuccessfulBackupInfo(CLUSTER_NAME, USER_CRN));
-        assertEquals("No successful backup found for data lake: " + CLUSTER_NAME, exception.getMessage());
+        assertEquals("No successful backup found for Data Lake: " + CLUSTER_NAME, exception.getMessage());
     }
 
     @Test

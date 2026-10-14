@@ -64,10 +64,10 @@ public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToSto
                 if (databasePauseSupportService.isDatabasePauseSupported(sdxCluster)) {
                     sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
                             "External database stop in progress", sdxCluster);
-                    LOGGER.debug("stop polling database stop for sdx: {}", sdxId);
+                    LOGGER.debug("stop polling database stop for Data Lake: {}", sdxId);
                     databaseService.stop(sdxCluster);
                 } else {
-                    LOGGER.debug("skipping stop of database for sdx: {}", sdxId);
+                    LOGGER.debug("skipping stop of database for Data Lake: {}", sdxId);
                 }
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_STOPPED,
                         "External database stopped", sdxCluster);
@@ -77,15 +77,15 @@ public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToSto
             LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
             response = new SdxStopFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Database poller stopped for Data Lake: {}", sdxId, pollerStoppedException);
             String message = String.format("Database stop timed out after %s minutes. Stop operation is still running in the background, " +
                     "please get more information on the cloud provider side.", durationInMinutes);
             response = new SdxStopFailedEvent(sdxId, userId, new PollerStoppedException(message));
         } catch (PollerException exception) {
-            LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
+            LOGGER.error("Database polling failed for Data Lake: {}", sdxId, exception);
             response = new SdxStopFailedEvent(sdxId, userId, exception);
         } catch (Exception anotherException) {
-            LOGGER.error("Something wrong happened in sdx database stop wait phase", anotherException);
+            LOGGER.error("Something wrong happened in Data Lake database stop wait phase", anotherException);
             response = new SdxStopFailedEvent(sdxId, userId, anotherException);
         }
         return response;

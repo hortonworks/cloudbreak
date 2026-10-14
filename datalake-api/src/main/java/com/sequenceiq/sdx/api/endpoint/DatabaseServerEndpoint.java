@@ -32,14 +32,14 @@ public interface DatabaseServerEndpoint {
     @GET
     @Path("/crn/{clusterCrn}/dbserver")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get database server for SDX cluster by cluster crn", operationId = "getDatabaseServerByClusterCrn",
+    @Operation(summary = "get database server for Data Lake cluster by cluster crn", operationId = "getDatabaseServerByClusterCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackDatabaseServerResponse getDatabaseServerByCrn(@PathParam("clusterCrn") @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) String clusterCrn);
 
     @GET
     @Path("/database/instance_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "list available database instance types for datalake", operationId = "listSdxDatabaseInstanceTypes",
+    @Operation(summary = "list available database instance types for Data Lake", operationId = "listSdxDatabaseInstanceTypes",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseInstanceTypesV4Response getDatabaseInstanceTypes(
             @QueryParam("environmentCrn") @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,

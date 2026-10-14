@@ -163,7 +163,7 @@ public class ParcelService {
         dataLakeClusterComponents.add(getComponent(components, StackType.CDH.name())
                 .orElseThrow(() -> new NotFoundException("Runtime component not found!")));
         getComponent(components, SmartRouterParcelService.COMPONENT_NAME).ifPresent(dataLakeClusterComponents::add);
-        LOGGER.debug("For datalake clusters only the CDH and Smart Router parcel is used in CM: {}", dataLakeClusterComponents);
+        LOGGER.debug("For Data Lake clusters only the CDH and Smart Router parcel is used in CM: {}", dataLakeClusterComponents);
         return dataLakeClusterComponents;
     }
 

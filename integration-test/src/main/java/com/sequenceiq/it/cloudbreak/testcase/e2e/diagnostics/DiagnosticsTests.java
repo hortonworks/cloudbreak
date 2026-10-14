@@ -34,7 +34,7 @@ public class DiagnosticsTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
-            when = "a valid SDX create request is sent with FreeIPA instances AND run diagnostics on the instances",
+            when = "a valid Data Lake create request is sent with FreeIPA instances AND run diagnostics on the instances",
             then = "the diagnostics flows should be executed successfully")
     public void testDiagnosticsOnFreeIpaAndDatalake(TestContext testContext) {
         String freeIpaDiagnostics = resourcePropertyProvider().getName();

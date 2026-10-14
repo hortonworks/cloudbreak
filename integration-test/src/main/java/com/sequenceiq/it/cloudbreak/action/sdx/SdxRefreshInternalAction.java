@@ -20,7 +20,7 @@ public class SdxRefreshInternalAction implements Action<SdxInternalTestDto, SdxC
         testDto.setResponse(
                 client.getDefaultClient(testContext).sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet())
         );
-        Log.whenJson(LOGGER, " SDX Internal get detail response: ", testDto.getResponse());
+        Log.whenJson(LOGGER, " Data Lake Internal get detail response: ", testDto.getResponse());
         return testDto;
     }
 }

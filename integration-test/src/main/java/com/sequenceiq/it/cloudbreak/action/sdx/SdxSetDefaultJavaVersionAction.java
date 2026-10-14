@@ -29,7 +29,7 @@ public class SdxSetDefaultJavaVersionAction implements Action<SdxInternalTestDto
         setDefaultJavaVersionAction.setRestartCM(restartCM);
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().setDefaultJavaVersionByName(testDto.getName(),
                 setDefaultJavaVersionAction);
-        testDto.setFlow("SDX set default Java version to " + defaultJavaVersion, flowIdentifier);
+        testDto.setFlow("Data Lake set default Java version to " + defaultJavaVersion, flowIdentifier);
         return testDto;
     }
 }

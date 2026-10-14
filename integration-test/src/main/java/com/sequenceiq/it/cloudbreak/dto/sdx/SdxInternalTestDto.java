@@ -217,7 +217,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withCloudStorage() {
         SdxCloudStorageTestDto cloudStorage = getCloudProvider().cloudStorage(given(SdxCloudStorageTestDto.class));
         if (cloudStorage == null) {
-            throw new IllegalArgumentException("SDX Cloud Storage does not exist!");
+            throw new IllegalArgumentException("Data Lake Cloud Storage does not exist!");
         }
         return withCloudStorage(cloudStorage.getRequest());
     }
@@ -344,7 +344,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withEnvironment() {
         EnvironmentTestDto environment = getTestContext().get(EnvironmentTestDto.class);
         if (environment == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Sdx: '%s' response!", getName()));
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Data Lake: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
     }
@@ -352,7 +352,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withEnvironmentKey(RunningParameter key) {
         EnvironmentTestDto environment = getTestContext().get(key.getKey());
         if (environment == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Sdx: '%s' response!", getName()));
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Data Lake: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
     }
@@ -513,7 +513,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Override
     public CloudbreakTestDto refresh() {
-        LOGGER.info("Refresh SDX Internal with name: {}", getName());
+        LOGGER.info("Refresh Data Lake Internal with name: {}", getName());
         return when(sdxTestClient.refreshInternal(), key("refresh-sdx-" + getName()).withSkipOnFail(false).withLogError(false));
     }
 
@@ -575,7 +575,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                     new TypeReference<>() {
                     });
         } catch (JSONException | IOException e) {
-            LOGGER.warn("Cannot get or fetch Authentication from SDX template (going further with Cloud Provider defaults): {}", templateJson, e);
+            LOGGER.warn("Cannot get or fetch Authentication from Data Lake template (going further with Cloud Provider defaults): {}", templateJson, e);
             return getCloudProvider().stackAuthentication(authentication);
         }
 
@@ -622,7 +622,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxRepairRequest getSdxRepairRequest(String... hostGroups) {
         SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class).withHostGroupNames(Arrays.asList(hostGroups)));
         if (repair == null) {
-            throw new IllegalArgumentException("SDX Repair does not exist!");
+            throw new IllegalArgumentException("Data Lake Repair does not exist!");
         }
         return repair.getRequest();
     }
@@ -630,7 +630,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxUpgradeRequest getSdxUpgradeRequest() {
         SdxUpgradeTestDto upgrade = given(SdxUpgradeTestDto.class);
         if (upgrade == null) {
-            throw new IllegalArgumentException("SDX Upgrade does not exist!");
+            throw new IllegalArgumentException("Data Lake Upgrade does not exist!");
         }
         return upgrade.getRequest();
     }
@@ -638,7 +638,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxClusterResizeRequest getSdxResizeRequest() {
         SdxResizeTestDto resize = given(SdxResizeTestDto.class);
         if (resize == null) {
-            throw new IllegalArgumentException("SDX Resize does not exist!");
+            throw new IllegalArgumentException("Data Lake Resize does not exist!");
         }
         return resize.getRequest();
     }
@@ -646,7 +646,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxRecoveryRequest getSdxRecoveryRequest() {
         SdxRecoveryTestDto recovery = given(SdxRecoveryTestDto.class);
         if (recovery == null) {
-            throw new IllegalArgumentException("SDX Recovery does not exist!");
+            throw new IllegalArgumentException("Data Lake Recovery does not exist!");
         }
         return recovery.getRequest();
     }
@@ -691,7 +691,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                     .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
             logCollectorUtil.collectLogFiles(stackResponse.getStatusReason(), ipAddresses);
         } catch (Exception e) {
-            LOGGER.warn("Failed to collect datalake log files for investigation.", e);
+            LOGGER.warn("Failed to collect Data Lake log files for investigation.", e);
         }
     }
 
@@ -707,10 +707,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public void deleteForCleanup() {
         try {
-            setFlow("SDX Internal deletion", getClientForCleanup().getDefaultClient(getTestContext()).sdxEndpoint().deleteByCrn(getCrn(), true));
+            setFlow("Data Lake Internal deletion", getClientForCleanup().getDefaultClient(getTestContext()).sdxEndpoint().deleteByCrn(getCrn(), true));
             awaitForFlow();
         } catch (NotFoundException nfe) {
-            LOGGER.info("SDX Internal resource not found, thus cleanup not needed.");
+            LOGGER.info("Data Lake Internal resource not found, thus cleanup not needed.");
         }
     }
 
@@ -776,10 +776,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .filter(ig -> ig.getName().equals(hostGroupName))
                 .findFirst();
         if (instanceGroupV4Response.isEmpty()) {
-            LOGGER.error("There is no valid '{}' group for SDX based on the StackV4Response, check test logs for possible failures.", hostGroupName);
+            LOGGER.error("There is no valid '{}' group for Data Lake based on the StackV4Response, check test logs for possible failures.", hostGroupName);
             return Set.of();
         } else if (CollectionUtils.isEmpty(instanceGroupV4Response.get().getMetadata())) {
-            LOGGER.error("There is no valid metadata for '{}' group of SDX based on the StackV4Response, check test logs for possible failures.",
+            LOGGER.error("There is no valid metadata for '{}' group of Data Lake based on the StackV4Response, check test logs for possible failures.",
                     hostGroupName);
             return Set.of();
         } else {

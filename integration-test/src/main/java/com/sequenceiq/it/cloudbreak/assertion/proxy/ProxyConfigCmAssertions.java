@@ -32,7 +32,7 @@ class ProxyConfigCmAssertions {
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeCmNoProxySettings() {
         return (testContext, testDto, client) -> {
-            LOGGER.info("Validating {} datalake's CM has no proxy settings", testDto.getCrn());
+            LOGGER.info("Validating {} Data Lake's CM has no proxy settings", testDto.getCrn());
             Map<String, String> expectedConfig = getEmptyExpectedConfig();
             clouderaManagerUtil.checkConfig(testDto, testContext, expectedConfig);
             return testDto;
@@ -50,7 +50,7 @@ class ProxyConfigCmAssertions {
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeCmProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            LOGGER.info("Validating {} datalake's CM has correct proxy settings {}", testDto.getCrn(), proxy.getName());
+            LOGGER.info("Validating {} Data Lake's CM has correct proxy settings {}", testDto.getCrn(), proxy.getName());
             Map<String, String> expectedConfig = getExpectedConfig(proxy);
             clouderaManagerUtil.checkConfig(testDto, testContext, expectedConfig);
             return testDto;

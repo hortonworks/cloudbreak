@@ -42,7 +42,7 @@ public class SdxAzureMultiAzVerticalScaleTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX MultiAz cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake MultiAz cluster in available state",
             when = "a valid MultiAz stack vertical scale request is sent",
             then = "the MultiAz stack should be vertically scaled with the new instance type and the cluster should be up and running"
     )

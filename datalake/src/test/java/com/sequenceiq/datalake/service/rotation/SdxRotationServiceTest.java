@@ -325,7 +325,7 @@ class SdxRotationServiceTest {
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
                 () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
-        assertEquals("No database server found for sdx cluster " + RESOURCE_CRN, runtimeException.getMessage());
+        assertEquals("No database server found for Data Lake cluster " + RESOURCE_CRN, runtimeException.getMessage());
     }
 
     @Test
@@ -367,7 +367,7 @@ class SdxRotationServiceTest {
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
                 () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(EXTERNAL_DATABASE_ROOT_PASSWORD.name()), null, null));
-        assertEquals("SDX cluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
+        assertEquals("Data Lake cluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
         verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(EXTERNAL_DATABASE_ROOT_PASSWORD)), isNull());
     }
 
@@ -397,7 +397,7 @@ class SdxRotationServiceTest {
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.preValidateRedbeamsRotation(RESOURCE_CRN));
-        assertEquals("No database server found for sdx cluster, rotation is not possible.", secretRotationException.getMessage());
+        assertEquals("No database server found for Data Lake cluster, rotation is not possible.", secretRotationException.getMessage());
         verify(redbeamsFlowService, never()).getLastFlowId(anyString());
     }
 

@@ -98,7 +98,7 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
 
     @Override
     public String getDisplayName() {
-        return "Create SDX";
+        return "Create Data Lake";
     }
 
     @Override

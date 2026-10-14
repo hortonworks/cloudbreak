@@ -35,13 +35,13 @@ public class SdxEventsHelper {
     private SdxService sdxService;
 
     public void ensureNonDeletedNonDetachedDatalakeExists(String environmentCrn) {
-        LOGGER.info("Looking for data lake associated with environment Crn {}", environmentCrn);
+        LOGGER.info("Looking for Data Lake associated with environment Crn {}", environmentCrn);
         List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(environmentCrn);
-        sdxClusters.forEach(sdxCluster -> LOGGER.info("Found SDX cluster {}", sdxCluster));
+        sdxClusters.forEach(sdxCluster -> LOGGER.info("Found Data Lake cluster {}", sdxCluster));
         if (sdxClusters.isEmpty()) {
             LOGGER.info("Data Lake not found for environment with Crn:{}", environmentCrn);
             throw new NotFoundException(
-                    "No non-deleted and non-detached data lake found for environment with Crn:" + environmentCrn
+                    "No non-deleted and non-detached Data Lake found for environment with Crn:" + environmentCrn
             );
         }
     }

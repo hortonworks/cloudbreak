@@ -79,6 +79,6 @@ class SaltServiceTest {
         BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest.updateSalt(sdxCluster));
 
         verifyNoInteractions(sdxReactorFlowManager);
-        assertEquals(String.format("SaltStack update cannot be initiated as datalake 'test-sdx-cluster' is currently in '%s' state.", status), ex.getMessage());
+        assertEquals(String.format("SaltStack update cannot be initiated as Data Lake 'test-sdx-cluster' is currently in '%s' state.", status), ex.getMessage());
     }
 }

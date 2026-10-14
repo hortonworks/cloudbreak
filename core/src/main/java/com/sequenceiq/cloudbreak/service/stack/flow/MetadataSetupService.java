@@ -413,11 +413,11 @@ public class MetadataSetupService {
                     /* Starts to check for a situation where we are resizing a datalake that did not previously have loadbalancers
                         so that we can use the same endpoint name for a seamless transition
                      */
-                    LOGGER.info("Using old datalake endpoint name for resized datalake: {}, env: {}", stack.getName(), stack.getEnvironmentCrn());
+                    LOGGER.info("Using old Data Lake endpoint name for resized Data Lake: {}, env: {}", stack.getName(), stack.getEnvironmentCrn());
                     if (stoppedDatalakes.size() > 1) {
                         String ids = stoppedDatalakes.stream().map(stackStatus -> stackStatus.getStack().getId())
                                 .map(Object::toString).collect(Collectors.joining(","));
-                        LOGGER.warn("more than one datalake found to resize from: {}", ids);
+                        LOGGER.warn("more than one Data Lake found to resize from: {}", ids);
                     }
                     Long oldId = stoppedDatalakes.getFirst().getStack().getId();
                     Set<LoadBalancer> oldLoadBalancers = loadBalancerPersistenceService.findByStackId(oldId);

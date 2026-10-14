@@ -62,7 +62,7 @@ public class DistroXAwsMultiAzRepairTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "valid MultiAz Datahub is provisioned, worker nodes scaled up and scaled down",
             then = "the MultiAz Datahub should be available and nodes should be distributed correctly across multiple AZs after each operation")
     public void testDistroXAwsMultiAzProvisionAndRepair(TestContext testContext, ITestContext iTestContext) {

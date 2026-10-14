@@ -46,7 +46,7 @@ public class DatalakeKraftMigrationWaitHandler extends ExceptionCatcherEventHand
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DatalakeKraftMigrationWaitRequest> event) {
-        LOGGER.error("ZooKeeper to KRaft migration polling failed unexpectedly for DataLake id {}", resourceId, e);
+        LOGGER.error("ZooKeeper to KRaft migration polling failed unexpectedly for Data Lake id {}", resourceId, e);
         return new DatalakeKraftMigrationFailedEvent(resourceId, event.getData().getUserId(), e);
     }
 
@@ -55,20 +55,20 @@ public class DatalakeKraftMigrationWaitHandler extends ExceptionCatcherEventHand
         Long sdxId = event.getData().getResourceId();
         String userId = event.getData().getUserId();
         try {
-            LOGGER.info("Start polling ZooKeeper to KRaft migration on Cloudbreak for DataLake id {}", sdxId);
+            LOGGER.info("Start polling ZooKeeper to KRaft migration on Cloudbreak for Data Lake id {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
             sdxWaitService.waitForCloudbreakFlow(sdxId, pollingConfig, "ZooKeeper to KRaft migration");
             return new SdxEvent(DATALAKE_KRAFT_MIGRATION_SUCCESS_EVENT.event(), sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("ZooKeeper to KRaft migration polling exited before timeout for DataLake id {}", sdxId, userBreakException);
+            LOGGER.error("ZooKeeper to KRaft migration polling exited before timeout for Data Lake id {}", sdxId, userBreakException);
             return new DatalakeKraftMigrationFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("ZooKeeper to KRaft migration poller stopped for DataLake id {}", sdxId);
+            LOGGER.error("ZooKeeper to KRaft migration poller stopped for Data Lake id {}", sdxId);
             return new DatalakeKraftMigrationFailedEvent(sdxId, userId,
                     new PollerStoppedException("ZooKeeper to KRaft migration timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException pollerException) {
-            LOGGER.error("ZooKeeper to KRaft migration polling failed for DataLake id {}", sdxId);
+            LOGGER.error("ZooKeeper to KRaft migration polling failed for Data Lake id {}", sdxId);
             return new DatalakeKraftMigrationFailedEvent(sdxId, userId, pollerException);
         }
     }

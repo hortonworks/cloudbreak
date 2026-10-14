@@ -37,7 +37,7 @@ public class ImageCatalogChangeTest extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "a running Freeipa/Datalake/Datahub",
+            given = "a running Freeipa/Data Lake/Data Hub",
             when = "calling change image catalog",
             then = "it should have new image catalog")
     public void testFreeipaImageCatalogChange(MockedTestContext testContext) {
@@ -72,7 +72,7 @@ public class ImageCatalogChangeTest extends AbstractMockTest {
                 .then((testContext1, testDto, client) -> {
                     final String actualCatalog = testDto.getResponse().getStackV4Response().getImage().getCatalogName();
                     if (!sdxNewImageCatalogName.equals(actualCatalog)) {
-                        throw new TestFailException(String.format("Image catalog of Datalake was not changed. Catalog : %s", actualCatalog));
+                        throw new TestFailException(String.format("Image catalog of Data Lake was not changed. Catalog : %s", actualCatalog));
                     }
                     return testDto;
                 });

@@ -35,7 +35,7 @@ public class DatalakeAddVolumesActions {
         return new AbstractSdxAction<>(DatalakeAddVolumesEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeAddVolumesEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Starting Datalake Add Volumes flow.");
+                LOGGER.debug("Starting Data Lake Add Volumes flow.");
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_ADD_VOLUMES_IN_PROGRESS,
                         String.format("Calling core services to trigger add volumes flow for group of %s on the Data Lake.",
                                 payload.getStackAddVolumesRequest().getInstanceGroup()), payload.getResourceId());
@@ -76,8 +76,8 @@ public class DatalakeAddVolumesActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeAddVolumesFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.warn("Failed to add volumes in DataLake.", exception);
-                String statusReason = "Datalake add volumes on stack failed";
+                LOGGER.warn("Failed to add volumes in Data Lake.", exception);
+                String statusReason = "Data Lake add volumes on stack failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }

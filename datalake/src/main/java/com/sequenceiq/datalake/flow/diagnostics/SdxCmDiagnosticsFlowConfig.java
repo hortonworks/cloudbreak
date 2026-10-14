@@ -77,7 +77,7 @@ public class SdxCmDiagnosticsFlowConfig extends AbstractFlowConfiguration<SdxCmD
 
     @Override
     public String getDisplayName() {
-        return "Collect CM based diagnostics for SDX cluster";
+        return "Collect CM based diagnostics for Data Lake cluster";
     }
 
     @Override

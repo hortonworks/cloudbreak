@@ -57,7 +57,7 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running environment ",
-            when = "create a SDX and DataHub clusters with forcing all supported java versions ",
+            when = "create a Data Lake and DataHub clusters with forcing all supported java versions ",
             then = "clusters are available and default java version is the forced one on all instances ")
     public void testClusterProvisionWithForcedJavaVersion(TestContext testContext) {
         Integer sdxJavaVersion = supportedJavaVersions.getFirst();

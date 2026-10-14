@@ -67,7 +67,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an env with freeipa, sdx and dh",
+            when = "create an env with freeipa, Data Lake and dh",
             then = "these should be available")
     public void testCreateEnvironment(MockedTestContext testContext) {
         testContext
@@ -95,7 +95,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an attached SDX and Datahub",
+            when = "create an attached Data Lake and Datahub",
             then = "should be stopped first and started after it and validate the flow events")
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
         testContext

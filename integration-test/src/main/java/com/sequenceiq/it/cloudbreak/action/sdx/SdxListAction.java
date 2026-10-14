@@ -16,13 +16,13 @@ public class SdxListAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+        Log.when(LOGGER, " Data Lake endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", Data Lake's environment: "
                 + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX list request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " Data Lake list request: ", testDto.getRequest());
         client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .list(testDto.getName(), false);
-        Log.whenJson(LOGGER, " SDX list response: ", client.getDefaultClient(testContext)
+        Log.whenJson(LOGGER, " Data Lake list response: ", client.getDefaultClient(testContext)
                 .sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName(), false));
         return testDto;
     }

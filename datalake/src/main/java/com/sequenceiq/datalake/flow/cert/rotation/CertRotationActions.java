@@ -113,7 +113,7 @@ public class CertRotationActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCertRotationFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Cert rotation failed for datalake", payload.getException());
+                LOGGER.error("Cert rotation failed for Data Lake", payload.getException());
                 certRotationService.handleFailure(payload.getResourceId(), payload.getException());
                 sendEvent(context, SdxCertRotationEvent.CERT_ROTATION_FAILURE_HANDLED_EVENT.event(), payload);
             }

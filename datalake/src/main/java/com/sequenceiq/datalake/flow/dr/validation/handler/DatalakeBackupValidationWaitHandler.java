@@ -57,7 +57,7 @@ public class DatalakeBackupValidationWaitHandler extends ExceptionCatcherEventHa
         String userId = request.getUserId();
         Selectable response;
         try {
-            LOGGER.info("Start polling datalake full backup status for id: {}", sdxId);
+            LOGGER.info("Start polling Data Lake full backup status for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes,
                 TimeUnit.MINUTES);
             sdxBackupRestoreService.waitForDatalakeDrBackupToComplete(sdxId, request.getOperationId(), request.getUserId(),
@@ -69,12 +69,12 @@ public class DatalakeBackupValidationWaitHandler extends ExceptionCatcherEventHa
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Backup validation poller timed out for cluster: {}", sdxId);
             response = new DatalakeBackupValidationFailedEvent(sdxId, userId,
-                new PollerStoppedException("Datalake backup validation timed out after " + durationInMinutes + " minutes"));
+                new PollerStoppedException("Data Lake backup validation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Backup validation polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupValidationFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakServiceException exception) {
-            LOGGER.info("Datalake backup validation failed. Reason: " + exception.getMessage());
+            LOGGER.info("Data Lake backup validation failed. Reason: " + exception.getMessage());
             response = new DatalakeBackupValidationFailedEvent(sdxId, userId, exception);
         }
         return response;

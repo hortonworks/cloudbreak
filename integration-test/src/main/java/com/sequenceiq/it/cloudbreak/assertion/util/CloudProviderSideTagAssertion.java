@@ -88,7 +88,7 @@ public class CloudProviderSideTagAssertion {
                     .map(InstanceMetaDataV4Response::getInstanceId)
                     .collect(Collectors.toList());
 
-            LOGGER.info(" TAG VALIDATION:\n SDX: {}\n instance IDs: {}.\n", testDto.getName(), instanceIds);
+            LOGGER.info(" TAG VALIDATION:\n Data Lake: {}\n instance IDs: {}.\n", testDto.getName(), instanceIds);
             verifyTags(instanceIds, customTags, testContext, testDto.getName());
 
             return testDto;

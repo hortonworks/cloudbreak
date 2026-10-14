@@ -78,7 +78,7 @@ public class EnvironmentCrossRealmTrustCancelSaltUpdateHandler extends Exception
         LOGGER.debug("In EnvironmentCrossRealmTrustCancelSaltUpdateHandler.accept");
         EnvironmentCrossRealmTrustCancelEvent data = event.getData();
         try {
-            LOGGER.info("Cross Realm Trust cancel: running salt update on datalakes for environment: {}", data.getResourceCrn());
+            LOGGER.info("Cross Realm Trust cancel: running salt update on Data Lakes for environment: {}", data.getResourceCrn());
             sdxPollerService.updateSaltOnAttachedDatalakeClusters(data.getResourceId(), data.getResourceName());
 
             LOGGER.info("Cross Realm Trust cancel: running salt update on datahub stacks to remove trust.conf for environment: {}", data.getResourceCrn());

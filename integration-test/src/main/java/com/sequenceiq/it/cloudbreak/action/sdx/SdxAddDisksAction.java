@@ -39,9 +39,9 @@ public class SdxAddDisksAction implements Action<SdxInternalTestDto, SdxClient> 
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+        Log.when(LOGGER, " Data Lake endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", Data Lake's environment: "
                 + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX add volumes request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " Data Lake add volumes request: ", testDto.getRequest());
         StackAddVolumesRequest addVolumesRequest = new StackAddVolumesRequest();
         addVolumesRequest.setType(volumeType);
         addVolumesRequest.setSize(size);
@@ -52,12 +52,12 @@ public class SdxAddDisksAction implements Action<SdxInternalTestDto, SdxClient> 
                 .sdxEndpoint()
                 .addVolumesByStackName(testDto.getResponse().getStackV4Response().getName(), addVolumesRequest);
         testDto.setFlow("SdxAddVolumes", flowIdentifier);
-        Log.whenJson(LOGGER, " SDX Add Volumes Flow: ", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()));
+        Log.whenJson(LOGGER, " Data Lake Add Volumes Flow: ", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()));
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX Add Volumes response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake Add Volumes response: ", detailedResponse);
         return testDto;
     }
 }

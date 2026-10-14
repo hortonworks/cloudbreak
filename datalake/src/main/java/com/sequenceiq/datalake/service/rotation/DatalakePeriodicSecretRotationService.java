@@ -57,7 +57,7 @@ public class DatalakePeriodicSecretRotationService implements PeriodicSecretRota
         SdxStatusEntity sdxStatusEntity = sdxStatusRepository.findFirstByDatalakeIdIsOrderByIdDesc(sdxCluster.getId());
         if (sdxStatusEntity == null) {
             throw new NotFoundException(
-                String.format("Datalake stack status with resource crn [%s] not found", resourceCrn));
+                String.format("Data Lake stack status with resource crn [%s] not found", resourceCrn));
         }
         return !flowLogService.isOtherFlowRunning(sdxCluster.getId())
             && DatalakeStatusEnum.RUNNING.equals(sdxStatusEntity.getStatus());
@@ -86,13 +86,13 @@ public class DatalakePeriodicSecretRotationService implements PeriodicSecretRota
     public SdxCluster getResourceByCrn(String resourceCrn) {
         return sdxClusterRepository.findByCrnAndDeletedIsNull(resourceCrn)
             .orElseThrow(() -> new NotFoundException(
-                String.format("Datalake stack with resource crn [%s] not found or deleted", resourceCrn)));
+                String.format("Data Lake stack with resource crn [%s] not found or deleted", resourceCrn)));
     }
 
     @Override
     public Instant getResourceCreationDate(String resourceCrn) {
         Optional<Long> created = sdxClusterRepository.getCreatedByResourceCrn(resourceCrn);
         return Instant.ofEpochMilli(created.orElseThrow(() -> new NotFoundException(
-            String.format("Datalake stack with resource crn [%s] not found or deleted", resourceCrn))));
+            String.format("Data Lake stack with resource crn [%s] not found or deleted", resourceCrn))));
     }
 }

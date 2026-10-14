@@ -297,7 +297,7 @@ class DiagnosticsFlowServiceTest {
         verifyNoInteractions(usageReporter);
     }
 
-    @DisplayName("11. Datalake stack type -> usage still reported (clusterType difference is internal)")
+    @DisplayName("11. Data Lake stack type -> usage still reported (clusterType difference is internal)")
     @Test
     void datalakeStackTypeAlsoReportsUsage() throws Exception {
         when(stack.getType()).thenReturn(StackType.DATALAKE);

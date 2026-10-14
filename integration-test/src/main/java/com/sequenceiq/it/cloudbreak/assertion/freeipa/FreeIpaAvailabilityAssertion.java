@@ -179,7 +179,7 @@ public class FreeIpaAvailabilityAssertion {
                 }
                 for (String serverIp : describeFreeIpaResponse.getFreeIpa().getServerIp()) {
                     if (!value.getRight().trim().contains(serverIp)) {
-                        throw new TestFailException(String.format("Loadbalancer fqdn %s does not match with freeIpa fqdn: %s on Sdx.",
+                        throw new TestFailException(String.format("Loadbalancer fqdn %s does not match with freeIpa fqdn: %s on Data Lake.",
                                 value.getRight(),
                                 serverIp));
                     }

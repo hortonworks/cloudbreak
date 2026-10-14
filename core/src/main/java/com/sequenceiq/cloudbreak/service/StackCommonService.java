@@ -458,10 +458,10 @@ public class StackCommonService {
     private void validateStackIsNotDataLake(StackView stack, Set<String> instanceIds) {
         if (StackType.DATALAKE.equals(stack.getType())) {
             if (instanceIds.size() == 1) {
-                throw new BadRequestException(String.format("%s is a node of a data lake cluster, therefore it's not allowed to delete/stop it.",
+                throw new BadRequestException(String.format("%s is a node of a Data Lake cluster, therefore it's not allowed to delete/stop it.",
                         List.copyOf(instanceIds).get(0)));
             } else {
-                throw new BadRequestException(String.format("%s are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.",
+                throw new BadRequestException(String.format("%s are nodes of a Data Lake cluster, therefore it's not allowed to delete/stop them.",
                         String.join(", ", instanceIds)));
             }
         }

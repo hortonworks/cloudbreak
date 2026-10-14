@@ -12,11 +12,11 @@ public class PdlSdxStartStopService extends AbstractPdlSdxService implements Pla
 
     @Override
     public void startSdx(String sdxCrn) {
-        LOGGER.info(String.format("datalake with CRN %s is private so should not be started", sdxCrn));
+        LOGGER.info(String.format("Data Lake with CRN %s is private so should not be started", sdxCrn));
     }
 
     @Override
     public void stopSdx(String sdxCrn) {
-        LOGGER.info(String.format("datalake with CRN %s is private so should not be stopped", sdxCrn));
+        LOGGER.info(String.format("Data Lake with CRN %s is private so should not be stopped", sdxCrn));
     }
 }

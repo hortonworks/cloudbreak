@@ -61,7 +61,7 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
             String imageId = upgradeService.getImageId(sdxId);
             String expectedImageId = request.getUpgradeOption().getUpgrade().getImageId();
             if (Objects.equals(imageId, expectedImageId)) {
-                LOGGER.info("Image changed in cloudbreak side for SDX {}, actual image: {}", sdxId, imageId);
+                LOGGER.info("Image changed in cloudbreak side for Data Lake {}, actual image: {}", sdxId, imageId);
                 response = new DatalakeVmReplaceEvent(sdxId, userId);
             } else {
                 String message = String.format("Image not changed in cloudbreak side, expected image: %s, actual image: %s", expectedImageId, imageId);

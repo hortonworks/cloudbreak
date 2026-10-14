@@ -50,14 +50,14 @@ public class PaasSdxStartStopService extends AbstractPaasSdxService implements P
     public void startSdx(String sdxCrn) {
         SdxClusterResponse sdx = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.getByCrn(sdxCrn));
         if (SKIP_START_OPERATION.contains(sdx.getStatus())) {
-            LOGGER.info("No need to call start for SDX {} as it is already running or starting.", sdxCrn);
+            LOGGER.info("No need to call start for Data Lake {} as it is already running or starting.", sdxCrn);
             return;
         }
 
-        LOGGER.info("Calling start for SDX PaaS cluster {}", sdxCrn);
+        LOGGER.info("Calling start for Data Lake PaaS cluster {}", sdxCrn);
         FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.startByCrn(sdxCrn));
 
-        LOGGER.info("Polling start for SDX PaaS cluster {}", sdxCrn);
+        LOGGER.info("Polling start for Data Lake PaaS cluster {}", sdxCrn);
         pollOperation(() -> flowPollingService.pollFlowIdAndReturnAttemptResult(flowId));
     }
 
@@ -65,14 +65,14 @@ public class PaasSdxStartStopService extends AbstractPaasSdxService implements P
     public void stopSdx(String sdxCrn) {
         SdxClusterResponse sdx = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.getByCrn(sdxCrn));
         if (SKIP_STOP_OPERATION.contains(sdx.getStatus())) {
-            LOGGER.info("No need to call stop for SDX {} as it is already stopped or stopping.", sdxCrn);
+            LOGGER.info("No need to call stop for Data Lake {} as it is already stopped or stopping.", sdxCrn);
             return;
         }
 
-        LOGGER.info("Calling stop for SDX PaaS cluster {}", sdxCrn);
+        LOGGER.info("Calling stop for Data Lake PaaS cluster {}", sdxCrn);
         FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.stopByCrn(sdxCrn));
 
-        LOGGER.info("Polling stop for SDX PaaS cluster {}", sdxCrn);
+        LOGGER.info("Polling stop for Data Lake PaaS cluster {}", sdxCrn);
         pollOperation(() -> flowPollingService.pollFlowIdAndReturnAttemptResult(flowId));
     }
 
@@ -83,8 +83,8 @@ public class PaasSdxStartStopService extends AbstractPaasSdxService implements P
                     .waitPeriodly(pollSleepTime, TimeUnit.SECONDS)
                     .run(pollingAttempt);
         } catch (PollerStoppedException e) {
-            LOGGER.error("Polling for datalake start/stop timed out", e);
-            throw new RuntimeException("Datalake start/stop timed out", e);
+            LOGGER.error("Polling for Data Lake start/stop timed out", e);
+            throw new RuntimeException("Data Lake start/stop timed out", e);
         }
     }
 }

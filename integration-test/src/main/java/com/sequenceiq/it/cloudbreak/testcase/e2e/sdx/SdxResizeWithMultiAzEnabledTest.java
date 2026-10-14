@@ -33,9 +33,9 @@ public class SdxResizeWithMultiAzEnabledTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is an available environment with a running SDX cluster (CUSTOM shape, single-az)",
-            when = "resize is called on the SDX cluster (target shape: ENTERPRISE multi-az )",
-            then = "SDX resize should be successful, the new cluster should be up and running"
+            given = "there is an available environment with a running Data Lake cluster (CUSTOM shape, single-az)",
+            when = "resize is called on the Data Lake cluster (target shape: ENTERPRISE multi-az )",
+            then = "Data Lake resize should be successful, the new cluster should be up and running"
     )
     public void testSdxResizeWithMultiAzEnabled(TestContext testContext) {
         String sdxKey = resourcePropertyProvider().getName();

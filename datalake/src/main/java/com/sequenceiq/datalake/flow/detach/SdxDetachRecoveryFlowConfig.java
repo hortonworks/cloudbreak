@@ -57,7 +57,7 @@ public class SdxDetachRecoveryFlowConfig extends AbstractFlowConfiguration<SdxDe
 
     @Override
     public String getDisplayName() {
-        return "Sdx detach recovery";
+        return "Data Lake detach recovery";
     }
 
     @Override

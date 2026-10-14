@@ -44,8 +44,8 @@ public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak ",
-            when = "creating an SDX with 100% spot percentage ",
-            then = "SDX is started on spot instances, or fails with insufficient spot capacity"
+            when = "creating a Data Lake with 100% spot percentage ",
+            then = "Data Lake is started on spot instances, or fails with insufficient spot capacity"
     )
     public void testSdxOnSpotInstances(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();

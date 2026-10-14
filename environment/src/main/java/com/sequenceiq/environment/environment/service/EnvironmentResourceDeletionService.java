@@ -65,13 +65,13 @@ public class EnvironmentResourceDeletionService {
 
     public Set<String> getAttachedSdxClusterCrns(EnvironmentView environment) {
         Set<String> clusterCrns = new HashSet<>();
-        LOGGER.debug("Get SDX clusters of the environment: '{}'", environment.getName());
+        LOGGER.debug("Get Data Lake clusters of the environment: '{}'", environment.getName());
         try {
             clusterCrns = platformAwareSdxConnector.listSdxCrns(environment.getResourceCrn());
         } catch (WebApplicationException e) {
-            propagateException("Failed to get SDX clusters from SDX service due to:", e);
+            propagateException("Failed to get Data Lake clusters from Data Lake service due to:", e);
         } catch (ProcessingException e) {
-            propagateException("Failed to get SDX clusters from SDX service due to:", e);
+            propagateException("Failed to get Data Lake clusters from Data Lake service due to:", e);
         }
         return clusterCrns;
     }
@@ -88,7 +88,7 @@ public class EnvironmentResourceDeletionService {
 
     public Set<String> getDatalakeClusterNames(EnvironmentView environment) {
         Set<String> clusterNames = new HashSet<>();
-        LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
+        LOGGER.debug("Get Data Lake clusters of the environment: '{}'", environment.getName());
         try {
             Set<String> datalakeClusterNames = doAsInternalActor(
                     () -> datalakeV4Endpoint
@@ -99,9 +99,9 @@ public class EnvironmentResourceDeletionService {
                             .collect(Collectors.toSet()));
             clusterNames.addAll(datalakeClusterNames);
         } catch (WebApplicationException e) {
-            propagateException("Failed to get Datalake clusters from Cloudbreak service due to:", e);
+            propagateException("Failed to get Data Lake clusters from Cloudbreak service due to:", e);
         } catch (ProcessingException e) {
-            propagateException("Failed to get Datalake clusters from Cloudbreak service due to:", e);
+            propagateException("Failed to get Data Lake clusters from Cloudbreak service due to:", e);
         }
         return clusterNames;
     }

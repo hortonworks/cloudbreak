@@ -46,15 +46,15 @@ public class DatalakeUpdatePublicDnsEntriesFlowActions {
         return new AbstractSdxAction<>(DatalakeUpdatePublicDnsEntriesTriggerEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpdatePublicDnsEntriesTriggerEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Initiating the process to update public DNS entries for the Datalake.");
+                LOGGER.info("Initiating the process to update public DNS entries for the Data Lake.");
                 WaitDatalakeUpdateDnsEntriesRequest waitDatalakeUpdateDnsEntriesRequest = new WaitDatalakeUpdateDnsEntriesRequest(payload.getResourceId(),
                         context.getUserId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_IN_PROGRESS,
-                        "Initiating the process to update public DNS entries for the Datalake",
+                        "Initiating the process to update public DNS entries for the Data Lake",
                         context.getSdxId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 cloudbreakStackService.updatePublicDnsEntries(sdxCluster);
-                LOGGER.info("Successfully initiated the process to update public DNS entries for the Datalake with payload: {}", payload);
+                LOGGER.info("Successfully initiated the process to update public DNS entries for the Data Lake with payload: {}", payload);
                 sendEvent(context, waitDatalakeUpdateDnsEntriesRequest);
             }
 
@@ -71,9 +71,9 @@ public class DatalakeUpdatePublicDnsEntriesFlowActions {
         return new AbstractSdxAction<>(WaitDatalakeUpdateDnsEntriesResponse.class) {
             @Override
             protected void doExecute(SdxContext context, WaitDatalakeUpdateDnsEntriesResponse payload, Map<Object, Object> variables) {
-                LOGGER.info("Successfully updated public DNS entries for the Datalake");
+                LOGGER.info("Successfully updated public DNS entries for the Data Lake");
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        "Successfully updated public DNS entries for the Datalake", context.getSdxId());
+                        "Successfully updated public DNS entries for the Data Lake", context.getSdxId());
                 sendEvent(context, new SdxEvent(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FINALIZED_EVENT.event(), context.getSdxId(), context.getUserId()));
             }
 
@@ -95,9 +95,9 @@ public class DatalakeUpdatePublicDnsEntriesFlowActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpdatePublicDnsEntriesFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn("Failed to update public DNS entries for Datalake with error: '{}'", payload.getException().getMessage(), payload.getException());
+                LOGGER.warn("Failed to update public DNS entries for Data Lake with error: '{}'", payload.getException().getMessage(), payload.getException());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FAILED,
-                        Collections.singleton(payload.getException().getMessage()), "Failed to update public DNS entries for Datalake", context.getSdxId());
+                        Collections.singleton(payload.getException().getMessage()), "Failed to update public DNS entries for Data Lake", context.getSdxId());
                 sendEvent(context);
             }
 

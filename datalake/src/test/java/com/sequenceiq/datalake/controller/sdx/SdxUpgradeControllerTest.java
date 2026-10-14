@@ -331,13 +331,13 @@ class SdxUpgradeControllerTest {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         request.setTargetMajorVersion(targetMajorVersion);
 
-        doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
+        doThrow(new NotFoundException("Data Lake cluster 'testCluster' not found."))
                 .when(sdxDatabaseServerUpgradeService).upgrade(eq(NameOrCrn.ofName(CLUSTER_NAME)), eq(targetMajorVersion), eq(false));
 
         NotFoundException exception = doAs(USER_CRN, () -> assertThrows(NotFoundException.class,
                 () -> underTest.upgradeDatabaseServerByName(CLUSTER_NAME, request)));
 
-        assertEquals(exception.getMessage(), "SDX cluster 'testCluster' not found.");
+        assertEquals(exception.getMessage(), "Data Lake cluster 'testCluster' not found.");
     }
 
     @ParameterizedTest

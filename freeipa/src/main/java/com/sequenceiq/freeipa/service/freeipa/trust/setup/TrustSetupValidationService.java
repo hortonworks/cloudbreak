@@ -165,7 +165,7 @@ public class TrustSetupValidationService {
             }
         } catch (RuntimeException e) {
             String message = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("An error occurred during the datalake validation: {}", message, e);
+            LOGGER.error("An error occurred during the Data Lake validation: {}", message, e);
             taskResults.add(new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.datalake.failure"), Map.of()));
         }
         return taskResults;

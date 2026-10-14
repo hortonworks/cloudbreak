@@ -174,7 +174,7 @@ public class RotateRdsCertificateService {
         if (datahubHasAttachedPaasDatalake(datalakeCrn)) {
             StackDto datalakeDto = stackDtoService.getByCrn(datalakeCrn);
             if (clusterHasExternalDatabase(datalakeDto)) {
-                LOGGER.info("Update Datalake's RDS SSL certificate to the latest: '{}/{}'", datalakeDto.getName(), datalakeCrn);
+                LOGGER.info("Update Data Lake's RDS SSL certificate to the latest: '{}/{}'", datalakeDto.getName(), datalakeCrn);
                 Cluster cluster = clusterService.getCluster(datalakeDto.getCluster().getId());
                 externalDatabaseService.updateToLatestSslCert(cluster);
             }

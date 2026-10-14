@@ -131,7 +131,7 @@ import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("SDX service tests")
+@DisplayName("Data Lake service tests")
 class SdxServiceTest {
     private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
 
@@ -406,7 +406,7 @@ class SdxServiceTest {
 
         Assertions.assertThatCode(() -> underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofCrn(ENVIRONMENT_CRN)))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("SDX cluster '" + ENVIRONMENT_CRN + "' not found.");
+                .hasMessage("Data Lake cluster '" + ENVIRONMENT_CRN + "' not found.");
     }
 
     @Test
@@ -416,7 +416,7 @@ class SdxServiceTest {
 
         Assertions.assertThatCode(() -> underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME)))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("SDX cluster '" + CLUSTER_NAME + "' not found.");
+                .hasMessage("Data Lake cluster '" + CLUSTER_NAME + "' not found.");
     }
 
     @Test
@@ -426,7 +426,7 @@ class SdxServiceTest {
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getByNameInAccount(USER_CRN, "sdxcluster"));
 
-        assertEquals("SDX cluster 'sdxcluster' not found.", notFoundException.getMessage());
+        assertEquals("Data Lake cluster 'sdxcluster' not found.", notFoundException.getMessage());
     }
 
     @Test
@@ -588,7 +588,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(any(), any())).thenReturn(sdxClusterOptional);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.syncComponentVersionsFromCm(USER_CRN, crn));
-        assertEquals("Reading CM and parcel versions from CM cannot be initiated as the datalake is in STOPPED state", exception.getMessage());
+        assertEquals("Reading CM and parcel versions from CM cannot be initiated as the Data Lake is in STOPPED state", exception.getMessage());
     }
 
     @Test
@@ -651,7 +651,7 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("SDX cluster exists for environment name: envir", badRequestException.getMessage());
+        assertEquals("Data Lake cluster exists for environment name: envir", badRequestException.getMessage());
     }
 
     @Test
@@ -778,7 +778,7 @@ class SdxServiceTest {
         assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
         assertEquals("envir", capturedSdx.getEnvName());
         assertEquals(ACCOUNT_ID, capturedSdx.getAccountId());
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", createdSdxCluster);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Data Lake requested", createdSdxCluster);
 
         assertEquals(1L, capturedSdx.getCreated());
         assertFalse(capturedSdx.isCreateDatabase());
@@ -1019,7 +1019,7 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
 
-        assertEquals("Custom instance group is not accepted on SDX Internal API.", badRequestException.getMessage());
+        assertEquals("Custom instance group is not accepted on Data Lake Internal API.", badRequestException.getMessage());
     }
 
     @Test

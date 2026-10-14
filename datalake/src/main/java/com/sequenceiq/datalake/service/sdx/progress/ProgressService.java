@@ -29,7 +29,7 @@ public class ProgressService {
         try {
             response.setLastInternalFlowOperation(progressV4Endpoint.getLastFlowLogProgressByResourceCrn(resourceCrn));
         } catch (NotFoundException notFoundException) {
-            LOGGER.debug("Stack for datalake '{}' has not found yet. It is acceptable for progress response.", resourceCrn);
+            LOGGER.debug("Stack for Data Lake '{}' has not found yet. It is acceptable for progress response.", resourceCrn);
         }
         return response;
     }
@@ -40,7 +40,7 @@ public class ProgressService {
         try {
             response.setRecentInternalFlowOperations(progressV4Endpoint.getFlowLogsProgressByResourceCrn(resourceCrn));
         } catch (NotFoundException notFoundException) {
-            LOGGER.debug("Stack for datalake '{}' has not found yet. It is acceptable for progress response.", resourceCrn);
+            LOGGER.debug("Stack for Data Lake '{}' has not found yet. It is acceptable for progress response.", resourceCrn);
         }
         return response;
     }

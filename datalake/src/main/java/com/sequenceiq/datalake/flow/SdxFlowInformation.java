@@ -48,18 +48,18 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
     @Override
     public void handleFlowFail(FlowLog flowLog) {
         SdxCluster sdxCluster = sdxService.getById(flowLog.getResourceId());
-        LOGGER.info("Handling failed SDX flow {} for {}", flowLog, sdxCluster.getName());
+        LOGGER.info("Handling failed Data Lake flow {} for {}", flowLog, sdxCluster.getName());
         SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
-        LOGGER.debug("Sdx status {} while handling flow failure", actualStatusForSdx);
+        LOGGER.debug("Data Lake status {} while handling flow failure", actualStatusForSdx);
         if (actualStatusForSdx != null) {
             DatalakeStatusEnum status = actualStatusForSdx.getStatus();
             if (status != null) {
                 DatalakeStatusEnum failedStatus = status.mapToFailedIfInProgress();
                 try {
-                    sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, "Datalake flow failed", sdxCluster);
+                    sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, "Data Lake flow failed", sdxCluster);
                 } catch (NotFoundException e) {
-                    LOGGER.warn("We tried to handle flow fail, but can't set status to failed because data lake was not found. " +
-                            "Probably another termination flow was terminate this data lake");
+                    LOGGER.warn("We tried to handle flow fail, but can't set status to failed because Data Lake was not found. " +
+                            "Probably another termination flow was terminate this Data Lake");
                 }
             }
         }

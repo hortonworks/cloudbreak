@@ -103,7 +103,7 @@ class DatalakeUpgradePreparationWaitHandlerTest {
         DatalakeUpgradePreparationFailedEvent result =
                 (DatalakeUpgradePreparationFailedEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(datalakeUpgradePreparationWaitRequest)));
 
-        assertEquals("Datalake upgrade preparation timed out after 0 minutes", result.getException().getMessage());
+        assertEquals("Data Lake upgrade preparation timed out after 0 minutes", result.getException().getMessage());
         assertEquals(PollerStoppedException.class, result.getException().getClass());
         assertEquals(SDX_ID, result.getResourceId());
         assertEquals(USER_ID, result.getUserId());

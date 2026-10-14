@@ -75,7 +75,7 @@ public class SdxCmSyncActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 Optional<String> newVersionOpt = sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
-                LOGGER.info("Sdx cm sync updated sdx version, new version: {}", newVersionOpt);
+                LOGGER.info("Data Lake cm sync updated Data Lake version, new version: {}", newVersionOpt);
                 sendEvent(context, SDX_CM_SYNC_FINALIZED_EVENT.event(), payload);
             }
         };
@@ -94,7 +94,7 @@ public class SdxCmSyncActions {
             @Override
             protected void doExecute(SdxContext context, SdxCmSyncFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.info("Sdx cm sync failure, error: ", exception);
+                LOGGER.info("Data Lake cm sync failure, error: ", exception);
                 Optional.ofNullable(exception)
                         .map(Throwable::getMessage)
                         .ifPresent(message -> setStatusForDatalakeAndNotify(payload.getResourceId(), message));

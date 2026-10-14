@@ -35,19 +35,19 @@ public class SdxRestoreInternalAction implements Action<SdxInternalTestDto, SdxC
 
         testContext.waitingFor(Duration.ofMinutes(2), "Waiting for CM services to be synchronized has been interrupted");
 
-        Log.when(LOGGER, format(" Internal SDX '%s' restore has been started to '%s' ", sdxName, backupLocation));
-        Log.whenJson(LOGGER, " Internal SDX restore request: ", testDto.getRequest());
-        LOGGER.info(format(" Internal SDX '%s' restore has been started to '%s'... ", sdxName, backupLocation));
+        Log.when(LOGGER, format(" Internal Data Lake '%s' restore has been started to '%s' ", sdxName, backupLocation));
+        Log.whenJson(LOGGER, " Internal Data Lake restore request: ", testDto.getRequest());
+        LOGGER.info(format(" Internal Data Lake '%s' restore has been started to '%s'... ", sdxName, backupLocation));
         SdxRestoreResponse sdxRestoreResponse = client.getDefaultClient(testContext)
                 .sdxRestoreEndpoint()
                 .restoreDatalakeByName(sdxName, backupId, backupLocation, false, false, false, false,
                         0, false);
-        testDto.setFlow("SDX restore", sdxRestoreResponse.getFlowIdentifier());
+        testDto.setFlow("Data Lake restore", sdxRestoreResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " Internal SDX response after restore: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " Internal Data Lake response after restore: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
         return testDto;
     }
 }

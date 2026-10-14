@@ -242,12 +242,12 @@ public class SdxDatabaseServerUpgradeServiceTest {
     @Test
     void testUpgradeWhenClusterNotExistThenExceptionIsThrown() {
         TargetMajorVersion targetMajorVersion = VERSION11;
-        doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
+        doThrow(new NotFoundException("Data Lake cluster 'testCluster' not found."))
                 .when(sdxService).getByNameOrCrn(any(), eq(NAME_OR_CRN));
 
         Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("SDX cluster 'testCluster' not found.");
+                .hasMessage("Data Lake cluster 'testCluster' not found.");
 
         verify(sdxDatabaseServerUpgradeAvailabilityService, never()).isUpgradeNeeded(any(), any(), eq(false));
         verify(databaseService, never()).getDatabaseServer(any());
@@ -349,7 +349,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         TargetMajorVersion targetMajorVersion = VERSION11;
         SdxCluster sdxCluster = getSdxCluster();
         String expectedCoreMessage = "Upgrading database server is not needed as it is already on the latest version (11).";
-        String mappedSdxMessage = String.format("Database server is already on the latest version for data lake %s", sdxCluster.getName());
+        String mappedSdxMessage = String.format("Database server is already on the latest version for Data Lake %s", sdxCluster.getName());
         when(cloudbreakMessagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
                 List.of(targetMajorVersion.getMajorVersion()))).thenReturn(expectedCoreMessage);
         when(databaseEngineVersionReaderService.getDatabaseServerMajorVersion(sdxCluster)).thenReturn(Optional.of(MajorVersion.VERSION_11));

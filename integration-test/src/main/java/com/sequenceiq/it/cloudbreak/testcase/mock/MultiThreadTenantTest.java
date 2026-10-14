@@ -195,7 +195,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     @Test(dataProvider = TEST_CONTEXT_THREAD)
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an attached SDX and Datahub",
+            when = "create an attached Data Lake and Datahub",
             then = "should not get 404 errors due to thread safe operations")
     public void testParallelMultiTenantStacks(MockedTestContext testContext) {
         testContext

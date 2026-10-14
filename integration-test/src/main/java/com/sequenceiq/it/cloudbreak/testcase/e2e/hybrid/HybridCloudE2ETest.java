@@ -295,20 +295,20 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
         if (sdxInternalTestDto != null && sdxInternalTestDto.getResponse() != null) {
             if (sdxInternalTestDto.getPrivateIpsForLogCollection().isEmpty()) {
-                LOGGER.warn("Error occured while creating SDX stack! So cannot download cluster logs from SDX.");
+                LOGGER.warn("Error occured while creating Data Lake stack! So cannot download cluster logs from Data Lake.");
             } else {
                 try {
                     String environmentCrnSdx = sdxInternalTestDto.getResponse().getEnvironmentCrn();
                     String sdxName = sdxInternalTestDto.getResponse().getName();
-                    LOGGER.info("Downloading YCloud SDX logs...");
+                    LOGGER.info("Downloading YCloud Data Lake logs...");
                     yarnClusterLogs.downloadClusterLogs(environmentCrnSdx, sdxName, sdxInternalTestDto.getPrivateIpsForLogCollection(), "sdx");
-                    LOGGER.info("YCloud SDX logs have been downloaded!");
+                    LOGGER.info("YCloud Data Lake logs have been downloaded!");
                 } catch (Exception sdxError) {
-                    LOGGER.warn("Error occured while downloading SDX logs!", sdxError);
+                    LOGGER.warn("Error occured while downloading Data Lake logs!", sdxError);
                 }
             }
         } else {
-            LOGGER.warn("YCloud Internal SDX TestDTO is not present! So downloading logs is not possible!");
+            LOGGER.warn("YCloud Internal Data Lake TestDTO is not present! So downloading logs is not possible!");
         }
 
         if (distroXTestDto != null && distroXTestDto.getResponse() != null) {

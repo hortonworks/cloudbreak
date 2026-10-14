@@ -30,7 +30,7 @@ public class ModifyProxyConfigFailureAction extends ModifyProxyConfigAction<Modi
 
     @Override
     protected void doExecute(SdxContext context, ModifyProxyConfigFailureResponse payload, Map<Object, Object> variables) throws Exception {
-        LOGGER.info("Modify proxy config failed for SDX stack {}", context.getSdxId());
+        LOGGER.info("Modify proxy config failed for Data Lake stack {}", context.getSdxId());
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_PROXY_CONFIG_MODIFICATION_FAILED,
                 payload.getException().getMessage(), context.getSdxId());
         sendEvent(context);

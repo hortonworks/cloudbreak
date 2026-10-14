@@ -74,7 +74,7 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
 
     @Override
     public String getDisplayName() {
-        return "Sdx stop";
+        return "Data Lake stop";
     }
 
     @Override

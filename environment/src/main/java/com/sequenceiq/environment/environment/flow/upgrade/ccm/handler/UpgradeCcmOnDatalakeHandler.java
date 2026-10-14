@@ -44,7 +44,7 @@ public class UpgradeCcmOnDatalakeHandler extends EventSenderAwareHandler<Environ
         LOGGER.debug("In UpgradeCcmOnDatalakeHandler.accept");
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            LOGGER.debug("Calling Upgrade CCM endpoint on data lake service");
+            LOGGER.debug("Calling Upgrade CCM endpoint on Data Lake service");
             SdxCcmUpgradeResponse ccmUpgradeResponse = sdxService.upgradeCcm(environmentDto.getResourceCrn());
             switch (ccmUpgradeResponse.getResponseType()) {
                 case ERROR:
@@ -53,7 +53,7 @@ public class UpgradeCcmOnDatalakeHandler extends EventSenderAwareHandler<Environ
                     sendFailedEvent(environmentDtoEvent, environmentDto, new SdxOperationFailedException(message));
                     return;
                 case TRIGGERED:
-                    LOGGER.debug("Waiting for data lake Upgrade CCM flow to finish.");
+                    LOGGER.debug("Waiting for Data Lake Upgrade CCM flow to finish.");
                     pollerService.waitForUpgradeCcm(environmentDto.getId(), ccmUpgradeResponse.getResourceCrn());
                     break;
                 case SKIP:

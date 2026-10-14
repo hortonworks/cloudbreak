@@ -82,7 +82,7 @@ public class SdxResizeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxResizeService.class);
 
-    private static final String SDX_CLUSTER = "SDX cluster";
+    private static final String SDX_CLUSTER = "Data Lake cluster";
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -151,7 +151,7 @@ public class SdxResizeService {
     private AccountIdService accountIdService;
 
     public Pair<SdxCluster, FlowIdentifier> resizeSdx(String userCrn, String clusterName, SdxClusterResizeRequest sdxClusterResizeRequest) {
-        LOGGER.info("Re-sizing SDX cluster with name {}", clusterName);
+        LOGGER.info("Re-sizing Data Lake cluster with name {}", clusterName);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         String environmentName = sdxClusterResizeRequest.getEnvironment();
         SdxClusterShape shape = sdxClusterResizeRequest.getClusterShape();
@@ -231,10 +231,10 @@ public class SdxResizeService {
 
     private void validateSdxResizeRequest(SdxCluster sdxCluster, String accountId, SdxClusterShape shape, boolean enableMultiAz) {
         if (!entitlementService.isDatalakeLightToMediumMigrationEnabled(accountId)) {
-            throw new BadRequestException("Resizing of the data lake is not supported");
+            throw new BadRequestException("Resizing of the Data Lake is not supported");
         }
         if (sdxCluster.getClusterShape() == shape && (!enableMultiAz || sdxCluster.isEnableMultiAz())) {
-            throw new BadRequestException("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ");
+            throw new BadRequestException("Data Lake cluster is already of requested shape and not resizing to multi AZ from single AZ");
         }
 
         boolean singleToMultiAzTransition = enableMultiAz && !sdxCluster.isEnableMultiAz();
@@ -242,14 +242,15 @@ public class SdxResizeService {
 
         sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(accountId, sdxCluster.getEnvCrn())
                 .ifPresent(existedSdx -> {
-                    throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());
+                    throw new BadRequestException("Data Lake which is detached already exists for the environment. Data Lake name: " +
+                            existedSdx.getClusterName());
                 });
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(), userCrn)) {
-            throw new BadRequestException("SDX cluster is in the process of backup. Resize can not get started.");
+            throw new BadRequestException("Data Lake cluster is in the process of backup. Resize can not get started.");
         }
         if (sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), userCrn)) {
-            throw new BadRequestException("SDX cluster is in the process of restore. Resize can not get started.");
+            throw new BadRequestException("Data Lake cluster is in the process of restore. Resize can not get started.");
         }
     }
 

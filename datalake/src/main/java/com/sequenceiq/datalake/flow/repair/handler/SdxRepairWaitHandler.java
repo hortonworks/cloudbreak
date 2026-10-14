@@ -63,7 +63,7 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Repair poller stopped for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake repair timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake repair timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Repair polling failed for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId, exception);

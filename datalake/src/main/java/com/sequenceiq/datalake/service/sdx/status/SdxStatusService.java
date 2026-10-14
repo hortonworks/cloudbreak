@@ -155,13 +155,13 @@ public class SdxStatusService {
                     }
                     sdxStatusRepository.save(sdxStatusEntity);
                     updateInMemoryStateStore(sdxCluster);
-                    LOGGER.info("Updated status of Datalake with name: {} from {} to {} with statusReason {}",
+                    LOGGER.info("Updated status of Data Lake with name: {} from {} to {} with statusReason {}",
                             sdxCluster.getClusterName(), getPreviousStatusText(previous), status, statusReason);
                 } else if (DELETED.equals(previous.getStatus())) {
                     if (sdxCluster.getDeleted() == null) {
                         setDeletedTime(sdxCluster);
                     } else {
-                        throw notFoundException("SDX cluster", sdxCluster.getClusterName());
+                        throw notFoundException("Data Lake cluster", sdxCluster.getClusterName());
                     }
                 } else {
                     throw new DatalakeStatusUpdateException(getActualStatusForSdx(sdxCluster).getStatus(), status);
@@ -223,10 +223,10 @@ public class SdxStatusService {
         if (actualStatusForSdx != null &&
                 (actualStatusForSdx.getStatus().isDeleteInProgressOrCompleted() || DELETED_ON_PROVIDER_SIDE.equals(actualStatusForSdx.getStatus()))) {
             DatalakeInMemoryStateStore.put(sdxCluster.getId(), PollGroup.CANCELLED);
-            LOGGER.info("Update {} datalake status in inmemory store to {}", sdxCluster.getClusterName(), PollGroup.CANCELLED.name());
+            LOGGER.info("Update {} Data Lake status in inmemory store to {}", sdxCluster.getClusterName(), PollGroup.CANCELLED.name());
         } else {
             DatalakeInMemoryStateStore.put(sdxCluster.getId(), PollGroup.POLLABLE);
-            LOGGER.info("Update {} datalake status in inmemory store to {}", sdxCluster.getClusterName(), PollGroup.POLLABLE.name());
+            LOGGER.info("Update {} Data Lake status in inmemory store to {}", sdxCluster.getClusterName(), PollGroup.POLLABLE.name());
         }
     }
 
@@ -263,7 +263,7 @@ public class SdxStatusService {
     }
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
-        LOGGER.info("Searching for SDX cluster by ids: {} and statuses: {}", resourceIds, statuses);
+        LOGGER.info("Searching for Data Lake cluster by ids: {} and statuses: {}", resourceIds, statuses);
         List<SdxStatusEntity> sdxStatusEntities = findLatestSdxStatusesFilteredByStatusesAndDatalakeIds(statuses, resourceIds);
         return sdxStatusEntities.stream().map(sdxStatusEntity -> sdxStatusEntity.getDatalake().getId()).collect(Collectors.toSet());
     }

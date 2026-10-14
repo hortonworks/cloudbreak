@@ -43,7 +43,7 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Manowar SDX cluster in available state",
+            given = "there is a running Manowar Data Lake cluster in available state",
             when = "Set a new workload user password for the acting user",
             and = "SSH to the MASTER node where checking the Cloudera Manager UUID file," +
                     " then checking CMAdmin group and HIVE resource config mappings via Cloudera Manager API",

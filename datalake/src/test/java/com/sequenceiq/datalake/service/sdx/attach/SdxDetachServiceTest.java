@@ -101,7 +101,7 @@ public class SdxDetachServiceTest {
         assertTrue(detachClusterResult.isDetached());
 
         verify(mockSdxStatusService).setStatusForDatalakeAndNotify(
-                eq(DatalakeStatusEnum.STOPPED), eq("Datalake detach in progress."), eq(TEST_CLUSTER_ID)
+                eq(DatalakeStatusEnum.STOPPED), eq("Data Lake detach in progress."), eq(TEST_CLUSTER_ID)
         );
     }
 
@@ -120,7 +120,7 @@ public class SdxDetachServiceTest {
         assertFalse(detachClusterResult.isDetached());
 
         verify(mockSdxStatusService).setStatusForDatalakeAndNotify(
-                eq(DatalakeStatusEnum.STOPPED), eq("Datalake detach in progress."), eq(TEST_CLUSTER_ID)
+                eq(DatalakeStatusEnum.STOPPED), eq("Data Lake detach in progress."), eq(TEST_CLUSTER_ID)
         );
     }
 
@@ -164,7 +164,7 @@ public class SdxDetachServiceTest {
     void testMarkAsDetached() {
         sdxDetachService.markAsDetached(TEST_CLUSTER_ID);
         verify(mockSdxStatusService).setStatusForDatalakeAndNotify(
-                eq(DatalakeStatusEnum.STOPPED), eq("Datalake is detached."), eq(TEST_CLUSTER_ID)
+                eq(DatalakeStatusEnum.STOPPED), eq("Data Lake is detached."), eq(TEST_CLUSTER_ID)
         );
     }
 

@@ -177,7 +177,7 @@ public class PdlSdxDescribeServiceTest {
         when(webApplicationExceptionMessageExtractor.getErrorMessage(exception)).thenReturn("extractedMessage");
 
         assertThatThrownBy(() -> underTest.extendRdcView(rdcView))
-                .hasMessage("Not able to fetch the datalake services for PDL %s: %s", PDL_CRN, "extractedMessage")
+                .hasMessage("Not able to fetch the Data Lake services for PDL %s: %s", PDL_CRN, "extractedMessage")
                 .hasCause(exception);
     }
 

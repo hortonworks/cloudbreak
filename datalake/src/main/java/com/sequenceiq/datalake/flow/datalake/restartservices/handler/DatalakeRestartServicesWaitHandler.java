@@ -60,20 +60,20 @@ public class DatalakeRestartServicesWaitHandler extends ExceptionCatcherEventHan
         String userId = sdxEvent.getUserId();
         Selectable response;
         try {
-            LOGGER.debug("Start polling datalake restart services process for id: {}", sdxId);
+            LOGGER.debug("Start polling Data Lake restart services process for id: {}", sdxId);
             SdxCluster sdxCluster = sdxService.getById(sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             poller.pollServiceRestartUntilAvailable(sdxCluster, pollingConfig);
             response = new SdxEvent(DatalakeRestartServicesFlowEvent.DATALAKE_RESTART_SERVICES_FINISHED_EVENT.event(), sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Datalake restart services polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.error("Data Lake restart services polling exited before timeout. Cause: ", userBreakException);
             response = new DatalakeRestartServicesFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Datalake restart services poller stopped for stack: {}", sdxId);
+            LOGGER.error("Data Lake restart services poller stopped for stack: {}", sdxId);
             response = new DatalakeRestartServicesFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake restart services timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake restart services timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Datalake restart services polling failed for stack: {}", sdxId);
+            LOGGER.error("Data Lake restart services polling failed for stack: {}", sdxId);
             response = new DatalakeRestartServicesFailedEvent(sdxId, userId, exception);
         }
         return response;

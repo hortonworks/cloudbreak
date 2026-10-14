@@ -21,7 +21,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
 class FlowPollingServiceTest {
     private static final String FLOW_POLL_ID = "poll-id";
 
-    private static final String FLOW_ERROR_MSG_ROOT = "SDX flow operation failed for flow ID:";
+    private static final String FLOW_ERROR_MSG_ROOT = "Data Lake flow operation failed for flow ID:";
 
     @Mock
     private SdxFlowEndpoint sdxFlowEndpoint;

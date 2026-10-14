@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Rotate RDS SSL certificates related SDX service tests")
+@DisplayName("Rotate RDS SSL certificates related Data Lake service tests")
 public class RotateRdsSslCertsSdxServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
@@ -87,6 +87,6 @@ public class RotateRdsSslCertsSdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRdsSslCertRotation(dlCrn)));
 
         verify(stackV4Endpoint).validateRotateRdsCertificateByCrnInternal(WORKSPACE_ID_DEFAULT, dlCrn, USER_CRN);
-        assertEquals("Failed to validate RDS SSL certificate rotation for SDX", actualException.getMessage());
+        assertEquals("Failed to validate RDS SSL certificate rotation for Data Lake", actualException.getMessage());
     }
 }

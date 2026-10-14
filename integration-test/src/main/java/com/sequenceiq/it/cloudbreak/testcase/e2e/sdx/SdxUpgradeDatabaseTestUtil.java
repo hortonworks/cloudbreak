@@ -52,7 +52,7 @@ public class SdxUpgradeDatabaseTestUtil {
     public <T extends AbstractSdxTestDto<?, SdxClusterDetailResponse, ?>> T checkDbEngineVersionIsUpdated(String targetDatabaseMajorVersion, T testDto) {
         String actualDatabaseMajorVersion = testDto.getResponse().getDatabaseEngineVersion();
         if (!targetDatabaseMajorVersion.equals(actualDatabaseMajorVersion)) {
-            String errorMsg = String.format("Datalake's database engine version is wrong: %s, expected: %s",
+            String errorMsg = String.format("Data Lake's database engine version is wrong: %s, expected: %s",
                     actualDatabaseMajorVersion, targetDatabaseMajorVersion);
             LOGGER.error(errorMsg);
             throw new TestFailException(errorMsg);
@@ -95,7 +95,7 @@ public class SdxUpgradeDatabaseTestUtil {
                 .filter(ssh -> !extractVersion(ssh.getValue()).startsWith(databaseMajorVersion))
                 .toList();
         if (!wrongVersions.isEmpty()) {
-            String errorMsg = String.format("Datalake's database engine version check is wrong on primary gateways: %s, expected: %s",
+            String errorMsg = String.format("Data Lake's database engine version check is wrong on primary gateways: %s, expected: %s",
                     dbVersions, databaseMajorVersion);
             LOGGER.error(errorMsg);
             throw new TestFailException(errorMsg);

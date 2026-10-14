@@ -34,14 +34,14 @@ public class SdxClusterConverter {
     public SdxClusterResponse sdxClusterToResponse(SdxCluster sdxCluster) {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         SdxStatusEntity actualStatusForSdx = measure(() -> sdxStatusService.getActualStatusForSdx(sdxCluster), LOGGER,
-                "Fetching SDX status took {}ms from DB. Name: [{}]", sdxCluster.getClusterName());
+                "Fetching Data Lake status took {}ms from DB. Name: [{}]", sdxCluster.getClusterName());
         if (actualStatusForSdx != null && actualStatusForSdx.getStatus() != null) {
             sdxClusterResponse.setStatus(SdxClusterStatusResponse.valueOf(actualStatusForSdx.getStatus().name()));
             sdxClusterResponse.setStatusReason(actualStatusForSdx.getStatusReason());
         }
         if (!sdxCluster.isDetached()) {
             Optional<SdxCluster> detachedSdxCluster = measure(() -> sdxService.findDetachedSdxClusterByOriginalCrn(sdxCluster.getCrn()), LOGGER,
-                    "Fetching detached SDX cluster took {}ms fromDB, Name: [{}]", sdxCluster.getClusterName());
+                    "Fetching detached Data Lake cluster took {}ms fromDB, Name: [{}]", sdxCluster.getClusterName());
             detachedSdxCluster.ifPresent(detached -> sdxClusterResponse.setDetachedClusterName(detached.getClusterName()));
         }
         sdxClusterResponse.setRuntime(sdxCluster.getRuntime());

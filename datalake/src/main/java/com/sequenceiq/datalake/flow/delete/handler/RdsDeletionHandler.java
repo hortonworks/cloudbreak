@@ -64,10 +64,10 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         try {
             sdxClusterRepository.findById(sdxId).ifPresent(sdxCluster -> {
                 if (sdxCluster.hasExternalDatabase() && StringUtils.isNotEmpty(sdxCluster.getDatabaseCrn())) {
-                    LOGGER.debug("start polling database termination for SDX: {}", sdxId);
+                    LOGGER.debug("start polling database termination for Data Lake: {}", sdxId);
                     databaseService.terminate(sdxCluster, rdsWaitRequest.isForced());
                 } else {
-                    LOGGER.debug("skipping deletion of database for SDX: {}", sdxId);
+                    LOGGER.debug("skipping deletion of database for Data Lake: {}", sdxId);
                 }
                 setDeletedStatus(sdxCluster);
             });
@@ -76,15 +76,15 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
             LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
             response = new SdxDeletionFailedEvent(sdxId, userId, userBreakException, rdsWaitRequest.isForced());
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Database poller stopped for SDX: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Database poller stopped for Data Lake: {}", sdxId, pollerStoppedException);
             response = new SdxDeletionFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database deletion timed out after " + durationInMinutes + " minutes"),
                     rdsWaitRequest.isForced());
         } catch (PollerException exception) {
-            LOGGER.error("Database polling failed for SDX: {}", sdxId, exception);
+            LOGGER.error("Database polling failed for Data Lake: {}", sdxId, exception);
             response = new SdxDeletionFailedEvent(sdxId, userId, exception, rdsWaitRequest.isForced());
         } catch (Exception anotherException) {
-            LOGGER.error("Something wrong happened in SDX database deletion wait phase", anotherException);
+            LOGGER.error("Something wrong happened in Data Lake database deletion wait phase", anotherException);
             response = new SdxDeletionFailedEvent(sdxId, userId, anotherException, rdsWaitRequest.isForced());
         }
         return response;
@@ -92,9 +92,9 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     private void setDeletedStatus(SdxCluster cluster) {
         try {
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", cluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Data Lake External RDS deleted", cluster);
         } catch (NotFoundException notFoundException) {
-            LOGGER.info("Can not set status to DELETED because data lake was not found");
+            LOGGER.info("Can not set status to DELETED because Data Lake was not found");
         }
         ownerAssignmentService.notifyResourceDeleted(cluster.getCrn());
     }

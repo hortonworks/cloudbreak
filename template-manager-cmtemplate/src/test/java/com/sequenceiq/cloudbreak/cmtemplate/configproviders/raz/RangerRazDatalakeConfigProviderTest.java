@@ -289,7 +289,7 @@ public class RangerRazDatalakeConfigProviderTest {
     }
 
     @Test
-    @DisplayName("New Enterprise SDX shape (no master group, Ranger Admin on gateway) attaches RAZ to the gateway group")
+    @DisplayName("New Enterprise Data Lake shape (no master group, Ranger Admin on gateway) attaches RAZ to the gateway group")
     void getAdditionalServicesWhenRazIsEnabledAndRangerAdminOnGateway() {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion("7.2.2");

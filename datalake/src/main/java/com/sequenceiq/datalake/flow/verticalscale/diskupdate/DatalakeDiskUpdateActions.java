@@ -36,7 +36,7 @@ public class DatalakeDiskUpdateActions {
         return new AbstractDatalakeDiskUpdateAction<>(DatalakeDiskUpdateEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeDiskUpdateEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Starting validations for datalake disk update.");
+                LOGGER.debug("Starting validations for Data Lake disk update.");
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_DISK_UPDATE_VALIDATION_IN_PROGRESS,
                         String.format("Validation of disk update is in progress for group of %s on the Data Lake.",
                                 payload.getDatalakeDiskUpdateRequest().getGroup()), payload.getResourceId());
@@ -50,7 +50,7 @@ public class DatalakeDiskUpdateActions {
         return new AbstractDatalakeDiskUpdateAction<>(DatalakeDiskUpdateEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeDiskUpdateEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Starting to update disks for datalake disk update.");
+                LOGGER.debug("Starting to update disks for Data Lake disk update.");
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_DISK_UPDATE_IN_PROGRESS,
                     String.format("Disk Update is in progress for group of %s on the Data Lake.",
                         payload.getDatalakeDiskUpdateRequest().getGroup()), payload.getResourceId());
@@ -85,7 +85,7 @@ public class DatalakeDiskUpdateActions {
         return new AbstractDatalakeDiskUpdateAction<>(DatalakeDiskUpdateFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeDiskUpdateFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to update disks in DataLake '%s'. Status: '%s'.",
+                LOGGER.error(String.format("Failed to update disks in Data Lake '%s'. Status: '%s'.",
                         payload.getDatalakeDiskUpdateEvent(), payload.getDatalakeStatus()), payload.getException());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         payload.getDatalakeStatus(),

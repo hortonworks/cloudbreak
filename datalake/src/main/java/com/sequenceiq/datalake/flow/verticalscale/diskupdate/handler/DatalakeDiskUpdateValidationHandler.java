@@ -78,8 +78,8 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
                 VolumeSetAttributes volumeSetAttributes = new Json(resource.getAttributes()).get(VolumeSetAttributes.class);
                 attachedVolumes.addAll(
                         volumeSetAttributes.getVolumes().stream()
-                        .filter(volume -> volume.getSize() < diskUpdateRequest.getSize())
-                        .toList()
+                                .filter(volume -> volume.getSize() < diskUpdateRequest.getSize())
+                                .toList()
                 );
             }
             boolean requestedSizeGreaterThanAvailable = attachedVolumes.size() > 0;
@@ -110,8 +110,7 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
                     .withDatalakeDiskUpdateEvent(payload)
                     .withException(e)
                     .withDatalakeStatus(DatalakeStatusEnum.DATALAKE_DISK_UPDATE_VALIDATION_FAILED).build();
-            LOGGER.error("Exception while validating datalake disk update: {} on stack {}, because: {}", e.getMessage(),
-                    payload.getStackCrn(), e.getMessage());
+            LOGGER.error("Exception while validating Data Lake disk update: {} on stack {}", e.getMessage(), payload.getStackCrn(), e);
             eventSender().sendEvent(failedEvent, datalakeDiskUpdateEvent.getHeaders());
         }
     }

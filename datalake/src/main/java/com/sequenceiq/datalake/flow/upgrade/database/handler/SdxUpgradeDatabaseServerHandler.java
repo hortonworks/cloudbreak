@@ -40,13 +40,13 @@ public class SdxUpgradeDatabaseServerHandler extends ExceptionCatcherEventHandle
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeDatabaseServerRequest> event) {
-        LOGGER.warn("Exception during upgrade of database server in SDX: ", e);
+        LOGGER.warn("Exception during upgrade of database server in Data Lake: ", e);
         return new SdxUpgradeDatabaseServerFailedEvent(resourceId, event.getData().getUserId(), e, "");
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeDatabaseServerRequest> event) {
-        LOGGER.debug("Entering upgrade of database server in SDX, event: {}", event);
+        LOGGER.debug("Entering upgrade of database server in Data Lake, event: {}", event);
         UpgradeDatabaseServerRequest request = event.getData();
         SdxCluster sdxCluster = sdxService.getById(request.getResourceId());
         sdxCluster.setSdxDatabase(databaseService.updateDatabaseTypeFromRedbeams(sdxCluster.getSdxDatabase()));

@@ -17,11 +17,11 @@ public class SdxChangeImageCatalogAction implements Action<SdxChangeImageCatalog
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxChangeImageCatalogAction.class);
 
     public SdxChangeImageCatalogTestDto action(TestContext testContext, SdxChangeImageCatalogTestDto testDto, SdxClient client) throws Exception {
-        Log.whenJson(LOGGER, format(" SDX put request:%n"), testDto.getRequest());
+        Log.whenJson(LOGGER, format(" Data Lake put request:%n"), testDto.getRequest());
         client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .changeImageCatalog(testContext.given(SdxInternalTestDto.class).getResponse().getName(), testDto.getRequest());
-        Log.when(LOGGER, format(" SDX change image catalog to: %s", testDto.getRequest().getImageCatalog()));
+        Log.when(LOGGER, format(" Data Lake change image catalog to: %s", testDto.getRequest().getImageCatalog()));
         return testDto;
     }
 }

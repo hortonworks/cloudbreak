@@ -60,7 +60,7 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         if (isWireEncryptionEnabled(source)) {
-            LOG.info(String.format("SDX Optimization Enabled for %s.", roleType));
+            LOG.info(String.format("Data Lake Optimization Enabled for %s.", roleType));
             configs.add(config(ATLAS_DIFFERENTIAL_AUDIT_CONFIG, "true"));
         }
         if (isAtlasKnoxConfigurationNeeded(source)) {

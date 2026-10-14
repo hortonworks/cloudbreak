@@ -32,8 +32,8 @@ public class SdxMigrationFromZookeeperToKraftStatusAction implements Action<SdxT
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Sdx get KRaft migration status: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " Sdx get KRaft migration status request: ", testDto.getRequest());
+        Log.when(LOGGER, format(" Data Lake get KRaft migration status: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Data Lake get KRaft migration status request: ", testDto.getRequest());
         KraftMigrationStatusResponse response = client.getDefaultClient(testContext)
                 .sdxKraftMigrationEndpoint()
                 .zookeeperToKraftMigrationStatusByCrn(testDto.getCrn());
@@ -44,7 +44,7 @@ public class SdxMigrationFromZookeeperToKraftStatusAction implements Action<SdxT
         if (desiredStatus != null && !response.getKraftMigrationStatus().equals(desiredStatus)) {
             throw new TestFailException("Kraft Migration Status are mismatched: expected: " + desiredStatus + ", got: " + response.getKraftMigrationStatus());
         }
-        Log.whenJson(LOGGER, " Sdx get KRaft migration status response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake get KRaft migration status response: ", detailedResponse);
         return testDto;
     }
 }

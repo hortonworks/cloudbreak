@@ -137,12 +137,12 @@ public class EncryptionProfileService {
         try {
             String encryptionProfileCrn;
             if (StringUtils.isBlank(encryptionProfileNameOrCrn)) {
-                LOGGER.info("Triggering Enable Encryption Profile flow for datalake {} "
+                LOGGER.info("Triggering Enable Encryption Profile flow for Data Lake {} "
                         + "(env-level profile will be inherited)", datalakeCrn);
                 encryptionProfileCrn = null;
             } else {
                 encryptionProfileCrn = resolveEncryptionProfileCrn(encryptionProfileNameOrCrn);
-                LOGGER.info("Triggering Enable Encryption Profile flow for datalake: {}, encryptionProfileCrn: {}",
+                LOGGER.info("Triggering Enable Encryption Profile flow for Data Lake: {}, encryptionProfileCrn: {}",
                         datalakeCrn, encryptionProfileCrn);
             }
             SdxCluster sdxCluster = sdxService.getByCrn(datalakeCrn);

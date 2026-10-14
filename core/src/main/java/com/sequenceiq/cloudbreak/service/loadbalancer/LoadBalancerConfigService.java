@@ -205,7 +205,7 @@ public class LoadBalancerConfigService {
 
         if (loadBalancerEnabler.isLoadBalancerEnabled(stack.getType(), stack.getCloudPlatform(), environment, loadBalancerFlagEnabled)) {
             if (!loadBalancerFlagEnabled) {
-                LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
+                LOGGER.debug("Load balancers are enabled for Data Lake and data hub stacks.");
             } else {
                 LOGGER.debug("Load balancer is explicitly defined for the stack.");
             }

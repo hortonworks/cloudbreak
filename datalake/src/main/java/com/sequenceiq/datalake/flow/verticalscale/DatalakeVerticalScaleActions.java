@@ -82,7 +82,7 @@ public class DatalakeVerticalScaleActions {
         return new AbstractDatalakeVerticalScaleAction<>(DatalakeVerticalScaleFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to Vertical scale in DataLake '%s'. Status: '%s'.",
+                LOGGER.error(String.format("Failed to Vertical scale in Data Lake '%s'. Status: '%s'.",
                         payload.getDataLakeVerticalScaleEvent(), payload.getDatalakeStatus()), payload.getException());
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
                         payload.getDatalakeStatus(),

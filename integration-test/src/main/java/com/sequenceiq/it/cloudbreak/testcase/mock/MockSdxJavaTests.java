@@ -39,7 +39,7 @@ public class MockSdxJavaTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Custom Create request is sent",
+            when = "a valid Data Lake Custom Create request is sent",
             then = "set default java version to 17"
     )
     public void testSetDefaultJavaVersion(MockedTestContext testContext) {

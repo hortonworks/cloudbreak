@@ -19,7 +19,7 @@ public class DetermineDatalakeDataSizesService {
 
     public void determineDatalakeDataSizes(Stack stack, String operationId) {
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Initiating determination of datalake data sizes for stack {} and operation ID {}", stack.getId(), operationId);
+        LOGGER.info("Initiating determination of Data Lake data sizes for stack {} and operation ID {}", stack.getId(), operationId);
         flowManager.triggerDetermineDatalakeDataSizes(stack.getId(), operationId);
     }
 }

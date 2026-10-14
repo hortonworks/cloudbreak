@@ -78,14 +78,14 @@ public class SdxRetryService {
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> stackV4Endpoint.retry(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
             } catch (BadRequestException e) {
-                LOGGER.warn("Sdx retry failed on cloudbreak side, but try to restart the flow. Related exception: ", e);
+                LOGGER.warn("Data Lake retry failed on cloudbreak side, but try to restart the flow. Related exception: ", e);
             }
         }
     }
 
     private boolean isCloudbreakRetryNecessary(String retriedEvent, ClassValue flowType) {
         if (!retryableDatalakeFlowConfigurationMap.containsKey(flowType.getClassValue())) {
-            LOGGER.info("Missing retryable datalake flow configuration for type: {}", flowType);
+            LOGGER.info("Missing retryable Data Lake flow configuration for type: {}", flowType);
             return false;
         }
         RetryableDatalakeFlowConfiguration<? extends FlowEvent> flowConfiguration = retryableDatalakeFlowConfigurationMap.get(flowType.getClassValue());

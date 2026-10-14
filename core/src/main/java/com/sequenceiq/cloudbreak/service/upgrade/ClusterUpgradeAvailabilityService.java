@@ -104,7 +104,7 @@ public class ClusterUpgradeAvailabilityService {
 
     public boolean determineReplaceVmsParameter(StackDtoDelegate stack, Boolean replaceVmsFromRequest, boolean lockComponents, boolean preCheck) {
         if (stack.getStack().isDatalake()) {
-            LOGGER.debug("ReplaceVms is always true for datalakes.");
+            LOGGER.debug("ReplaceVms is always true for Data Lakes.");
             return true;
         } else if (!upgradePreconditionService.notUsingEphemeralVolume(stack)) {
             LOGGER.debug("Cluster uses ephemeral volume, replaceVms should be false.");

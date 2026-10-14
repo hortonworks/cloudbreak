@@ -38,14 +38,14 @@ public interface DiskUpdateEndpoint {
 
     @PUT
     @Path("/{stackId}/stopCluster")
-    @Operation(summary = "Stops CM services running on Datalake", operationId = "stopCMServices",
+    @Operation(summary = "Stops CM services running on Data Lake", operationId = "stopCMServices",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void stopCMServices(@PathParam("stackId") long stackId) throws Exception;
 
     @PUT
     @Path("/{stackId}/startCluster")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Start CM services running on Datalake", operationId = "startCMServices",
+    @Operation(summary = "Start CM services running on Data Lake", operationId = "startCMServices",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void startCMServices(@PathParam("stackId") long stackId) throws Exception;
 }

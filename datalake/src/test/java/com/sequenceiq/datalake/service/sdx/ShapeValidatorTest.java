@@ -70,7 +70,7 @@ class ShapeValidatorTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateShape(MEDIUM_DUTY_HA, notSupportedRuntime, detailedEnvironmentResponse));
 
-        assertEquals("Provisioning a Medium Duty SDX shape is only valid for runtime version greater than or equal to "
+        assertEquals("Provisioning a Medium Duty Data Lake shape is only valid for runtime version greater than or equal to "
                 + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + notSupportedRuntime, badRequestException.getMessage());
     }
 
@@ -120,7 +120,7 @@ class ShapeValidatorTest {
         BadRequestException ex = assertThrows(BadRequestException.class, () ->
                 underTest.validateShape(MICRO_DUTY, "7.2.12", detailedEnvironmentResponse));
 
-        assertEquals(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. ", AWS.name()) +
+        assertEquals(String.format("Provisioning a micro duty Data Lake cluster is not enabled for %s. ", AWS.name()) +
                 "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", ex.getMessage());
     }
 
@@ -136,7 +136,7 @@ class ShapeValidatorTest {
         BadRequestException ex = assertThrows(BadRequestException.class, () ->
                 underTest.validateShape(shape, "7.3.3", detailedEnvironmentResponse));
 
-        assertEquals(String.format("Your account is not entitled to provision SDX with '%s' shape. " +
+        assertEquals(String.format("Your account is not entitled to provision Data Lake with '%s' shape. " +
                 "Contact Cloudera support to enable CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS entitlement for the account.", shape), ex.getMessage());
     }
 

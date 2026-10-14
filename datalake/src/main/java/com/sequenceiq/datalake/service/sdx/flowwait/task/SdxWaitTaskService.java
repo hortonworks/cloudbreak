@@ -29,7 +29,7 @@ public class SdxWaitTaskService {
      */
     public <V> void waitFor(SdxWaitTask<V> sdxWaitTask) {
         try {
-            LOGGER.debug("Starting an sdx wait task: {}", sdxWaitTask);
+            LOGGER.debug("Starting an Data Lake wait task: {}", sdxWaitTask);
             PollingConfig pollingConfig = sdxWaitTask.getPollingConfig();
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())

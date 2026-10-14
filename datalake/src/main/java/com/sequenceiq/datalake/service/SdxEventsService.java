@@ -57,7 +57,7 @@ public class SdxEventsService {
         combinedEvents.addAll(dlEvents);
 
         if (combinedEvents.isEmpty()) {
-            LOGGER.info("No events from datalake and cloudbreak service");
+            LOGGER.info("No events from Data Lake and cloudbreak service");
             return List.of();
         }
         return sortAndFilterBasedOnPageSize(combinedEvents, size);
@@ -68,7 +68,7 @@ public class SdxEventsService {
         if (pagedResponse != null && !pagedResponse.getContent().isEmpty()) {
             return pagedResponse.getContent();
         } else {
-            LOGGER.info("No events from datalake service");
+            LOGGER.info("No events from Data Lake service");
             return List.of();
         }
     }

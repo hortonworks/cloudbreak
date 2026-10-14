@@ -53,7 +53,7 @@ public class DatahubRefreshActions {
 
                 //Only called as a part of a resize operation so we should update the cluster to reference the newly created one
                 SdxCluster sdxCluster = sdxService.getByNameInAccount(payload.getUserId(), payload.getSdxName());
-                LOGGER.info("Updating the Sdx-id in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
+                LOGGER.info("Updating the Data Lake ID in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
                 SdxContext sdxContext = SdxContext.from(flowParameters, payload);
                 sdxContext.setSdxId(sdxCluster.getId());
                 return sdxContext;
@@ -62,7 +62,7 @@ public class DatahubRefreshActions {
             @Override
             protected void doExecute(SdxContext context, DatahubRefreshStartEvent payload, Map<Object, Object> variables) throws Exception {
                 payload = new DatahubRefreshStartEvent(context.getSdxId(), payload.getSdxName(), payload.getUserId());
-                LOGGER.info("Start Data Hub refresh associated with Sdx: {}", payload.getSdxName());
+                LOGGER.info("Start Data Hub refresh associated with Data Lake: {}", payload.getSdxName());
                 SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
                 variables.put(SDX, sdxCluster);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_STARTED,

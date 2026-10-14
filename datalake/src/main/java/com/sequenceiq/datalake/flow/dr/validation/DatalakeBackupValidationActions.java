@@ -62,13 +62,13 @@ public class DatalakeBackupValidationActions {
         return new AbstractSdxAction<>(DatalakeTriggerBackupValidationEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerBackupValidationEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Triggering datalake backup validation for {}", payload.getResourceId());
+                LOGGER.info("Triggering Data Lake backup validation for {}", payload.getResourceId());
                 variables.put(REASON, payload.getReason().name());
 
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_VALIDATION_IN_PROGRESS,
-                        "Datalake backup validation in progress", payload.getResourceId());
+                        "Data Lake backup validation in progress", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_VALIDATION_REQUESTED, sdxCluster);
 
                 DatalakeBackupStatusResponse backupStatusResponse =
@@ -95,7 +95,7 @@ public class DatalakeBackupValidationActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake backup validation in progress for {} ", payload.getResourceId());
+                LOGGER.info("Data Lake backup validation in progress for {} ", payload.getResourceId());
                 String backupId = (String) variables.get(BACKUP_ID);
                 sendEvent(context, DatalakeBackupValidationWaitRequest.from(context, backupId));
             }
@@ -112,10 +112,10 @@ public class DatalakeBackupValidationActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake backup validation finalized for cluster: {}", payload.getResourceId());
+                LOGGER.info("Data Lake backup validation finalized for cluster: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_VALIDATION_FINISHED,
-                        "Datalake backup validation finished", payload.getResourceId());
+                        "Data Lake backup validation finished", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_VALIDATION_FINISHED, sdxCluster);
                 sendEvent(context, DATALAKE_BACKUP_VALIDATION_FINALIZED_EVENT.event(), payload);
             }
@@ -135,7 +135,7 @@ public class DatalakeBackupValidationActions {
                 Exception exception = payload.getException();
                 String failureReason = getFailureReason(variables, exception);
                 LOGGER.error(
-                        "Datalake backup validation failed for datalake with id: {} with error: {}", payload.getResourceId(),
+                        "Data Lake backup validation failed for Data Lake with id: {} with error: {}", payload.getResourceId(),
                         failureReason, exception
                 );
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
@@ -154,12 +154,12 @@ public class DatalakeBackupValidationActions {
             private String getFailureReason(Map<Object, Object> variables, Exception exception) {
                 StringBuilder reason = new StringBuilder();
                 if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
-                    reason.append("Datalake backup validation failed during upgrade. Upgrade preparation not started. ");
+                    reason.append("Data Lake backup validation failed during upgrade. Upgrade preparation not started. ");
                 }
                 if (exception instanceof PollerStoppedException) {
-                    reason.append("Datalake backup validation timed out, see the backup status using cdp-cli for more information.");
+                    reason.append("Data Lake backup validation timed out, see the backup status using cdp-cli for more information.");
                 } else {
-                    reason.append("Datalake backup validation failed.");
+                    reason.append("Data Lake backup validation failed.");
                 }
                 if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
                     reason.append(" Failure message: ").append(exception.getMessage());

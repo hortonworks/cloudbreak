@@ -36,7 +36,7 @@ public interface SdxInternalEndpoint {
     @POST
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "create internal SDX cluster", operationId = "createInternalSdx",
+    @Operation(summary = "create internal Data Lake cluster", operationId = "createInternalSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterResponse create(@PathParam("name") String name, @Valid SdxInternalClusterRequest createSdxClusterRequest);
 
@@ -69,7 +69,7 @@ public interface SdxInternalEndpoint {
     @PUT
     @Path("crn/{crn}/update_trusted_realm")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Initiates the update of the trusted realm configuration on the datalake",
+    @Operation(summary = "Initiates the update of the trusted realm configuration on the Data Lake",
             operationId = "updateInternalSdxTrustedRealm",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateTrustedRealm(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn,
@@ -80,7 +80,7 @@ public interface SdxInternalEndpoint {
     @PUT
     @Path("crn/{crn}/salt_update")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Initiates a SaltStack update on the datalake",
+    @Operation(summary = "Initiates a SaltStack update on the Data Lake",
             operationId = "updateInternalSdxSalt",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateSalt(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn,

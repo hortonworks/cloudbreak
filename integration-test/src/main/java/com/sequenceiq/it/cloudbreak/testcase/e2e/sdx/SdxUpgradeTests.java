@@ -64,9 +64,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "upgrade called on the SDX cluster",
-            then = "SDX upgrade should be successful, the cluster should be up and running"
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
+            when = "upgrade called on the Data Lake cluster",
+            then = "Data Lake upgrade should be successful, the cluster should be up and running"
     )
     public void testSDXUpgrade(TestContext testContext) {
         List<String> actualVolumeIds = new ArrayList<>();
@@ -113,9 +113,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "patch upgrade called on the SDX cluster",
-            then = "SDX patch upgrade should be successful, the cluster should be up and running"
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
+            when = "patch upgrade called on the Data Lake cluster",
+            then = "Data Lake patch upgrade should be successful, the cluster should be up and running"
     )
     public void testSDXPatchUpgrade(TestContext testContext) {
         List<String> actualVolumeIds = new ArrayList<>();
@@ -180,9 +180,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and a HA SDX cluster in available state",
-            when = "upgrade called on the HA SDX cluster",
-            then = "HA SDX upgrade should be successful, the cluster should be up and running"
+            given = "there is a running Cloudbreak, and a HA Data Lake cluster in available state",
+            when = "upgrade called on the HA Data Lake cluster",
+            then = "HA Data Lake upgrade should be successful, the cluster should be up and running"
     )
     public void testSDXHAUpgrade(TestContext testContext) {
         List<String> actualVolumeIds = new ArrayList<>();

@@ -128,8 +128,8 @@ public class SdxOpenstackTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running openstack environment",
-            when = "a sdx cluster is created, stopped, started, and master host group is repaired",
-            then = "the sdx cluster should be available and healthy"
+            when = "a Data Lake cluster is created, stopped, started, and master host group is repaired",
+            then = "the Data Lake cluster should be available and healthy"
     )
     public void testSdxCreateStopStartRepair(TestContext testContext) {
         fetchCdhDetails(testContext);

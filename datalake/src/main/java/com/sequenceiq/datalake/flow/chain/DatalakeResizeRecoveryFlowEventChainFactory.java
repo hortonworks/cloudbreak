@@ -87,7 +87,7 @@ public class DatalakeResizeRecoveryFlowEventChainFactory implements FlowEventCha
     }
 
     private void logEventCreation(String event, Long datalakeId) {
-        LOGGER.info("Generated a {} for datalake {} in the datalake resize recovery flow chain.",
+        LOGGER.info("Generated a {} for Data Lake {} in the Data Lake resize recovery flow chain.",
                 event, datalakeId);
     }
 }

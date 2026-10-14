@@ -87,7 +87,7 @@ public class DistroXUpgradeResponseFilterService {
                 result.addAll(filterForDatalakeVersion(datalakeViewOpt.get().runtime(),
                         upgradeV4Response.getCurrent().getComponentVersions().getCdp(), candidates));
             } else {
-                LOGGER.debug("DataLake stack not found for environment {}", environmentCrn);
+                LOGGER.debug("Data Lake stack not found for environment {}", environmentCrn);
                 return candidates;
             }
         }

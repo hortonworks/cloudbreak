@@ -127,15 +127,15 @@ public class CertRenewalService {
         SdxCluster sdxCluster = sdxService.getById(id);
         cloudbreakPoller.pollUpdateUntilAvailable("Certificate renewal", sdxCluster, pollingConfig);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_FINISHED, ResourceEvent.DATALAKE_CERT_RENEWAL_FINISHED,
-                "Datalake is running", sdxCluster);
+                "Data Lake is running", sdxCluster);
     }
 
     public void finalizeCertRenewal(Long id) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Datalake cert renewal finished", id);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Data Lake cert renewal finished", id);
     }
 
     public void handleFailure(Long id, String reason) {
-        String message = defaultIfBlank(reason, "Datalake certificate renewal failed");
+        String message = defaultIfBlank(reason, "Data Lake certificate renewal failed");
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_FAILED, Collections.singletonList(message), message, id);
     }
 }

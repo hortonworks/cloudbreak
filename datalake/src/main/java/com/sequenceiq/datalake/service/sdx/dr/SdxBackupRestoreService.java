@@ -165,16 +165,16 @@ public class SdxBackupRestoreService {
 
     public DatalakeBackupStatusResponse triggerDatalakeBackup(Long id, String backupLocation, String backupName, String userCrn,
             DatalakeDrSkipOptions skipOptions) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
-        LOGGER.info("Triggering datalake backup for datalake: '{}' in '{}' env",
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Data Lake cluster", id));
+        LOGGER.info("Triggering Data Lake backup for Data Lake: '{}' in '{}' env",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         return datalakeDrClient.triggerBackup(
                 sdxCluster.getClusterName(), backupLocation, backupName, userCrn, skipOptions);
     }
 
     public DatalakeBackupStatusResponse triggerDatalakeBackupValidation(Long id, String backupLocation, String userCrn) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
-        LOGGER.info("Triggering datalake backup validation for datalake: '{}' in '{}' env",
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Data Lake cluster", id));
+        LOGGER.info("Triggering Data Lake backup validation for Data Lake: '{}' in '{}' env",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         return datalakeDrClient.triggerBackupValidation(sdxCluster.getClusterName(), backupLocation, userCrn);
     }
@@ -193,8 +193,8 @@ public class SdxBackupRestoreService {
         if (!Strings.isNullOrEmpty(backupId)) {
             datalakeDRProto.DatalakeBackupInfo backupInfo = datalakeDrClient.getBackupById(datalakeName, backupId, userCrn);
             if (backupInfo == null) {
-                LOGGER.error("Backup Id {} does not exist for data lake: {}", backupId, datalakeName);
-                throw new NotFoundException(String.format("Backup Id %s does not exist for data lake: %s", backupId, datalakeName));
+                LOGGER.error("Backup Id {} does not exist for Data Lake: {}", backupId, datalakeName);
+                throw new NotFoundException(String.format("Backup Id %s does not exist for Data Lake: %s", backupId, datalakeName));
             }
             backupLocation = backupInfo.getBackupLocation();
         } else {
@@ -206,7 +206,7 @@ public class SdxBackupRestoreService {
     }
 
     public DatalakeRestoreStatusResponse triggerDatalakeRestoreValidation(SdxCluster sdxCluster, String userCrn) {
-        LOGGER.info("Triggering datalake restore validation for datalake: '{}' in '{}' env",
+        LOGGER.info("Triggering Data Lake restore validation for Data Lake: '{}' in '{}' env",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         return datalakeDrClient.triggerRestoreValidation(sdxCluster.getClusterName(), userCrn);
     }
@@ -214,8 +214,8 @@ public class SdxBackupRestoreService {
     public datalakeDRProto.DatalakeBackupInfo getLastSuccessfulBackupInfo(String datalakeName, String userCrn) {
         datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackupInfo = datalakeDrClient.getLastSuccessfulBackup(datalakeName, userCrn, Optional.empty());
         if (lastSuccessfulBackupInfo == null) {
-            LOGGER.error("No successful backup found for data lake: {}", datalakeName);
-            throw new NotFoundException(String.format("No successful backup found for data lake: %s", datalakeName));
+            LOGGER.error("No successful backup found for Data Lake: {}", datalakeName);
+            throw new NotFoundException(String.format("No successful backup found for Data Lake: %s", datalakeName));
         }
         return lastSuccessfulBackupInfo;
     }
@@ -223,7 +223,7 @@ public class SdxBackupRestoreService {
     public Optional<datalakeDRProto.DatalakeBackupInfo> getLastSuccessfulBackupInfoWithRuntime(String datalakeName, String userCrn, String runtime) {
         datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackupInfo = datalakeDrClient.getLastSuccessfulBackup(datalakeName, userCrn, Optional.of(runtime));
         if (lastSuccessfulBackupInfo == null) {
-            LOGGER.error("No successful backup found for data lake {} for runtime {}", datalakeName, runtime);
+            LOGGER.error("No successful backup found for Data Lake {} for runtime {}", datalakeName, runtime);
             return Optional.empty();
         }
         return Optional.of(lastSuccessfulBackupInfo);
@@ -281,11 +281,11 @@ public class SdxBackupRestoreService {
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, backupV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {
-                updateFailureStatus(drStatus.getOperationId(), clusterId, String.format("SDX cluster with Id [%d] not found", clusterId));
+                updateFailureStatus(drStatus.getOperationId(), clusterId, String.format("Data Lake cluster with Id [%d] not found", clusterId));
             });
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Database backup failed for datalake-id: [%d]. Message: [%s]", clusterId, errorMessage);
+            String message = String.format("Database backup failed for Data Lake ID: [%d]. Message: [%s]", clusterId, errorMessage);
             throw new CloudbreakServiceException(message);
         }
     }
@@ -300,16 +300,16 @@ public class SdxBackupRestoreService {
                                 backupLocation, backupId, initiatorUserCrn, databaseMaxDurationInMin, dryRun));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, restoreV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
-            }, () -> updateFailureStatus(drStatus.getOperationId(), clusterId, String.format("SDX cluster with Id [%d] not found", clusterId)));
+            }, () -> updateFailureStatus(drStatus.getOperationId(), clusterId, String.format("Data Lake cluster with Id [%d] not found", clusterId)));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Database restore failed for datalake-id: [%d]. Message: [%s]", clusterId, errorMessage);
+            String message = String.format("Database restore failed for Data Lake ID: [%d]. Message: [%s]", clusterId, errorMessage);
             throw new CloudbreakServiceException(message);
         }
     }
 
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Data Lake cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -401,7 +401,7 @@ public class SdxBackupRestoreService {
     }
 
     private AttemptResult<StackV4Response> sdxDrSucceeded(StackV4Response stackV4Response) {
-        LOGGER.info("Database DR operation for SDX cluster {} is successful", stackV4Response.getCluster().getName());
+        LOGGER.info("Database DR operation for Data Lake cluster {} is successful", stackV4Response.getCluster().getName());
         return AttemptResults.finishWith(stackV4Response);
     }
 
@@ -439,7 +439,7 @@ public class SdxBackupRestoreService {
     public SdxBackupRestoreSettingsResponse setDatabaseBackupRestoreSettings(SdxCluster sdxCluster,
             SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        LOGGER.info("Setting database backup/restore settings for SDX cluster {} with settings {}.",
+        LOGGER.info("Setting database backup/restore settings for Data Lake cluster {} with settings {}.",
                 sdxCluster.getClusterName(), backupRestoreSettingsRequest);
         SdxBackupRestoreSettings backupRestoreSettings = sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn());
         if (backupRestoreSettings != null) {
@@ -448,7 +448,7 @@ public class SdxBackupRestoreService {
             backupRestoreSettings = getSdxBackupRestoreSettings(sdxCluster.getCrn(), backupRestoreSettingsRequest);
         }
         SdxBackupRestoreSettings savedSdxBackupRestoreSettings = sdxBackupRestoreSettingsRepository.save(backupRestoreSettings);
-        LOGGER.info("Database backup/restore settings for SDX cluster {} saved successfully: {}.", sdxCluster.getClusterName(),
+        LOGGER.info("Database backup/restore settings for Data Lake cluster {} saved successfully: {}.", sdxCluster.getClusterName(),
                 savedSdxBackupRestoreSettings);
         return getSdxBackupRestoreSettingsResponse(savedSdxBackupRestoreSettings);
     }
@@ -457,8 +457,8 @@ public class SdxBackupRestoreService {
         MDCBuilder.buildMdcContext(sdxCluster);
         SdxBackupRestoreSettings backupRestoreSettings = sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn());
         if (backupRestoreSettings == null) {
-            LOGGER.info("No backup/restore settings found for SDX cluster with CRN: {}", sdxCluster.getCrn());
-            throw new NotFoundException(String.format("No backup/restore settings found for SDX cluster with CRN: %s", sdxCluster.getCrn()));
+            LOGGER.info("No backup/restore settings found for Data Lake cluster with CRN: {}", sdxCluster.getCrn());
+            throw new NotFoundException(String.format("No backup/restore settings found for Data Lake cluster with CRN: %s", sdxCluster.getCrn()));
         }
         return getSdxBackupRestoreSettingsResponse(backupRestoreSettings);
     }
@@ -473,7 +473,7 @@ public class SdxBackupRestoreService {
         if (backupRestoreSettings != null) {
             sdxBackupRestoreSettingsRepository.delete(backupRestoreSettings);
         } else {
-            LOGGER.info("No backup/restore settings found for SDX cluster with CRN: {}", sdxCluster.getCrn());
+            LOGGER.info("No backup/restore settings found for Data Lake cluster with CRN: {}", sdxCluster.getCrn());
         }
     }
 
@@ -529,7 +529,7 @@ public class SdxBackupRestoreService {
     private void updateFailureStatus(String operationId, Long clusterId, String failure) {
         updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED,
                 failure);
-        throw notFound("SDX cluster", clusterId).get();
+        throw notFound("Data Lake cluster", clusterId).get();
     }
 
     private SdxOperation getDatabaseDrStatus(SdxCluster sdxCluster, String operationId,
@@ -563,7 +563,7 @@ public class SdxBackupRestoreService {
 
     public void waitForServiceToBeStopped(Long id, String operationId, String userCrn, PollingConfig pollingConfig,
             String pollingMessage, SdxOperationType type) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Data Lake cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -572,7 +572,7 @@ public class SdxBackupRestoreService {
 
     private AttemptResult<DatalakeOperationStatus> checkIfStopServicesHasCompleted(SdxCluster sdxCluster, String operationId,
             String userCrn, String pollingMessage, SdxOperationType type) {
-        LOGGER.info("{} polling datalake-dr service for status: '{}' in '{}' env", pollingMessage,
+        LOGGER.info("{} polling Data Lake DR service for status: '{}' in '{}' env", pollingMessage,
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         try {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
@@ -584,19 +584,19 @@ public class SdxBackupRestoreService {
                         datalakeDrClient.getRestoreStatusByRestoreId(sdxCluster.getClusterName(), operationId, userCrn);
 
                 if (statusResponse.getIncludedData().contains("STOP_SERVICES")) {
-                    LOGGER.info("Stopped services process for SDX cluster {} is successful", sdxCluster.getClusterName());
+                    LOGGER.info("Stopped services process for Data Lake cluster {} is successful", sdxCluster.getClusterName());
                     return AttemptResults.finishWith(statusResponse);
                 } else if (statusResponse.isComplete()) {
-                    LOGGER.info("Full DR operation for SDX cluster {} is successfully completed", sdxCluster.getClusterName());
+                    LOGGER.info("Full DR operation for Data Lake cluster {} is successfully completed", sdxCluster.getClusterName());
                     return AttemptResults.finishWith(statusResponse);
                 } else if (statusResponse.isFailed()) {
                     LOGGER.info("{} failed, statusReason: {}", pollingMessage, statusResponse.getFailureReason());
                     return AttemptResults.breakFor(statusResponse.getFailureReason());
                 } else if (statusResponse.getState() == State.CANCELLED) {
-                    LOGGER.info("Full DR operation for SDX cluster {} is cancelled", sdxCluster.getClusterName());
+                    LOGGER.info("Full DR operation for Data Lake cluster {} is cancelled", sdxCluster.getClusterName());
                     return AttemptResults.finishWith(statusResponse);
                 } else {
-                    LOGGER.info("Datalake {} wait for stopped services still in progress", sdxCluster.getClusterName());
+                    LOGGER.info("Data Lake {} wait for stopped services still in progress", sdxCluster.getClusterName());
                     return AttemptResults.justContinue();
                 }
             }
@@ -607,7 +607,7 @@ public class SdxBackupRestoreService {
 
     public DatalakeBackupStatusResponse waitForDatalakeDrBackupToComplete(Long id, String backupId, String userCrn, PollingConfig pollingConfig,
             String pollingMessage) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Data Lake cluster", id));
         DatalakeBackupStatusResponse response = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -617,7 +617,7 @@ public class SdxBackupRestoreService {
 
     private AttemptResult<DatalakeBackupStatusResponse> getBackupStatusAttemptResult(SdxCluster sdxCluster, String backupId,
             String userCrn, String pollingMessage) {
-        LOGGER.info("{} polling datalake-dr service for backup status: '{}' in '{}' env", pollingMessage,
+        LOGGER.info("{} polling Data Lake DR service for backup status: '{}' in '{}' env", pollingMessage,
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         try {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
@@ -627,10 +627,10 @@ public class SdxBackupRestoreService {
                 DatalakeBackupStatusResponse response = datalakeDrClient.getBackupStatusByBackupId(
                         sdxCluster.getClusterName(), backupId, userCrn);
                 if (response.getState().isNotComplete()) {
-                    LOGGER.info("Datalake {} backup still in progress", sdxCluster.getClusterName());
+                    LOGGER.info("Data Lake {} backup still in progress", sdxCluster.getClusterName());
                     return AttemptResults.justContinue();
                 } else {
-                    LOGGER.info("Backup for datalake {} complete with status {}", sdxCluster.getClusterName(), response.getState());
+                    LOGGER.info("Backup for Data Lake {} complete with status {}", sdxCluster.getClusterName(), response.getState());
                     if (response.isFailed()) {
                         return sdxFullDrFailed(sdxCluster, response.getFailureReason(), pollingMessage);
                     } else if (response.getState() == State.CANCELLED) {
@@ -646,7 +646,7 @@ public class SdxBackupRestoreService {
     }
 
     public SdxBackupStatusResponse getDatalakeBackupStatus(String datalakeName, String backupId, String backupName, String userCrn) {
-        LOGGER.info("Requesting datalake backup status for datalake: '{}'", datalakeName);
+        LOGGER.info("Requesting Data Lake backup status for Data Lake: '{}'", datalakeName);
         DatalakeBackupStatusResponse datalakeBackupStatusResponse = datalakeDrClient.getBackupStatus(
                 datalakeName, backupId, backupName, userCrn);
         return new SdxBackupStatusResponse(datalakeBackupStatusResponse.getBackupId(),
@@ -658,21 +658,21 @@ public class SdxBackupRestoreService {
     }
 
     public String getDatalakeBackupId(String datalakeName, String backupName, String userCrn) {
-        LOGGER.info("Requesting datalake backup Id for datalake: '{}'", datalakeName);
+        LOGGER.info("Requesting Data Lake backup Id for Data Lake: '{}'", datalakeName);
         return datalakeDrClient.getBackupId(datalakeName, backupName, userCrn);
     }
 
     public DatalakeRestoreStatusResponse triggerDatalakeRestore(Long id, String backupId, String backupLocationOverride, String userCrn,
             DatalakeDrSkipOptions skipOptions, boolean validationOnly) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
-        LOGGER.info("Triggering datalake restore for datalake: '{}' in '{}' env from backupId '{}",
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Data Lake cluster", id));
+        LOGGER.info("Triggering Data Lake restore for Data Lake: '{}' in '{}' env from backupId '{}",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName(), backupId);
         return datalakeDrClient.triggerRestore(
                 sdxCluster.getClusterName(), backupId, backupLocationOverride, userCrn, skipOptions, validationOnly);
     }
 
     public SdxRestoreStatusResponse getDatalakeRestoreStatus(String datalakeName, String restoreId, String backupName, String userCrn) {
-        LOGGER.info("Requesting datalake restore status for datalake: '{}' with restoreId '{}'", datalakeName, restoreId);
+        LOGGER.info("Requesting Data Lake restore status for Data Lake: '{}' with restoreId '{}'", datalakeName, restoreId);
         DatalakeRestoreStatusResponse datalakeBackupStatusResponse = datalakeDrClient.getRestoreStatus(
                 datalakeName, restoreId, backupName, userCrn);
         return new SdxRestoreStatusResponse(datalakeBackupStatusResponse.getBackupId(),
@@ -681,13 +681,13 @@ public class SdxBackupRestoreService {
     }
 
     public String getDatalakeRestoreId(String datalakeName, String backupName, String userCrn) {
-        LOGGER.info("Requesting datalake restore Id for datalake: '{}'", datalakeName);
+        LOGGER.info("Requesting Data Lake restore Id for Data Lake: '{}'", datalakeName);
         return datalakeDrClient.getRestoreId(datalakeName, backupName, userCrn);
     }
 
     public void waitForDatalakeDrRestoreToComplete(Long id, String restoreId, String userCrn, PollingConfig pollingConfig,
             String pollingMessage) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Data Lake cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -696,7 +696,7 @@ public class SdxBackupRestoreService {
 
     private AttemptResult<DatalakeBackupStatusResponse> getRestoreStatusAttemptResult(SdxCluster sdxCluster, String restoreId,
             String userCrn, String pollingMessage) {
-        LOGGER.info("{} polling datalake-dr service for restore status: '{}' in '{}' env", pollingMessage,
+        LOGGER.info("{} polling Data Lake DR service for restore status: '{}' in '{}' env", pollingMessage,
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         try {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
@@ -706,10 +706,10 @@ public class SdxBackupRestoreService {
                 DatalakeRestoreStatusResponse response = datalakeDrClient.getRestoreStatusByRestoreId(
                         sdxCluster.getClusterName(), restoreId, userCrn);
                 if (response.getState().isNotComplete()) {
-                    LOGGER.info("Datalake {} restore still in progress", sdxCluster.getClusterName());
+                    LOGGER.info("Data Lake {} restore still in progress", sdxCluster.getClusterName());
                     return AttemptResults.justContinue();
                 } else {
-                    LOGGER.info("Restore for datalake {} complete with status {}", sdxCluster.getClusterName(), response.getState());
+                    LOGGER.info("Restore for Data Lake {} complete with status {}", sdxCluster.getClusterName(), response.getState());
                     if (response.isFailed()) {
                         return sdxFullDrFailed(sdxCluster, response.getFailureReason(), pollingMessage);
                     } else {
@@ -728,12 +728,12 @@ public class SdxBackupRestoreService {
     }
 
     private AttemptResult<DatalakeBackupStatusResponse> sdxFullDrSucceeded(SdxCluster sdxCluster, DatalakeBackupStatusResponse response) {
-        LOGGER.info("Full DR operation for SDX cluster {} is successful", sdxCluster.getClusterName());
+        LOGGER.info("Full DR operation for Data Lake cluster {} is successful", sdxCluster.getClusterName());
         return AttemptResults.finishWith(response);
     }
 
     private AttemptResult<DatalakeBackupStatusResponse> sdxFullDrCancelled(SdxCluster sdxCluster, DatalakeBackupStatusResponse response) {
-        LOGGER.info("Full DR operation for SDX cluster {} is cancelled", sdxCluster.getClusterName());
+        LOGGER.info("Full DR operation for Data Lake cluster {} is cancelled", sdxCluster.getClusterName());
         return AttemptResults.finishWith(response);
     }
 
@@ -746,7 +746,7 @@ public class SdxBackupRestoreService {
     public boolean shouldSdxBackupBePerformed(SdxCluster cluster) {
         String reason = null;
         if (!datalakeDrConfig.isConfigured()) {
-            reason = "Datalake DR is not configured!";
+            reason = "Data Lake DR is not configured!";
         } else {
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
             CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
@@ -829,21 +829,21 @@ public class SdxBackupRestoreService {
         try {
             response = datalakeDrClient.submitDatalakeDataInfo(operationId, inputJson, userId);
         } catch (Exception ex) {
-            LOGGER.error("Unable to properly parse datalake data info input '" + inputJson + "' and submit it.", ex);
-            throw new BadRequestException("Unable to properly parse datalake data info input '" + inputJson + "' and submit it.", ex);
+            LOGGER.error("Unable to properly parse Data Lake data info input '" + inputJson + "' and submit it.", ex);
+            throw new BadRequestException("Unable to properly parse Data Lake data info input '" + inputJson + "' and submit it.", ex);
         }
 
         if (response == null) {
-            LOGGER.error("Failed to submit datalake data info for operation: " + operationId);
-            throw new CloudbreakServiceException("Failed to submit datalake data info for operation: " + operationId);
+            LOGGER.error("Failed to submit Data Lake data info for operation: " + operationId);
+            throw new CloudbreakServiceException("Failed to submit Data Lake data info for operation: " + operationId);
         }
 
-        LOGGER.info("Successfully submitted datalake data info for operation: " + operationId);
+        LOGGER.info("Successfully submitted Data Lake data info for operation: " + operationId);
     }
 
     public boolean isDatalakeInBackupProgress(String sdxClusterName, String actorCrn) {
         if (sdxClusterName == null || actorCrn == null) {
-            LOGGER.error("Didn't find datalake name or actor CRN. Can not validate if the datalake is in backup. Continue to next step.");
+            LOGGER.error("Didn't find Data Lake name or actor CRN. Can not validate if the Data Lake is in backup. Continue to next step.");
             return false;
         }
         try {
@@ -855,7 +855,7 @@ public class SdxBackupRestoreService {
             LOGGER.info("No backup in progress found on {}. Good to continue.", sdxClusterName);
             return false;
         } catch (RuntimeException exception) {
-            if (exception.getMessage().contains("Status information for backup operation on datalake")
+            if (exception.getMessage().contains("Status information for backup operation on")
                     && exception.getMessage().contains("not found")) {
                 // If the RuntimeException's error message matches the message that was thrown when no backup/restore status found, the program continues because
                 // it means this datalake has never run a backup or restore.
@@ -870,7 +870,7 @@ public class SdxBackupRestoreService {
 
     public boolean isDatalakeInRestoreProgress(String sdxClusterName, String actorCrn) {
         if (sdxClusterName == null || actorCrn == null) {
-            LOGGER.error("Didn't find datalake name or actor CRN. Can not validate if the datalake is in restore. Continue to next step.");
+            LOGGER.error("Didn't find Data Lake name or actor CRN. Can not validate if the Data Lake is in restore. Continue to next step.");
             return false;
         }
         try {
@@ -882,7 +882,7 @@ public class SdxBackupRestoreService {
             LOGGER.info("No restore in progress found on {}. Good to continue.", sdxClusterName);
             return false;
         } catch (RuntimeException exception) {
-            if (exception.getMessage().contains("Status information for restore operation on datalake")
+            if (exception.getMessage().contains("Status information for restore operation on")
                     && exception.getMessage().contains("not found")) {
                 LOGGER.info("No restore ever happened on {}. Good to continue.", sdxClusterName);
             } else {
@@ -944,7 +944,7 @@ public class SdxBackupRestoreService {
 
     public long getTotalDurationInMin(String startTimeStamp, String endTimeStamp) {
         try {
-            LOGGER.info("The start time and end time for the datalake backup are {} and {} ", startTimeStamp, endTimeStamp);
+            LOGGER.info("The start time and end time for the Data Lake backup are {} and {} ", startTimeStamp, endTimeStamp);
             if (startTimeStamp == null || startTimeStamp.isEmpty() ||
                     endTimeStamp == null || endTimeStamp.isEmpty()) {
                 return 0;

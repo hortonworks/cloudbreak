@@ -12,7 +12,7 @@ public class NetworkV4ResponseToNetworkV4RequestConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkV4ResponseToNetworkV4RequestConverter.class);
 
     public NetworkV4Request convert(NetworkV4Response networkV4Response) {
-        LOGGER.info("Datalake resize will use network details from the original datalake.");
+        LOGGER.info("Data Lake resize will use network details from the original Data Lake.");
 
         NetworkV4Request networkRequest = new NetworkV4Request();
 

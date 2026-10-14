@@ -71,7 +71,7 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
     @Description(
             given = "there is a running cloudbreak",
             when = "a custom encryption profile is used to create the environment",
-            then = "datalake and datahub uses the same TLS version from the custom encryption profile")
+            then = "Data Lake and Data Hub uses the same TLS version from the custom encryption profile")
     public void testCreateDistroXWithCustomEncryptionProfile(TestContext testContext) {
         String encryptionProfileName = "encryption-profile-" + UUID.randomUUID();
         testContext
@@ -129,7 +129,7 @@ public class DistroXCustomEncryptionProfileTest extends AbstractE2ETest {
     @Description(
             given = "there is a running cloudbreak",
             when = "a default encryption profile is used to create the environment",
-            then = "datalake and datahub uses the same TLS version from the default encryption profile with TLSv1.2 and TLSv1.3")
+            then = "Data Lake and Data Hub uses the same TLS version from the default encryption profile with TLSv1.2 and TLSv1.3")
     public void testCreateDistroXWithDefaultEncryptionProfile(TestContext testContext) {
         testContext
                 .given(CredentialTestDto.class)

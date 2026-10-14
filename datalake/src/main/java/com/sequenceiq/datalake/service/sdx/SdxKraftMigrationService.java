@@ -69,14 +69,14 @@ public class SdxKraftMigrationService {
     public KraftMigrationStatusResponse getZookeeperToKraftMigrationStatus(String userCrn, String clusterCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(sdxCluster);
-        LOGGER.debug("Getting ZooKeeper to KRaft migration status for DataLake cluster {}", sdxCluster.getClusterName());
+        LOGGER.debug("Getting ZooKeeper to KRaft migration status for Data Lake cluster {}", sdxCluster.getClusterName());
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> cloudbreakInternalCrnClient.withInternalCrn()
                             .stackKraftMigrationV4Endpoint()
                             .zookeeperToKraftMigrationStatusByCrnInternal(sdxCluster.getStackCrn(), userCrn));
         } catch (WebApplicationException e) {
-            String message = String.format("Could not retrieve ZooKeeper to KRaft migration status for DataLake cluster %s, reason: %s",
+            String message = String.format("Could not retrieve ZooKeeper to KRaft migration status for Data Lake cluster %s, reason: %s",
                     sdxCluster.getClusterName(), exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -89,7 +89,7 @@ public class SdxKraftMigrationService {
     public void triggerOnCloudbreak(Long sdxId, KraftMigrationOperationType operationType) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        LOGGER.debug("Triggering ZooKeeper to KRaft {} on Cloudbreak for DataLake cluster {}", operationType, sdxCluster.getClusterName());
+        LOGGER.debug("Triggering ZooKeeper to KRaft {} on Cloudbreak for Data Lake cluster {}", operationType, sdxCluster.getClusterName());
         sdxStatusService.setStatusForDatalake(getInProgressStatus(operationType), getInProgressMessage(operationType), sdxCluster);
         FlowIdentifier flowIdentifier = callCloudbreakEndpoint(sdxCluster, initiatorUserCrn, operationType);
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
@@ -122,7 +122,7 @@ public class SdxKraftMigrationService {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(() -> operation.apply(endpoint));
         } catch (WebApplicationException e) {
-            String message = String.format("Could not trigger ZooKeeper to KRaft %s for DataLake cluster %s, reason: %s",
+            String message = String.format("Could not trigger ZooKeeper to KRaft %s for Data Lake cluster %s, reason: %s",
                     operationType, sdxCluster.getClusterName(), exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
             throw new CloudbreakServiceException(message, e);

@@ -20,7 +20,7 @@ public class SdxRefreshAction implements Action<SdxTestDto, SdxClient> {
         testDto.setResponse(
                 client.getDefaultClient(testContext).sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet())
         );
-        Log.whenJson(LOGGER, " SDX get detail response: ", testDto.getResponse());
+        Log.whenJson(LOGGER, " Data Lake get detail response: ", testDto.getResponse());
         return testDto;
     }
 }

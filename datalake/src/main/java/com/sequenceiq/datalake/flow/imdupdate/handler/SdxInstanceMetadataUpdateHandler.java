@@ -36,13 +36,13 @@ public class SdxInstanceMetadataUpdateHandler extends ExceptionCatcherEventHandl
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<InstanceMetadataUpdateRequest> event) {
-        LOGGER.warn("Exception during instance metadata update in SDX: ", e);
+        LOGGER.warn("Exception during instance metadata update in Data Lake: ", e);
         return new SdxInstanceMetadataUpdateFailedEvent(resourceId, event.getData().getUserId(), e, "");
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent<InstanceMetadataUpdateRequest> event) {
-        LOGGER.debug("Entering instance metadata update in SDX, event: {}", event);
+        LOGGER.debug("Entering instance metadata update in Data Lake, event: {}", event);
         InstanceMetadataUpdateRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();

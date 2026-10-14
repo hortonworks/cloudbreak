@@ -53,7 +53,7 @@ public class ImageFilterParamsFactory {
         Set<ClusterComponentView> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
         if (stack.getStack().isDatalake()) {
             ClouderaManagerProduct stackProduct = getCdhProduct(componentsByBlueprint);
-            LOGGER.debug("For datalake clusters only the CDH parcel is related in CM: {}", stackProduct);
+            LOGGER.debug("For Data Lake clusters only the CDH parcel is related in CM: {}", stackProduct);
             return Map.of(stackProduct.getName(), stackProduct.getVersion());
         } else {
             Set<ClouderaManagerProduct> products = centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint);

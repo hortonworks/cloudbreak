@@ -21,18 +21,18 @@ public class SdxMigrationFromZookeeperToKraftRollbackAction implements Action<Sd
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Sdx rollback KRaft migration: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " Sdx rollback KRaft migration request: ", testDto.getRequest());
+        Log.when(LOGGER, format(" Data Lake rollback KRaft migration: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Data Lake rollback KRaft migration request: ", testDto.getRequest());
         FlowIdentifier flow = client.getDefaultClient(testContext)
                 .sdxKraftMigrationEndpoint()
                 .rollbackMigrationFromZookeeperToKraftByCrn(testDto.getCrn());
-        testDto.setFlow("Sdx rollback KRaft migration", flow);
+        testDto.setFlow("Data Lake rollback KRaft migration", flow);
 
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " Sdx rollback KRaft migration response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake rollback KRaft migration response: ", detailedResponse);
         return testDto;
     }
 }

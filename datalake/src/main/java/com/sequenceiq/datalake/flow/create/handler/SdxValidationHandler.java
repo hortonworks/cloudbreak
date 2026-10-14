@@ -67,20 +67,20 @@ public class SdxValidationHandler extends ExceptionCatcherEventHandler<SdxValida
                 sdxRecommendationService.validateRecommendedImage(environment, sdxCluster.get());
                 return new SdxValidationSuccessEvent(sdxId, userId);
             } else {
-                throw notFound("SDX cluster", sdxId).get();
+                throw notFound("Data Lake cluster", sdxId).get();
             }
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Env polling exited before timeout. Cause: ", userBreakException);
             return new SdxCreateFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Env poller stopped for sdx: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Env poller stopped for Data Lake: {}", sdxId, pollerStoppedException);
             return new SdxCreateFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Env wait timed out after " + durationInMinutes + " minutes in sdx validation phase"));
+                    new PollerStoppedException("Env wait timed out after " + durationInMinutes + " minutes in Data Lake validation phase"));
         } catch (PollerException exception) {
-            LOGGER.error("Env polling failed for sdx: {}", sdxId, exception);
+            LOGGER.error("Env polling failed for Data Lake: {}", sdxId, exception);
             return new SdxCreateFailedEvent(sdxId, userId, exception);
         } catch (Exception e) {
-            LOGGER.error("Sdx validation failed", e);
+            LOGGER.error("Data Lake validation failed", e);
             return new SdxCreateFailedEvent(sdxId, userId, e);
         }
     }

@@ -289,7 +289,7 @@ class EnvironmentServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateAndGetEnvironment("envName"), "BadRequestException should thrown");
 
-        assertEquals("Creating or Resizing datalake is not supported for Hybrid Environment", badRequestException.getMessage());
+        assertEquals("Creating or Resizing Data Lake is not supported for Hybrid Environment", badRequestException.getMessage());
     }
 
     private SdxClusterView getClusterView(String envCrn, String envName) {

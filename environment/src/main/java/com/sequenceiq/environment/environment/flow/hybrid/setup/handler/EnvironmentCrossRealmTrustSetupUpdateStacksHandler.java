@@ -98,7 +98,7 @@ public class EnvironmentCrossRealmTrustSetupUpdateStacksHandler extends Exceptio
             request.setRealm(realm);
             request.setSaltUpdateRequired(saltUpdateRequired);
 
-            LOGGER.info("Triggering update trusted realm on datalakes for environment {} (realm={})", envCrn, realm);
+            LOGGER.info("Triggering update trusted realm on Data Lakes for environment {} (realm={})", envCrn, realm);
             sdxPollerService.updateTrustedRealmOnAttachedDatalakeClusters(data.getResourceId(), data.getResourceName(), request);
 
             LOGGER.info("Triggering update trusted realm on datahub clusters for environment {} (saltUpdateRequired={}, realm={})",

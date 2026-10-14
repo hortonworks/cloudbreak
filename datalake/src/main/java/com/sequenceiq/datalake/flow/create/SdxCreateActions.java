@@ -267,7 +267,7 @@ public class SdxCreateActions {
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED,
-                        "Datalake is running", payload.getResourceId()
+                        "Data Lake is running", payload.getResourceId()
                 );
                 metricService.incrementMetricCounter(MetricType.SDX_CREATION_FINISHED, sdxCluster);
                 jobService.schedule(context.getSdxId(), SdxClusterJobAdapter.class);
@@ -294,7 +294,7 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
-                String statusReason = "Datalake creation failed";
+                String statusReason = "Data Lake creation failed";
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
                 if (StringUtils.hasText(errorMessage)) {
                     statusReason = statusReason + ". " + errorMessage;
@@ -307,9 +307,9 @@ public class SdxCreateActions {
                             statusReason, payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
                 } catch (NotFoundException notFoundException) {
-                    LOGGER.info("Can not set status to SDX_CREATION_FAILED because data lake was not found");
+                    LOGGER.info("Can not set status to SDX_CREATION_FAILED because Data Lake was not found");
                 } catch (DatalakeStatusUpdateException datalakeStatusUpdateException) {
-                    LOGGER.info("Status update for data lake failed (possible reason: ongoing parallel deletion flow): {}", exception.getMessage());
+                    LOGGER.info("Status update for Data Lake failed (possible reason: ongoing parallel deletion flow): {}", exception.getMessage());
                 }
 
                 Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());

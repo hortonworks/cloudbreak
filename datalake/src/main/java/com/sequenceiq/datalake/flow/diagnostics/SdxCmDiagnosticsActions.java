@@ -46,7 +46,7 @@ public class SdxCmDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCmDiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Start CM based diagnostics collection for sdx cluster with id: {}", context.getSdxId());
+                LOGGER.debug("Start CM based diagnostics collection for Data Lake cluster with id: {}", context.getSdxId());
                 FlowIdentifier flowIdentifier = diagnosticsFlowService.startCmDiagnosticsCollection(payload.getProperties());
                 SdxCmDiagnosticsCollectionEvent event = new SdxCmDiagnosticsCollectionEvent(payload.getResourceId(),
                         payload.getUserId(), payload.getProperties(), flowIdentifier);
@@ -72,7 +72,7 @@ public class SdxCmDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCmDiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Diagnostics collection is in progress for sdx cluster");
+                LOGGER.debug("Diagnostics collection is in progress for Data Lake cluster");
                 sendEvent(context, SdxCmDiagnosticsWaitRequest.from(context, payload));
             }
 
@@ -95,7 +95,7 @@ public class SdxCmDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCmDiagnosticsSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("CM based diagnostics collection is finished for sdx cluster");
+                LOGGER.debug("CM based diagnostics collection is finished for Data Lake cluster");
                 sendEvent(context, SDX_CM_DIAGNOSTICS_COLLECTION_FINALIZED_EVENT.event(), payload);
             }
 
@@ -118,7 +118,7 @@ public class SdxCmDiagnosticsActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCmDiagnosticsFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("CM based diagnostics collection failed for sdx cluster");
+                LOGGER.debug("CM based diagnostics collection failed for Data Lake cluster");
                 sendEvent(context, SDX_CM_DIAGNOSTICS_COLLECTION_FAILED_HANDLED_EVENT.event(), payload);
             }
 

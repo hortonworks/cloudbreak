@@ -187,7 +187,7 @@ public class ReportListener extends TestListenerAdapter {
 
         String datalakeCloudStorageUrl = storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
         tr.getTestContext().setAttribute(tr.getName() + DL_STORAGE_URL, datalakeCloudStorageUrl);
-        LOGGER.info("Data lake cloud storage: {}:{}", tr.getName() + DL_STORAGE_URL, datalakeCloudStorageUrl);
+        LOGGER.info("Data Lake cloud storage: {}:{}", tr.getName() + DL_STORAGE_URL, datalakeCloudStorageUrl);
         return datalakeCloudStorageUrl;
     }
 

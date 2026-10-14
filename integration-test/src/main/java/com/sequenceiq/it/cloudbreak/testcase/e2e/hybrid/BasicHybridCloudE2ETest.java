@@ -38,8 +38,8 @@ public class BasicHybridCloudE2ETest extends HybridCloudE2ETest implements Image
     @UseSpotInstances
     @Description(
             given = "there is a running AWS env and a child YARN env ",
-            when = "creating an SDX in YARN ",
-            then = "SDX is created and instances are accessible via ssh by valid username and password ",
+            when = "creating a Data Lake in YARN ",
+            then = "Data Lake is created and instances are accessible via ssh by valid username and password ",
             and = "instances are not accessible via ssh by invalid username and password "
     )
     public void testHybridSdx(TestContext testContext) {

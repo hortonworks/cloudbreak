@@ -40,13 +40,13 @@ public class RemoteHdfsConfigProvider {
         RdcView rdcView = source.getDatalakeView().get().getRdcView();
         String datalakeNameService = hdfsConfigHelper.getNameService(rdcView);
         if (StringUtils.isNotBlank(datalakeNameService)) {
-            LOGGER.info("Datalake nameservice for HDFS is {}", datalakeNameService);
+            LOGGER.info("Data Lake nameservice for HDFS is {}", datalakeNameService);
             return new StringBuilder()
                     .append(getSafetyValveProperty("dfs.nameservices", datalakeNameService))
                     .append(hdfsConfigHelper.getNameServiceConfigSafetyValveValue(rdcView))
                     .toString();
         } else {
-            LOGGER.info("Datalake does not have nameservice for HDFS");
+            LOGGER.info("Data Lake does not have nameservice for HDFS");
             return "";
         }
     }

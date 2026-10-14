@@ -80,7 +80,7 @@ public class SdxRepairService {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             startRepairInCb(sdxCluster, repairRequest);
         }, () -> {
-            throw notFound("SDX cluster", id).get();
+            throw notFound("Data Lake cluster", id).get();
         });
     }
 
@@ -91,7 +91,7 @@ public class SdxRepairService {
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.repairClusterInternal(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest), initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Data Lake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
@@ -128,7 +128,7 @@ public class SdxRepairService {
     public void waitCloudbreakClusterRepair(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster ->
             cloudbreakPoller.pollUpdateUntilAvailable("Repair", sdxCluster, pollingConfig), () -> {
-                throw notFound("SDX cluster", id).get();
+                throw notFound("Data Lake cluster", id).get();
         });
     }
 }

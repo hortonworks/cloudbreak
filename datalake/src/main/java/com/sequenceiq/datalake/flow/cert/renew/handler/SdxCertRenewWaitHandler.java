@@ -65,7 +65,7 @@ public class SdxCertRenewWaitHandler extends ExceptionCatcherEventHandler<SdxCer
             response = new SdxCertRenewalFailedEvent(sdxId, userId, userBreakException.getMessage());
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Cert renewal poller stopped.");
-            response = new SdxCertRenewalFailedEvent(sdxId, userId, "Datalake cert renewal timed out after " + durationInMinutes + " minutes");
+            response = new SdxCertRenewalFailedEvent(sdxId, userId, "Data Lake cert renewal timed out after " + durationInMinutes + " minutes");
         } catch (PollerException exception) {
             LOGGER.error("Cert renewal polling failed. Cause: ", exception);
             response = new SdxCertRenewalFailedEvent(sdxId, userId, exception.getMessage());

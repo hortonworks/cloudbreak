@@ -67,10 +67,10 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
-            given = "there is an available environment with a running datalake",
-            when = "disk resize is called first then delete disks is called on the datalake",
-            then = "attached EBS volumes on datalake must be modified to the new type and size" +
-                    " and then deleted, the new datalake should be up and running"
+            given = "there is an available environment with a running Data Lake",
+            when = "disk resize is called first then delete disks is called on the Data Lake",
+            then = "attached EBS volumes on Data Lake must be modified to the new type and size" +
+                    " and then deleted, the new Data Lake should be up and running"
     )
     public void testSdxVolumesVerticalScale(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();

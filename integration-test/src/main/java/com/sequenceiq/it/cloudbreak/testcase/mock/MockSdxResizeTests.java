@@ -57,8 +57,8 @@ public class MockSdxResizeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Resize request is sent",
-            then = "Resized SDX should be available AND deletable"
+            when = "a valid Data Lake Resize request is sent",
+            then = "Resized Data Lake should be available AND deletable"
     )
     public void testDefaultSdxResizeSuccessfully(MockedTestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();
@@ -97,8 +97,8 @@ public class MockSdxResizeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Resize request is sent",
-            then = "Resized SDX should be available AND deletable and resize status check should work"
+            when = "a valid Data Lake Resize request is sent",
+            then = "Resized Data Lake should be available AND deletable and resize status check should work"
     )
     public void testSdxResizeWithResizeStatusCheck(MockedTestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();
@@ -113,8 +113,8 @@ public class MockSdxResizeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "\"a valid SDX Resize request is sent and the resize fails during Enterprise SDX creation",
-            then = "Resized SDX should be available AND deletable"
+            when = "\"a valid Data Lake Resize request is sent and the resize fails during Enterprise Data Lake creation",
+            then = "Resized Data Lake should be available AND deletable"
     )
     public void testFailedSdxResizeCanBeRetried(MockedTestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();
@@ -139,7 +139,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Resize request is sent and the resize fails during Enterprise SDX creation",
+            when = "a valid Data Lake Resize request is sent and the resize fails during Enterprise Data Lake creation",
             then = "the retry endpoint should complete the original resize"
     )
     public void testFailedSdxResizeCanBeRolledBack(MockedTestContext testContext) {
@@ -164,8 +164,8 @@ public class MockSdxResizeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Resize request is sent but cancel datalake backup is called during the backup process",
-            then = "stack status reason should be datalake cancelled when stack turns back to be RUNNING"
+            when = "a valid Data Lake Resize request is sent but cancel Data Lake backup is called during the backup process",
+            then = "stack status reason should be Data Lake cancelled when stack turns back to be RUNNING"
     )
     public void testFailedSdxResizeWithBackupCancelled(MockedTestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();
@@ -196,7 +196,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .then((tc, testDto, client) -> {
                     SdxClusterDetailResponse sdx = testDto.getResponse();
-                    assertEquals(sdx.getStatusReason(), "Datalake backup cancelled");
+                    assertEquals(sdx.getStatusReason(), "Data Lake backup cancelled");
                     return testDto;
                 })
                 .validate();

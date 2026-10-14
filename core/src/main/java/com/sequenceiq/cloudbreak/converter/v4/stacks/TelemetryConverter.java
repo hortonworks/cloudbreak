@@ -130,7 +130,7 @@ public class TelemetryConverter {
     }
 
     public TelemetryRequest convert(DetailedEnvironmentResponse environment, SdxBasicView sdxBasicView) {
-        LOGGER.debug("Creating telemetry request based on datalake and environment responses.");
+        LOGGER.debug("Creating telemetry request based on Data Lake and environment responses.");
         TelemetryResponse telemetryResponse = environment != null ? environment.getTelemetry() : null;
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();
@@ -197,7 +197,7 @@ public class TelemetryConverter {
                     .map(FeaturesBase::getWorkloadAnalytics);
             if (workloadAnalyticsFeature.isPresent()) {
                 if (workloadAnalyticsFeature.get().getEnabled()) {
-                    LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with datalake details.");
+                    LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with Data Lake details.");
                     workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
                     workloadAnalyticsRequest.setAttributes(createWorkloadAnalyticsAttributes(environment, sdxBasicView));
                 } else {
@@ -406,7 +406,7 @@ public class TelemetryConverter {
             }
         }
         if (sdxBasicView != null) {
-            LOGGER.debug("Adding datalake references to workload analytics attributes.");
+            LOGGER.debug("Adding Data Lake references to workload analytics attributes.");
             if (StringUtils.isNotEmpty(sdxBasicView.crn())) {
                 attributes.put(DATABUS_HEADER_SDX_ID, Crn.safeFromString(sdxBasicView.crn()).getResource());
                 attributes.put(DATABUS_HEADER_DATALAKE_CRN, sdxBasicView.crn());

@@ -22,9 +22,9 @@ public class PollerRunnerImpl implements PollerRunner {
             String processName,
             SdxCluster sdxCluster) {
         try {
-            LOGGER.debug("Starting polling for {} for SDX: {}", processName, sdxCluster.getName());
+            LOGGER.debug("Starting polling for {} for Data Lake: {}", processName, sdxCluster.getName());
             pollingCommand.accept(pollingConfig);
-            LOGGER.debug("{} succeeded for SDX: {}", processName, sdxCluster.getName());
+            LOGGER.debug("{} succeeded for Data Lake: {}", processName, sdxCluster.getName());
             return PollerRunnerResult.ofSuccess();
         } catch (UserBreakException userBreakException) {
             String message = String.format("%s poller exited before timeout. Cause: %s", processName, userBreakException);

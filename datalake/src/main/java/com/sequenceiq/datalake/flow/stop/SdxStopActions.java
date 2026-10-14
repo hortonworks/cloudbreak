@@ -68,7 +68,7 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartStopEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Execute stop flow for SDX: {}", payload.getResourceId());
+                LOGGER.info("Execute stop flow for Data Lake: {}", payload.getResourceId());
                 stopService.stop(payload.getResourceId());
                 if (payload.isStopDataHubs()) {
                     sendEvent(context, SDX_STOP_ALL_DATAHUB_EVENT.event(), payload);
@@ -95,7 +95,7 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Stopping all datahub clusters for SDX in progress: {}", payload.getResourceId());
+                LOGGER.info("Stopping all datahub clusters for Data Lake in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
 
@@ -122,7 +122,7 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("SDX stop in progress: {}", payload.getResourceId());
+                LOGGER.info("Data Lake stop in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
 
@@ -149,7 +149,7 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStopSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("SDX RDS stop in progress: {}", payload.getResourceId());
+                LOGGER.info("Data Lake RDS stop in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
 
@@ -176,8 +176,8 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsStopSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("SDX stop finalized: {}", payload.getResourceId());
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake is stopped", payload.getResourceId());
+                LOGGER.info("Data Lake stop finalized: {}", payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Data Lake is stopped", payload.getResourceId());
                 sendEvent(context, SDX_STOP_FINALIZED_EVENT.event(), payload);
             }
 
@@ -201,8 +201,8 @@ public class SdxStopActions {
             protected void doExecute(SdxContext context, SdxFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.STOP_FAILED;
-                LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
-                String statusReason = "SDX stop failed";
+                LOGGER.info("Update Data Lake status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
+                String statusReason = "Data Lake stop failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
@@ -211,7 +211,7 @@ public class SdxStopActions {
                 if (flowChainLogService.isFlowTriggeredByFlowChain(
                         DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
                         flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId()))) {
-                    statusReason = "Datalake resize failure: " + statusReason;
+                    statusReason = "Data Lake resize failure: " + statusReason;
                 }
                 sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, List.of(Optional.ofNullable(exception.getMessage()).orElse("")),
                         statusReason, payload.getResourceId());

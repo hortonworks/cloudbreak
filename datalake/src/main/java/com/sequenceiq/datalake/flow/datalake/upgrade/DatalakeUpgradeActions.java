@@ -81,7 +81,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake upgrade has been started for {}", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade has been started for {}", payload.getResourceId());
                 sdxUpgradeService.upgradeRuntime(payload.getResourceId(), payload.getImageId(), payload.isRollingUpgradeEnabled());
                 sendEvent(context, DATALAKE_UPGRADE_IN_PROGRESS_EVENT.event(), payload);
             }
@@ -105,7 +105,7 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 String imageId = (String) variables.get(TARGET_IMAGE);
-                LOGGER.info("Datalake upgrade is in progress for {} with image: {}", payload.getResourceId(), imageId);
+                LOGGER.info("Data Lake upgrade is in progress for {} with image: {}", payload.getResourceId(), imageId);
                 sendEvent(context, DatalakeUpgradeWaitRequest.from(context, imageId));
             }
 
@@ -127,7 +127,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeImageChangeEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Start Datalake upgrade image change for {} ", payload.getResourceId());
+                LOGGER.info("Start Data Lake upgrade image change for {} ", payload.getResourceId());
                 sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 String catalogName = sdxUpgradeService.getCurrentImageCatalogName(payload.getResourceId());
                 UpgradeOptionV4Response upgrade = new UpgradeOptionV4Response().upgrade(
@@ -156,7 +156,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeChangeImageWaitRequest payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake upgrade image change is in progress for {} ", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade image change is in progress for {} ", payload.getResourceId());
                 sendEvent(context, new DatalakeChangeImageWaitRequest(context, payload.getUpgradeOption()));
             }
 
@@ -182,7 +182,7 @@ public class DatalakeUpgradeActions {
                     boolean rollingUpgradeEnabled = Boolean.TRUE.equals(variables.get(ROLLING_UPGRADE_ENABLED));
                     boolean keepVariant = Boolean.TRUE.equals(variables.get(KEEP_VARIANT));
                     String imageId = (String) variables.get(TARGET_IMAGE);
-                    LOGGER.info("Start Datalake upgrade vm replacement for {} rolling upgrade enabled: {}, keepVariant: {}, targetImage: {}",
+                    LOGGER.info("Start Data Lake upgrade vm replacement for {} rolling upgrade enabled: {}, keepVariant: {}, targetImage: {}",
                             payload.getResourceId(), rollingUpgradeEnabled, keepVariant, imageId);
                     sdxUpgradeService.upgradeOs(payload.getResourceId(), imageId, rollingUpgradeEnabled, keepVariant);
                     sendEvent(context, new SdxEvent(DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT.event(), context));
@@ -209,7 +209,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake upgrade vm replacement is in progress for {} ", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade vm replacement is in progress for {} ", payload.getResourceId());
                 sendEvent(context, new DatalakeVmReplaceWaitRequest(context));
             }
 
@@ -232,7 +232,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Sdx upgrade was finalized with sdx id: {}", payload.getResourceId());
+                LOGGER.info("Data Lake upgrade was finalized with Data Lake id: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_UPGRADE_FINISHED,
@@ -261,7 +261,7 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeCouldNotStartEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake upgrade could not be started for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Data Lake upgrade could not be started for Data Lake with id: {}", payload.getResourceId(), exception);
                 sendEvent(context, DATALAKE_UPGRADE_FAILED_HANDLED_EVENT.event(), payload);
             }
 
@@ -283,7 +283,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeValidationFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn("Sdx upgrade validation failed for sdxId: {}", payload.getResourceId());
+                LOGGER.warn("Data Lake upgrade validation failed for sdxId: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         "Upgrade validation failed",
@@ -309,7 +309,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn("Sdx upgrade failed for sdxId: {}", payload.getResourceId());
+                LOGGER.warn("Data Lake upgrade failed for sdxId: {}", payload.getResourceId());
                 sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED,

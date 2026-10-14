@@ -21,18 +21,18 @@ public class SdxUpgradeDatabaseServerAction implements Action<SdxTestDto, SdxCli
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         SdxUpgradeDatabaseServerRequest upgradeDatabaseServerRequest = testDto.getSdxUpgradeDatabaseServerRequest();
 
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+        Log.when(LOGGER, " Data Lake endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", Data Lake's environment: "
                 + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX upgrade database server request: ", upgradeDatabaseServerRequest);
+        Log.whenJson(LOGGER, " Data Lake upgrade database server request: ", upgradeDatabaseServerRequest);
         SdxUpgradeDatabaseServerResponse upgradeDatabaseServerResponse = client.getDefaultClient(testContext)
                 .sdxUpgradeEndpoint()
                 .upgradeDatabaseServerByName(testDto.getName(), upgradeDatabaseServerRequest);
-        testDto.setFlow("SDX upgrade database server", upgradeDatabaseServerResponse.getFlowIdentifier());
+        testDto.setFlow("Data Lake upgrade database server", upgradeDatabaseServerResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX upgrade database server response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake upgrade database server response: ", detailedResponse);
         return testDto;
     }
 }

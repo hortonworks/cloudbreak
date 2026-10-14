@@ -129,7 +129,7 @@ class DatalakePeriodicSecretRotationServiceTest {
 
         assertThatThrownBy(() -> underTest.isSchedulable(RESOURCE_CRN))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Datalake stack with resource crn")
+                .hasMessageContaining("Data Lake stack with resource crn")
                 .hasMessageContaining("not found or deleted");
     }
 

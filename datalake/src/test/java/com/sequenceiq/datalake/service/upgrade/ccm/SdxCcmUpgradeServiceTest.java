@@ -108,9 +108,9 @@ class SdxCcmUpgradeServiceTest {
     @Test
     void testNoDatalakeForEnv() {
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of());
-        when(messagesService.getMessage(any(), any())).thenReturn("no datalake");
+        when(messagesService.getMessage(any(), any())).thenReturn("no Data Lake");
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
-        assertThat(response.getReason()).isEqualTo("no datalake");
+        assertThat(response.getReason()).isEqualTo("no Data Lake");
         assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
     }
 

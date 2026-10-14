@@ -15,7 +15,8 @@ public class SdxConverter {
 
     public SharedServiceV4Request getSharedService(SdxBasicView sdx) {
         if (sdx == null) {
-            LOGGER.info("We don't attach the cluster to any Datalake, because the environment has not SDX. So we continue the creation as simple WORKLOAD.");
+            LOGGER.info("We don't attach the cluster to any Data Lake, because the environment has not Data Lake. So we continue the creation as simple " +
+                    "WORKLOAD.");
             return null;
         }
         return getSharedServiceV4Request(sdx);

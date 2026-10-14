@@ -62,8 +62,8 @@ public class DistroXGcpVolumesTest extends AbstractE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak and an environment with no freeipa",
-            when = "creating a new FreeIpa, Datalake and Datahub with instancetypes supporting hyperdisk on GCP",
-            then = "Freeipa, Datalake, Datahub should be created successfuly, all the datahub disks should be properly mounted")
+            when = "creating a new FreeIpa, Data Lake and Data Hub with instancetypes supporting hyperdisk on GCP",
+            then = "Freeipa, Data Lake, Data Hub should be created successfuly, all the Data Hub disks should be properly mounted")
     public void testNewGenGcpInstanceTypesWithHyperDiskSupport(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)

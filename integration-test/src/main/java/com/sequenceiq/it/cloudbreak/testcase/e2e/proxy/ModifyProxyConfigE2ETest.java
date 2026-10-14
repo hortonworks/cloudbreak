@@ -56,7 +56,7 @@ public class ModifyProxyConfigE2ETest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running FreeIpa/Datalake/Datahub ",
+            given = "there is a running FreeIpa/Data Lake/Data Hub ",
             when = "adding/modifying/removing proxy config ",
             then = "all existing and newly created nodes should have the new proxy config settings "
     )

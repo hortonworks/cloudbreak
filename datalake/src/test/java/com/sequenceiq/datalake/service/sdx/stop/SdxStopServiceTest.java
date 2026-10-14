@@ -51,7 +51,7 @@ public class SdxStopServiceTest {
 
     private static final Long CLUSTER_ID = 1L;
 
-    private static final String UNSTOPPABLE_FLOW_EXCEPTION_MESSAGE = "Can't stop datalake! Reason: Datalake " +
+    private static final String UNSTOPPABLE_FLOW_EXCEPTION_MESSAGE = "Can't stop Data Lake! Reason: Data Lake " +
             "%s can not be stopped while flow chain %s is running.";
 
     @Mock
@@ -116,7 +116,7 @@ public class SdxStopServiceTest {
         underTest.stop(CLUSTER_ID);
 
         verify(stackV4Endpoint).putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Data Lake stop in progress", sdxCluster);
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
     }
 
@@ -128,7 +128,7 @@ public class SdxStopServiceTest {
         underTest.stop(CLUSTER_ID);
 
         verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS,
-                ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress", sdxCluster);
+                ResourceEvent.SDX_STOP_STARTED, "Data Lake stop in progress", sdxCluster);
         verify(cloudbreakFlowService, times(0)).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
     }
 

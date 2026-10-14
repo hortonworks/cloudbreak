@@ -21,16 +21,16 @@ public class SdxScaleAction implements Action<SdxScaleTestDto, SdxClient> {
 
     @Override
     public SdxScaleTestDto action(TestContext testContext, SdxScaleTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Scaling SDX: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " Scaling SDX request: ", testDto.getRequest());
+        Log.when(LOGGER, format(" Scaling Data Lake: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Scaling Data Lake request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().horizontalScaleByName(testDto.getName(),
                 testDto.getRequest());
-        testDto.setFlow("SDX scale", flowIdentifier);
+        testDto.setFlow("Data Lake scale", flowIdentifier);
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX scale response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake scale response: ", detailedResponse);
         return testDto;
     }
 }

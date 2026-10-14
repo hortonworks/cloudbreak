@@ -30,7 +30,7 @@ public class UpdateTrustedRealmFailureAction extends UpdateTrustedRealmAction<Up
 
     @Override
     protected void doExecute(SdxContext context, UpdateTrustedRealmFailureResponse payload, Map<Object, Object> variables) throws Exception {
-        LOGGER.info("Update trusted realm failed for SDX stack {}", context.getSdxId());
+        LOGGER.info("Update trusted realm failed for Data Lake stack {}", context.getSdxId());
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPDATE_TRUSTED_REALM_FAILED,
                 payload.getException().getMessage(), context.getSdxId());
         sendEvent(context);

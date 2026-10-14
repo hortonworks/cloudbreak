@@ -109,8 +109,8 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "creating sequentally and separatelly environment, FreeIpa then SDX with metering pre-warmed images and no database",
-            when = "when new freeIpa and SDX are up and running then new DistroX should be created also with metering pre-warmed image and no database",
+            given = "creating sequentally and separatelly environment, FreeIpa then Data Lake with metering pre-warmed images and no database",
+            when = "when new freeIpa and Data Lake are up and running then new DistroX should be created also with metering pre-warmed image and no database",
                 and = "metering should be tested on all the Master host groups",
             then = "Metering Services, Scrapping and Metrics should be up and running on instances")
     public void testMonitoringOnFreeIpaSdxDistrox(TestContext testContext) {

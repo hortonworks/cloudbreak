@@ -93,7 +93,7 @@ public class SdxPollerService {
                         .run(sdxPollerProvider.flowListPoller(envId, flowIdentifiers));
             }
             if (multipleFlowsResultEvaluator.anyFailed(flowIdentifiers)) {
-                throw new EnvironmentServiceException(String.format("Sdx flow operation failed. FlowIds: %s", flowIdentifiers));
+                throw new EnvironmentServiceException(String.format("Data Lake flow operation failed. FlowIds: %s", flowIdentifiers));
             }
         } catch (PollerException e) {
             if (e.getCause() != null && e.getCause() instanceof WebApplicationException) {
@@ -116,9 +116,10 @@ public class SdxPollerService {
                     String crn = response.getCrn();
                     FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
                     if (skipStatuses.contains(response.getStatus())) {
-                        LOGGER.info("The env operation is skipped because of the status of sdx in the proper state: {}", skipStatuses);
+                        LOGGER.info("The env operation is skipped because of the status of Data Lake in the proper state: {}", skipStatuses);
                     } else {
-                        LOGGER.info("The env operation is executed, the status of sdx is {} but the skip status is {}", response.getStatus(), skipStatuses);
+                        LOGGER.info("The env operation is executed, the status of Data Lake is {} but the skip status is {}",
+                                response.getStatus(), skipStatuses);
                         flowIdentifier = sdxOperation.apply(crn);
                     }
                     return flowIdentifier;
@@ -127,7 +128,7 @@ public class SdxPollerService {
     }
 
     private Collection<SdxClusterResponse> getAttachedDatalakeClusters(String environmentName) {
-        LOGGER.debug("Getting SDX clusters for environment: '{}'", environmentName);
+        LOGGER.debug("Getting Data Lake clusters for environment: '{}'", environmentName);
         return sdxService.list(environmentName);
     }
 }

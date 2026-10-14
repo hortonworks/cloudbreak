@@ -92,42 +92,42 @@ public interface SdxEndpoint {
     @POST
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "create SDX cluster", operationId = "createSdx",
+    @Operation(summary = "create Data Lake cluster", operationId = "createSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength @PathParam("name") String name, @Valid SdxClusterRequest createSdxClusterRequest);
 
     @GET
     @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "list SDX clusters", operationId = "listSdx",
+    @Operation(summary = "list Data Lake clusters", operationId = "listSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxClusterResponse> list(@QueryParam("envName") String envName, @DefaultValue("false") @QueryParam("includeDetached") boolean includeDetached);
 
     @GET
     @Path("list/internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "list SDX clusters internally", operationId = "listSdxInternal",
+    @Operation(summary = "list Data Lake clusters internally", operationId = "listSdxInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxClusterResponse> internalList(@QueryParam("accountId") @NotEmpty String accountId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get SDX cluster", operationId = "getSdx",
+    @Operation(summary = "get Data Lake cluster", operationId = "getSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterResponse get(@PathParam("name") String name);
 
     @GET
     @Path("/crn/{clusterCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get SDX cluster by crn", operationId = "getSdxByCrn",
+    @Operation(summary = "get Data Lake cluster by crn", operationId = "getSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn(resource = VM_DATALAKE) String clusterCrn);
 
     @GET
     @Path("/envcrn/{envCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get SDX cluster by environment crn", operationId = "getSdxByEnvCrn",
+    @Operation(summary = "get Data Lake cluster by environment crn", operationId = "getSdxByEnvCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxClusterResponse> getByEnvCrn(@PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
             @DefaultValue("false") @QueryParam("includeDetached") boolean includeDetached);
@@ -135,28 +135,28 @@ public interface SdxEndpoint {
     @GET
     @Path("{name}/detail")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get SDX cluster detail", operationId = "getSdxDetail",
+    @Operation(summary = "get Data Lake cluster detail", operationId = "getSdxDetail",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterDetailResponse getDetail(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @GET
     @Path("/crn/{clusterCrn}/detail")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get SDX cluster detail by crn", operationId = "getSdxDetailByCrn",
+    @Operation(summary = "get Data Lake cluster detail by crn", operationId = "getSdxDetailByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterDetailResponse getDetailByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("entries") Set<String> entries);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "delete SDX cluster", operationId = "deleteSdx",
+    @Operation(summary = "delete Data Lake cluster", operationId = "deleteSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier delete(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @POST
     @Path("{name}/resize")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Re-size SDX cluster", operationId = "resizeSdx",
+    @Operation(summary = "Re-size Data Lake cluster", operationId = "resizeSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterResponse resize(@PathParam("name") String name, @Valid SdxClusterResizeRequest resizeSdxClusterRequest);
 
@@ -170,84 +170,84 @@ public interface SdxEndpoint {
     @DELETE
     @Path("/crn/{clusterCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "delete SDX cluster by crn", operationId = "deleteSdxByCrn",
+    @Operation(summary = "delete Data Lake cluster by crn", operationId = "deleteSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @POST
     @Path("{name}/manual_repair")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "repairs an sdxNode in the specified hostgroup", operationId = "repairSdxNode",
+    @Operation(summary = "repairs a Data Lake node in the specified hostgroup", operationId = "repairSdxNode",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier repairCluster(@PathParam("name") String name, SdxRepairRequest clusterRepairRequest);
 
     @POST
     @Path("/crn/{crn}/manual_repair")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "repairs an sdxNode in the specified hostgroup by crn", operationId = "repairSdxNodeByCrn",
+    @Operation(summary = "repairs a Data Lake node in the specified hostgroup by crn", operationId = "repairSdxNodeByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier repairClusterByCrn(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
 
     @POST
     @Path("/crn/{crn}/renew_certificate")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "renew certificate on SDX cluster by crn", operationId = "renewCertificateOnSdxByCrn",
+    @Operation(summary = "renew certificate on Data Lake cluster by crn", operationId = "renewCertificateOnSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier renewCertificate(@PathParam("crn") String crn);
 
     @POST
     @Path("{name}/sync")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "sync SDX cluster by name", operationId = "syncSdx",
+    @Operation(summary = "sync Data Lake cluster by name", operationId = "syncSdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void sync(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/sync")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "sync SDX cluster by crn", operationId = "syncSdxByCrn",
+    @Operation(summary = "sync Data Lake cluster by crn", operationId = "syncSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void syncByCrn(@PathParam("crn") String crn);
 
     @POST
     @Path("{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "retry sdx", operationId = "retrySdx",
+    @Operation(summary = "retry Data Lake", operationId = "retrySdx",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier retry(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "retry sdx by crn", operationId = "retrySdxByCrn",
+    @Operation(summary = "retry Data Lake by crn", operationId = "retrySdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier retryByCrn(@PathParam("crn") String crn);
 
     @POST
     @Path("{name}/start")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "start sdx", operationId = "startSdxByName",
+    @Operation(summary = "start Data Lake", operationId = "startSdxByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier startByName(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/start")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "start sdx by crn", operationId = "startSdxByCrn",
+    @Operation(summary = "start Data Lake by crn", operationId = "startSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier startByCrn(@PathParam("crn") String crn);
 
     @POST
     @Path("{name}/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "stop sdx", operationId = "stopSdxByName",
+    @Operation(summary = "stop Data Lake", operationId = "stopSdxByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier stopByName(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "stop sdx by crn", operationId = "stopSdxByCrn",
+    @Operation(summary = "stop Data Lake by crn", operationId = "stopSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier stopByCrn(@PathParam("crn") String crn);
 
@@ -272,14 +272,14 @@ public interface SdxEndpoint {
     @GET
     @Path("/versions")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "list datalake versions", operationId = "versions",
+    @Operation(summary = "list Data Lake versions", operationId = "versions",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<String> versions(@QueryParam("cloudPlatform") String cloudPlatform, @QueryParam("os") String os);
 
     @GET
     @Path("/advertisedruntimes")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "list advertised datalake versions", operationId = "advertisedruntimes",
+    @Operation(summary = "list advertised Data Lake versions", operationId = "advertisedruntimes",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform, @QueryParam("os") String os,
             @QueryParam("armEnabled") boolean armEnabled);
@@ -365,21 +365,21 @@ public interface SdxEndpoint {
     @POST
     @Path("{name}/sync_component_versions_from_cm")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "syncs CM and parcel versions from CM and updates SDX cluster version", operationId = "syncCmOnDatalakeCluster",
+    @Operation(summary = "syncs CM and parcel versions from CM and updates Data Lake cluster version", operationId = "syncCmOnDatalakeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByName(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/sync_component_versions_from_cm")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "syncs CM and parcel versions from CM and updates SDX cluster version", operationId = "syncCmOnDatalakeClusterByCrn",
+    @Operation(summary = "syncs CM and parcel versions from CM and updates Data Lake cluster version", operationId = "syncCmOnDatalakeClusterByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("instance_group_names")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gather available instance group names by SDX cluster attributes", operationId = "getInstanceGroupNamesBySdxDetails",
+    @Operation(summary = "Gather available instance group names by Data Lake cluster attributes", operationId = "getInstanceGroupNamesBySdxDetails",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Set<String> getInstanceGroupNamesBySdxDetails(
             @QueryParam("clusterShape") SdxClusterShape clusterShape,
@@ -396,7 +396,7 @@ public interface SdxEndpoint {
     @GET
     @Path("default_template")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the default template for the given datalake shape, cloud platform and runtime version", operationId = "getDefaultTemplate",
+    @Operation(summary = "Gets the default template for the given Data Lake shape, cloud platform and runtime version", operationId = "getDefaultTemplate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxDefaultTemplateResponse getDefaultTemplate(
             @QueryParam("clusterShape") SdxClusterShape clusterShape,
@@ -407,7 +407,7 @@ public interface SdxEndpoint {
     @GET
     @Path("recommendation")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets default and recommended instance types for the given datalake shape, cloud platform and runtime version",
+    @Operation(summary = "Gets default and recommended instance types for the given Data Lake shape, cloud platform and runtime version",
             operationId = "getRecommendation",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecommendationResponse getRecommendation(
@@ -422,7 +422,7 @@ public interface SdxEndpoint {
     @GET
     @Path("crn/{crn}/internal/stoppable")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Determines if the datalake can be stopped", operationId = "isStoppable",
+    @Operation(summary = "Determines if the Data Lake can be stopped", operationId = "isStoppable",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxStopValidationResponse isStoppableInternal(@PathParam("crn") String crn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
@@ -443,7 +443,7 @@ public interface SdxEndpoint {
     @PUT
     @Path("/crn/{crn}/submitDatalakeDataSizes/internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Submits datalake data sizes to Thunderhead DR service", operationId = "submitDatalakeDataSizesInternal",
+    @Operation(summary = "Submits Data Lake data sizes to Thunderhead DR service", operationId = "submitDatalakeDataSizesInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void submitDatalakeDataSizesInternal(
             @PathParam("crn") String crn,
@@ -544,7 +544,7 @@ public interface SdxEndpoint {
     @Path("name/{name}/set_default_java_version")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Set default java version on the DataLake by its name",
+    @Operation(summary = "Set default java version on the Data Lake by its name",
             operationId = "setDataLakeDefaultJavaVersionByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier setDefaultJavaVersionByName(@PathParam("name") String name, @NotNull @Valid SetDefaultJavaVersionRequest request);
@@ -553,7 +553,7 @@ public interface SdxEndpoint {
     @Path("crn/{crn}/set_default_java_version")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Set default java version on the DataLake by its CRN",
+    @Operation(summary = "Set default java version on the Data Lake by its CRN",
             operationId = "setDataLakeDefaultJavaVersionByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
@@ -562,7 +562,7 @@ public interface SdxEndpoint {
     @GET
     @Path("crn/{crn}/list_available_java_versions")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "List available java versions on the DataLake by its CRN",
+    @Operation(summary = "List available java versions on the Data Lake by its CRN",
             operationId = "listDataLakeAvailableJavaVersionsByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<String> listAvailableJavaVersionsByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
@@ -585,7 +585,7 @@ public interface SdxEndpoint {
     @GET
     @Path("{name}/get_with_resources")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "get SDX cluster detail", description = "getSdxDetailWithResourcesByName",
+    @Operation(summary = "get Data Lake cluster detail", description = "getSdxDetailWithResourcesByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterDetailResponse getSdxDetailWithResourcesByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 

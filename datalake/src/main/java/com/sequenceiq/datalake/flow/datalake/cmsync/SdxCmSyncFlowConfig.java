@@ -63,6 +63,6 @@ public class SdxCmSyncFlowConfig extends AbstractFlowConfiguration<SdxCmSyncStat
 
     @Override
     public String getDisplayName() {
-        return "Sync CM version and parcels and update data lake version";
+        return "Sync CM version and parcels and update Data Lake version";
     }
 }

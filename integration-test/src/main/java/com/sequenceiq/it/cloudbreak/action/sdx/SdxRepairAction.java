@@ -27,17 +27,17 @@ public class SdxRepairAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Starting repair on SDX: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest(hostGroups));
+        Log.when(LOGGER, format(" Starting repair on Data Lake: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Data Lake repair request: ", testDto.getSdxRepairRequest(hostGroups));
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .repairCluster(testDto.getName(), testDto.getSdxRepairRequest(hostGroups));
-        testDto.setFlow("SDX repair", flowIdentifier);
+        testDto.setFlow("Data Lake repair", flowIdentifier);
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX repair response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake repair response: ", detailedResponse);
         return testDto;
     }
 }

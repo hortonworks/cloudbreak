@@ -74,7 +74,7 @@ public class DatalakeRootVolumeUpdateHandler extends ExceptionCatcherEventHandle
             Long stackId = payload.getStackId();
             SdxCluster sdxCluster = sdxService.getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), payload.getClusterName());
             RootVolumeUpdateRequest rootVolumeUpdateRequest = payload.getRootVolumeUpdateRequest();
-            LOGGER.debug("Starting Disk Update for datalake.");
+            LOGGER.debug("Starting Disk Update for Data Lake.");
             LOGGER.debug("Calling updateRootVolumeByStackCrnInternal with request :: {}", rootVolumeUpdateRequest);
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> {
@@ -84,7 +84,7 @@ public class DatalakeRootVolumeUpdateHandler extends ExceptionCatcherEventHandle
                                 diskUpdateRequest, payload.getInitiatorUserCrn());
                     });
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-            LOGGER.debug("Starting polling for datalake root disk update flow :: {}", flowIdentifier);
+            LOGGER.debug("Starting polling for Data Lake root disk update flow :: {}", flowIdentifier);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_INTERVAL_IN_SECONDS, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             sdxWaitService.waitForCloudbreakFlow(sdxCluster.getId(), pollingConfig, "Polling Root Disk Update Flow");
             LOGGER.debug("Root Disk Update flow is complete :: {}", flowIdentifier);

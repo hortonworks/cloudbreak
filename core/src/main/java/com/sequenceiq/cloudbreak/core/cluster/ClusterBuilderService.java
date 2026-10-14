@@ -158,7 +158,7 @@ public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier
             if (StringUtils.isNotEmpty(stackDto.getDatalakeCrn())) {
                 return stackDto.getDatalakeCrn();
             } else {
-                LOGGER.info("Datalake CRN not found in Stack. Fetching the CRN SDX services.");
+                LOGGER.info("Data Lake CRN not found in Stack. Fetching the CRN Data Lake services.");
                 return platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackDto.getEnvironmentCrn()).map(SdxBasicView::crn).orElse(null);
             }
         }

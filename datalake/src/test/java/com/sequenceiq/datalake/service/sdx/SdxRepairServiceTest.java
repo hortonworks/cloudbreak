@@ -94,7 +94,7 @@ public class SdxRepairServiceTest {
         assertEquals(List.of("master"), captor.getValue().getHostGroups());
         assertNull(captor.getValue().getNodes());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Data Lake repair in progress", cluster);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class SdxRepairServiceTest {
         assertNull(captor.getValue().getHostGroups());
         assertEquals(deleteVolumes, captor.getValue().getNodes().isDeleteVolumes());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Data Lake repair in progress", cluster);
     }
 
     @Test

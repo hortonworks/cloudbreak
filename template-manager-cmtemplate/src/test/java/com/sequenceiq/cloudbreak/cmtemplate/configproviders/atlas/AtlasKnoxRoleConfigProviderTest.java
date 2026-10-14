@@ -153,19 +153,19 @@ class AtlasKnoxRoleConfigProviderTest {
     @Test
     public void isDatalakeVersionSupportedVersion() {
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md.bp");
-        assertTrue(() -> underTest.isDatalakeVersionSupported(inputJson), "Unsupported DataLake version!");
+        assertTrue(() -> underTest.isDatalakeVersionSupported(inputJson), "Unsupported Data Lake version!");
     }
 
     @Test
     public void isDatalakeVersionSupportedVersionEqualsWithMinimumVersion() {
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md_equals_with_minimum_version.bp");
-        assertTrue(() -> underTest.isDatalakeVersionSupported(inputJson), "Unsupported DataLake version!");
+        assertTrue(() -> underTest.isDatalakeVersionSupported(inputJson), "Unsupported Data Lake version!");
     }
 
     @Test
     public void isDatalakeVersionSupportedUnsupportedVersion() {
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md_lower_version.bp");
-        assertFalse(() -> underTest.isDatalakeVersionSupported(inputJson), "Unsupported DataLake version!");
+        assertFalse(() -> underTest.isDatalakeVersionSupported(inputJson), "Unsupported Data Lake version!");
     }
 
     private void wireEncryptionEnable() {

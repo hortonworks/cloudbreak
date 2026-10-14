@@ -73,6 +73,6 @@ public class DatalakeUpdatePublicDnsEntriesFlowConfig
 
     @Override
     public String getDisplayName() {
-        return "Update public DNS entries for Datalake";
+        return "Update public DNS entries for Data Lake";
     }
 }

@@ -32,7 +32,7 @@ public class SdxRepairInternalByNodeIdsAction implements Action<SdxInternalTestD
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Starting repair by node IDs on SDX Internal: %s for host groups: %s", testDto.getName(), hostGroups));
+        Log.when(LOGGER, format(" Starting repair by node IDs on Data Lake Internal: %s for host groups: %s", testDto.getName(), hostGroups));
         SdxClusterDetailResponse detail = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
@@ -44,15 +44,15 @@ public class SdxRepairInternalByNodeIdsAction implements Action<SdxInternalTestD
         Log.when(LOGGER, format(" Collected %d node IDs for repair: %s", nodeIds.size(), nodeIds));
         SdxRepairRequest repairRequest = new SdxRepairRequest();
         repairRequest.setNodesIds(nodeIds);
-        Log.whenJson(LOGGER, " SDX Internal repair by node IDs request: ", repairRequest);
+        Log.whenJson(LOGGER, " Data Lake Internal repair by node IDs request: ", repairRequest);
         FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .repairCluster(testDto.getName(), repairRequest);
-        testDto.setFlow("SDX Internal repair by node IDs", flowIdentifier);
+        testDto.setFlow("Data Lake Internal repair by node IDs", flowIdentifier);
         testDto.setResponse(client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet()));
-        Log.whenJson(LOGGER, " SDX Internal repair response: ", testDto.getResponse());
+        Log.whenJson(LOGGER, " Data Lake Internal repair response: ", testDto.getResponse());
         return testDto;
     }
 }

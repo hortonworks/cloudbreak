@@ -27,14 +27,14 @@ public class SdxVerticalScaleAction implements Action<SdxInternalTestDto, SdxCli
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.whenJson(LOGGER, format(" SDX vertical scale for crn %n"), testDto.getCrn());
+        Log.whenJson(LOGGER, format(" Data Lake vertical scale for crn %n"), testDto.getCrn());
         if (testContext.getCloudProvider().verticalScalingSupported()) {
             StackVerticalScaleV4Request verticalScaleRequest = convertVerticalScaleTestDtoToStackV4VerticalScaleRequest(testContext);
             FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().verticalScalingByCrn(testDto.getCrn(), verticalScaleRequest);
-            testDto.setFlow("SDX vertical scale", flowIdentifier);
-            Log.whenJson(LOGGER, format(" SDX vertical scale started: %n"), testDto.getCrn());
+            testDto.setFlow("Data Lake vertical scale", flowIdentifier);
+            Log.whenJson(LOGGER, format(" Data Lake vertical scale started: %n"), testDto.getCrn());
         } else {
-            Log.when(LOGGER, "SDX vertical scale is not supported by now for the following cloud provider: " + testContext.getCloudPlatform());
+            Log.when(LOGGER, "Data Lake vertical scale is not supported by now for the following cloud provider: " + testContext.getCloudPlatform());
         }
         return testDto;
     }

@@ -45,7 +45,7 @@ public class WaitDataLakeSkuMigrationHandler extends ExceptionCatcherEventHandle
 
     @Override
     protected Selectable doAccept(HandlerEvent<WaitDataLakeSkuMigrationRequest> event) {
-        LOGGER.info("Start polling migrating skus for datalake, event: {}", event);
+        LOGGER.info("Start polling migrating skus for Data Lake, event: {}", event);
         WaitDataLakeSkuMigrationRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -54,10 +54,10 @@ public class WaitDataLakeSkuMigrationHandler extends ExceptionCatcherEventHandle
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
             sdxWaitService.waitForCloudbreakFlow(sdxCluster, pollingConfig, "Migrating skus");
-            LOGGER.info("Migrating Skus finished for SDX stack {}. Force: {}", sdxId, request.isForce());
+            LOGGER.info("Migrating Skus finished for Data Lake stack {}. Force: {}", sdxId, request.isForce());
             return new WaitDataLakeSkuMigrationResult(sdxId, userId);
         } catch (SdxWaitException e) {
-            LOGGER.warn("Migrating skus failed for SDX stack {}", sdxId, e);
+            LOGGER.warn("Migrating skus failed for Data Lake stack {}", sdxId, e);
             return new DataLakeSkuMigrationFailedEvent(sdxId, userId, e);
         }
     }

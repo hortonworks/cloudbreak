@@ -20,13 +20,13 @@ public class SdxDescribeInternalAction implements Action<SdxInternalTestDto, Sdx
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         if (testDto.getResponse() != null) {
-            Log.when(LOGGER, format(" SDX Crn: %s ", testDto.getCrn()));
+            Log.when(LOGGER, format(" Data Lake Crn: %s ", testDto.getCrn()));
         }
-        Log.whenJson(LOGGER, " SDX describe internal request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " Data Lake describe internal request: ", testDto.getRequest());
         testDto.setResponse(client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet()));
-        Log.whenJson(LOGGER, " SDX describe internal response: ", testDto.getResponse());
+        Log.whenJson(LOGGER, " Data Lake describe internal response: ", testDto.getResponse());
         return testDto;
     }
 }

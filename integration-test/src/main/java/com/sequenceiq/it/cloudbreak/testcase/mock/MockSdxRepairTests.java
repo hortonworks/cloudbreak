@@ -59,8 +59,8 @@ public class MockSdxRepairTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "terminate instances and repair an sdx cluster",
-            then = "SDX should be available"
+            when = "terminate instances and repair a Data Lake cluster",
+            then = "Data Lake should be available"
     )
     public void repairTerminatedMasterAndIdbroker(MockedTestContext testContext) {
         testRepair(testContext,
@@ -72,8 +72,8 @@ public class MockSdxRepairTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "terminate instances and repair an sdx cluster",
-            then = "SDX should be available"
+            when = "terminate instances and repair a Data Lake cluster",
+            then = "Data Lake should be available"
     )
     public void repairTerminatedMaster(MockedTestContext testContext) {
         testRepair(testContext,
@@ -85,7 +85,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "terminate instances and repair an sdx cluster",
+            when = "terminate instances and repair a Data Lake cluster",
             then = "repair should fail and repaired instance should be in deleted on provider side"
     )
     public void repairTerminatedMasterAndItFailedButInstanceShouldBeDeletedOnProviderSide(MockedTestContext testContext) {
@@ -138,8 +138,8 @@ public class MockSdxRepairTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, invocationCount = 1)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "stop and repair an sdx cluster",
-            then = "SDX should be available"
+            when = "stop and repair a Data Lake cluster",
+            then = "Data Lake should be available"
     )
     public void repairStoppedMasterAndIdbroker(MockedTestContext testContext) {
         testRepair(testContext,

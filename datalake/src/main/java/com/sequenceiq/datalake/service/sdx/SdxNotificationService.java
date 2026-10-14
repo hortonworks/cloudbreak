@@ -42,7 +42,7 @@ public class SdxNotificationService {
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx, String userCrn) {
         webSocketNotificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), userCrn, null);
-        LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
+        LOGGER.info("Data Lake Notification has been sent: {}", resourceEvent);
     }
 
     private String getUserCrn(SdxCluster sdxCluster) {

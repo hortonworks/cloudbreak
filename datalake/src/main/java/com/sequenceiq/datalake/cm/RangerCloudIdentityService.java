@@ -48,11 +48,11 @@ public class RangerCloudIdentityService {
 
     private RangerCloudIdentitySyncStatus setAzureCloudIdentityMapping(String envCrn, SdxCluster sdxCluster, Map<String, String> azureUserMapping) {
         String stackCrn = sdxCluster.getStackCrn();
-        LOGGER.info("Updating azure cloud id mappings for envCrn = {}, datalake stack crn = {}", envCrn, stackCrn);
+        LOGGER.info("Updating azure cloud id mappings for envCrn = {}, Data Lake stack crn = {}", envCrn, stackCrn);
         try {
             if (!clouderaManagerRangerUtil.isCloudIdMappingSupported(sdxCluster.getStackCrn())) {
                 return newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE,
-                        "The datalake does not support cloud identity sync. Sync request is ignored.");
+                        "The Data Lake does not support cloud identity sync. Sync request is ignored.");
             }
             List<ApiCommand> apiCommands = clouderaManagerRangerUtil.setAzureCloudIdentityMapping(stackCrn, azureUserMapping);
             if (apiCommands.isEmpty()) {
@@ -71,23 +71,23 @@ public class RangerCloudIdentityService {
         if (sdxClusters.isEmpty()) {
             return Optional.empty();
         } else if (sdxClusters.size() > 1) {
-            LOGGER.error("Multiple datalakes per environment not supported, environmentCrn = {}", envCrn);
-            throw new IllegalStateException("Multiple datalakes per environment not supported");
+            LOGGER.error("Multiple Data Lakes per environment not supported, environmentCrn = {}", envCrn);
+            throw new IllegalStateException("Multiple Data Lakes per environment not supported");
         }
         return Optional.of(Iterables.getOnlyElement(sdxClusters));
     }
 
     private boolean isDatalakeRunning(SdxCluster sdxCluster) {
         SdxStatusEntity sdxStatusEntity = sdxStatusService.getActualStatusForSdx(sdxCluster);
-        LOGGER.debug("SDX status = {}", sdxStatusEntity.getStatus());
+        LOGGER.debug("Data Lake status = {}", sdxStatusEntity.getStatus());
         return sdxStatusEntity.getStatus().equals(DatalakeStatusEnum.RUNNING);
     }
 
     public Optional<RangerCloudIdentitySyncStatus> checkIfUnapplicable(Optional<SdxCluster> sdxCluster) {
         if (sdxCluster.isEmpty()) {
-            return Optional.of(newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE, "No datalakes associated with the environment."));
+            return Optional.of(newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE, "No Data Lakes associated with the environment."));
         } else if (!isDatalakeRunning(sdxCluster.get())) {
-            return Optional.of(newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE, "Datalake is not running for the environment."));
+            return Optional.of(newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE, "Data Lake is not running for the environment."));
         } else {
             return Optional.empty();
         }

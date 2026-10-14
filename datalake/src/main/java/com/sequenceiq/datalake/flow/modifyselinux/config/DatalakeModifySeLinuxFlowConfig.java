@@ -75,7 +75,7 @@ public class DatalakeModifySeLinuxFlowConfig extends AbstractFlowConfiguration<D
 
     @Override
     public String getDisplayName() {
-        return "Enable SeLinux Datalake";
+        return "Enable SeLinux Data Lake";
     }
 
     @Override

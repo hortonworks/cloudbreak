@@ -52,7 +52,7 @@ public class SdxDatabaseInstanceTypeService {
         List<DatabaseInstanceTypeV4> filtered = filterByDefaultSpec(vmTypes, defaultInstanceType,
                 capabilities.getRegionFallbackInstances().getOrDefault(region, List.of()));
 
-        LOGGER.info("Returning {} curated database instance types for datalake in region {} (default: {})", filtered.size(), region, defaultInstanceType);
+        LOGGER.info("Returning {} curated database instance types for Data Lake in region {} (default: {})", filtered.size(), region, defaultInstanceType);
         return new DatabaseInstanceTypesV4Response(filtered, defaultInstanceType);
     }
 

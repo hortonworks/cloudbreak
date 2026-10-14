@@ -21,7 +21,7 @@ public class DataLakeValidator {
 
     public void validate(Stack stack, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (stack.getEnvironmentCrn() != null && StackType.DATALAKE.equals(stack.getType())) {
-            LOGGER.info("Get data lake count in environment {}", stack.getEnvironmentCrn());
+            LOGGER.info("Get Data Lake count in environment {}", stack.getEnvironmentCrn());
             Long datalakesInEnv = sdxClientService.getByEnvironmentCrn(stack.getEnvironmentCrn())
                     .stream()
                     .filter(sdxClusterResponse -> !sdxClusterResponse.isDetached())

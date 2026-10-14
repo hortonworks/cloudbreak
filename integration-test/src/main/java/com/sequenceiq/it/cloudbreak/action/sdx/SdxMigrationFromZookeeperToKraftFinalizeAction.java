@@ -21,18 +21,18 @@ public class SdxMigrationFromZookeeperToKraftFinalizeAction implements Action<Sd
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Sdx finalize KRaft migration: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " Sdx finalize KRaft migration request: ", testDto.getRequest());
+        Log.when(LOGGER, format(" Data Lake finalize KRaft migration: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Data Lake finalize KRaft migration request: ", testDto.getRequest());
         FlowIdentifier flow = client.getDefaultClient(testContext)
                 .sdxKraftMigrationEndpoint()
                 .finalizeMigrationFromZookeeperToKraftByCrn(testDto.getCrn());
-        testDto.setFlow("Sdx finalize KRaft migration", flow);
+        testDto.setFlow("Data Lake finalize KRaft migration", flow);
 
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " Sdx finalize KRaft migration response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake finalize KRaft migration response: ", detailedResponse);
         return testDto;
     }
 }

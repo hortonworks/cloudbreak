@@ -450,7 +450,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext.given(storage, SdxCloudStorageTestDto.class);
         SdxCloudStorageTestDto cloudStorage = testContext.getCloudProvider().cloudStorage(testContext.get(storage));
         if (cloudStorage == null) {
-            throw new IllegalArgumentException("SDX Cloud Storage does not exist!");
+            throw new IllegalArgumentException("Data Lake Cloud Storage does not exist!");
         }
         return cloudStorage.getRequest();
     }

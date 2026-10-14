@@ -29,7 +29,7 @@ public abstract class AbstractDatalakeHorizontalScaleAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-        LOGGER.error("Datalake horizontal scale failed with exception.", ex);
+        LOGGER.error("Data Lake horizontal scale failed with exception.", ex);
         return payload;
     }
 }

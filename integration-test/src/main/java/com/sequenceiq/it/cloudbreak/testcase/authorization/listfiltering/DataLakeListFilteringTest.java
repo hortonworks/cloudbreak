@@ -54,9 +54,9 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there are datalakes",
+            given = "there are Data Lakes",
             when = "users share with each other",
-            then = "they see the other's datalake in the list")
+            then = "they see the other's Data Lake in the list")
     public void testDataLakeListFiltering(TestContext testContext) {
         testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);

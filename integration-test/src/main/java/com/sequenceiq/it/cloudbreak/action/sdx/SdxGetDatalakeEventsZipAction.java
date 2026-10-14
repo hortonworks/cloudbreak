@@ -18,13 +18,13 @@ public class SdxGetDatalakeEventsZipAction implements Action<SdxEventTestDto, Sd
 
     @Override
     public SdxEventTestDto action(TestContext testContext, SdxEventTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, "Getting zipped datalake events via " + client.getDefaultClient(testContext).sdxEventEndpoint() +
+        Log.when(LOGGER, "Getting zipped Data Lake events via " + client.getDefaultClient(testContext).sdxEventEndpoint() +
                 ", for input " + testDto.argsToString());
         Response zippedDatalakeEvents = client.getDefaultClient(testContext).sdxEventEndpoint().getDatalakeEventsZip(
                 testDto.getEnvironmentCrn(), testDto.getTypes()
         );
         testDto.setZippedResponseStatus(Optional.of(zippedDatalakeEvents.getStatus()));
-        Log.when(LOGGER, "Zipped datalake events response: " + zippedDatalakeEvents);
+        Log.when(LOGGER, "Zipped Data Lake events response: " + zippedDatalakeEvents);
         return testDto;
     }
 }

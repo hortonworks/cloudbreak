@@ -40,7 +40,7 @@ public class DistroXCustomTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running cloudbreak and existin environment, distrox, datalake",
+            given = "there is a running cloudbreak and existin environment, distrox, Data Lake",
             when = "a valid DistroX",
             then = "DistroX cluster is mutliaz")
     public void testForUserToRunExistingResources(TestContext testContext) {

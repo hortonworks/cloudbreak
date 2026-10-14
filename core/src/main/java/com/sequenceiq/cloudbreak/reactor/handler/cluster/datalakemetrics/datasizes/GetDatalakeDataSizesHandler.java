@@ -85,7 +85,7 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
 
     @Override
     protected Selectable defaultFailureEvent(Long stackId, Exception ex, Event<GetDatalakeDataSizesRequest> request) {
-        LOGGER.error("Failed to get the datalake data sizes for stack with ID: '" + stackId.toString() + '\'', ex);
+        LOGGER.error("Failed to get the Data Lake data sizes for stack with ID: '" + stackId.toString() + '\'', ex);
         return new DetermineDatalakeDataSizesFailureEvent(stackId, ex);
     }
 
@@ -124,7 +124,7 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
             checkDataSizesResultValid(result);
             return new DetermineDatalakeDataSizesSubmissionEvent(stackId, result, request.getOperationId());
         } catch (Exception ex) {
-            LOGGER.error("Failed to get datalake data sizes via Salt.", ex);
+            LOGGER.error("Failed to get Data Lake data sizes via Salt.", ex);
             return new DetermineDatalakeDataSizesFailureEvent(stackId, ex);
         }
     }

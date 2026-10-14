@@ -59,7 +59,7 @@ public class DatalakeHorizontalScaleWaitHandler extends EventSenderAwareHandler<
         try {
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
-            cloudbreakPoller.pollUpdateUntilAvailable("Datalake horizontal scaling",
+            cloudbreakPoller.pollUpdateUntilAvailable("Data Lake horizontal scaling",
                     sdxCluster, pollingConfig);
             DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
                     .datalakeHorizontalScaleFlowEventBuilderFactory(data)
@@ -67,7 +67,7 @@ public class DatalakeHorizontalScaleWaitHandler extends EventSenderAwareHandler<
             LOGGER.info("Polling finished for cluster: {}", sdxCluster.getCrn());
             eventSender().sendEvent(resultEventBuilder.build(), event.getHeaders());
         } catch (SdxWaitException e) {
-            LOGGER.info("Flow failed. Waiting for Datalake Horizontal scaling timed out.", e);
+            LOGGER.info("Flow failed. Waiting for Data Lake Horizontal scaling timed out.", e);
 
             DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
                     .datalakeHorizontalScaleFlowEventBuilderFactory(data)

@@ -24,7 +24,7 @@ public class DatabaseEngineVersionReaderService {
     public Optional<MajorVersion> getDatabaseServerMajorVersion(SdxCluster sdxCluster) {
         StackDatabaseServerResponse stackDatabaseServerResponse = databaseService.getDatabaseServer(sdxCluster.getDatabaseCrn());
         Optional<MajorVersion> databaseServerMajorVersion = Optional.ofNullable(stackDatabaseServerResponse.getMajorVersion());
-        LOGGER.debug("Database server major version is now {} for SDX {}", databaseServerMajorVersion, sdxCluster);
+        LOGGER.debug("Database server major version is now {} for Data Lake {}", databaseServerMajorVersion, sdxCluster);
         return databaseServerMajorVersion;
     }
 }

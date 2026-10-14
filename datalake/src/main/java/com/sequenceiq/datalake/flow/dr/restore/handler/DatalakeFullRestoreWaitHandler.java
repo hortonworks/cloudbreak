@@ -61,7 +61,7 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
         int duration = backupRestoreTimeoutService.getRestoreTimeout(sdxId, request.getFullDrMaxDurationInMin(), durationInMinutes, 0);
         LOGGER.info("Timeout duration for full restore set to {} minutes.", duration);
         try {
-            LOGGER.info("Start polling datalake full restore status for id: {} with timeout duration: {}", sdxId, duration);
+            LOGGER.info("Start polling Data Lake full restore status for id: {} with timeout duration: {}", sdxId, duration);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
                 TimeUnit.MINUTES);
             sdxBackupRestoreService.waitForDatalakeDrRestoreToComplete(sdxId, request.getOperationId(), request.getUserId(),
@@ -73,12 +73,12 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Full restore poller stopped for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId,
-                new PollerStoppedException("Data lake restore timed out after " + duration + " minutes"));
+                new PollerStoppedException("Data Lake restore timed out after " + duration + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Full restore polling failed for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakServiceException exception) {
-            LOGGER.info("Datalake restore failed. Reason: {}", exception.getMessage());
+            LOGGER.info("Data Lake restore failed. Reason: {}", exception.getMessage());
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         }
         return response;

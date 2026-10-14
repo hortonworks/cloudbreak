@@ -66,7 +66,7 @@ public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState,
 
     @Override
     public String getDisplayName() {
-        return "Sdx start";
+        return "Data Lake start";
     }
 
     @Override

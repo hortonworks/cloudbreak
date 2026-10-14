@@ -81,7 +81,7 @@ public class SdxStopService {
         freeipaService.checkFreeipaRunning(cluster.getEnvCrn());
         Optional<String> reasonUnstoppable = checkIfStoppable(cluster);
         if (reasonUnstoppable.isPresent()) {
-            throw new CloudbreakServiceException("Can't stop datalake! Reason: " + reasonUnstoppable.get());
+            throw new CloudbreakServiceException("Can't stop Data Lake! Reason: " + reasonUnstoppable.get());
         }
         return sdxReactorFlowManager.triggerSdxStopFlow(cluster);
     }
@@ -93,7 +93,7 @@ public class SdxStopService {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.putStopInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Data Lake stop in progress", sdxCluster);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {
             LOGGER.error("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
@@ -123,7 +123,7 @@ public class SdxStopService {
             );
             if (flowChainType != null && UNSTOPPABLE_FLOWS.contains(flowChainType)) {
                 reasonUnstoppable = Optional.of(
-                        "Datalake " + cluster.getClusterName() + " can not be stopped while flow chain " +
+                        "Data Lake " + cluster.getClusterName() + " can not be stopped while flow chain " +
                         flowChainType + " is running."
                 );
                 LOGGER.info(reasonUnstoppable.get());

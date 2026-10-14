@@ -129,11 +129,11 @@ public class CleanupUtil extends CleanupClientUtil {
 
         setSdxClient(sdxClient);
         setEnvironmentClient(environmentClient);
-        LOG.info("Found data lakes (sdxes): '{}'", foundSdxNames);
+        LOG.info("Found Data Lakes: '{}'", foundSdxNames);
         if (!foundSdxNames.isEmpty()) {
             deleteResources(foundSdxNames, TYPE_SDX, report);
         } else {
-            LOG.info("Cannot find any sdx");
+            LOG.info("Cannot find any Data Lake");
         }
     }
 
@@ -221,7 +221,7 @@ public class CleanupUtil extends CleanupClientUtil {
         List<String> sdxNames = new ArrayList<>();
 
         getAllEnvironments(environment).forEach((key, value) -> {
-            LOG.info("Collecting available sdxes for environment: {}", value);
+            LOG.info("Collecting available Data Lakes for environment: {}", value);
             sdxNames.addAll(sdx.sdxEndpoint().list(value, false).stream()
                     .map(SdxClusterResponse::getName)
                     .collect(Collectors.toList()));
@@ -484,16 +484,16 @@ public class CleanupUtil extends CleanupClientUtil {
             sdxClient.sdxEndpoint().delete(sdxName, true);
             WaitResult waitResult = waitUtil.waitForSdxCleanup(sdxClient, sdxName);
             if (waitResult == WaitResult.FAILED) {
-                throw new RuntimeException(String.format("Failed: Deleting %s data lake (sdx) has been failed!", sdxName));
+                throw new RuntimeException(String.format("Failed: Deleting %s Data Lake has been failed!", sdxName));
             }
             if (waitResult == WaitResult.TIMEOUT) {
-                throw new RuntimeException(String.format("Timeout: Deleting %s data lake (sdx) has been timed out!", sdxName));
+                throw new RuntimeException(String.format("Timeout: Deleting %s Data Lake has been timed out!", sdxName));
             }
         } catch (NotFoundException e) {
-            LOG.info("{} data lake (sdx) have already been deleted", sdxName);
+            LOG.info("{} Data Lake have already been deleted", sdxName);
         } catch (Exception e) {
-            LOG.error("{} data lake (sdx) cannot be deleted, because of: {}", sdxName, e.getMessage(), e);
-            throw new RuntimeException(String.format("%s data lake (sdx) cannot be deleted, because of: %s", sdxName, e.getMessage()));
+            LOG.error("{} Data Lake cannot be deleted, because of: {}", sdxName, e.getMessage(), e);
+            throw new RuntimeException(String.format("%s Data Lake cannot be deleted, because of: %s", sdxName, e.getMessage()));
         }
     }
 

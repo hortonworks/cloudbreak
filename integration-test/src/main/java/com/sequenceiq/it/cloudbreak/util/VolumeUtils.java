@@ -27,7 +27,7 @@ public class VolumeUtils {
             expectedVolumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Desired volume ID: %s ", volumeId)));
             throw new TestFailException("Host Group does not have the desired volume IDs!");
         } else {
-            actualVolumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Before and after SDX repair volume IDs are equal [%s]. ", volumeId)));
+            actualVolumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Before and after Data Lake repair volume IDs are equal [%s]. ", volumeId)));
         }
         return t;
     }

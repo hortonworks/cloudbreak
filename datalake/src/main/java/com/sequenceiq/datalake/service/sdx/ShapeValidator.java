@@ -86,7 +86,7 @@ public class ShapeValidator {
                         int volumeCount = countAttachedVolumes(instanceGroup);
                         if (volumeCount < minVolumes) {
                             throw new BadRequestException(String.format(
-                                    "SDX shape %s requires the '%s' host group to have at least %d attached volumes " +
+                                    "Data Lake shape %s requires the '%s' host group to have at least %d attached volumes " +
                                             "(ZooKeeper+KRaft, Kafka and Solr data-dir isolation); the cluster template provides %d.",
                                     shape.name(), groupName, minVolumes, volumeCount));
                         }
@@ -105,12 +105,12 @@ public class ShapeValidator {
 
     private void validateMicroDutyShape(String runtime, DetailedEnvironmentResponse environment, ValidationResultBuilder validationBuilder) {
         if (!entitlementService.microDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
-            String message = String.format("Provisioning a micro duty data lake cluster is not enabled for %s. " +
+            String message = String.format("Provisioning a micro duty Data Lake cluster is not enabled for %s. " +
                     "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", environment.getCloudPlatform());
             validationBuilder.error(message);
         }
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, MICRO_DUTY_REQUIRED_VERSION)) {
-            String message = String.format("Provisioning a Micro Duty SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+            String message = String.format("Provisioning a Micro Duty Data Lake shape is only valid for runtime version greater than or equal to %s and not %s",
                     MICRO_DUTY_REQUIRED_VERSION, runtime);
             validationBuilder.error(message);
         }
@@ -118,21 +118,21 @@ public class ShapeValidator {
 
     private void validateMediumDutyShape(String runtime, ValidationResultBuilder validationBuilder, String accountId) {
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, MEDIUM_DUTY_REQUIRED_VERSION)) {
-            String message = String.format("Provisioning a Medium Duty SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+            String message = String.format("Provisioning a Medium Duty Data Lake shape is only valid for runtime version greater than or equal to %s and not %s",
                     MEDIUM_DUTY_REQUIRED_VERSION, runtime);
             validationBuilder.error(message);
         }
         if (!isShapeVersionSupportedByMaximumRuntimeVersion(runtime, MEDIUM_DUTY_MAXIMUM_VERSION)
                 && !entitlementService.isSdxRuntimeUpgradeEnabledOnMediumDuty(accountId)) {
-            String message = String.format("Provisioning a Medium Duty SDX shape is only valid for 7.2.17 and below. " +
-                    "If you want to provision a %s SDX, Please use the ENTERPRISE shape!", runtime);
+            String message = String.format("Provisioning a Medium Duty Data Lake shape is only valid for 7.2.17 and below. " +
+                    "If you want to provision a %s Data Lake, Please use the ENTERPRISE shape!", runtime);
             validationBuilder.error(message);
         }
     }
 
     private void validateEnterpriseShape(String runtime, ValidationResultBuilder validationBuilder) {
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, ENTERPRISE_DATALAKE_REQUIRED_VERSION)) {
-            String message = String.format("Provisioning an Enterprise SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+            String message = String.format("Provisioning an Enterprise Data Lake shape is only valid for runtime version greater than or equal to %s and not %s",
                     ENTERPRISE_DATALAKE_REQUIRED_VERSION, runtime);
             validationBuilder.error(message);
         }
@@ -140,12 +140,12 @@ public class ShapeValidator {
 
     private void validateShapesWithoutHBaseAndHDFS(ValidationResultBuilder validationBuilder, SdxClusterShape shape, String accountId, String runtime) {
         if (!entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(accountId)) {
-            String message = String.format("Your account is not entitled to provision SDX with '%s' shape. " +
+            String message = String.format("Your account is not entitled to provision Data Lake with '%s' shape. " +
                     "Contact Cloudera support to enable CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS entitlement for the account.", shape.name());
             validationBuilder.error(message);
         }
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, SHAPES_WITHOUT_HBASE_REQUIRED_VERSION)) {
-            String message = String.format("Provisioning an %s SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+            String message = String.format("Provisioning an %s Data Lake shape is only valid for runtime version greater than or equal to %s and not %s",
                     shape.name(), SHAPES_WITHOUT_HBASE_REQUIRED_VERSION, runtime);
             validationBuilder.error(message);
         }
@@ -170,7 +170,7 @@ public class ShapeValidator {
     }
 
     private boolean isTriggeredInternally(String runtime) {
-        LOGGER.debug("Runtime is '{}'. If runtime is empty, then SDX internal call was used and runtime version will not be validated.", runtime);
+        LOGGER.debug("Runtime is '{}'. If runtime is empty, then Data Lake internal call was used and runtime version will not be validated.", runtime);
         return StringUtils.isEmpty(runtime);
     }
 }

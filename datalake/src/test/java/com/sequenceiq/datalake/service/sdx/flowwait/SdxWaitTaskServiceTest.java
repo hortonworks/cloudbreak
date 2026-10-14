@@ -52,7 +52,7 @@ public class SdxWaitTaskServiceTest {
     @Test
     void testWaitFor() {
         try (MockedStatic<Polling> polling = mockStatic(Polling.class)) {
-            SdxWaitTask<?> sdxWaitTask = new TestWaitTask(new SdxCluster(), POLLING_CONFIG, "My Sdx task");
+            SdxWaitTask<?> sdxWaitTask = new TestWaitTask(new SdxCluster(), POLLING_CONFIG, "My Data Lake task");
             setupPolling(polling);
 
             underTest.waitFor(sdxWaitTask);
@@ -66,7 +66,7 @@ public class SdxWaitTaskServiceTest {
     @Test
     void testWaitForWithPollerException() {
         try (MockedStatic<Polling> polling = mockStatic(Polling.class)) {
-            SdxWaitTask<?> sdxWaitTask = new TestWaitTask(new SdxCluster(), POLLING_CONFIG, "My Sdx task");
+            SdxWaitTask<?> sdxWaitTask = new TestWaitTask(new SdxCluster(), POLLING_CONFIG, "My Data Lake task");
             setupPolling(polling);
             doThrow(new PollerException()).when(pollingOptions).run(sdxWaitTask);
 

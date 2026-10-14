@@ -74,7 +74,7 @@ public class AttachedDatahubsRdsSettingsMigrationService {
     private void migrateDatahubs(Long stackId, Set<StackIdView> datahubIds, StackDto stackDto) {
         List<StackClusterStatusView> datahubStatuses =
                 stackService.findStatusesByIds(datahubIds.stream().map(StackIdView::getId).collect(Collectors.toList()));
-        LOGGER.debug("Attached datahubs for datalake {}: {}", stackDto.getName(),
+        LOGGER.debug("Attached datahubs for Data Lake {}: {}", stackDto.getName(),
                 datahubStatuses.stream().map(StackClusterStatusView::getName).collect(Collectors.joining(",")));
         Map<MigrationState, List<StackClusterStatusView>> datahubStatusesMap = datahubStatuses.stream().collect(Collectors.groupingBy(this::getUpdateStatus));
         LOGGER.debug("The following datahubs db params will be updated: {}", datahubStatusesMap.getOrDefault(MigrationState.UPDATABLE, List.of()).stream()

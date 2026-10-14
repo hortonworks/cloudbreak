@@ -95,9 +95,9 @@ public class SetDatalakeDefaultJavaVersionActions {
 
             @Override
             protected void doExecute(SdxContext context, SetDatalakeDefaultJavaVersionFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.warn("Failed to set the default Java version for datalake");
+                LOGGER.warn("Failed to set the default Java version for Data Lake");
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_DEFAULT_JAVA_VERSION_CHANGE_FAILED,
-                        Collections.singleton(payload.getException().getMessage()), "Failed to set the default Java version for datalake",
+                        Collections.singleton(payload.getException().getMessage()), "Failed to set the default Java version for Data Lake",
                         context.getSdxId());
                 sendEvent(context);
             }

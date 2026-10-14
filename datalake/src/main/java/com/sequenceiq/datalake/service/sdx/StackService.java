@@ -38,22 +38,22 @@ public class StackService {
 
     public StackV4Response getDetail(String name, Set<String> entries, String accountId) {
         try {
-            LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
+            LOGGER.info("Calling cloudbreak for Data Lake cluster details by name {}", name);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, name, entries, accountId));
         } catch (jakarta.ws.rs.NotFoundException e) {
-            LOGGER.info("Sdx cluster not found on CB side", e);
+            LOGGER.info("Data Lake cluster not found on CB side", e);
             return null;
         }
     }
 
     public StackV4Response getDetailWithResources(String name, Set<String> entries, String accountId) {
         try {
-            LOGGER.info("Calling cloudbreak for SDX cluster details with resources by name {}", name);
+            LOGGER.info("Calling cloudbreak for Data Lake cluster details with resources by name {}", name);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.getWithResources(WORKSPACE_ID_DEFAULT, name, entries, accountId));
         } catch (jakarta.ws.rs.NotFoundException e) {
-            LOGGER.info("Sdx cluster not found on CB side", e);
+            LOGGER.info("Data Lake cluster not found on CB side", e);
             return null;
         }
     }
@@ -106,7 +106,7 @@ public class StackService {
                     .orElse(msg);
             throw new BadRequestException(message, e);
         } catch (jakarta.ws.rs.WebApplicationException wae) {
-            String msg = String.format("Failed to validate %s for SDX", operationNameToValidate);
+            String msg = String.format("Failed to validate %s for Data Lake", operationNameToValidate);
             LOGGER.warn(msg, wae);
             throw new IllegalStateException(msg, wae);
         }
@@ -129,7 +129,7 @@ public class StackService {
     }
 
     public ResetJvmParamsV4Response resetJvmParams(String crn, ResetJvmParamsRequest request) {
-        LOGGER.info("Calling cloudbreak to reset JVM params for SDX cluster with CRN {}", crn);
+        LOGGER.info("Calling cloudbreak to reset JVM params for Data Lake cluster with CRN {}", crn);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 initiatorUserCrn -> stackV4Endpoint.resetJvmParams(WORKSPACE_ID_DEFAULT, crn, request, initiatorUserCrn));
     }
@@ -141,7 +141,7 @@ public class StackService {
     }
 
     public ResourceUpdateResponse updateDatalakeVolumeResourcesByCrn(SdxResourceUpdateRequest request) {
-        LOGGER.debug("Calling DistroX service for updating resource of datalake: '{}'", request.getCrn());
+        LOGGER.debug("Calling DistroX service for updating resource of Data Lake: '{}'", request.getCrn());
         StackResourceUpdateRequest stackResourceUpdateRequest = new StackResourceUpdateRequest(request);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 initiatorUserCrn -> stackV4Endpoint.updateStackVolumeResourcesByCrn(WORKSPACE_ID_DEFAULT, stackResourceUpdateRequest, initiatorUserCrn));

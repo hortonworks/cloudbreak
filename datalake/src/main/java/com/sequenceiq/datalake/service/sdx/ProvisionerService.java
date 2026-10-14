@@ -82,7 +82,7 @@ public class ProvisionerService {
                     () -> stackV4Endpoint.deleteInternal(0L, sdxCluster.getClusterName(), forced, initiatorUserCrn));
             sdxStatusService.setStatusForDatalakeAndNotify(
                     DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS, List.of(sdxCluster.getClusterName()),
-                    "Datalake stack deletion in progress", sdxCluster
+                    "Data Lake stack deletion in progress", sdxCluster
             );
         } catch (NotFoundException e) {
             LOGGER.info("Cannot find stack on cloudbreak side {}", sdxCluster.getClusterName());
@@ -107,7 +107,7 @@ public class ProvisionerService {
                     try {
                         StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
                                 () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
-                        LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
+                        LOGGER.info("Stack status of Data Lake {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
                                 stackV4Response.getStatus().name());
                         LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                         ClusterV4Response cluster = stackV4Response.getCluster();
@@ -148,7 +148,7 @@ public class ProvisionerService {
                         return AttemptResults.finishWith(null);
                     }
                 });
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, "Datalake stack deleted", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, "Data Lake stack deleted", sdxCluster);
     }
 
     public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment) {
@@ -172,7 +172,7 @@ public class ProvisionerService {
             sdxCluster.setStackCrn(stackV4Response.getCrn());
             sdxClusterRepository.save(sdxCluster);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
-            LOGGER.info("Sdx cluster updated");
+            LOGGER.info("Data Lake cluster updated");
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Cannot start provisioning: {}", errorMessage, e);
@@ -207,9 +207,9 @@ public class ProvisionerService {
 
     public StackV4Response waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig) {
         SdxCluster sdxCluster = sdxService.getById(id);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Data Lake stack creation in progress", sdxCluster);
         cloudbreakPoller.pollCreateUntilAvailable(sdxCluster, pollingConfig);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Stack created for Datalake", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Stack created for Data Lake", sdxCluster);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
     }

@@ -56,13 +56,13 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     @Override
     protected void executeJob(JobExecutionContext context) {
         if (getLocalId() != null && flowLogService.isOtherFlowRunning(Long.valueOf(getLocalId()))) {
-            LOGGER.debug("Sdx StatusChecker Job cannot run, because flow is running for datalake: {}", getLocalId());
+            LOGGER.debug("Data Lake StatusChecker Job cannot run, because flow is running for Data Lake: {}", getLocalId());
             return;
         }
-        LOGGER.debug("Sdx StatusChecker Job is running for datalake: '{}'", getLocalId());
+        LOGGER.debug("Data Lake StatusChecker Job is running for Data Lake: '{}'", getLocalId());
         if (getRemoteResourceCrn() == null) {
             jobService.unschedule(getLocalId());
-            LOGGER.debug("Sdx StatusChecker Job is unscheduled for datalake: '{}'", getLocalId());
+            LOGGER.debug("Data Lake StatusChecker Job is unscheduled for Data Lake: '{}'", getLocalId());
         } else {
             syncSdxStatus(context);
         }
@@ -73,7 +73,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdx);
             if (DatalakeStatusEnum.STACK_DELETED.equals(sdxStatus.getStatus()) ||
                     (DatalakeStatusEnum.DELETED.equals(sdxStatus.getStatus()) && sdx.getDeleted() != null)) {
-                LOGGER.info("Sdx status is {}. Unscheduling sdx sync job.", sdxStatus.getStatus());
+                LOGGER.info("Data Lake status is {}. Unscheduling Data Lake sync job.", sdxStatus.getStatus());
                 unscheduleSync(sdx);
             } else {
                 StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
@@ -112,7 +112,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         } else if (isStale(stack)) {
             return updateToStale(sdx, sdxStatus, stack.getStatusReason());
         } else {
-            LOGGER.debug("Sdx StatusChecker Job will ignore stack status {}. Current data lake state is {}.", stack, sdxStatus.getStatus());
+            LOGGER.debug("Data Lake StatusChecker Job will ignore stack status {}. Current Data Lake state is {}.", stack, sdxStatus.getStatus());
             return sdxStatus.getStatus();
         }
     }
@@ -252,21 +252,21 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void logStateChange(DatalakeStatusEnum from, DatalakeStatusEnum to) {
-        LOGGER.info("Sdx StatusChecker job changed the status of datalake: '{}', from: '{}', to: '{}'", getLocalId(), from.name(), to.name());
+        LOGGER.info("Data Lake StatusChecker job changed the status of Data Lake: '{}', from: '{}', to: '{}'", getLocalId(), from.name(), to.name());
     }
 
     private void updateSyncScheduleIfNecessary(DatalakeStatusEnum updatedStatus, SdxCluster sdx, JobExecutionContext context) {
         if (DatalakeStatusEnum.STACK_DELETED.equals(updatedStatus)) {
-            LOGGER.info("Sdx status is {}. Unscheduling sdx sync job.", updatedStatus);
+            LOGGER.info("Data Lake status is {}. Unscheduling Data Lake sync job.", updatedStatus);
             unscheduleSync(sdx);
         } else if (DatalakeStatusEnum.DELETED_ON_PROVIDER_SIDE.equals(updatedStatus)) {
             if (!isLongSyncJob(context)) {
-                LOGGER.info("Sdx status is {}. Rescheduling sync job to long interval.", updatedStatus);
+                LOGGER.info("Data Lake status is {}. Rescheduling sync job to long interval.", updatedStatus);
                 jobService.scheduleLongIntervalCheck(sdx.getId(), SdxClusterJobAdapter.class);
             }
         } else {
             if (isLongSyncJob(context)) {
-                LOGGER.info("Sdx status is {}. Rescheduling sync job to short interval.", updatedStatus);
+                LOGGER.info("Data Lake status is {}. Rescheduling sync job to short interval.", updatedStatus);
                 jobService.schedule(sdx.getId(), SdxClusterJobAdapter.class);
             }
         }

@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path("/diagnostics")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "/diagnostics", description = "Diagnostics for SDX")
+@Tag(name = "/diagnostics", description = "Diagnostics for Data Lake")
 public interface DiagnosticsEndpoint {
 
     @POST

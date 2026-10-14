@@ -126,7 +126,7 @@ class EnvTagsModificationActionsTest {
                 EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE
             ),
             Arguments.of(
-                "Datalake stack",
+                "Data Lake stack",
                 START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT.selector(),
                 (Function<EnvTagsModificationActions, Action<?, ?>>) EnvTagsModificationActions::modifyUserDefinedTagsOnDatalake,
                 MODIFY_USER_DEFINED_TAGS_ON_DATALAKE_EVENT.event(),

@@ -122,7 +122,7 @@ public class ClusterServicesRestartService {
         if (dhRdsConfigOp.isPresent() && dlRdsConfigOp.isPresent()) {
             RDSConfig dhRdsConfig = dhRdsConfigOp.get();
             RDSConfig dlRdsConfig = dlRdsConfigOp.get();
-            LOGGER.info("Datahub HmsRdsConfig {} and Datalake HmsRdsConfig {} are not the same", dhRdsConfig.getId(), dlRdsConfig.getId());
+            LOGGER.info("Datahub HmsRdsConfig {} and Data Lake HmsRdsConfig {} are not the same", dhRdsConfig.getId(), dlRdsConfig.getId());
 
             if (!Objects.equals(dhRdsConfig.getId(), dlRdsConfig.getId())) {
                 dhRdsConfigs.remove(dhRdsConfig);

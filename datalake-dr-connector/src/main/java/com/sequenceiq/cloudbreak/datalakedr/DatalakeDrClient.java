@@ -324,11 +324,11 @@ public class DatalakeDrClient {
                     .filter(backup -> "SUCCESSFUL".equals(backup.getOverallState()))
                     .filter(backup -> runtime.isEmpty() || backup.getRuntimeVersion().equalsIgnoreCase(runtime.get()))
                     .peek(backupInfo -> LOGGER.debug(
-                            "The following successful backup was found for data lake {} and runtime {}: {}", datalakeName, runtime, backupInfo))
+                            "The following successful backup was found for Data Lake {} and runtime {}: {}", datalakeName, runtime, backupInfo))
                     .findFirst()
                     .orElse(null);
         }
-        LOGGER.debug("No successful backup was found for data lake {} and runtime {}", datalakeName, runtime);
+        LOGGER.debug("No successful backup was found for Data Lake {} and runtime {}", datalakeName, runtime);
         return null;
     }
 

@@ -19,7 +19,7 @@ public class SdxResizeAction implements Action<SdxInternalTestDto, SdxClient> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxResizeAction.class);
 
     /**
-     * Starts SDX resize operation, and retrieves the detailed SDX response after it's finished.
+     * Starts Data Lake resize operation, and retrieves the detailed Data Lake response after it's finished.
      * @return result of the resize
      * @throws Exception if the SdxClusterDetailResponse cannot be converted to JSON
      */
@@ -27,18 +27,18 @@ public class SdxResizeAction implements Action<SdxInternalTestDto, SdxClient> {
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         SdxClusterResizeRequest clusterResizeRequest = testDto.getSdxResizeRequest();
 
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+        Log.when(LOGGER, " Data Lake endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", Data Lake's environment: "
                 + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX resize request: ", clusterResizeRequest);
+        Log.whenJson(LOGGER, " Data Lake resize request: ", clusterResizeRequest);
         SdxClusterResponse sdxClusterResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .resize(testDto.getName(), clusterResizeRequest);
-        testDto.setFlow("SDX resize", sdxClusterResponse.getFlowIdentifier());
+        testDto.setFlow("Data Lake resize", sdxClusterResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX resize response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake resize response: ", detailedResponse);
         return testDto;
     }
 }

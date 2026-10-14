@@ -49,12 +49,12 @@ public class CloudStorageManifester {
                 || isInternalCloudStorageConfigured(clusterRequest);
         boolean loggingConfigured = isLoggingConfigured(environment);
         if (isCloudStorageConfigured(sdxClusterRequest)) {
-            LOGGER.debug("Cloud storage configurations found in SDX cluster request.");
+            LOGGER.debug("Cloud storage configurations found in Data Lake cluster request.");
             cloudStorageRequest =
                     initSdxCloudStorageRequest(environment.getCloudPlatform(),
                             clusterRequest.getBlueprintName(), sdxCluster.getClusterName(), sdxClusterRequest.getCloudStorage());
         } else if (isInternalCloudStorageConfigured(clusterRequest)) {
-            LOGGER.debug("Cloud storage configurations found in internal SDX stack request.");
+            LOGGER.debug("Cloud storage configurations found in internal Data Lake stack request.");
             cloudStorageRequest = clusterRequest.getCloudStorage();
         }
 
@@ -73,7 +73,7 @@ public class CloudStorageManifester {
         boolean anyCloudStorageIsConfigured = !Strings.isNullOrEmpty(sdxCluster.getCloudStorageBaseLocation());
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         if (anyCloudStorageIsConfigured) {
-            LOGGER.debug("Cloud storage configurations found in SDX cluster request.");
+            LOGGER.debug("Cloud storage configurations found in Data Lake cluster request.");
             CloudStorageResponse cloudStorageResponse = clusterV4Response.getCloudStorage();
             cloudStorageRequest.copy(cloudStorageResponse);
             cloudStorageRequest.setAccountMapping(null);

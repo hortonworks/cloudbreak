@@ -43,7 +43,7 @@ public class SdxRollingVerticalScaleTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "a valid stack vertical scale request is sent with ONE_BY_ONE orchestrator",
             then = "the stack should be vertically scaled with the new instance type and the cluster should be up and running"
     )

@@ -69,7 +69,7 @@ public class SdxUpgradeDatabaseServerWaitHandler extends ExceptionCatcherEventHa
     }
 
     private void upgradeDatabaseServerAndPoll(SdxCluster sdxCluster, PollingConfig config) {
-        LOGGER.debug("Waiting for database server upgrade for SDX: {}", sdxCluster.getName());
+        LOGGER.debug("Waiting for database server upgrade for Data Lake: {}", sdxCluster.getName());
         sdxDatabaseServerUpgradeService.waitDatabaseUpgradeInCb(sdxCluster, config);
         sdxDatabaseServerUpgradeService.updateDatabaseServerEngineVersion(sdxCluster);
     }

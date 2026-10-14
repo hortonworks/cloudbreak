@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path("/operation")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "/operation", description = "Get progression details of (flow) operations on SDX cluster")
+@Tag(name = "/operation", description = "Get progression details of (flow) operations on Data Lake cluster")
 public interface OperationEndpoint {
 
     @GET

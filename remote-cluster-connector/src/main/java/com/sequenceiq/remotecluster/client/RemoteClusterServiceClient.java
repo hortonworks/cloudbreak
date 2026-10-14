@@ -112,7 +112,7 @@ public class RemoteClusterServiceClient {
         OnPremisesApiProto.ValidateClusterForDatalakeRequest request = OnPremisesApiProto.ValidateClusterForDatalakeRequest.newBuilder()
                 .setClusterCrn(clusterCrn)
                 .build();
-        LOGGER.info("Created request to validate cluster {} for datalake: {}", clusterCrn, request);
+        LOGGER.info("Created request to validate cluster {} for Data Lake: {}", clusterCrn, request);
         return createInternalOnPremisesApiBlockingStub(userCrn).validateClusterForDatalake(request);
     }
 

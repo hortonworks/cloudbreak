@@ -74,7 +74,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DataLakeUpgradeFlowChainTriggerEvent event) {
-        LOGGER.debug("Creating flow trigger event queue for data lake upgrade with event {}", event);
+        LOGGER.debug("Creating flow trigger event queue for Data Lake upgrade with event {}", event);
         Image currentImage = getCurrentImage(event);
         ImageChangeDto imageChangeDto = getImageChangeDto(event, currentImage);
         StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());

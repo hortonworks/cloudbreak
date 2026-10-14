@@ -22,18 +22,18 @@ public class SdxRecoveryAction implements Action<SdxTestDto, SdxClient> {
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         SdxRecoveryRequest recoveryRequest = testDto.getSdxRecoveryRequest();
 
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+        Log.when(LOGGER, " Data Lake endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", Data Lake's environment: "
                 + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX recovery request: ", recoveryRequest);
+        Log.whenJson(LOGGER, " Data Lake recovery request: ", recoveryRequest);
         SdxRecoveryResponse recoveryResponse = client.getDefaultClient(testContext)
                 .sdxRecoveryEndpoint()
                 .recoverClusterByName(testDto.getName(), recoveryRequest);
-        testDto.setFlow("SDX recovery", recoveryResponse.getFlowIdentifier());
+        testDto.setFlow("Data Lake recovery", recoveryResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX recovery response: ", detailedResponse);
+        Log.whenJson(LOGGER, " Data Lake recovery response: ", detailedResponse);
         return testDto;
     }
 }

@@ -134,7 +134,7 @@ public class CDPConfigService {
                 runtimeDutyOverlayLoader.materializeOverlayDuties(supportedRuntimes)
                         .forEach(cdpStackRequests::putIfAbsent);
             }
-            LOGGER.info("Cdp configs for datalakes: {}", cdpStackRequests);
+            LOGGER.info("Cdp configs for Data Lakes: {}", cdpStackRequests);
         } catch (IOException e) {
             throw new IllegalStateException("Can't read CDP template files", e);
         }
@@ -203,7 +203,7 @@ public class CDPConfigService {
             runtimeVersions = supportedOsFilter(runtimeVersions, os);
         }
 
-        LOGGER.debug("Available runtime versions for datalake: {}", runtimeVersions);
+        LOGGER.debug("Available runtime versions for Data Lake: {}", runtimeVersions);
         return runtimeVersions;
     }
 
@@ -277,7 +277,7 @@ public class CDPConfigService {
             }
         }
 
-        LOGGER.debug("Advertised runtime versions for datalake: {}", calculatedAdvertisedRuntimes);
+        LOGGER.debug("Advertised runtime versions for Data Lake: {}", calculatedAdvertisedRuntimes);
         return calculatedAdvertisedRuntimes;
     }
 }

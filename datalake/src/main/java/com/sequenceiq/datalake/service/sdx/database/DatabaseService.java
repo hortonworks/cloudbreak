@@ -139,7 +139,7 @@ public class DatabaseService {
     private EntitlementService entitlementService;
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
-        LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
+        LOGGER.info("Create databaseServer in environment {} for Data Lake {}", env.getName(), sdxCluster.getClusterName());
         String dbResourceCrn;
         DatabaseServerStatusV4Response serverStatusV4Response = null;
         if (dbHasBeenCreatedPreviously(sdxCluster)) {
@@ -148,7 +148,7 @@ public class DatabaseService {
             try {
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 if (sdxStatusService.getActualStatusForSdx(sdxCluster).getStatus().isDeleteInProgressOrCompleted()) {
-                    throw new CloudbreakServiceException("Datalake deletion in progress! Do not provision database, create flow cancelled");
+                    throw new CloudbreakServiceException("Data Lake deletion in progress! Do not provision database, create flow cancelled");
                 }
                 serverStatusV4Response =
                 ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -176,7 +176,7 @@ public class DatabaseService {
     }
 
     public void terminate(SdxCluster sdxCluster, boolean forced) {
-        LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
+        LOGGER.info("Terminating databaseServer of Data Lake {}", sdxCluster.getClusterName());
         try {
             DatabaseServerV4Response resp = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced));
@@ -189,7 +189,7 @@ public class DatabaseService {
     }
 
     public void start(SdxCluster sdxCluster) {
-        LOGGER.info("Starting databaseServer of SDX {}", sdxCluster.getClusterName());
+        LOGGER.info("Starting databaseServer of Data Lake {}", sdxCluster.getClusterName());
         String databaseCrn = sdxCluster.getDatabaseCrn();
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -201,7 +201,7 @@ public class DatabaseService {
     }
 
     public void stop(SdxCluster sdxCluster) {
-        LOGGER.info("Stopping databaseServer of SDX {}", sdxCluster.getClusterName());
+        LOGGER.info("Stopping databaseServer of Data Lake {}", sdxCluster.getClusterName());
         String databaseCrn = sdxCluster.getDatabaseCrn();
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -466,10 +466,10 @@ public class DatabaseService {
             AzureDatabaseType azureDbTypeInRedbeams = AzureDatabaseType.safeValueOf(
                     databaseServerV4Response.getDatabasePropertiesV4Response().getDatabaseType());
             AzureDatabaseType azureDatabaseTypeInSdx = azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase);
-            LOGGER.debug("DB type in redbeams is [{}] and in SDX [{}]", azureDbTypeInRedbeams, azureDatabaseTypeInSdx);
+            LOGGER.debug("DB type in redbeams is [{}] and in Data Lake [{}]", azureDbTypeInRedbeams, azureDatabaseTypeInSdx);
             if (FLEXIBLE_SERVER.equals(azureDbTypeInRedbeams) && SINGLE_SERVER.equals(azureDatabaseTypeInSdx)) {
                 azureDatabaseAttributesService.updateDatabaseType(sdxDatabase, azureDbTypeInRedbeams);
-                LOGGER.info("Updating database type from redbeams [{}] to sdx database [{}]", azureDbTypeInRedbeams, azureDatabaseTypeInSdx);
+                LOGGER.info("Updating database type from redbeams [{}] to Data Lake database [{}]", azureDbTypeInRedbeams, azureDatabaseTypeInSdx);
                 return sdxDatabaseRepository.save(sdxDatabase);
             } else {
                 LOGGER.debug("No update was required");

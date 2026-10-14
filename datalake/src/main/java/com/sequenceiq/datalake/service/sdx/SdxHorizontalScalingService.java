@@ -72,9 +72,9 @@ public class SdxHorizontalScalingService {
 
     public FlowIdentifier horizontalScaleDatalake(String name, DatalakeHorizontalScaleRequest scaleRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        LOGGER.info("Horizontal scaling Data lake with name {}", name);
+        LOGGER.info("Horizontal scaling Data Lake with name {}", name);
         SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountId, name)
-                .orElseThrow(() -> notFound("SDX cluster", name).get());
+                .orElseThrow(() -> notFound("Data Lake cluster", name).get());
         return sdxReactorFlowManager.triggerHorizontalScaleDataLake(sdxCluster, scaleRequest);
     }
 
@@ -91,7 +91,7 @@ public class SdxHorizontalScalingService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             if (errorMessage.contains("is currently in 'UPDATE_IN_PROGRESS' status")) {
-                LOGGER.warn("Flow already running in core, possibly datalake flow was restarted, return with last flow chain id: {}.",
+                LOGGER.warn("Flow already running in core, possibly Data Lake flow was restarted, return with last flow chain id: {}.",
                         sdxCluster.getLastCbFlowChainId());
                 return sdxCluster.getLastCbFlowChainId();
             }
@@ -106,7 +106,7 @@ public class SdxHorizontalScalingService {
 
     public void validateHorizontalScaleRequest(SdxCluster sdxCluster, DatalakeHorizontalScaleRequest request) {
         if (!SCALE_ENABLED_SDX_SHAPES.contains(sdxCluster.getClusterShape())) {
-            throw new BadRequestException(String.format("Horizontal scaling not supported on: %s. Supported Data lake shapes: %s",
+            throw new BadRequestException(String.format("Horizontal scaling not supported on: %s. Supported Data Lake shapes: %s",
                     sdxCluster.getClusterShape().name(), String.join(", ", SCALE_ENABLED_SDX_SHAPES.stream().map(SdxClusterShape::name).toList())));
         }
         String hostGroup = request.getGroup();
@@ -115,12 +115,12 @@ public class SdxHorizontalScalingService {
         }
         DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(sdxCluster.getEnvName());
         if (!EnvironmentStatus.upscalable().contains(environmentResponse.getEnvironmentStatus())) {
-            throw new BadRequestException(String.format("The Data lake cannot be scaled in the %s environment status.",
+            throw new BadRequestException(String.format("The Data Lake cannot be scaled in the %s environment status.",
                     environmentResponse.getEnvironmentStatus().name()));
         }
         StackV4Response stackResponse = stackV4Endpoint.getByCrn(1L, sdxCluster.getStackCrn(), Set.of());
         if (YARN == stackResponse.getCloudPlatform()) {
-            throw new BadRequestException("The Data lake horizontal scaling is not supported on YCloud");
+            throw new BadRequestException("The Data Lake horizontal scaling is not supported on YCloud");
         }
         Optional<String> nodeRequestValid = validateNodeRequest(stackResponse, request, sdxCluster);
         if (nodeRequestValid.isPresent()) {
@@ -139,7 +139,7 @@ public class SdxHorizontalScalingService {
     private Optional<String> validateNodeRequest(StackV4Response stack, DatalakeHorizontalScaleRequest request, SdxCluster sdxCluster) {
         if (request.getDesiredCount() < 0) {
             LOGGER.warn("Negative nodeCount was requested.");
-            return Optional.of("Negative nodeCount is not accepted. If you want to downscale your Data lake please " +
+            return Optional.of("Negative nodeCount is not accepted. If you want to downscale your Data Lake please " +
                     "use lower number than the actual node count");
         }
         String target = request.getGroup();

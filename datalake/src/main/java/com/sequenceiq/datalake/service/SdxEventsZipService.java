@@ -66,7 +66,7 @@ public class SdxEventsZipService {
      * then cloudbreak (core) events, up to {@link #maxSize} total.
      */
     public void streamDatalakeAuditEventsAsZip(String environmentCrn, OutputStream outputStream) throws IOException {
-        LOGGER.info("Streaming datalake audit events as zip for environment [{}]", environmentCrn);
+        LOGGER.info("Streaming Data Lake audit events as zip for environment [{}]", environmentCrn);
         sdxEventsHelper.ensureNonDeletedNonDetachedDatalakeExists(environmentCrn);
 
         List<SdxCluster> datalakes = sdxEventsHelper.getAvailableAndDetachedDatalakes(environmentCrn);
@@ -91,12 +91,12 @@ public class SdxEventsZipService {
                 remaining = writeDatalakeEvents(datalakeCrns, generator);
                 datalakeEventsWritten = maxSize - remaining;
             } catch (Exception e) {
-                LOGGER.error("Failed to stream datalake events, continuing with cloudbreak events only", e);
+                LOGGER.error("Failed to stream Data Lake events, continuing with cloudbreak events only", e);
             }
             int cloudbreakEventsWritten = writeCloudbreakEvents(datalakes, generator, remaining);
             generator.writeEndArray();
             generator.flush();
-            LOGGER.info("Finished streaming events for environment [{}]: {} datalake events, {} cloudbreak events",
+            LOGGER.info("Finished streaming events for environment [{}]: {} Data Lake events, {} cloudbreak events",
                     environmentCrn, datalakeEventsWritten, cloudbreakEventsWritten);
         } finally {
             generator.close();
@@ -126,7 +126,7 @@ public class SdxEventsZipService {
                 }
                 flushRemainder(generator, written.get());
             } catch (IOException e) {
-                throw new RuntimeException("Failed to stream datalake events to zip", e);
+                throw new RuntimeException("Failed to stream Data Lake events to zip", e);
             }
         });
         return remaining.get();

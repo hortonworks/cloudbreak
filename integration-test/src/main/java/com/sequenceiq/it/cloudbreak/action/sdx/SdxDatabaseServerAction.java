@@ -15,8 +15,8 @@ public class SdxDatabaseServerAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDatabaseServerAction.class);
 
     public StackDatabaseServerResponse getSdxExternalDatabaseConfigs(String sdxClusterCrn, SdxClient sdxClient, TestContext tc) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + sdxClient.getDefaultClient(tc).databaseServerEndpoint());
-        Log.whenJson(LOGGER, " SDX crn: ", sdxClusterCrn);
+        Log.when(LOGGER, " Data Lake endpoint: %s" + sdxClient.getDefaultClient(tc).databaseServerEndpoint());
+        Log.whenJson(LOGGER, " Data Lake crn: ", sdxClusterCrn);
 
         StackDatabaseServerResponse stackDatabaseServerResponse = sdxClient.getDefaultClient(tc)
                 .databaseServerEndpoint().getDatabaseServerByCrn(sdxClusterCrn);

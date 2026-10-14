@@ -67,7 +67,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "Streaming Analytics Datahub is provisioned, Kraft migration, rollback then migration is performed",
             then = "the Streaming Analytics Datahub should be available and running in KRaft mode")
     public void testKraftMigrationWithRollbackWhenNodesNotInTemplate(TestContext testContext, ITestContext iTestContext) {
@@ -100,7 +100,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "Streams Messaging Datahub is provisioned, Kraft migration, rollback then migration is performed",
             then = "the Streams Messaging Datahub should be available and running in KRaft mode")
     public void testKraftMigrationWithRollbackWhenNodesInTemplate(TestContext testContext, ITestContext iTestContext) {
@@ -133,7 +133,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "Streams Messaging Datahub is provisioned, Kraft migration fails at upscale, then repair is performed and migration is retried",
             then = "the Streams Messaging Datahub should be available and running in KRaft mode")
     public void testKraftMigrationFailAtUpscale(TestContext testContext, ITestContext iTestContext) {

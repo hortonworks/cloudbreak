@@ -65,7 +65,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running environment with FreeIPA and SDX in available state",
+            given = "there is a running environment with FreeIPA and Data Lake in available state",
             when = "a new DistroX should be created",
                 and = "MASTER host group should be recovered, where the instance had been terminated",
             then = "DistroX recovery should be successful, the cluster should be up and running with same volumes")

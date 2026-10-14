@@ -414,7 +414,7 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
     @Override
     public List<DistroXOperationValidationView> validateDistroXOperations(String environmentCrn, List<SdxClusterResponse> sdxClusterResponses) {
         StackDto stackDto = getSdxStackDto(environmentCrn)
-                .orElseThrow(() -> new BadRequestException("No SDX cluster found for environment: " + environmentCrn));
+                .orElseThrow(() -> new BadRequestException("No Data Lake cluster found for environment: " + environmentCrn));
 
         List<DistroXOperationValidationView> distroXOperationValidationViews = new ArrayList<>();
         for (DistroXOperations distroXOperation : DistroXOperations.values()) {

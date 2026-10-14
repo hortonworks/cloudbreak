@@ -36,7 +36,7 @@ public class DistroXRepairTests extends AbstractMockTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
+    @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state",
             when = "repair called on the DistroX cluster",
             then = "DistroX repair should be successful, the cluster should be up and running")
     public void testDistroXInstanceRepair(TestContext testContext) {

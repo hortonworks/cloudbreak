@@ -98,7 +98,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is an up and running SDX cluster ",
+            given = "there is an up and running Data Lake cluster ",
             when = "the current user tries to run sudo commands on any VM in the cluster ",
             then = "execution should fail in case of EnvironmentPrivilegedUser role is not assigned ",
                 and = "execution should pass in case of assigned EnvironmentPrivilegedUser role but changing the user to root should fail")

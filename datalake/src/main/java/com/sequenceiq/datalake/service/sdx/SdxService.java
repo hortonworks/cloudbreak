@@ -125,7 +125,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public static final String DATABASE_SSL_ENABLED = "databaseSslEnabled";
 
-    private static final String SDX_CLUSTER = "SDX cluster";
+    private static final String SDX_CLUSTER = "Data Lake cluster";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -251,7 +251,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public SdxCluster getById(Long id) {
-        LOGGER.info("Searching for SDX cluster by id {}", id);
+        LOGGER.info("Searching for Data Lake cluster by id {}", id);
         Optional<SdxCluster> sdxClusters = sdxClusterRepository.findById(id);
         if (sdxClusters.isPresent()) {
             return sdxClusters.get();
@@ -275,7 +275,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public Optional<SdxCluster> findDetachedSdxClusterByOriginalCrn(String originalCrn) {
-        LOGGER.info("Searching for detached SDX cluster by original crn {}", originalCrn);
+        LOGGER.info("Searching for detached Data Lake cluster by original crn {}", originalCrn);
         Optional<SdxCluster> result = Optional.empty();
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(ThreadBasedUserCrnProvider.getUserCrn());
         List<SdxCluster> detachedSdxClusters = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, originalCrn);
@@ -291,7 +291,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public SdxCluster getByCrn(String userCrn, String clusterCrn) {
-        LOGGER.info("Searching for single SDX cluster by crn {}", clusterCrn);
+        LOGGER.info("Searching for single Data Lake cluster by crn {}", clusterCrn);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
@@ -302,7 +302,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn, boolean includeDeleted) {
-        LOGGER.info("Searching for all SDX clusters by crn {}", clusterCrn);
+        LOGGER.info("Searching for all Data Lake clusters by crn {}", clusterCrn);
         List<SdxCluster> sdxClusterList = new ArrayList<>();
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
@@ -322,7 +322,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public SdxCluster getByCrn(String clusterCrn) {
-        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
+        LOGGER.info("Searching for Data Lake cluster by crn {}", clusterCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(clusterCrn);
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
@@ -332,7 +332,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
-        LOGGER.info("Searching Environment Crn by SDX cluster {}", clusterCrn);
+        LOGGER.info("Searching Environment Crn by Data Lake cluster {}", clusterCrn);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (envCrn.isPresent()) {
@@ -343,20 +343,20 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public SdxCluster getByNameInAccount(String userCrn, String name) {
-        LOGGER.info("Searching for SDX cluster by name {}", name);
+        LOGGER.info("Searching for Data Lake cluster by name {}", name);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, name), LOGGER,
-                "Fetching SDX cluster took {}ms from DB. Name: [{}]", name);
+                "Fetching Data Lake cluster took {}ms from DB. Name: [{}]", name);
         return sdxCluster.orElseThrow(notFound(SDX_CLUSTER, name));
     }
 
     public SdxCluster getByNameInAccountAllowDetached(String userCrn, String name) {
-        LOGGER.info("Searching for SDX cluster by name {} allowing detached", name);
+        LOGGER.info("Searching for Data Lake cluster by name {} allowing detached", name);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name), LOGGER,
-                "Fetching SDX cluster allowing detached took {}ms from DB. Name: [{}]", name);
+                "Fetching Data Lake cluster allowing detached took {}ms from DB. Name: [{}]", name);
         return sdxCluster.orElseThrow(notFound(SDX_CLUSTER, name));
     }
 
@@ -395,7 +395,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request, ImageSettingsV4Request imageSettingsV4Request) {
-        LOGGER.info("Creating SDX cluster with name {}", name);
+        LOGGER.info("Creating Data Lake cluster with name {}", name);
         String accountId = accountIdService.getAccountIdFromResourceCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         DetailedEnvironmentResponse environment = environmentService.validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
@@ -484,7 +484,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         try {
             savedSdxCluster = transactionService.required(() -> {
                 SdxCluster created = save(sdxCluster);
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", created);
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Data Lake requested", created);
                 return created;
             });
         } catch (TransactionExecutionException e) {
@@ -640,7 +640,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private void updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(StackV4Request request, String environmentCrn) {
         if (request != null && StringUtils.isEmpty(request.getEnvironmentCrn())) {
             request.setEnvironmentCrn(environmentCrn);
-            LOGGER.debug("Environment crn for internal sdx stack request set to: {}", environmentCrn);
+            LOGGER.debug("Environment crn for internal Data Lake stack request set to: {}", environmentCrn);
         }
     }
 
@@ -661,7 +661,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         MDCBuilder.buildMdcContext(cluster);
         SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(cluster);
         if (sdxStatus.getStatus().isStopState()) {
-            String message = String.format("Reading CM and parcel versions from CM cannot be initiated as the datalake is in %s state", sdxStatus.getStatus());
+            String message = String.format("Reading CM and parcel versions from CM cannot be initiated as the Data Lake is in %s state", sdxStatus.getStatus());
             LOGGER.info(message);
             throw new BadRequestException(message);
         } else {
@@ -764,12 +764,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private void validateSdxRequest(String name, String envName, String accountId) {
         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountId, name)
                 .ifPresent(foundSdx -> {
-                    throw new BadRequestException("SDX cluster exists with this name: " + name);
+                    throw new BadRequestException("Data Lake cluster exists with this name: " + name);
                 });
 
         sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(accountId, envName).stream().findFirst()
                 .ifPresent(existedSdx -> {
-                    throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
+                    throw new BadRequestException("Data Lake cluster exists for environment name: " + existedSdx.getEnvName());
                 });
     }
 
@@ -785,7 +785,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             if (cloudPlatform.equals(MOCK)) {
                 clusterRequest.setRuntime(MEDIUM_DUTY_REQUIRED_VERSION);
             } else {
-                validationBuilder.error("SDX cluster request has null runtime version and null image response. It cannot " +
+                validationBuilder.error("Data Lake cluster request has null runtime version and null image response. It cannot " +
                         "determine the runtime version.");
             }
         }
@@ -801,7 +801,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             ValidationResultBuilder validationBuilder) {
         if (StringUtils.isNotBlank(imageV4Response.getVersion()) && StringUtils.isNotBlank(clusterRequest.getRuntime())
                 && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
-            validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
+            validationBuilder.error("Data Lake cluster request must not specify both runtime version and image at the same time because image " +
                     "decides runtime version.");
         }
         if (imageSettingsV4Request != null && StringUtils.isNotBlank(imageSettingsV4Request.getId())
@@ -822,14 +822,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 validationResultBuilder.error("Cluster cannot be null.");
             }
             if (CollectionUtils.isNotEmpty(sdxClusterRequest.getCustomInstanceGroups())) {
-                validationResultBuilder.error("Custom instance group is not accepted on SDX Internal API.");
+                validationResultBuilder.error("Custom instance group is not accepted on Data Lake Internal API.");
             }
         } else if (SdxClusterShape.CUSTOM.equals(sdxClusterRequest.getClusterShape())) {
             validationResultBuilder.error("CUSTOM cluster shape requires stack request.");
         }
         ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
-            LOGGER.error("Cannot create SDX via internal API: {}", validationResult.getFormattedErrors());
+            LOGGER.error("Cannot create Data Lake via internal API: {}", validationResult.getFormattedErrors());
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
     }
@@ -847,19 +847,19 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public List<SdxCluster> listSdxByEnvCrn(String userCrn, String envCrn) {
-        LOGGER.info("Listing SDX clusters by environment crn {}", envCrn);
+        LOGGER.info("Listing Data Lake clusters by environment crn {}", envCrn);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listAllSdxByEnvCrn(String userCrn, String envCrn) {
-        LOGGER.info("Listing all the SDX clusters by environment crn {}", envCrn);
+        LOGGER.info("Listing all the Data Lake clusters by environment crn {}", envCrn);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listSdxByEnvCrn(String envCrn) {
-        LOGGER.debug("Listing SDX clusters by environment crn {}", envCrn);
+        LOGGER.debug("Listing Data Lake clusters by environment crn {}", envCrn);
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(envCrn);
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envCrn);
     }
@@ -867,7 +867,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public List<SdxCluster> listSdx(String userCrn, String envName) {
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         if (envName != null) {
-            LOGGER.info("Listing SDX clusters by environment name {}", envName);
+            LOGGER.info("Listing Data Lake clusters by environment name {}", envName);
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envName);
         } else {
             return sdxClusterRepository.findByAccountIdAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn);
@@ -877,7 +877,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public List<SdxCluster> listAllSdx(String userCrn, String envName) {
         String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         if (envName != null) {
-            LOGGER.info("Listing all the SDX clusters by environment name {}", envName);
+            LOGGER.info("Listing all the Data Lake clusters by environment name {}", envName);
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
         } else {
             return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
@@ -890,11 +890,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         LOGGER.info("Update '{}' runtime version from stackV4Response", clusterName);
         if (cdpVersionOpt.isPresent()) {
             String version = cdpVersionOpt.get();
-            LOGGER.info("Update Sdx runtime version of {} to {}, previous version: {}", clusterName, version, sdxCluster.getRuntime());
+            LOGGER.info("Update Data Lake runtime version of {} to {}, previous version: {}", clusterName, version, sdxCluster.getRuntime());
             sdxCluster.setRuntime(version);
             sdxClusterRepository.save(sdxCluster);
         } else {
-            LOGGER.warn("Cannot update the Sdx runtime version for cluster: {}", clusterName);
+            LOGGER.warn("Cannot update the Data Lake runtime version for cluster: {}", clusterName);
         }
         return cdpVersionOpt;
     }
@@ -952,7 +952,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         } catch (NotFoundException ignored) {
             LOGGER.info("Cannot find environment, ignoring", ignored);
         } catch (Exception e) {
-            LOGGER.warn("Error happened during fetching payload context for datalake with environment response.", e);
+            LOGGER.warn("Error happened during fetching payload context for Data Lake with environment response.", e);
         }
         return null;
     }

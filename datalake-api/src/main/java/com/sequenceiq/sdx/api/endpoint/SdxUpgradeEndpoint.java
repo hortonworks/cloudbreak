@@ -42,28 +42,28 @@ public interface SdxUpgradeEndpoint {
     @POST
     @Path("{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "upgrades the data lake cluster", operationId = "upgradeDatalakeCluster",
+    @Operation(summary = "upgrades the Data Lake cluster", operationId = "upgradeDatalakeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse upgradeClusterByName(@PathParam("name") String name, @Valid SdxUpgradeRequest upgradeSdxClusterRequest);
 
     @POST
     @Path("/crn/{crn}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "upgrades the data lake cluster", operationId = "upgradeDatalakeClusterByCrn",
+    @Operation(summary = "upgrades the Data Lake cluster", operationId = "upgradeDatalakeClusterByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse upgradeClusterByCrn(@PathParam("crn") String crn, @Valid SdxUpgradeRequest upgradeSdxClusterRequest);
 
     @POST
     @Path("{name}/prepare_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "prepares the data lake cluster for upgrade", operationId = "prepareDatalakeClusterUpgrade",
+    @Operation(summary = "prepares the Data Lake cluster for upgrade", operationId = "prepareDatalakeClusterUpgrade",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse prepareClusterUpgradeByName(@PathParam("name") String name, @Valid SdxUpgradeRequest distroxUpgradeRequest);
 
     @POST
     @Path("/crn/{crn}/prepare_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "prepares the data lake cluster for upgrade", operationId = "prepareDatalakeClusterUpgradeByCrn",
+    @Operation(summary = "prepares the Data Lake cluster for upgrade", operationId = "prepareDatalakeClusterUpgradeByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse prepareClusterUpgradeByCrn(@PathParam("crn") String crn, @Valid SdxUpgradeRequest distroxUpgradeRequest);
 
@@ -107,7 +107,7 @@ public interface SdxUpgradeEndpoint {
     @PUT
     @Path("{name}/upgrade_rds")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Upgrades the database server of the data lake", operationId = "upgradeDatalakeDatabaseByName",
+    @Operation(summary = "Upgrades the database server of the Data Lake", operationId = "upgradeDatalakeDatabaseByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByName(@PathParam("name") String clusterName,
             @Valid SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest);
@@ -115,7 +115,7 @@ public interface SdxUpgradeEndpoint {
     @PUT
     @Path("/crn/{crn}/upgrade_rds")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Upgrades the database server of the data lake", operationId = "upgradeDatalakeDatabaseByCrn",
+    @Operation(summary = "Upgrades the database server of the Data Lake", operationId = "upgradeDatalakeDatabaseByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String clusterCrn,
             @Valid SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest);
@@ -123,14 +123,14 @@ public interface SdxUpgradeEndpoint {
     @POST
     @Path("/rds_upgrade_status")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Check RDS upgrade status for a list of Datalake CRNs", operationId = "getDatabaseServerUpgradeStatusByDatalakeCrns",
+    @Operation(summary = "Check RDS upgrade status for a list of Data Lake CRNs", operationId = "getDatabaseServerUpgradeStatusByDatalakeCrns",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxDatabaseUpgradeStatus> getDatabaseServerUpgradeStatusByDatalakeCrns(@NotNull List<String> datalakeCrns);
 
     @GET
     @Path("/crn/{datalakeCrn}/rds_upgrade_status")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Check RDS upgrade status for a single Datalake by CRN", operationId = "getDatabaseServerUpgradeStatusByDatalakeCrn",
+    @Operation(summary = "Check RDS upgrade status for a single Data Lake by CRN", operationId = "getDatabaseServerUpgradeStatusByDatalakeCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxDatabaseUpgradeStatus getDatabaseServerUpgradeStatusByDatalakeCrn(
             @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("datalakeCrn") String datalakeCrn);
@@ -138,7 +138,7 @@ public interface SdxUpgradeEndpoint {
     @GET
     @Path("/name/{datalakeName}/rds_upgrade_status")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Check RDS upgrade status for a single Datalake by name", operationId = "getDatabaseServerUpgradeStatusByDatalakeName",
+    @Operation(summary = "Check RDS upgrade status for a single Data Lake by name", operationId = "getDatabaseServerUpgradeStatusByDatalakeName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxDatabaseUpgradeStatus getDatabaseServerUpgradeStatusByDatalakeName(@PathParam("datalakeName") String datalakeName);
 }

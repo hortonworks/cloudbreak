@@ -131,7 +131,7 @@ public class SELinuxAssertions {
         if (throwIfAnyError) {
             throwIfAnyError(validationResult);
         } else {
-            LOGGER.error("The SELinux validation found the following errors on the DataLake instances: \n{}", validationResult.getFormattedErrors());
+            LOGGER.error("The SELinux validation found the following errors on the Data Lake instances: \n{}", validationResult.getFormattedErrors());
         }
         return testDto;
     }

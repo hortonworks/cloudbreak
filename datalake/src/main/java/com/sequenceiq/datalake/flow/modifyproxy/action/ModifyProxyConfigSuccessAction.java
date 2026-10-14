@@ -31,7 +31,7 @@ public class ModifyProxyConfigSuccessAction extends ModifyProxyConfigAction<Modi
 
     @Override
     protected void doExecute(SdxContext context, ModifyProxyConfigSuccessResponse payload, Map<Object, Object> variables) throws Exception {
-        LOGGER.info("Modify proxy config finished for SDX stack {}", context.getSdxId());
+        LOGGER.info("Modify proxy config finished for Data Lake stack {}", context.getSdxId());
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.DATALAKE_PROXY_CONFIG_MODIFICATION_FINISHED,
                 "Successfully modified proxy config", context.getSdxId());
         sendEvent(context);

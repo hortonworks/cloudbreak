@@ -160,7 +160,7 @@ public class SdxRotationService {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
                 .orElseThrow(notFound("SdxCluster", datalakeCrn));
         if (sdxCluster.getDatabaseCrn() == null) {
-            throw new RuntimeException("No database server found for sdx cluster " + datalakeCrn);
+            throw new RuntimeException("No database server found for Data Lake cluster " + datalakeCrn);
         }
 
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
@@ -184,7 +184,7 @@ public class SdxRotationService {
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
-        SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
+        SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("Data Lake cluster", datalakeCrn));
         List<SecretType> filteredSecretTypes = secretTypes.stream()
                 .filter(type -> !conditionalRotationContextProviderMap.containsKey(type) ||
                         conditionalRotationContextProviderMap.get(type).isApplicable(sdxCluster))
@@ -202,7 +202,7 @@ public class SdxRotationService {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
                 .orElseThrow(notFound("SdxCluster", datalakeCrn));
         if (sdxCluster.getDatabaseCrn() == null) {
-            throw new SecretRotationException("No database server found for sdx cluster, rotation is not possible.", null);
+            throw new SecretRotationException("No database server found for Data Lake cluster, rotation is not possible.", null);
         }
         FlowLogResponse lastFlow = redbeamsFlowService.getLastFlowId(sdxCluster.getDatabaseCrn());
         if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {

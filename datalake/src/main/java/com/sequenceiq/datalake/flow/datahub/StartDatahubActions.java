@@ -49,7 +49,7 @@ public class StartDatahubActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Execute start datahub for sdx: {}", payload.getResourceId());
+                LOGGER.info("Execute start datahub for Data Lake: {}", payload.getResourceId());
 
                 String userId = payload.getUserId();
                 Long resourceId = payload.getResourceId();
@@ -57,7 +57,7 @@ public class StartDatahubActions {
                     sdxStartService.startAllDatahubs(resourceId);
                     sendEvent(context, new SdxEvent(START_DATAHUB_IN_PROGRESS_EVENT.event(), resourceId, userId));
                 } catch (Exception e) {
-                    LOGGER.error("Failed to start datahub, sdx: {}, user: {}", resourceId, userId, e);
+                    LOGGER.error("Failed to start datahub, Data Lake: {}, user: {}", resourceId, userId, e);
                     sendEvent(context, new SdxEvent(START_DATAHUB_FAILED_EVENT.event(), resourceId, userId));
                 }
             }
@@ -106,7 +106,7 @@ public class StartDatahubActions {
             protected void doExecute(SdxContext context, StartDatahubFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.START_FAILED;
-                LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
+                LOGGER.info("Update Data Lake status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
                 String statusReason = "Datahub start failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();

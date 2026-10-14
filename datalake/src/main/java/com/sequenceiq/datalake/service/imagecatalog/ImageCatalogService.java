@@ -56,7 +56,7 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
                         return imageV4Response;
                     }
                 }
-                String errorMessage = String.format("SDX cluster is on the cloud platform %s, but the image requested with uuid %s:%s does not support it",
+                String errorMessage = String.format("Data Lake cluster is on the cloud platform %s, but the image requested with uuid %s:%s does not support it",
                         providerName, imageSettingsV4Request.getCatalog() != null ? imageSettingsV4Request.getCatalog() : "default",
                         imageSettingsV4Request.getId());
                 LOGGER.error(errorMessage);
@@ -88,7 +88,7 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
             }
             return images;
         } catch (Exception e) {
-            LOGGER.error("Sdx service failed to get images for request {}", imageSettingsV4Request, e);
+            LOGGER.error("Data Lake service failed to get images for request {}", imageSettingsV4Request, e);
             return null;
         }
     }

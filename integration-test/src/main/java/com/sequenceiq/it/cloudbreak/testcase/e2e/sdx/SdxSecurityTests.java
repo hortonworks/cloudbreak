@@ -36,8 +36,8 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "autotls cert rotation is called on the SDX cluster",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
+            when = "autotls cert rotation is called on the Data Lake cluster",
             then = "host certificates' validity should be changed on all hosts, the cluster should be up and running"
     )
     public void testSDXAutoTlsCertRotation(TestContext testContext) {

@@ -56,8 +56,8 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX then DistroX create request is sent (latest Marketplace Image)",
-            then = "SDX and DistroX should be available AND deletable"
+            when = "a valid Data Lake then DistroX create request is sent (latest Marketplace Image)",
+            then = "Data Lake and DistroX should be available AND deletable"
     )
     public void testSDXAndDistroXWithMarketplaceImageCanBeCreatedSuccessfully(TestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();

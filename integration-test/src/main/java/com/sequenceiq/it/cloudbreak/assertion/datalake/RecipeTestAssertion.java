@@ -23,7 +23,7 @@ public class RecipeTestAssertion {
     public static <T extends AbstractSdxTestDto> Assertion<T, SdxClient> validateFilesOnHost(List<String> hostGroupNames, String filePath, String fileName,
             long requiredNumberOfFiles, SshJUtil sshJUtil) {
         return (testContext, testDto, sdxClient) -> {
-            Log.log(LOGGER, " Checking generated file(s) by recipe at datalake instance(s) (%s) on '%s' path by '%s' name! ", testDto.getCrn(),
+            Log.log(LOGGER, " Checking generated file(s) by recipe at Data Lake instance(s) (%s) on '%s' path by '%s' name! ", testDto.getCrn(),
                     filePath, fileName);
             sshJUtil.checkFilesOnHostByNameAndPath(testDto, getInstanceGroups(testDto, sdxClient), hostGroupNames, filePath,
                     fileName, 1, null, null);

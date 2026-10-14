@@ -56,9 +56,9 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "a SDX internal request and a DistroX request",
-            when = "a SDX internal create request is sent",
-            then = "the SDX cluster and the corresponding DistroX cluster is created")
+            given = "a Data Lake internal request and a DistroX request",
+            when = "a Data Lake internal create request is sent",
+            then = "the Data Lake cluster and the corresponding DistroX cluster is created")
     public void testCreateInternalSdxAndDistrox(TestContext testContext) {
         String blueprintName;
         if (imageValidatorE2ETestUtil.isFreeIpaImageValidation()) {
@@ -95,7 +95,7 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
                 .then(((context, sdx, client) -> {
                     SdxClusterStatusResponse clusterStatus = sdx.getResponse().getStatus();
                     if (!clusterStatus.isRunning()) {
-                        throw new TestFailException("SDX status is not running at the end of the validation. Current status is: " + clusterStatus);
+                        throw new TestFailException("Data Lake status is not running at the end of the validation. Current status is: " + clusterStatus);
                     }
                     return sdx;
                 }))

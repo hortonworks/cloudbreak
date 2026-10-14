@@ -109,26 +109,26 @@ public class ResizeRecoveryService implements RecoveryService {
 
     private String getReasonNonRecoverable(DatalakeStatusEnum status) {
         if (RUNNING.equals(status)) {
-            return "Datalake is running, resize can not be recovered from this point";
+            return "Data Lake is running, resize can not be recovered from this point";
         } else if (DELETE_FAILED.equals(status)) {
-            return "Failed to delete original data lake, not a recoverable error";
+            return "Failed to delete original Data Lake, not a recoverable error";
         } else {
-            return "Cannot recover from resize due to Datalake not being in a recoverable status: " + status;
+            return "Cannot recover from resize due to Data Lake not being in a recoverable status: " + status;
         }
     }
 
     private SdxRecoverableResponse validateRecoveryResizedClusterPresent(DatalakeStatusEnum status, String statusReason, boolean force) {
         if (force) {
-            return new SdxRecoverableResponse("Force flag provided. Resized datalake with status " + status + " will be recovered by force, " +
-                    "deleting the new resized datalake and recovering the old detached datalake.", RecoveryStatus.RECOVERABLE);
+            return new SdxRecoverableResponse("Force flag provided. Resized Data Lake with status " + status + " will be recovered by force, " +
+                    "deleting the new resized Data Lake and recovering the old detached Data Lake.", RecoveryStatus.RECOVERABLE);
         }
 
         if (FAILURE_STATES.contains(status)) {
-            return new SdxRecoverableResponse("Resized data lake is in a failed state. Recovery will restart the original data lake, " +
+            return new SdxRecoverableResponse("Resized Data Lake is in a failed state. Recovery will restart the original Data Lake, " +
                     "and delete the new one", RecoveryStatus.RECOVERABLE);
-        } else if (RUNNING.equals(status) && statusReason != null && statusReason.contains("Datalake restore failed")) {
+        } else if (RUNNING.equals(status) && statusReason != null && statusReason.contains("restore failed")) {
             return new SdxRecoverableResponse(
-                    "Failed to restore backup to new data lake, recovery will restart original data lake, and delete the new one",
+                    "Failed to restore backup to new Data Lake, recovery will restart original Data Lake, and delete the new one",
                     RecoveryStatus.RECOVERABLE
             );
         }
@@ -142,15 +142,15 @@ public class ResizeRecoveryService implements RecoveryService {
         List<SdxCluster> sdxClusters = sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getEnvCrn());
         if (sdxClusters.size() > 1) {
             return new SdxRecoverableResponse(
-                    "Resize can not be recovered from original cluster. It must have exactly one datalake in the environment",
+                    "Resize can not be recovered from original cluster. It must have exactly one Data Lake in the environment",
                     RecoveryStatus.NON_RECOVERABLE);
         } else if (STOPPED.equals(status)) {
             if (sdxCluster.isDetached()) {
                 return new SdxRecoverableResponse("Resize can recover detached cluster", RecoveryStatus.RECOVERABLE);
-            } else if (statusReason != null && statusReason.contains("SDX detach failed")) {
+            } else if (statusReason != null && statusReason.contains("detach failed")) {
                 return new SdxRecoverableResponse("Resize can recover stopped cluster", RecoveryStatus.RECOVERABLE);
             }
-        } else if (STOP_FAILED.equals(status) && statusReason != null && statusReason.contains("Datalake resize failure")) {
+        } else if (STOP_FAILED.equals(status) && statusReason != null && statusReason.contains("resize failure")) {
             return new SdxRecoverableResponse("Resize can be recovered from a failed stop", RecoveryStatus.RECOVERABLE);
         }
         return new SdxRecoverableResponse(

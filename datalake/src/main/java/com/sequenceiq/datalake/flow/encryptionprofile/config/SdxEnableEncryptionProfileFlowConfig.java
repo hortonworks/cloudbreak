@@ -76,7 +76,7 @@ public class SdxEnableEncryptionProfileFlowConfig
 
     @Override
     public String getDisplayName() {
-        return "Enable encryption profile on datalake";
+        return "Enable encryption profile on Data Lake";
     }
 
     @Override

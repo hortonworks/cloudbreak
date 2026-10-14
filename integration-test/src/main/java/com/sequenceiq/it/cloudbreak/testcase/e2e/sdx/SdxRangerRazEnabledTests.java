@@ -43,7 +43,7 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
     @Description(
             given = "there is a running Cloudbreak",
             when = "enableRangerRaz is called when Raz is installed",
-            then = "rangerRazEnabled is set for Sdx"
+            then = "rangerRazEnabled is set for Data Lake"
     )
     public void testCreateSdxWithRangerRaz(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();

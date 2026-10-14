@@ -67,7 +67,7 @@ public class DistroXEnableEncryptionProfileTest extends AbstractE2ETest {
     @Description(
             given = "there is a running cloudbreak",
             when = "encryption profile is enabled on the environment",
-            then = "datalake and datahub use the same TLS version and ciphers from the custom encryption profile")
+            then = "Data Lake and Data Hub use the same TLS version and ciphers from the custom encryption profile")
     public void testEnableEncryptionProfileInDistroX(TestContext testContext) {
         String encryptionProfileName = "encryption-profile-" + UUID.randomUUID();
         testContext
@@ -130,8 +130,8 @@ public class DistroXEnableEncryptionProfileTest extends AbstractE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
-            when = "encryption profile is enabled on the datalake and a different one on the datahub",
-            then = "datalake and datahub use different TLS version and ciphers from the custom encryption profiles")
+            when = "encryption profile is enabled on the Data Lake and a different one on the Data Hub",
+            then = "Data Lake and Data Hub use different TLS version and ciphers from the custom encryption profiles")
     public void testEnableDifferentEncryptionProfilesInSdxAndDistroX(TestContext testContext) {
         String envEncryptionProfileName = "encryption-profile-env" + UUID.randomUUID();
         String dlEncryptionProfileName = "encryption-profile-dl" + UUID.randomUUID();

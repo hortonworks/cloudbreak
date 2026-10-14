@@ -67,7 +67,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
 
         Selectable response;
         try {
-            LOGGER.info("Start polling datalake full backup status for id: {} with timeout duration: {}", sdxId, duration);
+            LOGGER.info("Start polling Data Lake full backup status for id: {} with timeout duration: {}", sdxId, duration);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
                     TimeUnit.MINUTES);
             DatalakeBackupStatusResponse backupStatusResponse = sdxBackupRestoreService.waitForDatalakeDrBackupToComplete(
@@ -82,7 +82,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
                     break;
                 // failed states are handled via Exception catch block
                 default:
-                    LOGGER.warn("Unknown datalake backup status, assuming successful backup: {}", backupStatusResponse.getState());
+                    LOGGER.warn("Unknown Data Lake backup status, assuming successful backup: {}", backupStatusResponse.getState());
                     response = new DatalakeBackupSuccessEvent(sdxId, userId, request.getOperationId());
             }
         } catch (UserBreakException userBreakException) {
@@ -91,12 +91,12 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Full backup poller stopped for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake backup timed out after " + duration + " minutes"));
+                    new PollerStoppedException("Data Lake backup timed out after " + duration + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Full backup polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakServiceException exception) {
-            LOGGER.info("Datalake backup failed. Reason: {}", exception.getMessage());
+            LOGGER.info("Data Lake backup failed. Reason: {}", exception.getMessage());
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);
         }
         return response;

@@ -53,7 +53,7 @@ public class RangerRazService {
                 sdxService.save(sdxCluster);
             }
         } else {
-            throw new BadRequestException(String.format("Ranger raz is not installed on the datalake: %s!", sdxCluster.getClusterName()));
+            throw new BadRequestException(String.format("Ranger raz is not installed on the Data Lake: %s!", sdxCluster.getClusterName()));
         }
     }
 

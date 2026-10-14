@@ -124,12 +124,12 @@ public class MultiAzDecorator {
             SubnetType subnetType;
             if (PUBLIC_SUBNET_SUPPORTED_TUNNEL.contains(tunnel)) {
                 subnetType = SubnetType.PUBLIC;
-                LOGGER.info("Trying to get subnets with type '{}' for Datalake's groups based on tunnel type: '{}'", subnetType, tunnel);
+                LOGGER.info("Trying to get subnets with type '{}' for Data Lake's groups based on tunnel type: '{}'", subnetType, tunnel);
                 cloudSubnetsBySubnetId.putAll(filterSubnetMetasBySubnetType(environment, subnetType));
             }
             if (cloudSubnetsBySubnetId.isEmpty()) {
                 subnetType = SubnetType.PRIVATE;
-                LOGGER.info("Trying to get subnets with type '{}' for Datalake's groups based on tunnel type: '{}'", subnetType, tunnel);
+                LOGGER.info("Trying to get subnets with type '{}' for Data Lake's groups based on tunnel type: '{}'", subnetType, tunnel);
                 cloudSubnetsBySubnetId.putAll(filterSubnetMetasBySubnetType(environment, subnetType));
             }
         }

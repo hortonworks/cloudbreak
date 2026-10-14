@@ -92,14 +92,14 @@ class DataLakeStatusCheckerServiceTest {
         DistroXOperationValidationView distroXOperationValidationView2 = new DistroXOperationValidationView();
         distroXOperationValidationView2.setOperation(DistroXOperations.SCALE);
         distroXOperationValidationView2.setAllowed(false);
-        distroXOperationValidationView2.setReason("Instance health check failed for SDX cluster");
+        distroXOperationValidationView2.setReason("Instance health check failed for Data Lake cluster");
         when(platformAwareSdxConnector.validateDistroxOperations(ENVIRONMENT_CRN))
                 .thenReturn(List.of(distroXOperationValidationView, distroXOperationValidationView1, distroXOperationValidationView2));
 
         BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateScaleOperationBasedOnDatalake(stack.getType(),
                 stack.getEnvironmentCrn(), true));
         assertEquals("Data Hub scaling is not allowed due to Data Lake being unavailable. Reason: " +
-                "'Instance health check failed for SDX cluster'.", e.getMessage());
+                "'Instance health check failed for Data Lake cluster'.", e.getMessage());
     }
 
         @Test
@@ -144,7 +144,7 @@ class DataLakeStatusCheckerServiceTest {
         DistroXOperationValidationView distroXOperationValidationView = new DistroXOperationValidationView();
         distroXOperationValidationView.setAllowed(false);
         distroXOperationValidationView.setOperation(DistroXOperations.START);
-        distroXOperationValidationView.setReason("Instance health check failed for SDX cluster");
+        distroXOperationValidationView.setReason("Instance health check failed for Data Lake cluster");
         DistroXOperationValidationView distroXOperationValidationView1 = new DistroXOperationValidationView();
         distroXOperationValidationView1.setOperation(DistroXOperations.CREATE);
         distroXOperationValidationView1.setAllowed(true);
@@ -156,7 +156,7 @@ class DataLakeStatusCheckerServiceTest {
 
         BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateStartOperationBasedOnDatalake(stack));
         assertEquals("Data Hub start is not allowed due to Data Lake being unavailable. Reason: " +
-                "'Instance health check failed for SDX cluster'.", e.getMessage());
+                "'Instance health check failed for Data Lake cluster'.", e.getMessage());
     }
 
     @Test

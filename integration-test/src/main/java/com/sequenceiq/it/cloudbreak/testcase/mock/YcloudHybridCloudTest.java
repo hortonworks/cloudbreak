@@ -95,9 +95,9 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there are an available parent and child environments",
-            when = "a valid SDX create request is sent to the child environment",
+            when = "a valid Data Lake create request is sent to the child environment",
             then = "environment should be created and parent environment should be referenced in the child environment",
-            and = "SDX is created with the proper information")
+            and = "Data Lake is created with the proper information")
     public void testCreateSdxOnChildEnvironment(MockedTestContext testContext) {
         validateParentEnvironment(testContext);
         createAndValidateChildEnvironment(testContext);

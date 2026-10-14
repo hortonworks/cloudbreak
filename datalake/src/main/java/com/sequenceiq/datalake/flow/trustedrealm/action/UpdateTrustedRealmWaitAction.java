@@ -29,7 +29,7 @@ public class UpdateTrustedRealmWaitAction extends UpdateTrustedRealmAction<SdxEv
 
     @Override
     protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-        LOGGER.info("Waiting for update trusted realm for SDX stack {}", context.getSdxId());
+        LOGGER.info("Waiting for update trusted realm for Data Lake stack {}", context.getSdxId());
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPDATE_TRUSTED_REALM_IN_PROGRESS,
                 "Updating trusted realm", context.getSdxId());
         sendEvent(context);

@@ -72,7 +72,7 @@ public class DatalakeRestoreValidationFlowConfig extends AbstractFlowConfigurati
 
     @Override
     public String getDisplayName() {
-        return "SDX Restore Validation";
+        return "Data Lake Restore Validation";
     }
 
     @Override

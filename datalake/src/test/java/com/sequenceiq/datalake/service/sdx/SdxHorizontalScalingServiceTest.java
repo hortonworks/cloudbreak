@@ -49,7 +49,7 @@ import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Sdx horizontal scaling service tests")
+@DisplayName("Data Lake horizontal scaling service tests")
 public class SdxHorizontalScalingServiceTest {
 
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";

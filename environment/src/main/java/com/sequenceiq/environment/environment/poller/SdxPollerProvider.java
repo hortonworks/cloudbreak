@@ -39,7 +39,7 @@ public class SdxPollerProvider {
 
     private AttemptResult<Void> collectSdxResults(List<FlowIdentifier> flowIdentifiers, Long envId) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-            String message = "Sdx polling cancelled in inmemory store, id: " + envId;
+            String message = "Data Lake polling cancelled in inmemory store, id: " + envId;
             LOGGER.info(message);
             throw new PollerStoppedException(message);
         }
@@ -52,7 +52,7 @@ public class SdxPollerProvider {
 
     public AttemptResult<Void> upgradeCcmPoller(Long envId, String datalakeCrn) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-            String message = "SDX polling cancelled in inmemory store, environment id: " + envId;
+            String message = "Data Lake polling cancelled in inmemory store, environment id: " + envId;
             LOGGER.info(message);
             throw new PollerStoppedException(message);
         }
@@ -60,15 +60,15 @@ public class SdxPollerProvider {
         OperationProgressStatus progressStatus = operation.getProgressStatus();
         switch (progressStatus) {
             case CANCELLED:
-                return AttemptResults.breakFor("SDX Upgrade CCM cancelled for datalake CRN " + datalakeCrn);
+                return AttemptResults.breakFor("Data Lake Upgrade CCM cancelled for Data Lake CRN " + datalakeCrn);
             case FAILED:
-                return AttemptResults.breakFor("SDX Upgrade CCM failed for environment CRN " + datalakeCrn);
+                return AttemptResults.breakFor("Data Lake Upgrade CCM failed for environment CRN " + datalakeCrn);
             case FINISHED:
                 return AttemptResults.justFinish();
             case RUNNING:
                 return AttemptResults.justContinue();
             default:
-                return AttemptResults.breakFor("SDX Upgrade CCM is in ambiguous state " + progressStatus + " for environment CRN " + datalakeCrn);
+                return AttemptResults.breakFor("Data Lake Upgrade CCM is in ambiguous state " + progressStatus + " for environment CRN " + datalakeCrn);
         }
     }
 

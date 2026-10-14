@@ -128,14 +128,14 @@ public class CleanupWaitUtil {
         }
 
         if (checkSdxesDeleteFailedStatus(sdx, environments)) {
-            LOG.info("One or more SDX cannot be terminated in the associated environment");
+            LOG.info("One or more Data Lake cannot be terminated in the associated environment");
             return WaitResult.FAILED;
         } else if (checkSdxesAreAvailable(sdx, environments)) {
-            LOG.info("Timeout: SDXes cannot be terminated in environment during {} retries", maxRetry);
+            LOG.info("Timeout: Data Lakes cannot be terminated in environment during {} retries", maxRetry);
             return WaitResult.TIMEOUT;
         } else {
             sleep(DELETE_SLEEP);
-            LOG.info("All the SDXs have been terminated in all the environments");
+            LOG.info("All the Data Lakes have been terminated in all the environments");
             return WaitResult.SUCCESSFUL;
         }
     }
@@ -162,14 +162,14 @@ public class CleanupWaitUtil {
         }
 
         if (checkSdxDeleteFailedStatus(sdxClient, sdxName)) {
-            LOG.info("Failed: {} sdx cannot be terminated", sdxName);
+            LOG.info("Failed: {} Data Lake cannot be terminated", sdxName);
             return WaitResult.FAILED;
         } else if (checkSdxIsAvailable(sdxClient, sdxName)) {
-            LOG.info("Timeout: {} sdx cannot be terminated during {} retries", sdxName, maxRetry);
+            LOG.info("Timeout: {} Data Lake cannot be terminated during {} retries", sdxName, maxRetry);
             return WaitResult.TIMEOUT;
         } else {
             sleep(DELETE_SLEEP);
-            LOG.info("Success: {} sdx have been terminated", sdxName);
+            LOG.info("Success: {} Data Lake have been terminated", sdxName);
             return WaitResult.SUCCESSFUL;
         }
     }
@@ -318,7 +318,7 @@ public class CleanupWaitUtil {
             );
         } catch (Exception e) {
             // Transient failure — assume still present so the poll keeps going rather than declaring success on a glitch.
-            LOG.warn("Transient error during check sdxes are available, assuming still present: {}", e.getMessage(), e);
+            LOG.warn("Transient error during check Data Lakes are available, assuming still present: {}", e.getMessage(), e);
             return true;
         }
     }
@@ -339,11 +339,11 @@ public class CleanupWaitUtil {
             sdxClient.sdxEndpoint().get(sdxName);
             return true;
         } catch (NotFoundException e) {
-            LOG.info("{} sdx not found (404) — treating as deleted", sdxName);
+            LOG.info("{} Data Lake not found (404) — treating as deleted", sdxName);
             return false;
         } catch (Exception e) {
             // Transient failure — keep polling instead of declaring success on a glitch.
-            LOG.warn("Transient error while checking {} sdx availability, assuming still present: {}", sdxName, e.getMessage(), e);
+            LOG.warn("Transient error while checking {} Data Lake availability, assuming still present: {}", sdxName, e.getMessage(), e);
             return true;
         }
     }
@@ -459,7 +459,7 @@ public class CleanupWaitUtil {
         } catch (Exception e) {
             // Transient failure — cannot confirm DELETE_FAILED so assume not failed and let the "are available"
             // check drive the poll loop instead.
-            LOG.warn("Transient error during check sdxes DELETE_FAILED state, assuming not failed: {}", e.getMessage(), e);
+            LOG.warn("Transient error during check Data Lakes DELETE_FAILED state, assuming not failed: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -482,7 +482,7 @@ public class CleanupWaitUtil {
             // Resource is gone — definitely not in DELETE_FAILED state.
             return false;
         } catch (Exception e) {
-            LOG.warn("Transient error while checking {} sdx's DELETE_FAILED state, assuming not failed: {}", sdxName, e.getMessage(), e);
+            LOG.warn("Transient error while checking {} Data Lake's DELETE_FAILED state, assuming not failed: {}", sdxName, e.getMessage(), e);
             return false;
         }
     }

@@ -122,7 +122,7 @@ public class SdxDetachFlowConfig extends AbstractFlowConfiguration<SdxDetachStat
 
     @Override
     public String getDisplayName() {
-        return "Sdx detach";
+        return "Data Lake detach";
     }
 
     @Override

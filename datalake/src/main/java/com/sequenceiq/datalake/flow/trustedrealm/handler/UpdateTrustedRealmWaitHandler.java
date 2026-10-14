@@ -55,7 +55,7 @@ public class UpdateTrustedRealmWaitHandler extends ExceptionCatcherEventHandler<
             sdxWaitService.waitForCloudbreakFlow(eventData.getResourceId(), pollingConfig, "Updating trusted realm");
             return new UpdateTrustedRealmSuccessResponse(eventData.getResourceId(), eventData.getUserId());
         } catch (SdxWaitException e) {
-            LOGGER.warn("Error occurred during waiting for update trusted realm for SDX stack {}, error: ",
+            LOGGER.warn("Error occurred during waiting for update trusted realm for Data Lake stack {}, error: ",
                     eventData.getResourceId(), e);
             return new UpdateTrustedRealmFailureResponse(eventData.getResourceId(), eventData.getUserId(), e);
         }

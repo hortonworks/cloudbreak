@@ -135,7 +135,7 @@ public class DatalakeBackupFlowConfig extends AbstractFlowConfiguration<Datalake
 
     @Override
     public String getDisplayName() {
-        return "SDX Database Backup";
+        return "Data Lake Database Backup";
     }
 
     @Override

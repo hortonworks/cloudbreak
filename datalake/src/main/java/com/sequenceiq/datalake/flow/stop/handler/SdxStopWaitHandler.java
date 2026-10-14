@@ -58,7 +58,7 @@ public class SdxStopWaitHandler extends ExceptionCatcherEventHandler<SdxStopWait
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Stop poller stopped for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake stop timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake stop timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Stop polling failed for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId, exception);

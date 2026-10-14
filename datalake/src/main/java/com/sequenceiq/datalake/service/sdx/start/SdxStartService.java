@@ -70,7 +70,7 @@ public class SdxStartService {
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.putStartInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Datalake start in progress", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Data Lake start in progress", sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (WebApplicationException e) {

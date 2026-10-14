@@ -111,7 +111,7 @@ public class SecretEncryptionAssertions {
         List<String> instanceIps = sdxInternalTestDto.getAllInstanceIps();
         Map<String, String> failedInstancesWithCommandOutput = getFailedInstancesWithCommandOutput(instanceIps);
         if (!failedInstancesWithCommandOutput.isEmpty()) {
-            throw new TestFailException("The secret encryption validation did not succeed on all the SDX instances. Failed instances with command output: "
+            throw new TestFailException("The secret encryption validation did not succeed on all the Data Lake instances. Failed instances with command output: "
                     + failedInstancesWithCommandOutput);
         }
     }

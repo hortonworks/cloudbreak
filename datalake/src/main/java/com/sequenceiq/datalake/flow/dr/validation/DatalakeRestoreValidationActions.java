@@ -61,13 +61,13 @@ public class DatalakeRestoreValidationActions {
         return new AbstractSdxAction<>(DatalakeTriggerRestoreValidationEvent.class) {
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerRestoreValidationEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Triggering datalake restore validation for {}", payload.getResourceId());
+                LOGGER.info("Triggering Data Lake restore validation for {}", payload.getResourceId());
                 variables.put(REASON, payload.getReason().name());
 
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_VALIDATION_IN_PROGRESS,
-                        "Datalake restore validation in progress", payload.getResourceId());
+                        "Data Lake restore validation in progress", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_VALIDATION_REQUESTED, sdxCluster);
 
                 DatalakeRestoreStatusResponse restoreStatusResponse =
@@ -94,7 +94,7 @@ public class DatalakeRestoreValidationActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake restore validation in progress for {} ", payload.getResourceId());
+                LOGGER.info("Data Lake restore validation in progress for {} ", payload.getResourceId());
                 String restoreId = (String) variables.get(RESTORE_ID);
                 sendEvent(context, DatalakeRestoreValidationWaitRequest.from(context, restoreId));
             }
@@ -111,10 +111,10 @@ public class DatalakeRestoreValidationActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake restore validation finalized for cluster: {}", payload.getResourceId());
+                LOGGER.info("Data Lake restore validation finalized for cluster: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_VALIDATION_FINISHED,
-                        "Datalake restore validation finished", payload.getResourceId());
+                        "Data Lake restore validation finished", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_VALIDATION_FINISHED, sdxCluster);
                 sendEvent(context, DATALAKE_RESTORE_VALIDATION_FINALIZED_EVENT.event(), payload);
             }
@@ -134,7 +134,7 @@ public class DatalakeRestoreValidationActions {
                 Exception exception = payload.getException();
                 String failureReason = getFailureReason(variables, exception);
                 LOGGER.error(
-                        "Datalake restore validation failed for datalake with id: {} with error: {}", payload.getResourceId(),
+                        "Data Lake restore validation failed for Data Lake with id: {} with error: {}", payload.getResourceId(),
                         failureReason, exception
                 );
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
@@ -154,9 +154,9 @@ public class DatalakeRestoreValidationActions {
             private String getFailureReason(Map<Object, Object> variables, Exception exception) {
                 StringBuilder reason = new StringBuilder();
                 if (exception instanceof PollerStoppedException) {
-                    reason.append("Datalake restore validation timed out, see the restore status using cdp-cli for more information.");
+                    reason.append("Data Lake restore validation timed out, see the restore status using cdp-cli for more information.");
                 } else {
-                    reason.append("Datalake restore validation failed.");
+                    reason.append("Data Lake restore validation failed.");
                 }
                 if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
                     reason.append(" Failure message: ").append(exception.getMessage());

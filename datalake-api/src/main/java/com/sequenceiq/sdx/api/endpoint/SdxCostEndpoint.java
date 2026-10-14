@@ -27,7 +27,7 @@ public interface SdxCostEndpoint {
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "cost of SDX clusters", operationId = "listSdxCost",
+    @Operation(summary = "cost of Data Lake clusters", operationId = "listSdxCost",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RealTimeCostResponse list(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) List<String> sdxCrns);
 }

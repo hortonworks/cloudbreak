@@ -190,7 +190,7 @@ public class SdxAttachServiceTest {
     void testMarkAsAttached() {
         sdxAttachService.markAsAttached(testCluster);
         verify(mockSdxStatusService).setStatusForDatalake(
-                eq(DatalakeStatusEnum.REQUESTED), eq("Newly attached datalake requested."), eq(testCluster)
+                eq(DatalakeStatusEnum.REQUESTED), eq("Newly attached Data Lake requested."), eq(testCluster)
         );
     }
 

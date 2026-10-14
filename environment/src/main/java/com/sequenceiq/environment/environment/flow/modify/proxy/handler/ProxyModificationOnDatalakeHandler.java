@@ -35,7 +35,7 @@ public class ProxyModificationOnDatalakeHandler extends EventSenderAwareHandler<
     public void accept(Event<EnvProxyModificationDefaultEvent> event) {
         EnvProxyModificationDefaultEvent eventData = event.getData();
         try {
-            LOGGER.info("Starting and waiting for datalake modify proxy config");
+            LOGGER.info("Starting and waiting for Data Lake modify proxy config");
             sdxPollerService.modifyProxyConfigOnAttachedDatalakeClusters(eventData.getResourceId(), eventData.getResourceName(),
                     eventData.getPreviousProxyConfigCrn());
 

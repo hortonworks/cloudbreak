@@ -71,9 +71,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been terminated",
-            then = "SDX recovery should be successful, the cluster should be up and running"
+            then = "Data Lake recovery should be successful, the cluster should be up and running"
     )
     public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2Instances(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -134,9 +134,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster with AWS_NATIVE variant in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster with AWS_NATIVE variant in available state",
             when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been terminated",
-            then = "SDX recovery should be successful, the cluster should be up and running"
+            then = "Data Lake recovery should be successful, the cluster should be up and running"
     )
     public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAwsNative(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -193,9 +193,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster with AWS variant in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster with AWS variant in available state",
             when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been terminated",
-            then = "SDX recovery should be successful, the cluster should be up and running"
+            then = "Data Lake recovery should be successful, the cluster should be up and running"
     )
     public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAws(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -279,9 +279,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
             when = "recovery called on the MASTER and then the IDBROKER host group, where the EC2 instance had been stopped",
-            then = "SDX recovery should be successful, the cluster should be up and running"
+            then = "Data Lake recovery should be successful, the cluster should be up and running"
     )
     public void testSDXRepairMasterAndIDBRokerWithStoppedEC2Instance(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -320,9 +320,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a Enterprise SDX cluster in available state",
+            given = "there is a Enterprise Data Lake cluster in available state",
             when = "IDBroker and Gateway instances are going to be deleted on the provider side",
-            then = "SDX repair should be done successfully, the cluster should be up and running"
+            then = "Data Lake repair should be done successfully, the cluster should be up and running"
     )
     public void testSDXEnterpriseRepair(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();

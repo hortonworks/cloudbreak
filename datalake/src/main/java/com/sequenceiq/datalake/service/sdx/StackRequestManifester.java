@@ -152,7 +152,7 @@ public class StackRequestManifester {
 
     private StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         try {
-            LOGGER.info("Setting up stack request of SDX {} for cloudbreak", sdxCluster.getClusterName());
+            LOGGER.info("Setting up stack request of Data Lake {} for cloudbreak", sdxCluster.getClusterName());
             StackV4Request stackRequest = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
             stackRequest.setName(sdxCluster.getClusterName());
             stackRequest.setType(StackType.DATALAKE);

@@ -72,7 +72,7 @@ public class DatalakeEnableSeLinuxActions {
 
             @Override
             protected void doExecute(CommonContext context, DatalakeModifySeLinuxFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to Enable SELinux in data lake '%s'. Status: '%s'.",
+                LOGGER.error(String.format("Failed to Enable SELinux in Data Lake '%s'. Status: '%s'.",
                         payload.getResourceCrn(), payload.getStatus()), payload.getException());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
                         DATALAKE_MODIFY_SELINUX_ON_DATALAKE_FAILED,

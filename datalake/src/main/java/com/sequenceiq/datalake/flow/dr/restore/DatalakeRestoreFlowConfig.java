@@ -120,7 +120,7 @@ public class DatalakeRestoreFlowConfig extends AbstractFlowConfiguration<Datalak
 
     @Override
     public String getDisplayName() {
-        return "SDX Database Restore";
+        return "Data Lake Database Restore";
     }
 
     @Override

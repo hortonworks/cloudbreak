@@ -31,9 +31,9 @@ public class SdxUpgradeFlexibleDatabaseServerTests extends PreconditionSdxE2ETes
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state with flexible 11",
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state with flexible 11",
             when = "upgrade called on the database",
-            then = "SDX upgrade database server should be successful to postgres 14, the cluster should be up and running"
+            then = "Data Lake upgrade database server should be successful to postgres 14, the cluster should be up and running"
     )
     public void testSDXFlexibleDatabaseUpgrade(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();

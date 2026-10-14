@@ -55,7 +55,7 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ex
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception exception, Event<DatalakeHorizontalScaleFlowEvent> event) {
-        LOGGER.error("Datalake horizontal scale rolling restart failed {}", exception.getMessage());
+        LOGGER.error("Data Lake horizontal scale rolling restart failed {}", exception.getMessage());
         return createFailureEvent(resourceId, exception, event.getData());
     }
 
@@ -69,7 +69,7 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ex
             LOGGER.debug("Start CM polling for services rolling restart process with id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
-            cloudbreakPoller.pollUpdateUntilAvailable("Datalake horizontal scaling",
+            cloudbreakPoller.pollUpdateUntilAvailable("Data Lake horizontal scaling",
                     sdxCluster, pollingConfig);
             LOGGER.debug("Services Rolling restart finsihed");
             distroxService.refreshDataHub(sdxCluster.getClusterName(), null);

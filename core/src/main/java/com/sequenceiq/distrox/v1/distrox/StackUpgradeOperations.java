@@ -125,8 +125,8 @@ public class StackUpgradeOperations {
     private void validateAttachedDataHubsForDataLake(String accountId, Stack stack, UpgradeV4Response upgradeResponse, UpgradeV4Request request) {
         InternalUpgradeSettings internalUpgradeSettings = request.getInternalUpgradeSettings();
         if (StackType.DATALAKE == stack.getType() && (internalUpgradeSettings == null || !internalUpgradeSettings.isUpgradePreparation())) {
-            LOGGER.info("Checking that the attached DataHubs of the Data lake are both in stopped state and upgradeable only in case if "
-                    + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
+            LOGGER.info("Checking that the attached DataHubs of the Data Lake are both in stopped state and upgradeable only in case if "
+                    + "Data Lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
             upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(stack.getEnvironmentCrn(), request.
                     isSkipDataHubValidation(), isRollingUpgradeEnabled(request), accountId));
         }

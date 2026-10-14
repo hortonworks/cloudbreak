@@ -316,7 +316,7 @@ class StackCommonServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.deleteInstanceInWorkspace(STACK_NAME, ACCOUNT_ID, "node1", true));
 
-        assertEquals("node1 is a node of a data lake cluster, therefore it's not allowed to delete/stop it.", exception.getMessage());
+        assertEquals("node1 is a node of a Data Lake cluster, therefore it's not allowed to delete/stop it.", exception.getMessage());
         verifyNoInteractions(stackOperationService);
     }
 
@@ -348,7 +348,7 @@ class StackCommonServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, ACCOUNT_ID, nodes, true));
 
-        assertEquals("node1, node2 are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.", exception.getMessage());
+        assertEquals("node1, node2 are nodes of a Data Lake cluster, therefore it's not allowed to delete/stop them.", exception.getMessage());
         verifyNoInteractions(stackOperationService);
     }
 
@@ -400,7 +400,7 @@ class StackCommonServiceTest {
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.stopMultipleInstancesInWorkspace(STACK_CRN, ACCOUNT_ID, instances, true));
-        assertEquals("i-09855f4f334550bce, i-0c06d3e9d07bacad8 are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.",
+        assertEquals("i-09855f4f334550bce, i-0c06d3e9d07bacad8 are nodes of a Data Lake cluster, therefore it's not allowed to delete/stop them.",
                 exception.getMessage());
         verifyNoInteractions(stackOperationService);
     }

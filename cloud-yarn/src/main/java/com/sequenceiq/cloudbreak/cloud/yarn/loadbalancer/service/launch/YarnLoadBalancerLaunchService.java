@@ -58,7 +58,7 @@ public class YarnLoadBalancerLaunchService {
         String applicationName = applicationNameUtil.createLoadBalancerName(authenticatedContext);
 
         if (!yarnApplicationCreationService.checkApplicationAlreadyCreated(yarnClient, applicationName)) {
-            LOGGER.debug("Creating the load balancer application for the Yarn datalake.");
+            LOGGER.debug("Creating the load balancer application for the Yarn Data Lake.");
             CreateApplicationRequest createApplicationRequest = createLoadBalancerRequest(cloudStack, applicationName, authenticatedContext, yarnClient);
             yarnApplicationCreationService.createApplication(yarnClient, createApplicationRequest);
             LOGGER.info("Successfully created the Yarn load balancer application.");

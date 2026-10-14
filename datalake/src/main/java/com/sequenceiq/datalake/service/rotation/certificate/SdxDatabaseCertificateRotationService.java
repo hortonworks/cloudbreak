@@ -107,13 +107,13 @@ public class SdxDatabaseCertificateRotationService {
 
     public void initAndWaitForStackCertificateRotation(SdxCluster sdxCluster, PollingConfig pollingConfig) {
         String stackCrn = sdxCluster.getStackCrn();
-        LOGGER.debug("Initiating Certificate rotation on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
+        LOGGER.debug("Initiating Certificate rotation on stack CRN {} for Data Lake {}", stackCrn, sdxCluster.getName());
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         StackRotateRdsCertificateV4Response stackRotateRdsCertificateV4Response =
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> stackV4Endpoint.rotateRdsCertificateByCrnInternal(0L, stackCrn, initiatorUserCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, stackRotateRdsCertificateV4Response.getFlowIdentifier());
-        LOGGER.debug("Waiting for Certificate rotation on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
+        LOGGER.debug("Waiting for Certificate rotation on stack CRN {} for Data Lake {}", stackCrn, sdxCluster.getName());
         cloudbreakPoller.pollCertificateRotationUntilAvailable(sdxCluster, pollingConfig);
     }
 
@@ -126,14 +126,14 @@ public class SdxDatabaseCertificateRotationService {
 
     private SdxRotateRdsCertificateV1Response checkPrerequisitesAndTrigger(SdxCluster sdxCluster, StackV4Response stack) {
         if (Objects.isNull(stack) || !stack.getStatus().isAvailable()) {
-            LOGGER.info("Datalake stack {} is not available for Certificate rotation", sdxCluster.getName());
+            LOGGER.info("Data Lake stack {} is not available for Certificate rotation", sdxCluster.getName());
             return getErrorDatalakeAnswer(getMessage(DATALAKE_DATABASE_CERTIFICATE_ROTATION_NOT_AVAILABLE), sdxCluster.getCrn());
         }
         if (!isRemoteDatabaseRequested(stack.getCluster().getDatabaseServerCrn())) {
-            LOGGER.info("Datalake stack {} is not using external database", sdxCluster.getName());
+            LOGGER.info("Data Lake stack {} is not using external database", sdxCluster.getName());
             return getErrorDatalakeAnswer(getMessage(DATALAKE_DATABASE_CERTIFICATE_ROTATION_NOT_AVAILABLE), sdxCluster.getCrn());
         }
-        LOGGER.info("Triggering flow to rotate RDS client certificates on Datalake {}.", stack.getName());
+        LOGGER.info("Triggering flow to rotate RDS client certificates on Data Lake {}.", stack.getName());
         return triggerCertificateRotationFlow(sdxCluster);
     }
 
@@ -151,7 +151,7 @@ public class SdxDatabaseCertificateRotationService {
     }
 
     private SdxRotateRdsCertificateV1Response noDatalakeAnswer(String environmentCrn) {
-        LOGGER.debug("Environment {} has no datalake", environmentCrn);
+        LOGGER.debug("Environment {} has no Data Lake", environmentCrn);
         return new SdxRotateRdsCertificateV1Response(
                 SKIP,
                 FlowIdentifier.notTriggered(),

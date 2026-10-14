@@ -273,7 +273,7 @@ class SdxResizeServiceTest {
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest));
 
-        assertEquals("SDX cluster 'sdxcluster' not found.", notFoundException.getMessage());
+        assertEquals("Data Lake cluster 'sdxcluster' not found.", notFoundException.getMessage());
     }
 
     @Test
@@ -292,7 +292,7 @@ class SdxResizeServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
                 sdxClusterResizeRequest));
-        assertEquals("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ",
+        assertEquals("Data Lake cluster is already of requested shape and not resizing to multi AZ from single AZ",
                 badRequestException.getMessage());
     }
 
@@ -372,7 +372,8 @@ class SdxResizeServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
                 sdxClusterResizeRequest));
-        assertEquals("SDX which is detached already exists for the environment. SDX name: " + sdxCluster.getClusterName(), badRequestException.getMessage());
+        assertEquals("Data Lake which is detached already exists for the environment. Data Lake name: " + sdxCluster.getClusterName(),
+                badRequestException.getMessage());
     }
 
     @Test
@@ -395,7 +396,7 @@ class SdxResizeServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
                 "BadRequestException should thrown");
-        assertEquals("SDX cluster is in the process of backup. Resize can not get started.", badRequestException.getMessage());
+        assertEquals("Data Lake cluster is in the process of backup. Resize can not get started.", badRequestException.getMessage());
     }
 
     @Test
@@ -419,7 +420,7 @@ class SdxResizeServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
                 "BadRequestException should thrown");
-        assertEquals("SDX cluster is in the process of restore. Resize can not get started.", badRequestException.getMessage());
+        assertEquals("Data Lake cluster is in the process of restore. Resize can not get started.", badRequestException.getMessage());
     }
 
     @Test
@@ -637,7 +638,7 @@ class SdxResizeServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
 
-        assertEquals("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ",
+        assertEquals("Data Lake cluster is already of requested shape and not resizing to multi AZ from single AZ",
                 badRequestException.getMessage());
     }
 
@@ -671,7 +672,7 @@ class SdxResizeServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
-        assertEquals("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ",
+        assertEquals("Data Lake cluster is already of requested shape and not resizing to multi AZ from single AZ",
                 badRequestException.getMessage());
     }
 
@@ -742,7 +743,7 @@ class SdxResizeServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
-        assertEquals("Resizing of the data lake is not supported", badRequestException.getMessage());
+        assertEquals("Resizing of the Data Lake is not supported", badRequestException.getMessage());
     }
 
     @Test

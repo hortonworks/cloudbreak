@@ -88,7 +88,7 @@ public class ClusterStartHandlerService {
             Predicate<RDSConfig> sharedDbPredicate = this::isSharedDatabase;
             Set<RDSConfig> rdsConfigs = rdsSettingsMigrationService.collectRdsConfigs(stack.getClusterId(), cmServicePredicate.and(sharedDbPredicate));
             if (!rdsConfigs.isEmpty()) {
-                LOGGER.info("Update rds configs which are using the datalake's shared database for services {}",
+                LOGGER.info("Update rds configs which are using the Data Lake's shared database for services {}",
                         rdsConfigs.stream().map(RDSConfig::getType).collect(Collectors.toSet()));
                 Table<String, String, String> cmServiceConfigs = rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs);
                 rdsSettingsMigrationService.updateCMServiceConfigs(stack, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, false);

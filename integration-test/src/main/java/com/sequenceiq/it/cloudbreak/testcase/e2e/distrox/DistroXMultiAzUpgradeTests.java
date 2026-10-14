@@ -53,7 +53,7 @@ public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and DistroX clusters in available state",
+            given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX clusters in available state",
             when = "upgrade called on DistroX cluster",
             then = "Upgrade should be successful,the clusters should be up and running and nodes should be distributed across multiple AZs")
     public void testDistroXMultiAzUpgrade(TestContext testContext) {

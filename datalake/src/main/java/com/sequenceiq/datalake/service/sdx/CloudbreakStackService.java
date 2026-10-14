@@ -46,7 +46,7 @@ public class CloudbreakStackService {
                     () -> stackV4Endpoint.get(WORKSPACE_ID, cluster.getClusterName(), Set.of(), cluster.getAccountId()));
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Could not retrieve stack for SDX cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
+            String message = String.format("Could not retrieve stack for Data Lake cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
             throw new CloudbreakServiceException(message, e);
         }
     }

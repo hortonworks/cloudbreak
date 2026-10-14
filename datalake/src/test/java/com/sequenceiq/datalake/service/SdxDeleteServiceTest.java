@@ -96,7 +96,7 @@ class SdxDeleteServiceTest {
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Data Lake deletion requested", sdxCluster);
     }
 
     @Test
@@ -111,7 +111,7 @@ class SdxDeleteServiceTest {
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Data Lake deletion requested", sdxCluster);
     }
 
     @Test
@@ -132,7 +132,7 @@ class SdxDeleteServiceTest {
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Data Lake deletion requested", sdxCluster);
     }
 
     @Test
@@ -182,7 +182,7 @@ class SdxDeleteServiceTest {
         underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", false);
         verify(sdxClusterRepository, times(1)).save(sdxCluster);
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Data Lake deletion requested", sdxCluster);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, false);
         verify(flowCancelService, times(1)).cancelRunningFlows(SDX_ID);
     }
@@ -202,7 +202,7 @@ class SdxDeleteServiceTest {
         underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", false);
         verify(sdxClusterRepository, times(1)).save(sdxCluster);
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Data Lake deletion requested", sdxCluster);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, false);
         verify(flowCancelService, times(1)).cancelRunningFlows(SDX_ID);
     }
@@ -225,7 +225,7 @@ class SdxDeleteServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true));
 
-        assertEquals("The following Data Hub(s) cluster(s) must be terminated before deletion of SDX cluster: [existingDistroXCluster].",
+        assertEquals("The following Data Hub(s) cluster(s) must be terminated before deletion of Data Lake cluster: [existingDistroXCluster].",
                 badRequestException.getMessage());
     }
 
@@ -248,7 +248,7 @@ class SdxDeleteServiceTest {
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Data Lake deletion requested", sdxCluster);
     }
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {

@@ -101,7 +101,7 @@ public class ClouderaManagerDeregisterService {
                     ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(datalakeClient(datalake));
                     clustersResourceApi.tearDownWorkloadCluster(datalake.getName(), stack.getName());
                 } else {
-                    LOGGER.info("Teardown is required but the datalake already deleted or in deletion phase: {}", datalake.getStatus());
+                    LOGGER.info("Teardown is required but the Data Lake already deleted or in deletion phase: {}", datalake.getStatus());
                 }
             } else {
                 LOGGER.info("The current cluster {} is a Data Lake cluster so teardown NOT_REQUIRED.", stack.getName());

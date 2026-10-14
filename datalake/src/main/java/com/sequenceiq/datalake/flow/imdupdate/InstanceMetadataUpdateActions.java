@@ -50,7 +50,7 @@ public class InstanceMetadataUpdateActions {
             @Override
             protected void doExecute(SdxContext context, SdxInstanceMetadataUpdateEvent payload, Map<Object, Object> variables) {
                 Long sdxId = payload.getResourceId();
-                LOGGER.info("Execute instance metadata update flow for SDX: {}", sdxId);
+                LOGGER.info("Execute instance metadata update flow for Data Lake: {}", sdxId);
                 sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_IMD_UPDATE_IN_PROGRESS, "Instance metadata update is in progress", sdxId);
                 InstanceMetadataUpdateRequest request = InstanceMetadataUpdateRequest.from(context, payload.getUpdateType());
                 sendEvent(context, request);
@@ -69,7 +69,7 @@ public class InstanceMetadataUpdateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxInstanceMetadataUpdateSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Wait for instance metadata update flow in core for SDX: {}", payload.getResourceId());
+                LOGGER.info("Wait for instance metadata update flow in core for Data Lake: {}", payload.getResourceId());
                 InstanceMetadataUpdateWaitRequest request = InstanceMetadataUpdateWaitRequest.from(context);
                 sendEvent(context, request);
             }
@@ -83,9 +83,9 @@ public class InstanceMetadataUpdateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxInstanceMetadataUpdateWaitSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Instance metadata update finalized for SDX: {}", payload.getResourceId());
+                LOGGER.info("Instance metadata update finalized for Data Lake: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(RUNNING, DATALAKE_IMD_UPDATE_FINISHED,
-                        "Datalake instance metadata update completed successfully", payload.getResourceId());
+                        "Data Lake instance metadata update completed successfully", payload.getResourceId());
                 metricService.incrementMetricCounter(IMD_UPDATE_FINISHED, sdxCluster);
                 sendEvent(context, SDX_IMD_UPDATE_FINALIZED_EVENT.event(), payload);
             }

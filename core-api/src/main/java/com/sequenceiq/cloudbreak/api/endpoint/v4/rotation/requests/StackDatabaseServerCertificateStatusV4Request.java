@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class StackDatabaseServerCertificateStatusV4Request {
 
     @NotNull
-    @Schema(description = "Crns of the datahubs or datalakes")
+    @Schema(description = "Crns of the datahubs or Data Lakes")
     @ValidCrn(resource = {DATAHUB, VM_DATALAKE})
     private Set<String> crns = new HashSet<>();
 

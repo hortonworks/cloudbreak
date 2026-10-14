@@ -138,7 +138,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             client.getDefaultClient(getTestContext()).sdxEndpoint().delete(sdxName, true);
             testContext.await(this, Map.of("status", DELETED), key("wait-purge-sdx-" + entity.getName()));
         } catch (Exception e) {
-            LOGGER.warn("Something went wrong on SDX {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
+            LOGGER.warn("Something went wrong on Data Lake {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
         }
     }
 
@@ -149,7 +149,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Override
     public SdxTestDto refresh() {
-        LOGGER.info("Refresh SDX with name: {}", getName());
+        LOGGER.info("Refresh Data Lake with name: {}", getName());
         return when(sdxTestClient.refresh(), key("refresh-sdx-" + getName()).withSkipOnFail(false).withLogError(false));
     }
 
@@ -229,7 +229,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxTestDto withCloudStorage() {
         SdxCloudStorageTestDto cloudStorage = getCloudProvider().cloudStorage(given(SdxCloudStorageTestDto.class));
         if (cloudStorage == null) {
-            throw new IllegalArgumentException("SDX Cloud Storage does not exist!");
+            throw new IllegalArgumentException("Data Lake Cloud Storage does not exist!");
         }
         return withCloudStorage(cloudStorage.getRequest());
     }
@@ -269,7 +269,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withExternalDatabase(SdxDatabaseRequest database) {
         if (isDatabaseAvailabilityTypeNone(database)) {
-            throw new TestFailException("Datalake's database availability type is NONE inside withExternalDatabase() function");
+            throw new TestFailException("Data Lake's database availability type is NONE inside withExternalDatabase() function");
         }
         getRequest().setExternalDatabase(database);
         return this;
@@ -277,7 +277,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withEmbeddedDatabase(SdxDatabaseRequest database) {
         if (!isDatabaseAvailabilityTypeNone(database)) {
-            throw new TestFailException("Datalake's database availability type is not NONE inside withEmbeddedDatabase() function");
+            throw new TestFailException("Data Lake's database availability type is not NONE inside withEmbeddedDatabase() function");
         }
         getRequest().setExternalDatabase(database);
         return this;
@@ -300,7 +300,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxTestDto withEnvironment() {
         EnvironmentTestDto environment = getTestContext().given(EnvironmentTestDto.class);
         if (environment == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this Data Lake: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
     }
@@ -308,7 +308,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxTestDto withEnvironmentClass(Class<EnvironmentTestDto> environmentClass) {
         EnvironmentTestDto environment = getTestContext().get(environmentClass.getSimpleName());
         if (environment == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this Data Lake: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
     }
@@ -394,7 +394,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxRepairRequest getSdxRepairRequest(String... hostgroups) {
         SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class).withHostGroupNames(Arrays.asList(hostgroups)));
         if (repair == null) {
-            throw new IllegalArgumentException("SDX Repair does not exist!");
+            throw new IllegalArgumentException("Data Lake Repair does not exist!");
         }
         return repair.getRequest();
     }
@@ -402,7 +402,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxUpgradeRequest getSdxUpgradeRequest() {
         SdxUpgradeTestDto upgrade = given(SdxUpgradeTestDto.class);
         if (upgrade == null) {
-            throw new IllegalArgumentException("SDX Upgrade does not exist!");
+            throw new IllegalArgumentException("Data Lake Upgrade does not exist!");
         }
         return upgrade.getRequest();
     }
@@ -410,7 +410,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxUpgradeDatabaseServerRequest getSdxUpgradeDatabaseServerRequest() {
         SdxUpgradeDatabaseServerTestDto upgradeDatabaseServer = given(SdxUpgradeDatabaseServerTestDto.class);
         if (upgradeDatabaseServer == null) {
-            throw new IllegalArgumentException("SDX Upgrade Database Server does not exist!");
+            throw new IllegalArgumentException("Data Lake Upgrade Database Server does not exist!");
         }
         return upgradeDatabaseServer.getRequest();
     }
@@ -418,7 +418,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxRecoveryRequest getSdxRecoveryRequest() {
         SdxRecoveryTestDto recovery = given(SdxRecoveryTestDto.class);
         if (recovery == null) {
-            throw new IllegalArgumentException("SDX Recovery does not exist!");
+            throw new IllegalArgumentException("Data Lake Recovery does not exist!");
         }
         return recovery.getRequest();
     }
@@ -502,18 +502,18 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                     .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
             logCollectorUtil.collectLogFiles(stackResponse.getStatusReason(), ipAddresses);
         } catch (Exception e) {
-            LOGGER.warn("Failed to collect datalake log files for investigation.", e);
+            LOGGER.warn("Failed to collect Data Lake log files for investigation.", e);
         }
     }
 
     @Override
     public void deleteForCleanup() {
         try {
-            LOGGER.info("Deleting DataLake with crn: {}", getCrn());
-            setFlow("SDX deletion", getClientForCleanup().getDefaultClient(getTestContext()).sdxEndpoint().deleteByCrn(getCrn(), true));
+            LOGGER.info("Deleting Data Lake with crn: {}", getCrn());
+            setFlow("Data Lake deletion", getClientForCleanup().getDefaultClient(getTestContext()).sdxEndpoint().deleteByCrn(getCrn(), true));
             awaitForFlow();
         } catch (NotFoundException nfe) {
-            LOGGER.info("SDX resource not found, thus cleanup not needed.");
+            LOGGER.info("Data Lake resource not found, thus cleanup not needed.");
         }
     }
 
@@ -527,7 +527,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withImage(String imageCatalog, String imageUuid) {
         if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
-            LOGGER.info("Using catalog [{}] and image [{}] for creating SDX", imageCatalog, imageUuid);
+            LOGGER.info("Using catalog [{}] and image [{}] for creating Data Lake", imageCatalog, imageUuid);
             ImageSettingsV4Request imageSettingsRequest = new ImageSettingsV4Request();
             imageSettingsRequest.setCatalog(imageCatalog);
             imageSettingsRequest.setId(imageUuid);

@@ -20,7 +20,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DatalakeCrn {
 
-    String message() default "Crn is not valid or not belongs to a datalake cluster";
+    String message() default "Crn is not valid or not belongs to a Data Lake cluster";
 
     Class<?>[] groups() default {};
 

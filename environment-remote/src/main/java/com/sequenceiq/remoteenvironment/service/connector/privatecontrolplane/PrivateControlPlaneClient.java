@@ -65,7 +65,7 @@ public class PrivateControlPlaneClient {
     }
 
     public DescribeDatalakeServicesResponse getDatalakeServices(String clusterIdentifier, String userCrn, String environmentCrn) {
-        LOGGER.info("Reading Datalake services with cluster proxy configuration for cluster Identifier: {}", clusterIdentifier);
+        LOGGER.info("Reading Data Lake services with cluster proxy configuration for cluster Identifier: {}", clusterIdentifier);
         DescribeDatalakeServicesRequest postRequest = new DescribeDatalakeServicesRequest();
         postRequest.setClusterid(environmentCrn);
         ClusterProxyProxyClient clusterProxyProxyClient = slowClusterProxyProxyClientFactory.create(clusterIdentifier, SERVICE_NAME, userCrn);

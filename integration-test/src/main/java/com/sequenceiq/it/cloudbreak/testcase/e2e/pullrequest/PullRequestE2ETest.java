@@ -26,9 +26,9 @@ public class PullRequestE2ETest extends AbstractE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given   = "Deploy Datalake",
+            given   = "Deploy Data Lake",
             when    = "Pull Request check happens",
-            then    = "environment and datalake must came up"
+            then    = "environment and Data Lake must came up"
     )
     public void testSimpleDatalake(TestContext testContext) {
         createDefaultDatalake(testContext);
@@ -38,7 +38,7 @@ public class PullRequestE2ETest extends AbstractE2ETest {
     @Description(
             given   = "Deploy Distrox",
             when    = "Pull Request check happens",
-            then    = "environment datalake and datahub must came up"
+            then    = "environment Data Lake and Data Hub must came up"
     )
     public void testSimpleDatahub(TestContext testContext) {
         createDefaultDatahub(testContext);

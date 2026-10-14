@@ -52,7 +52,7 @@ public class DistroxOperationValidatorService {
 
         if (sdxClusterResponses.isEmpty()) {
             distroXOperationValidationView.setAllowed(false);
-            distroXOperationValidationView.setReason(String.format("Could not find the datalake associated " +
+            distroXOperationValidationView.setReason(String.format("Could not find the Data Lake associated " +
                     "with the environment with crn: '%s'", environmentCrn));
             return distroXOperationValidationView;
         }
@@ -60,12 +60,12 @@ public class DistroxOperationValidatorService {
         if (entitlementService.isValidateDistroxOperationsBySdxHealthEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
                 (sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE) ||
                         sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_PRO))) {
-            LOGGER.info(String.format("Validating %s of data hub based on primary gateway health of datalake", distroXOperation.name()));
+            LOGGER.info(String.format("Validating %s of data hub based on primary gateway health of Data Lake", distroXOperation.name()));
             boolean primaryGatewayHealthy = isPrimaryGatewayHealthy(instanceMetadataViews);
             distroXOperationValidationView.setAllowed(primaryGatewayHealthy);
             if (!primaryGatewayHealthy) {
-                distroXOperationValidationView.setReason(String.format("Instance health check failed for SDX cluster '%s'. Details: " +
-                        "Primary gateway of data lake is not healthy.", sdxClusterResponses.getFirst().getName()));
+                distroXOperationValidationView.setReason(String.format("Instance health check failed for Data Lake cluster '%s'. Details: " +
+                        "Primary gateway of Data Lake is not healthy.", sdxClusterResponses.getFirst().getName()));
             }
             return distroXOperationValidationView;
         }
@@ -89,7 +89,7 @@ public class DistroxOperationValidatorService {
         distroXOperationValidationView.setOperation(distroXOperation);
         if (sdxClusterResponses.isEmpty()) {
             distroXOperationValidationView.setAllowed(false);
-            distroXOperationValidationView.setReason(String.format("Could not find the datalake associated " +
+            distroXOperationValidationView.setReason(String.format("Could not find the Data Lake associated " +
                     "with the environment with crn: '%s'", envCrn));
             return distroXOperationValidationView;
         }
@@ -97,7 +97,7 @@ public class DistroxOperationValidatorService {
                 (sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE) ||
                         sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_PRO))) {
 
-            LOGGER.info("Validating Creation of datahub based on datalake instance health");
+            LOGGER.info("Validating Creation of datahub based on Data Lake instance health");
             String sdxClusterName = sdxClusterResponses.getFirst().getName();
 
             //contains groups that have at least one healthy instance
@@ -131,7 +131,7 @@ public class DistroxOperationValidatorService {
                 errorDetails.add(String.format("Host group(s) without at least one healthy instance: '%s'", String.join(", ", missingHealthyGroups)));
             }
 
-            String reason = String.format("Instance health check failed for SDX cluster '%s'. Details: %s.",
+            String reason = String.format("Instance health check failed for Data Lake cluster '%s'. Details: %s.",
                     sdxClusterName, String.join("; ", errorDetails));
 
             distroXOperationValidationView.setReason(reason);
