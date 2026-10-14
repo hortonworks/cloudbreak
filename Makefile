@@ -34,6 +34,9 @@ build-autoscale:
 build-core:
 	 ./core/scripts/build-dev.sh
 
+build-maintenance:
+	 ./maintenance/scripts/build-dev.sh
+
 build-datalake:
 	 ./datalake/scripts/build-dev.sh
 
