@@ -29,7 +29,7 @@ import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
-import com.google.api.client.util.Maps;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
