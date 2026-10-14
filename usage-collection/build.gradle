@@ -62,7 +62,7 @@ protobuf {
 spotless {
   java {
     target 'src/generated/*/java/**/*.java'
-    indentWithSpaces(2)
+    leadingTabsToSpaces(2)
   }
 }
 
