@@ -63,7 +63,7 @@ set -ex -o pipefail
     echo "Run this test file: $INTEGRATIONTEST_SUITE_FILES"
 
     # Compile artifacts only; unit tests and static analysis run in separate CI jobs.
-    ./gradlew -Penv=jenkins -b build.gradle build \
+    ./gradlew -Penv=jenkins build \
       -x test \
       -x checkstyleMain \
       -x checkstyleTest \

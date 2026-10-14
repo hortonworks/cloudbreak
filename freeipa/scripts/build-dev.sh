@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set -x
 
-./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 -b build.gradle \
+./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 \
   :freeipa:buildInfo \
   :freeipa:build \
   :freeipa:publishBootJavaPublicationToMavenRepository \
@@ -14,7 +14,7 @@ set -x
   -x spotbugsMain \
   -x spotbugsTest
 
-./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 -b build.gradle \
+./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 \
   :freeipa-client:buildInfo \
   :freeipa-client:build \
   :freeipa-client:publishMavenJavaPublicationToMavenRepository \

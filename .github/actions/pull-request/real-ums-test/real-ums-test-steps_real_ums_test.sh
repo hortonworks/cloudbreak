@@ -10,7 +10,7 @@ main() {
     make fetch-ums-docker-gh-action
 
     cd ..
-    ./gradlew -Penv=jenkins -b build.gradle build \
+    ./gradlew -Penv=jenkins build \
           -x test \
           -x checkstyleMain \
           -x checkstyleTest \

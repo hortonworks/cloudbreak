@@ -20,7 +20,7 @@ main() {
   then
     echo "no need for build"
   else
-    $(pwd)/gradlew -Penv=jenkins -b build.gradle build --quiet --warning-mode none \
+    $(pwd)/gradlew -Penv=jenkins build --quiet --warning-mode none \
         -x test \
         -x checkstyleMain \
         -x checkstyleTest \

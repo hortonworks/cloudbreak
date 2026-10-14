@@ -10,7 +10,7 @@ main() {
   set -o pipefail
   local build_log
   build_log="$(mktemp)"
-  $(pwd)/gradlew -Penv=jenkins -b build.gradle \
+  $(pwd)/gradlew -Penv=jenkins \
     test \
     jacocoTestReport \
     -x checkstyleMain \

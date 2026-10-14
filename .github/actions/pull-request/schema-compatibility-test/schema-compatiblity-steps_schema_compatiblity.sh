@@ -18,7 +18,7 @@ main() {
   echo "Number of sql string found in commits: $x"
   if [ $x -ne 0 ]; then
     echo "build cb"
-    $(pwd)/gradlew -Penv=jenkins -b build.gradle build --quiet --no-daemon --parallel --warning-mode none \
+    $(pwd)/gradlew -Penv=jenkins build --quiet --no-daemon --parallel --warning-mode none \
       -x test \
       -x checkstyleMain \
       -x checkstyleTest \
@@ -40,7 +40,7 @@ main() {
 
     export PRIMARYKEY_CHECK=false
     git checkout -f $CB_VERSION
-    $(pwd)/gradlew -Penv=jenkins -b build.gradle build --quiet --no-daemon --parallel --warning-mode none \
+    $(pwd)/gradlew -Penv=jenkins build --quiet --no-daemon --parallel --warning-mode none \
       -x test \
       -x checkstyleMain \
       -x checkstyleTest \

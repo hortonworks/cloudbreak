@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set -x
 
-./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 -b build.gradle \
+./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 \
   :mock-thunderhead:buildInfo \
   :mock-thunderhead:build \
   :mock-thunderhead:publishBootJavaPublicationToMavenRepository \

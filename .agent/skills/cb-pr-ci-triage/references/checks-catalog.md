@@ -57,7 +57,7 @@ Unit Test always runs **all** modules, not changed-modules scoped.
 **CI command (exact):**
 
 ```bash
-./gradlew -Penv=jenkins -b build.gradle \
+./gradlew -Penv=jenkins \
   test jacocoTestReport \
   -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest \
   --no-daemon --quiet --parallel \

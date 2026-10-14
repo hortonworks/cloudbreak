@@ -9,7 +9,7 @@ main() {
     exit 0
   fi
   echo "Running checkstyleMain for:$TASKS"
-  $(pwd)/gradlew -Penv=jenkins -b build.gradle --quiet \
+  $(pwd)/gradlew -Penv=jenkins --quiet \
     $TASKS \
     --no-daemon --quiet --parallel -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
 }

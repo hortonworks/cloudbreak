@@ -37,8 +37,6 @@ maintenance-api/                                                                
 maintenance/                                                                        @cloudbreak/cloudbreak-bear
 
 # Wolf team should review template modules
-template-manager-blueprint/                                                         @cloudbreak/cloudbreak-wolf-backend
-template-manager-cmteplate/                                                         @cloudbreak/cloudbreak-wolf-backend
 template-manager-core/                                                              @cloudbreak/cloudbreak-wolf-backend
 template-manager-recipe/                                                            @cloudbreak/cloudbreak-wolf-backend
 template-manager-tag/                                                               @cloudbreak/cloudbreak-wolf-backend
@@ -60,7 +58,6 @@ core/src/main/resources/defaults/clustertemplates/                              
 integration-test/scripts/check-results.sh                                           @cloudbreak/cloudbreak-wolf-backend
 
 # Wolf team should review template generation related changes
-template-manager-blueprint/                                                         @cloudbreak/cloudbreak-wolf-backend
 template-manager-cmtemplate/                                                        @cloudbreak/cloudbreak-wolf-backend
 template-manager-tag/                                                               @cloudbreak/cloudbreak-wolf-backend
 template-manager-recipe/                                                            @cloudbreak/cloudbreak-wolf-backend

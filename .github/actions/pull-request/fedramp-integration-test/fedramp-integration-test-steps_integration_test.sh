@@ -8,7 +8,7 @@ main() {
   then
     echo "it was not requested with 'fedramp-it' label, no need for build"
   else
-    ./gradlew -Penv=jenkins -b build.gradle build \
+    ./gradlew -Penv=jenkins build \
       -x test \
       -x checkstyleMain \
       -x checkstyleTest \

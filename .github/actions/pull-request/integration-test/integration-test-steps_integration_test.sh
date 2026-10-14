@@ -3,7 +3,7 @@
 main() {
   set -ex -o pipefail
 
-  ./gradlew -Penv=jenkins -b build.gradle build \
+  ./gradlew -Penv=jenkins build \
     -x test \
     -x checkstyleMain \
     -x checkstyleTest \
