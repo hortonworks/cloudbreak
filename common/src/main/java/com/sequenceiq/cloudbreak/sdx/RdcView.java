@@ -36,6 +36,10 @@ public class RdcView {
         this.roleConfigs = Objects.requireNonNullElse(roleConfigs, new HashSet<>());
     }
 
+    public RdcView copy() {
+        return new RdcView(stackCrn, remoteDataContext, new HashSet<>(endpoints), new HashSet<>(serviceConfigs), new HashSet<>(roleConfigs));
+    }
+
     public String getStackCrn() {
         return stackCrn;
     }

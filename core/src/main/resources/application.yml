@@ -763,6 +763,8 @@ cb:
       connect.timeout.seconds: 125
       read.timeout.seconds: 125
       write.timeout.seconds: 125
+      rdc.connect.timeout.seconds: 30
+      rdc.read.timeout.seconds: 30
       syncCommandPoller:
         interrupt.timeout.seconds: 120
 

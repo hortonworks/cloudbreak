@@ -99,6 +99,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
+import okhttp3.OkHttpClient;
+
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerSetupServiceTest {
 
@@ -1199,5 +1201,20 @@ class ClouderaManagerSetupServiceTest {
         stack.setType(StackType.DATALAKE);
         stack.setResourceCrn("crn:cdp:datahub:us-west-1:accountId:cluster:name");
         return stack;
+    }
+
+    @Test
+    void getSdxContextUsesClientWithRdcTimeouts() throws Exception {
+        ReflectionTestUtils.setField(underTest, "rdcConnectTimeoutSeconds", 11);
+        ReflectionTestUtils.setField(underTest, "rdcReadTimeoutSeconds", 22);
+        when(apiClient.getHttpClient()).thenReturn(new OkHttpClient());
+        when(cdpResourceApi.getRemoteContextByCluster(any())).thenReturn(apiRemoteDataContext);
+
+        underTest.getSdxContext();
+
+        ArgumentCaptor<OkHttpClient> captor = ArgumentCaptor.forClass(OkHttpClient.class);
+        verify(apiClient).setHttpClient(captor.capture());
+        assertEquals(11_000, captor.getValue().connectTimeoutMillis());
+        assertEquals(22_000, captor.getValue().readTimeoutMillis());
     }
 }

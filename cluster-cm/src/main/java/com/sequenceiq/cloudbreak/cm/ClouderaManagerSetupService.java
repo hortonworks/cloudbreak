@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
@@ -27,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -90,6 +92,8 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+
+import okhttp3.OkHttpClient;
 
 @Service
 @Scope("prototype")
@@ -172,6 +176,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
+
+    @Value("${cb.cm.client.rdc.connect.timeout.seconds:30}")
+    private int rdcConnectTimeoutSeconds;
+
+    @Value("${cb.cm.client.rdc.read.timeout.seconds:30}")
+    private int rdcReadTimeoutSeconds;
 
     private final StackDtoDelegate stack;
 
@@ -533,6 +543,11 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         String password = cluster.getCloudbreakClusterManagerPassword();
         try {
             ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
+            OkHttpClient rdcHttpClient = rootClient.getHttpClient().newBuilder()
+                    .connectTimeout(rdcConnectTimeoutSeconds, TimeUnit.SECONDS)
+                    .readTimeout(rdcReadTimeoutSeconds, TimeUnit.SECONDS)
+                    .build();
+            rootClient.setHttpClient(rdcHttpClient);
             CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
             LOGGER.info("Get remote context from Data Lake cluster: {}", stack.getName());
             ApiRemoteDataContext remoteDataContext = cdpResourceApi.getRemoteContextByCluster(stack.getName());

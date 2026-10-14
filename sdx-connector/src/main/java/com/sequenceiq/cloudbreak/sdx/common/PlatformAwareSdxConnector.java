@@ -15,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.core.AttemptResult;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.RdcConstants;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.cache.RdcCache;
 import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
@@ -44,6 +47,9 @@ public class PlatformAwareSdxConnector {
 
     @Inject
     private RdcViewFactory datalakeContextViewFactory;
+
+    @Inject
+    private CacheManager cacheManager;
 
     @Inject
     private Map<TargetPlatform, PlatformAwareSdxStatusService<?>> platformDependentSdxStatusServicesMap;
@@ -68,14 +74,34 @@ public class PlatformAwareSdxConnector {
 
     @Deprecated
     public Map<String, String> getHmsServiceConfig(String sdxCrn) {
-        return getRdcView(sdxCrn).getServiceConfigs(RdcConstants.HIVE_SERVICE);
+        // Never serve stale data here: the RDC carries the HMS DB password, which gets written to the Data Hub config
+        return getRdcView(sdxCrn, false).getServiceConfigs(RdcConstants.HIVE_SERVICE);
     }
 
     public RdcView getRdcView(String sdxCrn) {
+        return getRdcView(sdxCrn, true);
+    }
+
+    private RdcView getRdcView(String sdxCrn, boolean staleAllowed) {
+        Cache cache = cacheManager.getCache(RdcCache.RDC_CACHE);
         PlatformAwareSdxDescribeService sdxDescribeService = platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn));
-        Optional<String> remoteDataContext = sdxDescribeService.getRemoteDataContext(sdxCrn);
+        Optional<String> remoteDataContext;
+        try {
+            remoteDataContext = sdxDescribeService.getRemoteDataContext(sdxCrn);
+        } catch (Exception e) {
+            RdcView cached = staleAllowed && cache != null ? cache.get(sdxCrn, RdcView.class) : null;
+            if (cached == null) {
+                throw e;
+            }
+            LOGGER.warn("RDC fetch failed for SDX [{}], returning cached (stale) RdcView", sdxCrn, e);
+            return cached.copy();
+        }
         RdcView rdcView = datalakeContextViewFactory.create(sdxCrn, remoteDataContext);
-        return sdxDescribeService.extendRdcView(rdcView);
+        rdcView = sdxDescribeService.extendRdcView(rdcView);
+        if (cache != null) {
+            cache.put(sdxCrn, rdcView.copy());
+        }
+        return rdcView;
     }
 
     public void tearDownDatahub(String sdxCrn, String datahubCrn) {
