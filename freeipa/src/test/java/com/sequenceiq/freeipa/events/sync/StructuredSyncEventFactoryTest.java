@@ -15,9 +15,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
-import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeipaStructuredSyncEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.FreeIpaStackDetails;
 import com.sequenceiq.freeipa.converter.stack.StackToStackDetailsConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -51,7 +51,7 @@ class StructuredSyncEventFactoryTest {
         when(stack.getEnvironmentCrn()).thenReturn("environmentCrn");
         when(clock.getCurrentTimeMillis()).thenReturn(12345L);
         when(nodeConfig.getId()).thenReturn("nodeConfigId");
-        StackDetails stackDetails = mock(StackDetails.class);
+        FreeIpaStackDetails stackDetails = mock(FreeIpaStackDetails.class);
         when(stackToStackDetailsConverter.convert(stack)).thenReturn(stackDetails);
 
         CDPFreeipaStructuredSyncEvent result = ThreadBasedUserCrnProvider.doAs("userCrn", () -> underTest.createCDPFreeipaStructuredSyncEvent(1L));

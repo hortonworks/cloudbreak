@@ -405,6 +405,8 @@ message Event {
     CDPCBNotificationSentEvent cdpCBNotificationSentEvent = 198;
     // A CDP CAI Inference endpoint started or stopped event
     CDPCMLServingEndpointStartedStoppedEvent cdpCMLServingEndpointStartedStoppedEvent = 199;
+    // The On Premises Connection creation or deletion has been requested.
+    CDPOnPremisesConnectionStatusChanged cdpOnPremisesConnectionStatusChanged = 200;
   }
 }
 
@@ -819,6 +821,20 @@ message CDPEnvironmentsEnvironmentType {
     MOCK = 5;
     // Openshift
     OPENSHIFT = 6;
+  }
+}
+
+// The deployment type of a CDP environment.
+message CDPEnvironmentDeploymentType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Public Cloud, the default
+    PUBLIC_CLOUD = 1;
+    // Hybrid
+    HYBRID = 2;
+    // Hybrid Base for testing
+    HYBRID_BASE = 3;
   }
 }
 
@@ -2753,6 +2769,24 @@ message OnPremisesControlPlaneStatus {
   }
 }
 
+// The status of the On Premises and Cloud Connection.
+message OnPremiseConnectionStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Status when an onpremise connection is initiated.
+    INITIATED = 1;
+    // Status when the connection is active.
+    ACTIVE = 2;
+    // Status when the connection is inactive.
+    INACTIVE = 3;
+    // Status when the connection liveness check failed due to error.
+    FAILED = 4;
+    // Status when the connection is deleted.
+    DELETED = 5;
+  }
+}
+
 message CDPOperationDetails {
   // The CDP account id of the event
   string accountId = 1;
@@ -2811,6 +2845,8 @@ message CDPEnvironmentDetails {
   CDPComputeClusterDetails computeClusterDetails = 13;
   // Environment deletion type
   CDPEnvironmentDeletionType.Value environmentDeletionType = 14;
+  // Environment deployment type
+  CDPEnvironmentDeploymentType.Value environmentDeploymentType = 15;
 }
 
 // CDP FreeIPA details closely related to the CDP Environment
@@ -2985,6 +3021,22 @@ message CDPFreeIPAExtendedDetails {
   CDPVerticalScaleDetails cdpVerticalScaleDetails = 3;
   // This field specifies the type of load balancer used for deploying a FreeIPA cluster.
   string loadBalancerType = 4;
+  // The trust relationship type of the FreeIPA cluster.
+  CDPFreeIPATrustRelationshipType.Value trustRelationshipType = 5;
+}
+
+// The type of the trust relationship of a CDP FreeIPA
+message CDPFreeIPATrustRelationshipType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The trust relationship type is unknown.
+    UNKNOWN = 1;
+    // The trust relationship type is one-way.
+    ONE_WAY = 2;
+    // The trust relationship type is two-way.
+    TWO_WAY = 3;
+  }
 }
 
 // Generated when FreeIPA status has changed
@@ -3099,6 +3151,7 @@ message CDPDatabaseDetails {
   bool sslEnabled = 4;
   // DB instance type actually used for the managed database (e.g. db.m5.large / Standard_D4s_v3)
   string instanceType = 5;
+
 }
 
 message CDPClusterDetails {
@@ -4451,27 +4504,27 @@ message CDPDFDiagnosticRequestCollection {
 }
 
 message CDPDFDiagnosticDestination {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET =0;
-    // A value indicating that the diagnostic bundle being sent is to a cloud storage.
-    CLOUD_STORAGE = 1;
-    // A value indicating that the diagnostic bundle being sent is to a support.
-    SUPPORT = 2;
-  }
+ enum Value {
+      // A value indicating the enum is unset.
+      UNSET =0;
+      // A value indicating that the diagnostic bundle being sent is to a cloud storage.
+      CLOUD_STORAGE = 1;
+      // A value indicating that the diagnostic bundle being sent is to a support.
+      SUPPORT = 2;
+ }
 }
 
 message CDPDFDiagnosticCollectionScope {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // A value indicating that the logs must be collected from both the deployment and environment.
-    ALL = 1;
-    // A value indicating that the logs must be collected from just the environment.
-    ENVIRONMENT = 2;
-    // A value indicating that the logs must be collected from just the deployment.
-    DEPLOYMENT = 3;
-  }
+ enum Value {
+      // A value indicating the enum is unset.
+      UNSET = 0;
+      // A value indicating that the logs must be collected from both the deployment and environment.
+      ALL = 1;
+      // A value indicating that the logs must be collected from just the environment.
+      ENVIRONMENT = 2;
+      // A value indicating that the logs must be collected from just the deployment.
+      DEPLOYMENT = 3;
+ }
 }
 
 message CDPDFProjectResourceType {
@@ -7435,6 +7488,20 @@ message CloudPrivatelinkAccessRevocationStatus {
 }
 
 
+// Host OS distribution details collected from Cloudera Manager during classic cluster sync.
+message CDPClassicClusterHostDistribution {
+  // The hostname (FQDN) of the cluster host.
+  string hostname = 1;
+  // The IP address of the cluster host.
+  string ipAddress = 2;
+  // The OS distribution type reported by Cloudera Manager (for example, RHEL9).
+  string distributionType = 3;
+  // The OS distribution name reported by Cloudera Manager (for example, redhat).
+  string distributionName = 4;
+  // The OS distribution version reported by Cloudera Manager (for example, 9.4).
+  string distributionVersion = 5;
+}
+
 // Generated when the classic cluster creation or deletion is requested.
 message CDPClassicClusterStatusChanged {
   // The CDP account identifier.
@@ -7455,6 +7522,8 @@ message CDPClassicClusterStatusChanged {
   string environmentCrn = 8;
   // The data center name of the registered on-premise cluster.
   string datacenterName = 9;
+  // Host OS distribution details for the classic cluster, populated during CM sync.
+  repeated CDPClassicClusterHostDistribution hosts = 10;
 }
 
 // Generated when the On Premises Control Plane registration or deletion is requested.
@@ -7469,6 +7538,26 @@ message CDPOnPremisesControlPlaneStatusChanged {
   OnPremisesControlPlaneStatus.Value status = 4;
   // The description of error during creation or deletion of the On Premises Control Plane Registration.
   string errorDescription = 5;
+}
+
+// Generated when the OnPremise Connection is created or deleted.
+message CDPOnPremisesConnectionStatusChanged {
+  // The CDP account identifier.
+  string accountId = 1;
+  // The CRN of the connection.
+  string connectionCrn = 2;
+  // The name of the connection.
+  string name = 3;
+  // The status of the operation.
+  OnPremiseConnectionStatus.Value status = 4;
+  // The CRN of the agent in the the On Prem cluster.
+  string agentCrn = 5;
+  // The creation time in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 createdAt = 6;
+  // The latest timestamp when an 'ACTIVE' status was recorded in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 lastActiveAt = 7;
+  // The description of the error during creation or deletion of the OnPremise Connection.
+  string errorDescription = 8;
 }
 
 // Generated when a status change has been done for a containerized datalake
@@ -7923,7 +8012,7 @@ message RuntimeInfo {
   oneof version_details {
     string vllm_version = 4;
     string transformers_library_version = 5;
-  }
+    }
   // Whether the runtime is the latest version
   bool latest_version = 6;
   // Runtime name

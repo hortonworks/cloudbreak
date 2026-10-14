@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeipaStructuredSyncEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.FreeIpaStackDetails;
 
 @Component
 public class CDPFreeipaStructuredSyncEventToCDPFreeIPASyncConverter {
@@ -52,7 +52,7 @@ public class CDPFreeipaStructuredSyncEventToCDPFreeIPASyncConverter {
                 cdpFreeIPASyncBuilder.setEnvironmentCrn(defaultIfEmpty(cdpFreeipaStructuredSyncEvent.getOperation().getEnvironmentCrn(), ""));
             }
 
-            StackDetails stackDetails = cdpFreeipaStructuredSyncEvent.getStackDetails();
+            FreeIpaStackDetails stackDetails = cdpFreeipaStructuredSyncEvent.getStackDetails();
             cdpFreeIPASyncBuilder.setFreeIPADetails(freeIPAExtendedDetailsConverter.convert(stackDetails));
             cdpFreeIPASyncBuilder.setStatusDetails(freeIPAStatusDetailsConverter.convert(stackDetails));
         }

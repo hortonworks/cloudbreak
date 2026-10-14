@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeIpaStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.FreeIpaStackDetails;
 
 @Component
 public class CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverter {
@@ -39,7 +39,7 @@ public class CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverter {
                 cdpFreeIPAStatusChangedBuilder.setEnvironmentCrn(cdpStructuredFlowEvent.getOperation().getEnvironmentCrn());
             }
 
-            StackDetails stackDetails = cdpStructuredFlowEvent.getPayload();
+            FreeIpaStackDetails stackDetails = cdpStructuredFlowEvent.getPayload();
             cdpFreeIPAStatusChangedBuilder.setFreeIPADetails(freeIPAExtendedDetailsConverter.convert(stackDetails));
             cdpFreeIPAStatusChangedBuilder.setStatusDetails(freeIPAStatusDetailsConverter.convert(stackDetails));
         }

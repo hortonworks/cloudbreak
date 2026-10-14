@@ -13,9 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeipaStructuredSyncEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.FreeIpaStackDetails;
 
 @ExtendWith(MockitoExtension.class)
 class CDPFreeipaStructuredSyncEventToCDPFreeIPASyncConverterTest {
@@ -46,7 +46,7 @@ class CDPFreeipaStructuredSyncEventToCDPFreeIPASyncConverterTest {
         cdpOperationDetails.setUuid("uuid");
         cdpOperationDetails.setEnvironmentCrn("envCrn");
         cdpFreeipaStructuredSyncEvent.setOperation(cdpOperationDetails);
-        StackDetails stackDetails = new StackDetails();
+        FreeIpaStackDetails stackDetails = new FreeIpaStackDetails();
         stackDetails.setCloudPlatform("AWS");
         cdpFreeipaStructuredSyncEvent.setStackDetails(stackDetails);
         UsageProto.CDPFreeIPAExtendedDetails cdpFreeIPAExtendedDetails = mock(UsageProto.CDPFreeIPAExtendedDetails.class);
