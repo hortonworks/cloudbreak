@@ -12,10 +12,10 @@ import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMig
 import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED;
 import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS;
 import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -37,9 +37,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
+import com.sequenceiq.cloudbreak.core.flow2.chain.MigrateZookeeperToKraftFlowEventChainFactory;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.config.MigrateZookeeperToKraftConfigurationFlowConfig;
@@ -56,6 +59,7 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +69,9 @@ class KraftMigrationOperationStatusFactoryTest {
 
     @Mock
     private FlowLogDBService flowLogDBService;
+
+    @Mock
+    private FlowChainLogService flowChainLogService;
 
     @Mock
     private StackDto stackDto;
@@ -93,6 +100,7 @@ class KraftMigrationOperationStatusFactoryTest {
             KraftMigrationOperationStatus expectedStatus) {
         when(stackDto.getId()).thenReturn(STACK_ID);
         FlowLog flowLog = new FlowLog();
+        flowLog.setFlowId("flowId");
         flowLog.setFlowType(ClassValue.of(flowConfigClass));
         flowLog.setFinalized(finalized);
         flowLog.setCurrentState(failed ? "FAILED_STATE" : "FINISHED_STATE");
@@ -114,18 +122,21 @@ class KraftMigrationOperationStatusFactoryTest {
         when(stackDto.getId()).thenReturn(STACK_ID);
 
         FlowLog lastLog = new FlowLog();
+        lastLog.setFlowId("flowId");
         lastLog.setFlowType(ClassValue.of(flowConfigClass));
         lastLog.setFinalized(false);
         lastLog.setCurrentState("RUNNING_STATE");
         lastLog.setCreated(200L);
 
         FlowLog previousLog = new FlowLog();
+        previousLog.setFlowId("flowId");
         previousLog.setFlowType(ClassValue.of(flowConfigClass));
         previousLog.setFinalized(false);
         previousLog.setCurrentState("FAILED_STATE");
         previousLog.setCreated(100L);
 
         FlowLog failedLog = new FlowLog();
+        failedLog.setFlowId("flowId");
         failedLog.setFlowType(ClassValue.of(flowConfigClass));
         failedLog.setFinalized(false);
         failedLog.setStateStatus(StateStatus.FAILED);
@@ -160,38 +171,23 @@ class KraftMigrationOperationStatusFactoryTest {
         flowLog.setStateStatus(failed ? StateStatus.FAILED : StateStatus.SUCCESSFUL);
         flowLog.setCreated(100L);
         flowLog.setFlowChainId("flowChainId");
-        Optional<FlowChainLog> flowChainLog = Optional.of(
-                new FlowChainLog("MigrateZookeeperToKraftFlowEventChainFactory/Upscale", "", "", "", "", ""));
-        when(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList())).thenReturn(List.of());
-        when(flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(anyLong())).thenReturn(List.of(flowLog));
-        when(flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(flowChainLog);
+        mockMigrationFlowChain(List.of(flowLog));
 
         Optional<KraftMigrationOperationStatus> result = underTest.getStatusFromFlowInformation(stackDto);
 
         verify(flowLogDBService).findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList());
-        verify(flowLogDBService).getLatestFlowLogsByResourceIdInFlowChain(eq(stackDto.getId()));
         assertEquals(expectedStatus, result.orElse(NOT_APPLICABLE));
     }
 
     @Test
     void testGetStatusFromFlowChainInformationAndFlowLogsWhenNoFlowRelatedFlowChain() {
         when(stackDto.getId()).thenReturn(STACK_ID);
-        FlowLog flowLog = new FlowLog();
-        flowLog.setFlowType(ClassValue.of(SetDefaultJavaVersionFlowConfig.class));
-        flowLog.setFinalized(false);
-        flowLog.setStateStatus(StateStatus.PENDING);
-        flowLog.setCreated(100L);
-        flowLog.setFlowChainId("flowChainId");
-        Optional<FlowChainLog> flowChainLog = Optional.of(
-                new FlowChainLog("AFLOWCHAINCONFIG/CHILDCHAIN", "", "", "", "", ""));
-        when(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList())).thenReturn(List.of());
-        when(flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(anyLong())).thenReturn(List.of(flowLog));
-        when(flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(flowChainLog);
+        when(flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(STACK_ID,
+                MigrateZookeeperToKraftFlowEventChainFactory.class.getSimpleName())).thenReturn(Optional.empty());
 
         Optional<KraftMigrationOperationStatus> result = underTest.getStatusFromFlowInformation(stackDto);
 
         verify(flowLogDBService).findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList());
-        verify(flowLogDBService).getLatestFlowLogsByResourceIdInFlowChain(eq(stackDto.getId()));
         assertFalse(result.isPresent());
     }
 
@@ -213,16 +209,90 @@ class KraftMigrationOperationStatusFactoryTest {
         migrationFlowChainFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
         migrationFlowChainFlowLog.setCreated(100L);
         migrationFlowChainFlowLog.setFlowChainId("flowChainId");
-        Optional<FlowChainLog> flowChainLog = Optional.of(
-                new FlowChainLog("MigrateZookeeperToKraftFlowEventChainFactory/Upscale", "", "", "", "", ""));
-        when(flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(anyLong())).thenReturn(List.of(migrationFlowChainFlowLog));
-        when(flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(flowChainLog);
+        mockMigrationFlowChain(List.of(migrationFlowChainFlowLog));
 
         Optional<KraftMigrationOperationStatus> result = underTest.getStatusFromFlowInformation(stackDto);
 
         verify(flowLogDBService).findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList());
-        verify(flowLogDBService).getLatestFlowLogsByResourceIdInFlowChain(eq(stackDto.getId()));
         assertEquals(ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE, result.orElse(NOT_APPLICABLE));
+    }
+
+    @ParameterizedTest
+    @MethodSource("completedOperationParameters")
+    void testNewerRollbackOrFinalizationTakesPrecedenceOverMigration(Class<?> flowConfigClass, KraftMigrationOperationStatus expectedStatus) {
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        FlowLog migrationLog = new FlowLog();
+        migrationLog.setFlowType(ClassValue.of(MigrateZookeeperToKraftMigrationFlowConfig.class));
+        migrationLog.setCreated(100L);
+        migrationLog.setFinalized(true);
+        mockMigrationFlowChain(List.of(migrationLog));
+
+        FlowLog newerOperationLog = new FlowLog();
+        newerOperationLog.setFlowType(ClassValue.of(flowConfigClass));
+        newerOperationLog.setCreated(200L);
+        newerOperationLog.setFinalized(true);
+        when(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList())).thenReturn(List.of(newerOperationLog));
+
+        assertThat(underTest.getStatusFromFlowInformation(stackDto)).contains(expectedStatus);
+    }
+
+    @Test
+    void testFailureInNestedUpscaleIsPreservedAfterFlowFinalization() {
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        FlowLog failedLog = new FlowLog();
+        failedLog.setFlowType(ClassValue.of(StackUpscaleConfig.class));
+        failedLog.setFlowId("upscaleFlowId");
+        failedLog.setCreated(100L);
+        failedLog.setStateStatus(StateStatus.FAILED);
+
+        FlowLog finishedLog = new FlowLog();
+        finishedLog.setFlowType(ClassValue.of(StackUpscaleConfig.class));
+        finishedLog.setFlowId("upscaleFlowId");
+        finishedLog.setCreated(200L);
+        finishedLog.setStateStatus(StateStatus.SUCCESSFUL);
+        finishedLog.setFinalized(true);
+        mockMigrationFlowChain(List.of(finishedLog, failedLog));
+
+        assertThat(underTest.getStatusFromFlowInformation(stackDto)).contains(ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED);
+    }
+
+    @Test
+    void testRollbackAfterFailedMigrationIsInProgress() {
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        FlowLog failedMigrationLog = new FlowLog();
+        failedMigrationLog.setFlowType(ClassValue.of(MigrateZookeeperToKraftMigrationFlowConfig.class));
+        failedMigrationLog.setFlowId("migrationFlowId");
+        failedMigrationLog.setCreated(100L);
+        failedMigrationLog.setStateStatus(StateStatus.FAILED);
+        mockMigrationFlowChain(List.of(failedMigrationLog));
+
+        FlowLog rollbackLog = new FlowLog();
+        rollbackLog.setFlowType(ClassValue.of(MigrateZookeeperToKraftRollbackFlowConfig.class));
+        rollbackLog.setFlowId("rollbackFlowId");
+        rollbackLog.setCreated(200L);
+        rollbackLog.setFinalized(false);
+        when(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList())).thenReturn(List.of(rollbackLog));
+
+        assertThat(underTest.getStatusFromFlowInformation(stackDto)).contains(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
+    }
+
+    private void mockMigrationFlowChain(List<FlowLog> logs) {
+        FlowChainLog migrationChain = new FlowChainLog(MigrateZookeeperToKraftFlowEventChainFactory.class.getSimpleName(),
+                "migrationChainId", null, "", "", "");
+        FlowChainLog upscaleChain = new FlowChainLog("MigrateZookeeperToKraftFlowEventChainFactory/UpscaleFlowEventChainFactory",
+                "upscaleChainId", "migrationChainId", "", "", "");
+        when(flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(STACK_ID,
+                MigrateZookeeperToKraftFlowEventChainFactory.class.getSimpleName())).thenReturn(Optional.of(migrationChain));
+        when(flowChainLogService.collectRelatedFlowChains(migrationChain)).thenReturn(List.of(migrationChain, upscaleChain));
+        Set<String> flowIds = Set.of("migrationFlowId", "upscaleFlowId");
+        when(flowLogDBService.getFlowIdsByChainIds(Set.of("migrationChainId", "upscaleChainId"))).thenReturn(flowIds);
+        when(flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(flowIds, PageRequest.of(0, 3))).thenReturn(new PageImpl<>(logs));
+    }
+
+    private static Stream<Arguments> completedOperationParameters() {
+        return Stream.of(
+                Arguments.of(MigrateZookeeperToKraftRollbackFlowConfig.class, ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE),
+                Arguments.of(MigrateZookeeperToKraftFinalizationFlowConfig.class, FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE));
     }
 
     private static Stream<Arguments> previousLogFailedParameters() {

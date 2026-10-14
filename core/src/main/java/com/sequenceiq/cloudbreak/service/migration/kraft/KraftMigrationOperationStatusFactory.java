@@ -16,12 +16,16 @@ import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMig
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
@@ -41,6 +45,7 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 @Component
@@ -63,6 +68,9 @@ public class KraftMigrationOperationStatusFactory {
     @Inject
     private FlowLogDBService flowLogDBService;
 
+    @Inject
+    private FlowChainLogService flowChainLogService;
+
     public Optional<KraftMigrationOperationStatus> getStatusFromFlowInformation(StackDto stack) {
         Optional<KraftMigrationOperationStatus> migrationStatus = Optional.empty();
         List<FlowLog> lastKraftFlowLogs = getMostRecentKraftFlowLastLogs(stack);
@@ -78,19 +86,18 @@ public class KraftMigrationOperationStatusFactory {
     private List<FlowLog> getMostRecentKraftFlowLastLogs(StackDto stackDto) {
         Long stackId = stackDto.getId();
         List<FlowLog> kraftFlowLogs = new ArrayList<>(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(stackId, RELATED_FLOW_CONFIGS));
-        List<FlowLog> latestFlowLogsInFlowChain = flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(stackId);
-        boolean kraftMigrationFlowChain = latestFlowLogsInFlowChain.stream()
-                .findFirst()
-                .map(FlowLog::getFlowChainId)
-                .flatMap(flowChainId -> flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId))
-                .map(FlowChainLog::getFlowChainType)
-                .filter(flowChainType -> flowChainType.contains(MigrateZookeeperToKraftFlowEventChainFactory.class.getSimpleName()))
-                .isPresent();
-
-        if (kraftMigrationFlowChain) {
-            LOGGER.debug("The Kraft migration flow chain has been found, adding the relevant '{}' flow logs", latestFlowLogsInFlowChain.size());
-            kraftFlowLogs.addAll(latestFlowLogsInFlowChain);
-        }
+        flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(stackId,
+                MigrateZookeeperToKraftFlowEventChainFactory.class.getSimpleName()).ifPresent(migrationFlowChain -> {
+                    Set<String> flowChainIds = flowChainLogService.collectRelatedFlowChains(migrationFlowChain).stream()
+                            .map(FlowChainLog::getFlowChainId)
+                            .collect(Collectors.toSet());
+                    Set<String> flowIds = flowLogDBService.getFlowIdsByChainIds(flowChainIds);
+                    List<FlowLog> migrationFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(flowIds,
+                            PageRequest.of(0, NUMBER_OF_LOGS_TO_CHECK_FOR_FAILURE)).getContent();
+                    LOGGER.debug("The Kraft migration flow chain '{}' has been found, adding the relevant '{}' flow logs",
+                            migrationFlowChain.getFlowChainId(), migrationFlowLogs.size());
+                    kraftFlowLogs.addAll(migrationFlowLogs);
+                });
 
         return kraftFlowLogs.stream()
                 .sorted(Comparator.comparingLong(FlowLog::getCreated).reversed())
@@ -102,7 +109,9 @@ public class KraftMigrationOperationStatusFactory {
     private KraftMigrationOperationStatus getStatusFromFlowInformation(FlowLog lastKnownFlowLog, List<FlowLog> mostRecentKraftFlowLogs) {
         Class<?> flowType = Optional.ofNullable(lastKnownFlowLog.getFlowType()).map(ClassValue::getClassValue).orElse(null);
         boolean lastFlowLogFinalized = Optional.ofNullable(lastKnownFlowLog.getFinalized()).orElse(false);
-        boolean lastFlowFailed = mostRecentKraftFlowLogs.stream().anyMatch(log -> StateStatus.FAILED.equals(log.getStateStatus()));
+        boolean lastFlowFailed = mostRecentKraftFlowLogs.stream()
+                .filter(log -> Objects.equals(lastKnownFlowLog.getFlowId(), log.getFlowId()))
+                .anyMatch(log -> StateStatus.FAILED.equals(log.getStateStatus()));
         return switch (flowType) {
             case null -> NOT_APPLICABLE;
 
