@@ -15,7 +15,6 @@ import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -38,6 +37,9 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
     @Inject
     private GcpStackUtil gcpStackUtil;
 
+    @Inject
+    private GcpDatabaseOperationRetryService gcpDatabaseOperationRetryService;
+
     @Override
     public List<CloudResource> terminate(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier) throws Exception {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
@@ -51,17 +53,17 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
                 SQLAdmin.Instances.Delete delete = sqlAdmin.instances().delete(projectId, deploymentName);
                 delete.setPrettyPrint(true);
                 try {
-                    Operation operation = delete.execute();
+                    Operation operation = gcpDatabaseOperationRetryService.executeRetryingOnConflict(delete, sqlAdmin, projectId, deploymentName);
                     verifyOperation(operation, buildableResource);
                     CloudResource operationAwareCloudResource = createOperationAwareCloudResource(buildableResource.getFirst(), operation);
-                    databasePollerService.terminateDatabasePoller(ac, buildableResource);
+                    databasePollerService.terminateDatabasePoller(ac, List.of(operationAwareCloudResource));
                     return Collections.singletonList(operationAwareCloudResource);
                 } catch (GoogleJsonResponseException e) {
-                    throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getFirst().getName());
+                    throw databaseRequestFailed(e, buildableResource.getFirst().getName());
                 }
             }
         } catch (GoogleJsonResponseException e) {
-            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getFirst().getName());
+            throw databaseRequestFailed(e, buildableResource.getFirst().getName());
         }
         return List.of();
     }

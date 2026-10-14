@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.OperationError;
 import com.google.api.services.sqladmin.model.OperationErrors;
@@ -45,11 +47,44 @@ public class GcpDatabaseServerBaseServiceTest {
         GoogleJsonError googleJsonError = mock(GoogleJsonError.class);
 
         when(googleJsonResponseException.getDetails()).thenReturn(googleJsonError);
+        when(googleJsonResponseException.getStatusCode()).thenReturn(400);
         when(googleJsonError.getMessage()).thenReturn("error");
 
         String result = underTest.checkException(googleJsonResponseException);
 
-        assertEquals("error", result);
+        assertEquals("error (HTTP 400)", result);
+    }
+
+    @Test
+    public void testCheckExceptionAddsStatusAndReasons() {
+        GoogleJsonError.ErrorInfo errorInfo = new GoogleJsonError.ErrorInfo();
+        errorInfo.setReason("operationInProgress");
+        GoogleJsonError details = new GoogleJsonError();
+        details.setCode(409);
+        details.setMessage("error");
+        details.setErrors(List.of(errorInfo, errorInfo));
+
+        String result = underTest.checkException(googleJsonResponseException(409, details));
+
+        assertEquals("error (HTTP 409, reason: operationInProgress)", result);
+    }
+
+    @Test
+    public void testCheckExceptionAddsStatusWithoutReasons() {
+        GoogleJsonError details = new GoogleJsonError();
+        details.setCode(400);
+        details.setMessage("error");
+
+        String result = underTest.checkException(googleJsonResponseException(400, details));
+
+        assertEquals("error (HTTP 400)", result);
+    }
+
+    @Test
+    public void testCheckExceptionWithoutDetails() {
+        String result = underTest.checkException(googleJsonResponseException(500, null));
+
+        assertEquals("500 Internal error (HTTP 500)", result);
     }
 
     @Test
@@ -72,4 +107,8 @@ public class GcpDatabaseServerBaseServiceTest {
                 gcpResourceException.getMessage());
     }
 
+    private GoogleJsonResponseException googleJsonResponseException(int code, GoogleJsonError details) {
+        return new GoogleJsonResponseException(new HttpResponseException.Builder(code, "Internal error", new HttpHeaders())
+                .setMessage(code + " Internal error"), details);
+    }
 }

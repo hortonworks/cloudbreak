@@ -15,7 +15,6 @@ import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -35,6 +34,9 @@ public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatab
     @Inject
     private DatabasePollerService databasePollerService;
 
+    @Inject
+    private GcpDatabaseOperationRetryService gcpDatabaseOperationRetryService;
+
     protected void startStop(AuthenticatedContext ac, DatabaseStack stack, String policy)
             throws IOException {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
@@ -47,21 +49,19 @@ public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatab
             Optional<DatabaseInstance> databaseInstance = getDatabaseInstance(deploymentName, sqlAdmin, projectId);
             if (!databaseInstance.isEmpty()) {
                 try {
-                    Operation operation = sqlAdmin
-                            .instances()
-                            .patch(projectId, deploymentName, getDatabaseInstance(policy))
-                            .execute();
+                    SQLAdmin.Instances.Patch patch = sqlAdmin.instances().patch(projectId, deploymentName, getDatabaseInstance(policy));
+                    Operation operation = gcpDatabaseOperationRetryService.executeRetryingOnConflict(patch, sqlAdmin, projectId, deploymentName);
                     verifyOperation(operation, gcpDatabase);
                     CloudResource operationAwareCloudResource = createOperationAwareCloudResource(gcpDatabase.get(0), operation);
                     databasePollerService.startDatabasePoller(ac, List.of(operationAwareCloudResource));
                 } catch (GoogleJsonResponseException e) {
-                    throw new GcpResourceException(checkException(e), resourceType(), gcpDatabase.get(0).getName());
+                    throw databaseRequestFailed(e, gcpDatabase.get(0).getName());
                 }
             } else {
                 LOGGER.debug("Deployment does not exists: {}", deploymentName);
             }
         } catch (GoogleJsonResponseException e) {
-            throw new GcpResourceException(checkException(e), resourceType(), gcpDatabase.get(0).getName());
+            throw databaseRequestFailed(e, gcpDatabase.get(0).getName());
         }
     }
 

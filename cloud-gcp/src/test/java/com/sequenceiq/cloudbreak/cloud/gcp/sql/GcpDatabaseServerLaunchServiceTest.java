@@ -350,6 +350,7 @@ public class GcpDatabaseServerLaunchServiceTest {
         GoogleJsonError googleJsonError = mock(GoogleJsonError.class);
         when(googleJsonResponseException.getDetails()).thenReturn(googleJsonError);
         when(googleJsonResponseException.getMessage()).thenReturn("error");
+        when(googleJsonResponseException.getStatusCode()).thenReturn(400);
         when(googleJsonError.getMessage()).thenReturn("error");
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
@@ -367,7 +368,7 @@ public class GcpDatabaseServerLaunchServiceTest {
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.launch(authenticatedContext, databaseStack, persistenceNotifier));
 
-        assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: driver ]", gcpResourceException.getMessage());
+        assertEquals("error (HTTP 400): [ resourceType: GCP_DATABASE,  resourceName: driver ]", gcpResourceException.getMessage());
     }
 
     @Test

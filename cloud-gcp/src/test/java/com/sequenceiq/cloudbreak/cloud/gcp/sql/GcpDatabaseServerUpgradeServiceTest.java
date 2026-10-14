@@ -344,6 +344,7 @@ public class GcpDatabaseServerUpgradeServiceTest {
         GoogleJsonError googleJsonError = mock(GoogleJsonError.class);
         when(googleJsonError.getMessage()).thenReturn("googleJsonError");
         when(googleJsonResponseException.getDetails()).thenReturn(googleJsonError);
+        when(googleJsonResponseException.getStatusCode()).thenReturn(400);
         when(sqlAdminInstances.patch(anyString(), anyString(), any())).thenThrow(googleJsonResponseException);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
@@ -351,6 +352,6 @@ public class GcpDatabaseServerUpgradeServiceTest {
         GcpResourceException actualException = assertThrows(GcpResourceException.class,
                 () -> underTest.upgrade(authenticatedContext, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11));
 
-        assertThat(actualException).hasMessageStartingWith("googleJsonError");
+        assertThat(actualException).hasMessageStartingWith("googleJsonError (HTTP 400)");
     }
 }
