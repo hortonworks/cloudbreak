@@ -224,6 +224,7 @@ public enum ResourceEvent {
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_STARTED("environment.user.defined.tags.modification.redbeams.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_EXPERIENCES_STARTED("environment.user.defined.tags.modification.experiences.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FAILED("environment.user.defined.tags.modification.failed"),
+    ENVIRONMENT_USER_DEFINED_TAGS_EXPERIENCES_PROPAGATION_FAILED("environment.user.defined.tags.experiences.propagation.failed"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FINISHED("environment.user.defined.tags.modification.finished"),
     ENVIRONMENT_NETWORK_CIDRS_MODIFICATION_STARTED("environment.network.cidrs.modification.started"),
     ENVIRONMENT_NETWORK_CIDRS_MODIFICATION_ON_FREEIPA_STARTED("environment.network.cidrs.modification.freeipa.started"),

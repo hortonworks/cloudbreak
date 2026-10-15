@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -28,15 +29,19 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.experience.common.CommonExperience;
 import com.sequenceiq.environment.experience.common.CommonExperienceConnectorService;
 import com.sequenceiq.environment.experience.common.CommonExperiencePathCreator;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
+import com.sequenceiq.environment.experience.liftie.ExperiencesByLiftie;
 import com.sequenceiq.environment.experience.liftie.LiftieConnectorService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -54,6 +59,8 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
     private static final Set<String> TAG_KEYS_TO_REMOVE = Set.of("custom");
+
+    private static final String FAILING_XP_BUSINESS_NAME = "Failing Business Name";
 
     private static final String EXPERIENCE_PATH = "http://experience:8080/api/v1/environments";
 
@@ -74,6 +81,12 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
     @Mock
     private CommonExperiencePathCreator commonExperiencePathCreator;
+
+    @Mock
+    private EventSenderService eventSenderService;
+
+    @Mock
+    private EnvironmentDto environmentDto;
 
     @InjectMocks
     private ModifyUserDefinedTagsOnExperiencesHandler underTest;
@@ -118,6 +131,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
         verify(liftieConnectorService).distributeEnvironmentTags(null, ENV_CRN, USER_DEFINED_TAGS);
         verify(commonExperienceConnectorService).distributeEnvironmentTags(EXPERIENCE_PATH, ENV_CRN, USER_DEFINED_TAGS);
+        verifyNoInteractions(eventSenderService);
     }
 
     @Test
@@ -129,7 +143,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService, eventSenderService);
     }
 
     @Test
@@ -144,7 +158,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService, eventSenderService);
     }
 
     @Test
@@ -156,7 +170,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService, eventSenderService);
     }
 
     @Test
@@ -166,6 +180,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
         environment.setAccountId(ACCOUNT_ID);
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
         when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
         doThrow(new RuntimeException("Liftie unavailable")).when(liftieConnectorService)
                 .distributeEnvironmentTags(any(), anyString(), any());
         when(experienceServicesConfig.getConfigs()).thenReturn(List.of());
@@ -174,6 +189,8 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyPropagationFailureEventSent("added or updated tag keys: custom",
+                ExperiencesByLiftie.KUBERNETES_XP);
     }
 
     @Test
@@ -183,8 +200,10 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
         environment.setAccountId(ACCOUNT_ID);
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
         when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
         CommonExperience xp = new CommonExperience();
         xp.setName("failingXp");
+        xp.setBusinessName(FAILING_XP_BUSINESS_NAME);
         xp.setEnvironmentTagsEndpoint("/env/{environmentCrn}/tags");
         when(experienceServicesConfig.getConfigs()).thenReturn(List.of(xp));
         when(commonExperiencePathCreator.createPathToEnvironmentTags(xp)).thenReturn(EXPERIENCE_PATH);
@@ -195,6 +214,8 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyPropagationFailureEventSent("added or updated tag keys: custom",
+                FAILING_XP_BUSINESS_NAME);
     }
 
     @Test
@@ -226,6 +247,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
         verify(liftieConnectorService).deleteEnvironmentTags(null, ENV_CRN, TAG_KEYS_TO_REMOVE);
         verify(commonExperienceConnectorService).deleteEnvironmentTags(EXPERIENCE_PATH, ENV_CRN, TAG_KEYS_TO_REMOVE);
+        verifyNoInteractions(eventSenderService);
     }
 
     @Test
@@ -237,7 +259,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService, eventSenderService);
     }
 
     @Test
@@ -252,7 +274,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService);
+        verifyNoInteractions(liftieConnectorService, commonExperienceConnectorService, eventSenderService);
     }
 
     @Test
@@ -262,6 +284,7 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
         environment.setAccountId(ACCOUNT_ID);
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
         when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
         doThrow(new RuntimeException("Liftie unavailable")).when(liftieConnectorService)
                 .deleteEnvironmentTags(any(), anyString(), any());
         when(experienceServicesConfig.getConfigs()).thenReturn(List.of());
@@ -270,6 +293,8 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyPropagationFailureEventSent("removed tag keys: custom",
+                ExperiencesByLiftie.KUBERNETES_XP);
     }
 
     @Test
@@ -279,8 +304,10 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
         environment.setAccountId(ACCOUNT_ID);
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
         when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
         CommonExperience xp = new CommonExperience();
         xp.setName("failingXp");
+        xp.setBusinessName(FAILING_XP_BUSINESS_NAME);
         xp.setEnvironmentTagsEndpoint("/env/{environmentCrn}/tags");
         when(experienceServicesConfig.getConfigs()).thenReturn(List.of(xp));
         when(commonExperiencePathCreator.createPathToEnvironmentTags(xp)).thenReturn(EXPERIENCE_PATH);
@@ -291,6 +318,56 @@ class ModifyUserDefinedTagsOnExperiencesHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyPropagationFailureEventSent("removed tag keys: custom",
+                FAILING_XP_BUSINESS_NAME);
+    }
+
+    @Test
+    @DisplayName("When Liftie and a common experience tag deletion both fail, then the event lists both and the finish event is returned")
+    void testWhenLiftieAndCommonExperienceTagDeletionFailThenEventListsBothAndFinishEventIsReturned() {
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
+        when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
+        CommonExperience xp = new CommonExperience();
+        xp.setName("failingXp");
+        xp.setBusinessName(FAILING_XP_BUSINESS_NAME);
+        xp.setEnvironmentTagsEndpoint("/env/{environmentCrn}/tags");
+        when(experienceServicesConfig.getConfigs()).thenReturn(List.of(xp));
+        when(commonExperiencePathCreator.createPathToEnvironmentTags(xp)).thenReturn(EXPERIENCE_PATH);
+        doThrow(new RuntimeException("Liftie unavailable")).when(liftieConnectorService).deleteEnvironmentTags(any(), anyString(), any());
+        doThrow(new RuntimeException("Connection refused")).when(commonExperienceConnectorService).deleteEnvironmentTags(anyString(), anyString(), any());
+
+        Selectable result = underTest.doAccept(deleteEvent());
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+        verifyPropagationFailureEventSent("removed tag keys: custom",
+                ExperiencesByLiftie.KUBERNETES_XP + ", " + FAILING_XP_BUSINESS_NAME);
+    }
+
+    @Test
+    @DisplayName("When sending the propagation failure event fails, then the finish event is still returned")
+    void testWhenSendingPropagationFailureEventFailsThenFinishEventIsStillReturned() {
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
+        when(entitlementService.isExperienceDeletionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
+        when(experienceServicesConfig.getConfigs()).thenReturn(List.of());
+        doThrow(new RuntimeException("Liftie unavailable")).when(liftieConnectorService).deleteEnvironmentTags(any(), anyString(), any());
+        doThrow(new RuntimeException("Event store unavailable")).when(eventSenderService).sendEventAndNotification(eq(environmentDto), any(), any(), any());
+
+        Selectable result = underTest.doAccept(deleteEvent());
+
+        assertInstanceOf(EnvTagsModificationEvent.class, result);
+        assertEquals(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
+    }
+
+    private void verifyPropagationFailureEventSent(String operation, String failedExperiences) {
+        verify(eventSenderService).sendEventAndNotification(eq(environmentDto), any(),
+                eq(ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_EXPERIENCES_PROPAGATION_FAILED), eq(List.of(operation, failedExperiences)));
     }
 
     private HandlerEvent<EnvTagsModificationEvent> deleteEvent() {

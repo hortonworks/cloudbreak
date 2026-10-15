@@ -31,11 +31,11 @@ import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyRes
 @Component
 public class ExperiencesByLiftie implements Experience {
 
+    public static final String KUBERNETES_XP = "Kubernetes Experience";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperiencesByLiftie.class);
 
     private static final String LIFTIE = "LIFTIE";
-
-    private static final String KUBERNETES_XP = "Kubernetes Experience";
 
     private final ListClustersResponseValidator listClustersResponseValidator;
 
